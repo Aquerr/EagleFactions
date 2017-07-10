@@ -1,2 +1,2 @@
-# N-Factions
-Repository for N-Factions plugin for SpongeForge
+# EagleFactions
+Repository for EagleFactions plugin for SpongeForge
