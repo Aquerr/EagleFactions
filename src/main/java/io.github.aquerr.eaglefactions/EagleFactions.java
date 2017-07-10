@@ -1,10 +1,15 @@
 package io.github.aquerr.eaglefactions;
 
+
+import io.github.aquerr.eaglefactions.commands.HelpCommand;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
@@ -14,6 +19,7 @@ public class EagleFactions
 {
     private static EagleFactions eagleFactions;
 
+
     protected EagleFactions()
     {
 
@@ -21,7 +27,6 @@ public class EagleFactions
 
     @Inject
     private Logger logger;
-
     public Logger getLogger()
     {
         return logger;
@@ -33,6 +38,30 @@ public class EagleFactions
         getLogger ().info ("Preparing wings...");
 
         eagleFactions = this;
+
+        InitializeCommands();
+
+
+    }
+
+    private void InitializeCommands()
+    {
+        getLogger ().info ("Inicjowanie komend...");
+
+        CommandSpec commandhelp = CommandSpec.builder ()
+                .description (Text.of ("Pomoc"))
+                .permission ("eaglefactions.command.help")
+                .executor (new HelpCommand ())
+                .build ();
+
+        CommandSpec commandEagleFactions = CommandSpec.builder ()
+                .description (Text.of ("Pomoc"))
+                .permission ("eaglefactions.command.help")
+                .executor (new HelpCommand())
+                .child (commandhelp, "help")
+                .build ();
+
+        Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "f");
     }
 
     @Listener
