@@ -1,0 +1,11 @@
+plugins {
+    id 'org.spongepowered.plugin' version '0.8.1'
+}
+
+group 'io.github.aquerr.n-factions'
+version '1.0-SNAPSHOT'
+description 'A factions plugin which will make setting up your war-server easier :)'
+
+dependencies {
+    compile 'org.spongepowered:spongeapi:5.1.0'
+}
