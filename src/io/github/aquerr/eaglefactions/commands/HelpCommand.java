@@ -15,7 +15,7 @@ public class HelpCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        source.sendMessage (Text.of (TextColors.AQUA, "Eagle Factions ", TextColors.WHITE, "wersja ", PluginInfo.Version));
+        source.sendMessage (Text.of (TextColors.AQUA, "Eagle Factions ", TextColors.WHITE, "version ", PluginInfo.Version));
 
         return CommandResult.success ();
     }
