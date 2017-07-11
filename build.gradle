@@ -2,9 +2,15 @@ plugins {
     id 'org.spongepowered.plugin' version '0.8.1'
 }
 
-group 'io.github.aquerr.eaglefactions'
-version '1.0-SNAPSHOT'
-description 'A factions plugin which will make setting up your war-server easier :)'
+group = 'io.github.aquerr.eaglefactions'
+version = '1.0-SNAPSHOT'
+description = 'A factions plugin that will make managing your battle-server easier. :)'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     compile 'org.spongepowered:spongeapi:5.1.0'
