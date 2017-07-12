@@ -1,19 +1,26 @@
 package io.github.aquerr.eaglefactions;
 
+import io.github.aquerr.eaglefactions.commands.CreateCommand;
 import io.github.aquerr.eaglefactions.commands.EagleFactionsCommand;
 import io.github.aquerr.eaglefactions.commands.HelpCommand;
 
 import com.google.inject.Inject;
+import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 import org.spongepowered.api.text.Text;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +34,17 @@ public class EagleFactions
 
     @Inject
     private Logger _logger;
+    public Logger getLogger(){return _logger;}
 
-    public Logger getLogger() {
-        return _logger;
-    }
+    private static EagleFactions eagleFactions;
+    public static EagleFactions getEagleFactions() {return eagleFactions;}
+
+    @Inject
+    @ConfigDir(sharedRoot = false)
+    private Path configDir;
+    public Path getConfigDir(){return configDir;}
+
+
 
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
@@ -40,8 +54,70 @@ public class EagleFactions
        getLogger ().info("EagleFactions is loading...");
        getLogger ().debug ("Preparing wings...");
 
+       SetupConfigs();
+
        InitializeCommands ();
 
+    }
+
+    private void SetupConfigs()
+    {
+        // Create Config Directory for EagleFactions
+        if (!Files.exists(configDir))
+        {
+            Path oldConfig = configDir.resolveSibling("io.github.aquerr.eaglefactions");
+
+            if (Files.exists(oldConfig) && Files.isDirectory(oldConfig))
+            {
+                try
+                {
+                    Files.move(oldConfig, configDir);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try
+                {
+                    Files.createDirectories(configDir);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // Create data Directory for EagleFactions
+        if (!Files.exists(configDir.resolve("data")))
+        {
+            try
+            {
+                Files.createDirectories(configDir.resolve("data"));
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        getLogger().info("Setting up configs...");
+
+        // Create config.conf
+        //Config.getConfig().setup();
+        // Create messages.conf
+        //MessageConfig.getConfig().setup();
+        // Create teams.conf
+        FactionsConfig.getConfig().setup();
+        // Create claims.conf
+        //ClaimsConfig.getConfig().setup();
+        // Create claims.conf
+        //ClaimsConfig.getConfig().setup();
+        // Start Tax Service
+        //Utils.startTaxService();
     }
 
     private void InitializeCommands()
@@ -55,6 +131,13 @@ public class EagleFactions
                 .permission ("eaglefactions.command.help")
                 .executor (new HelpCommand ())
                 .build());
+
+        _subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
+        .description (Text.of ("Create Faction Command"))
+        .permission ("eaglefactions.command.create")
+        .arguments (GenericArguments.onlyOne (GenericArguments.string (Text.of ("faction name"))))
+        .executor (new CreateCommand ())
+        .build ());
 
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Factions"))
@@ -72,4 +155,5 @@ public class EagleFactions
         getLogger ().info ("Current version " + PluginInfo.Version);
         getLogger ().info ("Have a great time with EagleFactions! :D");
     }
+
 }
