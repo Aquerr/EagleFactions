@@ -22,7 +22,7 @@ public class CreateCommand implements CommandExecutor
 
         if(source instanceof Player)
         {
-            Player player = (Player) source;
+            Player player = (Player)source;
 
             if(factionName.equalsIgnoreCase ("SafeZone") || factionName.equalsIgnoreCase ("WarZone"))
             {
@@ -34,7 +34,7 @@ public class CreateCommand implements CommandExecutor
             //if(factionName.length() > ConfigManager.getMaxNameLength()){}
             //if(factionName.length() < ConfigManager.getMinNameLength()){}
 
-            String playerFactionName = FactionManager.getFaction (player.getUniqueId ());
+            String playerFactionName = FactionManager.getFaction(player.getUniqueId ());
 
             if(playerFactionName == null)
             {
@@ -42,7 +42,11 @@ public class CreateCommand implements CommandExecutor
                     {
                         if(!FactionManager.getFactions().contains(factionName))
                         {
+                            //TODO: Invoke createFaction method here.
 
+                            FactionManager.createFaction(factionName, player.getUniqueId());
+
+                            return CommandResult.success ();
                         }
                     }
                     catch (NullPointerException exception)

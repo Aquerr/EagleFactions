@@ -84,8 +84,8 @@ public class Config implements Configurable
     public void populate()
     {
         get().getNode("eaglefactions").setComment("Contains all Eagle Factions related settings.");
-        get().getNode("eaglefactions", "name", "maxlength").setValue(30).setComment("This determines the maximum amount of characters a Polis's name can be.");
-        get().getNode("eaglefactions", "name", "minlength").setValue(3).setComment("This determines the minimum amount of characters a Polis's name can be.");
+        get().getNode("eaglefactions", "name", "maxlength").setValue(30).setComment("This determines the maximum amount of characters a Factions's name can be.");
+        get().getNode("eaglefactions", "name", "minlength").setValue(3).setComment("This determines the minimum amount of characters a Factions's name can be.");
         get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Polis prefixes.");
         get().getNode("eaglefactions", "create", "cost").setValue(50.00).setComment("The amount of currency it costs to create a Polis.");
         get().getNode("eaglefactions", "claims", "cost").setValue(100.00).setComment("The amount of currency it costs per claim of chunk.");

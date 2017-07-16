@@ -2,11 +2,17 @@ package io.github.aquerr.eaglefactions.managers;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonObject;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.Configs;
 import io.github.aquerr.eaglefactions.config.Configurable;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -33,14 +39,15 @@ public class FactionManager
                 continue;
             }
 
+            //TODO: If even leader and officers are stored in Members group, checking members is enough.
             if(FactionManager.getMembers(faction).contains(playerUUID.toString ()))
             {
                 return faction;
             }
-            else if(FactionManager.getLeader(faction).equals(playerUUID.toString ()))
-            {
-                return faction;
-            }
+           // else if(FactionManager.getLeader(faction).equals(playerUUID.toString ()))
+           // {
+           //     return faction;
+           // }
 
             //TODO:Add check for officers.
            // else if(TeamManager.getOfficers(faction).contains(playerUUID.toString ()))
@@ -108,7 +115,7 @@ public class FactionManager
 
     public static Set<Object> getFactions()
     {
-        if(Configs.getConfig(factionConfig).getNode("factions","factions").getValue() != null)
+        if(Configs.getConfig(factionConfig).getNode ("factions","factions").getValue() != null)
         {
             Configs.removeChild(factionConfig, new Object[]{"factions"}, "factions");
         }
@@ -119,5 +126,34 @@ public class FactionManager
         }
 
             return Sets.newHashSet ();
+    }
+
+    public static void createFaction(String factionName, UUID player)
+    {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("Name",factionName);
+        jsonObject.put("Home", "null");
+        jsonObject.put("Leader", player.toString());
+
+        JSONArray members = new JSONArray();
+        members.add(player);
+        jsonObject.put("Members",members);
+
+
+        JSONArray claims = new JSONArray();
+        jsonObject.put("Claims",claims);
+
+        String factionFile = EagleFactions.getEagleFactions().getConfigDir().toString() + factionName + ".json";
+
+        try(FileWriter file = new FileWriter(factionFile))
+        {
+            file.write(jsonObject.toJSONString());
+            file.flush();
+        }
+        catch(IOException exception)
+        {
+            exception.printStackTrace();
+        }
     }
 }
