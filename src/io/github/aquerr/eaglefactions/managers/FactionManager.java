@@ -115,16 +115,16 @@ public class FactionManager
 
     public static Set<Object> getFactions()
     {
-        if(Configs.getConfig(factionConfig).getNode ("factions","factions").getValue() != null)
-        {
-            Configs.removeChild(factionConfig, new Object[]{"factions"}, "factions");
-        }
-
-        if(Configs.getConfig(factionConfig).getNode("factions").getValue() != null)
-        {
-            return Configs.getConfig(factionConfig).getNode("factions").getChildrenMap().keySet();
-        }
-
+       // if(Configs.getConfig(factionConfig).getNode ("factions","factions").getValue() != null)
+       // {
+       //     Configs.removeChild(factionConfig, new Object[]{"factions"}, "factions");
+       // }
+//
+       // if(Configs.getConfig(factionConfig).getNode("factions").getValue() != null)
+       // {
+       //     return Configs.getConfig(factionConfig).getNode("factions").getChildrenMap().keySet();
+       // }
+//
             return Sets.newHashSet ();
     }
 

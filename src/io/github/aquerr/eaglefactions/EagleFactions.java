@@ -54,9 +54,11 @@ public class EagleFactions
        getLogger ().info("EagleFactions is loading...");
        getLogger ().debug ("Preparing wings...");
 
+        getLogger().info("Configs...");
        SetupConfigs();
 
-       InitializeCommands ();
+       getLogger().info("Commands...");
+       InitializeCommands();
 
     }
 
@@ -111,7 +113,8 @@ public class EagleFactions
         // Create messages.conf
         //MessageConfig.getConfig().setup();
         // Create teams.conf
-        FactionsConfig.getConfig().setup();
+        //TODO:Error occour while loading FactionsConfig.
+        //FactionsConfig.getConfig().setup();
         // Create claims.conf
         //ClaimsConfig.getConfig().setup();
         // Create claims.conf

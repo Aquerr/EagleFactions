@@ -39,24 +39,24 @@ public class FactionsConfig implements Configurable
     @Override
     public void setup()
     {
-        if (! Files.exists(configFile))
-        {
-            try
-            {
-                Files.createFile(configFile);
-                load();
-                populate();
-                save();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            load();
-        }
+       // if (! Files.exists(configFile))
+       // {
+       //     try
+       //     {
+       //         Files.createFile(configFile);
+       //         load();
+       //         populate();
+       //         save();
+       //     }
+       //     catch (IOException e)
+       //     {
+       //         e.printStackTrace();
+       //     }
+       // }
+       // else
+       // {
+       //     load();
+       // }
     }
 
     @Override
