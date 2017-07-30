@@ -64,36 +64,29 @@ public class EagleFactions
 
     private void SetupConfigs()
     {
-        // Create Config Directory for EagleFactions
-        if (!Files.exists(configDir))
+        //Create config directory for EagleFactions.
+        try
         {
-            Path oldConfig = configDir.resolveSibling("io.github.aquerr.eaglefactions");
+            Files.createDirectories(configDir);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
-            if (Files.exists(oldConfig) && Files.isDirectory(oldConfig))
+        // Create settings & data directory for EagleFactions
+        if (!Files.exists(configDir.resolve("settings")))
+        {
+            try
             {
-                try
-                {
-                    Files.move(oldConfig, configDir);
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
+                Files.createDirectories(configDir.resolve("settings"));
             }
-            else
+            catch (IOException e)
             {
-                try
-                {
-                    Files.createDirectories(configDir);
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
+                e.printStackTrace();
             }
         }
 
-        // Create data Directory for EagleFactions
         if (!Files.exists(configDir.resolve("data")))
         {
             try
