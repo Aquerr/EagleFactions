@@ -51,7 +51,7 @@ public class CreateCommand implements CommandExecutor
                     }
                     catch (NullPointerException exception)
                     {
-                        player.sendMessage (Text.of (TextColors.DARK_RED, "[ERROR]", TextColors.RED, "Filed to create a faction."));
+                        player.sendMessage (Text.of (TextColors.DARK_RED, "[ERROR] ", TextColors.RED, "Filed to create a faction."));
                     }
             }
             else
@@ -63,7 +63,7 @@ public class CreateCommand implements CommandExecutor
         }
         else
         {
-            source.sendMessage (Text.of (TextColors.DARK_RED, "[ERROR]",TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (TextColors.DARK_RED, "[ERROR] ",TextColors.RED, "Only in-game players can use this command!"));
         }
 
         return CommandResult.success ();
