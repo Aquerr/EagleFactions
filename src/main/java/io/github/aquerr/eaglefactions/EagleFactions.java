@@ -122,12 +122,14 @@ public class EagleFactions
 
         _subcommands = new HashMap<List<String>, CommandSpec>();
 
+        //Help command should display all possible commands in plugin.
         _subcommands.put (Arrays.asList ("help"), CommandSpec.builder ()
                 .description (Text.of ("Help"))
                 .permission ("eaglefactions.command.help")
                 .executor (new HelpCommand ())
                 .build());
 
+        //Create command should create a faction.
         _subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission ("eaglefactions.command.create")
@@ -135,17 +137,19 @@ public class EagleFactions
         .executor (new CreateCommand ())
         .build ());
 
+        //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Factions"))
-                .permission ("eaglefactions.command.use")
+                .permission ("eaglefactions.command.*")
                 .executor (new EagleFactionsCommand ())
                 .children (_subcommands)
                 .build ();
 
 
-
+        //Register commands
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "f");
 
+        //Display some info text in the console.
         getLogger ().info ("EagleFactions is ready to use!");
         getLogger ().info ("Thank you for choosing this plugin!");
         getLogger ().info ("Current version " + PluginInfo.Version);
