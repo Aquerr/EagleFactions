@@ -8,4 +8,5 @@ description = 'A factions plugin that will make managing your battle-server easi
 
 dependencies {
     compile 'org.spongepowered:spongeapi:6.0.0'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
 }

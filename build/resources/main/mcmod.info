@@ -1,8 +1,14 @@
 [
     {
         "modid": "eaglefactions",
-        "name": "EagleFactions",
-        "version": "1.0-SNAPSHOT",
-        "description": "A factions plugin that will make managing your battle-server easier. :)"
+        "name": "Eagle Factions",
+        "version": "1.0",
+        "description": "A factions plugin that will make managing your battle-server easier. :)",
+        "dependencies": [
+            "spongeapi@6.0.0"
+        ],
+        "requiredMods": [
+            "spongeapi@6.0.0"
+        ]
     }
 ]
