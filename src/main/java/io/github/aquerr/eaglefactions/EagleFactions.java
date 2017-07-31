@@ -149,6 +149,9 @@ public class EagleFactions
         //Register commands
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "f");
 
+
+
+
         //Display some info text in the console.
         getLogger ().info ("EagleFactions is ready to use!");
         getLogger ().info ("Thank you for choosing this plugin!");
