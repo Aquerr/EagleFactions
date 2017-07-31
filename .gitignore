@@ -23,3 +23,6 @@ hs_err_pid*
 
 # IDLE files
 .idea
+
+# Gradle files
+.gradle
