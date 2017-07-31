@@ -26,8 +26,6 @@ public class HelpCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        source.sendMessage (Text.of (TextColors.AQUA, "[Eagle Factions] ", TextColors.WHITE, "- Version ", PluginInfo.Version));
-
         Map<List<String>, CommandSpec> commands = EagleFactions.getEagleFactions()._subcommands;
         List<Text> helpList = Lists.newArrayList();
 
@@ -37,10 +35,10 @@ public class HelpCommand implements CommandExecutor
 
             Text commandHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, aliases.toString(), "\n"))
+                            .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
                             .build())
                     .append(Text.builder()
-                            .append(Text.of(TextColors.GRAY, commandSpec.getShortDescription(source).get(),Text.of("\n")))
+                            .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get()))
                             .build())
                     .build();
 
@@ -48,7 +46,7 @@ public class HelpCommand implements CommandExecutor
         }
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFaction Help List")).padding(Text.of("-")).contents(helpList);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success ();

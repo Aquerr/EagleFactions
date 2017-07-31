@@ -17,6 +17,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,16 +55,16 @@ public class EagleFactions
        getLogger ().info("EagleFactions is loading...");
        getLogger ().debug ("Preparing wings...");
 
-        getLogger().info("Configs...");
        SetupConfigs();
 
-       getLogger().info("Commands...");
        InitializeCommands();
 
     }
 
     private void SetupConfigs()
     {
+        getLogger().info("Setting up configs...");
+
         //Create config directory for EagleFactions.
         try
         {
@@ -98,8 +99,6 @@ public class EagleFactions
                 e.printStackTrace();
             }
         }
-
-        getLogger().info("Setting up configs...");
 
         // Create config.conf
         //Config.getConfig().setup();
@@ -150,13 +149,19 @@ public class EagleFactions
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "f");
 
 
-
+        //Display some info text in the console.
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Thank you for choosing this plugin!"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version " + PluginInfo.Version));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with EagleFactions! :D"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
 
         //Display some info text in the console.
-        getLogger ().info ("EagleFactions is ready to use!");
-        getLogger ().info ("Thank you for choosing this plugin!");
-        getLogger ().info ("Current version " + PluginInfo.Version);
-        getLogger ().info ("Have a great time with EagleFactions! :D");
+        //getLogger ().info ("EagleFactions is ready to use!");
+        //getLogger ().info ("Thank you for choosing this plugin!");
+        //getLogger ().info ("Current version " + PluginInfo.Version);
+        //getLogger ().info ("Have a great time with EagleFactions! :D");
     }
 
 }

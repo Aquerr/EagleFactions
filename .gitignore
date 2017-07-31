@@ -22,7 +22,12 @@
 hs_err_pid*
 
 # IDLE files
-.idea
-
-# Gradle files
+.classpath
+.externalToolBuilders
 .gradle
+.idea
+.project
+.settings
+.checkstyle
+.factorypath
+./eclipse
