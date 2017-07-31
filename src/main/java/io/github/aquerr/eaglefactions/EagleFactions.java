@@ -106,7 +106,7 @@ public class EagleFactions
         //MessageConfig.getConfig().setup();
         // Create teams.conf
         //TODO:Error occour while loading FactionsConfig.
-        //FactionsConfig.getConfig().setup();
+        FactionsConfig.getConfig().setup();
         // Create claims.conf
         //ClaimsConfig.getConfig().setup();
         // Create claims.conf
