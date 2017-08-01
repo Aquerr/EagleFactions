@@ -50,6 +50,7 @@ public class EagleFactions
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
     {
+        eagleFactions = this;
 
         //TODO:Change color of loggs.
        getLogger ().info("EagleFactions is loading...");
