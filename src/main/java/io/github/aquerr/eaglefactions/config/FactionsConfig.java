@@ -32,26 +32,26 @@ public class FactionsConfig implements Configurable
         return config;
     }
 
-   private Path configFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("data") + "/factions.conf");
+   private Path configFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("data") + "/factions.config");
    private ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(configFile).build();
    private CommentedConfigurationNode configNode;
 
    // @Override
     public void setup()
     {
-        if (! Files.exists(configFile))
+        if (!Files.exists(configFile))
         {
-            //try
-            //{
-                //Files.createFile(configFile);
-                //load();
-                //populate();
-                //save();
-           // }
-            //catch (IOException e)
-            //{
-            //    e.printStackTrace();
-            //}
+            try
+            {
+              Files.createFile(configFile);
+              load();
+              populate();
+              save();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
         else
         {

@@ -3,6 +3,8 @@ package io.github.aquerr.eaglefactions.managers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.config.Configurable;
+import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -20,7 +22,7 @@ public class FactionManager
 {
     //TODO:Add other configs
     //private static Configurable mainConfig = Config.getConfig();
-    //private static Configurable factionConfig = FactionsConfig.getConfig();
+    private static Configurable factionConfig = FactionsConfig.getConfig();
     //private static Configurable claimsConfig = ClaimsConfig.getConfig();
     //private static Configurable messageConfig = MessageConfig.getConfig();
 
@@ -126,32 +128,39 @@ public class FactionManager
 
     public static void createFaction(String factionName, UUID player)
     {
-        JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("Name",factionName);
-        jsonObject.put("Home", "null");
-        jsonObject.put("Leader", player.toString());
+        factionConfig.get().set
+        factionConfig.get().getNode(new Object[]{"factions", factionName, "leader"}).setValue(player.toString());
+        factionConfig.get().getNode(new Object[]{"factions", factionName, "members"}).setValue("");
+        factionConfig.get().getNode(new Object[]{"factions", factionName, "enemies"}).setValue("");
+        factionConfig.save();
 
-        JSONArray members = new JSONArray();
-        members.add(player);
-        jsonObject.put("Members",members);
-
-
-        JSONArray claims = new JSONArray();
-        jsonObject.put("Claims",claims);
-
-        EagleFactions.getEagleFactions().getLogger().info("Creating JSON file.");
-
-        String factionFile = EagleFactions.getEagleFactions().getConfigDir().toString() + factionName + ".json";
-
-        try(FileWriter file = new FileWriter(factionFile))
-        {
-            file.write(jsonObject.toJSONString());
-            file.flush();
-        }
-        catch(IOException exception)
-        {
-            exception.printStackTrace();
-        }
+       // JSONObject jsonObject = new JSONObject();
+//
+       // jsonObject.put("Name",factionName);
+       // jsonObject.put("Home", "null");
+       // jsonObject.put("Leader", player.toString());
+//
+       // JSONArray members = new JSONArray();
+       // members.add(player);
+       // jsonObject.put("Members",members);
+//
+//
+       // JSONArray claims = new JSONArray();
+       // jsonObject.put("Claims",claims);
+//
+       // EagleFactions.getEagleFactions().getLogger().info("Creating JSON file.");
+//
+       // String factionFile = EagleFactions.getEagleFactions().getConfigDir().toString() + factionName + ".json";
+//
+       // try(FileWriter file = new FileWriter(factionFile))
+       // {
+       //     file.write(jsonObject.toJSONString());
+       //     file.flush();
+       // }
+       // catch(IOException exception)
+       // {
+       //     exception.printStackTrace();
+       // }
     }
 }
