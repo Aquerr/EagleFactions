@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.commands.HelpCommand;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.config.MainConfig;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -102,16 +103,15 @@ public class EagleFactions
         }
 
         // Create config.conf
-        //Config.getConfig().setup();
+        MainConfig.getConfig().setup();
         // Create messages.conf
-        //MessageConfig.getConfig().setup();
+        //MessageConfig.getMainConfig().setup();
         // Create teams.conf
-        //TODO:Error occour while loading FactionsConfig.
         FactionsConfig.getConfig().setup();
         // Create claims.conf
-        //ClaimsConfig.getConfig().setup();
+        //ClaimsConfig.getMainConfig().setup();
         // Create claims.conf
-        //ClaimsConfig.getConfig().setup();
+        //ClaimsConfig.getMainConfig().setup();
         // Start Tax Service
         //Utils.startTaxService();
     }
@@ -129,6 +129,7 @@ public class EagleFactions
                 .executor (new HelpCommand ())
                 .build());
 
+        //TODO: Player should assign a faction tag while creating a faction.
         //Create command should create a faction.
         _subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))

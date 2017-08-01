@@ -42,11 +42,14 @@ public class CreateCommand implements CommandExecutor
                     {
                         if(!FactionManager.getFactions().contains(factionName))
                         {
-                            //TODO: Invoke createFaction method here.
+                            boolean didSucceed = FactionManager.createFaction(factionName, player.getUniqueId());
 
-                            FactionManager.createFaction(factionName, player.getUniqueId());
-
-                            return CommandResult.success ();
+                            if(didSucceed)
+                            {
+                                player.sendMessage(Text.of(TextColors.AQUA, "[EagleFactions] ", TextColors.GREEN, "Faction " + factionName + " has been created!"));
+                                return CommandResult.success ();
+                            }
+                            else{player.sendMessage(Text.of(TextColors.DARK_RED, "[ERROR] ", TextColors.RED, "Something went wrong while creating faction."));}
                         }
                     }
                     catch (NullPointerException exception)

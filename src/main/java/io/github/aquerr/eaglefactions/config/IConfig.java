@@ -5,7 +5,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public interface Configurable
+public interface IConfig
 {
     void setup();
 

@@ -5,41 +5,41 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public final class Configs
+public final class ConfigAccess
 {
-    private Configs()
+    private ConfigAccess()
     {
         ;
     }
 
-    public static CommentedConfigurationNode getConfig(Configurable config)
+    public static CommentedConfigurationNode getConfig(IConfig config)
     {
         return config.get();
     }
 
-    public static void saveConfig(Configurable config)
+    public static void saveConfig(IConfig config)
     {
         config.save();
     }
 
-    public static void setValueAndSave(Configurable config, Object[] nodePath, Object value)
+    public static void setValueAndSave(IConfig config, Object[] nodePath, Object value)
     {
         config.get().getNode(nodePath).setValue(value);
         config.save();
     }
 
-    public static void setValue(Configurable config, Object[] nodePath, Object value)
+    public static void setValue(IConfig config, Object[] nodePath, Object value)
     {
         config.get().getNode(nodePath).setValue(value);
     }
 
-    public static void removeChild(Configurable config, Object[] nodePath, Object child)
+    public static void removeChild(IConfig config, Object[] nodePath, Object child)
     {
         config.get().getNode(nodePath).removeChild(child);
         config.save();
     }
 
-    public static void removeChildren(Configurable config, Object[] nodePath)
+    public static void removeChildren(IConfig config, Object[] nodePath)
     {
         for (Object child : config.get().getNode(nodePath).getChildrenMap().keySet())
         {

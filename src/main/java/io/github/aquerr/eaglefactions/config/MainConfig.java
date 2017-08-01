@@ -13,21 +13,21 @@ import java.nio.file.Paths;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class Config implements Configurable
+public class MainConfig implements IConfig
 {
-    private static Config config = new Config();
+    private static MainConfig mainConfig = new MainConfig();
 
-    private Config()
+    private MainConfig()
     {
         ;
     }
 
-    public static Config getConfig()
+    public static MainConfig getConfig()
     {
-        return config;
+        return mainConfig;
     }
 
-    private Path configFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir() + "/config.conf");
+    private Path configFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir() + "/mainConfig.conf");
     private ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(configFile).build();
     private CommentedConfigurationNode configNode;
 
@@ -86,12 +86,12 @@ public class Config implements Configurable
         get().getNode("eaglefactions").setComment("Contains all Eagle Factions related settings.");
         get().getNode("eaglefactions", "name", "maxlength").setValue(30).setComment("This determines the maximum amount of characters a Factions's name can be.");
         get().getNode("eaglefactions", "name", "minlength").setValue(3).setComment("This determines the minimum amount of characters a Factions's name can be.");
-        get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Polis prefixes.");
-        get().getNode("eaglefactions", "create", "cost").setValue(50.00).setComment("The amount of currency it costs to create a Polis.");
-        get().getNode("eaglefactions", "claims", "cost").setValue(100.00).setComment("The amount of currency it costs per claim of chunk.");
-        get().getNode("eaglefactions", "claims", "cap").setValue(50).setComment("The maximum number of claims a Polis may have, overrides the one based on multiplier and player size.");
-        get().getNode("eaglefactions", "claims", "multiplier").setValue(5).setComment("This is used to get the claim cap based on Polis size (Max claims = the multiplier * players in Polis).");
-        get().getNode("eaglefactions", "claims", "items", "drop").setValue(false).setComment("Toggles the ability for players to drop items in claimed areas.");
+        get().getNode("eaglefactions", "tag", "maxlength").setValue(5).setComment("This determines the minimum amount of characters a Factions's tag can be.");
+        get().getNode("eaglefactions", "tag", "minlength").setValue(2).setComment("This determines the minimum amount of characters a Factions's tag can be.");
+        get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes.");
+        get().getNode("eaglefactions", "claims", "cap").setValue(50).setComment("The maximum number of claims a Faction may have, overrides the one based on multiplier and player size.");
+        get().getNode("eaglefactions", "power", "increment").setValue(1).setComment("How much power will be restored for player after 1 hour playing");
+        get().getNode("eaglefactions", "power", "maxpower").setValue(10).setComment("Maximum amount of power a player can have");
     }
 
     @Override

@@ -1,9 +1,5 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.gson.JsonObject;
-import com.google.gson.internal.bind.JsonTreeWriter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -11,14 +7,13 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class FactionsConfig implements Configurable
+public class FactionsConfig implements IConfig
 {
     private static FactionsConfig config = new FactionsConfig();
 
@@ -32,7 +27,7 @@ public class FactionsConfig implements Configurable
         return config;
     }
 
-   private Path configFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("data") + "/factions.config");
+   private Path configFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("data") + "/factions.conf");
    private ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(configFile).build();
    private CommentedConfigurationNode configNode;
 

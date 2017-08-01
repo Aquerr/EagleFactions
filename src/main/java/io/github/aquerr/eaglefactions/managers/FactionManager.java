@@ -2,15 +2,12 @@ package io.github.aquerr.eaglefactions.managers;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.config.Configurable;
+import io.github.aquerr.eaglefactions.config.ConfigAccess;
+import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import ninja.leaping.configurate.ConfigurationNode;
 
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -21,10 +18,10 @@ import java.util.UUID;
 public class FactionManager
 {
     //TODO:Add other configs
-    //private static Configurable mainConfig = Config.getConfig();
-    private static Configurable factionConfig = FactionsConfig.getConfig();
-    //private static Configurable claimsConfig = ClaimsConfig.getConfig();
-    //private static Configurable messageConfig = MessageConfig.getConfig();
+    //private static IConfig mainConfig = MainConfig.getMainConfig();
+    private static IConfig factionsConfig = FactionsConfig.getConfig();
+    //private static IConfig claimsConfig = ClaimsConfig.getMainConfig();
+    //private static IConfig messageConfig = MessageConfig.getMainConfig();
 
     public static String getFaction(UUID playerUUID)
     {
@@ -42,10 +39,10 @@ public class FactionManager
             {
                 return faction;
             }
-           // else if(FactionManager.getLeader(faction).equals(playerUUID.toString ()))
-           // {
-           //     return faction;
-           // }
+            else if(FactionManager.getLeader(faction).equals(playerUUID.toString ()))
+            {
+                return faction;
+            }
 
             //TODO:Add check for officers.
            // else if(TeamManager.getOfficers(faction).contains(playerUUID.toString ()))
@@ -58,17 +55,17 @@ public class FactionManager
 
     private static String getLeader(String factionName)
     {
-       // ConfigurationNode valueNode = Configs.getConfig(factionConfig).getNode((Object[]) ("teams." + factionName + ".leader").split("\\."));
-//
-       // if (valueNode.getValue() != null)
-       //     return valueNode.getString();
-       // else
+        ConfigurationNode valueNode = ConfigAccess.getConfig(factionsConfig).getNode((Object[]) ("factions." + factionName + ".leader").split("\\."));
+
+        if (valueNode.getValue() != null)
+            return valueNode.getString();
+        else
             return "";
     }
 
     private static ArrayList<String> getMembers(String factionName)
     {
-       // ConfigurationNode valueNode = Configs.getConfig(factionConfig).getNode((Object[]) ("teams." + factionName + ".members").split("\\."));
+       // ConfigurationNode valueNode = ConfigAccess.getMainConfig(factionsConfig).getNode((Object[]) ("teams." + factionName + ".members").split("\\."));
 //
        // if (valueNode.getValue() == null)
        //     return Lists.newArrayList();
@@ -113,54 +110,32 @@ public class FactionManager
 
     public static Set<Object> getFactions()
     {
-       // if(Configs.getConfig(factionConfig).getNode ("factions","factions").getValue() != null)
-       // {
-       //     Configs.removeChild(factionConfig, new Object[]{"factions"}, "factions");
-       // }
-//
-       // if(Configs.getConfig(factionConfig).getNode("factions").getValue() != null)
-       // {
-       //     return Configs.getConfig(factionConfig).getNode("factions").getChildrenMap().keySet();
-       // }
-//
+        if(ConfigAccess.getConfig(factionsConfig).getNode ("factions","factions").getValue() != null)
+        {
+            ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"}, "factions");
+        }
+
+        if(ConfigAccess.getConfig(factionsConfig).getNode("factions").getValue() != null)
+        {
+            return ConfigAccess.getConfig(factionsConfig).getNode("factions").getChildrenMap().keySet();
+        }
+
             return Sets.newHashSet ();
     }
 
-    public static void createFaction(String factionName, UUID player)
+    public static boolean createFaction(String factionName, UUID player)
     {
+        try
+        {
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(player.toString()));
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},"");
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},"");
+        }
+        catch (Exception exception)
+        {
+            return false;
+        }
 
-        factionConfig.get().set
-        factionConfig.get().getNode(new Object[]{"factions", factionName, "leader"}).setValue(player.toString());
-        factionConfig.get().getNode(new Object[]{"factions", factionName, "members"}).setValue("");
-        factionConfig.get().getNode(new Object[]{"factions", factionName, "enemies"}).setValue("");
-        factionConfig.save();
-
-       // JSONObject jsonObject = new JSONObject();
-//
-       // jsonObject.put("Name",factionName);
-       // jsonObject.put("Home", "null");
-       // jsonObject.put("Leader", player.toString());
-//
-       // JSONArray members = new JSONArray();
-       // members.add(player);
-       // jsonObject.put("Members",members);
-//
-//
-       // JSONArray claims = new JSONArray();
-       // jsonObject.put("Claims",claims);
-//
-       // EagleFactions.getEagleFactions().getLogger().info("Creating JSON file.");
-//
-       // String factionFile = EagleFactions.getEagleFactions().getConfigDir().toString() + factionName + ".json";
-//
-       // try(FileWriter file = new FileWriter(factionFile))
-       // {
-       //     file.write(jsonObject.toJSONString());
-       //     file.flush();
-       // }
-       // catch(IOException exception)
-       // {
-       //     exception.printStackTrace();
-       // }
+        return true;
     }
 }
