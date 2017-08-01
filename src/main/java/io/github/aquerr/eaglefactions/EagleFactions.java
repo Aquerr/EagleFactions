@@ -1,11 +1,10 @@
 package io.github.aquerr.eaglefactions;
 
-import io.github.aquerr.eaglefactions.commands.CreateCommand;
-import io.github.aquerr.eaglefactions.commands.EagleFactionsCommand;
-import io.github.aquerr.eaglefactions.commands.HelpCommand;
+import io.github.aquerr.eaglefactions.commands.*;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.config.MainConfig;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -50,15 +49,23 @@ public class EagleFactions
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
     {
+        eagleFactions = this;
 
         //TODO:Change color of loggs.
        getLogger ().info("EagleFactions is loading...");
-       getLogger ().debug ("Preparing wings...");
+       getLogger ().info ("Preparing wings...");
 
        SetupConfigs();
 
        InitializeCommands();
 
+        //Display some info text in the console.
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Thank you for choosing this plugin!"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version " + PluginInfo.Version));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with EagleFactions! :D"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
     }
 
     private void SetupConfigs()
@@ -101,16 +108,15 @@ public class EagleFactions
         }
 
         // Create config.conf
-        //Config.getConfig().setup();
+        MainConfig.getConfig().setup();
         // Create messages.conf
-        //MessageConfig.getConfig().setup();
+        //MessageConfig.getMainConfig().setup();
         // Create teams.conf
-        //TODO:Error occour while loading FactionsConfig.
-        //FactionsConfig.getConfig().setup();
+        FactionsConfig.getConfig().setup();
         // Create claims.conf
-        //ClaimsConfig.getConfig().setup();
+        //ClaimsConfig.getMainConfig().setup();
         // Create claims.conf
-        //ClaimsConfig.getConfig().setup();
+        //ClaimsConfig.getMainConfig().setup();
         // Start Tax Service
         //Utils.startTaxService();
     }
@@ -128,13 +134,27 @@ public class EagleFactions
                 .executor (new HelpCommand ())
                 .build());
 
-        //Create command should create a faction.
+        //TODO: Player should assign a faction tag while creating a faction.
+        //Create faction command.
         _subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission ("eaglefactions.command.create")
         .arguments (GenericArguments.onlyOne (GenericArguments.string (Text.of ("faction name"))))
         .executor (new CreateCommand ())
         .build ());
+
+        //Disband faction command.
+        _subcommands.put(Arrays.asList("disband"), CommandSpec.builder()
+        .description(Text.of("Disband Faction Command"))
+        .permission("eaglefactions.command.disband")
+        .executor(new DisbandCommand())
+        .build());
+
+        _subcommands.put(Arrays.asList("list"), CommandSpec.builder()
+        .description(Text.of("List all factions"))
+        .permission("eaglefactions.command.list")
+        .executor(new ListCommand())
+        .build());
 
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
@@ -147,21 +167,6 @@ public class EagleFactions
 
         //Register commands
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "f");
-
-
-        //Display some info text in the console.
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Thank you for choosing this plugin!"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version " + PluginInfo.Version));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with EagleFactions! :D"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
-
-        //Display some info text in the console.
-        //getLogger ().info ("EagleFactions is ready to use!");
-        //getLogger ().info ("Thank you for choosing this plugin!");
-        //getLogger ().info ("Current version " + PluginInfo.Version);
-        //getLogger ().info ("Have a great time with EagleFactions! :D");
     }
 
 }

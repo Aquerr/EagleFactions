@@ -1,4 +1,8 @@
-# Compiled class file
+# Compiled files
+bin
+build
+out
+lib
 *.class
 
 # Log file
@@ -21,7 +25,7 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# IDLE files
+# IDLE & Project files #
 .classpath
 .externalToolBuilders
 .gradle

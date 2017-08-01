@@ -40,6 +40,9 @@ public class HelpCommand implements CommandExecutor
                     .append(Text.builder()
                             .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get()))
                             .build())
+                    //.append(Text.builder()
+                    //        .append(Text.of(TextColors.GRAY, commandSpec.getUsage(source)))
+                    //        .build())
                     .build();
 
             helpList.add(commandHelp);
