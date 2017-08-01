@@ -1,9 +1,6 @@
 package io.github.aquerr.eaglefactions;
 
-import io.github.aquerr.eaglefactions.commands.CreateCommand;
-import io.github.aquerr.eaglefactions.commands.DisbandCommand;
-import io.github.aquerr.eaglefactions.commands.EagleFactionsCommand;
-import io.github.aquerr.eaglefactions.commands.HelpCommand;
+import io.github.aquerr.eaglefactions.commands.*;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
@@ -151,6 +148,12 @@ public class EagleFactions
         .description(Text.of("Disband Faction Command"))
         .permission("eaglefactions.command.disband")
         .executor(new DisbandCommand())
+        .build());
+
+        _subcommands.put(Arrays.asList("list"), CommandSpec.builder()
+        .description(Text.of("List all factions"))
+        .permission("eaglefactions.command.list")
+        .executor(new ListCommand())
         .build());
 
         //Build all commands
