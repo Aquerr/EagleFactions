@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.managers.FactionManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -29,7 +30,7 @@ public class DisbandCommand implements CommandExecutor
                     {
                         FactionManager.disbandFaction(playerFactionName);
 
-                        player.sendMessage(Text.of(TextColors.AQUA, "[EagleFactions] ",TextColors.GREEN,"Faction has been disbanded"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
 
                         return CommandResult.success();
                     }
@@ -40,12 +41,12 @@ public class DisbandCommand implements CommandExecutor
                 }
                 else if(FactionManager.getMembers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    player.sendMessage(Text.of(TextColors.DARK_RED, "[ERROR] ", "You need to be the leader to disband a faction!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You need to be the leader to disband a faction!"));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(TextColors.DARK_RED, "[ERROR] ", TextColors.RED, "You are not in the faction!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in the faction!"));
             }
         }
 
