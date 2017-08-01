@@ -25,12 +25,11 @@ public class DisbandCommand implements CommandExecutor
             {
                 if(FactionManager.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                 {
-                    //TODO: Invoke disband function here.
                     try
                     {
                         FactionManager.disbandFaction(playerFactionName);
 
-                        player.sendMessage(Text.of(TextColors.BLUE, "[EagleFactions] ",TextColors.GREEN,"Faction has been disbanded"));
+                        player.sendMessage(Text.of(TextColors.AQUA, "[EagleFactions] ",TextColors.GREEN,"Faction has been disbanded"));
 
                         return CommandResult.success();
                     }
