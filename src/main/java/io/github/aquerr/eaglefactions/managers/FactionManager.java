@@ -53,7 +53,7 @@ public class FactionManager
         return null;
     }
 
-    private static String getLeader(String factionName)
+    public static String getLeader(String factionName)
     {
         ConfigurationNode valueNode = ConfigAccess.getConfig(factionsConfig).getNode((Object[]) ("factions." + factionName + ".leader").split("\\."));
 
@@ -63,9 +63,9 @@ public class FactionManager
             return "";
     }
 
-    private static ArrayList<String> getMembers(String factionName)
+    public static ArrayList<String> getMembers(String factionName)
     {
-       // ConfigurationNode valueNode = ConfigAccess.getMainConfig(factionsConfig).getNode((Object[]) ("teams." + factionName + ".members").split("\\."));
+        ConfigurationNode valueNode = ConfigAccess.getConfig(factionsConfig).getNode((Object[]) ("teams." + factionName + ".members").split("\\."));
 //
        // if (valueNode.getValue() == null)
        //     return Lists.newArrayList();
@@ -123,11 +123,11 @@ public class FactionManager
             return Sets.newHashSet ();
     }
 
-    public static boolean createFaction(String factionName, UUID player)
+    public static boolean createFaction(String factionName, UUID playerUUID)
     {
         try
         {
-            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(player.toString()));
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},"");
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},"");
         }
@@ -137,5 +137,10 @@ public class FactionManager
         }
 
         return true;
+    }
+
+    public static void disbandFaction(String factionName)
+    {
+            ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"},factionName);
     }
 }
