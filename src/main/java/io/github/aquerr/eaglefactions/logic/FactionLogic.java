@@ -2,6 +2,9 @@ package io.github.aquerr.eaglefactions.logic;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
+import com.typesafe.config.parser.ConfigNode;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
@@ -9,9 +12,9 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 
 
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.UUID;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -64,49 +67,15 @@ public class FactionLogic
             return "";
     }
 
-    public static ArrayList<String> getMembers(String factionName)
+    public static List<String> getMembers(String factionName)
     {
-        ConfigurationNode valueNode = ConfigAccess.getConfig(factionsConfig).getNode((Object[]) ("teams." + factionName + ".members").split("\\."));
-//
-       // if (valueNode.getValue() == null)
-       //     return Lists.newArrayList();
-//
-       // String list = valueNode.getString();
-        ArrayList<String> membersList = Lists.newArrayList();
-       // boolean finished = false;
-//
-       // if (finished != true)
-       // {
-       //     int endIndex = list.indexOf(",");
-       //     if (endIndex != -1)
-       //     {
-       //         String substring = list.substring(0, endIndex);
-       //         membersList.add(substring);
-//
-       //         // If they Have More than 1
-       //         while (finished != true)
-       //         {
-       //             int startIndex = endIndex;
-       //             endIndex = list.indexOf(",", startIndex + 1);
-       //             if (endIndex != -1)
-       //             {
-       //                 String substrings = list.substring(startIndex + 1, endIndex);
-       //                 membersList.add(substrings);
-       //             }
-       //             else
-       //             {
-       //                 finished = true;
-       //             }
-       //         }
-       //     }
-       //     else
-       //     {
-       //         membersList.add(list);
-       //         finished = true;
-       //     }
-       // }
-//
-        return membersList;
+        ConfigurationNode membersNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"members");
+
+        List<String> membersList = membersNode.getList(objectToStringTransformer);
+
+        List<String> helpList = new ArrayList<>(membersList);
+
+        return helpList;
     }
 
     public static Set<Object> getFactions()
@@ -147,11 +116,28 @@ public class FactionLogic
 
     public static void joinFaction(UUID playerUUID, String factionName)
     {
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, playerUUID.toString());
+        ConfigurationNode membersNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"members");
+
+        List<String> membersList = membersNode.getList(objectToStringTransformer);
+
+        List<String> testList = new ArrayList<>(membersList);
+        testList.add(playerUUID.toString());
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, testList);
+
     }
 
     public static void leaveFaction(UUID playerUUID, String factionName)
     {
         ConfigAccess.removeChild(factionsConfig, new Object[]{"factions", factionName, "members"},playerUUID.toString());
     }
+
+    private static Function<Object,String> objectToStringTransformer = input -> {
+        if (input instanceof String)
+        {
+            return (String) input;
+        } else {
+            return null;
+        }
+    };
 }
