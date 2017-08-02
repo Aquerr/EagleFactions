@@ -166,6 +166,13 @@ public class EagleFactions
         .executor(new InviteCommand())
         .build());
 
+        //Join faction
+        Subcommands.put(Arrays.asList("join"), CommandSpec.builder()
+        .description(Text.of("Join a specific faction"))
+        .permission("eaglefactions.command.join")
+        .executor(new JoinCommand())
+        .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Factions"))
@@ -176,7 +183,7 @@ public class EagleFactions
 
 
         //Register commands
-        Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "f");
+        Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "faction", "f");
     }
 
 }

@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import io.github.aquerr.eaglefactions.managers.FactionManager;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -21,7 +21,7 @@ public class ListCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        HashSet<Object> factionsList = new HashSet<>(FactionManager.getFactions());
+        HashSet<Object> factionsList = new HashSet<>(FactionLogic.getFactions());
         List<Text> helpList = new ArrayList<>();
 
         for(Object faction: factionsList)

@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.managers.FactionManager;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -20,15 +20,15 @@ public class DisbandCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionManager.getFaction(player.getUniqueId ());
+            String playerFactionName = FactionLogic.getFaction(player.getUniqueId ());
 
             if(playerFactionName != null)
             {
-                if(FactionManager.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
+                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                 {
                     try
                     {
-                        FactionManager.disbandFaction(playerFactionName);
+                        FactionLogic.disbandFaction(playerFactionName);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
 
@@ -39,7 +39,7 @@ public class DisbandCommand implements CommandExecutor
                         exception.printStackTrace();
                     }
                 }
-                else if(FactionManager.getMembers(playerFactionName).contains(player.getUniqueId().toString()))
+                else if(FactionLogic.getMembers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You need to be the leader to disband a faction!"));
                 }

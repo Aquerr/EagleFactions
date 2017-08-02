@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.managers;
+package io.github.aquerr.eaglefactions.logic;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.entity.living.player.Player;
 
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.UUID;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class FactionManager
+public class FactionLogic
 {
     //TODO:Add other configs
     //private static IConfig mainConfig = MainConfig.getMainConfig();
@@ -25,7 +26,7 @@ public class FactionManager
 
     public static String getFaction(UUID playerUUID)
     {
-        for (Object t : FactionManager.getFactions ())
+        for (Object t : FactionLogic.getFactions ())
         {
             String faction = String.valueOf (t);
 
@@ -35,11 +36,11 @@ public class FactionManager
             }
 
             //TODO: If even leader and officers are stored in Members group, checking members is enough.
-            if(FactionManager.getMembers(faction).contains(playerUUID.toString ()))
+            if(FactionLogic.getMembers(faction).contains(playerUUID.toString ()))
             {
                 return faction;
             }
-            else if(FactionManager.getLeader(faction).equals(playerUUID.toString ()))
+            else if(FactionLogic.getLeader(faction).equals(playerUUID.toString ()))
             {
                 return faction;
             }
@@ -142,5 +143,10 @@ public class FactionManager
     public static void disbandFaction(String factionName)
     {
             ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"},factionName);
+    }
+
+    public static void joinFaction(UUID playerUUID, String factionName)
+    {
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, playerUUID.toString());
     }
 }

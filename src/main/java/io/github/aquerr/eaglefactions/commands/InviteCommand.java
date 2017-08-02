@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Invite;
-import io.github.aquerr.eaglefactions.managers.FactionManager;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -28,11 +28,11 @@ public class InviteCommand implements CommandExecutor
         {
             Player factionPlayer = (Player)source;
 
-            String playerFactionName = FactionManager.getFaction(factionPlayer.getUniqueId());
+            String playerFactionName = FactionLogic.getFaction(factionPlayer.getUniqueId());
 
             if(playerFactionName != null)
             {
-                if(FactionManager.getFaction(invitedPlayer.getUniqueId()) == null)
+                if(FactionLogic.getFaction(invitedPlayer.getUniqueId()) == null)
                 {
                     try
                     {
@@ -80,7 +80,7 @@ public class InviteCommand implements CommandExecutor
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Must be an ingame player to use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
         }
 
         return CommandResult.success();

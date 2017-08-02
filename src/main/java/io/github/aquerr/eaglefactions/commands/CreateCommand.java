@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.managers.FactionManager;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -35,15 +35,15 @@ public class CreateCommand implements CommandExecutor
             //if(factionName.length() > ConfigManager.getMaxNameLength()){}
             //if(factionName.length() < ConfigManager.getMinNameLength()){}
 
-            String playerFactionName = FactionManager.getFaction(player.getUniqueId ());
+            String playerFactionName = FactionLogic.getFaction(player.getUniqueId ());
 
             if(playerFactionName == null)
             {
                     try
                     {
-                        if(!FactionManager.getFactions().contains(factionName))
+                        if(!FactionLogic.getFactions().contains(factionName))
                         {
-                            boolean didSucceed = FactionManager.createFaction(factionName, player.getUniqueId());
+                            boolean didSucceed = FactionLogic.createFaction(factionName, player.getUniqueId());
 
                             if(didSucceed)
                             {
