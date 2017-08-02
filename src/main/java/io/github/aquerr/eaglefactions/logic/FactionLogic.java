@@ -142,11 +142,16 @@ public class FactionLogic
 
     public static void disbandFaction(String factionName)
     {
-            ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"},factionName);
+        ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"},factionName);
     }
 
     public static void joinFaction(UUID playerUUID, String factionName)
     {
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, playerUUID.toString());
+    }
+
+    public static void leaveFaction(UUID playerUUID, String factionName)
+    {
+        ConfigAccess.removeChild(factionsConfig, new Object[]{"factions", factionName, "members"},playerUUID.toString());
     }
 }

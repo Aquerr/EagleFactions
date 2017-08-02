@@ -165,12 +165,19 @@ public class EagleFactions
         .executor(new InviteCommand())
         .build());
 
-        //Join faction
+        //Join faction command
         Subcommands.put(Arrays.asList("join"), CommandSpec.builder()
         .description(Text.of("Join a specific faction"))
         .permission("eaglefactions.command.join")
         .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
         .executor(new JoinCommand())
+        .build());
+
+        //Leave faction command
+        Subcommands.put(Arrays.asList("leave"), CommandSpec.builder()
+        .description(Text.of("Leave a faction"))
+        .permission("eaglefactions.command.leave")
+        .executor(new LeaveCommand())
         .build());
 
         //Build all commands
