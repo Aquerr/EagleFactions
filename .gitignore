@@ -15,7 +15,7 @@ lib
 .mtj.tmp/
 
 # Package Files #
-*.jar
+*.7z
 *.war
 *.ear
 *.zip
