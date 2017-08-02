@@ -52,6 +52,10 @@ public class CreateCommand implements CommandExecutor
                             }
                             else{player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Something went wrong while creating faction."));}
                         }
+                        else
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Faction with the same name already exists!"));
+                        }
                     }
                     catch (NullPointerException exception)
                     {

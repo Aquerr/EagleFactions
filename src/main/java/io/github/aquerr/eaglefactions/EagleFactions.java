@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.commands.*;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
+import io.github.aquerr.eaglefactions.entities.Invite;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -30,7 +31,8 @@ import java.util.Map;
 public class EagleFactions
 {
 
-    public static Map<List<String>, CommandSpec> _subcommands;
+    public static Map<List<String>, CommandSpec> Subcommands;
+    public static List<Invite> InviteList;
 
     @Inject
     private Logger _logger;
@@ -125,10 +127,10 @@ public class EagleFactions
     {
         getLogger ().info ("Initializing commands...");
 
-        _subcommands = new HashMap<List<String>, CommandSpec>();
+        Subcommands = new HashMap<List<String>, CommandSpec>();
 
         //Help command should display all possible commands in plugin.
-        _subcommands.put (Arrays.asList ("help"), CommandSpec.builder ()
+        Subcommands.put (Arrays.asList ("help"), CommandSpec.builder ()
                 .description (Text.of ("Help"))
                 .permission ("eaglefactions.command.help")
                 .executor (new HelpCommand ())
@@ -136,7 +138,7 @@ public class EagleFactions
 
         //TODO: Player should assign a faction tag while creating a faction.
         //Create faction command.
-        _subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
+        Subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission ("eaglefactions.command.create")
         .arguments (GenericArguments.onlyOne (GenericArguments.string (Text.of ("faction name"))))
@@ -144,16 +146,24 @@ public class EagleFactions
         .build ());
 
         //Disband faction command.
-        _subcommands.put(Arrays.asList("disband"), CommandSpec.builder()
+        Subcommands.put(Arrays.asList("disband"), CommandSpec.builder()
         .description(Text.of("Disband Faction Command"))
         .permission("eaglefactions.command.disband")
         .executor(new DisbandCommand())
         .build());
 
-        _subcommands.put(Arrays.asList("list"), CommandSpec.builder()
+        //List all factions.
+        Subcommands.put(Arrays.asList("list"), CommandSpec.builder()
         .description(Text.of("List all factions"))
         .permission("eaglefactions.command.list")
         .executor(new ListCommand())
+        .build());
+
+        //Invite a player to the faction.
+        Subcommands.put(Arrays.asList("invite"), CommandSpec.builder()
+        .description(Text.of("Invites a player to the faction"))
+        .permission("eaglefactions.command.invite")
+        .executor(new InviteCommand())
         .build());
 
         //Build all commands
@@ -161,7 +171,7 @@ public class EagleFactions
                 .description (Text.of ("Factions"))
                 .permission ("eaglefactions.command.*")
                 .executor (new EagleFactionsCommand ())
-                .children (_subcommands)
+                .children (Subcommands)
                 .build ();
 
 

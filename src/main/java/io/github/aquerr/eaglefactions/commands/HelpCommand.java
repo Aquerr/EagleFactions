@@ -3,8 +3,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import com.google.common.collect.Lists;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import javafx.scene.control.Pagination;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -17,7 +15,6 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +23,7 @@ public class HelpCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Map<List<String>, CommandSpec> commands = EagleFactions.getEagleFactions()._subcommands;
+        Map<List<String>, CommandSpec> commands = EagleFactions.getEagleFactions().Subcommands;
         List<Text> helpList = Lists.newArrayList();
 
         for (List<String> aliases: commands.keySet())
