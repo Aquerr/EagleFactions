@@ -22,17 +22,14 @@ import org.spongepowered.api.text.format.TextColors;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description)
 public class EagleFactions
 {
 
     public static Map<List<String>, CommandSpec> Subcommands;
-    public static List<Invite> InviteList;
+    public static List<Invite> InviteList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -51,6 +48,7 @@ public class EagleFactions
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
     {
+
         eagleFactions = this;
 
         //TODO:Change color of loggs.
@@ -163,6 +161,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("invite"), CommandSpec.builder()
         .description(Text.of("Invites a player to the faction"))
         .permission("eaglefactions.command.invite")
+        .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
         .executor(new InviteCommand())
         .build());
 
@@ -170,6 +169,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("join"), CommandSpec.builder()
         .description(Text.of("Join a specific faction"))
         .permission("eaglefactions.command.join")
+        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
         .executor(new JoinCommand())
         .build());
 

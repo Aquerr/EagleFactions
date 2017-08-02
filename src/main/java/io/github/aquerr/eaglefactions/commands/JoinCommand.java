@@ -24,36 +24,44 @@ public class JoinCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            if(FactionLogic.getFactions().contains(factionName))
+            if(FactionLogic.getFaction(player.getUniqueId()) == null)
             {
-                for (Invite invite: EagleFactions.InviteList)
+
+                if(FactionLogic.getFactions().contains(factionName))
                 {
-                    if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(factionName))
+                    for (Invite invite: EagleFactions.InviteList)
                     {
-                        try
+                        if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(factionName))
                         {
-                            //TODO: Create a listener which will notify all players in faction that someone has joined.
-                            FactionLogic.joinFaction(player.getUniqueId(), factionName);
+                            try
+                            {
+                                //TODO: Create a listener which will notify all players in faction that someone has joined.
+                                FactionLogic.joinFaction(player.getUniqueId(), factionName);
 
-                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully joined faction ", TextColors.GOLD, factionName));
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully joined faction ", TextColors.GOLD, factionName));
 
-                            return CommandResult.success();
+                                return CommandResult.success();
+                            }
+                            catch (Exception exception)
+                            {
+                                exception.printStackTrace();
+                            }
+
                         }
-                        catch (Exception exception)
+                        else
                         {
-                            exception.printStackTrace();
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
                         }
-
                     }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
-                    }
+                }
+                else
+                {
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, factionName));
                 }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, factionName));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You already are in a faction."));
             }
 
             return CommandResult.success();
