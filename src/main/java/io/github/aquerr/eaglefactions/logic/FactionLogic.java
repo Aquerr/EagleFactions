@@ -133,11 +133,14 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
     }
 
-    private static Function<Object,String> objectToStringTransformer = input -> {
+    private static Function<Object,String> objectToStringTransformer = input ->
+    {
         if (input instanceof String)
         {
             return (String) input;
-        } else {
+        }
+        else
+        {
             return null;
         }
     };
