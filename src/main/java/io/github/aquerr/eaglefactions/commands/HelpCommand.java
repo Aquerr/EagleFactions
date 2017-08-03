@@ -32,7 +32,7 @@ public class HelpCommand implements CommandExecutor
 
             Text commandHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]",""))).append(Text.of(TextColors.AQUA, "/f" + aliases.toString().t))
+                            .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
                             .build())
                     .append(Text.builder()
                             .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
