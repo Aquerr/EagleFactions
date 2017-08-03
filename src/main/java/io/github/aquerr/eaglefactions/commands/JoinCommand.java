@@ -29,30 +29,55 @@ public class JoinCommand implements CommandExecutor
 
                 if(FactionLogic.getFactions().contains(factionName))
                 {
-                    for (Invite invite: EagleFactions.InviteList)
-                    {
-                        if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(factionName))
+                    //Invite invite = new Invite(factionName, player.getUniqueId());
+
+                    //player.sendMessage(Text.of("Trying join faction with following invite..."));
+                    //player.sendMessage(Text.of(invite.getFactionName() + " | " + invite.getPlayerUUID()));
+//
+                    //boolean inviteExists = EagleFactions.InviteList.contains(invite);
+                    //boolean inviteListNull = EagleFactions.InviteList == null;
+//
+//
+                    //player.sendMessage(Text.of("Does invite list contain your invite? = " + inviteExists));
+                    //player.sendMessage(Text.of("Is invite list null? = " + inviteListNull));
+
+
+
+                    //if(EagleFactions.InviteList.contains(invite) && EagleFactions.InviteList != null)
+                    //{
+                        for (Invite invite: EagleFactions.InviteList)
                         {
-                            try
+                            if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(factionName))
                             {
-                                //TODO: Create a listener which will notify all players in faction that someone has joined.
-                                FactionLogic.joinFaction(player.getUniqueId(), factionName);
+                                try
+                                {
 
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully joined faction ", TextColors.GOLD, factionName));
+                                    //TODO: Create a listener which will notify all players in faction that someone has joined.
+                                    FactionLogic.joinFaction(player.getUniqueId(), factionName);
 
-                                return CommandResult.success();
+                                    //TODO: Remove invite from InviteList if player joins a faction.
+
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully joined faction ", TextColors.GOLD, factionName));
+                                    return CommandResult.success();
+                                }
+                                catch (Exception exception)
+                                {
+                                    exception.printStackTrace();
+                                }
                             }
-                            catch (Exception exception)
-                            {
-                                exception.printStackTrace();
-                            }
+                        }
 
-                        }
-                        else
-                        {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
-                        }
-                    }
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
+
+                    //else if(!EagleFactions.InviteList.contains(invite))
+                    //{
+                    //    for (Invite test: EagleFactions.InviteList)
+                    //    {
+                    //        source.sendMessage(Text.of(test.getFactionName() + " | " + test.getPlayerUUID().toString() + "\n"));
+                    //    }
+//
+                    //    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
+                    //}
                 }
                 else
                 {
@@ -63,8 +88,6 @@ public class JoinCommand implements CommandExecutor
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You already are in a faction."));
             }
-
-            return CommandResult.success();
         }
         else
         {

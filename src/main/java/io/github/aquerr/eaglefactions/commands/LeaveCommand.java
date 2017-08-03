@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -22,14 +23,23 @@ public class LeaveCommand implements CommandExecutor
 
             String playerFactionName = FactionLogic.getFaction(player.getUniqueId());
 
+
             if(playerFactionName != null)
             {
-                FactionLogic.leaveFaction(player.getUniqueId(), playerFactionName);
+                if(!FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
+                {
 
-                //TODO: Add listener that will inform players in a faction that someone has left their faction.
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"You left faction ", TextColors.GOLD, playerFactionName));
+                    FactionLogic.leaveFaction(player.getUniqueId(), playerFactionName);
 
-                CommandResult.success();
+                    //TODO: Add listener that will inform players in a faction that someone has left their faction.
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"You left faction ", TextColors.GOLD, playerFactionName));
+
+                    CommandResult.success();
+                }
+                else
+                {
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't leave your faction because you are its leader! Disband your faction or set someone as leader."));
+                }
             }
             else
             {

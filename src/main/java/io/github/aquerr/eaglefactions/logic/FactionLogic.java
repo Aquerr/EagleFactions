@@ -98,6 +98,7 @@ public class FactionLogic
         try
         {
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},"");
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},"");
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},"");
         }
@@ -116,20 +117,20 @@ public class FactionLogic
 
     public static void joinFaction(UUID playerUUID, String factionName)
     {
-        ConfigurationNode membersNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"members");
+        List<String> memberList = new ArrayList<>(getMembers(factionName));
+        memberList.add(playerUUID.toString());
 
-        List<String> membersList = membersNode.getList(objectToStringTransformer);
-
-        List<String> testList = new ArrayList<>(membersList);
-        testList.add(playerUUID.toString());
-
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, testList);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
 
     }
 
     public static void leaveFaction(UUID playerUUID, String factionName)
     {
-        ConfigAccess.removeChild(factionsConfig, new Object[]{"factions", factionName, "members"},playerUUID.toString());
+        List<String> memberList = new ArrayList<>(getMembers(factionName));
+
+        memberList.remove(playerUUID.toString());
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
     }
 
     private static Function<Object,String> objectToStringTransformer = input -> {
