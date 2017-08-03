@@ -28,7 +28,7 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 * PVP-Block **(not implemented yet)**
 * Fully configurable
 
-### Links
+## Links
 
 * ~~Download Link~~
 * ~~Wiki~~
@@ -36,4 +36,4 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 
 Download link not yet provided
 
-Downloads will be **available** when version of the plugin hit **1.0.0**
+Download will be **available** when version of the plugin hits **1.0.0**
