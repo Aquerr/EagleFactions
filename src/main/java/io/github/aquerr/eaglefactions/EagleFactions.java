@@ -180,11 +180,18 @@ public class EagleFactions
         .executor(new LeaveCommand())
         .build());
 
+        //Version command
+        Subcommands.put(Arrays.asList("version"), CommandSpec.builder()
+        .description(Text.of("Shows plugin version"))
+        .permission("eaglefactions.command.version")
+        .executor(new VersionCommand())
+        .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
-                .description (Text.of ("Factions"))
+                .description (Text.of ("Help Command"))
                 .permission ("eaglefactions.command.*")
-                .executor (new EagleFactionsCommand ())
+                .executor (new HelpCommand())
                 .children (Subcommands)
                 .build ();
 
