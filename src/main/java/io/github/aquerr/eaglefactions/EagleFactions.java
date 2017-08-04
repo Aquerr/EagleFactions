@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.commands.*;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
+import io.github.aquerr.eaglefactions.entities.AllayInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import org.slf4j.Logger;
 
@@ -30,6 +31,7 @@ public class EagleFactions
 
     public static Map<List<String>, CommandSpec> Subcommands;
     public static List<Invite> InviteList = new ArrayList<>();
+    public static List<AllayInvite> AllayInviteList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -201,6 +203,13 @@ public class EagleFactions
         .permission("eaglefactions.command.player")
         .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
         .executor(new PlayerCommand())
+        .build());
+
+        Subcommands.put(Arrays.asList("ally"), CommandSpec.builder()
+        .description(Text.of("Invite faction to the alliance"))
+        .permission("eaglefactions.command.ally")
+        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+        .executor(new AllyCommand())
         .build());
 
         //Build all commands

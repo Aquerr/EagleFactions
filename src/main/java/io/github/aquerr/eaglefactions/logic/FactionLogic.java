@@ -127,6 +127,7 @@ public class FactionLogic
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},"");
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},new ArrayList<String>());
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "alliances"}, new ArrayList<String>());
         }
         catch (Exception exception)
         {
@@ -157,6 +158,33 @@ public class FactionLogic
         memberList.remove(playerUUID.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+    }
+
+    public static void addAllay(String playerFactionName, String invitedFactionName)
+    {
+        List<String> playerFactionAllianceList = new ArrayList<>(getAlliance(playerFactionName));
+        List<String> invitedFactionAllianceList = new ArrayList<>(getAlliance(invitedFactionName));
+
+        playerFactionAllianceList.add(invitedFactionName);
+        invitedFactionAllianceList.add(playerFactionName);
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", playerFactionName, "alliances"}, playerFactionAllianceList);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", invitedFactionName, "alliances"}, invitedFactionAllianceList);
+    }
+
+    public static List<String> getAlliance(String factionName)
+    {
+        ConfigurationNode allianceNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "alliances");
+
+        if (allianceNode.getValue() != null)
+        {
+            List<String> alliancesList = allianceNode.getList(objectToStringTransformer);
+
+            List<String> helpList = new ArrayList<>(alliancesList);
+
+            return helpList;
+        }
+        else return new ArrayList<String>();
     }
 
     private static Function<Object,String> objectToStringTransformer = input ->

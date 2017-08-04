@@ -49,6 +49,10 @@ public class DisbandCommand implements CommandExecutor
                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in the faction!"));
             }
         }
+        else
+        {
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+        }
 
         return CommandResult.success();
     }
