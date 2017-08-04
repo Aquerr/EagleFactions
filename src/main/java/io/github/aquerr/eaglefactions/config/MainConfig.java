@@ -89,8 +89,8 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "tag", "maxlength").setValue(5).setComment("This determines the minimum amount of characters a Factions's tag can be.");
         get().getNode("eaglefactions", "tag", "minlength").setValue(2).setComment("This determines the minimum amount of characters a Factions's tag can be.");
         get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes.");
-        get().getNode("eaglefactions", "claims", "cap").setValue(50).setComment("The maximum number of claims a Faction may have, overrides the one based on multiplier and player size.");
-        get().getNode("eaglefactions", "power", "increment").setValue(1).setComment("How much power will be restored for player after 1 hour playing");
+      //  get().getNode("eaglefactions", "claims", "cap").setValue(50).setComment("The maximum number of claims a Faction may have, overrides the one based on multiplier and player size.");
+        get().getNode("eaglefactions", "power", "increment").setValue(1).setComment("How much power will be restored for player after 1 hour of playing");
         get().getNode("eaglefactions", "power", "maxpower").setValue(10).setComment("Maximum amount of power a player can have");
     }
 
