@@ -66,7 +66,15 @@ public class FactionLogic
         Faction faction = new Faction(factionName, UUID.fromString(leaderUUID.toString()));
 
         faction.Members = getMembers(factionName);
-        //TODO: Add more properties to load.
+
+        //TODO: Load other faction properties here.
+        //faction.Officers = getOfficers(factionName);
+        //faction.Enemies = getEnemies(factionName);
+        //faction.Alliances = getAlliances(factionName);
+        //faction.Claims = getClaims(factionName);
+
+        //TODO: Implement power service.
+        //faction.Power = PowerService.getFactionPower(faction.Members);
 
         return faction;
     }
