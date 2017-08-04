@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.services.PlayerService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -86,7 +87,7 @@ public class InfoCommand implements CommandExecutor
 
                 Text info = Text.builder()
                         .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, faction.Name + "\n"))
-                        .append(Text.of(TextColors.AQUA, "Leader: ", TextColors.GOLD, getNameFromUUID(faction.Leader).get() + "\n"))
+                        .append(Text.of(TextColors.AQUA, "Leader: ", TextColors.GOLD, PlayerService.getPlayerName(faction.Leader).get() + "\n"))
                         .append(Text.of(TextColors.AQUA, "Officers: ", TextColors.GOLD, officersList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.GOLD, alliancesList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.GOLD, enemiesList + "\n"))
@@ -109,22 +110,5 @@ public class InfoCommand implements CommandExecutor
             }
 
         return CommandResult.success();
-    }
-
-    private Optional<String> getNameFromUUID(UUID playerUUID)
-    {
-        UserStorageService userStorageService = Sponge.getServiceManager().provideUnchecked(UserStorageService.class);
-        Optional<User> oUser = userStorageService.get(playerUUID);
-
-        if(oUser.isPresent())
-        {
-            String name = oUser.get().getName();
-            return Optional.of(name);
-        }
-        else
-        {
-            return Optional.empty();
-        }
-
     }
 }
