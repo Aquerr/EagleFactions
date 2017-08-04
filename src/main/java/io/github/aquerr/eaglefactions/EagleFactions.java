@@ -187,12 +187,20 @@ public class EagleFactions
         .executor(new VersionCommand())
         .build());
 
-        //Info command
+        //Info command. Shows info about a faction.
         Subcommands.put(Arrays.asList("info"), CommandSpec.builder()
         .description(Text.of("Show info about a faction"))
         .permission("eaglefaction.command.info")
         .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
         .executor(new InfoCommand())
+        .build());
+
+        //Player command. Shows info about a player. (its factions etc.)
+        Subcommands.put(Arrays.asList("p", "player"), CommandSpec.builder()
+        .description(Text.of("Show info about a player"))
+        .permission("eaglefactions.command.player")
+        .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+        .executor(new PlayerCommand())
         .build());
 
         //Build all commands
@@ -202,7 +210,6 @@ public class EagleFactions
                 .executor (new HelpCommand())
                 .children (Subcommands)
                 .build ();
-
 
         //Register commands
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "faction", "f");
