@@ -136,7 +136,7 @@ public class EagleFactions
 
         //TODO: Player should assign a faction tag while creating a faction.
         //Create faction command.
-        Subcommands.put (Arrays.asList ("create"), CommandSpec.builder ()
+        Subcommands.put (Arrays.asList ("c","create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission ("eaglefactions.command.create")
         .arguments (GenericArguments.onlyOne (GenericArguments.string (Text.of ("faction name"))))
@@ -166,7 +166,7 @@ public class EagleFactions
         .build());
 
         //Join faction command
-        Subcommands.put(Arrays.asList("join"), CommandSpec.builder()
+        Subcommands.put(Arrays.asList("j","join"), CommandSpec.builder()
         .description(Text.of("Join a specific faction"))
         .permission("eaglefactions.command.join")
         .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
@@ -181,14 +181,14 @@ public class EagleFactions
         .build());
 
         //Version command
-        Subcommands.put(Arrays.asList("version"), CommandSpec.builder()
+        Subcommands.put(Arrays.asList("v","version"), CommandSpec.builder()
         .description(Text.of("Shows plugin version"))
         .permission("eaglefactions.command.version")
         .executor(new VersionCommand())
         .build());
 
         //Info command. Shows info about a faction.
-        Subcommands.put(Arrays.asList("info"), CommandSpec.builder()
+        Subcommands.put(Arrays.asList("i","info"), CommandSpec.builder()
         .description(Text.of("Show info about a faction"))
         .permission("eaglefaction.command.info")
         .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
