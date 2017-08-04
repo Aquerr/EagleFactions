@@ -187,6 +187,14 @@ public class EagleFactions
         .executor(new VersionCommand())
         .build());
 
+        //Info command
+        Subcommands.put(Arrays.asList("info"), CommandSpec.builder()
+        .description(Text.of("Show info about a faction"))
+        .permission("eaglefaction.command.info")
+        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+        .executor(new InfoCommand())
+        .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))

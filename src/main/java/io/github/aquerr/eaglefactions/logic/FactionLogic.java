@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 
@@ -57,6 +58,27 @@ public class FactionLogic
         return null;
     }
 
+    public static Faction getFaction(String factionName)
+    {
+        ConfigurationNode leaderNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "leader");
+        Object leaderUUID = leaderNode.getValue();
+
+        Faction faction = new Faction(factionName, UUID.fromString(leaderUUID.toString()));
+
+        faction.Members = getMembers(factionName);
+
+        //TODO: Load other faction properties here.
+        //faction.Officers = getOfficers(factionName);
+        //faction.Enemies = getEnemies(factionName);
+        //faction.Alliances = getAlliances(factionName);
+        //faction.Claims = getClaims(factionName);
+
+        //TODO: Implement power service.
+        //faction.Power = PowerService.getFactionPower(faction.Members);
+
+        return faction;
+    }
+
     public static String getLeader(String factionName)
     {
         ConfigurationNode valueNode = ConfigAccess.getConfig(factionsConfig).getNode((Object[]) ("factions." + factionName + ".leader").split("\\."));
@@ -71,11 +93,15 @@ public class FactionLogic
     {
         ConfigurationNode membersNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"members");
 
-        List<String> membersList = membersNode.getList(objectToStringTransformer);
+        if (membersNode.getValue() != null)
+        {
+            List<String> membersList = membersNode.getList(objectToStringTransformer);
 
-        List<String> helpList = new ArrayList<>(membersList);
+            List<String> helpList = new ArrayList<>(membersList);
 
-        return helpList;
+            return helpList;
+        }
+        else return new ArrayList<String>();
     }
 
     public static Set<Object> getFactions()
@@ -99,8 +125,8 @@ public class FactionLogic
         {
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},"");
-            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},"");
-            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},"");
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},new ArrayList<String>());
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},new ArrayList<String>());
         }
         catch (Exception exception)
         {
@@ -133,11 +159,14 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
     }
 
-    private static Function<Object,String> objectToStringTransformer = input -> {
+    private static Function<Object,String> objectToStringTransformer = input ->
+    {
         if (input instanceof String)
         {
             return (String) input;
-        } else {
+        }
+        else
+        {
             return null;
         }
     };

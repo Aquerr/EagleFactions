@@ -19,7 +19,7 @@ public class CreateCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String factionName = context.<String> getOne ("faction name").get ();
+        String factionName = context.<String> getOne ("faction name").get();
 
         if(source instanceof Player)
         {

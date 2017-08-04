@@ -35,7 +35,7 @@ public class HelpCommand implements CommandExecutor
                             .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
                             .build())
                     .append(Text.builder()
-                            .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get()))
+                            .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
                             .build())
                     //.append(Text.builder()
                     //        .append(Text.of(TextColors.GRAY, commandSpec.getUsage(source)))
