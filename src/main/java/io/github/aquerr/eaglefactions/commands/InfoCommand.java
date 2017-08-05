@@ -41,48 +41,44 @@ public class InfoCommand implements CommandExecutor
                 List<Text> factionInfo = new ArrayList<>();
 
                 String membersList = "";
-
                 if(!faction.Members.isEmpty() && faction.Members != null)
                 {
                     for (String member: faction.Members)
                     {
-                        EagleFactions.getEagleFactions().getLogger().info("Adding a member...");
-
                         membersList += member + ", ";
                     }
+                   membersList = membersList.substring(0, membersList.length() - 2);
                 }
 
                 String officersList = "";
-
                 if(!faction.Officers.isEmpty() && faction.Officers != null)
                 {
                     for (String officer: faction.Officers)
                     {
-                        EagleFactions.getEagleFactions().getLogger().info("Adding an officer...");
                         officersList += officer + ", ";
                     }
+                    officersList = officersList.substring(0, officersList.length() - 2);
                 }
 
                 String alliancesList = "";
-
                 if(!faction.Alliances.isEmpty() && faction.Alliances != null)
                 {
                     for (String alliance: faction.Alliances)
                     {
                         alliancesList += alliance + ", ";
                     }
+                    alliancesList = alliancesList.substring(0, alliancesList.length() - 2);
                 }
 
                 String enemiesList = "";
-
                 if(!faction.Enemies.isEmpty() && faction.Enemies != null)
                 {
                     for (String enemy: faction.Enemies)
                     {
                         enemiesList += enemy + ", ";
                     }
+                   enemiesList = enemiesList.substring(0, enemiesList.length() - 2);
                 }
-
 
 
                 Text info = Text.builder()
