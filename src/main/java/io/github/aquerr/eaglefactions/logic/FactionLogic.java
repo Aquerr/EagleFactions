@@ -70,13 +70,28 @@ public class FactionLogic
         //TODO: Load other faction properties here.
         //faction.Officers = getOfficers(factionName);
         //faction.Enemies = getEnemies(factionName);
-        //faction.Alliances = getAlliances(factionName);
+        faction.Alliances = getAlliances(factionName);
         //faction.Claims = getClaims(factionName);
 
         //TODO: Implement power service.
         //faction.Power = PowerService.getFactionPower(faction.Members);
 
         return faction;
+    }
+
+    private static List<String> getAlliances(String factionName)
+    {
+        ConfigurationNode allianceNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"alliances");
+
+        if (allianceNode.getValue() != null)
+        {
+            List<String> allianceList = allianceNode.getList(objectToStringTransformer);
+
+            List<String> helpList = new ArrayList<>(allianceList);
+
+            return helpList;
+        }
+        else return new ArrayList<String>();
     }
 
     public static String getLeader(String factionName)
