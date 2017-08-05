@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import org.spongepowered.api.Sponge;
@@ -19,7 +20,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class AddEnemyCommand implements CommandExecutor
+public class RemoveEnemyCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
@@ -39,27 +40,48 @@ public class AddEnemyCommand implements CommandExecutor
                 {
                     if(FactionLogic.getFactions().contains(enemyFactionName))
                     {
-                        if(!FactionLogic.getAlliances(playerFactionName).contains(enemyFactionName))
+                        if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
                         {
-                            if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                            RemoveEnemy checkRemove = new RemoveEnemy(enemyFactionName, playerFactionName);
+                            if(EagleFactions.RemoveEnemyList.contains(checkRemove))
                             {
-                                FactionLogic.addEnemy(playerFactionName, enemyFactionName);
+                                FactionLogic.removeEnemy(playerFactionName, enemyFactionName);
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now enemies with " + enemyFactionName));
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted peace request from ", TextColors.GOLD, enemyFactionName + "!"));
+                            }
+                            else if(!EagleFactions.RemoveEnemyList.contains(checkRemove))
+                            {
+                                player.sendMessage(Text.of("There is no invite for your faction. Creating an invite... for them."));
+
+                                RemoveEnemy removeEnemy = new RemoveEnemy(playerFactionName, enemyFactionName);
+                                EagleFactions.RemoveEnemyList.add(removeEnemy);
 
                                 Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
-                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has declared you a ", TextColors.RED, "War!"));
+
+                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " wants to end the", TextColors.RED, "war", TextColors.WHITE, "with your faction ", TextColors.GREEN, "! You have 2 minutes to accept it!"));
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You requested war-end with faction ", TextColors.GOLD, enemyFactionName, TextColors.WHITE, " to the alliance."));
+
+                                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+                                taskBuilder.execute(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        if(EagleFactions.RemoveEnemyList.contains(removeEnemy) && EagleFactions.RemoveEnemyList != null)
+                                        {
+                                            EagleFactions.RemoveEnemyList.remove(removeEnemy);
+                                        }
+                                    }
+                                }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
 
                                 CommandResult.success();
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is already your enemy!"));
+
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is your ally! Remove alliance first to declare a war!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in the war with this faction!"));
                         }
                     }
                     else
