@@ -11,7 +11,7 @@ public abstract class PluginInfo
 {
     public static final String Id = "eaglefactions";
     public static final String Name = "Eagle Factions";
-    public static final String Version = "0.3.8";
+    public static final String Version = "0.3.9";
     public static final String Description = "A factions plugin that will make managing your battle-server easier. :)";
     public static final Text PluginPrefix = Text.of(TextColors.AQUA, "[" + Name + "] ");
     public static final Text ErrorPrefix = Text.of(TextColors.DARK_RED, "[ERROR] ");

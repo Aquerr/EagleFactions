@@ -50,6 +50,8 @@ public class AddAllyCommand implements CommandExecutor
                                 //TODO: Invoke add allay function here.
 
                                 FactionLogic.addAllay(playerFactionName, invitedFactionName);
+
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted an invitation from ", TextColors.GOLD, invitedFactionName + "!"));
                             }
                             else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                             {
