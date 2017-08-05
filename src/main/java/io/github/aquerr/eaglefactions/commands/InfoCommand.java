@@ -89,9 +89,9 @@ public class InfoCommand implements CommandExecutor
                         .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, faction.Name + "\n"))
                         .append(Text.of(TextColors.AQUA, "Leader: ", TextColors.GOLD, PlayerService.getPlayerName(faction.Leader).get() + "\n"))
                         .append(Text.of(TextColors.AQUA, "Officers: ", TextColors.GOLD, officersList + "\n"))
-                        .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.GOLD, alliancesList + "\n"))
-                        .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.GOLD, enemiesList + "\n"))
-                        .append(Text.of(TextColors.AQUA, "Members: ", TextColors.GOLD, membersList + "\n"))
+                        .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.BLUE, alliancesList + "\n"))
+                        .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.RED, enemiesList + "\n"))
+                        .append(Text.of(TextColors.AQUA, "Members: ", TextColors.GREEN, membersList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, faction.Power))
                         .build();
 
