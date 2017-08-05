@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.commands.*;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
-import io.github.aquerr.eaglefactions.entities.AllayInvite;
+import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import org.slf4j.Logger;
 
@@ -31,7 +31,7 @@ public class EagleFactions
 
     public static Map<List<String>, CommandSpec> Subcommands;
     public static List<Invite> InviteList = new ArrayList<>();
-    public static List<AllayInvite> AllayInviteList = new ArrayList<>();
+    public static List<AllyInvite> AllayInviteList = new ArrayList<>();
 
     @Inject
     private Logger _logger;

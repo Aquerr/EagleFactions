@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.AllayInvite;
+import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import org.spongepowered.api.Sponge;
@@ -42,17 +42,25 @@ public class AllyCommand implements CommandExecutor
                 {
                     if(FactionLogic.getFactions().contains(invitedFactionName))
                     {
-                        AllayInvite checkInvite = new AllayInvite(invitedFactionName, playerFactionName);
+                        AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFactionName);
 
-                        if(EagleFactions.AllayInviteList != null && EagleFactions.AllayInviteList.contains(checkInvite))
+                        boolean contain = EagleFactions.AllayInviteList.contains(checkInvite);
+
+                        if(contain) player.sendMessage(Text.of("There is an invite for your faction"));
+                        else player.sendMessage(Text.of(EagleFactions.AllayInviteList.toString()));
+
+                        if(EagleFactions.AllayInviteList.contains(checkInvite))
                         {
+
                             //TODO: Invoke add allay function here.
 
                             FactionLogic.addAllay(playerFactionName, invitedFactionName);
                         }
-                        else if(EagleFactions.AllayInviteList != null && !EagleFactions.AllayInviteList.contains(checkInvite))
+                        else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                         {
-                            AllayInvite invite = new AllayInvite(playerFactionName, invitedFactionName);
+                            player.sendMessage(Text.of("There is no invite for your faction. Creating an invite... for them."));
+
+                            AllyInvite invite = new AllyInvite(playerFactionName, invitedFactionName);
                             EagleFactions.AllayInviteList.add(invite);
 
                             Player invitedFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
