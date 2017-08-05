@@ -1,25 +1,30 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.services.PlayerService;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-/**
- * Created by Aquerr on 2017-08-04.
- */
-public class RemoveAllyCommand implements CommandExecutor
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+public class AddEnemyCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String removedFaction = context.<String>getOne(Text.of("faction name")).get();
+        String enemyFactionName = context.<String>getOne(Text.of("faction name")).get();
 
         if(source instanceof Player)
         {
@@ -32,20 +37,28 @@ public class RemoveAllyCommand implements CommandExecutor
                 //TODO: Add check for officer.
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
+                    if(FactionLogic.getFactions().contains(enemyFactionName))
                     {
-                        FactionLogic.removeAlliance(playerFactionName,removedFaction);
+                        if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                        {
+                            FactionLogic.addEnemy(playerFactionName, enemyFactionName);
 
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You removed your alliance with ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now enemies with " + enemyFactionName));
 
-                        CommandResult.success();
+                            Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
+                            enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has declared you ", TextColors.RED, "War"));
 
+                            CommandResult.success();
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is already your enemy!"));
+                        }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction is not in alliance with ", TextColors.GOLD, removedFaction + "!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, enemyFactionName + "!"));
                     }
-
                 }
                 else
                 {

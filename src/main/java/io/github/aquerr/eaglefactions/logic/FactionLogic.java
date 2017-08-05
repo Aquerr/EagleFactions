@@ -204,4 +204,31 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", playerFactionName, "alliances"}, playerFactionAllianceList);
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", removedFaction, "alliances"}, removedFactionAllianceList);
     }
+
+    public static List<String> getEnemies(String factionName)
+    {
+        ConfigurationNode enemiesNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "enemies");
+
+        if (enemiesNode.getValue() != null)
+        {
+            List<String> enemiesList = enemiesNode.getList(objectToStringTransformer);
+
+            List<String> helpList = new ArrayList<>(enemiesList);
+
+            return helpList;
+        }
+        else return new ArrayList<String>();
+    }
+
+    public static void addEnemy(String playerFactionName, String enemyFactionName)
+    {
+        List<String> playerFactionEnemiesList = new ArrayList<>(getEnemies(playerFactionName));
+        List<String> enemyFactionEnemiesList = new ArrayList<>(getEnemies(enemyFactionName));
+
+        playerFactionEnemiesList.add(enemyFactionName);
+        enemyFactionEnemiesList.add(playerFactionName);
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", playerFactionName, "enemies"}, playerFactionEnemiesList);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", enemyFactionName, "enemies"}, enemyFactionEnemiesList);
+    }
 }
