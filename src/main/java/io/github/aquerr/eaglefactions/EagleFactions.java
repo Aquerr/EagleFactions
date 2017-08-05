@@ -223,7 +223,6 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("ally"), CommandSpec.builder()
         .description(Text.of("Invite faction to the alliance"))
         .permission("eaglefactions.command.ally")
-        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
         .child(addAllyCommand, "a", "add")
         .child(removeAllyCommand, "r", "remove")
         .build());
