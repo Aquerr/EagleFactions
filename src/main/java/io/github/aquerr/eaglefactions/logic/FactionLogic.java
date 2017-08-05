@@ -63,7 +63,7 @@ public class FactionLogic
 
         //TODO: Load other faction properties here.
         //faction.Officers = getOfficers(factionName);
-        //faction.Enemies = getEnemies(factionName);
+        faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
         //faction.Claims = getClaims(factionName);
 
