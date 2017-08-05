@@ -1,19 +1,13 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.reflect.TypeToken;
-import com.typesafe.config.parser.ConfigNode;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.entity.living.player.Player;
 
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 
@@ -77,21 +71,6 @@ public class FactionLogic
         //faction.Power = PowerService.getFactionPower(faction.Members);
 
         return faction;
-    }
-
-    private static List<String> getAlliances(String factionName)
-    {
-        ConfigurationNode allianceNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"alliances");
-
-        if (allianceNode.getValue() != null)
-        {
-            List<String> allianceList = allianceNode.getList(objectToStringTransformer);
-
-            List<String> helpList = new ArrayList<>(allianceList);
-
-            return helpList;
-        }
-        else return new ArrayList<String>();
     }
 
     public static String getLeader(String factionName)
@@ -177,8 +156,8 @@ public class FactionLogic
 
     public static void addAllay(String playerFactionName, String invitedFactionName)
     {
-        List<String> playerFactionAllianceList = new ArrayList<>(getAlliance(playerFactionName));
-        List<String> invitedFactionAllianceList = new ArrayList<>(getAlliance(invitedFactionName));
+        List<String> playerFactionAllianceList = new ArrayList<>(getAlliances(playerFactionName));
+        List<String> invitedFactionAllianceList = new ArrayList<>(getAlliances(invitedFactionName));
 
         playerFactionAllianceList.add(invitedFactionName);
         invitedFactionAllianceList.add(playerFactionName);
@@ -187,7 +166,7 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", invitedFactionName, "alliances"}, invitedFactionAllianceList);
     }
 
-    public static List<String> getAlliance(String factionName)
+    public static List<String> getAlliances(String factionName)
     {
         ConfigurationNode allianceNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "alliances");
 
@@ -213,4 +192,16 @@ public class FactionLogic
             return null;
         }
     };
+
+    public static void removeAlliance(String playerFactionName, String removedFaction)
+    {
+        List<String> playerFactionAllianceList = new ArrayList<>(getAlliances(playerFactionName));
+        List<String> removedFactionAllianceList = new ArrayList<>(getAlliances(removedFaction));
+
+        playerFactionAllianceList.remove(removedFaction);
+        removedFactionAllianceList.remove(playerFactionName);
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", playerFactionName, "alliances"}, playerFactionAllianceList);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", removedFaction, "alliances"}, removedFactionAllianceList);
+    }
 }
