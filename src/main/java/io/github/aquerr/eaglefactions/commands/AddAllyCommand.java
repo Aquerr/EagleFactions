@@ -48,18 +48,20 @@ public class AddAllyCommand implements CommandExecutor
                             {
                                 AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFactionName);
 
+                                Player invitedFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
+
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
                                     FactionLogic.addAllay(playerFactionName, invitedFactionName);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted an invitation from ", TextColors.GOLD, invitedFactionName + "!"));
+
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " accepted your invite to the alliance."));
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
                                     AllyInvite invite = new AllyInvite(playerFactionName, invitedFactionName);
                                     EagleFactions.AllayInviteList.add(invite);
-
-                                    Player invitedFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
 
                                     invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has sent you an invite to the ", TextColors.AQUA, "alliance, ", TextColors.WHITE, "! You have 2 minutes to accept it!"));
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You invited faction ", TextColors.GOLD, invitedFactionName, TextColors.WHITE, " to the alliance."));
