@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.config.MainConfig;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
+import io.github.aquerr.eaglefactions.listeners.EntityDamageListener;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -63,6 +64,8 @@ public class EagleFactions
 
        InitializeCommands();
 
+       RegisterListeners();
+
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
@@ -86,19 +89,7 @@ public class EagleFactions
             e.printStackTrace();
         }
 
-        // Create settings & data directory for EagleFactions
-        if (!Files.exists(configDir.resolve("settings")))
-        {
-            try
-            {
-                Files.createDirectories(configDir.resolve("settings"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
+        // Create data directory for EagleFactions
         if (!Files.exists(configDir.resolve("data")))
         {
             try
@@ -275,4 +266,10 @@ public class EagleFactions
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "faction", "f");
     }
 
+    private void RegisterListeners()
+    {
+        getLogger ().info ("Registering listeners...");
+
+        Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
+    }
 }

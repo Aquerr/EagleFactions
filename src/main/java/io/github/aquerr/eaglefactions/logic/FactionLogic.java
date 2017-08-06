@@ -134,10 +134,12 @@ public class FactionLogic
         try
         {
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"},(new ArrayList<String>()));
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},"");
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "alliances"}, new ArrayList<String>());
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyfire"}, false);
         }
         catch (Exception exception)
         {
@@ -283,5 +285,14 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
 
+    }
+
+    public static boolean getFactionFriendlyFire(String factionName)
+    {
+        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("eaglefactions", factionName, "friendlyFire");
+
+        Boolean friendlyFire = friendlyFireNode.getBoolean();
+
+        return friendlyFire;
     }
 }
