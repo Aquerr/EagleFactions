@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import org.spongepowered.api.Sponge;
@@ -57,6 +58,8 @@ public class AddAllyCommand implements CommandExecutor
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted an invitation from ", TextColors.GOLD, invitedFactionName + "!"));
 
                                     invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " accepted your invite to the alliance."));
+
+                                    EagleFactions.AllayInviteList.remove(checkInvite);
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {

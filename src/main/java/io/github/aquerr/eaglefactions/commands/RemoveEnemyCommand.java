@@ -45,9 +45,11 @@ public class RemoveEnemyCommand implements CommandExecutor
                             RemoveEnemy checkRemove = new RemoveEnemy(enemyFactionName, playerFactionName);
                             if(EagleFactions.RemoveEnemyList.contains(checkRemove))
                             {
-                                FactionLogic.removeEnemy(playerFactionName, enemyFactionName);
+                                FactionLogic.removeEnemy(enemyFactionName, playerFactionName);
 
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted peace request from ", TextColors.GOLD, enemyFactionName + "!"));
+
+                                EagleFactions.RemoveEnemyList.remove(checkRemove);
                             }
                             else if(!EagleFactions.RemoveEnemyList.contains(checkRemove))
                             {

@@ -41,6 +41,8 @@ public class JoinCommand implements CommandExecutor
 
                                     //TODO: Remove invite from InviteList if player joins a faction.
 
+                                    EagleFactions.InviteList.remove(new Invite(factionName, player.getUniqueId()));
+
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully joined faction ", TextColors.GOLD, factionName));
                                     return CommandResult.success();
                                 }
