@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import org.spongepowered.api.Sponge;
@@ -37,8 +38,7 @@ public class AddAllyCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                //TODO: Add check for officer.
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
+                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
                     if(FactionLogic.getFactions().contains(invitedFactionName))
                     {

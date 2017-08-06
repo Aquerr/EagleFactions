@@ -83,7 +83,7 @@ public class FactionLogic
             return "";
     }
 
-    private static List<String> getOfficers(String factionName)
+    public static List<String> getOfficers(String factionName)
     {
         ConfigurationNode officersNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"officers");
 

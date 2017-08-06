@@ -34,8 +34,7 @@ public class RemoveEnemyCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                //TODO: Add check for officer.
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
+                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
                     if(FactionLogic.getFactions().contains(enemyFactionName))
                     {
