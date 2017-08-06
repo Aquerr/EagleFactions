@@ -280,6 +280,8 @@ public class EagleFactions
 
     private void RegisterListeners()
     {
+        getLogger ().info ("Registering listeners...");
+
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
     }
 }
