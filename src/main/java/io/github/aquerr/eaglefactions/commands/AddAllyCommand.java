@@ -47,25 +47,22 @@ public class AddAllyCommand implements CommandExecutor
                             if(!FactionLogic.getAlliances(playerFactionName).contains(invitedFactionName))
                             {
                                 AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFactionName);
+
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    //TODO: Invoke add allay function here.
-
                                     FactionLogic.addAllay(playerFactionName, invitedFactionName);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted an invitation from ", TextColors.GOLD, invitedFactionName + "!"));
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    player.sendMessage(Text.of("There is no invite for your faction. Creating an invite... for them."));
-
                                     AllyInvite invite = new AllyInvite(playerFactionName, invitedFactionName);
                                     EagleFactions.AllayInviteList.add(invite);
 
                                     Player invitedFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
 
-                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, playerFactionName, TextColors.GREEN, " has sent you an invite to the ", TextColors.AQUA, "alliance, ", TextColors.GREEN, "! You have 2 minutes to accept it!"));
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You invited faction ", TextColors.GOLD, invitedFactionName, TextColors.GREEN, " to the alliance."));
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has sent you an invite to the ", TextColors.AQUA, "alliance, ", TextColors.WHITE, "! You have 2 minutes to accept it!"));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You invited faction ", TextColors.GOLD, invitedFactionName, TextColors.WHITE, " to the alliance."));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

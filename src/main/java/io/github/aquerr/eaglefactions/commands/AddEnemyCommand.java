@@ -45,7 +45,7 @@ public class AddEnemyCommand implements CommandExecutor
                             {
                                 FactionLogic.addEnemy(playerFactionName, enemyFactionName);
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now enemies with " + enemyFactionName));
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now ", TextColors.RED, "enemies ", TextColors.WHITE, "with " + enemyFactionName));
 
                                 Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
                                 enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has declared you a ", TextColors.RED, "War!"));

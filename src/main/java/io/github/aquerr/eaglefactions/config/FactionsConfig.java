@@ -9,6 +9,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -84,6 +85,14 @@ public class FactionsConfig implements IConfig
     public void populate()
     {
         get().getNode("factions").setComment("This stores all the data of the factions.");
+
+        get().getNode("factions", "WarZone", "claims").setValue(new ArrayList<>());
+        get().getNode("factions", "WarZone", "members").setValue(new ArrayList<>());
+        get().getNode("factions", "WarZone", "power").setValue(9999);
+
+        get().getNode("factions", "SafeZone", "claims").setValue(new ArrayList<>());
+        get().getNode("factions", "SafeZone", "members").setValue(new ArrayList<>());
+        get().getNode("factions", "SafeZone", "power").setValue(9999);
     }
 
     @Override
