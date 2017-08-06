@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
+import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -32,6 +33,7 @@ public class EagleFactions
     public static Map<List<String>, CommandSpec> Subcommands;
     public static List<Invite> InviteList = new ArrayList<>();
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
+    public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -205,12 +207,53 @@ public class EagleFactions
         .executor(new PlayerCommand())
         .build());
 
+        //Build add ally command.
+        CommandSpec addAllyCommand = CommandSpec.builder()
+                .description(Text.of("Invite faction to the alliance"))
+                .permission("eaglefactions.command.ally.add")
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .executor(new AddAllyCommand())
+                .build();
+
+        //Build remove ally command.
+        CommandSpec removeAllyCommand = CommandSpec.builder()
+                .description(Text.of("Remove faction from the alliance"))
+                .permission("eaglefactions.command.ally.remove")
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .executor(new RemoveAllyCommand())
+                .build();
+
+        //Build alliance commands.
         Subcommands.put(Arrays.asList("ally"), CommandSpec.builder()
         .description(Text.of("Invite faction to the alliance"))
         .permission("eaglefactions.command.ally")
-        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
-        .executor(new AllyCommand())
+        .child(addAllyCommand, "a", "add")
+        .child(removeAllyCommand, "r", "remove")
         .build());
+
+        //Build add enemy command.
+        CommandSpec addEnemyCommand = CommandSpec.builder()
+                .description(Text.of("Set faction as enemy"))
+                .permission("eaglefactions.command.enemy.add")
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .executor(new AddEnemyCommand())
+                .build();
+
+        //Build remove enemy command.
+        CommandSpec removeEnemyCommand = CommandSpec.builder()
+                .description(Text.of("Remove faction from the enemies"))
+                .permission("eaglefactions.command.enemy.remove")
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .executor(new RemoveEnemyCommand())
+                .build();
+
+        //Build enemy commands.
+        Subcommands.put(Arrays.asList("enemy"), CommandSpec.builder()
+                .description(Text.of("Declare someone a war"))
+                .permission("eaglefactions.command.enemy")
+                .child(addEnemyCommand, "a", "add")
+                .child(removeEnemyCommand, "r", "remove")
+                .build());
 
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()

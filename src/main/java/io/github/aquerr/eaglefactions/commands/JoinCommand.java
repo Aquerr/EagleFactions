@@ -29,22 +29,6 @@ public class JoinCommand implements CommandExecutor
 
                 if(FactionLogic.getFactions().contains(factionName))
                 {
-                    //Invite invite = new Invite(factionName, player.getUniqueId());
-
-                    //player.sendMessage(Text.of("Trying join faction with following invite..."));
-                    //player.sendMessage(Text.of(invite.getFactionName() + " | " + invite.getPlayerUUID()));
-//
-                    //boolean inviteExists = EagleFactions.InviteList.contains(invite);
-                    //boolean inviteListNull = EagleFactions.InviteList == null;
-//
-//
-                    //player.sendMessage(Text.of("Does invite list contain your invite? = " + inviteExists));
-                    //player.sendMessage(Text.of("Is invite list null? = " + inviteListNull));
-
-
-
-                    //if(EagleFactions.InviteList.contains(invite) && EagleFactions.InviteList != null)
-                    //{
                         for (Invite invite: EagleFactions.InviteList)
                         {
                             if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(factionName))
@@ -66,18 +50,7 @@ public class JoinCommand implements CommandExecutor
                                 }
                             }
                         }
-
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
-
-                    //else if(!EagleFactions.InviteList.contains(invite))
-                    //{
-                    //    for (Invite test: EagleFactions.InviteList)
-                    //    {
-                    //        source.sendMessage(Text.of(test.getFactionName() + " | " + test.getPlayerUUID().toString() + "\n"));
-                    //    }
-//
-                    //    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
-                    //}
                 }
                 else
                 {

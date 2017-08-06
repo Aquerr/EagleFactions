@@ -23,19 +23,6 @@ public class AllyInvite
     @Override
     public boolean equals (Object allyInvite)
     {
-       // boolean isEqual = false;
-//
-       // if(allyInvite instanceof AllyInvite)
-       // {
-       //     if((this.FactionName == ((AllyInvite) allyInvite).FactionName) && this.InvitedFaction == ((AllyInvite) allyInvite).InvitedFaction)
-       //     {
-       //         isEqual = true;
-       //         return isEqual;
-       //     }
-       // }
-//
-       // return isEqual;
-
         if(!(allyInvite instanceof AllyInvite))
         {
             return false;

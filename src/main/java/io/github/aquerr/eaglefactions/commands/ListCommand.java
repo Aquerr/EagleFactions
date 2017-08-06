@@ -33,15 +33,11 @@ public class ListCommand implements CommandExecutor
                     .build();
 
             helpList.add(factionHelp);
-            //source.sendMessage(factionHelp);
-
         }
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
         PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions List")).padding(Text.of("-")).contents(helpList);
         paginationBuilder.sendTo(source);
-
-        //source.sendMessage(helpList);
 
         return CommandResult.success();
     }
