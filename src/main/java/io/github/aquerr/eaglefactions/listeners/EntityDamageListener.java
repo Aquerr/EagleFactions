@@ -21,9 +21,6 @@ public class EntityDamageListener
     @Listener
     public void onEntityDamage(DamageEntityEvent event)
     {
-        EagleFactions.getEagleFactions().getLogger().info("event.getcause().root()");
-        EagleFactions.getEagleFactions().getLogger().info(event.getCause().root().toString());
-
         if(event.getCause().root() instanceof EntityDamageSource)
         {
             EntityDamageSource source = (EntityDamageSource)event.getCause().root();
@@ -32,16 +29,11 @@ public class EntityDamageListener
              {
                  Player player = (Player) source.getSource();
 
-                 player.sendMessage(Text.of("YOU ATTACKED SOMEONE!"));
-
-                 EagleFactions.getEagleFactions().getLogger().info("Player attacked someone!");
-
                  if(event.getTargetEntity().getType() == EntityTypes.PLAYER)
                  {
                      Player attackedPlayer = (Player) event.getTargetEntity();
 
-                     EagleFactions.getEagleFactions().getLogger().info("Checking if players are in the same faction...");
-
+                     //Check if players are in the same faction
                      if(FactionLogic.getFactionName(player.getUniqueId()) == FactionLogic.getFactionName(attackedPlayer.getUniqueId()))
                      {
                          if(!FactionLogic.getFactionFriendlyFire(FactionLogic.getFactionName(player.getUniqueId())))
@@ -50,7 +42,7 @@ public class EntityDamageListener
                              event.setCancelled(true);
                          }
                          else return;
-                     }
+                     }//Check if players are in different factions but are in the alliance.
                      else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
                      {
                          event.setBaseDamage(0);
