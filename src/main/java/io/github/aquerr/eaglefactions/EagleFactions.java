@@ -89,19 +89,7 @@ public class EagleFactions
             e.printStackTrace();
         }
 
-        // Create settings & data directory for EagleFactions
-        if (!Files.exists(configDir.resolve("settings")))
-        {
-            try
-            {
-                Files.createDirectories(configDir.resolve("settings"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
+        // Create data directory for EagleFactions
         if (!Files.exists(configDir.resolve("data")))
         {
             try
