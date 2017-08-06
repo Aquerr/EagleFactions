@@ -293,7 +293,7 @@ public class FactionLogic
         ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "friendlyfire");
 
         Boolean friendlyFire = friendlyFireNode.getBoolean();
-        
+
         return friendlyFire;
     }
 
