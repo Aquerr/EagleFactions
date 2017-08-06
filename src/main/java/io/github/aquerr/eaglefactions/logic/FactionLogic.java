@@ -289,7 +289,7 @@ public class FactionLogic
 
     public static boolean getFactionFriendlyFire(String factionName)
     {
-        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("eaglefactions", factionName, "friendlyFire");
+        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("eaglefactions", factionName, "friendlyfire");
 
         Boolean friendlyFire = friendlyFireNode.getBoolean();
 
@@ -298,6 +298,6 @@ public class FactionLogic
 
     public static void setFactionFriendlyFire(String factionName, boolean turnOn)
     {
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyFire"}, turnOn);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyfire"}, turnOn);
     }
 }
