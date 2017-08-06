@@ -45,7 +45,7 @@ public class InfoCommand implements CommandExecutor
                 {
                     for (String member: faction.Members)
                     {
-                        membersList += member + ", ";
+                        membersList += PlayerService.getPlayerName(UUID.fromString(member)).get() + ", ";
                     }
                    membersList = membersList.substring(0, membersList.length() - 2);
                 }
@@ -55,7 +55,7 @@ public class InfoCommand implements CommandExecutor
                 {
                     for (String officer: faction.Officers)
                     {
-                        officersList += officer + ", ";
+                        officersList += PlayerService.getPlayerName(UUID.fromString(officer)).get() + ", ";
                     }
                     officersList = officersList.substring(0, officersList.length() - 2);
                 }
