@@ -40,7 +40,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                 {
                     if(FactionLogic.getFactions().contains(enemyFactionName))
                     {
-                        if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                        if(FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
                         {
                             RemoveEnemy checkRemove = new RemoveEnemy(enemyFactionName, playerFactionName);
                             if(EagleFactions.RemoveEnemyList.contains(checkRemove))
