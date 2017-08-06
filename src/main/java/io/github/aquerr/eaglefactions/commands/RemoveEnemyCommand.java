@@ -51,14 +51,12 @@ public class RemoveEnemyCommand implements CommandExecutor
                             }
                             else if(!EagleFactions.RemoveEnemyList.contains(checkRemove))
                             {
-                                player.sendMessage(Text.of("There is no invite for your faction. Creating an invite... for them."));
-
                                 RemoveEnemy removeEnemy = new RemoveEnemy(playerFactionName, enemyFactionName);
                                 EagleFactions.RemoveEnemyList.add(removeEnemy);
 
                                 Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
 
-                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " wants to end the", TextColors.RED, "war", TextColors.WHITE, "with your faction ", TextColors.GREEN, "! You have 2 minutes to accept it!"));
+                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " wants to end the ", TextColors.RED, "war ", TextColors.WHITE, "with your faction!", TextColors.GREEN, " You have 2 minutes to accept it!"));
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You requested war-end with faction ", TextColors.GOLD, enemyFactionName, TextColors.WHITE, " to the alliance."));
 
                                 Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();

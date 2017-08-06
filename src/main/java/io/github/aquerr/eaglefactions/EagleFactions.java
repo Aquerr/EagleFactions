@@ -207,6 +207,7 @@ public class EagleFactions
         .executor(new PlayerCommand())
         .build());
 
+        //Build add ally command.
         CommandSpec addAllyCommand = CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
                 .permission("eaglefactions.command.ally.add")
@@ -214,6 +215,7 @@ public class EagleFactions
                 .executor(new AddAllyCommand())
                 .build();
 
+        //Build remove ally command.
         CommandSpec removeAllyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the alliance"))
                 .permission("eaglefactions.command.ally.remove")
@@ -229,6 +231,7 @@ public class EagleFactions
         .child(removeAllyCommand, "r", "remove")
         .build());
 
+        //Build add enemy command.
         CommandSpec addEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Set faction as enemy"))
                 .permission("eaglefactions.command.enemy.add")
@@ -236,6 +239,7 @@ public class EagleFactions
                 .executor(new AddEnemyCommand())
                 .build();
 
+        //Build remove enemy command.
         CommandSpec removeEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the enemies"))
                 .permission("eaglefactions.command.enemy.remove")
