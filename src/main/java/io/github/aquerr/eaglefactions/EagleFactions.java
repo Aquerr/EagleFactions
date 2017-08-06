@@ -243,7 +243,7 @@ public class EagleFactions
                 .executor(new RemoveEnemyCommand())
                 .build();
 
-        //Build alliance commands.
+        //Build enemy commands.
         Subcommands.put(Arrays.asList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare someone a war"))
                 .permission("eaglefactions.command.enemy")
