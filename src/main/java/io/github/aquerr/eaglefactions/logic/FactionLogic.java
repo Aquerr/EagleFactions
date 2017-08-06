@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.entity.living.player.Player;
 
 
 import java.util.*;
@@ -257,6 +258,30 @@ public class FactionLogic
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", playerFactionName, "enemies"}, playerFactionEnemiesList);
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", enemyFactionName, "enemies"}, enemyFactionEnemiesList);
+    }
+
+    public static void addOfficer(String newOfficerName, String factionName)
+    {
+        List<String> officersList = new ArrayList<>(getOfficers(factionName));
+        List<String> membersList = new ArrayList<>(getMembers(factionName));
+
+        officersList.add(newOfficerName);
+        membersList.remove(newOfficerName);
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
+    }
+
+    public static void removeOfficer(String officerName, String factionName)
+    {
+        List<String> officersList = new ArrayList<>(getOfficers(factionName));
+        List<String> membersList = new ArrayList<>(getMembers(factionName));
+
+        officersList.remove(officerName);
+        membersList.add(officerName);
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
 
     }
 }

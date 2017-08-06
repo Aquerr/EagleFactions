@@ -255,6 +255,14 @@ public class EagleFactions
                 .child(removeEnemyCommand, "r", "remove")
                 .build());
 
+        //Officer command. Add or remove officers.
+        Subcommands.put(Arrays.asList("officer"), CommandSpec.builder()
+                .description(Text.of("Add or Remove officer"))
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+                .permission("eaglefactions.command.officer")
+                .executor(new OfficerCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
