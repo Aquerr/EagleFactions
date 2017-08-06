@@ -24,7 +24,7 @@ public class JoinCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            if(FactionLogic.getFaction(player.getUniqueId()) == null)
+            if(FactionLogic.getFactionName(player.getUniqueId()) == null)
             {
 
                 if(FactionLogic.getFactions().contains(factionName))

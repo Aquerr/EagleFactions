@@ -28,11 +28,11 @@ public class InviteCommand implements CommandExecutor
         {
             Player senderPlayer = (Player)source;
 
-            String senderFactionName = FactionLogic.getFaction(senderPlayer.getUniqueId());
+            String senderFactionName = FactionLogic.getFactionName(senderPlayer.getUniqueId());
 
             if(senderFactionName != null)
             {
-                if(FactionLogic.getFaction(invitedPlayer.getUniqueId()) == null)
+                if(FactionLogic.getFactionName(invitedPlayer.getUniqueId()) == null)
                 {
                     try
                     {

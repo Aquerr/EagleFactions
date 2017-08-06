@@ -22,7 +22,7 @@ public class FactionLogic
     //private static IConfig claimsConfig = ClaimsConfig.getMainConfig();
     //private static IConfig messageConfig = MessageConfig.getMainConfig();
 
-    public static String getFaction(UUID playerUUID)
+    public static String getFactionName(UUID playerUUID)
     {
         for (Object t : FactionLogic.getFactions ())
         {
@@ -44,10 +44,10 @@ public class FactionLogic
             }
 
             //TODO:Add check for officers.
-           // else if(TeamManager.getOfficers(faction).contains(playerUUID.toString ()))
-           // {
-           //     return faction;
-           // }
+            else if(FactionLogic.getOfficers(faction).contains(playerUUID.toString ()))
+            {
+                return faction;
+            }
         }
         return null;
     }
@@ -62,7 +62,7 @@ public class FactionLogic
         faction.Members = getMembers(factionName);
 
         //TODO: Load other faction properties here.
-        //faction.Officers = getOfficers(factionName);
+        faction.Officers = getOfficers(factionName);
         faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
         //faction.Claims = getClaims(factionName);
@@ -81,6 +81,21 @@ public class FactionLogic
             return valueNode.getString();
         else
             return "";
+    }
+
+    private static List<String> getOfficers(String factionName)
+    {
+        ConfigurationNode officersNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName,"officers");
+
+        if (officersNode.getValue() != null)
+        {
+            List<String> officersList = officersNode.getList(objectToStringTransformer);
+
+            List<String> helpList = new ArrayList<>(officersList);
+
+            return helpList;
+        }
+        else return new ArrayList<String>();
     }
 
     public static List<String> getMembers(String factionName)

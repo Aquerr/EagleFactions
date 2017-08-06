@@ -25,7 +25,7 @@ public class RemoveAllyCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFaction(player.getUniqueId());
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
             if(playerFactionName != null)
             {

@@ -35,7 +35,7 @@ public class CreateCommand implements CommandExecutor
             //if(factionName.length() > ConfigManager.getMaxNameLength()){}
             //if(factionName.length() < ConfigManager.getMinNameLength()){}
 
-            String playerFactionName = FactionLogic.getFaction(player.getUniqueId ());
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId ());
 
             if(playerFactionName == null)
             {

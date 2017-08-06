@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import org.spongepowered.api.Sponge;
@@ -37,7 +36,7 @@ public class PlayerCommand implements CommandExecutor
 
             List<Text> playerInfo = new ArrayList<Text>();
 
-            String playerFactionName = FactionLogic.getFaction(player.getUniqueId());
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
             if(playerFactionName == null) playerFactionName = "";
 
             Text info = Text.builder()
