@@ -254,6 +254,13 @@ public class EagleFactions
                 .executor(new OfficerCommand())
                 .build());
 
+        //Friendly Fire command.
+        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
+                .description(Text.of("Allow/Deny friendly fire in the faction"))
+                .permission("eaglefactions.command.friendlyfire")
+                .executor(new FriendlyFireCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))

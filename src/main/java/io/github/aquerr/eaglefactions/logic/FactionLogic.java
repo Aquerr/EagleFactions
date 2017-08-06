@@ -295,4 +295,9 @@ public class FactionLogic
 
         return friendlyFire;
     }
+
+    public static void setFactionFriendlyFire(String factionName, boolean turnOn)
+    {
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyFire"}, turnOn);
+    }
 }
