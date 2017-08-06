@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.google.common.collect.Sets;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
@@ -289,10 +290,10 @@ public class FactionLogic
 
     public static boolean getFactionFriendlyFire(String factionName)
     {
-        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("eaglefactions", factionName, "friendlyfire");
+        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "friendlyfire");
 
         Boolean friendlyFire = friendlyFireNode.getBoolean();
-
+        
         return friendlyFire;
     }
 
