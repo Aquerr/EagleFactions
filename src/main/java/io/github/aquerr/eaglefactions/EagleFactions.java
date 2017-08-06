@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.config.MainConfig;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
+import io.github.aquerr.eaglefactions.listeners.EntityDamageListener;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -62,6 +63,8 @@ public class EagleFactions
        SetupConfigs();
 
        InitializeCommands();
+
+       RegisterListeners();
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
@@ -275,4 +278,8 @@ public class EagleFactions
         Sponge.getCommandManager ().register (this, commandEagleFactions, "factions", "faction", "f");
     }
 
+    private void RegisterListeners()
+    {
+        Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
+    }
 }
