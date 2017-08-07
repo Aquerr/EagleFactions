@@ -119,14 +119,14 @@ public class PowerService
 
         if(faction.Leader != null)
         {
-            factionMaxPower += 10;
+            factionMaxPower += PowerService.getPlayerMaxPower(faction.Leader);
         }
 
         if(faction.Officers != null && !faction.Officers.isEmpty())
         {
             for (String officer: faction.Officers)
             {
-                factionMaxPower += 10;
+                factionMaxPower += PowerService.getPlayerMaxPower(UUID.fromString(officer));
             }
         }
 
@@ -134,7 +134,7 @@ public class PowerService
         {
             for (String member: faction.Members)
             {
-                factionMaxPower += 10;
+                factionMaxPower += PowerService.getPlayerMaxPower(UUID.fromString(member));
             }
         }
 
