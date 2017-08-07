@@ -42,7 +42,7 @@ public class PowerService
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            playerNode.getNode("power").setValue(10);
+            playerNode.getNode("power").setValue(MainLogic.getStartingPower());
             configLoader.save(playerNode);
         }
         catch (Exception exception)
@@ -65,7 +65,8 @@ public class PowerService
 
                  if(playerNode.getNode("power").getValue() != null)
                  {
-                     int playerPower = playerNode.getInt();
+                     int playerPower = playerNode.getNode("power").getInt();
+                     EagleFactions.getEagleFactions().getLogger().info(Integer.toString(playerPower));
                      return playerPower;
                  }
             }
