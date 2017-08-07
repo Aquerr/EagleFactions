@@ -141,7 +141,7 @@ public class PowerService
         return factionMaxPower;
     }
 
-    public int getPlayerMaxPower(UUID playerUUID)
+    public static int getPlayerMaxPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 

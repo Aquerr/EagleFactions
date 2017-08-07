@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
+import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -43,7 +44,7 @@ public class PlayerCommand implements CommandExecutor
                     .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerService.getPlayerName(player.getUniqueId()).get() + "\n"))
                     .append(Text.of(TextColors.AQUA, "Last Played: ", TextColors.GOLD, player.getJoinData().lastPlayed().get() + "\n"))
                     .append(Text.of(TextColors.AQUA, "Faction: ", TextColors.GOLD, playerFactionName))
-                   // .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, PowerService.getPlayerPower() + "\n"))
+                    .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, PowerService.getPlayerPower(player.getUniqueId()) + "/" + PowerService.getPlayerMaxPower(player.getUniqueId()) + "\n"))
                     .build();
 
             playerInfo.add(info);
