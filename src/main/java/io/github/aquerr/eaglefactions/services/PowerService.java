@@ -52,7 +52,7 @@ public class PowerService
         }
     }
 
-    public static int getPlayerPower(UUID playerUUID)
+    public static double getPlayerPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -66,7 +66,7 @@ public class PowerService
 
                  if(playerNode.getNode("power").getValue() != null)
                  {
-                     int playerPower = playerNode.getNode("power").getInt();
+                     double playerPower = playerNode.getNode("power").getDouble();
                      return playerPower;
                  }
             }
@@ -83,9 +83,9 @@ public class PowerService
         return 0;
     }
 
-    public static int getFactionPower(Faction faction)
+    public static double getFactionPower(Faction faction)
     {
-        int factionPower = 0;
+        double factionPower = 0;
 
         if(faction.Leader != null)
         {
@@ -96,7 +96,7 @@ public class PowerService
         {
             for (String officer: faction.Officers)
             {
-                int officerPower = getPlayerPower(UUID.fromString(officer));
+                double officerPower = getPlayerPower(UUID.fromString(officer));
                 factionPower += officerPower;
             }
         }
@@ -105,7 +105,7 @@ public class PowerService
         {
             for (String member: faction.Members)
             {
-                int memberPower = getPlayerPower(UUID.fromString(member));
+                double memberPower = getPlayerPower(UUID.fromString(member));
                 factionPower += memberPower;
             }
         }
@@ -113,9 +113,9 @@ public class PowerService
         return factionPower;
     }
 
-    public static int getFactionMaxPower(Faction faction)
+    public static double getFactionMaxPower(Faction faction)
     {
-        int factionMaxPower = 0;
+        double factionMaxPower = 0;
 
         if(faction.Leader != null)
         {
@@ -141,7 +141,7 @@ public class PowerService
         return factionMaxPower;
     }
 
-    public static int getPlayerMaxPower(UUID playerUUID)
+    public static double getPlayerMaxPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -151,7 +151,7 @@ public class PowerService
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            int playerMaxPower = playerNode.getNode("maxpower").getInt();
+            double playerMaxPower = playerNode.getNode("maxpower").getDouble();
 
             return playerMaxPower;
         }
@@ -161,5 +161,46 @@ public class PowerService
         }
 
         return 0;
+    }
+
+    public static void addPower(UUID playerUUID)
+    {
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+        try
+        {
+            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+            CommentedConfigurationNode playerNode = configLoader.load();
+
+            double playerPower = playerNode.getNode("power").getDouble();
+
+            playerNode.getNode("power").setValue(playerPower + MainLogic.getPowerIncrement());
+            configLoader.save(playerNode);
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+        }
+
+    }
+
+    public static void setPower(UUID playerUUID, double power)
+    {
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+        try
+        {
+            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+            CommentedConfigurationNode playerNode = configLoader.load();
+
+            playerNode.getNode("power").setValue(power);
+            configLoader.save(playerNode);
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+        }
     }
 }

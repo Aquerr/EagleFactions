@@ -18,20 +18,29 @@ public class MainLogic
         return friendlyFire;
     }
 
-    public static int getGlobalMaxPower()
+    public static double getGlobalMaxPower()
     {
         ConfigurationNode maxPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "maxpower");
 
-        int maxPower = maxPowerNode.getInt();
+        double maxPower = maxPowerNode.getInt();
 
         return maxPower;
     }
 
-    public static int getStartingPower()
+    public static double getStartingPower()
     {
         ConfigurationNode startingPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "startpower");
 
-        int startPower = startingPowerNode.getInt();
+        double startPower = startingPowerNode.getInt();
+
+        return startPower;
+    }
+
+    public static double getPowerIncrement()
+    {
+        ConfigurationNode powerIncrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "increment");
+
+        double startPower = powerIncrementNode.getDouble();
 
         return startPower;
     }
