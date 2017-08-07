@@ -18,7 +18,7 @@ public class MainLogic
         return friendlyFire;
     }
 
-    public static int getPlayerMaxPower()
+    public static int getGlobalMaxPower()
     {
         ConfigurationNode maxPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "maxpower");
 

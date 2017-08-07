@@ -43,6 +43,7 @@ public class PowerService
             CommentedConfigurationNode playerNode = configLoader.load();
 
             playerNode.getNode("power").setValue(MainLogic.getStartingPower());
+            playerNode.getNode("maxpower").setValue(MainLogic.getGlobalMaxPower());
             configLoader.save(playerNode);
         }
         catch (Exception exception)
@@ -66,7 +67,6 @@ public class PowerService
                  if(playerNode.getNode("power").getValue() != null)
                  {
                      int playerPower = playerNode.getNode("power").getInt();
-                     EagleFactions.getEagleFactions().getLogger().info(Integer.toString(playerPower));
                      return playerPower;
                  }
             }
@@ -139,5 +139,27 @@ public class PowerService
         }
 
         return factionMaxPower;
+    }
+
+    public int getPlayerMaxPower(UUID playerUUID)
+    {
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+        try
+        {
+            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+            CommentedConfigurationNode playerNode = configLoader.load();
+
+            int playerMaxPower = playerNode.getNode("maxpower").getInt();
+
+            return playerMaxPower;
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+        }
+
+        return 0;
     }
 }
