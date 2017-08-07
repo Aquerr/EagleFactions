@@ -17,4 +17,13 @@ public class MainLogic
 
         return friendlyFire;
     }
+
+    public static int getPlayerMaxPower()
+    {
+        ConfigurationNode maxPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "maxpower");
+
+        int maxPower = maxPowerNode.getInt();
+
+        return maxPower;
+    }
 }

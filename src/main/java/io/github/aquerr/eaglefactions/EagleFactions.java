@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.EntityDamageListener;
+import io.github.aquerr.eaglefactions.listeners.PlayerJoinListener;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -47,8 +48,6 @@ public class EagleFactions
     @ConfigDir(sharedRoot = false)
     private Path configDir;
     public Path getConfigDir(){return configDir;}
-
-
 
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
@@ -95,6 +94,18 @@ public class EagleFactions
             try
             {
                 Files.createDirectories(configDir.resolve("data"));
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        if (!Files.exists(configDir.resolve("players")))
+        {
+            try
+            {
+                Files.createDirectories(configDir.resolve("players"));
             }
             catch (IOException e)
             {
@@ -278,5 +289,6 @@ public class EagleFactions
         getLogger ().info ("Registering listeners...");
 
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
+        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
     }
 }
