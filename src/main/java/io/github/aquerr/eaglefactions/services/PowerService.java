@@ -112,4 +112,32 @@ public class PowerService
 
         return factionPower;
     }
+
+    public static int getFactionMaxPower(Faction faction)
+    {
+        int factionMaxPower = 0;
+
+        if(faction.Leader != null)
+        {
+            factionMaxPower += 10;
+        }
+
+        if(faction.Officers != null && !faction.Officers.isEmpty())
+        {
+            for (String officer: faction.Officers)
+            {
+                factionMaxPower += 10;
+            }
+        }
+
+        if(faction.Members != null && !faction.Members.isEmpty())
+        {
+            for (String member: faction.Members)
+            {
+                factionMaxPower += 10;
+            }
+        }
+
+        return factionMaxPower;
+    }
 }

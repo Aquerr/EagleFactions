@@ -4,7 +4,7 @@ Master branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleF
 
 Develop branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=develop)](https://travis-ci.org/Aquerr/EagleFactions)
 
-Current version: 0.5.1
+Current version: 0.5.2
 
 **NOTE: Plugin is currently in heavy development!**
 
@@ -20,9 +20,10 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 * Creating factions
 * Invite others to faction
 * Form aliances with other factions
+* Power system **(Finished in 33%)**
 * Claiming territories/lands **(not implemented yet)**
-* Power system **(not implemented yet)**
 * Friendly Fire can be disabled by factions leaders.
+* Option for disabling friendly fire between aliances.
 * Prefixes Tags **(not implemented yet)**
 * Custom ranks in factions **(not implemented yet)**
 * PVP-Block **(not implemented yet)**
@@ -32,8 +33,10 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 
 * ~~Download Link~~
 * ~~Wiki~~
+* ~~Documentation~~
 * ~~Ore~~
 
 Download link not yet provided
+Some *Alpha builds* may be available soon
 
-Download will be **available** when version of the plugin hits **1.0.0**
+Recommended downloads will be **available** when version of the plugin hits **1.0.0**

@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
+import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -88,7 +89,7 @@ public class InfoCommand implements CommandExecutor
                         .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.BLUE, alliancesList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.RED, enemiesList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Members: ", TextColors.GREEN, membersList + "\n"))
-                        .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, faction.Power))
+                        .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, faction.Power + "/" + PowerService.getFactionMaxPower(faction)))
                         .build();
 
                 factionInfo.add(info);
