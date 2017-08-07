@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.services;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -48,5 +49,66 @@ public class PowerService
         {
             exception.printStackTrace();
         }
+    }
+
+    public static int getPlayerPower(UUID playerUUID)
+    {
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+        if(checkIfPlayerExists(playerUUID))
+        {
+            try
+            {
+                ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+                CommentedConfigurationNode playerNode = configLoader.load();
+
+                 if(playerNode.getNode("power").getValue() != null)
+                 {
+                     int playerPower = playerNode.getInt();
+                     return playerPower;
+                 }
+            }
+            catch (Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        }
+        else
+        {
+            addPlayer(playerUUID);
+            return getPlayerPower(playerUUID);
+        }
+        return 0;
+    }
+
+    public static int getFactionPower(Faction faction)
+    {
+        int factionPower = 0;
+
+        if(faction.Leader != null)
+        {
+            factionPower += getPlayerPower(faction.Leader);
+        }
+
+        if(faction.Officers != null && !faction.Officers.isEmpty())
+        {
+            for (String officer: faction.Officers)
+            {
+                int officerPower = getPlayerPower(UUID.fromString(officer));
+                factionPower += officerPower;
+            }
+        }
+
+        if(faction.Members != null && !faction.Members.isEmpty())
+        {
+            for (String member: faction.Members)
+            {
+                int memberPower = getPlayerPower(UUID.fromString(member));
+                factionPower += memberPower;
+            }
+        }
+
+        return factionPower;
     }
 }

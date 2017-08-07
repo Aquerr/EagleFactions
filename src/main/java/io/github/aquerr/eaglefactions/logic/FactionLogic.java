@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 
@@ -70,7 +71,7 @@ public class FactionLogic
         //faction.Claims = getClaims(factionName);
 
         //TODO: Implement power service.
-        //faction.Power = PowerService.getFactionPower(faction.Members);
+        faction.Power = PowerService.getFactionPower(faction);
 
         return faction;
     }

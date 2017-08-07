@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Faction
 {
     public String Name;
-    public Integer Power;
+    public int Power;
     public List<String> Members;
     public List<String> Alliances;
     public List<String> Enemies;
