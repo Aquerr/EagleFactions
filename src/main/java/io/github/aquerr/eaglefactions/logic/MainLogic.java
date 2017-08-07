@@ -26,4 +26,13 @@ public class MainLogic
 
         return maxPower;
     }
+
+    public static int getStartingPower()
+    {
+        ConfigurationNode startingPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "startpower");
+
+        int startPower = startingPowerNode.getInt();
+
+        return startPower;
+    }
 }
