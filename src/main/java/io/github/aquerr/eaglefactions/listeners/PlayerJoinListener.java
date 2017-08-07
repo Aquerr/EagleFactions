@@ -25,12 +25,10 @@ public class PlayerJoinListener
 
             if(PowerService.checkIfPlayerExists(player.getUniqueId()))
             {
-                EagleFactions.getEagleFactions().getLogger().info("Player already exists!");
                 return;
             }
             else
             {
-                EagleFactions.getEagleFactions().getLogger().info("Adding new player...");
                 //Create player file and set power.
                 PowerService.addPlayer(player.getUniqueId());
             }
