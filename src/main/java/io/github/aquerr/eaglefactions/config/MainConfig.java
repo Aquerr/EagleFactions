@@ -92,6 +92,7 @@ public class MainConfig implements IConfig
       //  get().getNode("eaglefactions", "claims", "cap").setValue(50).setComment("The maximum number of claims a Faction may have, overrides the one based on multiplier and player size.");
         get().getNode("eaglefactions", "power", "increment").setValue(1).setComment("How much power will be restored for player after 1 hour of playing");
         get().getNode("eaglefactions", "power", "maxpower").setValue(10).setComment("Maximum amount of power a player can have");
+        get().getNode("eaglefactions", "power", "startpower").setValue(5).setComment("Starting amount of power");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances.");
     }
 
