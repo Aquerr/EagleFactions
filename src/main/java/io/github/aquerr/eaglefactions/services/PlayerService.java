@@ -38,4 +38,15 @@ public class PlayerService
         }
         else return Optional.empty();
     }
+
+    public static boolean isPlayerOnline(UUID playerUUID)
+    {
+        Optional<User> oUser = getUser(playerUUID);
+
+        if(oUser.isPresent())
+        {
+            return oUser.get().isOnline();
+        }
+        else return false;
+    }
 }

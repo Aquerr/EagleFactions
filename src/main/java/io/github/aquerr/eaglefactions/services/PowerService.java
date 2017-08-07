@@ -1,22 +1,38 @@
 package io.github.aquerr.eaglefactions.services;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.Task;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class PowerService
 {
+    public static Timer timerPower = new Timer();
+    public static TimerTask increasePower = new TimerTask()
+    {
+        @Override
+        public void run()
+        {
+
+        }
+    };
+
     public static boolean checkIfPlayerExists(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
@@ -202,5 +218,30 @@ public class PowerService
         {
             exception.printStackTrace();
         }
+    }
+
+    public static void increasePower(UUID playerUUID)
+    {
+        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+        taskBuilder.execute(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if(!PlayerService.isPlayerOnline(playerUUID)) return;
+
+                if(PowerService.getPlayerPower(playerUUID) + MainLogic.getPowerIncrement() < PowerService.getPlayerMaxPower(playerUUID))
+                {
+                    PowerService.addPower(playerUUID);
+                    increasePower(playerUUID);
+                }
+                else
+                {
+                    PowerService.setPower(playerUUID, PowerService.getPlayerMaxPower(playerUUID));
+                    increasePower(playerUUID);
+                }
+            }
+        }).delay(30, TimeUnit.MINUTES).name("Eaglefactions - Increase power scheduler").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
     }
 }
