@@ -94,6 +94,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "power", "decrement").setValue(2).setComment("How much power will be removed on player death");
         get().getNode("eaglefactions", "power", "maxpower").setValue(10).setComment("Maximum amount of power a player can have");
         get().getNode("eaglefactions", "power", "startpower").setValue(5).setComment("Starting amount of power");
+        get().getNode("eaglefactions", "power", "killaward").setValue(2).setValue("Player kill award");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances.");
     }
 
