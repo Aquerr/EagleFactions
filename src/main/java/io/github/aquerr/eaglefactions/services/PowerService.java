@@ -10,6 +10,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Task;
 
 import java.io.File;
@@ -23,16 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 public class PowerService
 {
-    public static Timer timerPower = new Timer();
-    public static TimerTask increasePower = new TimerTask()
-    {
-        @Override
-        public void run()
-        {
-
-        }
-    };
-
     public static boolean checkIfPlayerExists(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
@@ -179,7 +170,7 @@ public class PowerService
         return 0;
     }
 
-    public static void addPower(UUID playerUUID)
+    public static void addPower(UUID playerUUID, boolean isKillAward)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -191,7 +182,15 @@ public class PowerService
 
             double playerPower = playerNode.getNode("power").getDouble();
 
-            playerNode.getNode("power").setValue(playerPower + MainLogic.getPowerIncrement());
+            if(isKillAward)
+            {
+                double killAward = MainLogic.getKillAward();
+                playerNode.getNode("power").setValue(playerPower + killAward);
+            }
+            else
+            {
+                playerNode.getNode("power").setValue(playerPower + MainLogic.getPowerIncrement());
+            }
             configLoader.save(playerNode);
         }
         catch (Exception exception)
@@ -233,7 +232,7 @@ public class PowerService
 
                 if(PowerService.getPlayerPower(playerUUID) + MainLogic.getPowerIncrement() < PowerService.getPlayerMaxPower(playerUUID))
                 {
-                    PowerService.addPower(playerUUID);
+                    PowerService.addPower(playerUUID, false);
                     increasePower(playerUUID);
                 }
                 else
@@ -243,5 +242,33 @@ public class PowerService
                 }
             }
         }).delay(1, TimeUnit.MINUTES).name("Eaglefactions - Increase power scheduler").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+    }
+
+    public static void decreasePower(UUID playerUUID)
+    {
+        if(PowerService.getPlayerPower(playerUUID) - MainLogic.getPowerDecrement() > 0.0)
+        {
+            Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+            try
+            {
+                ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+                CommentedConfigurationNode playerNode = configLoader.load();
+
+                double playerPower = playerNode.getNode("power").getDouble();
+
+                playerNode.getNode("power").setValue(playerPower - MainLogic.getPowerDecrement());
+                configLoader.save(playerNode);
+            }
+            catch (Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        }
+        else
+        {
+            PowerService.setPower(playerUUID, 0.0);
+        }
     }
 }

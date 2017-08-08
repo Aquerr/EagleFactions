@@ -53,4 +53,13 @@ public class MainLogic
 
         return decrementPower;
     }
+
+    public static double getKillAward()
+    {
+        ConfigurationNode killAwardNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "killaward");
+
+        double killAward = killAwardNode.getDouble();
+
+        return killAward;
+    }
 }

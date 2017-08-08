@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,6 +48,13 @@ public class EntityDamageListener
                      {
                          event.setBaseDamage(0);
                          event.setCancelled(true);
+                     }
+                     else
+                     {
+                         if(event.willCauseDeath())
+                         {
+                             PowerService.addPower(player.getUniqueId(), true);
+                         }
                      }
                     // else return;
 
