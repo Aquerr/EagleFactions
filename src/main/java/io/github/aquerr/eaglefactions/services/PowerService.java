@@ -14,6 +14,7 @@ import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Task;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,7 +60,7 @@ public class PowerService
         }
     }
 
-    public static double getPlayerPower(UUID playerUUID)
+    public static BigDecimal getPlayerPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -73,7 +74,7 @@ public class PowerService
 
                  if(playerNode.getNode("power").getValue() != null)
                  {
-                     double playerPower = playerNode.getNode("power").getDouble();
+                     BigDecimal playerPower =  new BigDecimal(playerNode.getNode("power").getString());
                      return playerPower;
                  }
             }
@@ -87,24 +88,24 @@ public class PowerService
             addPlayer(playerUUID);
             return getPlayerPower(playerUUID);
         }
-        return 0;
+        return BigDecimal.ZERO;
     }
 
-    public static double getFactionPower(Faction faction)
+    public static BigDecimal getFactionPower(Faction faction)
     {
-        double factionPower = 0;
+        BigDecimal factionPower = BigDecimal.ZERO;
 
         if(faction.Leader != null)
         {
-            factionPower += getPlayerPower(faction.Leader);
+            factionPower.add(getPlayerPower(faction.Leader));
         }
 
         if(faction.Officers != null && !faction.Officers.isEmpty())
         {
             for (String officer: faction.Officers)
             {
-                double officerPower = getPlayerPower(UUID.fromString(officer));
-                factionPower += officerPower;
+                BigDecimal officerPower = getPlayerPower(UUID.fromString(officer));
+                factionPower.add(officerPower);
             }
         }
 
@@ -112,28 +113,28 @@ public class PowerService
         {
             for (String member: faction.Members)
             {
-                double memberPower = getPlayerPower(UUID.fromString(member));
-                factionPower += memberPower;
+                BigDecimal memberPower = getPlayerPower(UUID.fromString(member));
+                factionPower.add(memberPower);
             }
         }
 
         return factionPower;
     }
 
-    public static double getFactionMaxPower(Faction faction)
+    public static BigDecimal getFactionMaxPower(Faction faction)
     {
-        double factionMaxPower = 0;
+        BigDecimal factionMaxPower = BigDecimal.ZERO;
 
         if(faction.Leader != null)
         {
-            factionMaxPower += PowerService.getPlayerMaxPower(faction.Leader);
+            factionMaxPower.add(PowerService.getPlayerMaxPower(faction.Leader));
         }
 
         if(faction.Officers != null && !faction.Officers.isEmpty())
         {
             for (String officer: faction.Officers)
             {
-                factionMaxPower += PowerService.getPlayerMaxPower(UUID.fromString(officer));
+                factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(officer)));
             }
         }
 
@@ -141,14 +142,14 @@ public class PowerService
         {
             for (String member: faction.Members)
             {
-                factionMaxPower += PowerService.getPlayerMaxPower(UUID.fromString(member));
+                factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(member)));
             }
         }
 
         return factionMaxPower;
     }
 
-    public static double getPlayerMaxPower(UUID playerUUID)
+    public static BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -158,7 +159,7 @@ public class PowerService
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            double playerMaxPower = playerNode.getNode("maxpower").getDouble();
+            BigDecimal playerMaxPower =  new BigDecimal(playerNode.getNode("maxpower").getString());
 
             return playerMaxPower;
         }
@@ -167,7 +168,7 @@ public class PowerService
             exception.printStackTrace();
         }
 
-        return 0;
+        return BigDecimal.ZERO;
     }
 
     public static void addPower(UUID playerUUID, boolean isKillAward)
@@ -180,16 +181,16 @@ public class PowerService
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            double playerPower = playerNode.getNode("power").getDouble();
+            BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
             if(isKillAward)
             {
-                double killAward = MainLogic.getKillAward();
-                playerNode.getNode("power").setValue(playerPower + killAward);
+                BigDecimal killAward = MainLogic.getKillAward();
+                playerNode.getNode("power").setValue(playerPower.add(killAward));
             }
             else
             {
-                playerNode.getNode("power").setValue(playerPower + MainLogic.getPowerIncrement());
+                playerNode.getNode("power").setValue(playerPower.add(MainLogic.getPowerIncrement()));
             }
             configLoader.save(playerNode);
         }
@@ -200,7 +201,7 @@ public class PowerService
 
     }
 
-    public static void setPower(UUID playerUUID, double power)
+    public static void setPower(UUID playerUUID, BigDecimal power)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -230,9 +231,17 @@ public class PowerService
             {
                 if(!PlayerService.isPlayerOnline(playerUUID)) return;
 
-                if(PowerService.getPlayerPower(playerUUID) + MainLogic.getPowerIncrement() < PowerService.getPlayerMaxPower(playerUUID))
+                if(PowerService.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerService.getPlayerMaxPower(playerUUID).doubleValue())
                 {
+                    EagleFactions.getEagleFactions().getLogger().info("Player power before increase: ");
+                    EagleFactions.getEagleFactions().getLogger().info(String.valueOf(PowerService.getPlayerPower(playerUUID)));
+                    EagleFactions.getEagleFactions().getLogger().info("Power increment: ");
+                    EagleFactions.getEagleFactions().getLogger().info(String.valueOf(MainLogic.getPowerIncrement()));
+
                     PowerService.addPower(playerUUID, false);
+                    EagleFactions.getEagleFactions().getLogger().info("Player power after increase: ");
+                    EagleFactions.getEagleFactions().getLogger().info(String.valueOf(PowerService.getPlayerPower(playerUUID)));
+
                     increasePower(playerUUID);
                 }
                 else
@@ -246,7 +255,7 @@ public class PowerService
 
     public static void decreasePower(UUID playerUUID)
     {
-        if(PowerService.getPlayerPower(playerUUID) - MainLogic.getPowerDecrement() > 0.0)
+        if(PowerService.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
         {
             Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
@@ -256,9 +265,9 @@ public class PowerService
 
                 CommentedConfigurationNode playerNode = configLoader.load();
 
-                double playerPower = playerNode.getNode("power").getDouble();
+                BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-                playerNode.getNode("power").setValue(playerPower - MainLogic.getPowerDecrement());
+                playerNode.getNode("power").setValue(playerPower.subtract(MainLogic.getPowerDecrement()));
                 configLoader.save(playerNode);
             }
             catch (Exception exception)
@@ -268,7 +277,7 @@ public class PowerService
         }
         else
         {
-            PowerService.setPower(playerUUID, 0.0);
+            PowerService.setPower(playerUUID, BigDecimal.ZERO);
         }
     }
 }

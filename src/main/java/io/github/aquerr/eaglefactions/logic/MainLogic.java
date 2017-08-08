@@ -5,6 +5,8 @@ import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
 import ninja.leaping.configurate.ConfigurationNode;
 
+import java.math.BigDecimal;
+
 public class MainLogic
 {
     private static IConfig mainConfig = MainConfig.getConfig();
@@ -18,47 +20,47 @@ public class MainLogic
         return friendlyFire;
     }
 
-    public static double getGlobalMaxPower()
+    public static BigDecimal getGlobalMaxPower()
     {
         ConfigurationNode maxPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "maxpower");
 
-        double maxPower = maxPowerNode.getInt();
+        BigDecimal maxPower = new BigDecimal(maxPowerNode.getString());
 
         return maxPower;
     }
 
-    public static double getStartingPower()
+    public static BigDecimal getStartingPower()
     {
         ConfigurationNode startingPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "startpower");
 
-        double startPower = startingPowerNode.getInt();
+        BigDecimal startPower = new BigDecimal(startingPowerNode.getString());
 
         return startPower;
     }
 
-    public static double getPowerIncrement()
+    public static BigDecimal getPowerIncrement()
     {
         ConfigurationNode powerIncrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "increment");
 
-        double incrementPower = powerIncrementNode.getDouble();
+        BigDecimal incrementPower = new BigDecimal(powerIncrementNode.getString());
 
         return incrementPower;
     }
 
-    public static double getPowerDecrement()
+    public static BigDecimal getPowerDecrement()
     {
         ConfigurationNode powerDecrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "decrement");
 
-        double decrementPower = powerDecrementNode.getDouble();
+        BigDecimal decrementPower = new BigDecimal(powerDecrementNode.getString());
 
         return decrementPower;
     }
 
-    public static double getKillAward()
+    public static BigDecimal getKillAward()
     {
         ConfigurationNode killAwardNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "killaward");
 
-        double killAward = killAwardNode.getDouble();
+        BigDecimal killAward = new BigDecimal(killAwardNode.getString());
 
         return killAward;
     }

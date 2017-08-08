@@ -91,10 +91,10 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes.");
       //  get().getNode("eaglefactions", "claims", "cap").setValue(50).setComment("The maximum number of claims a Faction may have, overrides the one based on multiplier and player size.");
         get().getNode("eaglefactions", "power", "increment").setValue(0.05).setComment("How much power will be restored for player after 1 minute of playing. (0.05 per minute = 1,5 per hour");
-        get().getNode("eaglefactions", "power", "decrement").setValue(2).setComment("How much power will be removed on player death");
-        get().getNode("eaglefactions", "power", "maxpower").setValue(10).setComment("Maximum amount of power a player can have");
-        get().getNode("eaglefactions", "power", "startpower").setValue(5).setComment("Starting amount of power");
-        get().getNode("eaglefactions", "power", "killaward").setValue(2).setValue("Player kill award");
+        get().getNode("eaglefactions", "power", "decrement").setValue(2.0).setComment("How much power will be removed on player death");
+        get().getNode("eaglefactions", "power", "maxpower").setValue(10.0).setComment("Maximum amount of power a player can have");
+        get().getNode("eaglefactions", "power", "startpower").setValue(5.0).setComment("Starting amount of power");
+        get().getNode("eaglefactions", "power", "killaward").setValue(2.0).setComment("Player kill award");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances.");
     }
 

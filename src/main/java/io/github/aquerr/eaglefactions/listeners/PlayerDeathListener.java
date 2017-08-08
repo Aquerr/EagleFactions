@@ -15,8 +15,6 @@ public class PlayerDeathListener
     @Listener
     public void onPlayerDeath(DestructEntityEvent.Death event)
     {
-        EagleFactions.getEagleFactions().getLogger().info(event.getCause().root().toString());
-
         if(event.getTargetEntity() instanceof Player)
         {
             Player player = (Player)event.getTargetEntity();
