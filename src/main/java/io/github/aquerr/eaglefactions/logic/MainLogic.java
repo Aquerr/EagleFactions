@@ -40,8 +40,17 @@ public class MainLogic
     {
         ConfigurationNode powerIncrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "increment");
 
-        double startPower = powerIncrementNode.getDouble();
+        double incrementPower = powerIncrementNode.getDouble();
 
-        return startPower;
+        return incrementPower;
+    }
+
+    public static double getPowerDecrement()
+    {
+        ConfigurationNode powerDecrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "decrement");
+
+        double decrementPower = powerDecrementNode.getDouble();
+
+        return decrementPower;
     }
 }
