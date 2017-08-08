@@ -41,14 +41,14 @@ public class EntityDamageListener
                              event.setBaseDamage(0);
                              event.setCancelled(true);
                          }
-                         else return;
+                         //else return;
                      }//Check if players are in different factions but are in the alliance.
                      else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
                      {
                          event.setBaseDamage(0);
                          event.setCancelled(true);
                      }
-                     else return;
+                    // else return;
 
                  }
              }

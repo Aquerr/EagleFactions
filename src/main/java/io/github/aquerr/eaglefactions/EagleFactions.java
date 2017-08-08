@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.EntityDamageListener;
+import io.github.aquerr.eaglefactions.listeners.PlayerDeathListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerJoinListener;
 import org.slf4j.Logger;
 
@@ -290,5 +291,6 @@ public class EagleFactions
 
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
+        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
     }
 }
