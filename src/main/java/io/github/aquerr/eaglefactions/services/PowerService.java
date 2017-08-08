@@ -242,6 +242,6 @@ public class PowerService
                     increasePower(playerUUID);
                 }
             }
-        }).delay(30, TimeUnit.MINUTES).name("Eaglefactions - Increase power scheduler").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+        }).delay(1, TimeUnit.MINUTES).name("Eaglefactions - Increase power scheduler").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
     }
 }
