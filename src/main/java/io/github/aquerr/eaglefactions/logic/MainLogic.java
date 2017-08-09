@@ -64,4 +64,22 @@ public class MainLogic
 
         return killAward;
     }
+
+    public static int getMaxNameLength()
+    {
+        ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "name", "maxlength");
+
+        int maxLength = maxLengthNode.getInt();
+
+        return maxLength;
+    }
+
+    public static int getMinNameLength()
+    {
+        ConfigurationNode minLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "name", "minlength");
+
+        int minLength = minLengthNode.getInt();
+
+        return minLength;
+    }
 }
