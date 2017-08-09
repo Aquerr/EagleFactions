@@ -34,17 +34,12 @@ public class CreateCommand implements CommandExecutor
                 return CommandResult.success();
             }
 
-            //TODO:Block long faction names. Make a config file!
-            //if(factionName.length() > ConfigManager.getMaxNameLength()){}
-            //if(factionName.length() < ConfigManager.getMinNameLength()){}
-
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
             if (playerFactionName == null)
             {
                 if (! FactionLogic.getFactions().contains(factionName))
                 {
-
                     //Check name length
                     if(factionName.length() > MainLogic.getMaxNameLength())
                     {

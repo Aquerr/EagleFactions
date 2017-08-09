@@ -20,7 +20,7 @@ public class Faction
     public List<String> Enemies;
     public UUID Leader;
     public List<String> Officers;
-    public List<Chunk> Claims;
+    public List<String> Claims;
 
     public Faction(String factionName, UUID factionLeader)
     {

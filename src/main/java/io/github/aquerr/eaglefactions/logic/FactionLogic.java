@@ -9,6 +9,8 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.world.Chunk;
+import sun.util.resources.cldr.hy.CurrencyNames_hy;
 
 
 import java.util.*;
@@ -68,7 +70,7 @@ public class FactionLogic
         faction.Officers = getOfficers(factionName);
         faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
-        //faction.Claims = getClaims(factionName);
+        faction.Claims = getClaims(factionName);
 
         //TODO: Implement power service.
         faction.Power = PowerService.getFactionPower(faction);
@@ -142,6 +144,7 @@ public class FactionLogic
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "alliances"}, new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyfire"}, false);
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, new ArrayList<Chunk>());
         }
         catch (Exception exception)
         {
@@ -200,18 +203,6 @@ public class FactionLogic
         }
         else return new ArrayList<String>();
     }
-
-    private static Function<Object,String> objectToStringTransformer = input ->
-    {
-        if (input instanceof String)
-        {
-            return (String) input;
-        }
-        else
-        {
-            return null;
-        }
-    };
 
     public static void removeAlliance(String playerFactionName, String removedFaction)
     {
@@ -302,4 +293,79 @@ public class FactionLogic
     {
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyfire"}, turnOn);
     }
+
+    public static List<String> getClaims(String factionName)
+    {
+        ConfigurationNode claimsNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "claims");
+
+        EagleFactions.getEagleFactions().getLogger().info("Tranforming objects to chunks...");
+        List<String> calimsList = claimsNode.getList(objectToStringTransformer);
+
+        return calimsList;
+    }
+
+    public static void addClaim(String factionName, String claimedChunk)
+    {
+        List<String> claimsList = new ArrayList<>(getClaims(factionName));
+
+        claimsList.add(claimedChunk);
+
+        EagleFactions.getEagleFactions().getLogger().info("Saving claimList...");
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
+    }
+
+    public static boolean checkIfClaimed(String chunk)
+    {
+        for (Object object: getFactions())
+        {
+            String factionName = String.valueOf(object);
+            EagleFactions.getEagleFactions().getLogger().info("Checking claims for... " + factionName);
+
+            List<String> factionClaims = getClaims(factionName);
+            EagleFactions.getEagleFactions().getLogger().info("Got claims for... " + factionName);
+            EagleFactions.getEagleFactions().getLogger().info("Printing claims...");
+            EagleFactions.getEagleFactions().getLogger().info(factionClaims.toString());
+
+            if(!factionClaims.isEmpty() && factionClaims != null)
+            {
+                for (String claim: factionClaims)
+                {
+                    EagleFactions.getEagleFactions().getLogger().info("Comparing chunks");
+                    EagleFactions.getEagleFactions().getLogger().info("Faction claim: " + claim.toString());
+                    EagleFactions.getEagleFactions().getLogger().info("" + chunk.toString());
+                    if(claim.equalsIgnoreCase(chunk))
+                    {
+                        EagleFactions.getEagleFactions().getLogger().info("Claim found!");
+                        return true;
+                    }
+                    else EagleFactions.getEagleFactions().getLogger().info("Claim not found!");
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Function<Object,Chunk> objectToChunkTransformer = input ->
+    {
+        if (input instanceof Chunk)
+        {
+            return (Chunk) input;
+        }
+        else
+        {
+            return null;
+        }
+    };
+
+    private static Function<Object,String> objectToStringTransformer = input ->
+    {
+        if (input instanceof String)
+        {
+            return (String) input;
+        }
+        else
+        {
+            return null;
+        }
+    };
 }

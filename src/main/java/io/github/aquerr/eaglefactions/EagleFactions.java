@@ -273,10 +273,17 @@ public class EagleFactions
                 .executor(new FriendlyFireCommand())
                 .build());
 
+        //Claim command.
+        Subcommands.put(Arrays.asList("claim"), CommandSpec.builder()
+                .description(Text.of("Claim a land for your faction"))
+                .permission("eaglefactions.command.claim")
+                .executor(new ClaimCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
-                .permission ("eaglefactions.command.*")
+                .permission ("eaglefactions.command")
                 .executor (new HelpCommand())
                 .children (Subcommands)
                 .build ();
