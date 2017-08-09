@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -14,7 +13,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.World;
 
-public class ClaimCommand implements CommandExecutor
+public class UnclaimCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
@@ -33,24 +32,16 @@ public class ClaimCommand implements CommandExecutor
 
                     Chunk chunk = world.getChunk(player.getLocation().getChunkPosition()).get();
 
-                    if(!FactionLogic.isClaimed(chunk.toString()))
+                    if(FactionLogic.isClaimed(chunk.toString()))
                     {
+                        FactionLogic.removeClaim(playerFactionName, chunk.toString());
 
-                        if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
-                        {
-                            FactionLogic.addClaim(playerFactionName, chunk.toString());
-
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                            return CommandResult.success();
-                        }
-                        else
-                        {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction does not have power to claim more land!"));
-                        }
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
+                        return CommandResult.success();
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is already claimed!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed!"));
                     }
 
                 }

@@ -312,7 +312,16 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static boolean checkIfClaimed(String chunk)
+    public static void removeClaim(String factionName, String claimedChunk)
+    {
+        List<String> claimsList = new ArrayList<>(getClaims(factionName));
+
+        claimsList.remove(claimedChunk);
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
+    }
+
+    public static boolean isClaimed(String chunk)
     {
         for (Object object: getFactions())
         {
@@ -333,6 +342,8 @@ public class FactionLogic
         }
         return false;
     }
+
+
 
     private static Function<Object,Chunk> objectToChunkTransformer = input ->
     {
@@ -357,4 +368,6 @@ public class FactionLogic
             return null;
         }
     };
+
+
 }

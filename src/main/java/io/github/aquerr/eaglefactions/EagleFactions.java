@@ -280,6 +280,13 @@ public class EagleFactions
                 .executor(new ClaimCommand())
                 .build());
 
+        //Unclaim command.
+        Subcommands.put(Arrays.asList("unclaim"), CommandSpec.builder()
+                .description(Text.of("Unclaim a land caputred by your faction."))
+                .permission("eaglefactions.command.unclaim")
+                .executor(new UnclaimCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
