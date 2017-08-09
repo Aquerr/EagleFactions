@@ -9,9 +9,11 @@ Current version: 0.5.9
 **NOTE: Plugin is currently in heavy development!**
 
 ## General
-Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using "power". Yes! Power! Just like in the original factions plugin made for Bukkit (and then Spigot).
+Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using "power". Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
 
-Our plugin offers you all you need for you factions style minecraft server. There are even some extra cool features like custom ranks, "pvp-leave blocker" and many more.
+Eagle Factions will change your minecraft expirience forever. We offer you a new gameplay with some extra cool features like custom ranks, "pvp-leave blocker" and many more. You can even destroy enemy factions!
+
+Check our Wiki to get to know how everything works.
 
 Plugin is currently in alpha state, but **any feedback would be awesome!**
 
@@ -20,10 +22,11 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 * Creating factions
 * Invite others to faction
 * Form alliances with other factions
-* Power system **(Finished in 90%)**
+* Power system
 * Claiming territories/lands **(not implemented yet)**
-* Friendly Fire can be disabled by factions leaders.
+* Friendly Fire in faction can be disabled by its leaders.
 * Option for disabling friendly fire between aliances.
+* Unclaim other factions lands if their power is low. After hiting 0 claims, faction is beeing removed. **(not implemented yet)**
 * Prefixes Tags **(not implemented yet)**
 * Custom ranks in factions **(not implemented yet)**
 * PVP-Block **(not implemented yet)**
@@ -31,9 +34,8 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 
 ## Links
 
-* ~~Download Link~~
+* ~~Download Links~~
 * ~~Wiki~~
-* ~~Documentation~~
 * ~~Ore~~
 
 Download link not yet provided
@@ -41,3 +43,10 @@ Download link not yet provided
 Some **Alpha builds** may be available soon
 
 Recommended downloads will be **available** when version of the plugin hits **1.0.0**
+
+## Credits
+
+Plugin created by: [Aquerr](https://github.com/Aquerr) (also known as Niebek)
+
+Feel free to send me your feedback! I would love to hear your opinions about this plugin and suggestions for future updates!
+**If you find any issues while using the plugin, post them on Ore or [Github](https://github.com/Aquerr/EagleFactions/issues)**
