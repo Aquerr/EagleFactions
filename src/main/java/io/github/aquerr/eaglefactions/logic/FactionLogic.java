@@ -144,7 +144,7 @@ public class FactionLogic
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "alliances"}, new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyfire"}, false);
-            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, new ArrayList<Chunk>());
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, new ArrayList<String>());
         }
         catch (Exception exception)
         {
@@ -298,7 +298,6 @@ public class FactionLogic
     {
         ConfigurationNode claimsNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "claims");
 
-        EagleFactions.getEagleFactions().getLogger().info("Tranforming objects to chunks...");
         List<String> calimsList = claimsNode.getList(objectToStringTransformer);
 
         return calimsList;
@@ -310,7 +309,6 @@ public class FactionLogic
 
         claimsList.add(claimedChunk);
 
-        EagleFactions.getEagleFactions().getLogger().info("Saving claimList...");
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
@@ -319,26 +317,17 @@ public class FactionLogic
         for (Object object: getFactions())
         {
             String factionName = String.valueOf(object);
-            EagleFactions.getEagleFactions().getLogger().info("Checking claims for... " + factionName);
 
             List<String> factionClaims = getClaims(factionName);
-            EagleFactions.getEagleFactions().getLogger().info("Got claims for... " + factionName);
-            EagleFactions.getEagleFactions().getLogger().info("Printing claims...");
-            EagleFactions.getEagleFactions().getLogger().info(factionClaims.toString());
 
             if(!factionClaims.isEmpty() && factionClaims != null)
             {
                 for (String claim: factionClaims)
                 {
-                    EagleFactions.getEagleFactions().getLogger().info("Comparing chunks");
-                    EagleFactions.getEagleFactions().getLogger().info("Faction claim: " + claim.toString());
-                    EagleFactions.getEagleFactions().getLogger().info("" + chunk.toString());
                     if(claim.equalsIgnoreCase(chunk))
                     {
-                        EagleFactions.getEagleFactions().getLogger().info("Claim found!");
                         return true;
                     }
-                    else EagleFactions.getEagleFactions().getLogger().info("Claim not found!");
                 }
             }
         }

@@ -32,22 +32,15 @@ public class ClaimCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    EagleFactions.getEagleFactions().getLogger().info("Get current claim...");
                     World world = player.getWorld();
 
                     Chunk chunk = world.getChunk(player.getLocation().getChunkPosition()).get();
 
-                    EagleFactions.getEagleFactions().getLogger().info("Checking if claimed...");
-                    EagleFactions.getEagleFactions().getLogger().info("It should be " + FactionLogic.checkIfClaimed(chunk.toString()));
                     if(!FactionLogic.checkIfClaimed(chunk.toString()))
                     {
 
                         if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
-                            EagleFactions.getEagleFactions().getLogger().info("Adding a claim: ");
-                            EagleFactions.getEagleFactions().getLogger().info(chunk.toString());
-                            EagleFactions.getEagleFactions().getLogger().info("Claim position: ");
-                            EagleFactions.getEagleFactions().getLogger().info(chunk.getPosition().toString());
                             FactionLogic.addClaim(playerFactionName, chunk.toString());
 
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));

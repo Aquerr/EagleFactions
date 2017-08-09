@@ -75,7 +75,6 @@ public class PowerService
                  if(playerNode.getNode("power").getValue() != null)
                  {
                      BigDecimal playerPower =  new BigDecimal(playerNode.getNode("power").getString());
-                     EagleFactions.getEagleFactions().getLogger().info("Successfully got playerPower = " + playerPower.toString());
                      return playerPower;
                  }
             }
@@ -99,8 +98,6 @@ public class PowerService
         if(faction.Leader != null)
         {
             factionPower = factionPower.add(getPlayerPower(faction.Leader));
-            EagleFactions.getEagleFactions().getLogger().info("Leader power: " + getPlayerPower(faction.Leader).toString());
-            EagleFactions.getEagleFactions().getLogger().info("Faction power: " + factionPower.toString());
         }
 
         if(faction.Officers != null && !faction.Officers.isEmpty())
@@ -120,7 +117,6 @@ public class PowerService
                 factionPower = factionPower.add(memberPower);
             }
         }
-        EagleFactions.getEagleFactions().getLogger().info(factionPower.toString());
         return factionPower;
     }
 
