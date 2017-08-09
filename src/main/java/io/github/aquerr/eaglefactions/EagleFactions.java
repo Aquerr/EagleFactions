@@ -287,6 +287,13 @@ public class EagleFactions
                 .executor(new UnclaimCommand())
                 .build());
 
+        //Map command
+        Subcommands.put(Arrays.asList("map"), CommandSpec.builder()
+                .description(Text.of("Turn on/off factions map"))
+                .permission("eaglefactions.command.map")
+                .executor(new MapCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
