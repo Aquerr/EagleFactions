@@ -48,12 +48,12 @@ public class CreateCommand implements CommandExecutor
                     //Check name length
                     if(factionName.length() > MainLogic.getMaxNameLength())
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " char)"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " chars)"));
                         return CommandResult.success();
                     }
                     if(factionName.length() < MainLogic.getMinNameLength())
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars)"));
                         return CommandResult.success();
                     }
 
