@@ -34,20 +34,30 @@ public class EntityDamageListener
                  {
                      Player attackedPlayer = (Player) event.getTargetEntity();
 
-                     //Check if players are in the same faction
-                     if(FactionLogic.getFactionName(player.getUniqueId()) == FactionLogic.getFactionName(attackedPlayer.getUniqueId()))
+                     if(FactionLogic.getFactionName(player.getUniqueId()) != null)
                      {
-                         if(!FactionLogic.getFactionFriendlyFire(FactionLogic.getFactionName(player.getUniqueId())))
-                         {
-                             event.setBaseDamage(0);
-                             event.setCancelled(true);
-                         }
-                         //else return;
-                     }//Check if players are in different factions but are in the alliance.
-                     else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
-                     {
-                         event.setBaseDamage(0);
-                         event.setCancelled(true);
+                        //Check if players are in the same faction
+                        if(FactionLogic.getFactionName(player.getUniqueId()) == FactionLogic.getFactionName(attackedPlayer.getUniqueId()))
+                        {
+                            if(!FactionLogic.getFactionFriendlyFire(FactionLogic.getFactionName(player.getUniqueId())))
+                            {
+                                event.setBaseDamage(0);
+                                event.setCancelled(true);
+                            }
+                            else return;
+                        }//Check if players are in different factions but are in the alliance.
+                        else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
+                        {
+                            event.setBaseDamage(0);
+                            event.setCancelled(true);
+                        }
+                        else
+                        {
+                            if(event.willCauseDeath())
+                            {
+                                PowerService.addPower(player.getUniqueId(), true);
+                            }
+                        }
                      }
                      else
                      {
@@ -55,8 +65,8 @@ public class EntityDamageListener
                          {
                              PowerService.addPower(player.getUniqueId(), true);
                          }
-                     }
-                    // else return;
+                         return;
+                     };
 
                  }
              }
