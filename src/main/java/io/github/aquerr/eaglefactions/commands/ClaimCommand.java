@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
@@ -29,9 +30,7 @@ public class ClaimCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    World world = player.getWorld();
-
-                    Chunk chunk = world.getChunk(player.getLocation().getChunkPosition()).get();
+                    Vector3i chunk = player.getLocation().getChunkPosition();
 
                     if(!FactionLogic.isClaimed(chunk.toString()))
                     {

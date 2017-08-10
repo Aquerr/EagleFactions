@@ -1,16 +1,27 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class MapCommand implements CommandExecutor
 {
@@ -21,25 +32,126 @@ public class MapCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Map ", TextColors.GOLD, "Enabled"));
-
-            Text notCapturedLand = Text.of(TextColors.GRAY, "/");
-            Text factionLand = Text.of(TextColors.GREEN, "+");
-            Text allianceLand = Text.of(TextColors.BLUE, "+");
-            Text enemyLand = Text.of(TextColors.RED, "#");
-            Text normalFactionLand = Text.of(TextColors.WHITE, "+");
-            Text playerLocation = Text.of(TextColors.GOLD, "O");
+            Text notCapturedMark = Text.of(TextColors.GRAY, "/");
+            Text factionMark = Text.of(TextColors.GREEN, "+");
+            Text allianceMark = Text.of(TextColors.BLUE, "+");
+            Text enemyMark = Text.of(TextColors.RED, "#");
+            Text normalFactionMark = Text.of(TextColors.WHITE, "+");
+            Text playerLocationMark = Text.of(TextColors.GOLD, "+");
 
             World world = player.getWorld();
+            Vector3i playerPosition = player.getLocation().getChunkPosition();
 
-            Vector3d playerPosition = player.getLocation().getPosition();
+            List<Text> map = new ArrayList<>();
+            String normalFactions = "";
+            String allianceFactions = "";
+            String enemyFactions = "";
+            String playerFaction = "";
 
-            for (int column = 0; column <= 17; column++)
+            //Map resolution
+            int mapWidth = 20;
+            int mapHeight = 8;
+
+            //Half map resolution + 1 (for player column/row in the center)
+            int halfMapWidth = mapWidth / 2;
+            int halfMapHeight = mapHeight / 2;
+
+            //Vector3i topLeftPosition = playerPosition.add(-halfMapWidth, 0, -halfMapHeight);
+
+            for (int row = -halfMapHeight; row <= halfMapHeight; row++)
             {
-                for (int row = 0; row <= 9; row++)
+                Text.Builder textBuilder = Text.builder();
+
+                for (int column = -halfMapWidth; column <= halfMapWidth; column++)
                 {
-                    
+                    if(row == 0 && column == 0)
+                    {
+                        textBuilder.append(playerLocationMark);
+                        continue;
+                    }
+
+                    Vector3i chunk =  playerPosition.add(column, 0, row);
+
+                        if(FactionLogic.isClaimed(chunk.toString()))
+                        {
+                            String factionName = FactionLogic.getFactionNameByChunk(chunk.toString());
+
+                            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+
+                            if(playerFactionName != null)
+                            {
+                                if(factionName.equals(playerFactionName))
+                                {
+                                    textBuilder.append(factionMark);
+                                    playerFaction = factionName;
+                                }
+                                else if(FactionLogic.getAlliances(playerFactionName).contains(factionName))
+                                {
+                                    textBuilder.append(allianceMark);
+                                    allianceFactions += factionName + ", ";
+                                }
+                                else if(FactionLogic.getEnemies(playerFactionName).contains(factionName))
+                                {
+                                    textBuilder.append(enemyMark);
+                                    enemyFactions += factionName + ", ";
+                                }
+                                else
+                                {
+                                    if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                    else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                    else textBuilder.append(normalFactionMark);
+
+                                    normalFactions += factionName + ", ";
+                                }
+                            }
+                            else
+                            {
+                                if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                else textBuilder.append(normalFactionMark);
+
+                                normalFactions += factionName + ", ";
+                            }
+                        }
+                        else
+                        {
+                            textBuilder.append(notCapturedMark);
+                        }
                 }
+                map.add(textBuilder.build());
+
+
+            }
+
+            //Print map
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Showing map for: " + playerPosition.toString()));
+            player.sendMessage(Text.of(TextColors.GREEN, "==========================="));
+            for (Text text: map)
+            {
+                player.sendMessage(Text.of(text));
+            }
+            player.sendMessage(Text.of(TextColors.GREEN, "==========================="));
+
+            //PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
+            //PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions Map")).contents(map);
+            //paginationBuilder.sendTo(source);
+
+            //Print factions on map
+            if(!playerFaction.equals(""))
+            {
+                player.sendMessage(Text.of(TextColors.GOLD, "Your faction: ", TextColors.GREEN, playerFaction));
+            }
+            if(!normalFactions.isEmpty())
+            {
+                player.sendMessage(Text.of(TextColors.GOLD, "Factions: ", normalFactions));
+            }
+            if(!allianceFactions.isEmpty())
+            {
+                player.sendMessage(Text.of(TextColors.GOLD, "Alliances: ", TextColors.AQUA, allianceFactions));
+            }
+            if(!enemyFactions.isEmpty())
+            {
+                player.sendMessage(Text.of(TextColors.GOLD, "Enemies: ", TextColors.RED, enemyFactions));
             }
 
         }

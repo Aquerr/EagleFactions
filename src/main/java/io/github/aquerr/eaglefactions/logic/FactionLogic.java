@@ -57,6 +57,21 @@ public class FactionLogic
         return null;
     }
 
+    public static String getFactionNameByChunk(String chunk)
+    {
+        for(Object object: getFactions())
+        {
+            String factionName = String.valueOf(object);
+
+            if(getClaims(factionName).contains(chunk))
+            {
+                return factionName;
+            }
+        }
+
+        return null;
+    }
+
     public static Faction getFaction(String factionName)
     {
         ConfigurationNode leaderNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "leader");
@@ -66,13 +81,11 @@ public class FactionLogic
 
         faction.Members = getMembers(factionName);
 
-        //TODO: Load other faction properties here.
         faction.Officers = getOfficers(factionName);
         faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
         faction.Claims = getClaims(factionName);
 
-        //TODO: Implement power service.
         faction.Power = PowerService.getFactionPower(faction);
 
         return faction;
