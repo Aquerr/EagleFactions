@@ -34,7 +34,7 @@ public class MapCommand implements CommandExecutor
 
             Text notCapturedMark = Text.of(TextColors.GRAY, "/");
             Text factionMark = Text.of(TextColors.GREEN, "+");
-            Text allianceMark = Text.of(TextColors.BLUE, "+");
+            Text allianceMark = Text.of(TextColors.AQUA, "+");
             Text enemyMark = Text.of(TextColors.RED, "#");
             Text normalFactionMark = Text.of(TextColors.WHITE, "+");
             Text playerLocationMark = Text.of(TextColors.GOLD, "+");
@@ -66,6 +66,7 @@ public class MapCommand implements CommandExecutor
                 {
                     if(row == 0 && column == 0)
                     {
+                        //TODO: Faction that player is standing at is not showed in the list.
                         textBuilder.append(playerLocationMark);
                         continue;
                     }
@@ -88,12 +89,12 @@ public class MapCommand implements CommandExecutor
                                 else if(FactionLogic.getAlliances(playerFactionName).contains(factionName))
                                 {
                                     textBuilder.append(allianceMark);
-                                    allianceFactions += factionName + ", ";
+                                    if(!allianceFactions.contains(factionName)) allianceFactions += factionName + ", ";
                                 }
                                 else if(FactionLogic.getEnemies(playerFactionName).contains(factionName))
                                 {
                                     textBuilder.append(enemyMark);
-                                    enemyFactions += factionName + ", ";
+                                    if(!enemyFactions.contains(factionName)) enemyFactions += factionName + ", ";
                                 }
                                 else
                                 {
@@ -101,7 +102,7 @@ public class MapCommand implements CommandExecutor
                                     else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                     else textBuilder.append(normalFactionMark);
 
-                                    normalFactions += factionName + ", ";
+                                    if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
                                 }
                             }
                             else
@@ -110,7 +111,7 @@ public class MapCommand implements CommandExecutor
                                 else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                 else textBuilder.append(normalFactionMark);
 
-                                normalFactions += factionName + ", ";
+                                if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
                             }
                         }
                         else
@@ -125,12 +126,12 @@ public class MapCommand implements CommandExecutor
 
             //Print map
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Showing map for: " + playerPosition.toString()));
-            player.sendMessage(Text.of(TextColors.GREEN, "==========================="));
+            player.sendMessage(Text.of(TextColors.GREEN, "========================"));
             for (Text text: map)
             {
                 player.sendMessage(Text.of(text));
             }
-            player.sendMessage(Text.of(TextColors.GREEN, "==========================="));
+            player.sendMessage(Text.of(TextColors.GREEN, "========================"));
 
             //PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             //PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions Map")).contents(map);
@@ -139,21 +140,20 @@ public class MapCommand implements CommandExecutor
             //Print factions on map
             if(!playerFaction.equals(""))
             {
-                player.sendMessage(Text.of(TextColors.GOLD, "Your faction: ", TextColors.GREEN, playerFaction));
+                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction));
             }
             if(!normalFactions.isEmpty())
             {
-                player.sendMessage(Text.of(TextColors.GOLD, "Factions: ", normalFactions));
+                player.sendMessage(Text.of(TextColors.WHITE, "Factions: ", TextColors.NONE, normalFactions));
             }
             if(!allianceFactions.isEmpty())
             {
-                player.sendMessage(Text.of(TextColors.GOLD, "Alliances: ", TextColors.AQUA, allianceFactions));
+                player.sendMessage(Text.of(TextColors.AQUA, "Alliances: " + allianceFactions));
             }
             if(!enemyFactions.isEmpty())
             {
-                player.sendMessage(Text.of(TextColors.GOLD, "Enemies: ", TextColors.RED, enemyFactions));
+                player.sendMessage(Text.of(TextColors.RED, "Enemies: " + enemyFactions));
             }
-
         }
         else
         {
