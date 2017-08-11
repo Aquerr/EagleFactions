@@ -150,8 +150,7 @@ public class MapCommand implements CommandExecutor
             }
             if(!normalFactions.isEmpty())
             {
-                Text factions = Text.of(TextColors.WHITE, "Factions: ");
-                player.sendMessage(Text.of(factions + normalFactions.substring(0, normalFactions.length() - 2)));
+                player.sendMessage(Text.of(TextColors.WHITE, "Factions: ", TextColors.RESET, normalFactions.substring(0, normalFactions.length() - 2)));
             }
             if(!allianceFactions.isEmpty())
             {
