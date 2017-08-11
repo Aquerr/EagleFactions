@@ -34,7 +34,7 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 
 ## Links
 
-* Download Links **(Alpha Builds)**
+* [Download Links](https://github.com/Aquerr/EagleFactions/releases) **(Alpha Builds)**
 * ~~Wiki~~
 * ~~Ore~~
 
