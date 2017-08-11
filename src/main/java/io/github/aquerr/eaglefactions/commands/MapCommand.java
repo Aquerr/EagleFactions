@@ -146,19 +146,19 @@ public class MapCommand implements CommandExecutor
             //Print factions on map
             if(!playerFaction.equals(""))
             {
-                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction));
+                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction.substring(0, playerFaction.length() - 2)));
             }
             if(!normalFactions.isEmpty())
             {
-                player.sendMessage(Text.of(TextColors.WHITE, "Factions: ", TextColors.NONE, normalFactions));
+                player.sendMessage(Text.of(TextColors.WHITE, "Factions: ", TextColors.NONE, normalFactions.substring(0, normalFactions.length() - 2)));
             }
             if(!allianceFactions.isEmpty())
             {
-                player.sendMessage(Text.of(TextColors.AQUA, "Alliances: " + allianceFactions));
+                player.sendMessage(Text.of(TextColors.AQUA, "Alliances: " + allianceFactions.substring(0, allianceFactions.length() - 2)));
             }
             if(!enemyFactions.isEmpty())
             {
-                player.sendMessage(Text.of(TextColors.RED, "Enemies: " + enemyFactions));
+                player.sendMessage(Text.of(TextColors.RED, "Enemies: " + enemyFactions.substring(0, enemyFactions.length() - 2)));
             }
 
             player.sendMessage(Text.of("Currently standing at: ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " which is claimed by ", TextColors.GOLD, playerPositionCalim));
