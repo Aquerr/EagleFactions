@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -28,12 +29,12 @@ public class UnclaimCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    World world = player.getWorld();
-
-                    Chunk chunk = world.getChunk(player.getLocation().getChunkPosition()).get();
+                    Vector3i chunk = player.getLocation().getChunkPosition();
 
                     if(FactionLogic.isClaimed(chunk.toString()))
                     {
+                        //TODO: Check if claimed land will stay connected
+
                         FactionLogic.removeClaim(playerFactionName, chunk.toString());
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
