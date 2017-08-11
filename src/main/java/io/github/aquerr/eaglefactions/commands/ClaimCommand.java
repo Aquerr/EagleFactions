@@ -37,10 +37,17 @@ public class ClaimCommand implements CommandExecutor
 
                         if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
-                            FactionLogic.addClaim(playerFactionName, chunk.toString());
+                            if(FactionLogic.isClaimConnected(playerFactionName, chunk))
+                            {
+                                FactionLogic.addClaim(playerFactionName, chunk.toString());
 
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                            return CommandResult.success();
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                return CommandResult.success();
+                            }
+                            else
+                            {
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                            }
                         }
                         else
                         {

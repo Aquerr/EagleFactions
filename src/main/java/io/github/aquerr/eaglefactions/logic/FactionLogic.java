@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
@@ -383,4 +384,29 @@ public class FactionLogic
     };
 
 
+    public static boolean isClaimConnected(String factionName, Vector3i chunk)
+    {
+        List<String> claimsList = getClaims(factionName);
+
+        for (String object: claimsList)
+        {
+            String vectors[] = object.replace("(", "").replace(")", "").replace(" ", "").split(",");
+
+            int x = Integer.valueOf(vectors[0]);
+            int y = Integer.valueOf(vectors[1]);
+            int z = Integer.valueOf(vectors[2]);
+
+            Vector3i claim = Vector3i.from(x, y, z);
+
+            if((claim.getX() == chunk.getX()) && ((claim.getZ() + 1 == chunk.getZ()) || (claim.getZ() - 1 == chunk.getZ())))
+            {
+                return true;
+            }
+            else if((claim.getZ() == chunk.getZ()) && ((claim.getX() + 1 == chunk.getX()) || (claim.getX() - 1 == chunk.getX())))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
