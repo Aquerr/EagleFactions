@@ -292,6 +292,20 @@ public class EagleFactions
                 .executor(new MapCommand())
                 .build());
 
+        //Sethome command
+        Subcommands.put(Arrays.asList("sethome"), CommandSpec.builder()
+                .description(Text.of("Set faction's home"))
+                .permission("eaglefactions.command.sethome")
+                .executor(new SethomeCommand())
+                .build());
+
+        //Home command
+        Subcommands.put(Arrays.asList("home"), CommandSpec.builder()
+                .description(Text.of("Teleport to faciton's home"))
+                .permission("eaglefactions.command.home")
+                .executor(new HomeCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))

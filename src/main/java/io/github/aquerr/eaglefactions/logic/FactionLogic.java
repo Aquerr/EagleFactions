@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import io.github.aquerr.eaglefactions.EagleFactions;
@@ -153,7 +154,7 @@ public class FactionLogic
         {
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"},new ArrayList<String>());
-            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},"");
+            ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},null);
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "members"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "enemies"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "alliances"}, new ArrayList<String>());
@@ -408,5 +409,36 @@ public class FactionLogic
             }
         }
         return false;
+    }
+
+    public static void setHome(String factionName, Vector3d home)
+    {
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home.toString());
+    }
+
+    public static Vector3d getHome(String factionName)
+    {
+        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
+
+        if(homeNode.getValue() != null)
+        {
+            String homeString = homeNode.getString();
+
+            String vectors[] = homeString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+
+             double x = Double.valueOf(vectors[0]);
+             double y = Double.valueOf(vectors[1]);
+             double z = Double.valueOf(vectors[2]);
+
+             Vector3d home = Vector3d.from(x, y, z);
+
+             EagleFactions.getEagleFactions().getLogger().info(home.toString());
+
+             return home;
+        }
+        else
+        {
+            return null;
+        }
     }
 }

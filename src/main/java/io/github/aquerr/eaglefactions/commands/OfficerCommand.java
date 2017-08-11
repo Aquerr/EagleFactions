@@ -79,7 +79,7 @@ public class OfficerCommand implements CommandExecutor
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to invite players!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
             }
         }
         else
