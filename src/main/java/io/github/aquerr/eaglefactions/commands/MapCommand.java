@@ -124,9 +124,15 @@ public class MapCommand implements CommandExecutor
 
             }
 
+            String playerPositionCalim = "none";
+
+            if(FactionLogic.isClaimed(playerPosition.toString()))
+            {
+                playerPositionCalim = FactionLogic.getFactionNameByChunk(playerPosition.toString());
+            }
+
             //Print map
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Showing map for: " + playerPosition.toString()));
-            player.sendMessage(Text.of(TextColors.GREEN, "========================"));
+            player.sendMessage(Text.of(TextColors.GREEN, "=======Faction Map======"));
             for (Text text: map)
             {
                 player.sendMessage(Text.of(text));
@@ -154,6 +160,8 @@ public class MapCommand implements CommandExecutor
             {
                 player.sendMessage(Text.of(TextColors.RED, "Enemies: " + enemyFactions));
             }
+
+            player.sendMessage(Text.of("Currently standing at: ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " which is claimed by ", TextColors.GOLD, playerPositionCalim));
         }
         else
         {
