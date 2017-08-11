@@ -1,3 +1,5 @@
+![alt text](http://i.imgur.com/mXEWiOS.png)
+
 # Eagle Factions
 
 Master branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=master)](https://travis-ci.org/Aquerr/EagleFactions)
@@ -42,7 +44,8 @@ Recommended downloads will be **available** when version of the plugin hits **1.
 
 ## Credits
 
-Plugin created by: [Aquerr](https://github.com/Aquerr) (also known as Niebek)
+Plugin creator: [Aquerr](https://github.com/Aquerr) (also known as Niebek)
+Logo by: Joxuuu
 
 Feel free to send me your feedback! I would love to hear your opinions about this plugin and suggestions for future updates!
 **If you find any issues while using the plugin, post them on Ore or [Github](https://github.com/Aquerr/EagleFactions/issues)**
