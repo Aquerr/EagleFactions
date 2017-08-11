@@ -26,7 +26,7 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 * Claiming territories/lands
 * Friendly Fire in faction can be disabled by its leaders.
 * Option for disabling friendly fire between aliances.
-* Unclaim other factions lands if their power is low. After hiting 0 claims, faction is beeing removed. **(not implemented yet)**
+* Unclaim other factions lands if their power is low. **(not implemented yet)**
 * Prefixes Tags **(not implemented yet)**
 * Custom ranks in factions **(not implemented yet)**
 * PVP-Block **(not implemented yet)**
