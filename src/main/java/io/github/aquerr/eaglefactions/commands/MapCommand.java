@@ -39,7 +39,7 @@ public class MapCommand implements CommandExecutor
             Text normalFactionMark = Text.of(TextColors.WHITE, "+");
             Text playerLocationMark = Text.of(TextColors.GOLD, "+");
 
-            World world = player.getWorld();
+            //World world = player.getWorld();
             Vector3i playerPosition = player.getLocation().getChunkPosition();
 
             List<Text> map = new ArrayList<>();
@@ -71,6 +71,7 @@ public class MapCommand implements CommandExecutor
                         continue;
                     }
 
+                    //EagleFactions.getEagleFactions().getLogger().info("Getting player chunk... ");
                     Vector3i chunk =  playerPosition.add(column, 0, row);
 
                         if(FactionLogic.isClaimed(chunk))
@@ -132,12 +133,12 @@ public class MapCommand implements CommandExecutor
             }
 
             //Print map
-            player.sendMessage(Text.of(TextColors.GREEN, "=======Faction Map======"));
+            player.sendMessage(Text.of(TextColors.GREEN, "=====Factions Map====="));
             for (Text text: map)
             {
                 player.sendMessage(Text.of(text));
             }
-            player.sendMessage(Text.of(TextColors.GREEN, "========================"));
+            player.sendMessage(Text.of(TextColors.GREEN, "====================="));
 
             //PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             //PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions Map")).contents(map);
