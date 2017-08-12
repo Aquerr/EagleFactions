@@ -1,4 +1,4 @@
-![alt text](http://i.imgur.com/mXEWiOS.png)
+![alt text](http://i.imgur.com/j3hBGoH.png)
 
 # Eagle Factions
 
