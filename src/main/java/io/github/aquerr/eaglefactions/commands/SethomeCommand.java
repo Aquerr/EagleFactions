@@ -27,7 +27,7 @@ public class SethomeCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.isClaimed(player.getLocation().getChunkPosition().toString()))
+                    if(FactionLogic.isClaimed(player.getLocation().getChunkPosition()))
                     {
                         Vector3d home = new Vector3d(player.getLocation().getPosition());
 

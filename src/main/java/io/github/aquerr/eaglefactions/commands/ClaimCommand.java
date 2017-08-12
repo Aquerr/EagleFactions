@@ -32,7 +32,7 @@ public class ClaimCommand implements CommandExecutor
                 {
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if(!FactionLogic.isClaimed(chunk.toString()))
+                    if(!FactionLogic.isClaimed(chunk))
                     {
 
                         if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
@@ -41,7 +41,7 @@ public class ClaimCommand implements CommandExecutor
                             {
                                 if(FactionLogic.isClaimConnected(playerFactionName, chunk))
                                 {
-                                    FactionLogic.addClaim(playerFactionName, chunk.toString());
+                                    FactionLogic.addClaim(playerFactionName, chunk);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     return CommandResult.success();
@@ -53,7 +53,7 @@ public class ClaimCommand implements CommandExecutor
                             }
                             else
                             {
-                                FactionLogic.addClaim(playerFactionName, chunk.toString());
+                                FactionLogic.addClaim(playerFactionName, chunk);
 
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                 return CommandResult.success();

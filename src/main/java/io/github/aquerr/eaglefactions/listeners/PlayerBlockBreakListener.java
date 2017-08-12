@@ -23,9 +23,9 @@ public class PlayerBlockBreakListener
         {
             Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-            if(FactionLogic.isClaimed(claim.toString()))
+            if(FactionLogic.isClaimed(claim))
             {
-                if(!FactionLogic.getFactionNameByChunk(claim.toString()).equals(playerFactionName))
+                if(!FactionLogic.getFactionNameByChunk(claim).equals(playerFactionName))
                 {
                     event.setCancelled(true);
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));

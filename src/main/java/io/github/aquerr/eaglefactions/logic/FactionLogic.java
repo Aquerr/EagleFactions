@@ -59,13 +59,13 @@ public class FactionLogic
         return null;
     }
 
-    public static String getFactionNameByChunk(String chunk)
+    public static String getFactionNameByChunk(Vector3i chunk)
     {
         for(Object object: getFactions())
         {
             String factionName = String.valueOf(object);
 
-            if(getClaims(factionName).contains(chunk))
+            if(getClaims(factionName).contains(chunk.toString()))
             {
                 return factionName;
             }
@@ -318,25 +318,25 @@ public class FactionLogic
         return calimsList;
     }
 
-    public static void addClaim(String factionName, String claimedChunk)
+    public static void addClaim(String factionName, Vector3i claimedChunk)
     {
         List<String> claimsList = new ArrayList<>(getClaims(factionName));
 
-        claimsList.add(claimedChunk);
+        claimsList.add(claimedChunk.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static void removeClaim(String factionName, String claimedChunk)
+    public static void removeClaim(String factionName, Vector3i claimedChunk)
     {
         List<String> claimsList = new ArrayList<>(getClaims(factionName));
 
-        claimsList.remove(claimedChunk);
+        claimsList.remove(claimedChunk.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static boolean isClaimed(String chunk)
+    public static boolean isClaimed(Vector3i chunk)
     {
         for (Object object: getFactions())
         {
@@ -348,7 +348,7 @@ public class FactionLogic
             {
                 for (String claim: factionClaims)
                 {
-                    if(claim.equalsIgnoreCase(chunk))
+                    if(claim.equalsIgnoreCase(chunk.toString()))
                     {
                         return true;
                     }

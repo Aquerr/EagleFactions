@@ -31,11 +31,11 @@ public class UnclaimCommand implements CommandExecutor
                 {
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if(FactionLogic.isClaimed(chunk.toString()))
+                    if(FactionLogic.isClaimed(chunk))
                     {
                         //TODO: Check if claimed land will stay connected
 
-                        FactionLogic.removeClaim(playerFactionName, chunk.toString());
+                        FactionLogic.removeClaim(playerFactionName, chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                         return CommandResult.success();

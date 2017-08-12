@@ -73,9 +73,9 @@ public class MapCommand implements CommandExecutor
 
                     Vector3i chunk =  playerPosition.add(column, 0, row);
 
-                        if(FactionLogic.isClaimed(chunk.toString()))
+                        if(FactionLogic.isClaimed(chunk))
                         {
-                            String factionName = FactionLogic.getFactionNameByChunk(chunk.toString());
+                            String factionName = FactionLogic.getFactionNameByChunk(chunk);
 
                             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
@@ -126,9 +126,9 @@ public class MapCommand implements CommandExecutor
 
             String playerPositionCalim = "none";
 
-            if(FactionLogic.isClaimed(playerPosition.toString()))
+            if(FactionLogic.isClaimed(playerPosition))
             {
-                playerPositionCalim = FactionLogic.getFactionNameByChunk(playerPosition.toString());
+                playerPositionCalim = FactionLogic.getFactionNameByChunk(playerPosition);
             }
 
             //Print map
