@@ -15,7 +15,7 @@ Eagle Faction is a factions/war plugin for SpongeForge. You can simply create fa
 
 Eagle Factions will change your minecraft expirience forever. We offer you a new gameplay with some extra cool features like custom ranks, "pvp-leave blocker" and many more. You can even destroy enemy factions!
 
-Check our Wiki to get to know how everything works.
+Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know how everything works.
 
 Plugin is currently in alpha state, but **any feedback would be awesome!**
 
@@ -37,7 +37,7 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 ## Links
 
 * [Download Links](https://github.com/Aquerr/EagleFactions/releases) **(Alpha Builds)**
-* ~~Wiki~~
+* [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * ~~Ore~~
 
 Recommended downloads will be **available** when version of the plugin hits **1.0.0**
