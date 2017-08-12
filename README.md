@@ -45,6 +45,7 @@ Recommended downloads will be **available** when version of the plugin hits **1.
 ## Credits
 
 Plugin creator: [Aquerr](https://github.com/Aquerr)
+
 Logo by: Joxu ( #jx )
 
 Feel free to send me your feedback! I would love to hear your opinions about this plugin and suggestions for future updates!
