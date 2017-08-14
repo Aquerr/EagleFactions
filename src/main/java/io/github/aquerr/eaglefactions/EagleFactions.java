@@ -35,6 +35,7 @@ public class EagleFactions
     public static List<Invite> InviteList = new ArrayList<>();
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
+    public static List<String> AutoClaimList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -306,6 +307,12 @@ public class EagleFactions
                 .executor(new HomeCommand())
                 .build());
 
+        Subcommands.put(Arrays.asList("autoclaim"), CommandSpec.builder()
+                .description(Text.of("Autoclaim Command"))
+                .permission("eaglefactions.command.autoclaim")
+                .executor(new AutoClaimCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
@@ -328,5 +335,6 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
         Sponge.getEventManager().registerListeners(this, new PlayerBlockBreakListener());
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
+        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
     }
 }
