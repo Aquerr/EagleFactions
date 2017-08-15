@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.data.Transaction;
@@ -30,12 +31,23 @@ public class PlayerMoveListener
             {
                 if(!FactionLogic.isClaimed(chunk))
                 {
-                    if(FactionLogic.isClaimConnected(playerFactionName, chunk))
+                    if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                     {
-                        FactionLogic.addClaim(playerFactionName, chunk);
+                        if(FactionLogic.isClaimConnected(playerFactionName, chunk))
+                        {
+                            FactionLogic.addClaim(playerFactionName, chunk);
 
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                        return;
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                            return;
+                        }
+                        else
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                        }
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction does not have power to claim more land!"));
                     }
                 }
             }
