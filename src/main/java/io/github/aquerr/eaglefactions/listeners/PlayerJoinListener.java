@@ -38,6 +38,7 @@ public class PlayerJoinListener
             {
                 //Create player file and set power.
                 PowerService.addPlayer(player.getUniqueId());
+                PlayerService.setPlayerChunkPosition(player.getUniqueId(), player.getLocation().getChunkPosition());
                 return;
             }
 
