@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -27,11 +28,12 @@ public class LeaveCommand implements CommandExecutor
             {
                 if(!FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                 {
-
                     FactionLogic.leaveFaction(player.getUniqueId(), playerFactionName);
 
                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"You left faction ", TextColors.GOLD, playerFactionName));
+
+                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
 
                     CommandResult.success();
                 }

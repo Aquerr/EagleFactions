@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -31,6 +32,8 @@ public class DisbandCommand implements CommandExecutor
                         FactionLogic.disbandFaction(playerFactionName);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
+
+                        if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
 
                         return CommandResult.success();
                     }
