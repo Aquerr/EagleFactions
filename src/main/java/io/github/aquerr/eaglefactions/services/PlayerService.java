@@ -82,6 +82,10 @@ public class PlayerService
 
                 return chunk;
             }
+            else
+            {
+                return new Vector3i(0,0,0);
+            }
         }
         catch (Exception exception)
         {

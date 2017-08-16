@@ -15,6 +15,7 @@ import org.spongepowered.api.world.Chunk;
 import sun.util.resources.cldr.hy.CurrencyNames_hy;
 
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
@@ -411,9 +412,10 @@ public class FactionLogic
         return false;
     }
 
-    public static void setHome(String factionName, Vector3d home)
+    public static void setHome(String factionName, @Nullable Vector3d home)
     {
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home.toString());
+        if(home == null) ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions",factionName, "home"}, home);
+        else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home.toString());
     }
 
     public static Vector3d getHome(String factionName)
@@ -431,8 +433,6 @@ public class FactionLogic
              double z = Double.valueOf(vectors[2]);
 
              Vector3d home = Vector3d.from(x, y, z);
-
-             EagleFactions.getEagleFactions().getLogger().info(home.toString());
 
              return home;
         }

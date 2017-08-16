@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -12,6 +14,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 public class UnclaimCommand implements CommandExecutor
@@ -34,6 +37,12 @@ public class UnclaimCommand implements CommandExecutor
                     if(FactionLogic.isClaimed(chunk))
                     {
                         //TODO: Check if claimed land will stay connected
+
+                        //Check if faction's home was set in this claim. If yes then remove it.
+                        World world = player.getWorld();
+                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+
+                        if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(playerFactionName, null);
 
                         FactionLogic.removeClaim(playerFactionName, chunk);
 
