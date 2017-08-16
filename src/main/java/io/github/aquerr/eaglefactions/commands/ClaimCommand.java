@@ -43,7 +43,7 @@ public class ClaimCommand implements CommandExecutor
                                 {
                                     FactionLogic.addClaim(playerFactionName, chunk);
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     return CommandResult.success();
                                 }
                                 else
@@ -55,7 +55,7 @@ public class ClaimCommand implements CommandExecutor
                             {
                                 FactionLogic.addClaim(playerFactionName, chunk);
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                 return CommandResult.success();
                             }
 
