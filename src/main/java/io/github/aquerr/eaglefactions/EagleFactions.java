@@ -36,6 +36,7 @@ public class EagleFactions
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
     public static List<String> AutoClaimList = new ArrayList<>();
+    public static List<String> AutoMapList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -307,10 +308,18 @@ public class EagleFactions
                 .executor(new HomeCommand())
                 .build());
 
+        //Add autoclaim command.
         Subcommands.put(Arrays.asList("autoclaim"), CommandSpec.builder()
                 .description(Text.of("Autoclaim Command"))
                 .permission("eaglefactions.command.autoclaim")
                 .executor(new AutoClaimCommand())
+                .build());
+
+        //Add automap command
+        Subcommands.put(Arrays.asList("automap"), CommandSpec.builder()
+                .description(Text.of("Automap command"))
+                .permission("eaglefactions.command.automap")
+                .executor(new AutoMapCommand())
                 .build());
 
         //Build all commands

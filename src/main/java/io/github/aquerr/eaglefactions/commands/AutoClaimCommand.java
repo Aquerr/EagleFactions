@@ -17,7 +17,6 @@ public class AutoClaimCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-
         if(source instanceof Player)
         {
             Player player = (Player)source;

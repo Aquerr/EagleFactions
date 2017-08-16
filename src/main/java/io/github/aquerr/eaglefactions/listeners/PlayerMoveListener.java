@@ -5,8 +5,12 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -58,6 +62,10 @@ public class PlayerMoveListener
                 return;
             }
 
+        }
+        if(EagleFactions.AutoMapList.contains(player.getUniqueId().toString()))
+        {
+            Sponge.getCommandManager().process(player, "f map");
         }
         return;
     }
