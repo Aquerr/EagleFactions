@@ -32,40 +32,7 @@ public class PlayerMoveListener
             //Check if player has tuned on AutoClaim
             if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
             {
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-                Vector3i chunk = player.getLocation().getChunkPosition();
-
-                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
-                {
-                    if(!FactionLogic.isClaimed(chunk))
-                    {
-                        if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
-                        {
-                            if(FactionLogic.isClaimConnected(playerFactionName, chunk))
-                            {
-                                FactionLogic.addClaim(playerFactionName, chunk);
-
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                                return;
-                            }
-                            else
-                            {
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
-                            }
-                        }
-                        else
-                        {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction does not have power to claim more land!"));
-                        }
-                    }
-                }
-                else
-                {
-                    FactionLogic.addClaim(playerFactionName, chunk);
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                    return;
-                }
+                Sponge.getCommandManager().process(player, "f claim");
             }
 
             //Check if player has turned on AutoMap
