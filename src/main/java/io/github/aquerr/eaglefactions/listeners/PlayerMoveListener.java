@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -25,47 +26,57 @@ public class PlayerMoveListener
     @Listener
     public void onPlayerMove(MoveEntityEvent event, @Root Player player)
     {
-        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-        if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
+        //Set player location
+        if(!PlayerService.getPlayerChunkPosition(player.getUniqueId()).toString().equals(player.getLocation().getChunkPosition().toString()))
         {
-            Vector3i chunk = player.getLocation().getChunkPosition();
-
-            if(!FactionLogic.getClaims(playerFactionName).isEmpty())
+            //Check if player has tuned on AutoClaim
+            if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
             {
-                if(!FactionLogic.isClaimed(chunk))
-                {
-                    if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
-                    {
-                        if(FactionLogic.isClaimConnected(playerFactionName, chunk))
-                        {
-                            FactionLogic.addClaim(playerFactionName, chunk);
+                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                            return;
+                Vector3i chunk = player.getLocation().getChunkPosition();
+
+                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
+                {
+                    if(!FactionLogic.isClaimed(chunk))
+                    {
+                        if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
+                        {
+                            if(FactionLogic.isClaimConnected(playerFactionName, chunk))
+                            {
+                                FactionLogic.addClaim(playerFactionName, chunk);
+
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                return;
+                            }
+                            else
+                            {
+                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                            }
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction does not have power to claim more land!"));
                         }
                     }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction does not have power to claim more land!"));
-                    }
+                }
+                else
+                {
+                    FactionLogic.addClaim(playerFactionName, chunk);
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                    return;
                 }
             }
-            else
+
+            //Check if player has turned on AutoMap
+            if(EagleFactions.AutoMapList.contains(player.getUniqueId().toString()))
             {
-                FactionLogic.addClaim(playerFactionName, chunk);
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                return;
+                Sponge.getCommandManager().process(player, "f map");
             }
 
-        }
-        if(EagleFactions.AutoMapList.contains(player.getUniqueId().toString()))
-        {
-            Sponge.getCommandManager().process(player, "f map");
+
+            //Set new player chunk location.
+            PlayerService.setPlayerChunkPosition(player.getUniqueId(), player.getLocation().getChunkPosition());
         }
         return;
     }
