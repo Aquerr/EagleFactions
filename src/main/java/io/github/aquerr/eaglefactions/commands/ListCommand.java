@@ -21,7 +21,7 @@ public class ListCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        HashSet<Object> factionsList = new HashSet<>(FactionLogic.getFactions());
+        HashSet<Object> factionsList = new HashSet<>(FactionLogic.getFactionsNames());
         List<Text> helpList = new ArrayList<>();
 
         for(Object faction: factionsList)

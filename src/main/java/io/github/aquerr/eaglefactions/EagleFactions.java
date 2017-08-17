@@ -147,7 +147,8 @@ public class EagleFactions
         Subcommands.put (Arrays.asList ("c","create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission ("eaglefactions.command.create")
-        .arguments (GenericArguments.onlyOne (GenericArguments.string (Text.of ("faction name"))))
+        .arguments (GenericArguments.onlyOne(GenericArguments.string(Text.of("tag"))),
+                GenericArguments.remainingJoinedStrings(Text.of("factionName")))
         .executor (new CreateCommand ())
         .build ());
 

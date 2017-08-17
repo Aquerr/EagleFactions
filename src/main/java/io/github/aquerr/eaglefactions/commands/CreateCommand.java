@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -8,11 +9,9 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import sun.applet.Main;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -22,7 +21,11 @@ public class CreateCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String factionName = context.<String>getOne("faction name").get();
+        String factionName = context.<String>getOne("factionName").get();
+        String factionTag = context.<String>getOne("tag").get();
+
+        EagleFactions.getEagleFactions().getLogger().info("Faction Name: " + factionName);
+        EagleFactions.getEagleFactions().getLogger().info("Faction Tag: " + factionTag);
 
         if (source instanceof Player)
         {
@@ -36,9 +39,33 @@ public class CreateCommand implements CommandExecutor
 
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
+            EagleFactions.getEagleFactions().getLogger().info("Player Faction Name: " + playerFactionName);
+
             if (playerFactionName == null)
             {
-                if (! FactionLogic.getFactions().contains(factionName))
+                EagleFactions.getEagleFactions().getLogger().info("Checking if tag already exists...");
+                if(FactionLogic.getFactionsTags().contains(factionTag))
+                {
+                    EagleFactions.getEagleFactions().getLogger().info("Tag already exists!");
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is already taken!"));
+                    return CommandResult.success();
+                }
+                else
+                {
+                    //Check tag length
+                    if(factionTag.length() > MainLogic.getMaxTagLength())
+                    {
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " chars)"));
+                        return CommandResult.success();
+                    }
+                    if(factionTag.length() < MainLogic.getMinTagLength())
+                    {
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars)"));
+                        return CommandResult.success();
+                    }
+                }
+
+                if (!FactionLogic.getFactionsNames().contains(factionName))
                 {
                     //Check name length
                     if(factionName.length() > MainLogic.getMaxNameLength())
@@ -52,7 +79,7 @@ public class CreateCommand implements CommandExecutor
                         return CommandResult.success();
                     }
 
-                    boolean didSucceed = FactionLogic.createFaction(factionName, player.getUniqueId());
+                    boolean didSucceed = FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
 
                     if (didSucceed)
                     {

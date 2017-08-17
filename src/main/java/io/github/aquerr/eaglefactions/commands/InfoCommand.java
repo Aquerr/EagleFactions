@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -12,17 +11,13 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -35,11 +30,14 @@ public class InfoCommand implements CommandExecutor
     {
         String factionName = context.<String>getOne("faction name").get();
 
-            if(FactionLogic.getFactions().contains(factionName))
+            if(FactionLogic.getFactionsNames().contains(factionName))
             {
                 Faction faction = FactionLogic.getFaction(factionName);
 
                 List<Text> factionInfo = new ArrayList<>();
+
+                String leaderName = "";
+                if(faction.Leader != null && !faction.Leader.equals("")) leaderName = PlayerService.getPlayerName(UUID.fromString(leaderName)).get();
 
                 String membersList = "";
                 if(!faction.Members.isEmpty() && faction.Members != null)
@@ -84,7 +82,8 @@ public class InfoCommand implements CommandExecutor
 
                 Text info = Text.builder()
                         .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, faction.Name + "\n"))
-                        .append(Text.of(TextColors.AQUA, "Leader: ", TextColors.GOLD, PlayerService.getPlayerName(faction.Leader).get() + "\n"))
+                        .append(Text.of(TextColors.AQUA, "Tag: ", TextColors.GOLD, faction.Tag + "\n"))
+                        .append(Text.of(TextColors.AQUA, "Leader: ", TextColors.GOLD, leaderName + "\n"))
                         .append(Text.of(TextColors.AQUA, "Officers: ", TextColors.GOLD, officersList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.BLUE, alliancesList + "\n"))
                         .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.RED, enemiesList + "\n"))

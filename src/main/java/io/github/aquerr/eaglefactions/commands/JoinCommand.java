@@ -27,7 +27,7 @@ public class JoinCommand implements CommandExecutor
             if(FactionLogic.getFactionName(player.getUniqueId()) == null)
             {
 
-                if(FactionLogic.getFactions().contains(factionName))
+                if(FactionLogic.getFactionsNames().contains(factionName))
                 {
                     //If player has admin mode then force join.
                     if(EagleFactions.AdminList.contains(player.getUniqueId().toString())) FactionLogic.joinFaction(player.getUniqueId(), factionName);

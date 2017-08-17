@@ -5,9 +5,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextRepresentable;
-
-import javax.xml.soap.Text;
 
 public class ChatMessageListener
 {
@@ -18,10 +17,10 @@ public class ChatMessageListener
         {
             String message = event.getRawMessage().toPlain();
 
-            String factionName = FactionLogic.getFactionName(player.getUniqueId());
+            String factionTag = FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId()));
 
-            TextRepresentable header = org.spongepowered.api.text.Text.of("[" + factionName + "]" + player.getName() + ": ");
-            TextRepresentable textRepresentable = org.spongepowered.api.text.Text.of(message);
+            TextRepresentable header = Text.of("[" + factionTag + "]" + player.getName() + ": ");
+            TextRepresentable textRepresentable = Text.of(message);
 
             event.setMessage(header,textRepresentable);
         }
