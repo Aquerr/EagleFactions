@@ -37,7 +37,7 @@ public class InfoCommand implements CommandExecutor
                 List<Text> factionInfo = new ArrayList<>();
 
                 String leaderName = "";
-                if(faction.Leader != null && !faction.Leader.equals("")) leaderName = PlayerService.getPlayerName(UUID.fromString(leaderName)).get();
+                if(faction.Leader != null && !faction.Leader.equals("")) leaderName = PlayerService.getPlayerName(UUID.fromString(faction.Leader)).get();
 
                 String membersList = "";
                 if(!faction.Members.isEmpty() && faction.Members != null)
