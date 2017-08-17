@@ -28,6 +28,31 @@ public class UnclaimCommand implements CommandExecutor
 
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
+            //Check if player has admin mode.
+            if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            {
+                Vector3i chunk = player.getLocation().getChunkPosition();
+
+                if(FactionLogic.isClaimed(chunk))
+                {
+                    //Check if faction's home was set in this claim. If yes then remove it.
+                    World world = player.getWorld();
+                    Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+
+                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(playerFactionName, null);
+
+                    FactionLogic.removeClaim(playerFactionName, chunk);
+
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
+                    return CommandResult.success();
+                }
+                else
+                {
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed!"));
+                }
+            }
+
+            //Check if player is in the faction.
             if(playerFactionName != null)
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))

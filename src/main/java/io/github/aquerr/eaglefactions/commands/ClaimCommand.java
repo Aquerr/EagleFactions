@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.command.CommandException;
@@ -70,6 +72,22 @@ public class ClaimCommand implements CommandExecutor
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is already claimed!"));
                     }
 
+                }
+                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    Vector3i chunk = player.getLocation().getChunkPosition();
+
+                    if(!FactionLogic.isClaimed(chunk))
+                    {
+                        FactionLogic.addClaim(playerFactionName, chunk);
+
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                        return CommandResult.success();
+                    }
+                    else
+                    {
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is already claimed!"));
+                    }
                 }
                 else
                 {
