@@ -16,23 +16,30 @@ public class ChatMessageListener
     {
         if(FactionLogic.getFactionName(player.getUniqueId()) != null)
         {
-            String message = event.getMessage().toPlain();
+           // String message = event.getMessage().toPlain();
+//
+           // String fullMessage[] = message.split(":");
+//
+           // String head = fullMessage[0];
+           // String body = fullMessage[1];
+//
+           // head = head.replace(player.getName(), "");
+//
+           // String factionTag = FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId()));
+           // if(factionTag != null)
+           // {
+           //     TextRepresentable header = Text.of(head + "[", TextColors.GREEN, factionTag, TextColors.RESET, "]" + player.getName() + ":");
+           //     TextRepresentable textRepresentable = Text.of(body);
+//
+           //     event.setMessage(header,textRepresentable);
+           // }
 
-            String fullMessage[] = message.split(":");
+            Text text = Text.builder()
+                    .append(Text.of("[",TextColors.GREEN, FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId())), TextColors.RESET, "]"))
+                    .append(event.getMessage())
+                    .build();
 
-            String head = fullMessage[0];
-            String body = fullMessage[1];
-
-            head = head.replace(player.getName(), "");
-
-            String factionTag = FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId()));
-            if(factionTag != null)
-            {
-                TextRepresentable header = Text.of(head + "[", TextColors.GREEN, factionTag, TextColors.RESET, "]" + player.getName() + ":");
-                TextRepresentable textRepresentable = Text.of(body);
-
-                event.setMessage(header,textRepresentable);
-            }
+            event.setMessage(text);
         }
 
         return;
