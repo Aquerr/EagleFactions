@@ -37,6 +37,7 @@ public class EagleFactions
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
     public static List<String> AutoClaimList = new ArrayList<>();
     public static List<String> AutoMapList = new ArrayList<>();
+    public static List<String> AdminList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -320,6 +321,13 @@ public class EagleFactions
                 .description(Text.of("Automap command"))
                 .permission("eaglefactions.command.automap")
                 .executor(new AutoMapCommand())
+                .build());
+
+        //Add admin command
+        Subcommands.put(Arrays.asList("admin"), CommandSpec.builder()
+                .description(Text.of("admin"))
+                .permission("eaglefactions.command.admin")
+                .executor(new AdminCommand())
                 .build());
 
         //Build all commands
