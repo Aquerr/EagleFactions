@@ -55,12 +55,12 @@ public class CreateCommand implements CommandExecutor
                     //Check tag length
                     if(factionTag.length() > MainLogic.getMaxTagLength())
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " chars)"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too long! (Max " + MainLogic.getMaxTagLength() + " chars)"));
                         return CommandResult.success();
                     }
                     if(factionTag.length() < MainLogic.getMinTagLength())
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars)"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too short! (Min " + MainLogic.getMinTagLength() + " chars)"));
                         return CommandResult.success();
                     }
                 }
