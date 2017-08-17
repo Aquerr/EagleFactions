@@ -34,40 +34,47 @@ public class EntityDamageListener
                  {
                      Player attackedPlayer = (Player) event.getTargetEntity();
 
-                     if(FactionLogic.getFactionName(player.getUniqueId()) != null)
+                     if(FactionLogic.getFactionNameByChunk(attackedPlayer.getLocation().getChunkPosition()).equals("SafeZone") || FactionLogic.getFactionNameByChunk(player.getLocation().getChunkPosition()).equals("SafeZone"))
                      {
-                        //Check if players are in the same faction
-                        if(FactionLogic.getFactionName(player.getUniqueId()) == FactionLogic.getFactionName(attackedPlayer.getUniqueId()))
-                        {
-                            if(!FactionLogic.getFactionFriendlyFire(FactionLogic.getFactionName(player.getUniqueId())))
-                            {
-                                event.setBaseDamage(0);
-                                event.setCancelled(true);
-                            }
-                            else return;
-                        }//Check if players are in different factions but are in the alliance.
-                        else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
-                        {
-                            event.setBaseDamage(0);
-                            event.setCancelled(true);
-                        }
-                        else
-                        {
-                            if(event.willCauseDeath())
-                            {
-                                PowerService.addPower(player.getUniqueId(), true);
-                            }
-                        }
+                        event.setBaseDamage(0);
+                        event.setCancelled(true);
                      }
                      else
                      {
-                         if(event.willCauseDeath())
+                         if(FactionLogic.getFactionName(player.getUniqueId()) != null)
                          {
-                             PowerService.addPower(player.getUniqueId(), true);
+                             //Check if players are in the same faction
+                             if(FactionLogic.getFactionName(player.getUniqueId()) == FactionLogic.getFactionName(attackedPlayer.getUniqueId()))
+                             {
+                                 if(!FactionLogic.getFactionFriendlyFire(FactionLogic.getFactionName(player.getUniqueId())))
+                                 {
+                                     event.setBaseDamage(0);
+                                     event.setCancelled(true);
+                                 }
+                                 else return;
+                             }//Check if players are in different factions but are in the alliance.
+                             else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
+                             {
+                                 event.setBaseDamage(0);
+                                 event.setCancelled(true);
+                             }
+                             else
+                             {
+                                 if(event.willCauseDeath())
+                                 {
+                                     PowerService.addPower(player.getUniqueId(), true);
+                                 }
+                             }
                          }
-                         return;
-                     };
-
+                         else
+                         {
+                             if(event.willCauseDeath())
+                             {
+                                 PowerService.addPower(player.getUniqueId(), true);
+                             }
+                             return;
+                         }
+                     }
                  }
              }
         }
