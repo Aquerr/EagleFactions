@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.sun.xml.internal.ws.client.sei.ResponseBuilder;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -16,30 +17,34 @@ public class ChatMessageListener
     {
         if(FactionLogic.getFactionName(player.getUniqueId()) != null)
         {
-           // String message = event.getMessage().toPlain();
-//
-           // String fullMessage[] = message.split(":");
-//
-           // String head = fullMessage[0];
-           // String body = fullMessage[1];
-//
-           // head = head.replace(player.getName(), "");
-//
-           // String factionTag = FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId()));
-           // if(factionTag != null)
-           // {
-           //     TextRepresentable header = Text.of(head + "[", TextColors.GREEN, factionTag, TextColors.RESET, "]" + player.getName() + ":");
-           //     TextRepresentable textRepresentable = Text.of(body);
-//
-           //     event.setMessage(header,textRepresentable);
-           // }
+            //Get full formatted and colored message.
+            Text fullMessage = event.getMessage();
 
-            Text text = Text.builder()
-                    .append(Text.of("[",TextColors.GREEN, FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId())), TextColors.RESET, "]"))
-                    .append(event.getMessage())
+            //Get faction's tag
+            Text factionTag = Text.builder()
+                    .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId())), TextColors.RESET, "]"))
                     .build();
 
-            event.setMessage(text);
+            //Get message content
+            String message = event.getMessage().toPlain();
+            String messages[] = message.split(":");
+            String body = messages[1];
+
+            //Get message header (Any tags that are before player's name)
+            Text header = fullMessage.toBuilder()
+                    .remove(Text.of(player.getName() + ":"))
+                    .remove(Text.of(body))
+                    .build();
+
+            //Create final message with factions tag.
+            Text messageToPrint = Text.builder()
+                    .append(header)
+                    .append(factionTag)
+                    .append(Text.of(player.getName() + ":"))
+                    .append(Text.of(body))
+                    .build();
+
+            event.setMessage(messageToPrint);
         }
 
         return;
