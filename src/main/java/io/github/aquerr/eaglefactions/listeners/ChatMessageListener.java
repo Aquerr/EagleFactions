@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.sun.xml.internal.ws.client.sei.ResponseBuilder;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.entity.living.player.Player;
@@ -8,7 +7,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.format.TextColors;
 
 public class ChatMessageListener
