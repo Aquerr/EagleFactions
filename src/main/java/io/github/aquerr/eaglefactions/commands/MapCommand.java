@@ -99,8 +99,8 @@ public class MapCommand implements CommandExecutor
                                 }
                                 else
                                 {
-                                    if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                    else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                    if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                    else if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                     else textBuilder.append(normalFactionMark);
 
                                     if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
@@ -108,8 +108,8 @@ public class MapCommand implements CommandExecutor
                             }
                             else
                             {
-                                if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                else if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                 else textBuilder.append(normalFactionMark);
 
                                 if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
@@ -147,7 +147,7 @@ public class MapCommand implements CommandExecutor
             //Print factions on map
             if(!playerFaction.equals(""))
             {
-                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction.substring(0, playerFaction.length() - 2)));
+                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction));
             }
             if(!normalFactions.isEmpty())
             {

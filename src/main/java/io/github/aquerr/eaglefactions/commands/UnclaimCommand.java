@@ -49,6 +49,7 @@ public class UnclaimCommand implements CommandExecutor
                 else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed!"));
+                    return CommandResult.success();
                 }
             }
 

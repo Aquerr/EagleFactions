@@ -43,6 +43,7 @@ public class EntityDamageListener
                      {
                          if(FactionLogic.getFactionName(player.getUniqueId()) != null)
                          {
+                             EagleFactions.getEagleFactions().getLogger().info("Checking if players are in the same faction...");
                              //Check if players are in the same faction
                              if(FactionLogic.getFactionName(player.getUniqueId()) == FactionLogic.getFactionName(attackedPlayer.getUniqueId()))
                              {
@@ -72,7 +73,7 @@ public class EntityDamageListener
                              {
                                  PowerService.addPower(player.getUniqueId(), true);
                              }
-                             return;
+                             else return;
                          }
                      }
                  }

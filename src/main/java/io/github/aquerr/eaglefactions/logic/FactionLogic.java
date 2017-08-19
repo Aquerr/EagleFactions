@@ -34,11 +34,6 @@ public class FactionLogic
         {
             String faction = String.valueOf (t);
 
-            if(faction.equals ("WarZone") || faction.equals ("SafeZone"))
-            {
-                continue;
-            }
-
             //TODO: If even leader and officers are stored in Members group, checking members is enough.
             if(FactionLogic.getMembers(faction).contains(playerUUID.toString ()))
             {
@@ -70,7 +65,7 @@ public class FactionLogic
             }
         }
 
-        return null;
+        return "";
     }
 
     public static Faction getFaction(String factionName)
