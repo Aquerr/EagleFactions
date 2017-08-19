@@ -16,33 +16,53 @@ import org.spongepowered.api.world.World;
 public class PlayerBlockBreakListener
 {
     @Listener
-    public void onBlockBreak(ChangeBlockEvent.Break event, @Root Player player)
+    public void onBlockBreak(ChangeBlockEvent.Break event)
     {
-        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-        for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+        if(event.getCause().root() instanceof Player)
         {
-            World world = player.getWorld();
-            Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+            Player player = (Player)event.getCause().root();
 
-            if(FactionLogic.isClaimed(world.getUniqueId(), claim))
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                World world = player.getWorld();
+                Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+
+                if(FactionLogic.isClaimed(world.getUniqueId(), claim))
                 {
-                    event.setCancelled(true);
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
-                    return;
+                    if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                    {
+                        event.setCancelled(true);
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
                 else
                 {
                     return;
                 }
             }
-            else
+        }
+        else
+        {
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                return;
+                World world = transaction.getFinal().getLocation().get().getExtent();
+                Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+
+                if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone"))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
             }
         }
+
     }
 
 }
