@@ -31,6 +31,7 @@ public class MapCommand implements CommandExecutor
         if(source instanceof Player)
         {
             Player player = (Player)source;
+            World world = player.getWorld();
 
             Text notCapturedMark = Text.of(TextColors.GRAY, "/");
             Text factionMark = Text.of(TextColors.GREEN, "+");
@@ -74,9 +75,10 @@ public class MapCommand implements CommandExecutor
                     //EagleFactions.getEagleFactions().getLogger().info("Getting player chunk... ");
                     Vector3i chunk =  playerPosition.add(column, 0, row);
 
-                        if(FactionLogic.isClaimed(chunk))
+
+                        if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
                         {
-                            String factionName = FactionLogic.getFactionNameByChunk(chunk);
+                            String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
 
                             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
@@ -127,9 +129,9 @@ public class MapCommand implements CommandExecutor
 
             String playerPositionCalim = "none";
 
-            if(FactionLogic.isClaimed(playerPosition))
+            if(FactionLogic.isClaimed(world.getUniqueId(), playerPosition))
             {
-                playerPositionCalim = FactionLogic.getFactionNameByChunk(playerPosition);
+                playerPositionCalim = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
             }
 
             //Print map

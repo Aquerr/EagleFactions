@@ -11,6 +11,7 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.World;
 
 public class SethomeCommand implements CommandExecutor
 {
@@ -27,7 +28,9 @@ public class SethomeCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.isClaimed(player.getLocation().getChunkPosition()))
+                    World world = player.getWorld();
+
+                    if(FactionLogic.isClaimed(world.getUniqueId(), player.getLocation().getChunkPosition()))
                     {
                         Vector3d home = new Vector3d(player.getLocation().getPosition());
 

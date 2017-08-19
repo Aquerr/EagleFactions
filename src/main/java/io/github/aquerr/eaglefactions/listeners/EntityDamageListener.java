@@ -13,6 +13,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.World;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +30,24 @@ public class EntityDamageListener
              if(source.getSource() instanceof Player)
              {
                  Player player = (Player) source.getSource();
+                 World world = player.getWorld();
+
+                 if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
+                 {
+                     event.setBaseDamage(0);
+                     event.setCancelled(true);
+                     return;
+                 }
 
                  if(event.getTargetEntity().getType() == EntityTypes.PLAYER)
                  {
                      Player attackedPlayer = (Player) event.getTargetEntity();
 
-                     if(FactionLogic.getFactionNameByChunk(attackedPlayer.getLocation().getChunkPosition()).equals("SafeZone") || FactionLogic.getFactionNameByChunk(player.getLocation().getChunkPosition()).equals("SafeZone"))
+                     if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition()).equals("SafeZone") || FactionLogic.getFactionNameByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
                      {
-                        event.setBaseDamage(0);
-                        event.setCancelled(true);
+                         event.setBaseDamage(0);
+                         event.setCancelled(true);
+                         return;
                      }
                      else
                      {
@@ -51,6 +61,7 @@ public class EntityDamageListener
                                  {
                                      event.setBaseDamage(0);
                                      event.setCancelled(true);
+                                     return;
                                  }
                                  else return;
                              }//Check if players are in different factions but are in the alliance.
@@ -58,12 +69,14 @@ public class EntityDamageListener
                              {
                                  event.setBaseDamage(0);
                                  event.setCancelled(true);
+                                 return;
                              }
                              else
                              {
                                  if(event.willCauseDeath())
                                  {
                                      PowerService.addPower(player.getUniqueId(), true);
+                                     return;
                                  }
                              }
                          }
@@ -73,7 +86,6 @@ public class EntityDamageListener
                              {
                                  PowerService.addPower(player.getUniqueId(), true);
                              }
-                             else return;
                          }
                      }
                  }

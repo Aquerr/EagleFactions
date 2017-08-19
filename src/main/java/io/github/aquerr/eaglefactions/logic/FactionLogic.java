@@ -53,13 +53,13 @@ public class FactionLogic
         return null;
     }
 
-    public static String getFactionNameByChunk(Vector3i chunk)
+    public static String getFactionNameByChunk(UUID worldUUID ,Vector3i chunk)
     {
         for(Object object: getFactionsNames())
         {
             String factionName = String.valueOf(object);
 
-            if(getClaims(factionName).contains(chunk.toString()))
+            if(getClaims(factionName).contains(worldUUID.toString() + "|" + chunk.toString()))
             {
                 return factionName;
             }
@@ -334,25 +334,25 @@ public class FactionLogic
         return calimsList;
     }
 
-    public static void addClaim(String factionName, Vector3i claimedChunk)
+    public static void addClaim(String factionName, UUID worldUUID, Vector3i claimedChunk)
     {
         List<String> claimsList = new ArrayList<>(getClaims(factionName));
 
-        claimsList.add(claimedChunk.toString());
+        claimsList.add(worldUUID.toString() + "|" + claimedChunk.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static void removeClaim(String factionName, Vector3i claimedChunk)
+    public static void removeClaim(String factionName, UUID worldUUID, Vector3i claimedChunk)
     {
         List<String> claimsList = new ArrayList<>(getClaims(factionName));
 
-        claimsList.remove(claimedChunk.toString());
+        claimsList.remove(worldUUID.toString() + "|" + claimedChunk.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static boolean isClaimed(Vector3i chunk)
+    public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
         for (Object object: getFactionsNames())
         {
@@ -364,7 +364,7 @@ public class FactionLogic
             {
                 for (String claim: factionClaims)
                 {
-                    if(claim.equalsIgnoreCase(chunk.toString()))
+                    if(claim.equalsIgnoreCase(worldUUID.toString() + "|" + chunk.toString()))
                     {
                         return true;
                     }
@@ -401,27 +401,30 @@ public class FactionLogic
     };
 
 
-    public static boolean isClaimConnected(String factionName, Vector3i chunk)
+    public static boolean isClaimConnected(String factionName, UUID worldUUID, Vector3i chunk)
     {
         List<String> claimsList = getClaims(factionName);
 
         for (String object: claimsList)
         {
-            String vectors[] = object.replace("(", "").replace(")", "").replace(" ", "").split(",");
-
-            int x = Integer.valueOf(vectors[0]);
-            int y = Integer.valueOf(vectors[1]);
-            int z = Integer.valueOf(vectors[2]);
-
-            Vector3i claim = Vector3i.from(x, y, z);
-
-            if((claim.getX() == chunk.getX()) && ((claim.getZ() + 1 == chunk.getZ()) || (claim.getZ() - 1 == chunk.getZ())))
+            if(object.contains(worldUUID.toString()))
             {
-                return true;
-            }
-            else if((claim.getZ() == chunk.getZ()) && ((claim.getX() + 1 == chunk.getX()) || (claim.getX() - 1 == chunk.getX())))
-            {
-                return true;
+                String vectors[] = object.replace(worldUUID.toString(), "").replace("(", "").replace(")", "").replace(" ", "").split(",");
+
+                int x = Integer.valueOf(vectors[0]);
+                int y = Integer.valueOf(vectors[1]);
+                int z = Integer.valueOf(vectors[2]);
+
+                Vector3i claim = Vector3i.from(x, y, z);
+
+                if((claim.getX() == chunk.getX()) && ((claim.getZ() + 1 == chunk.getZ()) || (claim.getZ() - 1 == chunk.getZ())))
+                {
+                    return true;
+                }
+                else if((claim.getZ() == chunk.getZ()) && ((claim.getX() + 1 == chunk.getX()) || (claim.getX() - 1 == chunk.getX())))
+                {
+                    return true;
+                }
             }
         }
         return false;

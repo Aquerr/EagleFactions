@@ -29,11 +29,12 @@ public class PlayerInteractListener
 
         if(location.isPresent())
         {
+            World world = player.getWorld();
             Vector3i claim = location.get().getChunkPosition();
 
-            if(FactionLogic.isClaimed(claim))
+            if(FactionLogic.isClaimed(world.getUniqueId(), claim))
             {
-                if(FactionLogic.getFactionNameByChunk(claim).equals(playerFactionName))
+                if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
                 {
                     return;
                 }
