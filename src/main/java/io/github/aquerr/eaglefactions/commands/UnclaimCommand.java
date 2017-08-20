@@ -66,11 +66,15 @@ public class UnclaimCommand implements CommandExecutor
                         //TODO: Check if claimed land will stay connected
 
                         //Check if faction's home was set in this claim. If yes then remove it.
-                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+                        if(world.getLocation(FactionLogic.getHome(playerFactionName)) != null)
+                        {
+                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
 
-                        if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(playerFactionName, null);
+                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(playerFactionName, null);
+                        }
 
-                        FactionLogic.removeClaim(playerFactionName,world.getUniqueId(), chunk);
+
+                        FactionLogic.removeClaim(playerFactionName, world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                         return CommandResult.success();
