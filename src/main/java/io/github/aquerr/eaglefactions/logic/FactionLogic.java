@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.world.Chunk;
@@ -478,5 +479,25 @@ public class FactionLogic
         ConfigurationNode tagNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "tag");
 
         return tagNode.getString();
+    }
+
+    public static boolean hasOnlinePlayers(String factionName)
+    {
+        if(FactionLogic.getLeader(factionName) != null && !FactionLogic.getLeader(factionName).equals(""))
+        {
+            if(PlayerService.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
+        }
+
+        for (String playerUUID: getOfficers(factionName))
+        {
+            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+        }
+
+        for (String playerUUID: getMembers(factionName))
+        {
+            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+        }
+
+        return false;
     }
 }
