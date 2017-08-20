@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -18,31 +19,28 @@ public class PlayerBlockPlaceListener
     @Listener
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
-        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-        for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+        if(!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
         {
-            World world = player.getWorld();
-            Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-            if(FactionLogic.isClaimed(world.getUniqueId(), claim))
-            {
-                if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
-                {
-                    event.setCancelled(true);
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
-                    return;
-                }
-                else
-                {
-                    return;
-                }
-            }
-            else
-            {
-                return;
-            }
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+             {
+                 World world = player.getWorld();
+                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+
+                 if(FactionLogic.isClaimed(world.getUniqueId(), claim))
+                 {
+                     if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                     {
+                         event.setCancelled(true);
+                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
+                         return;
+                     }
+                 }
+             }
         }
+        return;
     }
 
 }

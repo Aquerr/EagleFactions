@@ -351,7 +351,7 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
         Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerBlockBreakListener());
+        Sponge.getEventManager().registerListeners(this, new EntityBlockBreakListener());
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
         Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
