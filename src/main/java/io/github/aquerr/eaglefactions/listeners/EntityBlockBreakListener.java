@@ -56,8 +56,6 @@ public class EntityBlockBreakListener
         {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-
-                
                 World world = transaction.getFinal().getLocation().get().getExtent();
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 

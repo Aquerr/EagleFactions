@@ -100,4 +100,13 @@ public class MainLogic
 
         return minLength;
     }
+
+    public static boolean getMobSpawning()
+    {
+        ConfigurationNode mobSpawningNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "spawn", "mobs");
+
+        boolean mobSpawning = mobSpawningNode.getBoolean();
+
+        return mobSpawning;
+    }
 }
