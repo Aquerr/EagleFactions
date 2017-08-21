@@ -36,7 +36,7 @@ public class RemoveEnemyCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.getFactions().contains(enemyFactionName))
+                    if(FactionLogic.getFactionsNames().contains(enemyFactionName))
                     {
                         if(FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
                         {

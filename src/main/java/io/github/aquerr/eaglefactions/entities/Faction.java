@@ -14,17 +14,19 @@ import java.util.UUID;
 public class Faction
 {
     public String Name;
+    public String Tag;
     public BigDecimal Power;
     public List<String> Members;
     public List<String> Alliances;
     public List<String> Enemies;
-    public UUID Leader;
+    public String Leader;
     public List<String> Officers;
     public List<String> Claims;
 
-    public Faction(String factionName, UUID factionLeader)
+    public Faction(String factionName, String factionTag, String factionLeader)
     {
         this.Name = factionName;
+        this.Tag = factionTag;
         this.Leader = factionLeader;
         this.Power = new BigDecimal("0.0");
         this.Members = new ArrayList<>();

@@ -95,6 +95,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "power", "startpower").setValue(5.0).setComment("Starting amount of power");
         get().getNode("eaglefactions", "power", "killaward").setValue(2.0).setComment("Player kill award");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances.");
+        get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands.");
     }
 
     @Override

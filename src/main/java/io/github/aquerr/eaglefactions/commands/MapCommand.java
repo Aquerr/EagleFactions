@@ -31,6 +31,7 @@ public class MapCommand implements CommandExecutor
         if(source instanceof Player)
         {
             Player player = (Player)source;
+            World world = player.getWorld();
 
             Text notCapturedMark = Text.of(TextColors.GRAY, "/");
             Text factionMark = Text.of(TextColors.GREEN, "+");
@@ -74,9 +75,10 @@ public class MapCommand implements CommandExecutor
                     //EagleFactions.getEagleFactions().getLogger().info("Getting player chunk... ");
                     Vector3i chunk =  playerPosition.add(column, 0, row);
 
-                        if(FactionLogic.isClaimed(chunk))
+
+                        if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
                         {
-                            String factionName = FactionLogic.getFactionNameByChunk(chunk);
+                            String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
 
                             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
@@ -99,8 +101,8 @@ public class MapCommand implements CommandExecutor
                                 }
                                 else
                                 {
-                                    if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                    else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                    if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                    else if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                     else textBuilder.append(normalFactionMark);
 
                                     if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
@@ -108,8 +110,8 @@ public class MapCommand implements CommandExecutor
                             }
                             else
                             {
-                                if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                else if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                else if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                 else textBuilder.append(normalFactionMark);
 
                                 if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
@@ -127,9 +129,9 @@ public class MapCommand implements CommandExecutor
 
             String playerPositionCalim = "none";
 
-            if(FactionLogic.isClaimed(playerPosition))
+            if(FactionLogic.isClaimed(world.getUniqueId(), playerPosition))
             {
-                playerPositionCalim = FactionLogic.getFactionNameByChunk(playerPosition);
+                playerPositionCalim = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
             }
 
             //Print map
@@ -147,7 +149,7 @@ public class MapCommand implements CommandExecutor
             //Print factions on map
             if(!playerFaction.equals(""))
             {
-                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction.substring(0, playerFaction.length() - 2)));
+                player.sendMessage(Text.of(TextColors.GREEN, "Your faction: ", TextColors.GREEN, playerFaction));
             }
             if(!normalFactions.isEmpty())
             {

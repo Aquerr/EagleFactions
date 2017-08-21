@@ -37,6 +37,7 @@ public class EagleFactions
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
     public static List<String> AutoClaimList = new ArrayList<>();
     public static List<String> AutoMapList = new ArrayList<>();
+    public static List<String> AdminList = new ArrayList<>();
 
     @Inject
     private Logger _logger;
@@ -146,7 +147,8 @@ public class EagleFactions
         Subcommands.put (Arrays.asList ("c","create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission ("eaglefactions.command.create")
-        .arguments (GenericArguments.onlyOne (GenericArguments.string (Text.of ("faction name"))))
+        .arguments (GenericArguments.onlyOne(GenericArguments.string(Text.of("tag"))),
+                GenericArguments.remainingJoinedStrings(Text.of("factionName")))
         .executor (new CreateCommand ())
         .build ());
 
@@ -322,6 +324,13 @@ public class EagleFactions
                 .executor(new AutoMapCommand())
                 .build());
 
+        //Add admin command
+        Subcommands.put(Arrays.asList("admin"), CommandSpec.builder()
+                .description(Text.of("admin"))
+                .permission("eaglefactions.command.admin")
+                .executor(new AdminCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
@@ -342,8 +351,10 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
         Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerBlockBreakListener());
+        Sponge.getEventManager().registerListeners(this, new EntityBlockBreakListener());
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
+        Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
+        Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
     }
 }

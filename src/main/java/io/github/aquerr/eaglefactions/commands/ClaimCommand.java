@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.command.CommandException;
@@ -30,18 +32,19 @@ public class ClaimCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
+                    World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if(!FactionLogic.isClaimed(chunk))
+                    if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
 
                         if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
                             if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                             {
-                                if(FactionLogic.isClaimConnected(playerFactionName, chunk))
+                                if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                 {
-                                    FactionLogic.addClaim(playerFactionName, chunk);
+                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     return CommandResult.success();
@@ -53,7 +56,7 @@ public class ClaimCommand implements CommandExecutor
                             }
                             else
                             {
-                                FactionLogic.addClaim(playerFactionName, chunk);
+                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                 return CommandResult.success();
@@ -70,6 +73,23 @@ public class ClaimCommand implements CommandExecutor
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is already claimed!"));
                     }
 
+                }
+                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    World world = player.getWorld();
+                    Vector3i chunk = player.getLocation().getChunkPosition();
+
+                    if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    {
+                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                        return CommandResult.success();
+                    }
+                    else
+                    {
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is already claimed!"));
+                    }
                 }
                 else
                 {

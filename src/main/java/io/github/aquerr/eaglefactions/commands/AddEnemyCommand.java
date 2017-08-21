@@ -32,7 +32,7 @@ public class AddEnemyCommand implements CommandExecutor
                 //TODO: Add check for officer.
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.getFactions().contains(enemyFactionName))
+                    if(FactionLogic.getFactionsNames().contains(enemyFactionName))
                     {
                         if(!FactionLogic.getAlliances(playerFactionName).contains(enemyFactionName))
                         {

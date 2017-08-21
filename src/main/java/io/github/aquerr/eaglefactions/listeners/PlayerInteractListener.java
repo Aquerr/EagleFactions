@@ -23,30 +23,34 @@ public class PlayerInteractListener
     @Listener
     public void onPlayerInteract(InteractBlockEvent.Secondary event, @Root Player player)
     {
-        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-        Optional<Location<World>> location = event.getTargetBlock().getLocation();
-
-        if(location.isPresent())
+        if(!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
         {
-            Vector3i claim = location.get().getChunkPosition();
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-            if(FactionLogic.isClaimed(claim))
+            Optional<Location<World>> location = event.getTargetBlock().getLocation();
+
+            if(location.isPresent())
             {
-                if(FactionLogic.getFactionNameByChunk(claim).equals(playerFactionName))
+                World world = player.getWorld();
+                Vector3i claim = location.get().getChunkPosition();
+
+                if(FactionLogic.isClaimed(world.getUniqueId(), claim))
                 {
-                    return;
+                    if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        event.setCancelled(true);
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to do this!"));
+                        return;
+                    }
                 }
                 else
                 {
-                    event.setCancelled(true);
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to do this!"));
                     return;
                 }
-            }
-            else
-            {
-                return;
             }
         }
     }

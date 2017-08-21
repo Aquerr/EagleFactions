@@ -82,4 +82,31 @@ public class MainLogic
 
         return minLength;
     }
+
+    public static int getMaxTagLength()
+    {
+        ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "tag", "maxlength");
+
+        int maxLength = maxLengthNode.getInt();
+
+        return maxLength;
+    }
+
+    public static int getMinTagLength()
+    {
+        ConfigurationNode minLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "tag", "minlength");
+
+        int minLength = minLengthNode.getInt();
+
+        return minLength;
+    }
+
+    public static boolean getMobSpawning()
+    {
+        ConfigurationNode mobSpawningNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "spawn", "mobs");
+
+        boolean mobSpawning = mobSpawningNode.getBoolean();
+
+        return mobSpawning;
+    }
 }

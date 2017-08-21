@@ -42,6 +42,23 @@ public class AutoClaimCommand implements CommandExecutor
                         return CommandResult.success();
                     }
                 }
+                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
+                    {
+                        EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
+
+                        return CommandResult.success();
+                    }
+                    else
+                    {
+                        EagleFactions.AutoClaimList.add(player.getUniqueId().toString());
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
+
+                        return CommandResult.success();
+                    }
+                }
                 else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));

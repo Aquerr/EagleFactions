@@ -8,11 +8,10 @@ import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Chunk;
-import sun.util.resources.cldr.hy.CurrencyNames_hy;
 
 
 import javax.annotation.Nullable;
@@ -32,14 +31,9 @@ public class FactionLogic
 
     public static String getFactionName(UUID playerUUID)
     {
-        for (Object t : FactionLogic.getFactions ())
+        for (Object t : FactionLogic.getFactionsNames())
         {
             String faction = String.valueOf (t);
-
-            if(faction.equals ("WarZone") || faction.equals ("SafeZone"))
-            {
-                continue;
-            }
 
             //TODO: If even leader and officers are stored in Members group, checking members is enough.
             if(FactionLogic.getMembers(faction).contains(playerUUID.toString ()))
@@ -60,37 +54,44 @@ public class FactionLogic
         return null;
     }
 
-    public static String getFactionNameByChunk(Vector3i chunk)
+    public static String getFactionNameByChunk(UUID worldUUID ,Vector3i chunk)
     {
-        for(Object object: getFactions())
+        for(Object object: getFactionsNames())
         {
             String factionName = String.valueOf(object);
 
-            if(getClaims(factionName).contains(chunk.toString()))
+            if(getClaims(factionName).contains(worldUUID.toString() + "|" + chunk.toString()))
             {
                 return factionName;
             }
         }
 
-        return null;
+        return "";
     }
 
     public static Faction getFaction(String factionName)
     {
+        EagleFactions.getEagleFactions().getLogger().info("Getting a faction: " + factionName);
         ConfigurationNode leaderNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "leader");
-        Object leaderUUID = leaderNode.getValue();
 
-        Faction faction = new Faction(factionName, UUID.fromString(leaderUUID.toString()));
+        String leaderUUID = "";
+        if(leaderNode.getValue() != null) leaderUUID = leaderNode.getString();
+
+        ConfigurationNode tagNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "tag");
+
+        String factionTag = "";
+        if(tagNode.getValue() != null) factionTag = tagNode.getString();
+
+        Faction faction = new Faction(factionName, factionTag, leaderUUID);
 
         faction.Members = getMembers(factionName);
-
         faction.Officers = getOfficers(factionName);
         faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
         faction.Claims = getClaims(factionName);
-
         faction.Power = PowerService.getFactionPower(faction);
 
+        EagleFactions.getEagleFactions().getLogger().info("Returning a faction...");
         return faction;
     }
 
@@ -134,7 +135,7 @@ public class FactionLogic
         else return new ArrayList<String>();
     }
 
-    public static Set<Object> getFactions()
+    public static Set<Object> getFactionsNames()
     {
         if(ConfigAccess.getConfig(factionsConfig).getNode ("factions","factions").getValue() != null)
         {
@@ -149,10 +150,25 @@ public class FactionLogic
             return Sets.newHashSet ();
     }
 
-    public static boolean createFaction(String factionName, UUID playerUUID)
+    public static List<Faction> getFactions()
+    {
+        List<Faction> factionsList = new ArrayList<>();
+
+        for (Object object: getFactionsNames())
+        {
+            String factionName = String.valueOf(object);
+
+            factionsList.add(getFaction(factionName));
+        }
+
+        return factionsList;
+    }
+
+    public static boolean createFaction(String factionName,String factionTag, UUID playerUUID)
     {
         try
         {
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "tag"}, factionTag);
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},null);
@@ -319,27 +335,27 @@ public class FactionLogic
         return calimsList;
     }
 
-    public static void addClaim(String factionName, Vector3i claimedChunk)
+    public static void addClaim(String factionName, UUID worldUUID, Vector3i claimedChunk)
     {
         List<String> claimsList = new ArrayList<>(getClaims(factionName));
 
-        claimsList.add(claimedChunk.toString());
+        claimsList.add(worldUUID.toString() + "|" + claimedChunk.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static void removeClaim(String factionName, Vector3i claimedChunk)
+    public static void removeClaim(String factionName, UUID worldUUID, Vector3i claimedChunk)
     {
         List<String> claimsList = new ArrayList<>(getClaims(factionName));
 
-        claimsList.remove(claimedChunk.toString());
+        claimsList.remove(worldUUID.toString() + "|" + claimedChunk.toString());
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 
-    public static boolean isClaimed(Vector3i chunk)
+    public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
-        for (Object object: getFactions())
+        for (Object object: getFactionsNames())
         {
             String factionName = String.valueOf(object);
 
@@ -349,7 +365,7 @@ public class FactionLogic
             {
                 for (String claim: factionClaims)
                 {
-                    if(claim.equalsIgnoreCase(chunk.toString()))
+                    if(claim.equalsIgnoreCase(worldUUID.toString() + "|" + chunk.toString()))
                     {
                         return true;
                     }
@@ -386,27 +402,30 @@ public class FactionLogic
     };
 
 
-    public static boolean isClaimConnected(String factionName, Vector3i chunk)
+    public static boolean isClaimConnected(String factionName, UUID worldUUID, Vector3i chunk)
     {
         List<String> claimsList = getClaims(factionName);
 
         for (String object: claimsList)
         {
-            String vectors[] = object.replace("(", "").replace(")", "").replace(" ", "").split(",");
-
-            int x = Integer.valueOf(vectors[0]);
-            int y = Integer.valueOf(vectors[1]);
-            int z = Integer.valueOf(vectors[2]);
-
-            Vector3i claim = Vector3i.from(x, y, z);
-
-            if((claim.getX() == chunk.getX()) && ((claim.getZ() + 1 == chunk.getZ()) || (claim.getZ() - 1 == chunk.getZ())))
+            if(object.contains(worldUUID.toString()))
             {
-                return true;
-            }
-            else if((claim.getZ() == chunk.getZ()) && ((claim.getX() + 1 == chunk.getX()) || (claim.getX() - 1 == chunk.getX())))
-            {
-                return true;
+                String vectors[] = object.replace(worldUUID.toString(), "").replace("(", "").replace(")", "").replace(" ", "").split(",");
+
+                int x = Integer.valueOf(vectors[0]);
+                int y = Integer.valueOf(vectors[1]);
+                int z = Integer.valueOf(vectors[2]);
+
+                Vector3i claim = Vector3i.from(x, y, z);
+
+                if((claim.getX() == chunk.getX()) && ((claim.getZ() + 1 == chunk.getZ()) || (claim.getZ() - 1 == chunk.getZ())))
+                {
+                    return true;
+                }
+                else if((claim.getZ() == chunk.getZ()) && ((claim.getX() + 1 == chunk.getX()) || (claim.getX() - 1 == chunk.getX())))
+                {
+                    return true;
+                }
             }
         }
         return false;
@@ -440,5 +459,45 @@ public class FactionLogic
         {
             return null;
         }
+    }
+
+    public static List<String> getFactionsTags()
+    {
+        List<Faction> factionsList = getFactions();
+        List<String> factionsTags = new ArrayList<>();
+
+        for (Faction faction: factionsList)
+        {
+            factionsTags.add(faction.Tag);
+        }
+
+        return factionsTags;
+    }
+
+    public static String getFactionTag(String factionName)
+    {
+        ConfigurationNode tagNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "tag");
+
+        return tagNode.getString();
+    }
+
+    public static boolean hasOnlinePlayers(String factionName)
+    {
+        if(FactionLogic.getLeader(factionName) != null && !FactionLogic.getLeader(factionName).equals(""))
+        {
+            if(PlayerService.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
+        }
+
+        for (String playerUUID: getOfficers(factionName))
+        {
+            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+        }
+
+        for (String playerUUID: getMembers(factionName))
+        {
+            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+        }
+
+        return false;
     }
 }
