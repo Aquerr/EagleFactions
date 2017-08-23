@@ -326,9 +326,16 @@ public class EagleFactions
 
         //Add admin command
         Subcommands.put(Arrays.asList("admin"), CommandSpec.builder()
-                .description(Text.of("admin"))
+                .description(Text.of("Toggle admin mode"))
                 .permission("eaglefactions.command.admin")
                 .executor(new AdminCommand())
+                .build());
+
+        //Add Coords Command
+        Subcommands.put(Arrays.asList("coords"), CommandSpec.builder()
+                .description(Text.of("Show your teammates coords"))
+                .permission("eaglefactions.command.coords")
+                .executor(new CoordsCommand())
                 .build());
 
         //Build all commands
