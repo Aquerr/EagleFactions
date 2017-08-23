@@ -15,6 +15,7 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class HelpCommand implements CommandExecutor
 
         for (List<String> aliases: commands.keySet())
         {
+            //Add sorting on aliases.
             CommandSpec commandSpec = commands.get(aliases);
 
             Text commandHelp = Text.builder()
@@ -45,6 +47,8 @@ public class HelpCommand implements CommandExecutor
 
         //Sort commands alphabetically
         helpList.sort(Text::compareTo);
+
+        //Collections.sort(helpList);
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
         PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList);
