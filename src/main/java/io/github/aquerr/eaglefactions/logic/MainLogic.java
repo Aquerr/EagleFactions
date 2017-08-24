@@ -65,6 +65,15 @@ public class MainLogic
         return killAward;
     }
 
+    public static BigDecimal getPunishment()
+    {
+        ConfigurationNode punishmentNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "punishment");
+
+        BigDecimal punishment = new BigDecimal(punishmentNode.getString());
+
+        return punishment;
+    }
+
     public static int getMaxNameLength()
     {
         ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "name", "maxlength");
