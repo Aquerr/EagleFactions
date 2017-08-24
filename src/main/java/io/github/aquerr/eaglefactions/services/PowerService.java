@@ -12,6 +12,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Task;
+import sun.applet.Main;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -269,6 +270,37 @@ public class PowerService
         else
         {
             PowerService.setPower(playerUUID, BigDecimal.ZERO);
+        }
+    }
+
+    public static void punish(UUID playerUUID)
+    {
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+        try
+        {
+            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+            CommentedConfigurationNode playerNode = configLoader.load();
+
+            BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
+
+            BigDecimal punishment = MainLogic.getPunishment();
+
+            if(playerPower.doubleValue() - punishment.doubleValue() > 0)
+            {
+                playerNode.getNode("power").setValue(playerPower.subtract(punishment));
+            }
+            else
+            {
+                playerNode.getNode("power").setValue(0.0);
+            }
+
+            configLoader.save(playerNode);
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
         }
     }
 }

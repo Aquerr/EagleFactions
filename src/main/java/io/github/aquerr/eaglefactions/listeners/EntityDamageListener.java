@@ -64,18 +64,26 @@ public class EntityDamageListener
                                         event.setCancelled(true);
                                         return;
                                     }
-                                }//Check if players are in different factions but are in the alliance.
+                                    else
+                                    {
+                                        if(event.willCauseDeath())
+                                        {
+                                            PowerService.punish(player.getUniqueId());
+                                            return;
+                                        }
+                                    }
+                                }//Check if players are in the alliance.
                                 else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
                                 {
                                     event.setBaseDamage(0);
                                     event.setCancelled(true);
                                     return;
                                 }
-                                else
+                                else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && MainLogic.getAllianceFriendlyFire())
                                 {
                                     if(event.willCauseDeath())
                                     {
-                                        PowerService.addPower(player.getUniqueId(), true);
+                                        PowerService.punish(player.getUniqueId());
                                         return;
                                     }
                                 }
