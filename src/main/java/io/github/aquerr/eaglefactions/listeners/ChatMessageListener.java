@@ -16,6 +16,8 @@ public class ChatMessageListener
     {
         if(FactionLogic.getFactionName(player.getUniqueId()) != null)
         {
+            String factionName = FactionLogic.getFactionName(player.getUniqueId());
+
           //  //Get full formatted and colored message.
           //  Text fullMessage = event.getMessage();
           //  EagleFactions.getEagleFactions().getLogger().info(fullMessage.toPlain());
@@ -66,14 +68,41 @@ public class ChatMessageListener
 //
           //  event.setMessage(messageToPrint);
 
-              //Get faction's tag
-              Text factionTag = Text.builder()
-                      .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId())), TextColors.RESET, "]"))
-                      .build();
-              EagleFactions.getEagleFactions().getLogger().info(factionTag.toPlain());
+            Text factionPrefix = Text.builder().build();
 
+            if(!FactionLogic.getFactionTag(factionName).equals("") || FactionLogic.getFactionTag(factionName) != null)
+            {
+                //Get faction's tag
+                Text factionTag = Text.builder()
+                        .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
+                        .build();
+
+                factionPrefix.toBuilder().append(factionTag).build();
+            }
+
+            //Get leader prefix.
+            if(FactionLogic.getLeader(factionName).equals(player.getUniqueId().toString()))
+            {
+                Text leaderPrefix = Text.builder()
+                        .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
+                        .build();
+
+                factionPrefix.toBuilder().append(leaderPrefix).build();
+            }
+
+            //Get officer prefix.
+            if(FactionLogic.getOfficers(factionName).contains(player.getUniqueId().toString()))
+            {
+                Text officerPrefix = Text.builder()
+                        .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
+                        .build();
+
+                factionPrefix.toBuilder().append(officerPrefix).build();
+            }
+
+            //Build the whole message & print.
             Text messageToPrint = Text.builder()
-                    .append(factionTag)
+                    .append(factionPrefix)
                     .append(event.getMessage())
                     .build();
 
