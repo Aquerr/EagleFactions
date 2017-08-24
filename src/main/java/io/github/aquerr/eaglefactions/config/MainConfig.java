@@ -89,11 +89,12 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "tag", "maxlength").setValue(5).setComment("This determines the minimum amount of characters a Factions's tag can be.");
         get().getNode("eaglefactions", "tag", "minlength").setValue(2).setComment("This determines the minimum amount of characters a Factions's tag can be.");
         get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes.");
-        get().getNode("eaglefactions", "power", "increment").setValue(0.04).setComment("How much power will be restored for player after 1 minute of playing. (0.05 per minute = 1,5 per hour");
+        get().getNode("eaglefactions", "power", "increment").setValue(0.04).setComment("How much power will be restored for player after 1 minute of playing. (0.04 per minute = 1,2 per hour");
         get().getNode("eaglefactions", "power", "decrement").setValue(2.0).setComment("How much power will be removed on player death");
         get().getNode("eaglefactions", "power", "maxpower").setValue(10.0).setComment("Maximum amount of power a player can have");
         get().getNode("eaglefactions", "power", "startpower").setValue(5.0).setComment("Starting amount of power");
         get().getNode("eaglefactions", "power", "killaward").setValue(2.0).setComment("Player kill award");
+        get().getNode("eaglefactions", "power", "punishment").setValue(1.0).setComment("Punishment after killing a teammate.");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances.");
         get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands.");
     }
