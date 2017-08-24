@@ -29,7 +29,6 @@ public class HelpCommand implements CommandExecutor
 
         for (List<String> aliases: commands.keySet())
         {
-            //Add sorting on aliases.
             CommandSpec commandSpec = commands.get(aliases);
 
             Text commandHelp = Text.builder()
@@ -45,13 +44,11 @@ public class HelpCommand implements CommandExecutor
             helpList.add(commandHelp);
         }
 
-        //Sort commands alphabetically
+        //Sort commands alphabetically.
         helpList.sort(Text::compareTo);
 
-        //Collections.sort(helpList);
-
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList).linesPerPage(10);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success ();
