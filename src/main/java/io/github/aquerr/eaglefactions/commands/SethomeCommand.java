@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -32,7 +33,7 @@ public class SethomeCommand implements CommandExecutor
 
                     if(FactionLogic.isClaimed(world.getUniqueId(), player.getLocation().getChunkPosition()))
                     {
-                        Vector3d home = new Vector3d(player.getLocation().getPosition());
+                        Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
                         FactionLogic.setHome(playerFactionName, home);
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));

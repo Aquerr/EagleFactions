@@ -431,13 +431,13 @@ public class FactionLogic
         return false;
     }
 
-    public static void setHome(String factionName, @Nullable Vector3d home)
+    public static void setHome(String factionName, @Nullable Vector3i home)
     {
         if(home == null) ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions",factionName, "home"}, home);
         else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home.toString());
     }
 
-    public static Vector3d getHome(String factionName)
+    public static Vector3i getHome(String factionName)
     {
         ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
 
@@ -447,11 +447,11 @@ public class FactionLogic
 
             String vectors[] = homeString.replace("(", "").replace(")", "").replace(" ", "").split(",");
 
-             double x = Double.valueOf(vectors[0]);
-             double y = Double.valueOf(vectors[1]);
-             double z = Double.valueOf(vectors[2]);
+             int x = Integer.valueOf(vectors[0]);
+             int y = Integer.valueOf(vectors[1]);
+             int z = Integer.valueOf(vectors[2]);
 
-             Vector3d home = Vector3d.from(x, y, z);
+             Vector3i home = Vector3i.from(x, y, z);
 
              return home;
         }

@@ -33,7 +33,7 @@ public class ListCommand implements CommandExecutor
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "- " + tag + faction.Name + "(" + faction.Power + "/" + PowerService.getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, "- " + tag + faction.Name + " (" + faction.Power + "/" + PowerService.getFactionMaxPower(faction) + ")"))
                             .build())
                     .build();
 

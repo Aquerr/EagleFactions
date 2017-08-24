@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -32,9 +33,9 @@ public class HomeCommand implements CommandExecutor
                 {
                     //TODO: Wait 5-10 seconds before teleport.
 
-                    Vector3d home = FactionLogic.getHome(playerFactionName);
+                    Vector3i home = FactionLogic.getHome(playerFactionName);
                     
-                    player.setLocation(player.getLocation().setPosition(home));
+                    player.setLocation(player.getLocation().setBlockPosition(home));
 
                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home"));
                 }

@@ -92,7 +92,7 @@ public class CoordsCommand implements CommandExecutor
                 }
 
                 PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Faction Coords")).contents(teamCoords);
+                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Team Coords")).contents(teamCoords);
                 paginationBuilder.sendTo(source);
 
             }
