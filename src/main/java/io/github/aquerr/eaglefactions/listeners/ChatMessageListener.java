@@ -70,8 +70,10 @@ public class ChatMessageListener
 
             Text factionPrefix = Text.builder().build();
 
-            if(!FactionLogic.getFactionTag(factionName).equals("") || FactionLogic.getFactionTag(factionName) != null)
+            if(!FactionLogic.getFactionTag(factionName).equals("") && FactionLogic.getFactionTag(factionName) != null)
             {
+                EagleFactions.getEagleFactions().getLogger().info("Tag has been found!");
+
                 //Get faction's tag
                 Text factionTag = Text.builder()
                         .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
@@ -83,6 +85,9 @@ public class ChatMessageListener
             //Get leader prefix.
             if(FactionLogic.getLeader(factionName).equals(player.getUniqueId().toString()))
             {
+                EagleFactions.getEagleFactions().getLogger().info("Leader has been found!");
+
+
                 Text leaderPrefix = Text.builder()
                         .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
                         .build();
@@ -93,12 +98,16 @@ public class ChatMessageListener
             //Get officer prefix.
             if(FactionLogic.getOfficers(factionName).contains(player.getUniqueId().toString()))
             {
+                EagleFactions.getEagleFactions().getLogger().info("Officer has been found!");
+
                 Text officerPrefix = Text.builder()
                         .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
                         .build();
 
                 factionPrefix.toBuilder().append(officerPrefix).build();
             }
+
+            EagleFactions.getEagleFactions().getLogger().info("Build the whole message!");
 
             //Build the whole message & print.
             Text messageToPrint = Text.builder()

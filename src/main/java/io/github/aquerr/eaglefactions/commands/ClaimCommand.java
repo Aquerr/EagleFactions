@@ -38,7 +38,7 @@ public class ClaimCommand implements CommandExecutor
                     if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
 
-                        if(PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
+                        if(PowerService.getFactionPower(playerFactionName).doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
                             if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                             {

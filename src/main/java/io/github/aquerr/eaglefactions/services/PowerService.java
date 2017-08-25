@@ -2,6 +2,9 @@ package io.github.aquerr.eaglefactions.services;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.config.ConfigAccess;
+import io.github.aquerr.eaglefactions.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -26,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PowerService
 {
+    private static IConfig factionsConfig = FactionsConfig.getConfig();
+
     public static boolean checkIfPlayerExists(UUID playerUUID)
     {
         Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
@@ -92,32 +97,36 @@ public class PowerService
         return BigDecimal.ZERO;
     }
 
-    public static BigDecimal getFactionPower(Faction faction)
+    public static BigDecimal getFactionPower(String factionName)
     {
-        BigDecimal factionPower = BigDecimal.ZERO;
+        ConfigurationNode powerNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "power");
 
-        if(faction.Leader != null && faction.Leader != "")
-        {
-            factionPower = factionPower.add(getPlayerPower(UUID.fromString(faction.Leader)));
-        }
+        BigDecimal factionPower = new BigDecimal(powerNode.getDouble());
 
-        if(faction.Officers != null && !faction.Officers.isEmpty())
-        {
-            for (String officer: faction.Officers)
-            {
-                BigDecimal officerPower = getPlayerPower(UUID.fromString(officer));
-                factionPower =factionPower.add(officerPower);
-            }
-        }
-
-        if(faction.Members != null && !faction.Members.isEmpty())
-        {
-            for (String member: faction.Members)
-            {
-                BigDecimal memberPower = getPlayerPower(UUID.fromString(member));
-                factionPower = factionPower.add(memberPower);
-            }
-        }
+       // BigDecimal factionPower = BigDecimal.ZERO;
+//
+       // if(faction.Leader != null && faction.Leader != "")
+       // {
+       //     factionPower = factionPower.add(getPlayerPower(UUID.fromString(faction.Leader)));
+       // }
+//
+       // if(faction.Officers != null && !faction.Officers.isEmpty())
+       // {
+       //     for (String officer: faction.Officers)
+       //     {
+       //         BigDecimal officerPower = getPlayerPower(UUID.fromString(officer));
+       //         factionPower =factionPower.add(officerPower);
+       //     }
+       // }
+//
+       // if(faction.Members != null && !faction.Members.isEmpty())
+       // {
+       //     for (String member: faction.Members)
+       //     {
+       //         BigDecimal memberPower = getPlayerPower(UUID.fromString(member));
+       //         factionPower = factionPower.add(memberPower);
+       //     }
+       // }
         return factionPower;
     }
 

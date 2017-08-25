@@ -89,7 +89,7 @@ public class FactionLogic
         faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
         faction.Claims = getClaims(factionName);
-        faction.Power = PowerService.getFactionPower(faction);
+        faction.Power = PowerService.getFactionPower(factionName);
 
         EagleFactions.getEagleFactions().getLogger().info("Returning a faction...");
         return faction;
