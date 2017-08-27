@@ -410,7 +410,7 @@ public class FactionLogic
         {
             if(object.contains(worldUUID.toString()))
             {
-                String vectors[] = object.replace(worldUUID.toString(), "").replace("(", "").replace(")", "").replace(" ", "").split(",");
+                String vectors[] = object.replace(worldUUID.toString() + "|", "").replace("(", "").replace(")", "").replace(" ", "").split(",");
 
                 int x = Integer.valueOf(vectors[0]);
                 int y = Integer.valueOf(vectors[1]);
@@ -431,10 +431,15 @@ public class FactionLogic
         return false;
     }
 
-    public static void setHome(String factionName, @Nullable Vector3i home)
+    public static void setHome(UUID worldUUID ,String factionName, @Nullable Vector3i home)
     {
-        if(home == null) ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions",factionName, "home"}, home);
-        else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home.toString());
+
+        if(home != null)
+        {
+            String newHome = worldUUID.toString() + "|" + home.toString();
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions",factionName, "home"}, newHome);
+        }
+        else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home);
     }
 
     public static Vector3i getHome(String factionName)
@@ -445,7 +450,7 @@ public class FactionLogic
         {
             String homeString = homeNode.getString();
 
-            String vectors[] = homeString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+            String vectors[] = homeString.split("|")[1].replace("(", "").replace(")", "").replace(" ", "").split(",");
 
              int x = Integer.valueOf(vectors[0]);
              int y = Integer.valueOf(vectors[1]);
@@ -496,6 +501,19 @@ public class FactionLogic
         for (String playerUUID: getMembers(factionName))
         {
             if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isHomeInWorld(UUID worldUUID, String factionName)
+    {
+        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
+
+        if(homeNode.getValue() != null)
+        {
+            if(homeNode.getString().contains(worldUUID.toString())) return true;
+            else return false;
         }
 
         return false;

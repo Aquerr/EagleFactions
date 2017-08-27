@@ -35,7 +35,7 @@ public class SethomeCommand implements CommandExecutor
                     {
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
-                        FactionLogic.setHome(playerFactionName, home);
+                        FactionLogic.setHome(world.getUniqueId(), playerFactionName, home);
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
                     }
                     else

@@ -37,7 +37,7 @@ public class CoordsCommand implements CommandExecutor
                 if(FactionLogic.getHome(factionName) != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of("Home: " + FactionLogic.getHome(factionName).toString()))
+                            .append(Text.of("Faction's Home: " + FactionLogic.getHome(factionName).toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
