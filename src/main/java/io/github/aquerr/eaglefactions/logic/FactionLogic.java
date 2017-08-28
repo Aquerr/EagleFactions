@@ -71,7 +71,6 @@ public class FactionLogic
 
     public static Faction getFaction(String factionName)
     {
-        EagleFactions.getEagleFactions().getLogger().info("Getting a faction: " + factionName);
         ConfigurationNode leaderNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "leader");
 
         String leaderUUID = "";
@@ -91,7 +90,6 @@ public class FactionLogic
         faction.Claims = getClaims(factionName);
         faction.Power = PowerService.getFactionPower(factionName);
 
-        EagleFactions.getEagleFactions().getLogger().info("Returning a faction...");
         return faction;
     }
 

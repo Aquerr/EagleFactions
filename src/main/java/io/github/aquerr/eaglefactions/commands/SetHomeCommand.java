@@ -14,7 +14,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
-public class SethomeCommand implements CommandExecutor
+public class SetHomeCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException

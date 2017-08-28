@@ -300,7 +300,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("sethome"), CommandSpec.builder()
                 .description(Text.of("Set faction's home"))
                 .permission("eaglefactions.command.sethome")
-                .executor(new SethomeCommand())
+                .executor(new SetHomeCommand())
                 .build());
 
         //Home command
@@ -336,6 +336,13 @@ public class EagleFactions
                 .description(Text.of("Show your teammates coords"))
                 .permission("eaglefactions.command.coords")
                 .executor(new CoordsCommand())
+                .build());
+
+        //Add SetPower Command
+        Subcommands.put(Arrays.asList("setpower"), CommandSpec.builder()
+                .description(Text.of("Set player's power"))
+                .permission("eaglefactions.command.setpower")
+                .executor(new SetPowerCommand())
                 .build());
 
         //Build all commands
