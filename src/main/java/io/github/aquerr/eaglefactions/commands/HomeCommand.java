@@ -31,13 +31,22 @@ public class HomeCommand implements CommandExecutor
             {
                 if(FactionLogic.getHome(playerFactionName) != null)
                 {
-                    //TODO: Wait 5-10 seconds before teleport.
+                    //TODO: Wait 5-10 seconds before teleporting.
 
-                    Vector3i home = FactionLogic.getHome(playerFactionName);
-                    
-                    player.setLocation(player.getLocation().setBlockPosition(home));
+                    World world = player.getWorld();
 
-                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home"));
+                    if(FactionLogic.isHomeInWorld(world.getUniqueId(), playerFactionName))
+                    {
+                        Vector3i home = FactionLogic.getHome(playerFactionName);
+
+                        player.setLocation(player.getLocation().setBlockPosition(home));
+
+                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home"));
+                    }
+                    else
+                    {
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, "Faction's home is not in this world."));
+                    }
                 }
                 else
                 {

@@ -37,9 +37,12 @@ public class UnclaimCommand implements CommandExecutor
                 if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
                 {
                     //Check if faction's home was set in this claim. If yes then remove it.
-                    Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+                    if(FactionLogic.getHome(playerFactionName) != null)
+                    {
+                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
 
-                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(playerFactionName, null);
+                        if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
+                    }
 
                     FactionLogic.removeClaim(playerFactionName, world.getUniqueId() ,chunk);
 
@@ -66,11 +69,11 @@ public class UnclaimCommand implements CommandExecutor
                         //TODO: Check if claimed land will stay connected
 
                         //Check if faction's home was set in this claim. If yes then remove it.
-                        if(world.getLocation(FactionLogic.getHome(playerFactionName)) != null)
+                        if(FactionLogic.getHome(playerFactionName) != null)
                         {
                             Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
 
-                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(playerFactionName, null);
+                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
                         }
 
 
