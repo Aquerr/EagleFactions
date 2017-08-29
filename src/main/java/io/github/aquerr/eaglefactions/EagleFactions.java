@@ -342,6 +342,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission("eaglefactions.command.setpower")
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
                 .executor(new SetPowerCommand())
                 .build());
 
@@ -357,7 +358,6 @@ public class EagleFactions
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
                 .permission ("eaglefactions.command")
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
                 .executor (new HelpCommand())
                 .children (Subcommands)
                 .build ();
