@@ -345,6 +345,14 @@ public class EagleFactions
                 .executor(new SetPowerCommand())
                 .build());
 
+        //Add MaxPower Command
+        Subcommands.put(Arrays.asList("maxpower"), CommandSpec.builder()
+                .description(Text.of("Set player's maxpower"))
+                .permission("eaglefactions.command.maxpower")
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .executor(new MaxPowerCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))

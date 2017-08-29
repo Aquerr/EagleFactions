@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import com.flowpowered.noise.module.combiner.Power;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.services.PowerService;
@@ -13,38 +12,48 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
+import java.util.Optional;
 
-public class SetPowerCommand implements CommandExecutor
+public class MaxPowerCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Player selectedPlayer = context.<Player>getOne("player").get();
-        BigDecimal power = context.<BigDecimal>getOne("power").get();
+        Optional<Player> selectedPlayer = context.<Player>getOne(Text.of("player"));
+        Optional<BigDecimal> power = context.<BigDecimal>getOne(Text.of("power"));
 
         if(source instanceof Player)
         {
             Player player = (Player)source;
 
-            if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            if(selectedPlayer.isPresent())
             {
-                if(selectedPlayer != null)
+                if(power.isPresent())
                 {
-                    PowerService.setPower(selectedPlayer.getUniqueId(), power);
+                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                    {
+                        PowerService.setMaxPower(selectedPlayer.get().getUniqueId(), power.get());
 
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
-                    return CommandResult.success();
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's maxpower has been changed!"));
+                        return CommandResult.success();
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You need to toggle faction admin mode to do this!"));
+                    }
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no such player."));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You did not assign power!"));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You need to toggle faction admin mode to do this!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no such player."));
             }
+
         }
         else
         {

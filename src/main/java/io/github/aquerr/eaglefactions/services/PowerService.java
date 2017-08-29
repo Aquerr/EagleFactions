@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -305,6 +306,25 @@ public class PowerService
                 playerNode.getNode("power").setValue(0.0);
             }
 
+            configLoader.save(playerNode);
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+        }
+    }
+
+    public static void setMaxPower(UUID playerUUID, BigDecimal power)
+    {
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+
+        try
+        {
+            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+
+            CommentedConfigurationNode playerNode = configLoader.load();
+
+            playerNode.getNode("maxpower").setValue(power);
             configLoader.save(playerNode);
         }
         catch (Exception exception)
