@@ -14,14 +14,15 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public class SetPowerCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Player selectedPlayer = context.<Player>getOne("player").get();
-        BigDecimal power = context.<BigDecimal>getOne("power").get();
+        Optional<Player> selectedPlayer = context.<Player>getOne("player");
+        Optional<BigDecimal> power = context.<BigDecimal>getOne("power");
 
         if(source instanceof Player)
         {
@@ -31,10 +32,17 @@ public class SetPowerCommand implements CommandExecutor
             {
                 if(selectedPlayer != null)
                 {
-                    PowerService.setPower(selectedPlayer.getUniqueId(), power);
+                    if(power.isPresent())
+                    {
+                        PowerService.setPower(selectedPlayer.get().getUniqueId(), power.get());
 
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
-                    return CommandResult.success();
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
+                        return CommandResult.success();
+                    }
+                    else
+                    {
+
+                    }
                 }
                 else
                 {
