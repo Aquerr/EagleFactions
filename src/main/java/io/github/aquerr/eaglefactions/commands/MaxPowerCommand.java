@@ -12,7 +12,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -22,7 +21,7 @@ public class MaxPowerCommand implements CommandExecutor
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         Optional<Player> selectedPlayer = context.<Player>getOne(Text.of("player"));
-        Optional<BigDecimal> power = context.<BigDecimal>getOne(Text.of("power"));
+        Optional<String> power = context.<String>getOne(Text.of("power"));
 
         if(source instanceof Player)
         {
@@ -32,9 +31,11 @@ public class MaxPowerCommand implements CommandExecutor
             {
                 if(power.isPresent())
                 {
-                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                     {
-                        PowerService.setMaxPower(selectedPlayer.get().getUniqueId(), power.get());
+                        BigDecimal newPower = new BigDecimal(power.get());
+
+                        PowerService.setMaxPower(selectedPlayer.get().getUniqueId(), newPower);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's maxpower has been changed!"));
                         return CommandResult.success();

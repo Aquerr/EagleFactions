@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import com.flowpowered.noise.module.combiner.Power;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.services.PowerService;
@@ -22,7 +21,7 @@ public class SetPowerCommand implements CommandExecutor
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         Optional<Player> selectedPlayer = context.<Player>getOne("player");
-        Optional<BigDecimal> power = context.<BigDecimal>getOne("power");
+        Optional<String> power = context.<String>getOne("power");
 
         if(source instanceof Player)
         {
@@ -34,7 +33,9 @@ public class SetPowerCommand implements CommandExecutor
                 {
                     if(power.isPresent())
                     {
-                        PowerService.setPower(selectedPlayer.get().getUniqueId(), power.get());
+                        BigDecimal newPower = new BigDecimal(power.get());
+
+                        PowerService.setPower(selectedPlayer.get().getUniqueId(), newPower);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
                         return CommandResult.success();
