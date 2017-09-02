@@ -447,8 +447,12 @@ public class FactionLogic
         if(homeNode.getValue() != null)
         {
             String homeString = homeNode.getString();
+            String splitter = "\\|";
 
-            String vectors[] = homeString.split("|")[1].replace("(", "").replace(")", "").replace(" ", "").split(",");
+          //  String worldUUID = homeString.split(splitter)[0];
+            String vectorsString = homeString.split(splitter)[1];
+
+            String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
 
              int x = Integer.valueOf(vectors[0]);
              int y = Integer.valueOf(vectors[1]);
@@ -510,10 +514,11 @@ public class FactionLogic
 
         if(homeNode.getValue() != null)
         {
+            EagleFactions.getEagleFactions().getLogger().info("Home may be in this world...");
             if(homeNode.getString().contains(worldUUID.toString())) return true;
             else return false;
         }
-
+        EagleFactions.getEagleFactions().getLogger().info("Home is not set...");
         return false;
     }
 }

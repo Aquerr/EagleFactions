@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -37,8 +38,11 @@ public class HomeCommand implements CommandExecutor
 
                     if(FactionLogic.isHomeInWorld(world.getUniqueId(), playerFactionName))
                     {
+                        EagleFactions.getEagleFactions().getLogger().info("Found home!!!");
+
                         Vector3i home = FactionLogic.getHome(playerFactionName);
 
+                        EagleFactions.getEagleFactions().getLogger().info("Teleporting the player...");
                         player.setLocation(player.getLocation().setBlockPosition(home));
 
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home"));
