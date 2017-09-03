@@ -357,7 +357,6 @@ public class EagleFactions
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
-                .permission ("eaglefactions.command")
                 .executor (new HelpCommand())
                 .children (Subcommands)
                 .build ();
