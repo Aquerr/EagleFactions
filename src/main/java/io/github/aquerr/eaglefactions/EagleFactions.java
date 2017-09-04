@@ -115,18 +115,9 @@ public class EagleFactions
             }
         }
 
-        // Create config.conf
+        // Create configs
         MainConfig.getConfig().setup();
-        // Create messages.conf
-        //MessageConfig.getMainConfig().setup();
-        // Create teams.conf
         FactionsConfig.getConfig().setup();
-        // Create claims.conf
-        //ClaimsConfig.getMainConfig().setup();
-        // Create claims.conf
-        //ClaimsConfig.getMainConfig().setup();
-        // Start Tax Service
-        //Utils.startTaxService();
     }
 
     private void InitializeCommands()
