@@ -37,11 +37,11 @@ public class PlayerInteractListener
                 if(FactionLogic.isClaimed(world.getUniqueId(), claim))
                 {
 
-                    if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                    if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.interact"))
                     {
                         return;
                     }
-                    else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                    else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.interact"))
                     {
                         return;
                     }
