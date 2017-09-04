@@ -31,13 +31,26 @@ public class PlayerBlockPlaceListener
 
                  if(FactionLogic.isClaimed(world.getUniqueId(), claim))
                  {
-                     if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                     if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                     {
+                         return;
+                     }
+                     else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                     {
+                         return;
+                     }
+                     else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                     {
+                         return;
+                     }
+                     else
                      {
                          event.setCancelled(true);
                          player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
                          return;
                      }
                  }
+                 else return;
              }
         }
         return;
