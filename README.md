@@ -50,3 +50,7 @@ Logo by: Joxu ( #jx )
 
 Feel free to send me your feedback! I would love to hear your opinions about this plugin and suggestions for future updates!
 **If you find any issues while using the plugin, post them on Ore or [Github](https://github.com/Aquerr/EagleFactions/issues)**
+
+## License
+
+[MIT](https://github.com/Aquerr/EagleFactions/blob/master/LICENSE)
