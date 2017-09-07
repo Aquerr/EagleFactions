@@ -33,10 +33,14 @@ public class PlayerBlockPlaceListener
                  {
                      if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
                      {
+                         EagleFactions.getEagleFactions().getLogger().info("Player has permissions in SafeZone");
+
                          return;
                      }
                      else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
                      {
+                         EagleFactions.getEagleFactions().getLogger().info("Player has permissions in WarZone");
+
                          return;
                      }
                      else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
