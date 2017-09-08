@@ -97,6 +97,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "power", "punishment").setValue(1.0).setComment("Punishment after killing a teammate.");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances.");
         get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands.");
+        get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline.");
     }
 
     @Override
