@@ -118,4 +118,13 @@ public class MainLogic
 
         return mobSpawning;
     }
+
+    public static boolean getBlockEnteringFactions()
+    {
+        ConfigurationNode mobSpawningNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "blockEnteringFactions");
+
+        boolean mobSpawning = mobSpawningNode.getBoolean();
+
+        return mobSpawning;
+    }
 }

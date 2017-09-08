@@ -115,18 +115,9 @@ public class EagleFactions
             }
         }
 
-        // Create config.conf
+        // Create configs
         MainConfig.getConfig().setup();
-        // Create messages.conf
-        //MessageConfig.getMainConfig().setup();
-        // Create teams.conf
         FactionsConfig.getConfig().setup();
-        // Create claims.conf
-        //ClaimsConfig.getMainConfig().setup();
-        // Create claims.conf
-        //ClaimsConfig.getMainConfig().setup();
-        // Start Tax Service
-        //Utils.startTaxService();
     }
 
     private void InitializeCommands()
@@ -289,6 +280,13 @@ public class EagleFactions
                 .executor(new UnclaimCommand())
                 .build());
 
+        //Add Unclaimall Command
+        Subcommands.put(Arrays.asList("unclaimall"), CommandSpec.builder()
+                .description(Text.of("Remove all claims"))
+                .permission("eaglefactions.command.unclaimall")
+                .executor(new UnclaimallCommand())
+                .build());
+
         //Map command
         Subcommands.put(Arrays.asList("map"), CommandSpec.builder()
                 .description(Text.of("Turn on/off factions map"))
@@ -357,7 +355,6 @@ public class EagleFactions
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
-                .permission ("eaglefactions.command")
                 .executor (new HelpCommand())
                 .children (Subcommands)
                 .build ();

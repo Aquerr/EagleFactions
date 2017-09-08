@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.Sponge;
@@ -19,6 +20,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.Location;
@@ -41,7 +43,7 @@ public class PlayerMoveListener
             {
                 if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals("SafeZone") && !FactionLogic.getFactionNameByChunk(world.getUniqueId(),newChunk).equals("WarZone") && !FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals(""))
                 {
-                    if(!FactionLogic.hasOnlinePlayers(FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk)))
+                    if(!FactionLogic.hasOnlinePlayers(FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk)) && MainLogic.getBlockEnteringFactions())
                     {
                         //Teleport player back if all entering faction's players are offline.
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't enter this faction! None of this faction's players are online!"));
@@ -53,11 +55,12 @@ public class PlayerMoveListener
                 String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk);
                 if(factionName == "") factionName = "Wilderness";
 
-                Title title = Title.builder()
-                        .subtitle(Text.of("You have enterned faction ", TextColors.GOLD, factionName))
+                //TODO: Show respective colors for enemy faction, alliance & neutral.
+                Text information = Text.builder()
+                        .append(Text.of("You have entered faction ", TextColors.GOLD, factionName))
                         .build();
 
-                player.sendTitle(title);
+                player.sendMessage(ChatTypes.ACTION_BAR, information);
             }
             //Check if player has tuned on AutoClaim
             if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
