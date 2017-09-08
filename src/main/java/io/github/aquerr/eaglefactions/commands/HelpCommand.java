@@ -10,6 +10,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
@@ -30,6 +31,16 @@ public class HelpCommand implements CommandExecutor
         for (List<String> aliases: commands.keySet())
         {
             CommandSpec commandSpec = commands.get(aliases);
+
+            if(source instanceof Player)
+            {
+                Player player = (Player)source;
+
+                if(commandSpec.testPermission(player))
+                {
+                    continue;
+                }
+            }
 
             Text commandHelp = Text.builder()
                     .append(Text.builder()
