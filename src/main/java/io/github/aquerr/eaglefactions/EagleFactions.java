@@ -280,6 +280,13 @@ public class EagleFactions
                 .executor(new UnclaimCommand())
                 .build());
 
+        //Add Unclaimall Command
+        Subcommands.put(Arrays.asList("unclaimall"), CommandSpec.builder()
+                .description(Text.of("Remove all claims"))
+                .permission("eaglefactions.command.unclaimall")
+                .executor(new UnclaimallCommand())
+                .build());
+
         //Map command
         Subcommands.put(Arrays.asList("map"), CommandSpec.builder()
                 .description(Text.of("Turn on/off factions map"))

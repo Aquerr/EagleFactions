@@ -88,7 +88,7 @@ public class FactionLogic
         faction.Enemies = getEnemies(factionName);
         faction.Alliances = getAlliances(factionName);
         faction.Claims = getClaims(factionName);
-        faction.Power = PowerService.getFactionPower(factionName);
+        faction.Power = PowerService.getFactionPower(faction);
 
         return faction;
     }
@@ -375,17 +375,17 @@ public class FactionLogic
 
 
 
-    private static Function<Object,Chunk> objectToChunkTransformer = input ->
-    {
-        if (input instanceof Chunk)
-        {
-            return (Chunk) input;
-        }
-        else
-        {
-            return null;
-        }
-    };
+   // private static Function<Object,Chunk> objectToChunkTransformer = input ->
+   // {
+   //     if (input instanceof Chunk)
+   //     {
+   //         return (Chunk) input;
+   //     }
+   //     else
+   //     {
+   //         return null;
+   //     }
+   // };
 
     private static Function<Object,String> objectToStringTransformer = input ->
     {
@@ -429,7 +429,7 @@ public class FactionLogic
         return false;
     }
 
-    public static void setHome(UUID worldUUID ,String factionName, @Nullable Vector3i home)
+    public static void setHome(@Nullable UUID worldUUID ,String factionName, @Nullable Vector3i home)
     {
 
         if(home != null)
@@ -437,7 +437,7 @@ public class FactionLogic
             String newHome = worldUUID.toString() + "|" + home.toString();
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions",factionName, "home"}, newHome);
         }
-        else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, home);
+        else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, null);
     }
 
     public static Vector3i getHome(String factionName)
@@ -520,5 +520,12 @@ public class FactionLogic
         }
         EagleFactions.getEagleFactions().getLogger().info("Home is not set...");
         return false;
+    }
+
+    public static void removeClaims(String factionName)
+    {
+        List<String> claimsList = new ArrayList<>();
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
 }

@@ -24,9 +24,6 @@ public class CreateCommand implements CommandExecutor
         String factionName = context.<String>getOne("factionName").get();
         String factionTag = context.<String>getOne("tag").get();
 
-        EagleFactions.getEagleFactions().getLogger().info("Faction Name: " + factionName);
-        EagleFactions.getEagleFactions().getLogger().info("Faction Tag: " + factionTag);
-
         if (source instanceof Player)
         {
             Player player = (Player) source;
@@ -39,14 +36,10 @@ public class CreateCommand implements CommandExecutor
 
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-            EagleFactions.getEagleFactions().getLogger().info("Player Faction Name: " + playerFactionName);
-
             if (playerFactionName == null)
             {
-                EagleFactions.getEagleFactions().getLogger().info("Checking if tag already exists...");
                 if(FactionLogic.getFactionsTags().contains(factionTag))
                 {
-                    EagleFactions.getEagleFactions().getLogger().info("Tag already exists!");
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is already taken!"));
                     return CommandResult.success();
                 }
