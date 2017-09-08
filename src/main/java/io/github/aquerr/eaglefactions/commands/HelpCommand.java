@@ -36,7 +36,7 @@ public class HelpCommand implements CommandExecutor
             {
                 Player player = (Player)source;
 
-                if(commandSpec.testPermission(player))
+                if(!commandSpec.testPermission(player))
                 {
                     continue;
                 }
@@ -47,10 +47,18 @@ public class HelpCommand implements CommandExecutor
                             .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
                             .build())
                     .append(Text.builder()
-                            .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
+                            .append(Text.of(TextColors.WHITE, " - " + commandSpec.getShortDescription(source).get().toPlain() + "\n"))
                             .build())
-
+                    .append(Text.builder()
+                            .append(Text.of(TextColors.GRAY, "Usage: /f " + aliases.toString().replace("[","").replace("]","") + " " + commandSpec.getUsage(source).toPlain()))
+                            .build())
                     .build();
+
+                   // .append(Text.builder()
+                   //         .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
+                   //         .build())
+//
+                  //  .build();
 
             helpList.add(commandHelp);
         }
