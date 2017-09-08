@@ -49,7 +49,7 @@ Plugin creator: [Aquerr](https://github.com/Aquerr)
 Logo by: Joxu ( #jx )
 
 Feel free to send me your feedback! I would love to hear your opinions about this plugin and suggestions for future updates!
-**If you find any issues while using the plugin, post them on Ore or [Github](https://github.com/Aquerr/EagleFactions/issues)**
+**If you find any issues while using the plugin, post them on [Spongepowered Forum](https://forums.spongepowered.org/t/eagle-factions-a-simple-yet-powerful-war-plugin/20749) or [Github](https://github.com/Aquerr/EagleFactions/issues)**
 
 ## License
 
