@@ -13,6 +13,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.math.BigDecimal;
+
 /**
  * Created by Aquerr on 2017-07-12.
  */
@@ -38,7 +40,7 @@ public class CreateCommand implements CommandExecutor
 
             if (playerFactionName == null)
             {
-                if(FactionLogic.getFactionsTags().contains(factionTag))
+                if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is already taken!"));
                     return CommandResult.success();
@@ -58,7 +60,8 @@ public class CreateCommand implements CommandExecutor
                     }
                 }
 
-                if (!FactionLogic.getFactionsNames().contains(factionName))
+                //TODO: Ignore case while checking factions names.
+                if (!FactionLogic.getFactionsNames().stream().anyMatch(x -> x.equalsIgnoreCase(factionName)))
                 {
                     //Check name length
                     if(factionName.length() > MainLogic.getMaxNameLength())
