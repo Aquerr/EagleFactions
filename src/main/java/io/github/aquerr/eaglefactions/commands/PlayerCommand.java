@@ -16,8 +16,9 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,9 +42,13 @@ public class PlayerCommand implements CommandExecutor
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
             if(playerFactionName == null) playerFactionName = "";
 
+            Date lastPlayed = Date.from(player.getJoinData().lastPlayed().get());
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            String formattedDate = formatter.format(lastPlayed);
+
             Text info = Text.builder()
                     .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerService.getPlayerName(player.getUniqueId()).get() + "\n"))
-                    .append(Text.of(TextColors.AQUA, "Last Played: ", TextColors.GOLD, Date.from(player.getJoinData().lastPlayed().get()) + "\n"))
+                    .append(Text.of(TextColors.AQUA, "Last Played: ", TextColors.GOLD, formattedDate + "\n"))
                     .append(Text.of(TextColors.AQUA, "Faction: ", TextColors.GOLD, playerFactionName + "\n"))
                     .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, PowerService.getPlayerPower(player.getUniqueId()) + "/" + PowerService.getPlayerMaxPower(player.getUniqueId())))
                     .build();

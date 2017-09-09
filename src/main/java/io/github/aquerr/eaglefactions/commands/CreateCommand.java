@@ -60,7 +60,6 @@ public class CreateCommand implements CommandExecutor
                     }
                 }
 
-                //TODO: Ignore case while checking factions names.
                 if (!FactionLogic.getFactionsNames().stream().anyMatch(x -> x.equalsIgnoreCase(factionName)))
                 {
                     //Check name length
