@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
@@ -20,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Aquerr on 2017-08-04.
@@ -29,14 +31,31 @@ public class PlayerCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Player player = context.<Player>getOne(Text.of("player")).get();
+        Optional<Player> optionalPlayer = context.<Player>getOne("player");
 
         //TODO: Add check if provided player has entry in server database (if player played on the server).
         //player.hasPlayedBefore() is not a solution for this problem.
 
+        if(optionalPlayer.isPresent())
+        {
+            Player player = optionalPlayer.get();
+            showPlayerInfo(player);
+        }
+        else
+        {
+            if(source instanceof Player)
+            {
+                Player player = (Player)source;
+                showPlayerInfo(player);
+            }
+        }
+        return CommandResult.success();
+    }
+
+    private void showPlayerInfo(Player player)
+    {
         if(player.hasPlayedBefore())
         {
-
             List<Text> playerInfo = new ArrayList<Text>();
 
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
@@ -57,16 +76,11 @@ public class PlayerCommand implements CommandExecutor
 
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Player Info")).padding(Text.of("=")).contents(playerInfo);
-            paginationBuilder.sendTo(source);
-
-            CommandResult.success();
-
+            paginationBuilder.sendTo(player);
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "This player has not played on this server!"));
+            player.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "This player has not played on this server!"));
         }
-
-        return CommandResult.success();
     }
 }

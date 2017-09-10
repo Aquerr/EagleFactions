@@ -199,7 +199,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("p", "player"), CommandSpec.builder()
         .description(Text.of("Show info about a player"))
         .permission("eaglefactions.command.player")
-        .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+        .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
         .executor(new PlayerCommand())
         .build());
 
