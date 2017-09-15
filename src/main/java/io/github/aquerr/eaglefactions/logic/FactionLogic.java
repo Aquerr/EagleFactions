@@ -205,7 +205,7 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
     }
 
-    public static void addAllay(String playerFactionName, String invitedFactionName)
+    public static void addAlly(String playerFactionName, String invitedFactionName)
     {
         List<String> playerFactionAllianceList = new ArrayList<>(getAlliances(playerFactionName));
         List<String> invitedFactionAllianceList = new ArrayList<>(getAlliances(invitedFactionName));
@@ -232,7 +232,7 @@ public class FactionLogic
         else return new ArrayList<String>();
     }
 
-    public static void removeAlliance(String playerFactionName, String removedFaction)
+    public static void removeAlly(String playerFactionName, String removedFaction)
     {
         List<String> playerFactionAllianceList = new ArrayList<>(getAlliances(playerFactionName));
         List<String> removedFactionAllianceList = new ArrayList<>(getAlliances(removedFaction));
