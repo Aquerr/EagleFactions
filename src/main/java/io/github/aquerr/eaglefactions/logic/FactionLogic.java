@@ -524,4 +524,25 @@ public class FactionLogic
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
     }
+
+    public static void kickPlayer(UUID playerUUID, String factionName)
+    {
+        if(getMembers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> memberList = new ArrayList<>(getMembers(factionName));
+
+            memberList.remove(playerUUID.toString());
+
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+
+        }
+        else if(getOfficers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> officersList = new ArrayList<>(getOfficers(factionName));
+
+            officersList.remove(playerUUID.toString());
+
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        }
+    }
 }
