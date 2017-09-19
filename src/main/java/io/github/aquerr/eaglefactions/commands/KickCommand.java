@@ -46,7 +46,7 @@ public class KickCommand implements CommandExecutor
                                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
                                     // player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You left faction ", TextColors.GOLD, playerFactionName));
 
-                                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+                                    if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId().toString());
 
                                     CommandResult.success();
                                 }
