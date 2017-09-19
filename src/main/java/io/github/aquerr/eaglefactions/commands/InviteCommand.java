@@ -40,7 +40,8 @@ public class InviteCommand implements CommandExecutor
                         Invite invite = new Invite(senderFactionName, invitedPlayer.getUniqueId());
                         EagleFactions.InviteList.add(invite);
 
-                        invitedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, senderFactionName, TextColors.GREEN, " has sent you an invite! You have 2 minutes to accept it!"));
+                        invitedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, senderFactionName, TextColors.GREEN, " has sent you an invite! You have 2 minutes to accept it!" +
+                                " Type ", TextColors.GOLD, "/f join " + senderFactionName, TextColors.WHITE, " to join."));
 
                         senderPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You invited ", TextColors.GOLD, invitedPlayer.getName(), TextColors.GREEN, " to your faction."));
 

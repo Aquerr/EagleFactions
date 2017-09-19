@@ -56,7 +56,8 @@ public class RemoveEnemyCommand implements CommandExecutor
 
                                 Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
 
-                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " wants to end the ", TextColors.RED, "war ", TextColors.WHITE, "with your faction!", TextColors.GREEN, " You have 2 minutes to accept it!"));
+                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " wants to end the ", TextColors.RED, "war ", TextColors.WHITE, "with your faction!", TextColors.GREEN, " You have 2 minutes to accept it!" +
+                                        " Type ", TextColors.GOLD, "/f remove enemy " + playerFactionName, TextColors.WHITE, " to accept it."));
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You requested war-end with faction ", TextColors.GOLD, enemyFactionName, TextColors.WHITE, " to the alliance."));
 
                                 Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
