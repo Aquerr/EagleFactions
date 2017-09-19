@@ -198,11 +198,23 @@ public class FactionLogic
 
     public static void leaveFaction(UUID playerUUID, String factionName)
     {
-        List<String> memberList = new ArrayList<>(getMembers(factionName));
+        if(getMembers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> memberList = new ArrayList<>(getMembers(factionName));
 
-        memberList.remove(playerUUID.toString());
+            memberList.remove(playerUUID.toString());
 
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+
+        }
+        else if(getOfficers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> officersList = new ArrayList<>(getOfficers(factionName));
+
+            officersList.remove(playerUUID.toString());
+
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        }
     }
 
     public static void addAlly(String playerFactionName, String invitedFactionName)
