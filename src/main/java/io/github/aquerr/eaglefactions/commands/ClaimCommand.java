@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -42,16 +43,26 @@ public class ClaimCommand implements CommandExecutor
                         {
                             if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                             {
-                                if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                if(MainLogic.requireConnectedClaims())
+                                {
+                                    if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                    {
+                                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+
+                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                        return CommandResult.success();
+                                    }
+                                    else
+                                    {
+                                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                                    }
+                                }
+                                else
                                 {
                                     FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     return CommandResult.success();
-                                }
-                                else
-                                {
-                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
                                 }
                             }
                             else
