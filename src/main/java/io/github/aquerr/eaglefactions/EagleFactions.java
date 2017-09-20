@@ -54,16 +54,18 @@ public class EagleFactions
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
     {
-
         eagleFactions = this;
 
-        //TODO:Change color of loggs.
-       getLogger ().info("EagleFactions is loading...");
-       getLogger ().info ("Preparing wings...");
+       //Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions is loading..."));
+       Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
 
        SetupConfigs();
 
+       Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
+
        InitializeCommands();
+
+       Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Commands loaded..."));
 
        RegisterListeners();
 
@@ -71,7 +73,7 @@ public class EagleFactions
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Thank you for choosing this plugin!"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version " + PluginInfo.Version));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version: " + PluginInfo.Version));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with EagleFactions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
     }
