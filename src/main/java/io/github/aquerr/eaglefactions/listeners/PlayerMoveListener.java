@@ -32,11 +32,15 @@ public class PlayerMoveListener
     public void onPlayerMove(MoveEntityEvent event, @Root Player player)
     {
         //Check if player changed chunk.
-        if(!PlayerService.getPlayerChunkPosition(player.getUniqueId()).toString().equals(player.getLocation().getChunkPosition().toString()))
+        World world = player.getWorld();
+        Location lastLocation = new Location(world, PlayerService.getPlayerChunkPosition(player.getUniqueId()));
+        Location newLocation = player.getLocation();
+
+        if(!lastLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
         {
-            World world = player.getWorld();
-            Vector3i oldChunk = PlayerService.getPlayerChunkPosition(player.getUniqueId());
-            Vector3i newChunk = player.getLocation().getChunkPosition();
+            //World world = player.getWorld();
+            Vector3i oldChunk = lastLocation.getChunkPosition();
+            Vector3i newChunk = newLocation.getChunkPosition();
 
             //Inform a player about entering faction's land.
             if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), oldChunk).equals(FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk)))
@@ -47,7 +51,7 @@ public class PlayerMoveListener
                     {
                         //Teleport player back if all entering faction's players are offline.
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't enter this faction! None of this faction's players are online!"));
-                        player.setLocation(new Location<World>(world, event.getFromTransform().getLocation().getBlockPosition()));
+                        player.setLocation(new Location<World>(world, lastLocation.getBlockPosition()));
                         return;
                     }
                 }
@@ -73,10 +77,11 @@ public class PlayerMoveListener
             {
                 Sponge.getCommandManager().process(player, "f map");
             }
-            
-            //Set new player chunk location.
-            PlayerService.setPlayerChunkPosition(player.getUniqueId(), player.getLocation().getChunkPosition());
+
         }
+
+        //Set new player chunk location.
+        PlayerService.setPlayerChunkPosition(player.getUniqueId(), player.getLocation().getBlockPosition());
         return;
     }
 }
