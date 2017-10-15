@@ -124,11 +124,6 @@ public class FactionLogic
 
     public static List<String> getFactionsNames()
     {
-       //if(ConfigAccess.getConfig(factionsConfig).getNode ("factions","factions").getValue() != null)
-       //{
-       //    ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"}, "factions");
-       //}
-
         if(ConfigAccess.getConfig(factionsConfig).getNode("factions").getValue() != null)
         {
             Set<Object> objectList =  ConfigAccess.getConfig(factionsConfig).getNode("factions").getChildrenMap().keySet();
@@ -164,7 +159,7 @@ public class FactionLogic
     {
         try
         {
-            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "tag"}, factionTag);
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "tag"}, factionTag.toString());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},null);
