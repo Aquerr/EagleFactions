@@ -8,6 +8,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -20,12 +21,12 @@ public class AttackLogic
         {
             if(seconds == 10)
             {
-                   player.sendMessage(Text.of("Claim destroyed!"));
+                   player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
                    FactionLogic.removeClaim(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk), player.getWorld().getUniqueId(), attackedChunk);
             }
             else
             {
-                player.sendMessage(Text.of("Seconds: " + seconds));
+                player.sendMessage(Text.of(seconds));
                 Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
                 taskBuilder.execute(new Runnable()
                 {
@@ -40,7 +41,7 @@ public class AttackLogic
         }
         else
         {
-            player.sendMessage(Text.of("You moved from the chunk!"));
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
         }
     }
 }
