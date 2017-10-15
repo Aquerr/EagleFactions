@@ -45,7 +45,7 @@ public class AttackCommand implements CommandExecutor
                                 Vector3i attackedClaim = player.getLocation().getChunkPosition();
                                 int seconds = 0;
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for 10 seconds to destroy it!"));
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, "10 seconds", TextColors.GREEN, " to destroy it!"));
                                 AttackLogic.attack(player, attackedClaim, seconds);
                                 return CommandResult.success();
                             }
