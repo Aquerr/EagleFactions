@@ -51,7 +51,7 @@ public class AddAllyCommand implements CommandExecutor
 
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    FactionLogic.addAllay(playerFactionName, invitedFactionName);
+                                    FactionLogic.addAlly(playerFactionName, invitedFactionName);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted an invitation from ", TextColors.GOLD, invitedFactionName + "!"));
 
@@ -64,7 +64,8 @@ public class AddAllyCommand implements CommandExecutor
                                     AllyInvite invite = new AllyInvite(playerFactionName, invitedFactionName);
                                     EagleFactions.AllayInviteList.add(invite);
 
-                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has sent you an invite to the ", TextColors.AQUA, "alliance, ", TextColors.WHITE, "! You have 2 minutes to accept it!"));
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has sent you an invite to the ", TextColors.AQUA, "alliance, ", TextColors.WHITE, "! You have 2 minutes to accept it!" +
+                                            " Type ", TextColors.GOLD, "/f ally add " + playerFactionName, TextColors.WHITE, " to accept it."));
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You invited faction ", TextColors.GOLD, invitedFactionName, TextColors.WHITE, " to the alliance."));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();

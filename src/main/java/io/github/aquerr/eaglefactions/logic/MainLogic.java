@@ -127,4 +127,13 @@ public class MainLogic
 
         return mobSpawning;
     }
+
+    public static boolean requireConnectedClaims()
+    {
+        ConfigurationNode requireConnectedClaimsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "connectedClaims");
+
+        boolean requireConnectedClaims = requireConnectedClaimsNode.getBoolean();
+
+        return requireConnectedClaims;
+    }
 }

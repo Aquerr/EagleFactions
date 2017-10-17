@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -40,28 +41,44 @@ public class ClaimCommand implements CommandExecutor
 
                         if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
-                            if(!FactionLogic.getClaims(playerFactionName).isEmpty())
+                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
-                                if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
+                                {
+                                    if(MainLogic.requireConnectedClaims())
+                                    {
+                                        if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                        {
+                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+
+                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            return CommandResult.success();
+                                        }
+                                        else
+                                        {
+                                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+
+                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                        return CommandResult.success();
+                                    }
+                                }
+                                else
                                 {
                                     FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     return CommandResult.success();
                                 }
-                                else
-                                {
-                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
-                                }
                             }
                             else
                             {
-                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                                return CommandResult.success();
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction is under attack! You need to wait ", TextColors.GOLD, "2 minutes", TextColors.RED, " to be able to claim again!"));
                             }
-
                         }
                         else
                         {

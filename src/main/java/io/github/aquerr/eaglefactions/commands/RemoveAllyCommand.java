@@ -33,7 +33,7 @@ public class RemoveAllyCommand implements CommandExecutor
                 {
                     if(FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
                     {
-                        FactionLogic.removeAlliance(playerFactionName,removedFaction);
+                        FactionLogic.removeAlly(playerFactionName,removedFaction);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You removed your alliance with ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
 

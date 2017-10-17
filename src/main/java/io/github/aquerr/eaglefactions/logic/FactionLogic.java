@@ -23,32 +23,23 @@ import java.util.function.Function;
  */
 public class FactionLogic
 {
-    //TODO:Add other configs
-    //private static IConfig mainConfig = MainConfig.getMainConfig();
     private static IConfig factionsConfig = FactionsConfig.getConfig();
-    //private static IConfig claimsConfig = ClaimsConfig.getMainConfig();
-    //private static IConfig messageConfig = MessageConfig.getMainConfig();
 
     public static String getFactionName(UUID playerUUID)
     {
-        for (Object t : FactionLogic.getFactionsNames())
+        for (String factionName : FactionLogic.getFactionsNames())
         {
-            String faction = String.valueOf (t);
-
-            //TODO: If even leader and officers are stored in Members group, checking members is enough.
-            if(FactionLogic.getMembers(faction).contains(playerUUID.toString ()))
+            if(FactionLogic.getMembers(factionName).contains(playerUUID.toString ()))
             {
-                return faction;
+                return factionName;
             }
-            else if(FactionLogic.getLeader(faction).equals(playerUUID.toString ()))
+            else if(FactionLogic.getLeader(factionName).equals(playerUUID.toString ()))
             {
-                return faction;
+                return factionName;
             }
-
-            //TODO:Add check for officers.
-            else if(FactionLogic.getOfficers(faction).contains(playerUUID.toString ()))
+            else if(FactionLogic.getOfficers(factionName).contains(playerUUID.toString ()))
             {
-                return faction;
+                return factionName;
             }
         }
         return null;
@@ -56,10 +47,8 @@ public class FactionLogic
 
     public static String getFactionNameByChunk(UUID worldUUID ,Vector3i chunk)
     {
-        for(Object object: getFactionsNames())
+        for(String factionName: getFactionsNames())
         {
-            String factionName = String.valueOf(object);
-
             if(getClaims(factionName).contains(worldUUID.toString() + "|" + chunk.toString()))
             {
                 return factionName;
@@ -133,29 +122,33 @@ public class FactionLogic
         else return new ArrayList<String>();
     }
 
-    public static Set<Object> getFactionsNames()
+    public static List<String> getFactionsNames()
     {
-        if(ConfigAccess.getConfig(factionsConfig).getNode ("factions","factions").getValue() != null)
-        {
-            ConfigAccess.removeChild(factionsConfig, new Object[]{"factions"}, "factions");
-        }
-
         if(ConfigAccess.getConfig(factionsConfig).getNode("factions").getValue() != null)
         {
-            return ConfigAccess.getConfig(factionsConfig).getNode("factions").getChildrenMap().keySet();
+            Set<Object> objectList =  ConfigAccess.getConfig(factionsConfig).getNode("factions").getChildrenMap().keySet();
+            List<String> namesList = new ArrayList<>();
+
+            for(Object object: objectList)
+            {
+                String factionName = String.valueOf(object);
+
+                namesList.add(factionName);
+            }
+
+            return namesList;
+
         }
 
-            return Sets.newHashSet ();
+            return new ArrayList<>();
     }
 
     public static List<Faction> getFactions()
     {
         List<Faction> factionsList = new ArrayList<>();
 
-        for (Object object: getFactionsNames())
+        for (String factionName: getFactionsNames())
         {
-            String factionName = String.valueOf(object);
-
             factionsList.add(getFaction(factionName));
         }
 
@@ -166,7 +159,7 @@ public class FactionLogic
     {
         try
         {
-            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "tag"}, factionTag);
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "tag"}, factionTag.toString());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "leader"},(playerUUID.toString()));
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"},new ArrayList<String>());
             ConfigAccess.setValueAndSave(factionsConfig,new Object[]{"factions", factionName, "home"},null);
@@ -200,14 +193,26 @@ public class FactionLogic
 
     public static void leaveFaction(UUID playerUUID, String factionName)
     {
-        List<String> memberList = new ArrayList<>(getMembers(factionName));
+        if(getMembers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> memberList = new ArrayList<>(getMembers(factionName));
 
-        memberList.remove(playerUUID.toString());
+            memberList.remove(playerUUID.toString());
 
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+
+        }
+        else if(getOfficers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> officersList = new ArrayList<>(getOfficers(factionName));
+
+            officersList.remove(playerUUID.toString());
+
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        }
     }
 
-    public static void addAllay(String playerFactionName, String invitedFactionName)
+    public static void addAlly(String playerFactionName, String invitedFactionName)
     {
         List<String> playerFactionAllianceList = new ArrayList<>(getAlliances(playerFactionName));
         List<String> invitedFactionAllianceList = new ArrayList<>(getAlliances(invitedFactionName));
@@ -234,7 +239,7 @@ public class FactionLogic
         else return new ArrayList<String>();
     }
 
-    public static void removeAlliance(String playerFactionName, String removedFaction)
+    public static void removeAlly(String playerFactionName, String removedFaction)
     {
         List<String> playerFactionAllianceList = new ArrayList<>(getAlliances(playerFactionName));
         List<String> removedFactionAllianceList = new ArrayList<>(getAlliances(removedFaction));
@@ -353,10 +358,8 @@ public class FactionLogic
 
     public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
-        for (Object object: getFactionsNames())
+        for (String factionName: getFactionsNames())
         {
-            String factionName = String.valueOf(object);
-
             List<String> factionClaims = getClaims(factionName);
 
             if(!factionClaims.isEmpty() && factionClaims != null)
@@ -527,5 +530,26 @@ public class FactionLogic
         List<String> claimsList = new ArrayList<>();
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "claims"}, claimsList);
+    }
+
+    public static void kickPlayer(UUID playerUUID, String factionName)
+    {
+        if(getMembers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> memberList = new ArrayList<>(getMembers(factionName));
+
+            memberList.remove(playerUUID.toString());
+
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, memberList);
+
+        }
+        else if(getOfficers(factionName).contains(playerUUID.toString()))
+        {
+            List<String> officersList = new ArrayList<>(getOfficers(factionName));
+
+            officersList.remove(playerUUID.toString());
+
+            ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        }
     }
 }
