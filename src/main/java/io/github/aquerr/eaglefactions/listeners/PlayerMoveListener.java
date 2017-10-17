@@ -47,12 +47,15 @@ public class PlayerMoveListener
             {
                 if(!FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals("SafeZone") && !FactionLogic.getFactionNameByChunk(world.getUniqueId(),newChunk).equals("WarZone") && !FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals(""))
                 {
-                    if(!FactionLogic.hasOnlinePlayers(FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk)) && MainLogic.getBlockEnteringFactions())
+                    if(!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                     {
-                        //Teleport player back if all entering faction's players are offline.
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't enter this faction! None of this faction's players are online!"));
-                        player.setLocation(new Location<World>(world, lastLocation.getBlockPosition()));
-                        return;
+                        if(!FactionLogic.hasOnlinePlayers(FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk)) && MainLogic.getBlockEnteringFactions())
+                        {
+                            //Teleport player back if all entering faction's players are offline.
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't enter this faction! None of this faction's players are online!"));
+                            player.setLocation(new Location<World>(world, lastLocation.getBlockPosition()));
+                            return;
+                        }
                     }
                 }
 

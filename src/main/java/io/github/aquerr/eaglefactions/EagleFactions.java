@@ -363,6 +363,7 @@ public class EagleFactions
                 .executor(new MaxPowerCommand())
                 .build());
 
+        //Add Attack Command
         Subcommands.put(Arrays.asList("attack"), CommandSpec.builder()
                 .description(Text.of("Destroy a claim"))
                 .permission(PluginPermissions.AttackCommand)
