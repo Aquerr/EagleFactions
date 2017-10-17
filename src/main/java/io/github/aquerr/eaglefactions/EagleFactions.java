@@ -38,6 +38,7 @@ public class EagleFactions
     public static List<String> AutoClaimList = new ArrayList<>();
     public static List<String> AutoMapList = new ArrayList<>();
     public static List<String> AdminList = new ArrayList<>();
+    public static List<String> AttackedFactions = new ArrayList<>();
 
     @Inject
     private Logger _logger;

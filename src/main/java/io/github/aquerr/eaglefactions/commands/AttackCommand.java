@@ -1,24 +1,19 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-
-import java.util.concurrent.TimeUnit;
 
 public class AttackCommand implements CommandExecutor
 {
@@ -42,6 +37,8 @@ public class AttackCommand implements CommandExecutor
                         {
                             if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
                             {
+                                //EagleFactions.AttackedFactions.add(faction.Name);
+                                AttackLogic.blockClaiming(faction.Name);
                                 Vector3i attackedClaim = player.getLocation().getChunkPosition();
                                 int seconds = 0;
 

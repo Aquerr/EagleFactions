@@ -41,20 +41,30 @@ public class ClaimCommand implements CommandExecutor
 
                         if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
-                            if(!FactionLogic.getClaims(playerFactionName).isEmpty())
+                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
-                                if(MainLogic.requireConnectedClaims())
+                                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                                 {
-                                    if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                    if(MainLogic.requireConnectedClaims())
+                                    {
+                                        if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                        {
+                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+
+                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            return CommandResult.success();
+                                        }
+                                        else
+                                        {
+                                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                                        }
+                                    }
+                                    else
                                     {
                                         FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                         return CommandResult.success();
-                                    }
-                                    else
-                                    {
-                                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
                                     }
                                 }
                                 else
@@ -67,12 +77,8 @@ public class ClaimCommand implements CommandExecutor
                             }
                             else
                             {
-                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                                return CommandResult.success();
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction is under attack! You need to wait ", TextColors.GOLD, "2 minutes", TextColors.RED, " to be able to claim again!"));
                             }
-
                         }
                         else
                         {

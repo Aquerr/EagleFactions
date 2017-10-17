@@ -1,16 +1,14 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class AttackLogic
@@ -26,7 +24,7 @@ public class AttackLogic
             }
             else
             {
-                player.sendMessage(Text.of(seconds));
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
                 Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
                 taskBuilder.execute(new Runnable()
                 {
@@ -36,12 +34,46 @@ public class AttackLogic
                                   attack(player, attackedChunk, seconds + 1);
                      }
 
-                }).delay(1, TimeUnit.SECONDS).name("EagleFaction - Attack").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+                }).delay(1, TimeUnit.SECONDS).name("EagleFactions - Attack").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
             }
         }
         else
         {
             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+        }
+    }
+
+    public static void blockClaiming(String factionName)
+    {
+        if(!EagleFactions.AttackedFactions.contains(factionName)) EagleFactions.AttackedFactions.add(factionName);
+
+        restoreClaiming(factionName);
+    }
+
+    public static void restoreClaiming(String factionName)
+    {
+        if(Sponge.getScheduler().getScheduledTasks(EagleFactions.getEagleFactions()).stream().anyMatch(x->x.getName().equals("EagleFactions - Restore Claiming for " + factionName)))
+        {
+            Task scheduledTask = (Task)Sponge.getScheduler().getTasksByName("EagleFactions - Restore Claiming for " + factionName).toArray()[0];
+            scheduledTask.cancel();
+
+            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder().name("EagleFactions - Restore Claiming for " + factionName);
+            taskBuilder.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if(EagleFactions.AttackedFactions.contains(factionName)) EagleFactions.AttackedFactions.remove(factionName);
+                }
+            }).delay(2, TimeUnit.MINUTES).submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+        }
+        else
+        {
+            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder().name("EagleFactions - Restore Claiming for " + factionName);
+            taskBuilder.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if(EagleFactions.AttackedFactions.contains(factionName)) EagleFactions.AttackedFactions.remove(factionName);
+                }
+            }).delay(2, TimeUnit.MINUTES).submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
         }
     }
 }
