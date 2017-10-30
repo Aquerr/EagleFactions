@@ -58,6 +58,18 @@ public class PlayerMoveListener
                         }
                     }
                 }
+                else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), oldChunk).equals("WarZone") && FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals("SafeZone") && !EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    //Block player when trying to enter SafeZone from WarZone
+                    event.setCanceled(true);
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't enter SafeZone when you are in WarZone"));
+                }
+
+                else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), oldChunk).equals("SafeZone") && FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals("WarZone"))
+                {
+                    //Inform player no way back when enter in WarZone
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Be careful, you enter in WarZone ! No way back !"));
+                }
 
                 String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk);
                 if(factionName == "") factionName = "Wilderness";
