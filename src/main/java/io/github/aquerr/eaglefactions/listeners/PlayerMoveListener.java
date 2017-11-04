@@ -61,7 +61,7 @@ public class PlayerMoveListener
                 else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), oldChunk).equals("WarZone") && FactionLogic.getFactionNameByChunk(world.getUniqueId(), newChunk).equals("SafeZone") && !EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                 {
                     //Block player when trying to enter SafeZone from WarZone
-                    event.setCanceled(true);
+                    player.setLocation(new Location<World>(world, lastLocation.getBlockPosition()));
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't enter SafeZone when you are in WarZone"));
                 }
 
