@@ -99,6 +99,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands.");
         get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline.");
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
+        get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue("false").setComment("Block entering to the SafeZone from the WarZone");
     }
 
     @Override

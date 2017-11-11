@@ -136,4 +136,13 @@ public class MainLogic
 
         return requireConnectedClaims;
     }
+
+    public static boolean shouldBlockSafeZoneFromWarZone()
+    {
+        ConfigurationNode blockSafeZoneFromWarZoneNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone");
+
+        boolean blockSafeZoneFromWarZone = blockSafeZoneFromWarZoneNode.getBoolean();
+
+        return blockSafeZoneFromWarZone;
+    }
 }
