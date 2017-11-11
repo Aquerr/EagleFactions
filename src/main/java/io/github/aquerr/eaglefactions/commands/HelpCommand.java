@@ -67,7 +67,7 @@ public class HelpCommand implements CommandExecutor
         helpList.sort(Text::compareTo);
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList).linesPerPage(10);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList).linesPerPage(14);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success ();
