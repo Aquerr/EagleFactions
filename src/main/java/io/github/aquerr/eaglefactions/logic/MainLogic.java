@@ -145,4 +145,22 @@ public class MainLogic
 
         return blockSafeZoneFromWarZone;
     }
+
+    public static boolean isPlayerLimit()
+    {
+        ConfigurationNode isPlayerLimitNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "playerlimit", "playerlimit");
+
+        boolean playerLimit = isPlayerLimitNode.getBoolean();
+
+        return playerLimit;
+    }
+
+    public static int getPlayerLimit()
+    {
+        ConfigurationNode limitNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "playerlimit", "limit");
+
+        int limit = limitNode.getInt();
+
+        return limit;
+    }
 }

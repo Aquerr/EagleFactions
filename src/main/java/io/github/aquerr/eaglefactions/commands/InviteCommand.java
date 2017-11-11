@@ -2,8 +2,10 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -32,11 +34,26 @@ public class InviteCommand implements CommandExecutor
 
             if(senderFactionName != null)
             {
+                if(MainLogic.isPlayerLimit())
+                {
+                    int playerCount = 0;
+                    Faction faction = FactionLogic.getFaction(senderFactionName);
+                    playerCount += faction.Leader.equals("") ? 0 : 1;
+                    playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
+                    playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
+
+                    if(playerCount >= MainLogic.getPlayerLimit())
+                    {
+                        senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't invite more players to your faction. Faction's player limit has been achieved!"));
+                        return CommandResult.success();
+                    }
+
+                }
+
                 if(FactionLogic.getFactionName(invitedPlayer.getUniqueId()) == null)
                 {
                     try
                     {
-                        //TODO: Create an invitation here and send it to the invited player.
                         Invite invite = new Invite(senderFactionName, invitedPlayer.getUniqueId());
                         EagleFactions.InviteList.add(invite);
 
@@ -71,7 +88,7 @@ public class InviteCommand implements CommandExecutor
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Player already is in a faction!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Player is already in a faction!"));
                 }
             }
             else
