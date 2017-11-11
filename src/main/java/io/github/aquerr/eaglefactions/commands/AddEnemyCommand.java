@@ -19,17 +19,23 @@ public class AddEnemyCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String enemyFactionName = context.<String>getOne(Text.of("faction name")).get();
+        String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
 
         if(source instanceof Player)
         {
             Player player = (Player)source;
-
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+
+            String enemyFactionName = FactionLogic.getRealFactionName(rawFactionName);
+            if (enemyFactionName == null)
+            {
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+
+                return CommandResult.success();
+            }
 
             if(playerFactionName != null)
             {
-                //TODO: Add check for officer.
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
                     if(FactionLogic.getFactionsNames().contains(enemyFactionName))
@@ -42,6 +48,7 @@ public class AddEnemyCommand implements CommandExecutor
 
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now ", TextColors.RED, "enemies ", TextColors.WHITE, "with " + enemyFactionName));
 
+                                //TODO: Check if player is online
                                 Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
                                 enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has declared you a ", TextColors.RED, "War!"));
 
@@ -69,7 +76,7 @@ public class AddEnemyCommand implements CommandExecutor
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to invite players!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
             }
         }
         else

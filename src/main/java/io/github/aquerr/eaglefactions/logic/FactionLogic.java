@@ -143,6 +143,13 @@ public class FactionLogic
             return new ArrayList<>();
     }
 
+    public static String getRealFactionName(String rawFactionName)
+    {
+        List<String> factionsNames = getFactionsNames();
+
+        return factionsNames.stream().filter(x->x.equalsIgnoreCase(rawFactionName)).findFirst().orElse(null);
+    }
+
     public static List<Faction> getFactions()
     {
         List<Faction> factionsList = new ArrayList<>();
@@ -253,6 +260,7 @@ public class FactionLogic
 
     public static List<String> getEnemies(String factionName)
     {
+
         ConfigurationNode enemiesNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "enemies");
 
         if (enemiesNode.getValue() != null)

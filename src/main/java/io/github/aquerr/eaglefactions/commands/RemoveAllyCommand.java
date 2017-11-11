@@ -19,41 +19,49 @@ public class RemoveAllyCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String removedFaction = context.<String>getOne(Text.of("faction name")).get();
+        String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
 
         if(source instanceof Player)
         {
             Player player = (Player)source;
-
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-            if(playerFactionName != null)
+            String removedFaction = FactionLogic.getRealFactionName(rawFactionName);
+            if (removedFaction == null)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+                return CommandResult.success();
+            }
+            else
+            {
+                if(playerFactionName != null)
                 {
-                    if(FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
+                    if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                     {
-                        FactionLogic.removeAlly(playerFactionName,removedFaction);
+                        if(FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
+                        {
+                            FactionLogic.removeAlly(playerFactionName, removedFaction);
 
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You removed your alliance with ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You disbanded your alliance with ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
 
-                        CommandResult.success();
+                            CommandResult.success();
+
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction is not in the alliance with ", TextColors.GOLD, removedFaction + "!"));
+                        }
 
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction is not in alliance with ", TextColors.GOLD, removedFaction + "!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
                     }
-
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
                 }
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to invite players!"));
             }
         }
         else

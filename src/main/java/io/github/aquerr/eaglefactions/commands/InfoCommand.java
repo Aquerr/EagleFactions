@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -28,9 +29,19 @@ public class InfoCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String factionName = context.<String>getOne("faction name").get();
+        String rawFactionName = context.<String>getOne("faction name").get();
 
-            if(FactionLogic.getFactionsNames().contains(factionName))
+            String factionName = FactionLogic.getRealFactionName(rawFactionName);
+
+            EagleFactions.getEagleFactions().getLogger().error("rawFactionName is: " + rawFactionName);
+            EagleFactions.getEagleFactions().getLogger().error("Real Faction Name is: " + factionName);
+
+            if (factionName == null)
+            {
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+                return CommandResult.success();
+            }
+            else
             {
                 Faction faction = FactionLogic.getFaction(factionName);
 
@@ -46,7 +57,7 @@ public class InfoCommand implements CommandExecutor
                     {
                         membersList += PlayerService.getPlayerName(UUID.fromString(member)).get() + ", ";
                     }
-                   membersList = membersList.substring(0, membersList.length() - 2);
+                    membersList = membersList.substring(0, membersList.length() - 2);
                 }
 
                 String officersList = "";
@@ -76,7 +87,7 @@ public class InfoCommand implements CommandExecutor
                     {
                         enemiesList += enemy + ", ";
                     }
-                   enemiesList = enemiesList.substring(0, enemiesList.length() - 2);
+                    enemiesList = enemiesList.substring(0, enemiesList.length() - 2);
                 }
 
 
@@ -99,11 +110,6 @@ public class InfoCommand implements CommandExecutor
                 paginationBuilder.sendTo(source);
 
                 CommandResult.success();
-
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, factionName));
             }
 
         return CommandResult.success();
