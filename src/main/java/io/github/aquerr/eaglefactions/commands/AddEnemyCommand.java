@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
@@ -29,13 +30,33 @@ public class AddEnemyCommand implements CommandExecutor
             String enemyFactionName = FactionLogic.getRealFactionName(rawFactionName);
             if (enemyFactionName == null)
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
-
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
                 return CommandResult.success();
             }
 
             if(playerFactionName != null)
             {
+                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    if(!FactionLogic.getAlliances(playerFactionName).contains(enemyFactionName))
+                    {
+                        if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                        {
+                            FactionLogic.addEnemy(playerFactionName, enemyFactionName);
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction has been added to the enemies!"));
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is already your enemy!"));
+                        }
+                    }
+                    else
+                    {
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is your ally! Remove alliance first to declare a war!"));
+                    }
+                    return CommandResult.success();
+                }
+
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
                     if(FactionLogic.getFactionsNames().contains(enemyFactionName))

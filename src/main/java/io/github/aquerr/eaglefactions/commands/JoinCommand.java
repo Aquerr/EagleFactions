@@ -29,8 +29,7 @@ public class JoinCommand implements CommandExecutor
                 String factionName = FactionLogic.getRealFactionName(rawFactionName);
                 if (factionName == null)
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
-
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
                     return CommandResult.success();
                 }
                 else

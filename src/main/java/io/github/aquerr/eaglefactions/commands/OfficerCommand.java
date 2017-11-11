@@ -35,12 +35,38 @@ public class OfficerCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(newOfficerPlayer.getUniqueId().toString()))
-                {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't use this command on yourself ;)"));
-                }
-                else
-                {
+                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                    {
+                        if(FactionLogic.getFactionName(newOfficerPlayer.getUniqueId()).equals(playerFactionName))
+                        {
+                            if(!FactionLogic.getLeader(playerFactionName).equals(newOfficerPlayer.getUniqueId().toString()))
+                            {
+                                if(!FactionLogic.getOfficers(playerFactionName).contains(newOfficerPlayer.getUniqueId().toString()))
+                                {
+                                    FactionLogic.addOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
+
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
+                                }
+                                else
+                                {
+                                    FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
+
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
+                                }
+                            }
+                            else
+                            {
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't set faction's leader as officer!"));
+                            }
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This player is not in your team!"));
+                        }
+
+                        return CommandResult.success();
+                    }
+
                     if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                     {
                         if(FactionLogic.getFactionName(newOfficerPlayer.getUniqueId()).equals(playerFactionName))
@@ -57,7 +83,7 @@ public class OfficerCommand implements CommandExecutor
                                 {
                                     FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
 
-                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You removed ", TextColors.GOLD, newOfficerPlayer, TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You removed ", TextColors.GOLD, newOfficerPlayer, TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }
                             else
@@ -75,7 +101,6 @@ public class OfficerCommand implements CommandExecutor
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader to do this!"));
                     }
-                }
             }
             else
             {

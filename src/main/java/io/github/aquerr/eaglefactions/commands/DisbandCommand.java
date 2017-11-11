@@ -9,6 +9,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -25,12 +26,21 @@ public class DisbandCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
+                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    FactionLogic.disbandFaction(playerFactionName);
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
+
+                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+
+                    return CommandResult.success();
+                }
+
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                 {
                     try
                     {
                         FactionLogic.disbandFaction(playerFactionName);
-
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
 
                         if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());

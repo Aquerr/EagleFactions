@@ -33,9 +33,6 @@ public class InfoCommand implements CommandExecutor
 
             String factionName = FactionLogic.getRealFactionName(rawFactionName);
 
-            EagleFactions.getEagleFactions().getLogger().error("rawFactionName is: " + rawFactionName);
-            EagleFactions.getEagleFactions().getLogger().error("Real Faction Name is: " + factionName);
-
             if (factionName == null)
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));

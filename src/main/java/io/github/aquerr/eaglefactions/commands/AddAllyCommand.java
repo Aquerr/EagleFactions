@@ -37,13 +37,33 @@ public class AddAllyCommand implements CommandExecutor
             String invitedFactionName = FactionLogic.getRealFactionName(rawFactionName);
             if (invitedFactionName == null)
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
-
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
                 return CommandResult.success();
             }
 
             if(playerFactionName != null)
             {
+                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
+                    if(!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))
+                    {
+                        if(!FactionLogic.getAlliances(playerFactionName).contains(invitedFactionName))
+                        {
+                            FactionLogic.addAlly(playerFactionName, invitedFactionName);
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction has been added to the alliance!"));
+                        }
+                        else
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are in alliance with this faction!"));
+                        }
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are in WAR with this faction! Send a request for peace to this faction first!"));
+                    }
+                    return CommandResult.success();
+                }
+
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
                         if(!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))

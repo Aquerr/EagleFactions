@@ -34,13 +34,29 @@ public class RemoveEnemyCommand implements CommandExecutor
             String enemyFactionName = FactionLogic.getRealFactionName(rawFactionName);
             if (enemyFactionName == null)
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
                 return CommandResult.success();
             }
             else
             {
                 if(playerFactionName != null)
                 {
+                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                    {
+                        if(FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                        {
+                            FactionLogic.removeEnemy(enemyFactionName, playerFactionName);
+
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You removed war state with ", TextColors.GOLD, enemyFactionName, TextColors.GREEN, "!"));
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in the war with this faction!"));
+                        }
+
+                        return CommandResult.success();
+                    }
+
                     if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                     {
                         if(FactionLogic.getFactionsNames().contains(enemyFactionName))

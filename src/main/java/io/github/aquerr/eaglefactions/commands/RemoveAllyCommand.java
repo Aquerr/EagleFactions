@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -29,13 +30,29 @@ public class RemoveAllyCommand implements CommandExecutor
             String removedFaction = FactionLogic.getRealFactionName(rawFactionName);
             if (removedFaction == null)
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
                 return CommandResult.success();
             }
             else
             {
                 if(playerFactionName != null)
                 {
+                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                    {
+                        if(!FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
+                        {
+                            FactionLogic.removeAlly(playerFactionName, removedFaction);
+
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You disbanded your alliance with ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Your faction is not in the alliance with ", TextColors.GOLD, removedFaction + "!"));
+                        }
+
+                        return CommandResult.success();
+                    }
+
                     if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                     {
                         if(FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
