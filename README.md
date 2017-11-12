@@ -2,9 +2,9 @@
 
 # Eagle Factions
 
-Master branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=master)](https://travis-ci.org/Aquerr/EagleFactions)
+API 6.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.11.2%2Fapi-6.0.0)](https://travis-ci.org/Aquerr/EagleFactions)
 
-Develop branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=develop)](https://travis-ci.org/Aquerr/EagleFactions)
+API 5.1.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.10.2%2Fapi-5.1.0)](https://travis-ci.org/Aquerr/EagleFactions)
 
 Current version: 0.9.4
 
