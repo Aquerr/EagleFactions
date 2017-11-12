@@ -163,4 +163,13 @@ public class MainLogic
 
         return limit;
     }
+
+    public static int getAttackTime()
+    {
+        ConfigurationNode attackTimeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "attacktime");
+
+        int attackTime = attackTimeNode.getInt();
+
+        return attackTime;
+    }
 }
