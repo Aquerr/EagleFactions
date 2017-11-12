@@ -43,7 +43,7 @@ public class HomeCommand implements CommandExecutor
                         Vector3i home = FactionLogic.getHome(playerFactionName);
 
                         EagleFactions.getEagleFactions().getLogger().info("Teleporting the player...");
-                        player.setLocation(player.getLocation().setBlockPosition(home));
+                        player.setLocation(player.getLocation().setPosition(new Vector3d(home.getX(), player.getLocation().getY(), home.getZ())));
 
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home"));
                     }
