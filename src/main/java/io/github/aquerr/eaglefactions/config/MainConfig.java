@@ -100,6 +100,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline. Default: true");
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");
+        get().getNode("eaglefactions", "gameplay", "attacktime").setValue(10).setComment("How much time in seconds takes destroying a claim. Default: 10");
         get().getNode("eaglefactions", "playerlimit", "playerlimit").setValue(false).setComment("Turns on/off player limit in factions. Default: false");
         get().getNode("eaglefactions", "playerlimit", "limit").setValue(15).setComment("Player limit in the faction. Default: 15");
     }

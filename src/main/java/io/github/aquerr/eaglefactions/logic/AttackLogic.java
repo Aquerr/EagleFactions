@@ -17,7 +17,7 @@ public class AttackLogic
     {
         if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
         {
-            if(seconds == 10)
+            if(seconds == MainLogic.getAttackTime())
             {
                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
                    FactionLogic.removeClaim(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk), player.getWorld().getUniqueId(), attackedChunk);

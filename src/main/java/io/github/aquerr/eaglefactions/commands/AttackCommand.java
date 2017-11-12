@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -37,12 +38,13 @@ public class AttackCommand implements CommandExecutor
                         {
                             if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
                             {
-                                //EagleFactions.AttackedFactions.add(faction.Name);
+                                int attackTime = MainLogic.getAttackTime();
+
                                 AttackLogic.blockClaiming(faction.Name);
                                 Vector3i attackedClaim = player.getLocation().getChunkPosition();
                                 int seconds = 0;
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, "10 seconds", TextColors.GREEN, " to destroy it!"));
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
                                 AttackLogic.attack(player, attackedClaim, seconds);
                                 return CommandResult.success();
                             }
