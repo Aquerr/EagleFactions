@@ -88,7 +88,8 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "name", "minlength").setValue(3).setComment("This determines the minimum amount of characters a Factions's name can be. Default: 3");
         get().getNode("eaglefactions", "tag", "maxlength").setValue(5).setComment("This determines the minimum amount of characters a Factions's tag can be. Default: 5");
         get().getNode("eaglefactions", "tag", "minlength").setValue(2).setComment("This determines the minimum amount of characters a Factions's tag can be. Default: 2");
-        get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes. Default: true");
+        //get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes. Default: true");
+        get().getNode("eaglefactions", "chat", "prefix").setValue("tag").setComment("Should faction name or tag display in chat when someone is writing? Default: tag (Available Options: tag, name)");
         get().getNode("eaglefactions", "power", "increment").setValue(0.04).setComment("How much power will be restored for player after 1 minute of playing. (0.04 per minute = 1,2 per hour.) Default: 0.04");
         get().getNode("eaglefactions", "power", "decrement").setValue(2.0).setComment("How much power will be removed on player death. Default: 2.0");
         get().getNode("eaglefactions", "power", "maxpower").setValue(10.0).setComment("Maximum amount of power a player can have. Default: 10.0");
