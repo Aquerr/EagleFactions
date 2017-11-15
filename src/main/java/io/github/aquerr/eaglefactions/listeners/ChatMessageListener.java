@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -70,14 +71,26 @@ public class ChatMessageListener
 
             Text.Builder factionPrefix = Text.builder();
 
-            if(!FactionLogic.getFactionTag(factionName).equals("") && FactionLogic.getFactionTag(factionName) != null)
+            if(MainLogic.getPrefixOption().equals("tag"))
             {
-                //Get faction's tag
-                Text factionTag = Text.builder()
-                        .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
+                if(!FactionLogic.getFactionTag(factionName).equals("") && FactionLogic.getFactionTag(factionName) != null)
+                {
+                    //Get faction's tag
+                    Text factionTag = Text.builder()
+                            .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
+                            .build();
+
+                    factionPrefix.append(factionTag);
+                }
+            }
+            else if (MainLogic.getPrefixOption().equals("name"))
+            {
+                //Add faction name
+                Text factionNamePrefix = Text.builder()
+                        .append(Text.of("[" ,TextColors.GREEN, factionName, TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(factionTag);
+                factionPrefix.append(factionNamePrefix);
             }
 
             //Get leader prefix.

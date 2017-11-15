@@ -136,4 +136,49 @@ public class MainLogic
 
         return requireConnectedClaims;
     }
+
+    public static boolean shouldBlockSafeZoneFromWarZone()
+    {
+        ConfigurationNode blockSafeZoneFromWarZoneNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone");
+
+        boolean blockSafeZoneFromWarZone = blockSafeZoneFromWarZoneNode.getBoolean();
+
+        return blockSafeZoneFromWarZone;
+    }
+
+    public static boolean isPlayerLimit()
+    {
+        ConfigurationNode isPlayerLimitNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "playerlimit", "playerlimit");
+
+        boolean playerLimit = isPlayerLimitNode.getBoolean();
+
+        return playerLimit;
+    }
+
+    public static int getPlayerLimit()
+    {
+        ConfigurationNode limitNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "playerlimit", "limit");
+
+        int limit = limitNode.getInt();
+
+        return limit;
+    }
+
+    public static int getAttackTime()
+    {
+        ConfigurationNode attackTimeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "attacktime");
+
+        int attackTime = attackTimeNode.getInt();
+
+        return attackTime;
+    }
+
+    public static String getPrefixOption()
+    {
+        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "prefix");
+
+        String prefix = prefixNode.getString();
+
+        return prefix;
+    }
 }

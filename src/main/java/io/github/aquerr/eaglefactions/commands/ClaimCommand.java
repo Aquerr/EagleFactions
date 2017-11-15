@@ -38,33 +38,42 @@ public class ClaimCommand implements CommandExecutor
 
                     if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-
                         if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
                         {
                             if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
                                 if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                                 {
-                                    if(MainLogic.requireConnectedClaims())
+                                    if(playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
                                     {
-                                        if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+
+                                        return CommandResult.success();
+                                    }
+                                    else
+                                    {
+                                        if(MainLogic.requireConnectedClaims())
+                                        {
+                                            if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                            {
+                                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+
+                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                                return CommandResult.success();
+                                            }
+                                            else
+                                            {
+                                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
+                                            }
+                                        }
+                                        else
                                         {
                                             FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                             return CommandResult.success();
                                         }
-                                        else
-                                        {
-                                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Claims needs to be connected!"));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                                        return CommandResult.success();
                                     }
                                 }
                                 else

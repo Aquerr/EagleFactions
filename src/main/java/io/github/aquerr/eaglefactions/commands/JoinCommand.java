@@ -18,7 +18,7 @@ public class JoinCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String factionName = context.<String>getOne("faction name").get();
+        String rawFactionName = context.<String>getOne("faction name").get();
 
         if(source instanceof Player)
         {
@@ -26,8 +26,13 @@ public class JoinCommand implements CommandExecutor
 
             if(FactionLogic.getFactionName(player.getUniqueId()) == null)
             {
-
-                if(FactionLogic.getFactionsNames().contains(factionName))
+                String factionName = FactionLogic.getRealFactionName(rawFactionName);
+                if (factionName == null)
+                {
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+                    return CommandResult.success();
+                }
+                else
                 {
                     //If player has admin mode then force join.
                     if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
@@ -60,10 +65,6 @@ public class JoinCommand implements CommandExecutor
                         }
                     }
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You haven't been invited to this faction."));
-                }
-                else
-                {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, factionName));
                 }
             }
             else

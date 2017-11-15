@@ -32,7 +32,7 @@ public class FriendlyFireCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                 {
                     if(FactionLogic.getFactionFriendlyFire(playerFactionName))
                     {
@@ -43,7 +43,20 @@ public class FriendlyFireCommand implements CommandExecutor
                     {
                         FactionLogic.setFactionFriendlyFire(playerFactionName,true);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction's ", TextColors.GOLD, "Friendly Fire", TextColors.WHITE, " has been set to ", TextColors.GOLD, "true"));
+                    }
+                }
 
+                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                {
+                    if(FactionLogic.getFactionFriendlyFire(playerFactionName))
+                    {
+                        FactionLogic.setFactionFriendlyFire(playerFactionName,false);
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction's ", TextColors.GOLD, "Friendly Fire", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
+                    }
+                    else
+                    {
+                        FactionLogic.setFactionFriendlyFire(playerFactionName,true);
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction's ", TextColors.GOLD, "Friendly Fire", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
                     }
                 }
                 else

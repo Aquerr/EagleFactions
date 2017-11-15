@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
@@ -27,10 +28,10 @@ public class SetHomeCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
-                {
-                    World world = player.getWorld();
+                World world = player.getWorld();
 
+                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                {
                     if(FactionLogic.isClaimed(world.getUniqueId(), player.getLocation().getChunkPosition()))
                     {
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
@@ -43,6 +44,22 @@ public class SetHomeCommand implements CommandExecutor
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed! You cen set home only on climed land!"));
                     }
 
+                    return CommandResult.success();
+                }
+
+                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                {
+                    if(FactionLogic.isClaimed(world.getUniqueId(), player.getLocation().getChunkPosition()))
+                    {
+                        Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
+
+                        FactionLogic.setHome(world.getUniqueId(), playerFactionName, home);
+                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
+                    }
+                    else
+                    {
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed! You cen set home only on climed land!"));
+                    }
                 }
                 else
                 {
