@@ -30,37 +30,45 @@ public class AttackCommand implements CommandExecutor
             {
                 if(FactionLogic.isClaimed(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()))
                 {
-                    if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                    if(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone") || FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("WarZone"))
                     {
-                        Faction faction = FactionLogic.getFaction(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
-
-                        if(!FactionLogic.getAlliances(playerFactionName).contains(faction.Name))
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction!"));
+                        return CommandResult.success();
+                    }
+                    else
+                    {
+                        if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                         {
-                            if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
+                            Faction faction = FactionLogic.getFaction(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
+
+                            if(!FactionLogic.getAlliances(playerFactionName).contains(faction.Name))
                             {
-                                int attackTime = MainLogic.getAttackTime();
+                                if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
+                                {
+                                    int attackTime = MainLogic.getAttackTime();
 
-                                AttackLogic.blockClaiming(faction.Name);
-                                Vector3i attackedClaim = player.getLocation().getChunkPosition();
-                                int seconds = 0;
+                                    AttackLogic.blockClaiming(faction.Name);
+                                    Vector3i attackedClaim = player.getLocation().getChunkPosition();
+                                    int seconds = 0;
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
-                                AttackLogic.attack(player, attackedClaim, seconds);
-                                return CommandResult.success();
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
+                                    AttackLogic.attack(player, attackedClaim, seconds);
+                                    return CommandResult.success();
+                                }
+                                else
+                                {
+                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! Their power is too high!"));
+                                }
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! Their power is too high!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! You are in the alliance with it!"));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! You are in the alliance with it!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
                         }
-                    }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
                     }
                 }
                 else

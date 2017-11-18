@@ -172,4 +172,13 @@ public class MainLogic
 
         return attackTime;
     }
+
+    public static String getPrefixOption()
+    {
+        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "prefix");
+
+        String prefix = prefixNode.getString();
+
+        return prefix;
+    }
 }
