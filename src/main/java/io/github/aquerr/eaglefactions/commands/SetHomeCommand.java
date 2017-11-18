@@ -32,17 +32,10 @@ public class SetHomeCommand implements CommandExecutor
 
                 if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.isClaimed(world.getUniqueId(), player.getLocation().getChunkPosition()))
-                    {
-                        Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
+                    Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
-                        FactionLogic.setHome(world.getUniqueId(), playerFactionName, home);
-                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
-                    }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed! You cen set home only on climed land!"));
-                    }
+                    FactionLogic.setHome(world.getUniqueId(), playerFactionName, home);
+                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
 
                     return CommandResult.success();
                 }
@@ -58,7 +51,7 @@ public class SetHomeCommand implements CommandExecutor
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed! You cen set home only on climed land!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed! You can set home only in claimed land!"));
                     }
                 }
                 else
