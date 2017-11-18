@@ -38,11 +38,8 @@ public class HomeCommand implements CommandExecutor
 
                     if(FactionLogic.isHomeInWorld(world.getUniqueId(), playerFactionName))
                     {
-                        EagleFactions.getEagleFactions().getLogger().info("Found home!!!");
-
                         Vector3i home = FactionLogic.getHome(playerFactionName);
 
-                        EagleFactions.getEagleFactions().getLogger().info("Teleporting the player...");
                         player.setLocation(player.getLocation().setBlockPosition(home));
 
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home"));
