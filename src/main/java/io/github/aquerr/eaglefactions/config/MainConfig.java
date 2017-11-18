@@ -19,7 +19,6 @@ public class MainConfig implements IConfig
 
     private MainConfig()
     {
-        ;
     }
 
     public static MainConfig getConfig()

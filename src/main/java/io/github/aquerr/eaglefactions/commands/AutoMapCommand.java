@@ -32,7 +32,7 @@ public class AutoMapCommand implements CommandExecutor
             {
                 EagleFactions.AutoMapList.add(player.getUniqueId().toString());
 
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoMap", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
                 return CommandResult.success();
             }
         }

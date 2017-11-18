@@ -27,7 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-@Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description)
+@Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = {"Aquerr"})
 public class EagleFactions
 {
 
@@ -136,7 +136,6 @@ public class EagleFactions
                 .executor (new HelpCommand ())
                 .build());
 
-        //TODO: Player should assign a faction tag while creating a faction.
         //Create faction command.
         Subcommands.put (Arrays.asList ("c","create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
@@ -368,6 +367,13 @@ public class EagleFactions
                 .description(Text.of("Destroy a claim"))
                 .permission(PluginPermissions.AttackCommand)
                 .executor(new AttackCommand())
+                .build());
+
+        //Reload Command
+        Subcommands.put(Arrays.asList("reload"), CommandSpec.builder()
+                .description(Text.of("Reload config file"))
+                .permission(PluginPermissions.ReloadCommand)
+                .executor(new ReloadCommand())
                 .build());
 
         //Build all commands

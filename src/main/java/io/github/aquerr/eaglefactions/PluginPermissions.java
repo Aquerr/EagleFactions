@@ -47,4 +47,6 @@ public abstract class PluginPermissions
     public static final String MaxPowerCommand = "eaglefactions.command.maxpower";
     public static final String CoordsCommand = "eaglefactions.command.coords";
     public static final String AttackCommand = "eaglefactions.command.attack";
+
+    public static final String ReloadCommand = "eaglefactions.command.reload";
 }
