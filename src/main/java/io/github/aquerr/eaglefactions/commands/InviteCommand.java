@@ -39,15 +39,14 @@ public class InviteCommand implements CommandExecutor
                     int playerCount = 0;
                     Faction faction = FactionLogic.getFaction(senderFactionName);
                     playerCount += faction.Leader.equals("") ? 0 : 1;
-                    playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
+                    playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
                     playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
 
                     if(playerCount >= MainLogic.getPlayerLimit())
                     {
-                        senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't invite more players to your faction. Faction's player limit has been achieved!"));
+                        senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't invite more players to your faction. Faction's player limit has been reached!"));
                         return CommandResult.success();
                     }
-
                 }
 
                 if(FactionLogic.getFactionName(invitedPlayer.getUniqueId()) == null)
