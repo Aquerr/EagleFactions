@@ -51,7 +51,7 @@ public class OfficerCommand implements CommandExecutor
                                 {
                                     FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
 
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }
                             else
@@ -77,13 +77,13 @@ public class OfficerCommand implements CommandExecutor
                                 {
                                     FactionLogic.addOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
 
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer, TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
                                 }
                                 else
                                 {
                                     FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
 
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You removed ", TextColors.GOLD, newOfficerPlayer, TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }
                             else
