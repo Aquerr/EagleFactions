@@ -2,8 +2,10 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -49,6 +51,20 @@ public class JoinCommand implements CommandExecutor
                         {
                             try
                             {
+                                if(MainLogic.isPlayerLimit())
+                                {
+                                    int playerCount = 0;
+                                    Faction faction = FactionLogic.getFaction(factionName);
+                                    playerCount += faction.Leader.equals("") ? 0 : 1;
+                                    playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
+                                    playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
+
+                                    if(playerCount >= MainLogic.getPlayerLimit())
+                                    {
+                                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't join this faction because it reached its player limit!"));
+                                        return CommandResult.success();
+                                    }
+                                }
 
                                 //TODO: Create a listener which will notify all players in faction that someone has joined.
                                 FactionLogic.joinFaction(player.getUniqueId(), factionName);

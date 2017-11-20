@@ -39,7 +39,7 @@ public class KickCommand implements CommandExecutor
                         {
                             if(!FactionLogic.getLeader(playerFactionName).equals(selectedPlayer.getUniqueId().toString()))
                             {
-                                if(!FactionLogic.getOfficers(playerFactionName).contains(selectedPlayer.getUniqueId().toString()) && FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                                if(!FactionLogic.getOfficers(playerFactionName).contains(selectedPlayer.getUniqueId().toString()) || FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
                                 {
                                     FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFactionName);
 
