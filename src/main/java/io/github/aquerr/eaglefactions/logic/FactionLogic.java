@@ -122,6 +122,55 @@ public class FactionLogic
         else return new ArrayList<String>();
     }
 
+    
+    public static List<String> getPlayers(String factionName)
+    {
+    	List<String> factionPlayers = new ArrayList<>();
+
+    	factionPlayers.add(FactionLogic.getLeader(factionName));
+        
+        for (String uuid : FactionLogic.getOfficers(factionName))
+        {
+        	factionPlayers.add(FactionLogic.getLeader(uuid));
+        }
+        
+        for (String uuid : FactionLogic.getMembers(factionName))
+        {
+        	factionPlayers.add(uuid);
+        }
+        
+        return factionPlayers;
+    }
+    
+    public static List<String> getPlayersOnline(String factionName)
+    {
+    	List<String> factionPlayers = new ArrayList<>();
+    	
+    	String factionLeader = FactionLogic.getLeader(factionName);
+    	if (PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
+    	{
+    		factionPlayers.add(factionLeader);
+    	}
+        
+        for (String uuid : FactionLogic.getOfficers(factionName))
+        {
+        	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	{
+        		factionPlayers.add(FactionLogic.getLeader(uuid));
+        	}
+        }
+        
+        for (String uuid : FactionLogic.getMembers(factionName))
+        {
+        	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	{
+        		factionPlayers.add(uuid);
+        	}
+        }
+        
+        return factionPlayers;
+    }
+    
     public static List<String> getFactionsNames()
     {
         if(ConfigAccess.getConfig(factionsConfig).getNode("factions").getValue() != null)
