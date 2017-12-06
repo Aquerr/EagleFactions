@@ -3,10 +3,14 @@ package io.github.aquerr.eaglefactions.logic;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
+import javafx.util.Pair;
 import ninja.leaping.configurate.ConfigurationNode;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.math.BigDecimal;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
@@ -194,11 +198,22 @@ public class MainLogic
         return createByItems;
     }
 
-    public static List<String> getNeededItems()
+    public static HashMap<String, Integer> getNeededItems()
     {
         ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "items");
 
-        List<String> items = itemsNode.getList(objectToStringTransformer);
+        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
+        HashMap<String, Integer> items = new HashMap<>();
+
+        for (String itemWithAmount: itemsList)
+        {
+            String strings[] = itemWithAmount.split("\\|");
+
+            String item = strings[0];
+            int amount = Integer.valueOf(strings[1]);
+
+            items.put(item, amount);
+        }
 
         return items;
     }
