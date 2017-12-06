@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -101,6 +103,10 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");
         get().getNode("eaglefactions", "gameplay", "attacktime").setValue(10).setComment("How much time in seconds takes destroying a claim. Default: 10");
+        get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems").setValue(false).setComment("Allows/denies using items/blocks to create a faction. Default: false");
+        get().getNode("eaglefactions", "gameplay", "factioncreation", "items").setValue(new ArrayList<>(Arrays.asList("35:1|35", "5|20", "265|1"))).setComment("A list of items/blocks that will be taken from the player after creating a faction" +
+                "There is a simple list of items below which you can edit by yourself. Below list contains: 35 orange wool, 20 wooden planks, 4 iron ingots. Write every item/block in format 35:1|42 where 35:1 is an item/block id and 42 is an amount.");
+        //get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyplacingblock")
         get().getNode("eaglefactions", "playerlimit", "playerlimit").setValue(false).setComment("Turns on/off player limit in factions. Default: false");
         get().getNode("eaglefactions", "playerlimit", "limit").setValue(15).setComment("Player limit in the faction. Default: 15");
     }

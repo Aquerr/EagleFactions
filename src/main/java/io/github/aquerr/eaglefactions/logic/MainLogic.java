@@ -6,6 +6,9 @@ import io.github.aquerr.eaglefactions.config.MainConfig;
 import ninja.leaping.configurate.ConfigurationNode;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 public class MainLogic
 {
@@ -181,4 +184,34 @@ public class MainLogic
 
         return prefix;
     }
+
+    public static boolean getCreateByItems()
+    {
+        ConfigurationNode createByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems");
+
+        boolean createByItems = createByItemsNode.getBoolean();
+
+        return createByItems;
+    }
+
+    public static List<String> getNeededItems()
+    {
+        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "items");
+
+        List<String> items = itemsNode.getList(objectToStringTransformer);
+
+        return items;
+    }
+
+    private static Function<Object,String> objectToStringTransformer = input ->
+    {
+        if (input instanceof String)
+        {
+            return (String) input;
+        }
+        else
+        {
+            return null;
+        }
+    };
 }
