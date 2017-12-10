@@ -198,14 +198,14 @@ public class MainLogic
         return createByItems;
     }
 
-    public static HashMap<String, Integer> getNeededItems()
+    public static HashMap<String, Integer> getRequiredItemsToCreate()
     {
         ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "items");
 
         List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();
 
-        for (String itemWithAmount: itemsList)
+        for (String itemWithAmount : itemsList)
         {
             String strings[] = itemWithAmount.split("\\|");
 

@@ -162,7 +162,7 @@ public class FactionLogic
         return factionsList;
     }
 
-    public static boolean createFaction(String factionName,String factionTag, UUID playerUUID)
+    public static void createFaction(String factionName,String factionTag, UUID playerUUID)
     {
         try
         {
@@ -178,10 +178,8 @@ public class FactionLogic
         }
         catch (Exception exception)
         {
-            return false;
+            exception.printStackTrace();
         }
-
-        return true;
     }
 
     public static void disbandFaction(String factionName)

@@ -1,19 +1,25 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -74,16 +80,15 @@ public class CreateCommand implements CommandExecutor
                         return CommandResult.success();
                     }
 
-                    boolean didSucceed = FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
-
-                    if (didSucceed)
+                    if (MainLogic.getCreateByItems())
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
-                        return CommandResult.success();
+                        return createByItems(factionName, factionTag, player);
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Something went wrong while creating faction."));
+                        FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
+                        return CommandResult.success();
                     }
                 }
                 else
@@ -101,6 +106,58 @@ public class CreateCommand implements CommandExecutor
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
         }
 
+        return CommandResult.success();
+    }
+
+    private CommandResult createByItems(String factionName, String factionTag, Player player)
+    {
+        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToCreate();
+        Inventory inventory = player.getInventory();
+        int allRequiredItems = requiredItems.size();
+        int foundItems = 0;
+
+        for (String itemId : requiredItems.keySet())
+        {
+            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+            if(itemType.isPresent())
+            {
+                ItemStack itemStack = ItemStack.builder()
+                        .itemType(itemType.get()).build();
+                itemStack.setQuantity(requiredItems.get(itemId));
+
+                if (inventory.contains(itemStack))
+                {
+                    foundItems += 1;
+                }
+                else
+                {
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to create a faction!"));
+                    break;
+                }
+            }
+        }
+
+        if (allRequiredItems == foundItems)
+        {
+            for (String itemId : requiredItems.keySet())
+            {
+                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+                if(itemType.isPresent())
+                {
+                    ItemStack itemStack = ItemStack.builder()
+                            .itemType(itemType.get()).build();
+                    itemStack.setQuantity(requiredItems.get(itemId));
+
+                    inventory.query(itemStack.getItem()).poll(itemStack.getQuantity());
+                }
+            }
+
+            FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
+            return CommandResult.success();
+        }
         return CommandResult.success();
     }
 }
