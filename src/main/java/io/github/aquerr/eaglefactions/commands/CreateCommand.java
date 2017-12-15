@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -29,81 +30,92 @@ public class CreateCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String factionName = context.<String>getOne("factionName").get();
-        String factionTag = context.<String>getOne("tag").get();
+        Optional<String> optionalFactionName = context.<String>getOne("faction name");
+        Optional<String> optionalFactionTag = context.<String>getOne("tag");
 
-        if (source instanceof Player)
+        if(optionalFactionName.isPresent() && optionalFactionTag.isPresent())
         {
-            Player player = (Player) source;
+            String factionName = optionalFactionName.get();
+            String factionTag = optionalFactionTag.get();
 
-            if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
+            if (source instanceof Player)
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't use this faction name!"));
-                return CommandResult.success();
-            }
+                Player player = (Player) source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-            if (playerFactionName == null)
-            {
-                if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
+                if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is already taken!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't use this faction name!"));
                     return CommandResult.success();
                 }
-                else
-                {
-                    //Check tag length
-                    if(factionTag.length() > MainLogic.getMaxTagLength())
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too long! (Max " + MainLogic.getMaxTagLength() + " chars)"));
-                        return CommandResult.success();
-                    }
-                    if(factionTag.length() < MainLogic.getMinTagLength())
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too short! (Min " + MainLogic.getMinTagLength() + " chars)"));
-                        return CommandResult.success();
-                    }
-                }
 
-                if (!FactionLogic.getFactionsNames().stream().anyMatch(x -> x.equalsIgnoreCase(factionName)))
-                {
-                    //Check name length
-                    if(factionName.length() > MainLogic.getMaxNameLength())
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " chars)"));
-                        return CommandResult.success();
-                    }
-                    if(factionName.length() < MainLogic.getMinNameLength())
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars)"));
-                        return CommandResult.success();
-                    }
+                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-                    if (MainLogic.getCreateByItems())
+                if (playerFactionName == null)
+                {
+                    if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
                     {
-                        return createByItems(factionName, factionTag, player);
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is already taken!"));
+                        return CommandResult.success();
                     }
                     else
                     {
-                        FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
-                        return CommandResult.success();
+                        //Check tag length
+                        if(factionTag.length() > MainLogic.getMaxTagLength())
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too long! (Max " + MainLogic.getMaxTagLength() + " chars)"));
+                            return CommandResult.success();
+                        }
+                        if(factionTag.length() < MainLogic.getMinTagLength())
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too short! (Min " + MainLogic.getMinTagLength() + " chars)"));
+                            return CommandResult.success();
+                        }
                     }
-                }
-                else
+
+                    if (!FactionLogic.getFactionsNames().stream().anyMatch(x -> x.equalsIgnoreCase(factionName)))
+                    {
+                        //Check name length
+                        if(factionName.length() > MainLogic.getMaxNameLength())
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " chars)"));
+                            return CommandResult.success();
+                        }
+                        if(factionName.length() < MainLogic.getMinNameLength())
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars)"));
+                            return CommandResult.success();
+                        }
+
+                        if (MainLogic.getCreateByItems())
+                        {
+                            return createByItems(factionName, factionTag, player);
+                        }
+                        else
+                        {
+                            FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
+                            return CommandResult.success();
+                        }
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Faction with the same name already exists!"));
+                    }
+                } else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Faction with the same name already exists!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are already in a faction. You must leave or disband your faction first."));
                 }
+
+
             } else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are already in a faction. You must leave or disband your faction first."));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
             }
-
-
-        } else
+        }
+        else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
+            source.sendMessage(Text.of(TextColors.RED, "Usage: /f create <tag> <faction name>"));
         }
 
         return CommandResult.success();

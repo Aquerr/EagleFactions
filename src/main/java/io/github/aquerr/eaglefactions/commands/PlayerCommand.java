@@ -33,7 +33,8 @@ public class PlayerCommand implements CommandExecutor
     {
         Optional<Player> optionalPlayer = context.<Player>getOne("player");
 
-        //TODO: Add check if provided player has entry in server database (if player played on the server).
+        //TODO: This command should work even for players that are offline.
+        //TODO: Add check if provided player has played on this server.
         //player.hasPlayedBefore() is not a solution for this problem.
 
         if(optionalPlayer.isPresent())
@@ -64,6 +65,8 @@ public class PlayerCommand implements CommandExecutor
             Date lastPlayed = Date.from(player.getJoinData().lastPlayed().get());
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             String formattedDate = formatter.format(lastPlayed);
+
+            //TODO: Show if player is online or offline.
 
             Text info = Text.builder()
                     .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerService.getPlayerName(player.getUniqueId()).get() + "\n"))

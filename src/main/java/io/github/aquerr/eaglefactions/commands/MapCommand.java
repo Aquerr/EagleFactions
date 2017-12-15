@@ -54,10 +54,9 @@ public class MapCommand implements CommandExecutor
             int mapHeight = 8;
 
             //Half map resolution + 1 (for player column/row in the center)
+            //Needs to be an odd number so the map will have equal distance to the left and right.
             int halfMapWidth = mapWidth / 2;
             int halfMapHeight = mapHeight / 2;
-
-            //Vector3i topLeftPosition = playerPosition.add(-halfMapWidth, 0, -halfMapHeight);
 
             for (int row = -halfMapHeight; row <= halfMapHeight; row++)
             {
@@ -72,59 +71,81 @@ public class MapCommand implements CommandExecutor
                         continue;
                     }
 
-                    //EagleFactions.getEagleFactions().getLogger().info("Getting player chunk... ");
-                    Vector3i chunk =  playerPosition.add(column, 0, row);
+                    Vector3i chunk = playerPosition.add(column, 0, row);
 
-
-                        if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    if (FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    {
+                        String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
+                        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                        if (playerFactionName != null)
                         {
-                            String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
-
-                            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-                            if(playerFactionName != null)
+                            if (factionName.equals(playerFactionName))
                             {
-                                if(factionName.equals(playerFactionName))
+                                textBuilder.append(factionMark);
+                                playerFaction = factionName;
+                            }
+                            else if (FactionLogic.getAlliances(playerFactionName).contains(factionName))
+                            {
+                                textBuilder.append(allianceMark);
+                                if (!allianceFactions.contains(factionName))
                                 {
-                                    textBuilder.append(factionMark);
-                                    playerFaction = factionName;
+                                    allianceFactions += factionName + ", ";
                                 }
-                                else if(FactionLogic.getAlliances(playerFactionName).contains(factionName))
+                            }
+                            else if (FactionLogic.getEnemies(playerFactionName).contains(factionName))
+                            {
+                                textBuilder.append(enemyMark);
+                                if (!enemyFactions.contains(factionName))
                                 {
-                                    textBuilder.append(allianceMark);
-                                    if(!allianceFactions.contains(factionName)) allianceFactions += factionName + ", ";
-                                }
-                                else if(FactionLogic.getEnemies(playerFactionName).contains(factionName))
-                                {
-                                    textBuilder.append(enemyMark);
-                                    if(!enemyFactions.contains(factionName)) enemyFactions += factionName + ", ";
-                                }
-                                else
-                                {
-                                    if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                    else if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
-                                    else textBuilder.append(normalFactionMark);
-
-                                    if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
+                                    enemyFactions += factionName + ", ";
                                 }
                             }
                             else
                             {
-                                if(factionName.equals("SafeZone")) textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                else if(factionName.equals("WarZone")) textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
-                                else textBuilder.append(normalFactionMark);
-
-                                if(!normalFactions.contains(factionName)) normalFactions += factionName + ", ";
+                                if (factionName.equals("SafeZone"))
+                                {
+                                    textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                }
+                                else if (factionName.equals("WarZone"))
+                                {
+                                    textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                }
+                                else
+                                {
+                                    textBuilder.append(normalFactionMark);
+                                }
+                                if (!normalFactions.contains(factionName))
+                                {
+                                    normalFactions += factionName + ", ";
+                                }
                             }
                         }
                         else
                         {
-                            textBuilder.append(notCapturedMark);
+                            if (factionName.equals("SafeZone"))
+                            {
+                                textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                            }
+                            else if (factionName.equals("WarZone"))
+                            {
+                                textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                            }
+                            else
+                            {
+                                textBuilder.append(normalFactionMark);
+                            }
+                            if (!normalFactions.contains(factionName))
+                            {
+                                normalFactions += factionName + ", ";
+                            }
                         }
+                    }
+                    else
+                    {
+                        textBuilder.append(notCapturedMark);
+                    }
                 }
                 map.add(textBuilder.build());
-
-
             }
 
             String playerPositionCalim = "none";

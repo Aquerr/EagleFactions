@@ -20,45 +20,38 @@ public class MaxPowerCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<Player> selectedPlayer = context.<Player>getOne(Text.of("player"));
-        Optional<String> power = context.<String>getOne(Text.of("power"));
+        Optional<Player> optionalSelectedPlayer = context.<Player>getOne(Text.of("player"));
+        Optional<String> optionalPower = context.<String>getOne(Text.of("power"));
 
-        if(source instanceof Player)
+        if (optionalSelectedPlayer.isPresent() && optionalPower.isPresent())
         {
-            Player player = (Player)source;
-
-            if(selectedPlayer.isPresent())
+            if (source instanceof Player)
             {
-                if(power.isPresent())
+                Player player = (Player) source;
+
+                if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                 {
-                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
-                    {
-                        BigDecimal newPower = new BigDecimal(power.get());
+                    BigDecimal newPower = new BigDecimal(optionalPower.get());
 
-                        PowerService.setMaxPower(selectedPlayer.get().getUniqueId(), newPower);
+                    PowerService.setMaxPower(optionalSelectedPlayer.get().getUniqueId(), newPower);
 
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's maxpower has been changed!"));
-                        return CommandResult.success();
-                    }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You need to toggle faction admin mode to do this!"));
-                    }
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's maxpower has been changed!"));
+                    return CommandResult.success();
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You did not assign power!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You need to toggle faction admin mode to do this!"));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no such player."));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
             }
-
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
+            source.sendMessage(Text.of(TextColors.RED, "Usage: /f maxpower <player> <power>"));
         }
 
         return CommandResult.success();

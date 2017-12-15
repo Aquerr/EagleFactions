@@ -17,6 +17,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -25,16 +26,18 @@ public class OfficerCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Player newOfficerPlayer = context.<Player>getOne("player").get();
+        Optional<Player> optionalNewOfficerPlayer = context.<Player>getOne("player");
 
-        if(source instanceof Player)
+        if (optionalNewOfficerPlayer.isPresent())
         {
-            Player player = (Player)source;
-
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-            if(playerFactionName != null)
+            if(source instanceof Player)
             {
+                Player player = (Player)source;
+                Player newOfficerPlayer = optionalNewOfficerPlayer.get();
+                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+
+                if(playerFactionName != null)
+                {
                     if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                     {
                         if(FactionLogic.getFactionName(newOfficerPlayer.getUniqueId()).equals(playerFactionName))
@@ -44,13 +47,11 @@ public class OfficerCommand implements CommandExecutor
                                 if(!FactionLogic.getOfficers(playerFactionName).contains(newOfficerPlayer.getUniqueId().toString()))
                                 {
                                     FactionLogic.addOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
-
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
                                 }
                                 else
                                 {
                                     FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
-
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }
@@ -76,13 +77,11 @@ public class OfficerCommand implements CommandExecutor
                                 if(!FactionLogic.getOfficers(playerFactionName).contains(newOfficerPlayer.getUniqueId().toString()))
                                 {
                                     FactionLogic.addOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
-
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
                                 }
                                 else
                                 {
                                     FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
-
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }
@@ -101,15 +100,21 @@ public class OfficerCommand implements CommandExecutor
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader to do this!"));
                     }
+                }
+                else
+                {
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
+            source.sendMessage(Text.of(TextColors.RED, "Usage: /f officer <player>"));
         }
 
         return CommandResult.success();
