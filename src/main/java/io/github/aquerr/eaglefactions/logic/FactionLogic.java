@@ -1,9 +1,6 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.Sets;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
@@ -11,8 +8,6 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.world.Chunk;
-
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -572,11 +567,9 @@ public class FactionLogic
 
         if(homeNode.getValue() != null)
         {
-            EagleFactions.getEagleFactions().getLogger().info("Home may be in this world...");
             if(homeNode.getString().contains(worldUUID.toString())) return true;
             else return false;
         }
-        EagleFactions.getEagleFactions().getLogger().info("Home is not set...");
         return false;
     }
 

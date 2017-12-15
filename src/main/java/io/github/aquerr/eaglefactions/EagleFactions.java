@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;

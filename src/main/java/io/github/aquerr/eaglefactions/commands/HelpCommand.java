@@ -16,7 +16,6 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
