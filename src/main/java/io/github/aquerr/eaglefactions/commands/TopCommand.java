@@ -27,9 +27,12 @@ public class TopCommand implements CommandExecutor
 
         factionsList.sort((o1, o2) -> o2.Power.compareTo(o1.Power));
 
+        //This should show only top 10 factions on the server.
+
         for(Faction faction: factionsList)
         {
             if(faction.Name.equalsIgnoreCase("safezone") || faction.Name.equalsIgnoreCase("warzone")) continue;
+            if(index == 11) break;
 
             index++;
             String tag = "";
