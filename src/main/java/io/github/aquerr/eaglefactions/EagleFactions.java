@@ -384,17 +384,19 @@ public class EagleFactions
                 .executor(new ReloadCommand())
                 .build());
 
-//        CommandCallable chatCommand = new ChatCommand();
-////
-////        SimpleDispatcher rootCommand = new SimpleDispatcher();
-
-//        rootCommand.register(chatCommand, "chatcommand", "chat");
-
+        //Chat Command
         Subcommands.put(Arrays.asList("chat"), CommandSpec.builder()
                 .description(Text.of("Chat command"))
                 .permission(PluginPermissions.ChatCommand)
                 .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
                 .executor(new ChatCommand())
+                .build());
+
+        //Top Command
+        Subcommands.put(Arrays.asList("top"), CommandSpec.builder()
+                .description(Text.of("Top Command"))
+                .permission(PluginPermissions.TopCommand)
+                .executor(new TopCommand())
                 .build());
 
         //Build all commands
