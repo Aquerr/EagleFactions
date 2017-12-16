@@ -28,23 +28,23 @@ public class ChatMessageListener
             MessageChannel messageChannel = event.getOriginalChannel();
             String factionName = FactionLogic.getFactionName(player.getUniqueId());
 
-            Text.Builder formatMessage = Text.builder();
+            Text.Builder formattedMessage = Text.builder();
             Text.Builder chatTypePrefix = Text.builder();
-            Text.Builder factionPrefix = Text.builder();
+            Text.Builder factionAndRankPrefix = Text.builder();
 
             //Message = Prefixes + Player Name + Text
             //OriginalMessage = Player Name + Text
             //RawMessage = Text
 
             //Get the entire message and remove nickname and chat from it so prefixes from other plugins will be shown correctly.
-            formatMessage.append(event.getMessage().getChildren());
-            formatMessage.remove(event.getOriginalMessage().getChildren());
+            formattedMessage.append(event.getMessage().getChildren());
+            formattedMessage.remove(event.getOriginalMessage().getChildren());
 
             if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
             {
                 if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
                 {
-                    formatMessage.append(Text.of(TextColors.BLUE, event.getRawMessage()));
+                    formattedMessage.append(Text.of(TextColors.BLUE, event.getRawMessage()));
                     chatTypePrefix.append(getAlliancePrefix());
                     messageChannel.asMutable().clearMembers();
 
@@ -72,7 +72,7 @@ public class ChatMessageListener
                 }
                 else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
                 {
-                    formatMessage.append(Text.of(TextColors.GREEN, event.getRawMessage()));
+                    formattedMessage.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                     chatTypePrefix.append(getFactionPrefix());
                     messageChannel.asMutable().clearMembers();
 
@@ -91,7 +91,7 @@ public class ChatMessageListener
             }
             else
             {
-                formatMessage.append(event.getRawMessage());
+                formattedMessage.append(event.getRawMessage());
             }
 
             if(MainLogic.getPrefixOption().equals("tag"))
@@ -103,7 +103,7 @@ public class ChatMessageListener
                             .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
                             .build();
 
-                    factionPrefix.append(factionTag);
+                    factionAndRankPrefix.append(factionTag);
                 }
             }
             else if (MainLogic.getPrefixOption().equals("name"))
@@ -113,7 +113,7 @@ public class ChatMessageListener
                         .append(Text.of("[" ,TextColors.GREEN, factionName, TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(factionNamePrefix);
+                factionAndRankPrefix.append(factionNamePrefix);
             }
 
             //Get leader prefix.
@@ -123,7 +123,7 @@ public class ChatMessageListener
                         .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(leaderPrefix);
+                factionAndRankPrefix.append(leaderPrefix);
             }
 
             //Get officer prefix.
@@ -133,14 +133,14 @@ public class ChatMessageListener
                         .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(officerPrefix);
+                factionAndRankPrefix.append(officerPrefix);
             }
 
             //Build the whole message & print.
             Text messageToPrint = Text.builder()
                     .append(chatTypePrefix.build())
-                    .append(factionPrefix.build())
-                    .append(formatMessage.build())
+                    .append(factionAndRankPrefix.build())
+                    .append(formattedMessage.build())
                     .build();
 
             event.setChannel(messageChannel);

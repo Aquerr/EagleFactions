@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.entities;
 
 public enum ChatEnum
 {
-    Everyone,
+    Global,
     Alliance,
     Faction
 }
