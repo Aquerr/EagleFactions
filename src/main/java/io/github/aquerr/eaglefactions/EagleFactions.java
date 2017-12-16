@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
@@ -40,6 +41,7 @@ public class EagleFactions
     public static List<String> AutoMapList = new ArrayList<>();
     public static List<String> AdminList = new ArrayList<>();
     public static List<String> AttackedFactions = new ArrayList<>();
+    public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
 
     @Inject
     private Logger _logger;
@@ -391,6 +393,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("chat"), CommandSpec.builder()
                 .description(Text.of("Chat command"))
                 .permission(PluginPermissions.ChatCommand)
+                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
                 .executor(new ChatCommand())
                 .build());
 

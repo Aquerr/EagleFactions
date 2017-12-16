@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
 
+
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
@@ -118,40 +119,40 @@ public class FactionLogic
     }
 
     
-    public static List<String> getPlayers(String factionName)
+    public static List<UUID> getPlayers(String factionName)
     {
-    	List<String> factionPlayers = new ArrayList<>();
+    	List<UUID> factionPlayers = new ArrayList<>();
 
-    	factionPlayers.add(FactionLogic.getLeader(factionName));
+    	factionPlayers.add(UUID.fromString(FactionLogic.getLeader(factionName)));
         
         for (String uuid : FactionLogic.getOfficers(factionName))
         {
-        	factionPlayers.add(FactionLogic.getLeader(uuid));
+        	factionPlayers.add(UUID.fromString(uuid));
         }
         
         for (String uuid : FactionLogic.getMembers(factionName))
         {
-        	factionPlayers.add(uuid);
+        	factionPlayers.add(UUID.fromString(uuid));
         }
         
         return factionPlayers;
     }
     
-    public static List<String> getPlayersOnline(String factionName)
+    public static List<UUID> getPlayersOnline(String factionName)
     {
-    	List<String> factionPlayers = new ArrayList<>();
+    	List<UUID> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = FactionLogic.getLeader(factionName);
     	if (PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
     	{
-    		factionPlayers.add(factionLeader);
+    		factionPlayers.add(UUID.fromString(factionLeader));
     	}
         
         for (String uuid : FactionLogic.getOfficers(factionName))
         {
         	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(FactionLogic.getLeader(uuid));
+        		factionPlayers.add(UUID.fromString(uuid));
         	}
         }
         
@@ -159,7 +160,7 @@ public class FactionLogic
         {
         	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(uuid);
+        		factionPlayers.add(UUID.fromString(uuid));
         	}
         }
         

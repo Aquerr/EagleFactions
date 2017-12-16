@@ -1,13 +1,22 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class ChatMessageListener
 {
@@ -16,9 +25,74 @@ public class ChatMessageListener
     {
         if(FactionLogic.getFactionName(player.getUniqueId()) != null)
         {
+            MessageChannel messageChannel = event.getOriginalChannel();
             String factionName = FactionLogic.getFactionName(player.getUniqueId());
 
+            Text.Builder formatMessage = Text.builder();
+            Text.Builder chatTypePrefix = Text.builder();
             Text.Builder factionPrefix = Text.builder();
+
+            //Message = Prefixes + Player Name + Text
+            //OriginalMessage = Player Name + Text
+            //RawMessage = Text
+
+            //Get the entire message and remove nickname and chat from it so prefixes from other plugins will be shown correctly.
+            formatMessage.append(event.getMessage().getChildren());
+            formatMessage.remove(event.getOriginalMessage().getChildren());
+
+            if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
+            {
+                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
+                {
+                    formatMessage.append(Text.of(TextColors.BLUE, event.getRawMessage()));
+                    chatTypePrefix.append(getAlliancePrefix());
+                    messageChannel.asMutable().clearMembers();
+
+                    Set<MessageReceiver> receivers = new HashSet<>();
+
+                    for (String allianceName : FactionLogic.getAlliances(factionName))
+                    {
+                        for (UUID uuid : FactionLogic.getPlayersOnline(allianceName))
+                        {
+                            if(Sponge.getServer().getPlayer(uuid).isPresent())
+                            {
+                                receivers.add(Sponge.getServer().getPlayer(uuid).get());
+                            }
+                        }
+                    }
+
+                    for (UUID uuid : FactionLogic.getPlayersOnline(factionName))
+                    {
+                        if(Sponge.getServer().getPlayer(uuid).isPresent())
+                        {
+                            receivers.add(Sponge.getServer().getPlayer(uuid).get());
+                        }
+                    }
+                    messageChannel = MessageChannel.fixed(receivers);
+                }
+                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
+                {
+                    formatMessage.append(Text.of(TextColors.GREEN, event.getRawMessage()));
+                    chatTypePrefix.append(getFactionPrefix());
+                    messageChannel.asMutable().clearMembers();
+
+                    Set<MessageReceiver> receivers = new HashSet<>();
+
+                    for (UUID uuid : FactionLogic.getPlayersOnline(factionName))
+                    {
+                        if(Sponge.getServer().getPlayer(uuid).isPresent())
+                        {
+                            receivers.add(Sponge.getServer().getPlayer(uuid).get());
+                        }
+                    }
+
+                    messageChannel = MessageChannel.fixed(receivers);
+                }
+            }
+            else
+            {
+                formatMessage.append(event.getRawMessage());
+            }
 
             if(MainLogic.getPrefixOption().equals("tag"))
             {
@@ -64,12 +138,30 @@ public class ChatMessageListener
 
             //Build the whole message & print.
             Text messageToPrint = Text.builder()
+                    .append(chatTypePrefix.build())
                     .append(factionPrefix.build())
-                    .append(event.getMessage())
+                    .append(formatMessage.build())
                     .build();
 
+            event.setChannel(messageChannel);
             event.setMessage(messageToPrint);
         }
         return;
+    }
+
+    private Text getAlliancePrefix()
+    {
+        Text alliancePrefix = Text.builder()
+                .append(Text.of("[", TextColors.BLUE, "Alliance", TextColors.RESET, "]"))
+                .build();
+        return alliancePrefix;
+    }
+
+    private Text getFactionPrefix()
+    {
+        Text factionPrefix = Text.builder()
+                .append(Text.of("[", TextColors.GREEN, "Faction", TextColors.RESET, "]"))
+                .build();
+        return factionPrefix;
     }
 }
