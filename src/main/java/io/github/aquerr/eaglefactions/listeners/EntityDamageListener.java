@@ -1,24 +1,14 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
-
-import java.util.List;
-import java.util.Optional;
 
 public class EntityDamageListener
 {

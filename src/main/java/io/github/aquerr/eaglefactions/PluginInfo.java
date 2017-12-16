@@ -15,4 +15,5 @@ public abstract class PluginInfo
     public static final String Description = "A factions plugin that will make managing your battle-server easier. :)";
     public static final Text PluginPrefix = Text.of(TextColors.AQUA, "[" + Name + "] ");
     public static final Text ErrorPrefix = Text.of(TextColors.DARK_RED, "[ERROR] ");
+    public static final String Author = "Aquerr";
 }

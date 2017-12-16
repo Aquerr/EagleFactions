@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -19,6 +18,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -29,8 +29,11 @@ public class InfoCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        String rawFactionName = context.<String>getOne("faction name").get();
+        Optional<String> optionalFactionName = context.<String>getOne("faction name");
 
+        if (optionalFactionName.isPresent())
+        {
+            String rawFactionName = optionalFactionName.get();
             String factionName = FactionLogic.getRealFactionName(rawFactionName);
 
             if (factionName == null)
@@ -108,6 +111,12 @@ public class InfoCommand implements CommandExecutor
 
                 CommandResult.success();
             }
+        }
+        else
+        {
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
+            source.sendMessage(Text.of(TextColors.RED, "Usage: /f info <faction name>"));
+        }
 
         return CommandResult.success();
     }

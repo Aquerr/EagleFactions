@@ -1,14 +1,22 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class ChatMessageListener
 {
@@ -17,59 +25,74 @@ public class ChatMessageListener
     {
         if(FactionLogic.getFactionName(player.getUniqueId()) != null)
         {
+            MessageChannel messageChannel = event.getOriginalChannel();
             String factionName = FactionLogic.getFactionName(player.getUniqueId());
 
-          //  //Get full formatted and colored message.
-          //  Text fullMessage = event.getMessage();
-          //  EagleFactions.getEagleFactions().getLogger().info(fullMessage.toPlain());
-//
-          //  //Get faction's tag
-          //  Text factionTag = Text.builder()
-          //          .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(FactionLogic.getFactionName(player.getUniqueId())), TextColors.RESET, "]"))
-          //          .build();
-          //  EagleFactions.getEagleFactions().getLogger().info(factionTag.toPlain());
-//
-//
-//
-          //  //Get message content
-          //  String message = event.getMessage().toPlain();
-          //  String messages[] = message.split(":");
-          //  String body = messages[1];
-          //  EagleFactions.getEagleFactions().getLogger().info(body);
-//
-          //  //Get message header (Any tags that are before player's name)
-          //  Text header = fullMessage.toBuilder()
-          //          .remove(Text.of(messages[0].replace(player.getName() + ":", ""))).style(fullMessage.getStyle())
-          //          .remove(Text.of(body))
-          //          .build();
-//
-          //  //Text header = Text.of("");
-//
-          // // for (Text child: fullMessage.toBuilder().getChildren())
-          // // {
-          // //     for (Text nextChild: child.getChildren())
-          // //     {
-          // //         EagleFactions.getEagleFactions().getLogger().info("Child w childrenie to: " + nextChild.toPlain());
-          // //     }
-////
-          // // }
-//
-          //  EagleFactions.getEagleFactions().getLogger().info(fullMessage.getChildren().toString());
-          //  EagleFactions.getEagleFactions().getLogger().info(header.toPlain());
-//
-//
-          //  //Create final message with factions tag.
-          //  Text messageToPrint = Text.builder()
-          //          .append(header)
-          //          .append(factionTag)
-          //          .append(Text.of(player.getName() + ":"))
-          //          .append(Text.of(body))
-          //          .build();
-          //  EagleFactions.getEagleFactions().getLogger().info(messageToPrint.toPlain());
-//
-          //  event.setMessage(messageToPrint);
+            Text.Builder formattedMessage = Text.builder();
+            Text.Builder chatTypePrefix = Text.builder();
+            Text.Builder factionAndRankPrefix = Text.builder();
 
-            Text.Builder factionPrefix = Text.builder();
+            //Message = Prefixes + Player Name + Text
+            //OriginalMessage = Player Name + Text
+            //RawMessage = Text
+
+            //Get the entire message and remove nickname and chat from it so prefixes from other plugins will be shown correctly.
+            formattedMessage.append(event.getMessage().getChildren());
+            formattedMessage.remove(event.getOriginalMessage().getChildren());
+
+            if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
+            {
+                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
+                {
+                    formattedMessage.append(Text.of(TextColors.BLUE, event.getRawMessage()));
+                    chatTypePrefix.append(getAlliancePrefix());
+                    messageChannel.asMutable().clearMembers();
+
+                    Set<MessageReceiver> receivers = new HashSet<>();
+
+                    for (String allianceName : FactionLogic.getAlliances(factionName))
+                    {
+                        for (UUID uuid : FactionLogic.getPlayersOnline(allianceName))
+                        {
+                            if(Sponge.getServer().getPlayer(uuid).isPresent())
+                            {
+                                receivers.add(Sponge.getServer().getPlayer(uuid).get());
+                            }
+                        }
+                    }
+
+                    for (UUID uuid : FactionLogic.getPlayersOnline(factionName))
+                    {
+                        if(Sponge.getServer().getPlayer(uuid).isPresent())
+                        {
+                            receivers.add(Sponge.getServer().getPlayer(uuid).get());
+                        }
+                    }
+                    messageChannel = MessageChannel.fixed(receivers);
+                }
+                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
+                {
+                    formattedMessage.append(Text.of(TextColors.GREEN, event.getRawMessage()));
+                    chatTypePrefix.append(getFactionPrefix());
+                    messageChannel.asMutable().clearMembers();
+
+                    Set<MessageReceiver> receivers = new HashSet<>();
+
+                    for (UUID uuid : FactionLogic.getPlayersOnline(factionName))
+                    {
+                        if(Sponge.getServer().getPlayer(uuid).isPresent())
+                        {
+                            receivers.add(Sponge.getServer().getPlayer(uuid).get());
+                        }
+                    }
+
+                    messageChannel = MessageChannel.fixed(receivers);
+                }
+            }
+            else
+            {
+                formattedMessage.append(event.getRawMessage());
+            }
 
             if(MainLogic.getPrefixOption().equals("tag"))
             {
@@ -80,7 +103,7 @@ public class ChatMessageListener
                             .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
                             .build();
 
-                    factionPrefix.append(factionTag);
+                    factionAndRankPrefix.append(factionTag);
                 }
             }
             else if (MainLogic.getPrefixOption().equals("name"))
@@ -90,7 +113,7 @@ public class ChatMessageListener
                         .append(Text.of("[" ,TextColors.GREEN, factionName, TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(factionNamePrefix);
+                factionAndRankPrefix.append(factionNamePrefix);
             }
 
             //Get leader prefix.
@@ -100,7 +123,7 @@ public class ChatMessageListener
                         .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(leaderPrefix);
+                factionAndRankPrefix.append(leaderPrefix);
             }
 
             //Get officer prefix.
@@ -110,18 +133,35 @@ public class ChatMessageListener
                         .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
                         .build();
 
-                factionPrefix.append(officerPrefix);
+                factionAndRankPrefix.append(officerPrefix);
             }
 
             //Build the whole message & print.
             Text messageToPrint = Text.builder()
-                    .append(factionPrefix.build())
-                    .append(event.getMessage())
+                    .append(chatTypePrefix.build())
+                    .append(factionAndRankPrefix.build())
+                    .append(formattedMessage.build())
                     .build();
 
+            event.setChannel(messageChannel);
             event.setMessage(messageToPrint);
         }
-
         return;
+    }
+
+    private Text getAlliancePrefix()
+    {
+        Text alliancePrefix = Text.builder()
+                .append(Text.of("[", TextColors.BLUE, "Alliance", TextColors.RESET, "]"))
+                .build();
+        return alliancePrefix;
+    }
+
+    private Text getFactionPrefix()
+    {
+        Text factionPrefix = Text.builder()
+                .append(Text.of("[", TextColors.GREEN, "Faction", TextColors.RESET, "]"))
+                .build();
+        return factionPrefix;
     }
 }
