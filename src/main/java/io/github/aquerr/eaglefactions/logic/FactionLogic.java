@@ -363,7 +363,35 @@ public class FactionLogic
 
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
+    }
 
+    public static void setLeader(String newLeaderUUIDAsString, String playerFactionName)
+    {
+        if (!getLeader(playerFactionName).equals(""))
+        {
+            String lastLeader = getLeader(playerFactionName);
+            addOfficer(lastLeader, playerFactionName);
+        }
+
+        if(getOfficers(playerFactionName).contains(newLeaderUUIDAsString))
+        {
+            removeOfficer(newLeaderUUIDAsString, playerFactionName);
+        }
+        else if(getMembers(playerFactionName).contains(newLeaderUUIDAsString))
+        {
+            removeMember(UUID.fromString(newLeaderUUIDAsString), playerFactionName);
+        }
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[] {"factions", playerFactionName, "leader"}, newLeaderUUIDAsString);
+    }
+
+    public static void removeMember(UUID playerUUID, String factionName)
+    {
+        List<String> membersList = new ArrayList<>(getMembers(factionName));
+
+        membersList.remove(playerUUID.toString());
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
     }
 
     public static boolean getFactionFriendlyFire(String factionName)

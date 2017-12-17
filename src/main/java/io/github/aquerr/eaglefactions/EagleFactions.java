@@ -399,6 +399,14 @@ public class EagleFactions
                 .executor(new TopCommand())
                 .build());
 
+        //Setleader Command
+        Subcommands.put(Arrays.asList("setleader"), CommandSpec.builder()
+                .description(Text.of("Set someone as leader (removes you as a leader if you are one)"))
+                .permission(PluginPermissions.SetLeaderCommand)
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .executor(new SetLeaderCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
