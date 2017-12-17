@@ -39,20 +39,20 @@ public class PlayerCommand implements CommandExecutor
         if(optionalPlayer.isPresent())
         {
             Player player = optionalPlayer.get();
-            showPlayerInfo(player);
+            showPlayerInfo(source, player);
         }
         else
         {
             if(source instanceof Player)
             {
                 Player player = (Player)source;
-                showPlayerInfo(player);
+                showPlayerInfo(source, player);
             }
         }
         return CommandResult.success();
     }
 
-    private void showPlayerInfo(Player player)
+    private void showPlayerInfo(CommandSource source, Player player)
     {
         if(player.hasPlayedBefore())
         {
@@ -78,7 +78,7 @@ public class PlayerCommand implements CommandExecutor
 
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Player Info")).padding(Text.of("=")).contents(playerInfo);
-            paginationBuilder.sendTo(player);
+            paginationBuilder.sendTo(source);
         }
         else
         {
