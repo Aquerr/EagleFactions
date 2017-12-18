@@ -37,7 +37,7 @@ public class SetLeaderCommand implements CommandExecutor
                         {
                             if(!FactionLogic.getLeader(playerFactionName).equals(newLeaderPlayer.getUniqueId().toString()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId().toString(), playerFactionName);
+                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFactionName);
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You set ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
                             }
                             else
@@ -59,7 +59,7 @@ public class SetLeaderCommand implements CommandExecutor
                         {
                             if(!FactionLogic.getLeader(playerFactionName).equals(newLeaderPlayer.getUniqueId().toString()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId().toString(), playerFactionName);
+                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFactionName);
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You set ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
                                 return CommandResult.success();
                             }
