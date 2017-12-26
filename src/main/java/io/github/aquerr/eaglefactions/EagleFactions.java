@@ -388,7 +388,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("chat"), CommandSpec.builder()
                 .description(Text.of("Chat command"))
                 .permission(PluginPermissions.ChatCommand)
-//                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
+                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
                 .executor(new ChatCommand())
                 .build());
 
