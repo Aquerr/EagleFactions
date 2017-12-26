@@ -6,7 +6,7 @@ API 6.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/Eag
 
 API 5.1.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.10.2%2Fapi-5.1.0)](https://travis-ci.org/Aquerr/EagleFactions)
 
-Current version: 0.9.6
+Current version: 0.9.7
 
 **NOTE: Plugin is currently in heavy development!**
 
@@ -30,6 +30,7 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 * Option for disabling friendly fire between aliances.
 * Unclaim other factions lands if their power is low.
 * Prefixes Factions Tags
+* Faction internal chat
 * Custom ranks in factions **(not implemented yet)**
 * PVP-Block **(not implemented yet)**
 * Fully configurable
