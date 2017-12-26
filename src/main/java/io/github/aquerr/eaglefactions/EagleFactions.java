@@ -388,7 +388,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("chat"), CommandSpec.builder()
                 .description(Text.of("Chat command"))
                 .permission(PluginPermissions.ChatCommand)
-                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
+//                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
                 .executor(new ChatCommand())
                 .build());
 
@@ -397,6 +397,14 @@ public class EagleFactions
                 .description(Text.of("Top Command"))
                 .permission(PluginPermissions.TopCommand)
                 .executor(new TopCommand())
+                .build());
+
+        //Setleader Command
+        Subcommands.put(Arrays.asList("setleader"), CommandSpec.builder()
+                .description(Text.of("Set someone as leader (removes you as a leader if you are one)"))
+                .permission(PluginPermissions.SetLeaderCommand)
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .executor(new SetLeaderCommand())
                 .build());
 
         //Build all commands

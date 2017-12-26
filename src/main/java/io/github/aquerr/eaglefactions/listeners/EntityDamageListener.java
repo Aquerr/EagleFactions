@@ -1,13 +1,16 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
 public class EntityDamageListener
@@ -15,9 +18,9 @@ public class EntityDamageListener
     @Listener
     public void onEntityDamage(DamageEntityEvent event)
     {
-        if(event.getCause().root() instanceof EntityDamageSource)
+        if(event.getCause().root() instanceof DamageSource)
         {
-            EntityDamageSource source = (EntityDamageSource)event.getCause().root();
+            DamageSource source = (DamageSource) event.getCause().root();
 
                 if(event.getTargetEntity().getType() == EntityTypes.PLAYER)
                 {
@@ -31,9 +34,9 @@ public class EntityDamageListener
                         return;
                     }
 
-                    if(source.getSource() instanceof Player)
+                    if(source instanceof Player)
                     {
-                        Player player = (Player) source.getSource();
+                        Player player = (Player) source;
 
                         if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
                         {
@@ -86,21 +89,6 @@ public class EntityDamageListener
                                     return;
                                 }
                             }
-                        }
-                    }
-                }
-                else
-                {
-                    if(source.getSource() instanceof Player)
-                    {
-                        Player player = (Player) source.getSource();
-                        World world = player.getWorld();
-
-                        if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
-                        {
-                            event.setBaseDamage(0);
-                            event.setCancelled(true);
-                            return;
                         }
                     }
                 }

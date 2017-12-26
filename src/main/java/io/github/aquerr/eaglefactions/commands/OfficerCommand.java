@@ -39,12 +39,12 @@ public class OfficerCommand implements CommandExecutor
                             {
                                 if(!FactionLogic.getOfficers(playerFactionName).contains(newOfficerPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.addOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
+                                    FactionLogic.addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
                                 }
                                 else
                                 {
-                                    FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
+                                    FactionLogic.removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }
@@ -69,12 +69,12 @@ public class OfficerCommand implements CommandExecutor
                             {
                                 if(!FactionLogic.getOfficers(playerFactionName).contains(newOfficerPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.addOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
+                                    FactionLogic.addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You added ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Officer", TextColors.WHITE, "!"));
                                 }
                                 else
                                 {
-                                    FactionLogic.removeOfficer(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
+                                    FactionLogic.removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId().toString(), playerFactionName);
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You removed ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " from your ", TextColors.BLUE, "Officers", TextColors.WHITE, "!"));
                                 }
                             }

@@ -35,6 +35,7 @@ public abstract class PluginPermissions
     public static final String UnclaimCommand = "eaglefactions.command.unclaim";
     public static final String UnclaimAllCommand = "eaglefactions.command.unclaimall";
 
+    public static final String SetLeaderCommand = "eaglefactions.command.setleader";
     public static final String OfficerCommand = "eaglefactions.command.officer";
     public static final String SetHomeCommand = "eaglefactions.command.sethome";
     public static final String HomeCommand = "eaglefactions.command.home";

@@ -341,29 +341,68 @@ public class FactionLogic
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", enemyFactionName, "enemies"}, enemyFactionEnemiesList);
     }
 
-    public static void addOfficer(String newOfficerName, String factionName)
+    public static void addOfficerAndRemoveMember(String newOfficerUUIDAsString, String factionName)
+    {
+        addOfficer(UUID.fromString(newOfficerUUIDAsString), factionName);
+        removeMember(UUID.fromString(newOfficerUUIDAsString), factionName);
+    }
+
+    public static void removeOfficerAndSetAsMember(String officerNameAsString, String factionName)
+    {
+        removeOfficer(UUID.fromString(officerNameAsString), factionName);
+        addMember(UUID.fromString(officerNameAsString), factionName);
+    }
+
+    public static void setLeader(UUID newLeaderUUID, String playerFactionName)
+    {
+        if (!getLeader(playerFactionName).equals(""))
+        {
+            String lastLeader = getLeader(playerFactionName);
+            addOfficerAndRemoveMember(lastLeader, playerFactionName);
+        }
+
+        if(getOfficers(playerFactionName).contains(newLeaderUUID.toString()))
+        {
+            removeOfficer(newLeaderUUID, playerFactionName);
+        }
+        else if(getMembers(playerFactionName).contains(newLeaderUUID.toString()))
+        {
+            removeMember(newLeaderUUID, playerFactionName);
+        }
+
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[] {"factions", playerFactionName, "leader"}, newLeaderUUID.toString());
+    }
+
+    public static void addOfficer(UUID playerUUID, String factionName)
     {
         List<String> officersList = new ArrayList<>(getOfficers(factionName));
+        officersList.add(playerUUID.toString());
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+    }
+
+    public static void addMember(UUID playerUUID, String factionName)
+    {
         List<String> membersList = new ArrayList<>(getMembers(factionName));
 
-        officersList.add(newOfficerName);
-        membersList.remove(newOfficerName);
+        membersList.add(playerUUID.toString());
 
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
     }
 
-    public static void removeOfficer(String officerName, String factionName)
+    public static void removeOfficer(UUID playerUUID, String factionName)
     {
         List<String> officersList = new ArrayList<>(getOfficers(factionName));
+        officersList.remove(playerUUID.toString());
+        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+    }
+
+    public static void removeMember(UUID playerUUID, String factionName)
+    {
         List<String> membersList = new ArrayList<>(getMembers(factionName));
 
-        officersList.remove(officerName);
-        membersList.add(officerName);
+        membersList.remove(playerUUID.toString());
 
-        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
         ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "members"}, membersList);
-
     }
 
     public static boolean getFactionFriendlyFire(String factionName)

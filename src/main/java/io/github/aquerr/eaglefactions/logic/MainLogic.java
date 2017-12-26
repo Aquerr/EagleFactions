@@ -182,11 +182,20 @@ public class MainLogic
 
     public static String getPrefixOption()
     {
-        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "prefix");
+        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "factionprefix");
 
         String prefix = prefixNode.getString();
 
         return prefix;
+    }
+
+    public static Boolean shouldDisplayRank()
+    {
+        ConfigurationNode rankNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "factionrank");
+
+        Boolean rank = rankNode.getBoolean();
+
+        return rank;
     }
 
     public static boolean getCreateByItems()
