@@ -46,6 +46,7 @@ public class ChatCommand implements CommandExecutor
                     else
                     {
                         EagleFactions.ChatList.put(player.getUniqueId(), optionalChatType.get());
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
                     }
                 }
                 else
