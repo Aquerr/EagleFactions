@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -88,7 +90,8 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "tag", "maxlength").setValue(5).setComment("This determines the minimum amount of characters a Factions's tag can be. Default: 5");
         get().getNode("eaglefactions", "tag", "minlength").setValue(2).setComment("This determines the minimum amount of characters a Factions's tag can be. Default: 2");
         //get().getNode("eaglefactions", "prefix", "display").setValue(true).setComment("Allows/denies displaying Faction prefixes. Default: true");
-        get().getNode("eaglefactions", "chat", "prefix").setValue("tag").setComment("Should faction name or tag display in chat when someone is writing? Default: tag (Available Options: tag, name)");
+        get().getNode("eaglefactions", "chat", "factionprefix").setValue("tag").setComment("Should faction name or tag be displayed in chat when someone is writing? Default: tag (Available Options: tag, name, none)");
+        get().getNode("eaglefactions", "chat", "factionrank").setValue(true).setComment("Should faction rank (leader, officer) be displayed in chat when someone is writing? Default: true");
         get().getNode("eaglefactions", "power", "increment").setValue(0.04).setComment("How much power will be restored for player after 1 minute of playing. (0.04 per minute = 1,2 per hour.) Default: 0.04");
         get().getNode("eaglefactions", "power", "decrement").setValue(2.0).setComment("How much power will be removed on player death. Default: 2.0");
         get().getNode("eaglefactions", "power", "maxpower").setValue(10.0).setComment("Maximum amount of power a player can have. Default: 10.0");
@@ -101,6 +104,12 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");
         get().getNode("eaglefactions", "gameplay", "attacktime").setValue(10).setComment("How much time in seconds takes destroying a claim. Default: 10");
+        get().getNode("eaglefactions", "gameplay", "factioncreation").setComment("Faction creation node. You can choose if faction should be created by items or for free.");
+        get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems").setValue(false).setComment("Allows/denies using items/blocks to create a faction. Default: false");
+        get().getNode("eaglefactions", "gameplay", "factioncreation", "items").setValue(new ArrayList<>(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"))).setComment("A list of items/blocks that will be taken from the player after creating a faction." + "\n" +
+                "There is a simple list of items below which you can edit by yourself. Current list contains: 35 orange wool, 20 wooden planks, 4 iron ingots." + "\n" +
+                "Write every item/block in format 35:1|42 where 35:1 is an item/block id and 42 is an amount.");
+        //get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyplacingblock")
         get().getNode("eaglefactions", "playerlimit", "playerlimit").setValue(false).setComment("Turns on/off player limit in factions. Default: false");
         get().getNode("eaglefactions", "playerlimit", "limit").setValue(15).setComment("Player limit in the faction. Default: 15");
     }

@@ -6,11 +6,13 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import org.slf4j.Logger;
 
+import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -27,7 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-@Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = {"Aquerr"})
+@Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = PluginInfo.Author)
 public class EagleFactions
 {
 
@@ -39,6 +41,7 @@ public class EagleFactions
     public static List<String> AutoMapList = new ArrayList<>();
     public static List<String> AdminList = new ArrayList<>();
     public static List<String> AttackedFactions = new ArrayList<>();
+    public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
 
     @Inject
     private Logger _logger;
@@ -51,6 +54,11 @@ public class EagleFactions
     @ConfigDir(sharedRoot = false)
     private Path configDir;
     public Path getConfigDir(){return configDir;}
+
+    @Inject
+    private Game game;
+    public Game getGame(){return game;}
+
 
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
@@ -140,8 +148,8 @@ public class EagleFactions
         Subcommands.put (Arrays.asList ("c","create"), CommandSpec.builder ()
         .description (Text.of ("Create Faction Command"))
         .permission (PluginPermissions.CreateCommand)
-        .arguments (GenericArguments.onlyOne(GenericArguments.string(Text.of("tag"))),
-                GenericArguments.remainingJoinedStrings(Text.of("factionName")))
+        .arguments (GenericArguments.optional(GenericArguments.string(Text.of("tag"))),
+                GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
         .executor (new CreateCommand ())
         .build ());
 
@@ -163,7 +171,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("invite"), CommandSpec.builder()
         .description(Text.of("Invites a player to the faction"))
         .permission(PluginPermissions.InviteCommand)
-        .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+        .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
         .executor(new InviteCommand())
         .build());
 
@@ -171,7 +179,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("kick"), CommandSpec.builder()
         .description(Text.of("Kicks a player from the faction"))
         .permission(PluginPermissions.KickCommand)
-        .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+        .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
         .executor(new KickCommand())
         .build());
 
@@ -179,7 +187,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("j","join"), CommandSpec.builder()
         .description(Text.of("Join a specific faction"))
         .permission(PluginPermissions.JoinCommand)
-        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
         .executor(new JoinCommand())
         .build());
 
@@ -201,7 +209,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("i","info"), CommandSpec.builder()
         .description(Text.of("Show info about a faction"))
         .permission(PluginPermissions.InfoCommand)
-        .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
         .executor(new InfoCommand())
         .build());
 
@@ -217,7 +225,7 @@ public class EagleFactions
         CommandSpec addAllyCommand = CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
                 .permission(PluginPermissions.AddAllyCommand)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
                 .executor(new AddAllyCommand())
                 .build();
 
@@ -225,7 +233,7 @@ public class EagleFactions
         CommandSpec removeAllyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the alliance"))
                 .permission(PluginPermissions.RemoveAllyCommand)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
                 .executor(new RemoveAllyCommand())
                 .build();
 
@@ -241,7 +249,7 @@ public class EagleFactions
         CommandSpec addEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Set faction as enemy"))
                 .permission(PluginPermissions.AddEnemyCommand)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
                 .executor(new AddEnemyCommand())
                 .build();
 
@@ -249,7 +257,7 @@ public class EagleFactions
         CommandSpec removeEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the enemies"))
                 .permission(PluginPermissions.RemoveEnemyCommand)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
                 .executor(new RemoveEnemyCommand())
                 .build();
 
@@ -264,7 +272,7 @@ public class EagleFactions
         //Officer command. Add or remove officers.
         Subcommands.put(Arrays.asList("officer"), CommandSpec.builder()
                 .description(Text.of("Add or Remove officer"))
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .permission(PluginPermissions.OfficerCommand)
                 .executor(new OfficerCommand())
                 .build());
@@ -350,7 +358,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission(PluginPermissions.SetPowerCommand)
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
                 .executor(new SetPowerCommand())
                 .build());
 
@@ -358,7 +366,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("maxpower"), CommandSpec.builder()
                 .description(Text.of("Set player's maxpower"))
                 .permission(PluginPermissions.MaxPowerCommand)
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
                 .executor(new MaxPowerCommand())
                 .build());
 
@@ -374,6 +382,29 @@ public class EagleFactions
                 .description(Text.of("Reload config file"))
                 .permission(PluginPermissions.ReloadCommand)
                 .executor(new ReloadCommand())
+                .build());
+
+        //Chat Command
+        Subcommands.put(Arrays.asList("chat"), CommandSpec.builder()
+                .description(Text.of("Chat command"))
+                .permission(PluginPermissions.ChatCommand)
+                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
+                .executor(new ChatCommand())
+                .build());
+
+        //Top Command
+        Subcommands.put(Arrays.asList("top"), CommandSpec.builder()
+                .description(Text.of("Top Command"))
+                .permission(PluginPermissions.TopCommand)
+                .executor(new TopCommand())
+                .build());
+
+        //Setleader Command
+        Subcommands.put(Arrays.asList("setleader"), CommandSpec.builder()
+                .description(Text.of("Set someone as leader (removes you as a leader if you are one)"))
+                .permission(PluginPermissions.SetLeaderCommand)
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .executor(new SetLeaderCommand())
                 .build());
 
         //Build all commands

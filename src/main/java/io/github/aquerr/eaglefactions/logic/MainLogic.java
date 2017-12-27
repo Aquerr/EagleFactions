@@ -3,9 +3,16 @@ package io.github.aquerr.eaglefactions.logic;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
+import javafx.util.Pair;
 import ninja.leaping.configurate.ConfigurationNode;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.math.BigDecimal;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Function;
 
 public class MainLogic
 {
@@ -175,10 +182,60 @@ public class MainLogic
 
     public static String getPrefixOption()
     {
-        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "prefix");
+        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "factionprefix");
 
         String prefix = prefixNode.getString();
 
         return prefix;
     }
+
+    public static Boolean shouldDisplayRank()
+    {
+        ConfigurationNode rankNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "factionrank");
+
+        Boolean rank = rankNode.getBoolean();
+
+        return rank;
+    }
+
+    public static boolean getCreateByItems()
+    {
+        ConfigurationNode createByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems");
+
+        boolean createByItems = createByItemsNode.getBoolean();
+
+        return createByItems;
+    }
+
+    public static HashMap<String, Integer> getRequiredItemsToCreate()
+    {
+        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "items");
+
+        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
+        HashMap<String, Integer> items = new HashMap<>();
+
+        for (String itemWithAmount : itemsList)
+        {
+            String strings[] = itemWithAmount.split("\\|");
+
+            String item = strings[0];
+            int amount = Integer.valueOf(strings[1]);
+
+            items.put(item, amount);
+        }
+
+        return items;
+    }
+
+    private static Function<Object,String> objectToStringTransformer = input ->
+    {
+        if (input instanceof String)
+        {
+            return (String) input;
+        }
+        else
+        {
+            return null;
+        }
+    };
 }

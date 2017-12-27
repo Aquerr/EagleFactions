@@ -21,37 +21,42 @@ public class KickCommand implements CommandExecutor
     {
         Optional<Player> optionalSelectedPlayer = context.<Player>getOne(Text.of("player"));
 
-        if(source instanceof Player)
+        if (optionalSelectedPlayer.isPresent())
         {
-            Player player = (Player)source;
-
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
-            if(playerFactionName != null)
+            if(source instanceof Player)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                Player player = (Player)source;
+                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+
+                if(playerFactionName != null)
                 {
-                    if(optionalSelectedPlayer.isPresent())
+                    if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                     {
-                        Player selectedPlayer = optionalSelectedPlayer.get();
-
-                        if(FactionLogic.getFactionName(selectedPlayer.getUniqueId()).equals(playerFactionName))
+                        if(optionalSelectedPlayer.isPresent())
                         {
-                            if(!FactionLogic.getLeader(playerFactionName).equals(selectedPlayer.getUniqueId().toString()))
+                            Player selectedPlayer = optionalSelectedPlayer.get();
+
+                            if(FactionLogic.getFactionName(selectedPlayer.getUniqueId()).equals(playerFactionName))
                             {
-                                if(!FactionLogic.getOfficers(playerFactionName).contains(selectedPlayer.getUniqueId().toString()) || FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
+                                if(!FactionLogic.getLeader(playerFactionName).equals(selectedPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFactionName);
+                                    if(!FactionLogic.getOfficers(playerFactionName).contains(selectedPlayer.getUniqueId().toString()) || FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
+                                    {
+                                        FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFactionName);
 
-                                    //TODO: Add listener that will inform players in a faction that someone has left their faction.
-                                    // player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You left faction ", TextColors.GOLD, playerFactionName));
+                                        //TODO: Add listener that will inform players in a faction that someone has left their faction.
 
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You kicked ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " from the faction."));
-                                    selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were kicked from faction ", TextColors.GOLD, playerFactionName));
+                                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You kicked ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " from the faction."));
+                                        selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were kicked from faction ", TextColors.GOLD, playerFactionName));
 
-                                    if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId().toString());
+                                        if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId().toString());
 
-                                    CommandResult.success();
+                                        return CommandResult.success();
+                                    }
+                                    else
+                                    {
+                                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't kick this player!"));
+                                    }
                                 }
                                 else
                                 {
@@ -60,32 +65,33 @@ public class KickCommand implements CommandExecutor
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't kick this player!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This player is not in your faction!"));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This player is not in your faction!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no such player."));
                         }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no such player."));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You needs to be the leader or an officer to kick players from the faction."));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You needs to be the leader or an officer to kick players from the faction."));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in a faction!"));
                 }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in a faction!"));
+                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
+            source.sendMessage(Text.of(TextColors.RED, "Usage: /f kick <player>"));
         }
 
         return CommandResult.success();

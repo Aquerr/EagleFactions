@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.services.PlayerService;
@@ -33,26 +32,27 @@ public class PlayerCommand implements CommandExecutor
     {
         Optional<Player> optionalPlayer = context.<Player>getOne("player");
 
-        //TODO: Add check if provided player has entry in server database (if player played on the server).
+        //TODO: This command should work even for players that are offline.
+        //TODO: Add check if provided player has played on this server.
         //player.hasPlayedBefore() is not a solution for this problem.
 
         if(optionalPlayer.isPresent())
         {
             Player player = optionalPlayer.get();
-            showPlayerInfo(player);
+            showPlayerInfo(source, player);
         }
         else
         {
             if(source instanceof Player)
             {
                 Player player = (Player)source;
-                showPlayerInfo(player);
+                showPlayerInfo(source, player);
             }
         }
         return CommandResult.success();
     }
 
-    private void showPlayerInfo(Player player)
+    private void showPlayerInfo(CommandSource source, Player player)
     {
         if(player.hasPlayedBefore())
         {
@@ -65,6 +65,8 @@ public class PlayerCommand implements CommandExecutor
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             String formattedDate = formatter.format(lastPlayed);
 
+            //TODO: Show if player is online or offline.
+
             Text info = Text.builder()
                     .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerService.getPlayerName(player.getUniqueId()).get() + "\n"))
                     .append(Text.of(TextColors.AQUA, "Last Played: ", TextColors.GOLD, formattedDate + "\n"))
@@ -76,7 +78,7 @@ public class PlayerCommand implements CommandExecutor
 
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Player Info")).padding(Text.of("=")).contents(playerInfo);
-            paginationBuilder.sendTo(player);
+            paginationBuilder.sendTo(source);
         }
         else
         {

@@ -21,6 +21,8 @@ public abstract class PluginPermissions
     public static final String ListCommand = "eaglefactions.command.list";
     public static final String KickCommand = "eaglefactions.command.kick";
     public static final String FriendlyFireCommand = "eaglefactions.command.friendlyfire";
+    public static final String ChatCommand = "eaglefactions.command.chat";
+    public static final String TopCommand = "eaglefactions.command.top";
 
 
     public static final String HelpCommand = "eaglefactions.command.help";
@@ -33,6 +35,7 @@ public abstract class PluginPermissions
     public static final String UnclaimCommand = "eaglefactions.command.unclaim";
     public static final String UnclaimAllCommand = "eaglefactions.command.unclaimall";
 
+    public static final String SetLeaderCommand = "eaglefactions.command.setleader";
     public static final String OfficerCommand = "eaglefactions.command.officer";
     public static final String SetHomeCommand = "eaglefactions.command.sethome";
     public static final String HomeCommand = "eaglefactions.command.home";
