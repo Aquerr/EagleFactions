@@ -104,7 +104,15 @@ public class PlayerService
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            playerNode.getNode("chunkPosition").setValue(chunk.toString());
+            if(chunk != null)
+            {
+                playerNode.getNode("chunkPosition").setValue(chunk.toString());
+            }
+            else
+            {
+                playerNode.getNode("chunkPosition").setValue(null);
+            }
+
             configLoader.save(playerNode);
         }
         catch (Exception exception)
