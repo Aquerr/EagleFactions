@@ -31,8 +31,8 @@ public class ChatMessageListener
             Text.Builder formattedMessage = Text.builder();
 
             Text.Builder factionAndRankPrefix = Text.builder();
-            Text.Builder otherPluginsPrefixes = Text.builder();
-            Text.Builder playerText = Text.builder();
+            Text.Builder otherPrefixesAndPlayer = Text.builder();
+            //Text.Builder playerText = Text.builder();
             Text.Builder message = Text.builder();
 
             //Message = Prefixes + Player Name + Text
@@ -40,12 +40,10 @@ public class ChatMessageListener
             //RawMessage = Text
 
             //Get player name
-            playerText.append(event.getOriginalMessage().getChildren().get(0));
+            //playerText.append(event.getOriginalMessage().getChildren().get(0));
 
-            //Get the entire message and remove nickname and chat from it so prefixes from other plugins will be shown correctly.
-            //Prefixes + Player Name + Text - (Player Name + Text) = Prefixes
-            otherPluginsPrefixes.append(event.getMessage().getChildren());
-            otherPluginsPrefixes.remove(event.getOriginalMessage().getChildren());
+            //Get Other Plugin Prefixes and Nickname from message.
+            otherPrefixesAndPlayer.append(event.getMessage().getChildren().get(0));
 
             //Get ChatType from Eagle Factions
             //and add it to the formattedMessage
@@ -108,7 +106,7 @@ public class ChatMessageListener
             else
             {
                 //If player is chatting in global chat then directly get raw message from event.
-                message.append(event.getRawMessage());
+                message.append(event.getMessage().getChildren().get(1));
             }
 
             //Get faction prefix from Eagle Factions.
@@ -159,8 +157,10 @@ public class ChatMessageListener
 
             //Add faction tag and faction rank
             formattedMessage.append(factionAndRankPrefix.build());
+            //Add Other Plugins Prefixes
+            formattedMessage.append(otherPrefixesAndPlayer.build());
             //Add player name
-            formattedMessage.append(playerText.build());
+            //formattedMessage.append(playerText.build());
             //Add message
             formattedMessage.append(message.build());
 
