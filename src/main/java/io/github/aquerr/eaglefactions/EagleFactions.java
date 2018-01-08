@@ -358,7 +358,8 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission(PluginPermissions.SetPowerCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("power"))))
                 .executor(new SetPowerCommand())
                 .build());
 
@@ -366,7 +367,8 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("maxpower"), CommandSpec.builder()
                 .description(Text.of("Set player's maxpower"))
                 .permission(PluginPermissions.MaxPowerCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("power"))))
                 .executor(new MaxPowerCommand())
                 .build());
 
