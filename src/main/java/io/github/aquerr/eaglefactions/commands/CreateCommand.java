@@ -125,8 +125,13 @@ public class CreateCommand implements CommandExecutor
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
+
+        //ItemStack test = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.MAGENTA).quantity(1).build();
+
         for (String itemId : requiredItems.keySet())
         {
+//            EagleFactions.getEagleFactions().getLogger().info("Item id: " + itemId);
+
             Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
             if(itemType.isPresent())
@@ -134,8 +139,24 @@ public class CreateCommand implements CommandExecutor
                 ItemStack itemStack = ItemStack.builder()
                         .itemType(itemType.get()).build();
                 itemStack.setQuantity(requiredItems.get(itemId));
+//
+//                EagleFactions.getEagleFactions().getLogger().info("GetItem: " + itemStack.getItem().toString());
+//                EagleFactions.getEagleFactions().getLogger().info("Item Stack: " + itemStack.toString());
 
-                if (inventory.contains(itemStack))
+//                Iterable<Slot> slotIterable = inventory.slots();
+//
+//                for (Slot slot : slotIterable)
+//                {
+//                    EagleFactions.getEagleFactions().getLogger().info("Slot: " + slot.peek().toString());
+//                }
+//
+//                EagleFactions.getEagleFactions().getLogger().info("Size: " + String.valueOf(inventory.query(itemStack).size()));
+//                EagleFactions.getEagleFactions().getLogger().info("Capacity: " + String.valueOf(inventory.query(itemStack).capacity()));
+//
+//                EagleFactions.getEagleFactions().getLogger().info("ItemStack?: " + inventory.query(itemStack.getItem()).peek(itemStack.getQuantity()).toString());
+//                EagleFactions.getEagleFactions().getLogger().info("Needed quantity: " + itemStack.getQuantity());
+
+                if(inventory.query(itemType.get()).peek().isPresent() && inventory.query(itemType.get()).peek().get().getQuantity() >= itemStack.getQuantity())
                 {
                     foundItems += 1;
                 }
