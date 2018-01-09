@@ -208,7 +208,6 @@ public class EagleFactions
         //Info command. Shows info about a faction.
         Subcommands.put(Arrays.asList("i","info"), CommandSpec.builder()
         .description(Text.of("Show info about a faction"))
-        .permission(PluginPermissions.InfoCommand)
         .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
         .executor(new InfoCommand())
         .build());
