@@ -31,12 +31,7 @@ public class SetPowerCommand implements CommandExecutor
 
                 if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
                 {
-                    BigDecimal newPower = new BigDecimal(optionalPower.get());
-
-                    PowerService.setPower(optionalSelectedPlayer.get().getUniqueId(), newPower);
-
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
-                    return CommandResult.success();
+                    setPower(optionalSelectedPlayer.get(), optionalPower.get());
                 }
                 else
                 {
@@ -45,7 +40,7 @@ public class SetPowerCommand implements CommandExecutor
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                setPower(optionalSelectedPlayer.get(), optionalPower.get());
             }
         }
         else
@@ -55,5 +50,14 @@ public class SetPowerCommand implements CommandExecutor
         }
 
         return CommandResult.success();
+    }
+
+    private void setPower(Player player, String power)
+    {
+        BigDecimal newPower = new BigDecimal(power);
+
+        PowerService.setPower(player.getUniqueId(), newPower);
+
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
     }
 }
