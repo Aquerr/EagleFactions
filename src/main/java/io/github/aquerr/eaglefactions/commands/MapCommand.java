@@ -214,7 +214,7 @@ public class MapCommand implements CommandExecutor
                 {
                     if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
+                        if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
                             if (!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
