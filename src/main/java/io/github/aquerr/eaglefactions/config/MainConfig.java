@@ -105,6 +105,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");
         get().getNode("eaglefactions", "gameplay", "attacktime").setValue(10).setComment("How much time in seconds takes destroying a claim. Default: 10");
+        get().getNode("eaglefactions", "gameplay", "attackOnlyAtNight").setValue(false).setComment("Should attacking other factions (using /f attack command) be able only at night? Default: false");
         get().getNode("eaglefactions", "gameplay", "factioncreation").setComment("Faction creation node. You can choose if faction should be created by items or for free.");
         get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems").setValue(false).setComment("Allows/denies using items/blocks to create a faction. Default: false");
         get().getNode("eaglefactions", "gameplay", "factioncreation", "items").setValue(new ArrayList<>(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"))).setComment("A list of items/blocks that will be taken from the player after creating a faction." + "\n" +

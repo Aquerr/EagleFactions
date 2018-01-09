@@ -236,6 +236,15 @@ public class MainLogic
         return spawnAfterDeath;
     }
 
+    public static boolean shouldAttackOnlyAtNight()
+    {
+        ConfigurationNode attackOnlyAtNightNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "attackOnlyAtNight");
+
+        boolean attackAtNight = attackOnlyAtNightNode.getBoolean();
+
+        return attackAtNight;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)
