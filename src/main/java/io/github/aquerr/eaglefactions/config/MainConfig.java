@@ -100,6 +100,7 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "power", "punishment").setValue(1.0).setComment("Punishment after killing a teammate. Default: 1.0");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances. Default: false");
         get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands. Default: false");
+        get().getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath").setValue(false).setComment("Should player spawn at faction's home after death? Default: false");
         get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline. Default: true");
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");

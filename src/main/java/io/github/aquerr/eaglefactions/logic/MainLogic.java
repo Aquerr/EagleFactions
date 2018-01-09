@@ -227,6 +227,15 @@ public class MainLogic
         return items;
     }
 
+    public static boolean shouldSpawnAtHomeAfterDeath()
+    {
+        ConfigurationNode spawnAfterDeathNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath");
+
+        boolean spawnAfterDeath = spawnAfterDeathNode.getBoolean();
+
+        return spawnAfterDeath;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)
