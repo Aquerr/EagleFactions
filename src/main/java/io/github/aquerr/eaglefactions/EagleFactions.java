@@ -432,5 +432,6 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
         Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
+        Sponge.getEventManager().registerListeners(this, new FireSpreadListener());
     }
 }
