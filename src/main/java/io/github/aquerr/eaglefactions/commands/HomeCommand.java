@@ -35,7 +35,7 @@ public class HomeCommand implements CommandExecutor
 
                     if(FactionLogic.isHomeInWorld(world.getUniqueId(), playerFactionName))
                     {
-                        Vector3i home = FactionLogic.getHome(playerFactionName);
+                        Vector3i home = FactionLogic.getHome(playerFactionName).BlockPosition;
 
                         player.setLocation(player.getLocation().setPosition(new Vector3d(home.getX(), home.getY(), home.getZ())));
 

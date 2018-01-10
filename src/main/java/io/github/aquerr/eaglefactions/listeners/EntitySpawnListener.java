@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.player.Player;
@@ -37,7 +39,9 @@ public class EntitySpawnListener
                     if(FactionLogic.getFactionName(player.getUniqueId()) != null)
                     {
                         event.setCancelled(true);
-                        player.setLocation(new Location<World>(event.getTargetWorld(), FactionLogic.getHome(FactionLogic.getFactionName(player.getUniqueId()))));
+                        FactionHome factionHome = FactionLogic.getHome(FactionLogic.getFactionName(player.getUniqueId()));
+                        World world = Sponge.getServer().getWorld(factionHome.WorldUUID).get();
+                        player.setLocation(new Location<World>(world, factionHome.BlockPosition));
                         return;
                     }
                 }

@@ -39,7 +39,7 @@ public class UnclaimCommand implements CommandExecutor
                     //Check if faction's home was set in this claim. If yes then remove it.
                     if(FactionLogic.getHome(playerFactionName) != null)
                     {
-                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName).BlockPosition);
 
                         if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
                     }
@@ -71,7 +71,7 @@ public class UnclaimCommand implements CommandExecutor
                         //Check if faction's home was set in this claim. If yes then remove it.
                         if(FactionLogic.getHome(playerFactionName) != null)
                         {
-                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName).BlockPosition);
 
                             if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
                         }

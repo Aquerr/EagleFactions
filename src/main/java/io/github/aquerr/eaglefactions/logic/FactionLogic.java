@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -533,7 +534,7 @@ public class FactionLogic
         else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, null);
     }
 
-    public static Vector3i getHome(String factionName)
+    public static FactionHome getHome(String factionName)
     {
         ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
 
@@ -542,7 +543,7 @@ public class FactionLogic
             String homeString = homeNode.getString();
             String splitter = "\\|";
 
-          //  String worldUUID = homeString.split(splitter)[0];
+            String worldUUIDString = homeString.split(splitter)[0];
             String vectorsString = homeString.split(splitter)[1];
 
             String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
@@ -551,9 +552,10 @@ public class FactionLogic
              int y = Integer.valueOf(vectors[1]);
              int z = Integer.valueOf(vectors[2]);
 
-             Vector3i home = Vector3i.from(x, y, z);
+             Vector3i blockPosition = Vector3i.from(x, y, z);
+             UUID worldUUID = UUID.fromString(worldUUIDString);
 
-             return home;
+             return new FactionHome(worldUUID, blockPosition);
         }
         else
         {
