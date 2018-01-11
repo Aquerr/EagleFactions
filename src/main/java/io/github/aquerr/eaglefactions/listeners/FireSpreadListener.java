@@ -15,7 +15,8 @@ public class FireSpreadListener
         {
             event.getLocations().forEach(x ->
             {
-                if (FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone"))
+                if (FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
+                        FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
                 {
                     event.setCancelled(true);
                     return;
