@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
+import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Game;
@@ -208,7 +209,7 @@ public class EagleFactions
         //Info command. Shows info about a faction.
         Subcommands.put(Arrays.asList("i","info"), CommandSpec.builder()
         .description(Text.of("Show info about a faction"))
-        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+        .arguments(new FactionNameArgument(Text.of("faction name")))
         .executor(new InfoCommand())
         .build());
 
