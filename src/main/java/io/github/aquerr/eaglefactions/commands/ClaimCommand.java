@@ -54,10 +54,18 @@ public class ClaimCommand implements CommandExecutor
                                         {
                                             if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+                                                if (MainLogic.isDelayedClaimingToggled())
+                                                {
+                                                    FactionLogic.addClaimWithDelay(player, playerFactionName, world.getUniqueId(), chunk, 0);
+                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
+                                                }
+                                                else
+                                                {
+                                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
 
-                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                                                return CommandResult.success();
+                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                                    return CommandResult.success();
+                                                }
                                             }
                                             else
                                             {

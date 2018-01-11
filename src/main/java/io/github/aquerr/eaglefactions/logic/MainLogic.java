@@ -254,6 +254,24 @@ public class MainLogic
         return canHomeBetweenWorlds;
     }
 
+    public static boolean isDelayedClaimingToggled()
+    {
+        ConfigurationNode isDelayedClaimingToggledNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Delayed_Claim");
+
+        boolean isToggled = isDelayedClaimingToggledNode.getBoolean();
+
+        return isToggled;
+    }
+
+    public static boolean getClaimingDelay()
+    {
+        ConfigurationNode claimingDelayNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_Time");
+
+        boolean claimingDelay = claimingDelayNode.getBoolean();
+
+        return claimingDelay;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
@@ -9,10 +10,16 @@ import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -640,6 +647,36 @@ public class FactionLogic
             officersList.remove(playerUUID.toString());
 
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
+        }
+    }
+
+    public static void addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk, int seconds)
+    {
+        if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+        {
+            if (seconds >= MainLogic.getAttackTime())
+            {
+                FactionLogic.addClaim(playerFactionName, worldUUID, chunk);
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+            }
+            else
+            {
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+                taskBuilder.execute(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        addClaimWithDelay(player, playerFactionName, worldUUID, chunk, seconds + 1);
+                    }
+
+                }).delay(1, TimeUnit.SECONDS).name("EagleFactions - Claim").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+            }
+        }
+        else
+        {
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
         }
     }
 }
