@@ -534,7 +534,7 @@ public class FactionLogic
         else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, null);
     }
 
-    public static FactionHome getHome(String factionName)
+    public static @Nullable FactionHome getHome(String factionName)
     {
         ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
 
