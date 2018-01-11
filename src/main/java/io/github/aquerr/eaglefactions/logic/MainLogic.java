@@ -245,6 +245,15 @@ public class MainLogic
         return attackAtNight;
     }
 
+    public static boolean canHomeBetweenWorlds()
+    {
+        ConfigurationNode canHomeBetweenWorldsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "teleportBetweenWorlds");
+
+        boolean canHomeBetweenWorlds = canHomeBetweenWorldsNode.getBoolean();
+
+        return canHomeBetweenWorlds;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)

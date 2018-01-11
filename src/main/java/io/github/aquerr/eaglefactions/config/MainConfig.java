@@ -114,6 +114,7 @@ public class MainConfig implements IConfig
         //get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyplacingblock")
         get().getNode("eaglefactions", "playerlimit", "playerlimit").setValue(false).setComment("Turns on/off player limit in factions. Default: false");
         get().getNode("eaglefactions", "playerlimit", "limit").setValue(15).setComment("Player limit in the faction. Default: 15");
+        get().getNode("eaglefactions", "home", "teleportBetweenWorlds").setValue(false).setComment("Should players be able to teleport to faction's home while being in other world? Default: false");
     }
 
     @Override

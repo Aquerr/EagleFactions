@@ -603,17 +603,17 @@ public class FactionLogic
         return false;
     }
 
-    public static boolean isHomeInWorld(UUID worldUUID, String factionName)
-    {
-        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
-
-        if(homeNode.getValue() != null)
-        {
-            if(homeNode.getString().contains(worldUUID.toString())) return true;
-            else return false;
-        }
-        return false;
-    }
+//    public static boolean isHomeInWorld(UUID worldUUID, String factionName)
+//    {
+//        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
+//
+//        if(homeNode.getValue() != null)
+//        {
+//            if(homeNode.getString().contains(worldUUID.toString())) return true;
+//            else return false;
+//        }
+//        return false;
+//    }
 
     public static void removeClaims(String factionName)
     {

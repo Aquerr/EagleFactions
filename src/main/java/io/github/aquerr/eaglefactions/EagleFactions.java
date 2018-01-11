@@ -55,9 +55,9 @@ public class EagleFactions
     private Path configDir;
     public Path getConfigDir(){return configDir;}
 
-    @Inject
-    private Game game;
-    public Game getGame(){return game;}
+//    @Inject
+//    private Game game;
+//    public Game getGame(){return game;}
 
 
     @Listener
