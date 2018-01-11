@@ -153,17 +153,18 @@ public class MapCommand implements CommandExecutor
                     }
                     else
                     {
-                        textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
+                        if(MainLogic.isDelayedClaimingToggled()) textBuilder.append(notCapturedMark).build();
+                        else textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     }
                 }
                 map.add(textBuilder.build());
             }
 
-            String playerPositionCalim = "none";
+            String playerPositionClaim = "none";
 
             if(FactionLogic.isClaimed(world.getUniqueId(), playerPosition))
             {
-                playerPositionCalim = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
+                playerPositionClaim = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
             }
 
             //Print map
@@ -196,7 +197,7 @@ public class MapCommand implements CommandExecutor
                 player.sendMessage(Text.of(TextColors.RED, "Enemies: " + enemyFactions.substring(0, enemyFactions.length() - 2)));
             }
 
-            player.sendMessage(Text.of("Currently standing at: ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " which is claimed by ", TextColors.GOLD, playerPositionCalim));
+            player.sendMessage(Text.of("Currently standing at: ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " which is claimed by ", TextColors.GOLD, playerPositionClaim));
         }
 
 
