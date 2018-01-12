@@ -25,7 +25,6 @@ public class FactionNameArgument extends CommandElement
     @Override
     protected String parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
     {
-        EagleFactions.getEagleFactions().getLogger().info(args.toString());
         if (args.hasNext())
         {
             return args.next();
