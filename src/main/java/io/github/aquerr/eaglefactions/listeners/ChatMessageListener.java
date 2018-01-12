@@ -63,22 +63,17 @@ public class ChatMessageListener
 
                     for (String allianceName : FactionLogic.getAlliances(factionName))
                     {
-                        for (UUID uuid : FactionLogic.getPlayersOnline(allianceName))
+                        for (Player factionPlayer : FactionLogic.getPlayersOnline(allianceName))
                         {
-                            if(Sponge.getServer().getPlayer(uuid).isPresent())
-                            {
-                                receivers.add(Sponge.getServer().getPlayer(uuid).get());
-                            }
+                            receivers.add(factionPlayer);
                         }
                     }
 
-                    for (UUID uuid : FactionLogic.getPlayersOnline(factionName))
+                    for (Player factionPlayer : FactionLogic.getPlayersOnline(factionName))
                     {
-                        if(Sponge.getServer().getPlayer(uuid).isPresent())
-                        {
-                            receivers.add(Sponge.getServer().getPlayer(uuid).get());
-                        }
+                        receivers.add(factionPlayer);
                     }
+
                     messageChannel = MessageChannel.fixed(receivers);
                 }
                 else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
@@ -89,12 +84,9 @@ public class ChatMessageListener
 
                     Set<MessageReceiver> receivers = new HashSet<>();
 
-                    for (UUID uuid : FactionLogic.getPlayersOnline(factionName))
+                    for (Player factionPlayer : FactionLogic.getPlayersOnline(factionName))
                     {
-                        if(Sponge.getServer().getPlayer(uuid).isPresent())
-                        {
-                            receivers.add(Sponge.getServer().getPlayer(uuid).get());
-                        }
+                        receivers.add(factionPlayer);
                     }
 
                     messageChannel = MessageChannel.fixed(receivers);

@@ -146,21 +146,21 @@ public class FactionLogic
         return factionPlayers;
     }
     
-    public static List<UUID> getPlayersOnline(String factionName)
+    public static List<Player> getPlayersOnline(String factionName)
     {
-    	List<UUID> factionPlayers = new ArrayList<>();
+    	List<Player> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = FactionLogic.getLeader(factionName);
     	if (PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
     	{
-    		factionPlayers.add(UUID.fromString(factionLeader));
+    		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(factionLeader)).get());
     	}
         
         for (String uuid : FactionLogic.getOfficers(factionName))
         {
         	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(UUID.fromString(uuid));
+        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
@@ -168,7 +168,7 @@ public class FactionLogic
         {
         	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(UUID.fromString(uuid));
+        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         

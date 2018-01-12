@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -16,6 +17,10 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class AttackCommand implements CommandExecutor
 {
@@ -85,6 +90,7 @@ public class AttackCommand implements CommandExecutor
                                 Vector3i attackedClaim = player.getLocation().getChunkPosition();
                                 int seconds = 0;
 
+                                informAboutAttack(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedClaim));
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
                                 AttackLogic.attack(player, attackedClaim, seconds);
                                 return;
@@ -114,5 +120,12 @@ public class AttackCommand implements CommandExecutor
         {
             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to do this!"));
         }
+    }
+
+    private void informAboutAttack(String factionName)
+    {
+        List<Player> playersList = FactionLogic.getPlayersOnline(factionName);
+
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is under ", TextColors.RED, "attack", TextColors.RESET, "!")));
     }
 }
