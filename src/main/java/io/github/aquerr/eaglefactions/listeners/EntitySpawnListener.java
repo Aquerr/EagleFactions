@@ -51,7 +51,7 @@ public class EntitySpawnListener
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Could not spawn at faction's home. Home may not me set!"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Could not spawn at faction's home! Home may not be set!"));
                         }
                     }
                 }
