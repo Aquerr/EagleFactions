@@ -188,7 +188,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("j","join"), CommandSpec.builder()
         .description(Text.of("Join a specific faction"))
         .permission(PluginPermissions.JoinCommand)
-        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+        .arguments(new FactionNameArgument(Text.of("faction name")))
         .executor(new JoinCommand())
         .build());
 
@@ -225,7 +225,7 @@ public class EagleFactions
         CommandSpec addAllyCommand = CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
                 .permission(PluginPermissions.AddAllyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new AddAllyCommand())
                 .build();
 
@@ -233,7 +233,7 @@ public class EagleFactions
         CommandSpec removeAllyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the alliance"))
                 .permission(PluginPermissions.RemoveAllyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new RemoveAllyCommand())
                 .build();
 
@@ -249,7 +249,7 @@ public class EagleFactions
         CommandSpec addEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Set faction as enemy"))
                 .permission(PluginPermissions.AddEnemyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new AddEnemyCommand())
                 .build();
 
@@ -257,7 +257,7 @@ public class EagleFactions
         CommandSpec removeEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the enemies"))
                 .permission(PluginPermissions.RemoveEnemyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new RemoveEnemyCommand())
                 .build();
 
