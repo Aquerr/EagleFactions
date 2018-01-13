@@ -13,7 +13,6 @@ import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import org.slf4j.Logger;
 
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -429,7 +428,7 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
         Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new EntityBlockBreakListener());
+        Sponge.getEventManager().registerListeners(this, new BlockBreakListener());
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
         Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
