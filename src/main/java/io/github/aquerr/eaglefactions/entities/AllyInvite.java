@@ -1,10 +1,5 @@
 package io.github.aquerr.eaglefactions.entities;
 
-import com.google.common.hash.HashCode;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.util.Objects;
-
 /**
  * Created by Aquerr on 2017-08-04.
  */

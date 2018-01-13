@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -34,23 +33,31 @@ public class HomeCommand implements CommandExecutor
                 {
                     //TODO: Wait 5-10 seconds before teleporting.
 
-                    FactionHome factionHome = FactionLogic.getHome(playerFactionName);
-
-                    if(MainLogic.canHomeBetweenWorlds())
+                    if (EagleFactions.BlockedHome.contains(player.getUniqueId()))
                     {
-                        player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
-                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You can't teleport to faction's home because you died recently died in your faction's land!"));
+                        return CommandResult.success();
                     }
                     else
                     {
-                        if(player.getWorld().getUniqueId().equals(factionHome.WorldUUID))
+                        FactionHome factionHome = FactionLogic.getHome(playerFactionName);
+
+                        if(MainLogic.canHomeBetweenWorlds())
                         {
-                            player.setLocation(new Location<World>(player.getWorld(), factionHome.BlockPosition));
+                            player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
                             source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, "Faction's home is not in this world."));
+                            if(player.getWorld().getUniqueId().equals(factionHome.WorldUUID))
+                            {
+                                player.setLocation(new Location<World>(player.getWorld(), factionHome.BlockPosition));
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
+                            }
+                            else
+                            {
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, "Faction's home is not in this world."));
+                            }
                         }
                     }
                 }

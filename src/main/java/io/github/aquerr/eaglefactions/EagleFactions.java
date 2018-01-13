@@ -42,6 +42,7 @@ public class EagleFactions
     public static List<String> AutoMapList = new ArrayList<>();
     public static List<String> AdminList = new ArrayList<>();
     public static List<String> AttackedFactions = new ArrayList<>();
+    public static List<UUID> BlockedHome = new ArrayList<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
 
     @Inject

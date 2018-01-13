@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-
 import com.google.common.collect.Lists;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import org.spongepowered.api.Sponge;

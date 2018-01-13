@@ -272,6 +272,24 @@ public class MainLogic
         return claimingDelay;
     }
 
+    public static boolean shouldBlockHomeAfterDeathInOwnFaction()
+    {
+        ConfigurationNode blockHomeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Turned_On");
+
+        boolean blockHome = blockHomeNode.getBoolean();
+
+        return blockHome;
+    }
+
+    public static int getHomeBlockTimeAfterDeath()
+    {
+        ConfigurationNode blockHomeTimeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Time");
+
+        int blockHomeTime = blockHomeTimeNode.getInt();
+
+        return blockHomeTime;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)

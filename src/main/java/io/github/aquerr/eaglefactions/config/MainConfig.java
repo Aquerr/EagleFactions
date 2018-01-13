@@ -101,9 +101,9 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances. Default: false");
         get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands. Default: false");
         get().getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath").setValue(false).setComment("Should player spawn at faction's home after death? Default: false");
-        get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline. Default: true");
         get().getNode("eaglefactions", "claims", "Delayed_Claim").setValue(false).setComment("Should it take some time to claim a territory? Default: false");
         get().getNode("eaglefactions", "claims", "Claiming_Time").setValue(10).setComment("How much time in seconds should claiming take? (Delayed_Claim must be set to true for this to work) Default: 10");
+        get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline. Default: true");
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");
         get().getNode("eaglefactions", "gameplay", "attacktime").setValue(10).setComment("How much time in seconds takes destroying a claim. Default: 10");
@@ -117,6 +117,8 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "playerlimit", "playerlimit").setValue(false).setComment("Turns on/off player limit in factions. Default: false");
         get().getNode("eaglefactions", "playerlimit", "limit").setValue(15).setComment("Player limit in the faction. Default: 15");
         get().getNode("eaglefactions", "home", "teleportBetweenWorlds").setValue(false).setComment("Should players be able to teleport to faction's home while being in other world? Default: false");
+        get().getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Turned_On").setValue(false).setComment("Block using of /home command after being killed in own faction territory? Default: false");
+        get().getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Time").setValue(60).setComment("How much time in seconds should player be blocked before using Home Command? Default: 60");
     }
 
     @Override
