@@ -7,6 +7,5 @@ version = '1.0-SNAPSHOT'
 description = 'A factions plugin that will make managing your battle-server easier. :)'
 
 dependencies {
-    compile 'org.spongepowered:spongeapi:5.1.0'
-    //compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile 'org.spongepowered:spongeapi:7.0.0'
 }
