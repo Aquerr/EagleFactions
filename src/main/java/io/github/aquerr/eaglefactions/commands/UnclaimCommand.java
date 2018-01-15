@@ -29,7 +29,7 @@ public class UnclaimCommand implements CommandExecutor
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
             //Check if player has admin mode.
-            if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            if(EagleFactions.AdminList.contains(player.getUniqueId()))
             {
                 World world = player.getWorld();
                 Vector3i chunk = player.getLocation().getChunkPosition();

@@ -105,7 +105,7 @@ public class ClaimCommand implements CommandExecutor
                     }
 
                 }
-                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                else if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();

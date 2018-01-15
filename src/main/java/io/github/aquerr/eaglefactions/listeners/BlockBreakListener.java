@@ -23,7 +23,7 @@ public class BlockBreakListener
         {
             Player player = (Player)event.getCause().root();
 
-            if(!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            if(!EagleFactions.AdminList.contains(player.getUniqueId()))
             {
                 String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 

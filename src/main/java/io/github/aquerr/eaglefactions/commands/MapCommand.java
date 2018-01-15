@@ -284,7 +284,7 @@ public class MapCommand implements CommandExecutor
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                     }
                 }
-                else if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                else if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {

@@ -26,7 +26,7 @@ public class UnclaimallCommand implements CommandExecutor
             //Check if player is in the faction.
             if(playerFactionName != null)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     if(FactionLogic.getHome(playerFactionName) != null)
                     {

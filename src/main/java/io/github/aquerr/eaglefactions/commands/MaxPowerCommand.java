@@ -29,7 +29,7 @@ public class MaxPowerCommand implements CommandExecutor
             {
                 Player player = (Player) source;
 
-                if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     setMaxPower(optionalSelectedPlayer.get(), optionalPower.get());
                 }

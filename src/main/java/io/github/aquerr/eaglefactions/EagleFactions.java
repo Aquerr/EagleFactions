@@ -37,9 +37,9 @@ public class EagleFactions
     public static List<Invite> InviteList = new ArrayList<>();
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
-    public static List<String> AutoClaimList = new ArrayList<>();
-    public static List<String> AutoMapList = new ArrayList<>();
-    public static List<String> AdminList = new ArrayList<>();
+    public static List<UUID> AutoClaimList = new ArrayList<>();
+    public static List<UUID> AutoMapList = new ArrayList<>();
+    public static List<UUID> AdminList = new ArrayList<>();
     public static List<String> AttackedFactions = new ArrayList<>();
     public static List<UUID> BlockedHome = new ArrayList<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();

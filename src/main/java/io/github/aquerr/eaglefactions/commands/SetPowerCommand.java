@@ -29,7 +29,7 @@ public class SetPowerCommand implements CommandExecutor
             {
                 Player player = (Player) source;
 
-                if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     setPower(optionalSelectedPlayer.get(), optionalPower.get());
                 }

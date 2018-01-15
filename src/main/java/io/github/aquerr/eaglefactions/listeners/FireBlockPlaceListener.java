@@ -48,7 +48,7 @@ public class FireBlockPlaceListener
         {
             Player player = (Player)event.getCause().root();
 
-            if (!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            if (!EagleFactions.AdminList.contains(player.getUniqueId()))
             {
                 event.getTransactions().forEach(x->
                 {

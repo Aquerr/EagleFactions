@@ -31,7 +31,7 @@ public class SetLeaderCommand implements CommandExecutor
 
                 if(playerFactionName != null)
                 {
-                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
                         if(FactionLogic.getFactionName(newLeaderPlayer.getUniqueId()).equals(playerFactionName))
                         {

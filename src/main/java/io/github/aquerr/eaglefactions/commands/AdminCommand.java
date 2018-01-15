@@ -20,15 +20,15 @@ public class AdminCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            if(EagleFactions.AdminList.contains(player.getUniqueId()))
             {
-                EagleFactions.AdminList.remove(player.getUniqueId().toString());
+                EagleFactions.AdminList.remove(player.getUniqueId());
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "Admin Mode", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
                 return CommandResult.success();
             }
             else
             {
-                EagleFactions.AdminList.add(player.getUniqueId().toString());
+                EagleFactions.AdminList.add(player.getUniqueId());
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "Admin Mode", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
                 return CommandResult.success();
             }

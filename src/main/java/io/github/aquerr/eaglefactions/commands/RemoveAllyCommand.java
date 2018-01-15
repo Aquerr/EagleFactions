@@ -43,7 +43,7 @@ public class RemoveAllyCommand implements CommandExecutor
                 {
                     if(playerFactionName != null)
                     {
-                        if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                        if(EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
                             if(!FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
                             {
