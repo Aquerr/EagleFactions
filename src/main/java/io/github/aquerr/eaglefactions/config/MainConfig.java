@@ -103,6 +103,11 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath").setValue(false).setComment("Should player spawn at faction's home after death? Default: false");
         get().getNode("eaglefactions", "claims", "Delayed_Claim").setValue(false).setComment("Should it take some time to claim a territory? Default: false");
         get().getNode("eaglefactions", "claims", "Claiming_Time").setValue(10).setComment("How much time in seconds should claiming take? (Delayed_Claim must be set to true for this to work) Default: 10");
+        get().getNode("eaglefactions", "claims", "Claiming_By_Items").setComment("Here you can find all options for claiming by using items.");
+        get().getNode("eaglefactions", "claims", "Claiming_By_Items", "Turned_On").setValue(false).setComment("Allows/denies using items/blocks to claim a territory. Default: false");
+        get().getNode("eaglefactions", "claims", "Claiming_By_Items", "Items").setValue(new ArrayList<>(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"))).setComment("A list of items/blocks that will be taken from the player after creating a faction." + "\n" +
+                "There is a simple list of items below which you can edit by yourself. Current list contains: 35 orange wool, 20 wooden planks, 4 iron ingots." + "\n" +
+                "Write every item/block in format 35:1|42 where 35:1 is an item/block id and 42 is an amount.");
         get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline. Default: true");
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");

@@ -290,6 +290,35 @@ public class MainLogic
         return blockHomeTime;
     }
 
+    public static boolean getClaimByItems()
+    {
+        ConfigurationNode claimByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Turned_On");
+
+        boolean claimByItems = claimByItemsNode.getBoolean();
+
+        return claimByItems;
+    }
+
+    public static HashMap<String, Integer> getRequiredItemsToClaim()
+    {
+        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Items");
+
+        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
+        HashMap<String, Integer> items = new HashMap<>();
+
+        for (String itemWithAmount : itemsList)
+        {
+            String strings[] = itemWithAmount.split("\\|");
+
+            String item = strings[0];
+            int amount = Integer.valueOf(strings[1]);
+
+            items.put(item, amount);
+        }
+
+        return items;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)
