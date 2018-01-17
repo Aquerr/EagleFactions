@@ -28,9 +28,12 @@ public class PlayerDeathListener
 
             PlayerService.setPlayerChunkPosition(player.getUniqueId(), null);
 
-            if (FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals(FactionLogic.getFactionName(player.getUniqueId())))
+            if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction())
             {
-                AttackLogic.blockHome(player.getUniqueId());
+                if (FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals(FactionLogic.getFactionName(player.getUniqueId())))
+                {
+                    AttackLogic.blockHome(player.getUniqueId());
+                }
             }
 
             return;
