@@ -5,15 +5,25 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 public class ClaimCommand implements CommandExecutor
 {
@@ -137,6 +147,60 @@ public class ClaimCommand implements CommandExecutor
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
         }
 
+        return CommandResult.success();
+    }
+
+    private CommandResult claimByItems(String factionName, String factionTag, Player player)
+    {
+        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
+        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        int allRequiredItems = requiredItems.size();
+        int foundItems = 0;
+
+        for (String itemId : requiredItems.keySet())
+        {
+            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+            if(itemType.isPresent())
+            {
+                ItemStack itemStack = ItemStack.builder()
+                        .itemType(itemType.get()).build();
+                itemStack.setQuantity(requiredItems.get(itemId));
+
+                //TODO: This needs to be tested.
+                if (inventory.contains(itemStack))
+                {
+                    foundItems += 1;
+                }
+                else
+                {
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                    break;
+                }
+            }
+        }
+
+        if (allRequiredItems == foundItems)
+        {
+            for (String itemId : requiredItems.keySet())
+            {
+                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+                if(itemType.isPresent())
+                {
+                    ItemStack itemStack = ItemStack.builder()
+                            .itemType(itemType.get()).build();
+                    itemStack.setQuantity(requiredItems.get(itemId));
+
+                    //TODO: This needs to be tested.
+                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
+                }
+            }
+
+            //FactionLogic.addClaim(factionName, factionTag, player.getUniqueId());
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
+            return CommandResult.success();
+        }
         return CommandResult.success();
     }
 }
