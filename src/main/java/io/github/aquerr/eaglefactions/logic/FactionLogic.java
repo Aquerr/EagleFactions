@@ -12,6 +12,10 @@ import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -656,8 +660,16 @@ public class FactionLogic
         {
             if (seconds >= MainLogic.getAttackTime())
             {
-                FactionLogic.addClaim(playerFactionName, worldUUID, chunk);
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                if (MainLogic.shouldClaimByItems())
+                {
+                    if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                    else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                }
+                else
+                {
+                    addClaim(playerFactionName, worldUUID, chunk);
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                }
             }
             else
             {
@@ -678,5 +690,79 @@ public class FactionLogic
         {
             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
         }
+    }
+
+    public static void startClaiming(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    {
+        if (MainLogic.isDelayedClaimingToggled())
+        {
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
+            addClaimWithDelay(player, playerFactionName, worldUUID, chunk, 0);
+        }
+        else
+        {
+            if (MainLogic.shouldClaimByItems())
+            {
+                if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+            }
+            else
+            {
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                addClaim(playerFactionName, worldUUID, chunk);
+            }
+        }
+    }
+
+    private static boolean addClaimByItems(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    {
+        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
+        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        int allRequiredItems = requiredItems.size();
+        int foundItems = 0;
+
+        for (String itemId : requiredItems.keySet())
+        {
+            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+            if(itemType.isPresent())
+            {
+                ItemStack itemStack = ItemStack.builder()
+                        .itemType(itemType.get()).build();
+                itemStack.setQuantity(requiredItems.get(itemId));
+
+                //TODO: This needs to be tested.
+                if (inventory.contains(itemStack))
+                {
+                    foundItems += 1;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (allRequiredItems == foundItems)
+        {
+            for (String itemId : requiredItems.keySet())
+            {
+                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+                if(itemType.isPresent())
+                {
+                    ItemStack itemStack = ItemStack.builder()
+                            .itemType(itemType.get()).build();
+                    itemStack.setQuantity(requiredItems.get(itemId));
+
+                    //TODO: This needs to be tested.
+                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
+                }
+            }
+
+            addClaim(playerFactionName, worldUUID, chunk);
+            return true;
+        }
+        else return false;
     }
 }

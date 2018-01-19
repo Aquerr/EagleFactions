@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.Sponge;
@@ -64,18 +65,20 @@ public class ClaimCommand implements CommandExecutor
                                         {
                                             if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                             {
-                                                if (MainLogic.isDelayedClaimingToggled())
-                                                {
-                                                    FactionLogic.addClaimWithDelay(player, playerFactionName, world.getUniqueId(), chunk, 0);
-                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
-                                                }
-                                                else
-                                                {
-                                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                                                    return CommandResult.success();
-                                                }
+                                                FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
+                                                return CommandResult.success();
+//                                                if (MainLogic.isDelayedClaimingToggled())
+//                                                {
+//                                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
+//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
+//                                                }
+//                                                else
+//                                                {
+//                                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+//
+//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+//                                                    return CommandResult.success();
+//                                                }
                                             }
                                             else
                                             {
@@ -84,18 +87,14 @@ public class ClaimCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                             return CommandResult.success();
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                     return CommandResult.success();
                                 }
                             }
@@ -147,60 +146,6 @@ public class ClaimCommand implements CommandExecutor
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
         }
 
-        return CommandResult.success();
-    }
-
-    private CommandResult claimByItems(String factionName, String factionTag, Player player)
-    {
-        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
-        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
-        int allRequiredItems = requiredItems.size();
-        int foundItems = 0;
-
-        for (String itemId : requiredItems.keySet())
-        {
-            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-            if(itemType.isPresent())
-            {
-                ItemStack itemStack = ItemStack.builder()
-                        .itemType(itemType.get()).build();
-                itemStack.setQuantity(requiredItems.get(itemId));
-
-                //TODO: This needs to be tested.
-                if (inventory.contains(itemStack))
-                {
-                    foundItems += 1;
-                }
-                else
-                {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
-                    break;
-                }
-            }
-        }
-
-        if (allRequiredItems == foundItems)
-        {
-            for (String itemId : requiredItems.keySet())
-            {
-                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-                if(itemType.isPresent())
-                {
-                    ItemStack itemStack = ItemStack.builder()
-                            .itemType(itemType.get()).build();
-                    itemStack.setQuantity(requiredItems.get(itemId));
-
-                    //TODO: This needs to be tested.
-                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
-                }
-            }
-
-            //FactionLogic.addClaim(factionName, factionTag, player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
-            return CommandResult.success();
-        }
         return CommandResult.success();
     }
 }

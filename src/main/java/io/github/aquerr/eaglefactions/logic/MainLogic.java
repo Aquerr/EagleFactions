@@ -290,7 +290,7 @@ public class MainLogic
         return blockHomeTime;
     }
 
-    public static boolean getClaimByItems()
+    public static boolean shouldClaimByItems()
     {
         ConfigurationNode claimByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Turned_On");
 
