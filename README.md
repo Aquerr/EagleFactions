@@ -61,3 +61,10 @@ Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 ## License
 
 [MIT](https://github.com/Aquerr/EagleFactions/blob/master/LICENSE)
+
+## Donation
+
+Donation is not required. This plugin is free, but if your server is gaining money because of it, then why not to give some thanks to the author 
+by sending him a small donation. :)
+
+If you would like to support me and motivate me even more for making this plugin, you can donate me here [Paypal](paypal.me/aquerr)
