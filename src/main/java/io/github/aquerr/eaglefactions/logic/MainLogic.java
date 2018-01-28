@@ -263,11 +263,11 @@ public class MainLogic
         return isToggled;
     }
 
-    public static boolean getClaimingDelay()
+    public static int getClaimingDelay()
     {
         ConfigurationNode claimingDelayNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_Time");
 
-        boolean claimingDelay = claimingDelayNode.getBoolean();
+        int claimingDelay = claimingDelayNode.getInt();
 
         return claimingDelay;
     }

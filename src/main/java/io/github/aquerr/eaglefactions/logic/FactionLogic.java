@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -658,7 +659,7 @@ public class FactionLogic
     {
         if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
         {
-            if (seconds >= MainLogic.getAttackTime())
+            if (seconds >= MainLogic.getClaimingDelay())
             {
                 if (MainLogic.shouldClaimByItems())
                 {
@@ -721,17 +722,29 @@ public class FactionLogic
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
-        for (String itemId : requiredItems.keySet())
+        for (String requiredItem : requiredItems.keySet())
         {
+            String[] idAndVariant = requiredItem.split(":");
+
+            String itemId = idAndVariant[0] + ":" + idAndVariant[1];
             Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
             if(itemType.isPresent())
             {
                 ItemStack itemStack = ItemStack.builder()
                         .itemType(itemType.get()).build();
-                itemStack.setQuantity(requiredItems.get(itemId));
+                itemStack.setQuantity(requiredItems.get(requiredItem));
 
-                //TODO: This needs to be tested.
+                if (idAndVariant.length == 3)
+                {
+                    if (itemType.get().getBlock().isPresent())
+                    {
+                        int variant = Integer.parseInt(idAndVariant[2]);
+                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                        itemStack = ItemStack.builder().fromBlockState(blockState).build();
+                    }
+                }
+
                 if (inventory.contains(itemStack))
                 {
                     foundItems += 1;
@@ -745,17 +758,29 @@ public class FactionLogic
 
         if (allRequiredItems == foundItems)
         {
-            for (String itemId : requiredItems.keySet())
+            for (String requiredItem : requiredItems.keySet())
             {
+                String[] idAndVariant = requiredItem.split(":");
+                String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+
                 Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
                 if(itemType.isPresent())
                 {
                     ItemStack itemStack = ItemStack.builder()
                             .itemType(itemType.get()).build();
-                    itemStack.setQuantity(requiredItems.get(itemId));
+                    itemStack.setQuantity(requiredItems.get(requiredItem));
 
-                    //TODO: This needs to be tested.
+                    if (idAndVariant.length == 3)
+                    {
+                        if (itemType.get().getBlock().isPresent())
+                        {
+                            int variant = Integer.parseInt(idAndVariant[2]);
+                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                            itemStack = ItemStack.builder().fromBlockState(blockState).build();
+                        }
+                    }
+
                     inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
                 }
             }

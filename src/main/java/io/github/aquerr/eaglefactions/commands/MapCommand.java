@@ -51,7 +51,6 @@ public class MapCommand implements CommandExecutor
             Text normalFactionMark = Text.of(TextColors.WHITE, "+");
             Text playerLocationMark = Text.of(TextColors.GOLD, "+");
 
-            //World world = player.getWorld();
             Vector3i playerPosition = player.getLocation().getChunkPosition();
 
             List<Text> map = new ArrayList<>();
@@ -175,10 +174,6 @@ public class MapCommand implements CommandExecutor
             }
             player.sendMessage(Text.of(TextColors.GREEN, "====================="));
 
-            //PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-            //PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions Map")).contents(map);
-            //paginationBuilder.sendTo(source);
-
             //Print factions on map
             if(!playerFaction.equals(""))
             {
@@ -217,24 +212,22 @@ public class MapCommand implements CommandExecutor
                     {
                         if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
-                            if (!EagleFactions.AttackedFactions.contains(playerFactionName))
+                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
-                                if (!FactionLogic.getClaims(playerFactionName).isEmpty())
+                                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                                 {
-                                    if (playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
+                                    if(playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
                                     {
                                         FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     }
                                     else
                                     {
-                                        if (MainLogic.requireConnectedClaims())
+                                        if(MainLogic.requireConnectedClaims())
                                         {
-                                            if (FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                            if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                                FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                             }
                                             else
                                             {
@@ -243,17 +236,13 @@ public class MapCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                 }
                             }
                             else
