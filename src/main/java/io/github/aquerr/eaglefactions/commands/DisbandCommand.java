@@ -21,16 +21,16 @@ public class DisbandCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId ());
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
             if(playerFactionName != null)
             {
-                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     FactionLogic.disbandFaction(playerFactionName);
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
 
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
 
                     return CommandResult.success();
                 }
@@ -40,9 +40,9 @@ public class DisbandCommand implements CommandExecutor
                     try
                     {
                         FactionLogic.disbandFaction(playerFactionName);
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
 
-                        if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+                        if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
 
                         return CommandResult.success();
                     }

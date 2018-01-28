@@ -1,17 +1,30 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -138,21 +151,21 @@ public class FactionLogic
         return factionPlayers;
     }
     
-    public static List<UUID> getPlayersOnline(String factionName)
+    public static List<Player> getPlayersOnline(String factionName)
     {
-    	List<UUID> factionPlayers = new ArrayList<>();
+    	List<Player> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = FactionLogic.getLeader(factionName);
     	if (PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
     	{
-    		factionPlayers.add(UUID.fromString(factionLeader));
+    		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(factionLeader)).get());
     	}
         
         for (String uuid : FactionLogic.getOfficers(factionName))
         {
         	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(UUID.fromString(uuid));
+        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
@@ -160,7 +173,7 @@ public class FactionLogic
         {
         	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(UUID.fromString(uuid));
+        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
@@ -533,7 +546,7 @@ public class FactionLogic
         else ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "home"}, null);
     }
 
-    public static Vector3i getHome(String factionName)
+    public static @Nullable FactionHome getHome(String factionName)
     {
         ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
 
@@ -542,7 +555,7 @@ public class FactionLogic
             String homeString = homeNode.getString();
             String splitter = "\\|";
 
-          //  String worldUUID = homeString.split(splitter)[0];
+            String worldUUIDString = homeString.split(splitter)[0];
             String vectorsString = homeString.split(splitter)[1];
 
             String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
@@ -551,9 +564,10 @@ public class FactionLogic
              int y = Integer.valueOf(vectors[1]);
              int z = Integer.valueOf(vectors[2]);
 
-             Vector3i home = Vector3i.from(x, y, z);
+             Vector3i blockPosition = Vector3i.from(x, y, z);
+             UUID worldUUID = UUID.fromString(worldUUIDString);
 
-             return home;
+             return new FactionHome(worldUUID, blockPosition);
         }
         else
         {
@@ -601,17 +615,17 @@ public class FactionLogic
         return false;
     }
 
-    public static boolean isHomeInWorld(UUID worldUUID, String factionName)
-    {
-        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
-
-        if(homeNode.getValue() != null)
-        {
-            if(homeNode.getString().contains(worldUUID.toString())) return true;
-            else return false;
-        }
-        return false;
-    }
+//    public static boolean isHomeInWorld(UUID worldUUID, String factionName)
+//    {
+//        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
+//
+//        if(homeNode.getValue() != null)
+//        {
+//            if(homeNode.getString().contains(worldUUID.toString())) return true;
+//            else return false;
+//        }
+//        return false;
+//    }
 
     public static void removeClaims(String factionName)
     {
@@ -639,5 +653,141 @@ public class FactionLogic
 
             ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "officers"}, officersList);
         }
+    }
+
+    public static void addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk, int seconds)
+    {
+        if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+        {
+            if (seconds >= MainLogic.getClaimingDelay())
+            {
+                if (MainLogic.shouldClaimByItems())
+                {
+                    if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                    else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                }
+                else
+                {
+                    addClaim(playerFactionName, worldUUID, chunk);
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                }
+            }
+            else
+            {
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+                taskBuilder.execute(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        addClaimWithDelay(player, playerFactionName, worldUUID, chunk, seconds + 1);
+                    }
+
+                }).delay(1, TimeUnit.SECONDS).name("EagleFactions - Claim").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+            }
+        }
+        else
+        {
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+        }
+    }
+
+    public static void startClaiming(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    {
+        if (MainLogic.isDelayedClaimingToggled())
+        {
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
+            addClaimWithDelay(player, playerFactionName, worldUUID, chunk, 0);
+        }
+        else
+        {
+            if (MainLogic.shouldClaimByItems())
+            {
+                if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+            }
+            else
+            {
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                addClaim(playerFactionName, worldUUID, chunk);
+            }
+        }
+    }
+
+    private static boolean addClaimByItems(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    {
+        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
+        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        int allRequiredItems = requiredItems.size();
+        int foundItems = 0;
+
+        for (String requiredItem : requiredItems.keySet())
+        {
+            String[] idAndVariant = requiredItem.split(":");
+
+            String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+            if(itemType.isPresent())
+            {
+                ItemStack itemStack = ItemStack.builder()
+                        .itemType(itemType.get()).build();
+                itemStack.setQuantity(requiredItems.get(requiredItem));
+
+                if (idAndVariant.length == 3)
+                {
+                    if (itemType.get().getBlock().isPresent())
+                    {
+                        int variant = Integer.parseInt(idAndVariant[2]);
+                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                        itemStack = ItemStack.builder().fromBlockState(blockState).build();
+                    }
+                }
+
+                if (inventory.contains(itemStack))
+                {
+                    foundItems += 1;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (allRequiredItems == foundItems)
+        {
+            for (String requiredItem : requiredItems.keySet())
+            {
+                String[] idAndVariant = requiredItem.split(":");
+                String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+
+                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+                if(itemType.isPresent())
+                {
+                    ItemStack itemStack = ItemStack.builder()
+                            .itemType(itemType.get()).build();
+                    itemStack.setQuantity(requiredItems.get(requiredItem));
+
+                    if (idAndVariant.length == 3)
+                    {
+                        if (itemType.get().getBlock().isPresent())
+                        {
+                            int variant = Integer.parseInt(idAndVariant[2]);
+                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                            itemStack = ItemStack.builder().fromBlockState(blockState).build();
+                        }
+                    }
+
+                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
+                }
+            }
+
+            addClaim(playerFactionName, worldUUID, chunk);
+            return true;
+        }
+        else return false;
     }
 }

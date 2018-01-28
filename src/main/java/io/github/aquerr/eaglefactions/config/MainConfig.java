@@ -100,10 +100,19 @@ public class MainConfig implements IConfig
         get().getNode("eaglefactions", "power", "punishment").setValue(1.0).setComment("Punishment after killing a teammate. Default: 1.0");
         get().getNode("eaglefactions", "friendlyfire", "alliance").setValue(false).setComment("Allows/denies friendly fire between alliances. Default: false");
         get().getNode("eaglefactions", "spawn", "mobs").setValue(false).setComment("Allows/denies mob spawning on factions lands. Default: false");
+        get().getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath").setValue(false).setComment("Should player spawn at faction's home after death? Default: false");
+        get().getNode("eaglefactions", "claims", "Delayed_Claim").setValue(false).setComment("Should it take some time to claim a territory? Default: false");
+        get().getNode("eaglefactions", "claims", "Claiming_Time").setValue(10).setComment("How much time in seconds should claiming take? (Delayed_Claim must be set to true for this to work) Default: 10");
+        get().getNode("eaglefactions", "claims", "Claiming_By_Items").setComment("Here you can find all options for claiming by using items.");
+        get().getNode("eaglefactions", "claims", "Claiming_By_Items", "Turned_On").setValue(false).setComment("Allows/denies using items/blocks to claim a territory. Default: false");
+        get().getNode("eaglefactions", "claims", "Claiming_By_Items", "Items").setValue(new ArrayList<>(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"))).setComment("A list of items/blocks that will be taken from the player after creating a faction." + "\n" +
+                "There is a simple list of items below which you can edit by yourself. Current list contains: 35 orange wool, 20 wooden planks, 4 iron ingots." + "\n" +
+                "Write every item/block in format 35:1|42 where 35:1 is an item/block id and 42 is an amount.");
         get().getNode("eaglefactions", "gameplay", "blockEnteringFactions").setValue(true).setComment("Blocks entering faction's lands that players are offline. Default: true");
         get().getNode("eaglefactions", "gameplay", "connectedClaims").setValue(true).setComment("Require claims to be connected? Default: true");
         get().getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone").setValue(false).setComment("Block entering to the SafeZone from the WarZone. Default: false");
         get().getNode("eaglefactions", "gameplay", "attacktime").setValue(10).setComment("How much time in seconds takes destroying a claim. Default: 10");
+        get().getNode("eaglefactions", "gameplay", "attackOnlyAtNight").setValue(false).setComment("Should attacking other factions (using /f attack command) be able only at night? Default: false");
         get().getNode("eaglefactions", "gameplay", "factioncreation").setComment("Faction creation node. You can choose if faction should be created by items or for free.");
         get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems").setValue(false).setComment("Allows/denies using items/blocks to create a faction. Default: false");
         get().getNode("eaglefactions", "gameplay", "factioncreation", "items").setValue(new ArrayList<>(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"))).setComment("A list of items/blocks that will be taken from the player after creating a faction." + "\n" +
@@ -112,6 +121,9 @@ public class MainConfig implements IConfig
         //get().getNode("eaglefactions", "gameplay", "factioncreation", "createbyplacingblock")
         get().getNode("eaglefactions", "playerlimit", "playerlimit").setValue(false).setComment("Turns on/off player limit in factions. Default: false");
         get().getNode("eaglefactions", "playerlimit", "limit").setValue(15).setComment("Player limit in the faction. Default: 15");
+        get().getNode("eaglefactions", "home", "teleportBetweenWorlds").setValue(false).setComment("Should players be able to teleport to faction's home while being in other world? Default: false");
+        get().getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Turned_On").setValue(false).setComment("Block using of /home command after being killed in own faction territory? Default: false");
+        get().getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Time").setValue(60).setComment("How much time in seconds should player be blocked before using Home Command? Default: 60");
     }
 
     @Override

@@ -51,7 +51,6 @@ public class MapCommand implements CommandExecutor
             Text normalFactionMark = Text.of(TextColors.WHITE, "+");
             Text playerLocationMark = Text.of(TextColors.GOLD, "+");
 
-            //World world = player.getWorld();
             Vector3i playerPosition = player.getLocation().getChunkPosition();
 
             List<Text> map = new ArrayList<>();
@@ -153,17 +152,18 @@ public class MapCommand implements CommandExecutor
                     }
                     else
                     {
-                        textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
+                        if(MainLogic.isDelayedClaimingToggled()) textBuilder.append(notCapturedMark).build();
+                        else textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     }
                 }
                 map.add(textBuilder.build());
             }
 
-            String playerPositionCalim = "none";
+            String playerPositionClaim = "none";
 
             if(FactionLogic.isClaimed(world.getUniqueId(), playerPosition))
             {
-                playerPositionCalim = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
+                playerPositionClaim = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
             }
 
             //Print map
@@ -173,10 +173,6 @@ public class MapCommand implements CommandExecutor
                 player.sendMessage(Text.of(text));
             }
             player.sendMessage(Text.of(TextColors.GREEN, "====================="));
-
-            //PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-            //PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions Map")).contents(map);
-            //paginationBuilder.sendTo(source);
 
             //Print factions on map
             if(!playerFaction.equals(""))
@@ -196,7 +192,7 @@ public class MapCommand implements CommandExecutor
                 player.sendMessage(Text.of(TextColors.RED, "Enemies: " + enemyFactions.substring(0, enemyFactions.length() - 2)));
             }
 
-            player.sendMessage(Text.of("Currently standing at: ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " which is claimed by ", TextColors.GOLD, playerPositionCalim));
+            player.sendMessage(Text.of("Currently standing at: ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " which is claimed by ", TextColors.GOLD, playerPositionClaim));
         }
 
 
@@ -214,26 +210,24 @@ public class MapCommand implements CommandExecutor
                 {
                     if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
+                        if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
-                            if (!EagleFactions.AttackedFactions.contains(playerFactionName))
+                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
-                                if (!FactionLogic.getClaims(playerFactionName).isEmpty())
+                                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                                 {
-                                    if (playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
+                                    if(playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
                                     {
                                         FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                                     }
                                     else
                                     {
-                                        if (MainLogic.requireConnectedClaims())
+                                        if(MainLogic.requireConnectedClaims())
                                         {
-                                            if (FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                            if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                                FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                             }
                                             else
                                             {
@@ -242,17 +236,13 @@ public class MapCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                 }
                             }
                             else
@@ -270,7 +260,7 @@ public class MapCommand implements CommandExecutor
                         //Check if faction's home was set in this claim. If yes then remove it.
                         if (FactionLogic.getHome(playerFactionName) != null)
                         {
-                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName).BlockPosition);
 
                             if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                             {
@@ -283,7 +273,7 @@ public class MapCommand implements CommandExecutor
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                     }
                 }
-                else if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                else if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
@@ -296,7 +286,7 @@ public class MapCommand implements CommandExecutor
                         //Check if faction's home was set in this claim. If yes then remove it.
                         if (FactionLogic.getHome(playerFactionName) != null)
                         {
-                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName));
+                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName).BlockPosition);
 
                             if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                             {

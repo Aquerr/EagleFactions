@@ -1,12 +1,8 @@
 package io.github.aquerr.eaglefactions.entities;
 
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.Chunk;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by Aquerr on 2017-07-13.

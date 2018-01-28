@@ -10,9 +10,9 @@ import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
+import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import org.slf4j.Logger;
 
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -37,10 +37,11 @@ public class EagleFactions
     public static List<Invite> InviteList = new ArrayList<>();
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
-    public static List<String> AutoClaimList = new ArrayList<>();
-    public static List<String> AutoMapList = new ArrayList<>();
-    public static List<String> AdminList = new ArrayList<>();
+    public static List<UUID> AutoClaimList = new ArrayList<>();
+    public static List<UUID> AutoMapList = new ArrayList<>();
+    public static List<UUID> AdminList = new ArrayList<>();
     public static List<String> AttackedFactions = new ArrayList<>();
+    public static List<UUID> BlockedHome = new ArrayList<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
 
     @Inject
@@ -55,9 +56,9 @@ public class EagleFactions
     private Path configDir;
     public Path getConfigDir(){return configDir;}
 
-    @Inject
-    private Game game;
-    public Game getGame(){return game;}
+//    @Inject
+//    private Game game;
+//    public Game getGame(){return game;}
 
 
     @Listener
@@ -187,7 +188,7 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("j","join"), CommandSpec.builder()
         .description(Text.of("Join a specific faction"))
         .permission(PluginPermissions.JoinCommand)
-        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+        .arguments(new FactionNameArgument(Text.of("faction name")))
         .executor(new JoinCommand())
         .build());
 
@@ -208,8 +209,7 @@ public class EagleFactions
         //Info command. Shows info about a faction.
         Subcommands.put(Arrays.asList("i","info"), CommandSpec.builder()
         .description(Text.of("Show info about a faction"))
-        .permission(PluginPermissions.InfoCommand)
-        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+        .arguments(new FactionNameArgument(Text.of("faction name")))
         .executor(new InfoCommand())
         .build());
 
@@ -225,7 +225,7 @@ public class EagleFactions
         CommandSpec addAllyCommand = CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
                 .permission(PluginPermissions.AddAllyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new AddAllyCommand())
                 .build();
 
@@ -233,7 +233,7 @@ public class EagleFactions
         CommandSpec removeAllyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the alliance"))
                 .permission(PluginPermissions.RemoveAllyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new RemoveAllyCommand())
                 .build();
 
@@ -249,7 +249,7 @@ public class EagleFactions
         CommandSpec addEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Set faction as enemy"))
                 .permission(PluginPermissions.AddEnemyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new AddEnemyCommand())
                 .build();
 
@@ -257,7 +257,7 @@ public class EagleFactions
         CommandSpec removeEnemyCommand = CommandSpec.builder()
                 .description(Text.of("Remove faction from the enemies"))
                 .permission(PluginPermissions.RemoveEnemyCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(new FactionNameArgument(Text.of("faction name")))
                 .executor(new RemoveEnemyCommand())
                 .build();
 
@@ -358,7 +358,8 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission(PluginPermissions.SetPowerCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("power"))))
                 .executor(new SetPowerCommand())
                 .build());
 
@@ -366,7 +367,8 @@ public class EagleFactions
         Subcommands.put(Arrays.asList("maxpower"), CommandSpec.builder()
                 .description(Text.of("Set player's maxpower"))
                 .permission(PluginPermissions.MaxPowerCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))), GenericArguments.remainingJoinedStrings(Text.of("power")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("power"))))
                 .executor(new MaxPowerCommand())
                 .build());
 
@@ -426,10 +428,11 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
         Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new EntityBlockBreakListener());
+        Sponge.getEventManager().registerListeners(this, new BlockBreakListener());
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
         Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
+        Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
     }
 }

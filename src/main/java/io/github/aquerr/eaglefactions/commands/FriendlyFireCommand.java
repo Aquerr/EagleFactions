@@ -25,7 +25,7 @@ public class FriendlyFireCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     if(FactionLogic.getFactionFriendlyFire(playerFactionName))
                     {

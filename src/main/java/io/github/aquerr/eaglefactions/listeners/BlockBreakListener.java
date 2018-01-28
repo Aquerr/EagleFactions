@@ -14,7 +14,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
-public class EntityBlockBreakListener
+public class BlockBreakListener
 {
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event)
@@ -23,7 +23,7 @@ public class EntityBlockBreakListener
         {
             Player player = (Player)event.getCause().root();
 
-            if(!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+            if(!EagleFactions.AdminList.contains(player.getUniqueId()))
             {
                 String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 

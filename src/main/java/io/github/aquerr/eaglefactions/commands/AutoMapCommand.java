@@ -20,16 +20,16 @@ public class AutoMapCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            if(EagleFactions.AutoMapList.contains(player.getUniqueId().toString()))
+            if(EagleFactions.AutoMapList.contains(player.getUniqueId()))
             {
-                EagleFactions.AutoMapList.remove(player.getUniqueId().toString());
+                EagleFactions.AutoMapList.remove(player.getUniqueId());
 
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoMap", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
                 return CommandResult.success();
             }
             else
             {
-                EagleFactions.AutoMapList.add(player.getUniqueId().toString());
+                EagleFactions.AutoMapList.add(player.getUniqueId());
 
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoMap", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
                 return CommandResult.success();

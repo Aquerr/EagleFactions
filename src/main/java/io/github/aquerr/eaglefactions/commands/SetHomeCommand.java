@@ -29,10 +29,9 @@ public class SetHomeCommand implements CommandExecutor
             {
                 World world = player.getWorld();
 
-                if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
-
                     FactionLogic.setHome(world.getUniqueId(), playerFactionName, home);
                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
 

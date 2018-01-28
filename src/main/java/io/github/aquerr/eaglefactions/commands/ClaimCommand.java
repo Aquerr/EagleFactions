@@ -35,7 +35,7 @@ public class ClaimCommand implements CommandExecutor
 
                     if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
+                        if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
                             if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
@@ -54,9 +54,7 @@ public class ClaimCommand implements CommandExecutor
                                         {
                                             if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                                FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
                                             }
                                             else
@@ -66,18 +64,14 @@ public class ClaimCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                             return CommandResult.success();
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                     return CommandResult.success();
                                 }
                             }
@@ -97,7 +91,7 @@ public class ClaimCommand implements CommandExecutor
                     }
 
                 }
-                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                else if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();

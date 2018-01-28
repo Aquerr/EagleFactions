@@ -29,14 +29,9 @@ public class MaxPowerCommand implements CommandExecutor
             {
                 Player player = (Player) source;
 
-                if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    BigDecimal newPower = new BigDecimal(optionalPower.get());
-
-                    PowerService.setMaxPower(optionalSelectedPlayer.get().getUniqueId(), newPower);
-
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's maxpower has been changed!"));
-                    return CommandResult.success();
+                    setMaxPower(optionalSelectedPlayer.get(), optionalPower.get());
                 }
                 else
                 {
@@ -45,7 +40,7 @@ public class MaxPowerCommand implements CommandExecutor
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                setMaxPower(optionalSelectedPlayer.get(), optionalPower.get());
             }
         }
         else
@@ -55,5 +50,14 @@ public class MaxPowerCommand implements CommandExecutor
         }
 
         return CommandResult.success();
+    }
+
+    private void setMaxPower(Player player, String power)
+    {
+        BigDecimal newPower = new BigDecimal(power);
+
+        PowerService.setMaxPower(player.getUniqueId(), newPower);
+
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's maxpower has been changed!"));
     }
 }

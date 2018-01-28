@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands;
 
-
 import com.google.common.collect.Lists;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import org.spongepowered.api.Sponge;
@@ -69,7 +68,7 @@ public class HelpCommand implements CommandExecutor
         PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "EagleFactions Command List")).padding(Text.of("-")).contents(helpList).linesPerPage(14);
         paginationBuilder.sendTo(source);
 
-        return CommandResult.success ();
+        return CommandResult.success();
     }
 
 }
