@@ -154,11 +154,5 @@ public class InfoCommand implements CommandExecutor
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
         PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Faction Info")).contents(factionInfo);
         paginationBuilder.sendTo(source);
-        }
-        else
-        {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f info <faction name>"));
-        }
     }
 }
