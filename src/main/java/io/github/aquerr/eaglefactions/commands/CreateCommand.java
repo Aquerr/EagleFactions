@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -13,6 +14,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -125,15 +127,28 @@ public class CreateCommand implements CommandExecutor
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
-        for (String itemId : requiredItems.keySet())
+        for (String requiredItem : requiredItems.keySet())
         {
+            String[] idAndVariant = requiredItem.split(":");
+
+            String itemId = idAndVariant[0] + ":" + idAndVariant[1];
             Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
             if(itemType.isPresent())
             {
                 ItemStack itemStack = ItemStack.builder()
                         .itemType(itemType.get()).build();
-                itemStack.setQuantity(requiredItems.get(itemId));
+                itemStack.setQuantity(requiredItems.get(requiredItem));
+
+                if (idAndVariant.length == 3)
+                {
+                    if (itemType.get().getBlock().isPresent())
+                    {
+                        int variant = Integer.parseInt(idAndVariant[2]);
+                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                        itemStack = ItemStack.builder().fromBlockState(blockState).build();
+                    }
+                }
 
                 if (inventory.contains(itemStack))
                 {
@@ -149,17 +164,30 @@ public class CreateCommand implements CommandExecutor
 
         if (allRequiredItems == foundItems)
         {
-            for (String itemId : requiredItems.keySet())
+            for (String requiredItem : requiredItems.keySet())
             {
+                String[] idAndVariant = requiredItem.split(":");
+                String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+
                 Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
                 if(itemType.isPresent())
                 {
                     ItemStack itemStack = ItemStack.builder()
                             .itemType(itemType.get()).build();
-                    itemStack.setQuantity(requiredItems.get(itemId));
+                    itemStack.setQuantity(requiredItems.get(requiredItem));
 
-                    inventory.query(itemStack.getItem()).poll(itemStack.getQuantity());
+                    if (idAndVariant.length == 3)
+                    {
+                        if (itemType.get().getBlock().isPresent())
+                        {
+                            int variant = Integer.parseInt(idAndVariant[2]);
+                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                            itemStack = ItemStack.builder().fromBlockState(blockState).build();
+                        }
+                    }
+
+                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
                 }
             }
 

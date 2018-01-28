@@ -27,33 +27,33 @@ public class AutoClaimCommand implements CommandExecutor
             {
                 if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
+                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
                     {
-                        EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+                        EagleFactions.AutoClaimList.remove(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
 
                         return CommandResult.success();
                     }
                     else
                     {
-                        EagleFactions.AutoClaimList.add(player.getUniqueId().toString());
+                        EagleFactions.AutoClaimList.add(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
 
                         return CommandResult.success();
                     }
                 }
-                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                else if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId().toString()))
+                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
                     {
-                        EagleFactions.AutoClaimList.remove(player.getUniqueId().toString());
+                        EagleFactions.AutoClaimList.remove(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
 
                         return CommandResult.success();
                     }
                     else
                     {
-                        EagleFactions.AutoClaimList.add(player.getUniqueId().toString());
+                        EagleFactions.AutoClaimList.add(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
 
                         return CommandResult.success();

@@ -3,17 +3,28 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 public class ClaimCommand implements CommandExecutor
 {
@@ -35,7 +46,7 @@ public class ClaimCommand implements CommandExecutor
 
                     if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() >= FactionLogic.getClaims(playerFactionName).size())
+                        if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
                             if(!EagleFactions.AttackedFactions.contains(playerFactionName))
                             {
@@ -54,10 +65,20 @@ public class ClaimCommand implements CommandExecutor
                                         {
                                             if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                                FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
+//                                                if (MainLogic.isDelayedClaimingToggled())
+//                                                {
+//                                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
+//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
+//                                                }
+//                                                else
+//                                                {
+//                                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+//
+//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+//                                                    return CommandResult.success();
+//                                                }
                                             }
                                             else
                                             {
@@ -66,18 +87,14 @@ public class ClaimCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                            FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                             return CommandResult.success();
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                     return CommandResult.success();
                                 }
                             }
@@ -97,7 +114,7 @@ public class ClaimCommand implements CommandExecutor
                     }
 
                 }
-                else if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                else if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();

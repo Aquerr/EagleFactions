@@ -28,6 +28,8 @@ public abstract class PluginPermissions
     public static final String HelpCommand = "eaglefactions.command.help";
     public static final String PlayerCommand = "eaglefactions.command.player";
     public static final String InfoCommand = "eaglefactions.command.info";
+    public static final String InfoCommandSelf = "eaglefactions.command.info.self";
+    public static final String InfoCommandOthers = "eaglefactions.command.info.others";
     public static final String VersionCommand = "eaglefactions.command.version";
 
     public static final String ClaimCommand = "eaglefactions.command.claim";

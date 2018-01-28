@@ -47,7 +47,7 @@ public class AddAllyCommand implements CommandExecutor
 
                 if (playerFactionName != null)
                 {
-                    if (EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                    if (EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
                         if (!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))
                         {

@@ -227,6 +227,98 @@ public class MainLogic
         return items;
     }
 
+    public static boolean shouldSpawnAtHomeAfterDeath()
+    {
+        ConfigurationNode spawnAfterDeathNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath");
+
+        boolean spawnAfterDeath = spawnAfterDeathNode.getBoolean();
+
+        return spawnAfterDeath;
+    }
+
+    public static boolean shouldAttackOnlyAtNight()
+    {
+        ConfigurationNode attackOnlyAtNightNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "attackOnlyAtNight");
+
+        boolean attackAtNight = attackOnlyAtNightNode.getBoolean();
+
+        return attackAtNight;
+    }
+
+    public static boolean canHomeBetweenWorlds()
+    {
+        ConfigurationNode canHomeBetweenWorldsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "teleportBetweenWorlds");
+
+        boolean canHomeBetweenWorlds = canHomeBetweenWorldsNode.getBoolean();
+
+        return canHomeBetweenWorlds;
+    }
+
+    public static boolean isDelayedClaimingToggled()
+    {
+        ConfigurationNode isDelayedClaimingToggledNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Delayed_Claim");
+
+        boolean isToggled = isDelayedClaimingToggledNode.getBoolean();
+
+        return isToggled;
+    }
+
+    public static int getClaimingDelay()
+    {
+        ConfigurationNode claimingDelayNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_Time");
+
+        int claimingDelay = claimingDelayNode.getInt();
+
+        return claimingDelay;
+    }
+
+    public static boolean shouldBlockHomeAfterDeathInOwnFaction()
+    {
+        ConfigurationNode blockHomeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Turned_On");
+
+        boolean blockHome = blockHomeNode.getBoolean();
+
+        return blockHome;
+    }
+
+    public static int getHomeBlockTimeAfterDeath()
+    {
+        ConfigurationNode blockHomeTimeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Time");
+
+        int blockHomeTime = blockHomeTimeNode.getInt();
+
+        return blockHomeTime;
+    }
+
+    public static boolean shouldClaimByItems()
+    {
+        ConfigurationNode claimByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Turned_On");
+
+        boolean claimByItems = claimByItemsNode.getBoolean();
+
+        return claimByItems;
+    }
+
+    public static HashMap<String, Integer> getRequiredItemsToClaim()
+    {
+        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Items");
+
+        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
+        HashMap<String, Integer> items = new HashMap<>();
+
+        for (String itemWithAmount : itemsList)
+        {
+            String strings[] = itemWithAmount.split("\\|");
+
+            String item = strings[0];
+            int amount = Integer.valueOf(strings[1]);
+
+            items.put(item, amount);
+        }
+
+        return items;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)

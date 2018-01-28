@@ -42,7 +42,7 @@ public class JoinCommand implements CommandExecutor
                     else
                     {
                         //If player has admin mode then force join.
-                        if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                        if(EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
                             FactionLogic.joinFaction(player.getUniqueId(), factionName);
                             source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully joined faction ", TextColors.GOLD, factionName));

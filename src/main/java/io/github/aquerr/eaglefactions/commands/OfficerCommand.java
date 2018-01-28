@@ -31,7 +31,7 @@ public class OfficerCommand implements CommandExecutor
 
                 if(playerFactionName != null)
                 {
-                    if(EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
                         if(FactionLogic.getFactionName(newOfficerPlayer.getUniqueId()).equals(playerFactionName))
                         {

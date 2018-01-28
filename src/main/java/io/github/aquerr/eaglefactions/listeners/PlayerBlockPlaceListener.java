@@ -20,7 +20,7 @@ public class PlayerBlockPlaceListener
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
 
-        if(!EagleFactions.AdminList.contains(player.getUniqueId().toString()))
+        if(!EagleFactions.AdminList.contains(player.getUniqueId()))
         {
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 

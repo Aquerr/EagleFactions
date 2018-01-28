@@ -49,7 +49,7 @@ public class KickCommand implements CommandExecutor
                                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You kicked ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " from the faction."));
                                         selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were kicked from faction ", TextColors.GOLD, playerFactionName));
 
-                                        if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId().toString())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId().toString());
+                                        if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
 
                                         return CommandResult.success();
                                     }
