@@ -20,7 +20,7 @@ public class ChatCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        //Optional<ChatEnum> optionalChatType = context.<ChatEnum>getOne("chat");
+        Optional<ChatEnum> optionalChatType = context.<ChatEnum>getOne("chat");
 
         if(source instanceof Player)
         {
@@ -28,28 +28,29 @@ public class ChatCommand implements CommandExecutor
 
             if (FactionLogic.getFactionName(player.getUniqueId()) != null)
             {
-//                if(optionalChatType.isPresent())
-//                {
-//                    if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
-//                    {
-//                        if (optionalChatType.get().equals(ChatEnum.Global))
-//                        {
-//                            EagleFactions.ChatList.remove(player.getUniqueId());
-//                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, "Global", TextColors.RESET, "!"));
-//                        }
-//                        else
-//                        {
-//                            EagleFactions.ChatList.replace(player.getUniqueId(), EagleFactions.ChatList.get(player.getUniqueId()), optionalChatType.get());
-//                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
-//                        }
-//                    }
-//                    else
-//                    {
-//                        EagleFactions.ChatList.put(player.getUniqueId(), optionalChatType.get());
-//                    }
-//                }
-//                else
-//                {
+                if(optionalChatType.isPresent())
+                {
+                    if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
+                    {
+                        if (optionalChatType.get().equals(ChatEnum.Global))
+                        {
+                            EagleFactions.ChatList.remove(player.getUniqueId());
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, "Global", TextColors.RESET, "!"));
+                        }
+                        else
+                        {
+                            EagleFactions.ChatList.replace(player.getUniqueId(), EagleFactions.ChatList.get(player.getUniqueId()), optionalChatType.get());
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
+                        }
+                    }
+                    else
+                    {
+                        EagleFactions.ChatList.put(player.getUniqueId(), optionalChatType.get());
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
+                    }
+                }
+                else
+                {
                     //If player is in alliance chat or faction chat.
                     if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
                     {
@@ -69,7 +70,7 @@ public class ChatCommand implements CommandExecutor
                         EagleFactions.ChatList.put(player.getUniqueId(), ChatEnum.Alliance);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Changed chat to ", TextColors.GOLD, "Alliance", TextColors.RESET, "!"));
                     }
-//                }
+                }
             }
             else
             {
