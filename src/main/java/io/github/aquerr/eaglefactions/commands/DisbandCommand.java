@@ -28,7 +28,7 @@ public class DisbandCommand implements CommandExecutor
                 if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     FactionLogic.disbandFaction(playerFactionName);
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
+                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
 
                     if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
 
@@ -40,7 +40,7 @@ public class DisbandCommand implements CommandExecutor
                     try
                     {
                         FactionLogic.disbandFaction(playerFactionName);
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
 
                         if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
 
