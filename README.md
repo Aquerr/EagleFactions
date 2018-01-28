@@ -66,4 +66,4 @@ Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 
 Donation is not required but if your server is gaining money because of it, then why not to give some thanks to the author by sending him a small donation? :)
 
-If you would like to support me and motivate me even more for making this plugin, you can donate me here [Paypal](paypal.me/aquerr)
+If you would like to support me and motivate me even more for making this plugin, you can donate me here [Paypal](https://www.paypal.me/aquerr)
