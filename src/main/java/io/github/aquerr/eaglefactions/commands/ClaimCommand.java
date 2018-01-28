@@ -56,18 +56,6 @@ public class ClaimCommand implements CommandExecutor
                                             {
                                                 FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
-//                                                if (MainLogic.isDelayedClaimingToggled())
-//                                                {
-//                                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
-//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
-//                                                }
-//                                                else
-//                                                {
-//                                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-//
-//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-//                                                    return CommandResult.success();
-//                                                }
                                             }
                                             else
                                             {

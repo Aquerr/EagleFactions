@@ -1,10 +1,12 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -18,7 +20,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -143,13 +147,14 @@ public class CreateCommand implements CommandExecutor
                 {
                     if (itemType.get().getBlock().isPresent())
                     {
+                        List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                         int variant = Integer.parseInt(idAndVariant[2]);
-                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                        BlockState blockState = (BlockState) blockStateList.toArray()[variant];
                         itemStack = ItemStack.builder().fromBlockState(blockState).build();
                     }
                 }
 
-                if (inventory.contains(itemStack))
+                if(inventory.query(itemStack.getItem()).peek().isPresent() && inventory.query(itemStack.getItem()).peek().get().getQuantity() >= itemStack.getQuantity())
                 {
                     foundItems += 1;
                 }
@@ -180,8 +185,9 @@ public class CreateCommand implements CommandExecutor
                     {
                         if (itemType.get().getBlock().isPresent())
                         {
+                            List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                             int variant = Integer.parseInt(idAndVariant[2]);
-                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                            BlockState blockState = (BlockState) blockStateList.toArray()[variant];
                             itemStack = ItemStack.builder().fromBlockState(blockState).build();
                         }
                     }

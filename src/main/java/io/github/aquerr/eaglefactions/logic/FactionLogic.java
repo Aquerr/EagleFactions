@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.config.IConfig;
@@ -25,6 +26,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -738,13 +740,14 @@ public class FactionLogic
                 {
                     if (itemType.get().getBlock().isPresent())
                     {
+                        List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                         int variant = Integer.parseInt(idAndVariant[2]);
-                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                        BlockState blockState = (BlockState) blockStateList.toArray()[variant];
                         itemStack = ItemStack.builder().fromBlockState(blockState).build();
                     }
                 }
 
-                if (inventory.contains(itemStack))
+                if(inventory.query(itemStack.getItem()).peek().isPresent() && inventory.query(itemStack.getItem()).peek().get().getQuantity() >= itemStack.getQuantity())
                 {
                     foundItems += 1;
                 }
@@ -774,8 +777,9 @@ public class FactionLogic
                     {
                         if (itemType.get().getBlock().isPresent())
                         {
+                            List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                             int variant = Integer.parseInt(idAndVariant[2]);
-                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                            BlockState blockState = (BlockState) blockStateList.toArray()[variant];
                             itemStack = ItemStack.builder().fromBlockState(blockState).build();
                         }
                     }
