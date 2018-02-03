@@ -2,6 +2,8 @@
 
 # Eagle Factions
 
+API 7.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.12.2%2Fapi-7.0.0)](https://travis-ci.org/Aquerr/EagleFactions)
+
 API 6.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.11.2%2Fapi-6.0.0)](https://travis-ci.org/Aquerr/EagleFactions)
 
 API 5.1.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.10.2%2Fapi-5.1.0)](https://travis-ci.org/Aquerr/EagleFactions)
@@ -59,3 +61,9 @@ Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 ## License
 
 [MIT](https://github.com/Aquerr/EagleFactions/blob/master/LICENSE)
+
+## Donation
+
+Donation is not required but if your server is gaining money because of it, then why not to give some thanks to the author by sending him a small donation? :)
+
+If you would like to support me and motivate me even more for making this plugin, you can donate me here [Paypal](https://www.paypal.me/aquerr)
