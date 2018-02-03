@@ -24,8 +24,6 @@ public class EntityDamageListener
         {
                 if(event.getTargetEntity().getType() == EntityTypes.PLAYER)
                 {
-                    EagleFactions.getEagleFactions().getLogger().info("Attacked player: " + event.getSource().toString());
-
                     Player attackedPlayer = (Player) event.getTargetEntity();
                     World world = attackedPlayer.getWorld();
 
@@ -37,14 +35,12 @@ public class EntityDamageListener
                         return;
                     }
 
-                    if (event.getSource() instanceof EntityDamageSource)
+                    if (event.getCause().root() instanceof EntityDamageSource)
                     {
-                        EntityDamageSource entityDamageSource = (EntityDamageSource) event.getSource();
+                        EntityDamageSource entityDamageSource = (EntityDamageSource) event.getCause().root();
 
                         if(entityDamageSource.getSource() instanceof Player)
                         {
-                            EagleFactions.getEagleFactions().getLogger().info("It is a player!");
-
                             Player player = (Player) entityDamageSource.getSource();
 
                             //Block all damage a player could deal if location is SafeZone.
