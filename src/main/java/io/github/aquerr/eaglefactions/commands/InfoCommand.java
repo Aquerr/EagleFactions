@@ -47,11 +47,11 @@ public class InfoCommand implements CommandExecutor
                 if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if(!source.hasPermission(PluginPermissions.InfoCommandSelf) && (source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
+                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to view information about your faction!"));
                     }
-                    else if(!source.hasPermission(PluginPermissions.InfoCommandOthers) && (source instanceof Player && !FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
+                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && !FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to view information about other factions!"));
                     }
