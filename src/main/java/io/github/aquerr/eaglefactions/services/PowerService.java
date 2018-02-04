@@ -197,16 +197,20 @@ public class PowerService
 
             BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-            if(isKillAward)
+            if(PowerService.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerService.getPlayerMaxPower(playerUUID).doubleValue())
             {
-                BigDecimal killAward = MainLogic.getKillAward();
-                playerNode.getNode("power").setValue(playerPower.add(killAward));
+                if(isKillAward)
+                {
+                    BigDecimal killAward = MainLogic.getKillAward();
+                    playerNode.getNode("power").setValue(playerPower.add(killAward));
+                }
+                else
+                {
+                    playerNode.getNode("power").setValue(playerPower.add(MainLogic.getPowerIncrement()));
+                }
+
+                configLoader.save(playerNode);
             }
-            else
-            {
-                playerNode.getNode("power").setValue(playerPower.add(MainLogic.getPowerIncrement()));
-            }
-            configLoader.save(playerNode);
         }
         catch (Exception exception)
         {
