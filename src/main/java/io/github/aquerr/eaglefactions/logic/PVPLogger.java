@@ -33,7 +33,7 @@ public class PVPLogger
         else
         {
             AttackedPlayers.add(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "PVPLogger has turned off for you! You can now disconnect safely."));
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "PVPLogger has turned on! You will die if you disconnect in " + 120 + "s!"));
 
             Task allowLogging = Sponge.getScheduler().createTaskBuilder().execute(new Runnable()
             {
