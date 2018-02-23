@@ -77,13 +77,13 @@ public class EntityDamageListener
                                             }
                                         }
                                     }//Check if players are in the alliance.
-                                    else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.getAllianceFriendlyFire())
+                                    else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.isAllianceFriendlyFire())
                                     {
                                         event.setBaseDamage(0);
                                         event.setCancelled(true);
                                         return;
                                     }
-                                    else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && MainLogic.getAllianceFriendlyFire())
+                                    else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && MainLogic.isAllianceFriendlyFire())
                                     {
                                         PVPLogger.addOrUpdatePlayer(attackedPlayer);
                                         if(event.willCauseDeath())

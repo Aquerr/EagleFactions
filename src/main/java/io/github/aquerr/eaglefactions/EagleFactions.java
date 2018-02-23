@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import org.slf4j.Logger;
 
@@ -32,8 +33,7 @@ import java.util.*;
 @Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = PluginInfo.Author)
 public class EagleFactions
 {
-
-    public static Map<List<String>, CommandSpec> Subcommands;
+    public static Map<List<String>, CommandSpec> Subcommands = new HashMap<List<String>, CommandSpec>();
     public static List<Invite> InviteList = new ArrayList<>();
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
@@ -135,8 +135,6 @@ public class EagleFactions
     private void InitializeCommands()
     {
         getLogger ().info ("Initializing commands...");
-
-        Subcommands = new HashMap<List<String>, CommandSpec>();
 
         //Help command should display all possible commands in plugin.
         Subcommands.put (Arrays.asList ("help"), CommandSpec.builder ()
@@ -278,11 +276,11 @@ public class EagleFactions
                 .build());
 
         //Friendly Fire command.
-        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
-                .description(Text.of("Allow/Deny friendly fire in the faction"))
-                .permission(PluginPermissions.FriendlyFireCommand)
-                .executor(new FriendlyFireCommand())
-                .build());
+//        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
+//                .description(Text.of("Allow/Deny friendly fire in the faction"))
+//                .permission(PluginPermissions.FriendlyFireCommand)
+//                .executor(new FriendlyFireCommand())
+//                .build());
 
         //Claim command.
         Subcommands.put(Arrays.asList("claim"), CommandSpec.builder()
