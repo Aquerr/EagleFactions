@@ -3,39 +3,44 @@ package io.github.aquerr.eaglefactions.services;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
-import io.github.aquerr.eaglefactions.config.FactionsConfig;
-import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Task;
-import sun.applet.Main;
 
-import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class PowerService
 {
-    private static IConfig factionsConfig = FactionsConfig.getConfig();
+    //private static IConfig factionsConfig = FactionsConfig.getConfig();
+
+    private static CommentedConfigurationNode _commentedConfigurationNode;
+
+    public static void setup(Path configPath)
+    {
+        try
+        {
+            _commentedConfigurationNode = HoconConfigurationLoader.builder().setPath(configPath).build().load();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
+    }
 
     public static boolean checkIfPlayerExists(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
         if(Files.exists(playerFile))
         {
             return true;
@@ -48,7 +53,7 @@ public class PowerService
 
     public static void addPlayer(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -103,7 +108,7 @@ public class PowerService
     {
         if(faction.Name.equals("SafeZone") || faction.Name.equals("WarZone"))
         {
-            ConfigurationNode powerNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", faction.Name, "power");
+            ConfigurationNode powerNode = _commentedConfigurationNode.getNode("factions", faction.Name, "power");
 
             BigDecimal factionPowerInFile = new BigDecimal(powerNode.getDouble());
 

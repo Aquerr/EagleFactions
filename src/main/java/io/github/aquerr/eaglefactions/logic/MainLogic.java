@@ -1,26 +1,37 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import io.github.aquerr.eaglefactions.config.ConfigAccess;
-import io.github.aquerr.eaglefactions.config.IConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
-import javafx.util.Pair;
 import ninja.leaping.configurate.ConfigurationNode;
-import sun.java2d.pipe.SpanShapeRenderer;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.function.Function;
 
 public class MainLogic
 {
-    private static IConfig mainConfig = MainConfig.getConfig();
+    private static CommentedConfigurationNode _commentedConfigurationNode;
+
+    public static void setup(Path configPath)
+    {
+        try
+        {
+            _commentedConfigurationNode = HoconConfigurationLoader.builder().setPath(configPath).build().load();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
+    }
 
     public static boolean isFactionFriendlyFire()
     {
-        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(mainConfig).getNode("friendlyfire-faction");
+        ConfigurationNode friendlyFireNode = _commentedConfigurationNode.getNode("friendlyfire-faction");
 
         Boolean friendlyFire = friendlyFireNode.getBoolean();
 
@@ -29,7 +40,7 @@ public class MainLogic
 
     public static boolean isAllianceFriendlyFire()
     {
-        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(mainConfig).getNode("friendlyfire-alliance");
+        ConfigurationNode friendlyFireNode = _commentedConfigurationNode.getNode("friendlyfire-alliance");
 
         Boolean friendlyFire = friendlyFireNode.getBoolean();
 
@@ -38,7 +49,7 @@ public class MainLogic
 
     public static BigDecimal getGlobalMaxPower()
     {
-        ConfigurationNode maxPowerNode = ConfigAccess.getConfig(mainConfig).getNode("power", "maxpower");
+        ConfigurationNode maxPowerNode = _commentedConfigurationNode.getNode("power", "maxpower");
 
         BigDecimal maxPower = new BigDecimal(maxPowerNode.getString());
 
@@ -47,7 +58,7 @@ public class MainLogic
 
     public static BigDecimal getStartingPower()
     {
-        ConfigurationNode startingPowerNode = ConfigAccess.getConfig(mainConfig).getNode("power", "startpower");
+        ConfigurationNode startingPowerNode = _commentedConfigurationNode.getNode("power", "startpower");
 
         BigDecimal startPower = new BigDecimal(startingPowerNode.getString());
 
@@ -56,7 +67,7 @@ public class MainLogic
 
     public static BigDecimal getPowerIncrement()
     {
-        ConfigurationNode powerIncrementNode = ConfigAccess.getConfig(mainConfig).getNode("power", "increment");
+        ConfigurationNode powerIncrementNode = _commentedConfigurationNode.getNode("power", "increment");
 
         BigDecimal incrementPower = new BigDecimal(powerIncrementNode.getString());
 
@@ -65,7 +76,7 @@ public class MainLogic
 
     public static BigDecimal getPowerDecrement()
     {
-        ConfigurationNode powerDecrementNode = ConfigAccess.getConfig(mainConfig).getNode("power", "decrement");
+        ConfigurationNode powerDecrementNode = _commentedConfigurationNode.getNode("power", "decrement");
 
         BigDecimal decrementPower = new BigDecimal(powerDecrementNode.getString());
 
@@ -74,7 +85,7 @@ public class MainLogic
 
     public static BigDecimal getKillAward()
     {
-        ConfigurationNode killAwardNode = ConfigAccess.getConfig(mainConfig).getNode("power", "killaward");
+        ConfigurationNode killAwardNode = _commentedConfigurationNode.getNode("power", "killaward");
 
         BigDecimal killAward = new BigDecimal(killAwardNode.getString());
 
@@ -83,7 +94,7 @@ public class MainLogic
 
     public static BigDecimal getPunishment()
     {
-        ConfigurationNode punishmentNode = ConfigAccess.getConfig(mainConfig).getNode("power", "punishment");
+        ConfigurationNode punishmentNode = _commentedConfigurationNode.getNode("power", "punishment");
 
         BigDecimal punishment = new BigDecimal(punishmentNode.getString());
 
@@ -92,7 +103,7 @@ public class MainLogic
 
     public static int getMaxNameLength()
     {
-        ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("name", "max-length");
+        ConfigurationNode maxLengthNode = _commentedConfigurationNode.getNode("name", "max-length");
 
         int maxLength = maxLengthNode.getInt();
 
@@ -101,7 +112,7 @@ public class MainLogic
 
     public static int getMinNameLength()
     {
-        ConfigurationNode minLengthNode = ConfigAccess.getConfig(mainConfig).getNode("name", "min-length");
+        ConfigurationNode minLengthNode = _commentedConfigurationNode.getNode("name", "min-length");
 
         int minLength = minLengthNode.getInt();
 
@@ -110,7 +121,7 @@ public class MainLogic
 
     public static int getMaxTagLength()
     {
-        ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("tag", "max-length");
+        ConfigurationNode maxLengthNode = _commentedConfigurationNode.getNode("tag", "max-length");
 
         int maxLength = maxLengthNode.getInt();
 
@@ -119,7 +130,7 @@ public class MainLogic
 
     public static int getMinTagLength()
     {
-        ConfigurationNode minLengthNode = ConfigAccess.getConfig(mainConfig).getNode("tag", "min-length");
+        ConfigurationNode minLengthNode = _commentedConfigurationNode.getNode("tag", "min-length");
 
         int minLength = minLengthNode.getInt();
 
@@ -128,7 +139,7 @@ public class MainLogic
 
     public static boolean getMobSpawning()
     {
-        ConfigurationNode mobSpawningNode = ConfigAccess.getConfig(mainConfig).getNode("spawn", "mobs");
+        ConfigurationNode mobSpawningNode = _commentedConfigurationNode.getNode("spawn", "mobs");
 
         boolean mobSpawning = mobSpawningNode.getBoolean();
 
@@ -137,7 +148,7 @@ public class MainLogic
 
     public static boolean getBlockEnteringFactions()
     {
-        ConfigurationNode enteringFactionsNode = ConfigAccess.getConfig(mainConfig).getNode("block-entering-faction-while-offline");
+        ConfigurationNode enteringFactionsNode = _commentedConfigurationNode.getNode("block-entering-faction-while-offline");
 
         boolean enteringFactions = enteringFactionsNode.getBoolean();
 
@@ -146,7 +157,7 @@ public class MainLogic
 
     public static boolean requireConnectedClaims()
     {
-        ConfigurationNode requireConnectedClaimsNode = ConfigAccess.getConfig(mainConfig).getNode("connected-claims");
+        ConfigurationNode requireConnectedClaimsNode = _commentedConfigurationNode.getNode("connected-claims");
 
         boolean requireConnectedClaims = requireConnectedClaimsNode.getBoolean();
 
@@ -155,7 +166,7 @@ public class MainLogic
 
     public static boolean shouldBlockSafeZoneFromWarZone()
     {
-        ConfigurationNode blockSafeZoneFromWarZoneNode = ConfigAccess.getConfig(mainConfig).getNode("block-safezone-from-warzone");
+        ConfigurationNode blockSafeZoneFromWarZoneNode = _commentedConfigurationNode.getNode("block-safezone-from-warzone");
 
         boolean blockSafeZoneFromWarZone = blockSafeZoneFromWarZoneNode.getBoolean();
 
@@ -164,7 +175,7 @@ public class MainLogic
 
     public static boolean isPlayerLimit()
     {
-        ConfigurationNode isPlayerLimitNode = ConfigAccess.getConfig(mainConfig).getNode("player-limit", "toggled");
+        ConfigurationNode isPlayerLimitNode = _commentedConfigurationNode.getNode("player-limit", "toggled");
 
         boolean playerLimit = isPlayerLimitNode.getBoolean();
 
@@ -173,7 +184,7 @@ public class MainLogic
 
     public static int getPlayerLimit()
     {
-        ConfigurationNode limitNode = ConfigAccess.getConfig(mainConfig).getNode("player-limit", "limit");
+        ConfigurationNode limitNode = _commentedConfigurationNode.getNode("player-limit", "limit");
 
         int limit = limitNode.getInt();
 
@@ -182,7 +193,7 @@ public class MainLogic
 
     public static int getAttackTime()
     {
-        ConfigurationNode attackTimeNode = ConfigAccess.getConfig(mainConfig).getNode("attack-time");
+        ConfigurationNode attackTimeNode = _commentedConfigurationNode.getNode("attack-time");
 
         int attackTime = attackTimeNode.getInt();
 
@@ -191,7 +202,7 @@ public class MainLogic
 
     public static String getPrefixOption()
     {
-        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("faction-prefix");
+        ConfigurationNode prefixNode = _commentedConfigurationNode.getNode("faction-prefix");
 
         String prefix = prefixNode.getString();
 
@@ -200,7 +211,7 @@ public class MainLogic
 
     public static Boolean shouldDisplayRank()
     {
-        ConfigurationNode rankNode = ConfigAccess.getConfig(mainConfig).getNode("faction-rank");
+        ConfigurationNode rankNode = _commentedConfigurationNode.getNode("faction-rank");
 
         Boolean rank = rankNode.getBoolean();
 
@@ -209,7 +220,7 @@ public class MainLogic
 
     public static boolean getCreateByItems()
     {
-        ConfigurationNode createByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("creating-by-items", "toggled");
+        ConfigurationNode createByItemsNode = _commentedConfigurationNode.getNode("creating-by-items", "toggled");
 
         boolean createByItems = createByItemsNode.getBoolean();
 
@@ -218,7 +229,7 @@ public class MainLogic
 
     public static HashMap<String, Integer> getRequiredItemsToCreate()
     {
-        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("creating-by-items", "items");
+        ConfigurationNode itemsNode = _commentedConfigurationNode.getNode("creating-by-items", "items");
 
         List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();
@@ -238,7 +249,7 @@ public class MainLogic
 
     public static boolean shouldSpawnAtHomeAfterDeath()
     {
-        ConfigurationNode spawnAfterDeathNode = ConfigAccess.getConfig(mainConfig).getNode("spawn", "spawn-at-home-after-death");
+        ConfigurationNode spawnAfterDeathNode = _commentedConfigurationNode.getNode("spawn", "spawn-at-home-after-death");
 
         boolean spawnAfterDeath = spawnAfterDeathNode.getBoolean();
 
@@ -247,7 +258,7 @@ public class MainLogic
 
     public static boolean shouldAttackOnlyAtNight()
     {
-        ConfigurationNode attackOnlyAtNightNode = ConfigAccess.getConfig(mainConfig).getNode("attack-only-at-night");
+        ConfigurationNode attackOnlyAtNightNode = _commentedConfigurationNode.getNode("attack-only-at-night");
 
         boolean attackAtNight = attackOnlyAtNightNode.getBoolean();
 
@@ -256,7 +267,7 @@ public class MainLogic
 
     public static boolean canHomeBetweenWorlds()
     {
-        ConfigurationNode canHomeBetweenWorldsNode = ConfigAccess.getConfig(mainConfig).getNode("home-from-other-worlds");
+        ConfigurationNode canHomeBetweenWorldsNode = _commentedConfigurationNode.getNode("home-from-other-worlds");
 
         boolean canHomeBetweenWorlds = canHomeBetweenWorldsNode.getBoolean();
 
@@ -265,7 +276,7 @@ public class MainLogic
 
     public static boolean isDelayedClaimingToggled()
     {
-        ConfigurationNode isDelayedClaimingToggledNode = ConfigAccess.getConfig(mainConfig).getNode("delayed-claim", "toggled");
+        ConfigurationNode isDelayedClaimingToggledNode = _commentedConfigurationNode.getNode("delayed-claim", "toggled");
 
         boolean isToggled = isDelayedClaimingToggledNode.getBoolean();
 
@@ -274,7 +285,7 @@ public class MainLogic
 
     public static int getClaimingDelay()
     {
-        ConfigurationNode claimingDelayNode = ConfigAccess.getConfig(mainConfig).getNode("delayed-claim", "claiming-time");
+        ConfigurationNode claimingDelayNode = _commentedConfigurationNode.getNode("delayed-claim", "claiming-time");
 
         int claimingDelay = claimingDelayNode.getInt();
 
@@ -283,7 +294,7 @@ public class MainLogic
 
     public static boolean shouldBlockHomeAfterDeathInOwnFaction()
     {
-        ConfigurationNode blockHomeNode = ConfigAccess.getConfig(mainConfig).getNode("block-home-after-death-in-own-faction", "toggled");
+        ConfigurationNode blockHomeNode = _commentedConfigurationNode.getNode("block-home-after-death-in-own-faction", "toggled");
 
         boolean blockHome = blockHomeNode.getBoolean();
 
@@ -292,7 +303,7 @@ public class MainLogic
 
     public static int getHomeBlockTimeAfterDeath()
     {
-        ConfigurationNode blockHomeTimeNode = ConfigAccess.getConfig(mainConfig).getNode("block-home-after-death-in-own-faction", "time");
+        ConfigurationNode blockHomeTimeNode = _commentedConfigurationNode.getNode("block-home-after-death-in-own-faction", "time");
 
         int blockHomeTime = blockHomeTimeNode.getInt();
 
@@ -301,7 +312,7 @@ public class MainLogic
 
     public static boolean shouldClaimByItems()
     {
-        ConfigurationNode claimByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("claiming-by-items", "toggled");
+        ConfigurationNode claimByItemsNode = _commentedConfigurationNode.getNode("claiming-by-items", "toggled");
 
         boolean claimByItems = claimByItemsNode.getBoolean();
 
@@ -310,7 +321,7 @@ public class MainLogic
 
     public static HashMap<String, Integer> getRequiredItemsToClaim()
     {
-        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("claiming-by-items", "items");
+        ConfigurationNode itemsNode = _commentedConfigurationNode.getNode("claiming-by-items", "items");
 
         List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();

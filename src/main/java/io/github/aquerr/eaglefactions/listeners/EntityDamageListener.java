@@ -59,7 +59,7 @@ public class EntityDamageListener
                                     if(FactionLogic.getFactionName(player.getUniqueId()).equals(FactionLogic.getFactionName(attackedPlayer.getUniqueId())))
                                     {
                                         //If friendlyfire is off the block the damage.
-                                        if(!FactionLogic.getFactionFriendlyFire(FactionLogic.getFactionName(player.getUniqueId())))
+                                        if(!MainLogic.isFactionFriendlyFire())
                                         {
                                             event.setBaseDamage(0);
                                             event.setCancelled(true);

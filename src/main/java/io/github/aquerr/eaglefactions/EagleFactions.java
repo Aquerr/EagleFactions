@@ -3,15 +3,15 @@ package io.github.aquerr.eaglefactions;
 import io.github.aquerr.eaglefactions.commands.*;
 
 import com.google.inject.Inject;
-import io.github.aquerr.eaglefactions.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.config.MainConfig;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
+import io.github.aquerr.eaglefactions.services.PowerService;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -25,8 +25,6 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -53,8 +51,8 @@ public class EagleFactions
 
     @Inject
     @ConfigDir(sharedRoot = false)
-    private Path configDir;
-    public Path getConfigDir(){return configDir;}
+    private Path _configDir;
+    public Path getConfigDir(){return _configDir;}
 
 //    @Inject
 //    private Game game;
@@ -92,44 +90,10 @@ public class EagleFactions
     {
         getLogger().info("Setting up configs...");
 
-        //Create config directory for EagleFactions.
-        try
-        {
-            Files.createDirectories(configDir);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        // Create data directory for EagleFactions
-        if (!Files.exists(configDir.resolve("data")))
-        {
-            try
-            {
-                Files.createDirectories(configDir.resolve("data"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (!Files.exists(configDir.resolve("players")))
-        {
-            try
-            {
-                Files.createDirectories(configDir.resolve("players"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
         // Create configs
-        MainConfig.getConfig().setup();
-        FactionsConfig.getConfig().setup();
+        MainConfig.setup(_configDir);
+        FactionLogic.setupFactionLogic(_configDir);
+        PowerService.setup(_configDir);
     }
 
     private void InitializeCommands()
