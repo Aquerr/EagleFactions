@@ -13,31 +13,24 @@ import java.nio.file.Path;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class MainConfig
+public class Configuration
 {
-    private MainConfig _mainConfig = new MainConfig();
-
-    public MainConfig()
+    public Configuration(Path configDir)
     {
-
+        setup(configDir);
     }
 
-    private static Path configPath;
-    private static ConfigurationLoader<CommentedConfigurationNode> configLoader;
-    private static CommentedConfigurationNode configNode;
+    private Path configPath;
+    private ConfigurationLoader<CommentedConfigurationNode> configLoader;
+    private CommentedConfigurationNode configNode;
 
-    public static void setup(Path configDir)
+    public void setup(Path configDir)
     {
         if (!Files.exists(configDir))
         {
             try
             {
                 Files.createDirectory(configDir);
-                configPath = configDir.resolve("Settings.conf");
-                configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
-
-                InputStream inputStream = MainConfig.class.getClass().getClassLoader().getResourceAsStream("Settings.conf");
-                Files.copy(inputStream, configPath);
             }
             catch (IOException exception)
             {
@@ -45,17 +38,33 @@ public class MainConfig
             }
         }
 
+        configPath = configDir.resolve("Settings.conf");
+        configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
+
+        if (!Files.exists(configPath))
+        {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("Settings.conf");
+            try
+            {
+                Files.copy(inputStream, configPath);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
         load();
-        setupMainLogic(configPath);
+        setupMainLogic(this);
     }
 
-    private static void setupMainLogic(Path configPath)
+    private void setupMainLogic(Configuration configuration)
     {
         //TODO: Try to send the config class to main logic.
-        MainLogic.setup(configPath);
+        MainLogic.setup(configuration);
     }
 
-    public static void load()
+    public void load()
     {
         try
         {
@@ -67,7 +76,7 @@ public class MainConfig
         }
     }
 
-    public static void save()
+    public void save()
     {
         try
         {
@@ -79,8 +88,13 @@ public class MainConfig
         }
     }
 
-    public static CommentedConfigurationNode get()
+    public CommentedConfigurationNode get()
     {
         return configNode;
+    }
+
+    public Path getConfigPath()
+    {
+        return configPath;
     }
 }

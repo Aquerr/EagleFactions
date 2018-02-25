@@ -1,8 +1,6 @@
 package io.github.aquerr.eaglefactions.services;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -24,13 +22,16 @@ public class PowerService
 {
     //private static IConfig factionsConfig = FactionsConfig.getConfig();
 
-    private static CommentedConfigurationNode _commentedConfigurationNode;
+    private static CommentedConfigurationNode _factionsNode;
+    private static Path playersPath;
 
-    public static void setup(Path configPath)
+    public static void setup(Path configDir)
     {
         try
         {
-            _commentedConfigurationNode = HoconConfigurationLoader.builder().setPath(configPath).build().load();
+            _factionsNode = HoconConfigurationLoader.builder().setPath(Paths.get(configDir.resolve("data") + "/factions.conf")).build().load();
+            playersPath = configDir.resolve("players");
+            if (!Files.exists(playersPath)) Files.createDirectory(playersPath);
         }
         catch (IOException exception)
         {
@@ -40,7 +41,7 @@ public class PowerService
 
     public static boolean checkIfPlayerExists(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
         if(Files.exists(playerFile))
         {
             return true;
@@ -53,7 +54,7 @@ public class PowerService
 
     public static void addPlayer(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -75,7 +76,7 @@ public class PowerService
 
     public static BigDecimal getPlayerPower(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         if(checkIfPlayerExists(playerUUID))
         {
@@ -108,7 +109,7 @@ public class PowerService
     {
         if(faction.Name.equals("SafeZone") || faction.Name.equals("WarZone"))
         {
-            ConfigurationNode powerNode = _commentedConfigurationNode.getNode("factions", faction.Name, "power");
+            ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.Name, "power");
 
             BigDecimal factionPowerInFile = new BigDecimal(powerNode.getDouble());
 
@@ -142,6 +143,15 @@ public class PowerService
 
     public static BigDecimal getFactionMaxPower(Faction faction)
     {
+        if(faction.Name.equals("SafeZone") || faction.Name.equals("WarZone"))
+        {
+            ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.Name, "power");
+
+            BigDecimal factionPowerInFile = new BigDecimal(powerNode.getDouble());
+
+            return factionPowerInFile;
+        }
+
         BigDecimal factionMaxPower = BigDecimal.ZERO;
 
         if(faction.Leader != null && faction.Leader != "")
@@ -170,7 +180,7 @@ public class PowerService
 
     public static BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -192,7 +202,7 @@ public class PowerService
 
     public static void addPower(UUID playerUUID, boolean isKillAward)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -226,7 +236,7 @@ public class PowerService
 
     public static void setPower(UUID playerUUID, BigDecimal power)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -272,7 +282,7 @@ public class PowerService
     {
         if(PowerService.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
         {
-            Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+            Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
             try
             {
@@ -298,7 +308,7 @@ public class PowerService
 
     public static void punish(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -329,7 +339,7 @@ public class PowerService
 
     public static void setMaxPower(UUID playerUUID, BigDecimal power)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {

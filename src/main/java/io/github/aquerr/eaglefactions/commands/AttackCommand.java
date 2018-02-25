@@ -75,29 +75,36 @@ public class AttackCommand implements CommandExecutor
                     {
                         Faction faction = FactionLogic.getFaction(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
 
-                        if(!FactionLogic.getAlliances(playerFactionName).contains(faction.Name))
+                        if (!FactionLogic.getFactionName(player.getUniqueId()).equals(faction.Name))
                         {
-                            if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
-                            {
-                                int attackTime = MainLogic.getAttackTime();
+                             if(!FactionLogic.getAlliances(playerFactionName).contains(faction.Name))
+                             {
+                                 if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
+                                 {
+                                     int attackTime = MainLogic.getAttackTime();
 
-                                AttackLogic.blockClaiming(faction.Name);
-                                Vector3i attackedClaim = player.getLocation().getChunkPosition();
-                                int seconds = 0;
+                                     AttackLogic.blockClaiming(faction.Name);
+                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();
+                                     int seconds = 0;
 
-                                AttackLogic.informAboutAttack(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedClaim));
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
-                                AttackLogic.attack(player, attackedClaim, seconds);
-                                return;
-                            }
-                            else
-                            {
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! Their power is too high!"));
-                            }
+                                     AttackLogic.informAboutAttack(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedClaim));
+                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
+                                     AttackLogic.attack(player, attackedClaim, seconds);
+                                     return;
+                                 }
+                                 else
+                                 {
+                                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! Their power is too high!"));
+                                 }
+                             }
+                             else
+                             {
+                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! You are in the alliance with it!"));
+                             }
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! You are in the alliance with it!"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack yourself! :)"));
                         }
                     }
                     else

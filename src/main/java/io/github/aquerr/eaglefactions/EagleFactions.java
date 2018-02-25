@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions;
 import io.github.aquerr.eaglefactions.commands.*;
 
 import com.google.inject.Inject;
-import io.github.aquerr.eaglefactions.config.MainConfig;
+import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
@@ -12,6 +12,7 @@ import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -41,6 +42,8 @@ public class EagleFactions
     public static List<String> AttackedFactions = new ArrayList<>();
     public static List<UUID> BlockedHome = new ArrayList<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
+
+    private Configuration _configuration;
 
     @Inject
     private Logger _logger;
@@ -91,7 +94,8 @@ public class EagleFactions
         getLogger().info("Setting up configs...");
 
         // Create configs
-        MainConfig.setup(_configDir);
+        _configuration = new Configuration(_configDir);
+
         FactionLogic.setupFactionLogic(_configDir);
         PowerService.setup(_configDir);
     }
@@ -397,5 +401,10 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
         Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
+    }
+
+    public Configuration getConfiguration()
+    {
+        return this._configuration;
     }
 }

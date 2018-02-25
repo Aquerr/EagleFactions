@@ -8,7 +8,7 @@ API 6.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/Eag
 
 API 5.1.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.10.2%2Fapi-5.1.0)](https://travis-ci.org/Aquerr/EagleFactions)
 
-Current version: 0.9.9
+Current version: 0.9.10
 
 **NOTE: Plugin is currently in heavy development!**
 

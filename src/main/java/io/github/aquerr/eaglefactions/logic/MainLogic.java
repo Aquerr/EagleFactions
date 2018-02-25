@@ -1,11 +1,9 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import io.github.aquerr.eaglefactions.config.ConfigAccess;
-import io.github.aquerr.eaglefactions.config.MainConfig;
+import io.github.aquerr.eaglefactions.config.Configuration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -17,11 +15,11 @@ public class MainLogic
 {
     private static CommentedConfigurationNode _commentedConfigurationNode;
 
-    public static void setup(Path configPath)
+    public static void setup(Configuration configuration)
     {
         try
         {
-            _commentedConfigurationNode = HoconConfigurationLoader.builder().setPath(configPath).build().load();
+            _commentedConfigurationNode = HoconConfigurationLoader.builder().setPath(configuration.getConfigPath()).build().load();
         }
         catch (IOException exception)
         {
@@ -49,7 +47,7 @@ public class MainLogic
 
     public static BigDecimal getGlobalMaxPower()
     {
-        ConfigurationNode maxPowerNode = _commentedConfigurationNode.getNode("power", "maxpower");
+        ConfigurationNode maxPowerNode = _commentedConfigurationNode.getNode("power", "max-power");
 
         BigDecimal maxPower = new BigDecimal(maxPowerNode.getString());
 
@@ -58,7 +56,7 @@ public class MainLogic
 
     public static BigDecimal getStartingPower()
     {
-        ConfigurationNode startingPowerNode = _commentedConfigurationNode.getNode("power", "startpower");
+        ConfigurationNode startingPowerNode = _commentedConfigurationNode.getNode("power", "start-power");
 
         BigDecimal startPower = new BigDecimal(startingPowerNode.getString());
 

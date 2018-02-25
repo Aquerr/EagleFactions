@@ -2,14 +2,12 @@ package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.config.ConfigAccess;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.services.PlayerService;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
-import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
@@ -23,12 +21,9 @@ import org.spongepowered.api.text.format.TextColors;
 
 
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -91,27 +86,6 @@ public class FactionLogic
         }
 
         return null;
-
-//        ConfigurationNode leaderNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "leader");
-//
-//        String leaderUUID = "";
-//        if(leaderNode.getValue() != null) leaderUUID = leaderNode.getString();
-//
-//        ConfigurationNode tagNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "tag");
-//
-//        String factionTag = "";
-//        if(tagNode.getValue() != null) factionTag = tagNode.getString();
-//
-//        Faction faction = new Faction(factionName, factionTag, leaderUUID);
-//
-//        faction.Members = getMembers(factionName);
-//        faction.Officers = getOfficers(factionName);
-//        faction.Enemies = getEnemies(factionName);
-//        faction.Alliances = getAlliances(factionName);
-//        faction.Claims = getClaims(factionName);
-//        faction.Power = PowerService.getFactionPower(faction);
-//
-//        return faction;
     }
 
     public static String getLeader(String factionName)
@@ -372,20 +346,6 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-//    public static boolean getFactionFriendlyFire(String factionName)
-//    {
-//        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "friendlyfire");
-//
-//        Boolean friendlyFire = friendlyFireNode.getBoolean();
-//
-//        return friendlyFire;
-//    }
-
-//    public static void setFactionFriendlyFire(String factionName, boolean turnOn)
-//    {
-//        ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions", factionName, "friendlyfire"}, turnOn);
-//    }
-
     public static List<String> getClaims(String factionName)
     {
         Faction faction = getFaction(factionName);
@@ -468,12 +428,11 @@ public class FactionLogic
         {
             String newHome = worldUUID.toString() + "|" + home.toString();
 
-            //faction.Home = newHome;
-            //ConfigAccess.setValueAndSave(factionsConfig, new Object[]{"factions",factionName, "home"}, newHome);
+            faction.Home = newHome;
         }
         else
         {
-         //faction.Home = null;
+            faction.Home = null;
         }
 
         factionsStorage.addOrUpdateFaction(faction);
@@ -483,33 +442,31 @@ public class FactionLogic
     {
         //TODO: Add home property in faction class...
 
-//        ConfigurationNode homeNode = factionsStorage.getNode("factions", factionName, "home");
-//
-//        if(homeNode.getValue() != null)
-//        {
-//            String homeString = homeNode.getString();
-//            String splitter = "\\|";
-//
-//            String worldUUIDString = homeString.split(splitter)[0];
-//            String vectorsString = homeString.split(splitter)[1];
-//
-//            String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
-//
-//             int x = Integer.valueOf(vectors[0]);
-//             int y = Integer.valueOf(vectors[1]);
-//             int z = Integer.valueOf(vectors[2]);
-//
-//             Vector3i blockPosition = Vector3i.from(x, y, z);
-//             UUID worldUUID = UUID.fromString(worldUUIDString);
-//
-//             return new FactionHome(worldUUID, blockPosition);
-//        }
-//        else
-//        {
-//            return null;
-//        }
+        Faction faction = getFaction(factionName);
 
-        return null;
+        if(faction.Home != null && faction.Home != "")
+        {
+            String homeString = faction.Home;
+            String splitter = "\\|";
+
+            String worldUUIDString = homeString.split(splitter)[0];
+            String vectorsString = homeString.split(splitter)[1];
+
+            String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+
+             int x = Integer.valueOf(vectors[0]);
+             int y = Integer.valueOf(vectors[1]);
+             int z = Integer.valueOf(vectors[2]);
+
+             Vector3i blockPosition = Vector3i.from(x, y, z);
+             UUID worldUUID = UUID.fromString(worldUUIDString);
+
+             return new FactionHome(worldUUID, blockPosition);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public static List<String> getFactionsTags()
@@ -551,18 +508,6 @@ public class FactionLogic
 
         return false;
     }
-
-//    public static boolean isHomeInWorld(UUID worldUUID, String factionName)
-//    {
-//        ConfigurationNode homeNode = ConfigAccess.getConfig(factionsConfig).getNode("factions", factionName, "home");
-//
-//        if(homeNode.getValue() != null)
-//        {
-//            if(homeNode.getString().contains(worldUUID.toString())) return true;
-//            else return false;
-//        }
-//        return false;
-//    }
 
     public static void removeClaims(String factionName)
     {
