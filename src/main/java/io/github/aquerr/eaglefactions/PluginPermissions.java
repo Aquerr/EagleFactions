@@ -56,4 +56,5 @@ public abstract class PluginPermissions
     public static final String MaxPowerCommand = "eaglefactions.admin.maxpower";
 
     public static final String ReloadCommand = "eaglefactions.admin.reload";
+    public static final String VersionNotify = "eaglefactions.admin.version.notify";
 }

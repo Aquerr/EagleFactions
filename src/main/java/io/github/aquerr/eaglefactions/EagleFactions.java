@@ -1,8 +1,7 @@
 package io.github.aquerr.eaglefactions;
 
-import io.github.aquerr.eaglefactions.commands.*;
-
 import com.google.inject.Inject;
+import io.github.aquerr.eaglefactions.commands.*;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
@@ -12,9 +11,8 @@ import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.services.PowerService;
-import io.github.aquerr.eaglefactions.storage.IStorage;
+import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -22,7 +20,6 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -67,7 +64,6 @@ public class EagleFactions
     {
         eagleFactions = this;
 
-       //Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions is loading..."));
        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
 
        SetupConfigs();
@@ -82,17 +78,21 @@ public class EagleFactions
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Thank you for choosing this plugin!"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version: " + PluginInfo.Version));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with EagleFactions! :D"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with Eagle Factions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
+
+        if (!VersionChecker.isLatest(PluginInfo.Version))
+        {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA,"Eagle Factions", TextColors.GOLD, " is available!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
+        }
     }
 
     private void SetupConfigs()
     {
-        getLogger().info("Setting up configs...");
-
         // Create configs
         _configuration = new Configuration(_configDir);
 
@@ -102,8 +102,6 @@ public class EagleFactions
 
     private void InitializeCommands()
     {
-        getLogger ().info ("Initializing commands...");
-
         //Help command should display all possible commands in plugin.
         Subcommands.put (Arrays.asList ("help"), CommandSpec.builder ()
                 .description (Text.of ("Help"))
@@ -388,8 +386,6 @@ public class EagleFactions
 
     private void RegisterListeners()
     {
-        getLogger ().info ("Registering listeners...");
-
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
