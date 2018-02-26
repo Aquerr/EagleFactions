@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
@@ -17,6 +18,8 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.concurrent.TimeUnit;
+
 public class HomeCommand implements CommandExecutor
 {
     @Override
@@ -33,7 +36,7 @@ public class HomeCommand implements CommandExecutor
                 {
                     //TODO: Wait 5-10 seconds before teleporting.
 
-                    if (EagleFactions.BlockedHome.contains(player.getUniqueId()))
+                    if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.contains(player.getUniqueId()))
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You can't teleport to faction's home because you died recently died in your faction's land!"));
                         return CommandResult.success();
@@ -44,8 +47,8 @@ public class HomeCommand implements CommandExecutor
 
                         if(MainLogic.canHomeBetweenWorlds())
                         {
-                            player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
-                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
+                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Stay still for ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " seconds", TextColors.RESET, "!"));
+                            teleportHome(player, player.getLocation().getBlockPosition(), factionHome, 0);
                         }
                         else
                         {
@@ -79,5 +82,36 @@ public class HomeCommand implements CommandExecutor
         }
 
         return CommandResult.success();
+    }
+
+    private void teleportHome(Player player, Vector3i lastBlockPosition, FactionHome factionHome, int seconds)
+    {
+        if (player.getLocation().getBlockPosition().equals(lastBlockPosition))
+        {
+            if (MainLogic.getHomeDelayTime() >= seconds)
+            {
+                player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
+            }
+            else
+            {
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                Sponge.getScheduler().createTaskBuilder().execute(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if (seconds >= MainLogic.getHomeDelayTime())
+                        {
+                            teleportHome(player, lastBlockPosition, factionHome, seconds + 1);
+                        }
+                    }
+                }).delay(1, TimeUnit.SECONDS).submit(EagleFactions.getEagleFactions());
+            }
+        }
+        else
+        {
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Teleporting has been cancelled because you moved!"));
+        }
     }
 }

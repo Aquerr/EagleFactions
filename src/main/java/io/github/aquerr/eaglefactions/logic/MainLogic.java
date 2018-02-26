@@ -272,6 +272,15 @@ public class MainLogic
         return canHomeBetweenWorlds;
     }
 
+    public static int getHomeDelayTime()
+    {
+        ConfigurationNode homeDelayTimeNode = _commentedConfigurationNode.getNode("home-delay");
+
+        int homeDelay = homeDelayTimeNode.getInt();
+
+        return homeDelay;
+    }
+
     public static boolean isDelayedClaimingToggled()
     {
         ConfigurationNode isDelayedClaimingToggledNode = _commentedConfigurationNode.getNode("delayed-claim", "toggled");
