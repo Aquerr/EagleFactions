@@ -39,7 +39,6 @@ public class Configuration
         }
 
         configPath = configDir.resolve("Settings.conf");
-        configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
 
         if (!Files.exists(configPath))
         {
@@ -53,6 +52,8 @@ public class Configuration
                 e.printStackTrace();
             }
         }
+
+        configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
 
         load();
         setupMainLogic(this);
@@ -69,6 +70,7 @@ public class Configuration
         try
         {
             configNode = configLoader.load();
+            MainLogic.setup(this);
         }
         catch (IOException e)
         {

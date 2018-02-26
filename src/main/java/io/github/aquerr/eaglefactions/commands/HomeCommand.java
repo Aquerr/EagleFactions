@@ -13,6 +13,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
@@ -54,8 +55,8 @@ public class HomeCommand implements CommandExecutor
                         {
                             if(player.getWorld().getUniqueId().equals(factionHome.WorldUUID))
                             {
-                                player.setLocation(new Location<World>(player.getWorld(), factionHome.BlockPosition));
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Stay still for ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " seconds", TextColors.RESET, "!"));
+                                teleportHome(player, player.getLocation().getBlockPosition(), factionHome, 0);
                             }
                             else
                             {
@@ -88,7 +89,7 @@ public class HomeCommand implements CommandExecutor
     {
         if (player.getLocation().getBlockPosition().equals(lastBlockPosition))
         {
-            if (MainLogic.getHomeDelayTime() >= seconds)
+            if (seconds >= MainLogic.getHomeDelayTime())
             {
                 player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
@@ -96,12 +97,13 @@ public class HomeCommand implements CommandExecutor
             else
             {
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
-                Sponge.getScheduler().createTaskBuilder().execute(new Runnable()
+                Task.Builder teleportHomeTask = Sponge.getScheduler().createTaskBuilder();
+                teleportHomeTask.execute(new Runnable()
                 {
                     @Override
                     public void run()
                     {
-                        if (seconds >= MainLogic.getHomeDelayTime())
+                        if (seconds < MainLogic.getHomeDelayTime())
                         {
                             teleportHome(player, lastBlockPosition, factionHome, seconds + 1);
                         }
@@ -111,7 +113,7 @@ public class HomeCommand implements CommandExecutor
         }
         else
         {
-            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Teleporting has been cancelled because you moved!"));
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You did move! Teleporting has been cancelled!"));
         }
     }
 }

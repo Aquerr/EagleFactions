@@ -117,7 +117,7 @@ public class PowerService
         }
 
         BigDecimal factionPower = BigDecimal.ZERO;
-        if(faction.Leader != null && faction.Leader != "")
+        if(faction.Leader != null && !faction.Leader.equals(""))
         {
             factionPower = factionPower.add(getPlayerPower(UUID.fromString(faction.Leader)));
         }
@@ -154,7 +154,7 @@ public class PowerService
 
         BigDecimal factionMaxPower = BigDecimal.ZERO;
 
-        if(faction.Leader != null && faction.Leader != "")
+        if(faction.Leader != null && !faction.Leader.equals(""))
         {
             factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(faction.Leader)));
         }

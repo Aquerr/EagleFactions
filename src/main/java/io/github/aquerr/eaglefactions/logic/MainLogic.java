@@ -346,6 +346,24 @@ public class MainLogic
         return items;
     }
 
+    public static double getAttackMinPowerPercentage()
+    {
+        ConfigurationNode attackMinPowerPercentageMode = _commentedConfigurationNode.getNode("attack-min-power-percentage");
+
+        Object attackMinPowerPercentage = attackMinPowerPercentageMode.getValue();
+
+        if (attackMinPowerPercentage instanceof Integer)
+        {
+            return ((Integer)attackMinPowerPercentage).doubleValue() / 100;
+        }
+        else if(attackMinPowerPercentage instanceof Double)
+        {
+            return (Double) attackMinPowerPercentage / 100;
+        }
+
+        return 0.2;
+    }
+
     private static Function<Object,String> objectToStringTransformer = input ->
     {
         if (input instanceof String)

@@ -79,7 +79,7 @@ public class AttackCommand implements CommandExecutor
                         {
                              if(!FactionLogic.getAlliances(playerFactionName).contains(faction.Name))
                              {
-                                 if(PowerService.getFactionMaxPower(faction).doubleValue() * 0.2 >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
+                                 if(PowerService.getFactionMaxPower(faction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
                                  {
                                      int attackTime = MainLogic.getAttackTime();
 

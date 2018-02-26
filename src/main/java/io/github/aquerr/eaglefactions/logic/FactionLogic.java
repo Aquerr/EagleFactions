@@ -152,14 +152,14 @@ public class FactionLogic
     	List<Player> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = faction.Leader;
-    	if (PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
+    	if (!faction.Leader.equals("") && PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
     	{
     		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(factionLeader)).get());
     	}
         
         for (String uuid : faction.Officers)
         {
-        	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	if (!uuid.equals("") && PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
         		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
         	}
@@ -167,7 +167,7 @@ public class FactionLogic
         
         for (String uuid : faction.Members)
         {
-        	if (PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	if (!uuid.equals("") && PlayerService.isPlayerOnline(UUID.fromString(uuid)))
         	{
         		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
         	}
@@ -440,11 +440,9 @@ public class FactionLogic
 
     public static @Nullable FactionHome getHome(String factionName)
     {
-        //TODO: Add home property in faction class...
-
         Faction faction = getFaction(factionName);
 
-        if(faction.Home != null && faction.Home != "")
+        if(faction.Home != null && !faction.Home.equals(""))
         {
             String homeString = faction.Home;
             String splitter = "\\|";
