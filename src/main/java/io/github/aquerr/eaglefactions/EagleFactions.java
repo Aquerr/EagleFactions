@@ -397,6 +397,7 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
         Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
+        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
     }
 
     public Configuration getConfiguration()
