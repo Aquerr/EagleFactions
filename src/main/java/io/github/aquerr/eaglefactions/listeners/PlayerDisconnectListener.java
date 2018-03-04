@@ -13,7 +13,7 @@ public class PlayerDisconnectListener
     @Listener
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player)
     {
-        if (PVPLogger.wasAttacked(player))
+        if (PVPLogger.isActive() && PVPLogger.isPlayerBlocked(player))
         {
             player.damage(1000, DamageSource.builder().type(DamageTypes.ATTACK).build());
             PVPLogger.removePlayer(player);

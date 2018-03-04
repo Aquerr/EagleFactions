@@ -10,16 +10,12 @@ API 5.1.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/Eag
 
 Current version: 0.9.10
 
-**NOTE: Plugin is currently in heavy development!**
-
 ## General
 Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using "power". Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
 
 Eagle Factions will change your minecraft expirience forever. We offer you a new gameplay with some extra cool features like custom ranks, "pvp-leave blocker" and many more. You can even destroy enemy factions!
 
 Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know how everything works.
-
-Plugin is currently in alpha state, but **any feedback would be awesome!**
 
 ## Features
 
@@ -34,7 +30,7 @@ Plugin is currently in alpha state, but **any feedback would be awesome!**
 * Prefixes Factions Tags
 * Faction internal chat
 * Custom ranks in factions **(not implemented yet)**
-* PVP-Block **(not implemented yet)**
+* PVP-Logger
 * Fully configurable
 
 ## Links

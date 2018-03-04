@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
@@ -86,7 +87,7 @@ public class EagleFactions
 
         if (!VersionChecker.isLatest(PluginInfo.Version))
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA,"Eagle Factions", TextColors.GOLD, " is available!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.Name, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
         }
     }
@@ -98,6 +99,9 @@ public class EagleFactions
 
         FactionLogic.setupFactionLogic(_configDir);
         PowerService.setup(_configDir);
+
+        //PVPLogger
+        PVPLogger.setupPVPLogger();
     }
 
     private void InitializeCommands()

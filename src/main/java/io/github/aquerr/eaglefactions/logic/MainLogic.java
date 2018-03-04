@@ -375,4 +375,22 @@ public class MainLogic
             return null;
         }
     };
+
+    public static boolean isPVPLoggerActive()
+    {
+        ConfigurationNode isPVPLoggerActiveNode = _commentedConfigurationNode.getNode("pvp-logger", "active");
+
+        boolean isActive = isPVPLoggerActiveNode.getBoolean();
+
+        return isActive;
+    }
+
+    public static int getPVPLoggerTime()
+    {
+        ConfigurationNode pvpLoggerTimeNode = _commentedConfigurationNode.getNode("pvp-logger", "time");
+
+        int pvpLoggerTime = pvpLoggerTimeNode.getInt();
+
+        return pvpLoggerTime;
+    }
 }

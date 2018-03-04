@@ -85,7 +85,7 @@ public class EntityDamageListener
                                     }
                                     else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && MainLogic.isAllianceFriendlyFire())
                                     {
-                                        PVPLogger.addOrUpdatePlayer(attackedPlayer);
+                                        if(PVPLogger.isActive()) PVPLogger.addOrUpdatePlayer(attackedPlayer);
                                         if(event.willCauseDeath())
                                         {
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPunishment()) + "\n",
@@ -96,7 +96,7 @@ public class EntityDamageListener
                                     }
                                     else
                                     {
-                                        PVPLogger.addOrUpdatePlayer(attackedPlayer);
+                                        if(PVPLogger.isActive()) PVPLogger.addOrUpdatePlayer(attackedPlayer);
                                         if(event.willCauseDeath())
                                         {
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been increased by ", TextColors.GOLD, String.valueOf(MainLogic.getKillAward()) + "\n",
@@ -108,7 +108,7 @@ public class EntityDamageListener
                                 }
                                 else
                                 {
-                                    PVPLogger.addOrUpdatePlayer(attackedPlayer);
+                                    if(PVPLogger.isActive()) PVPLogger.addOrUpdatePlayer(attackedPlayer);
                                     if(event.willCauseDeath())
                                     {
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been increased by ", TextColors.GOLD, String.valueOf(MainLogic.getKillAward()) + "\n",

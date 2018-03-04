@@ -17,10 +17,28 @@ import java.util.concurrent.TimeUnit;
 public class PVPLogger
 {
     private static List<UUID> AttackedPlayers = new ArrayList<>();
+    private static boolean _isActive;
+    private static int _blockTime;
+
+    public static void setupPVPLogger()
+    {
+        _isActive = MainLogic.isPVPLoggerActive();
+        _blockTime = MainLogic.getPVPLoggerTime();
+    }
+
+    public static boolean isActive()
+    {
+        return _isActive;
+    }
+
+    public static int getBlockTime()
+    {
+        return _blockTime;
+    }
 
     public static boolean addOrUpdatePlayer(Player player)
     {
-        //If player already is in a list, then update it's time.
+        //Update player's time if it already in a list.
 
         Optional<Task> optionalTask = Sponge.getScheduler().getScheduledTasks().stream().filter(x->x.getName().equals("EagleFactions - PVPLogger for " + player.getUniqueId().toString())).findFirst();
 
@@ -33,7 +51,7 @@ public class PVPLogger
         else
         {
             AttackedPlayers.add(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "PVPLogger has turned on! You will die if you disconnect in " + 120 + "s!"));
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "PVPLogger has turned on! You will die if you disconnect in " + getBlockTime() + "s!"));
 
             Task.Builder allowLogging = Sponge.getScheduler().createTaskBuilder();
 
@@ -45,13 +63,13 @@ public class PVPLogger
                     AttackedPlayers.remove(player.getUniqueId());
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "PVPLogger has turned off for you! You can now disconnect safely."));
                 }
-            }).delay(2, TimeUnit.MINUTES).submit(EagleFactions.getEagleFactions());
+            }).delay(getBlockTime(), TimeUnit.SECONDS).submit(EagleFactions.getEagleFactions());
 
             return true;
         }
     }
 
-    public static boolean wasAttacked(Player player)
+    public static boolean isPlayerBlocked(Player player)
     {
         if (AttackedPlayers.contains(player.getUniqueId())) return true;
 
