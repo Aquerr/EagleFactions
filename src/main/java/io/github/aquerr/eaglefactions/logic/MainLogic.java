@@ -1,235 +1,134 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import io.github.aquerr.eaglefactions.config.Configuration;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.List;
 
 public class MainLogic
 {
-    private static CommentedConfigurationNode _commentedConfigurationNode;
+    private static Configuration _configuration;
 
     public static void setup(Configuration configuration)
     {
-        try
-        {
-            _commentedConfigurationNode = HoconConfigurationLoader.builder().setPath(configuration.getConfigPath()).build().load();
-        }
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
+        _configuration = configuration;
     }
 
     public static boolean isFactionFriendlyFire()
     {
-        ConfigurationNode friendlyFireNode = _commentedConfigurationNode.getNode("friendlyfire-faction");
-
-        Boolean friendlyFire = friendlyFireNode.getBoolean();
-
-        return friendlyFire;
+        return _configuration.getBoolean("friendlyfire-faction");
     }
 
     public static boolean isAllianceFriendlyFire()
     {
-        ConfigurationNode friendlyFireNode = _commentedConfigurationNode.getNode("friendlyfire-alliance");
-
-        Boolean friendlyFire = friendlyFireNode.getBoolean();
-
-        return friendlyFire;
+        return _configuration.getBoolean("friendlyfire-alliance");
     }
 
     public static BigDecimal getGlobalMaxPower()
     {
-        ConfigurationNode maxPowerNode = _commentedConfigurationNode.getNode("power", "max-power");
-
-        BigDecimal maxPower = new BigDecimal(maxPowerNode.getString());
-
-        return maxPower;
+        return new BigDecimal(_configuration.getString("power", "max-power"));
     }
 
     public static BigDecimal getStartingPower()
     {
-        ConfigurationNode startingPowerNode = _commentedConfigurationNode.getNode("power", "start-power");
-
-        BigDecimal startPower = new BigDecimal(startingPowerNode.getString());
-
-        return startPower;
+        return new BigDecimal(_configuration.getString("power", "start-power"));
     }
 
     public static BigDecimal getPowerIncrement()
     {
-        ConfigurationNode powerIncrementNode = _commentedConfigurationNode.getNode("power", "increment");
-
-        BigDecimal incrementPower = new BigDecimal(powerIncrementNode.getString());
-
-        return incrementPower;
+        return new BigDecimal(_configuration.getString("power", "increment"));
     }
 
     public static BigDecimal getPowerDecrement()
     {
-        ConfigurationNode powerDecrementNode = _commentedConfigurationNode.getNode("power", "decrement");
-
-        BigDecimal decrementPower = new BigDecimal(powerDecrementNode.getString());
-
-        return decrementPower;
+        return new BigDecimal(_configuration.getString("power", "decrement"));
     }
 
     public static BigDecimal getKillAward()
     {
-        ConfigurationNode killAwardNode = _commentedConfigurationNode.getNode("power", "killaward");
-
-        BigDecimal killAward = new BigDecimal(killAwardNode.getString());
-
-        return killAward;
+        return new BigDecimal(_configuration.getString("power", "killaward"));
     }
 
     public static BigDecimal getPunishment()
     {
-        ConfigurationNode punishmentNode = _commentedConfigurationNode.getNode("power", "punishment");
-
-        BigDecimal punishment = new BigDecimal(punishmentNode.getString());
-
-        return punishment;
+        return new BigDecimal(_configuration.getString("power", "punishment"));
     }
 
     public static int getMaxNameLength()
     {
-        ConfigurationNode maxLengthNode = _commentedConfigurationNode.getNode("name", "max-length");
-
-        int maxLength = maxLengthNode.getInt();
-
-        return maxLength;
+        return _configuration.getInt("name", "max-length");
     }
 
     public static int getMinNameLength()
     {
-        ConfigurationNode minLengthNode = _commentedConfigurationNode.getNode("name", "min-length");
-
-        int minLength = minLengthNode.getInt();
-
-        return minLength;
+        return _configuration.getInt("name", "min-length");
     }
 
     public static int getMaxTagLength()
     {
-        ConfigurationNode maxLengthNode = _commentedConfigurationNode.getNode("tag", "max-length");
-
-        int maxLength = maxLengthNode.getInt();
-
-        return maxLength;
+        return _configuration.getInt("tag", "max-length");
     }
 
     public static int getMinTagLength()
     {
-        ConfigurationNode minLengthNode = _commentedConfigurationNode.getNode("tag", "min-length");
-
-        int minLength = minLengthNode.getInt();
-
-        return minLength;
+        return _configuration.getInt("tag", "min-length");
     }
 
     public static boolean getMobSpawning()
     {
-        ConfigurationNode mobSpawningNode = _commentedConfigurationNode.getNode("spawn", "mobs");
-
-        boolean mobSpawning = mobSpawningNode.getBoolean();
-
-        return mobSpawning;
+        return _configuration.getBoolean("spawn", "mobs");
     }
 
     public static boolean getBlockEnteringFactions()
     {
-        ConfigurationNode enteringFactionsNode = _commentedConfigurationNode.getNode("block-entering-faction-while-offline");
-
-        boolean enteringFactions = enteringFactionsNode.getBoolean();
-
-        return enteringFactions;
+        return _configuration.getBoolean("block-entering-faction-while-offline");
     }
 
     public static boolean requireConnectedClaims()
     {
-        ConfigurationNode requireConnectedClaimsNode = _commentedConfigurationNode.getNode("connected-claims");
-
-        boolean requireConnectedClaims = requireConnectedClaimsNode.getBoolean();
-
-        return requireConnectedClaims;
+        return _configuration.getBoolean("connected-claims");
     }
 
     public static boolean shouldBlockSafeZoneFromWarZone()
     {
-        ConfigurationNode blockSafeZoneFromWarZoneNode = _commentedConfigurationNode.getNode("block-safezone-from-warzone");
-
-        boolean blockSafeZoneFromWarZone = blockSafeZoneFromWarZoneNode.getBoolean();
-
-        return blockSafeZoneFromWarZone;
+        return _configuration.getBoolean("block-safezone-from-warzone");
     }
 
     public static boolean isPlayerLimit()
     {
-        ConfigurationNode isPlayerLimitNode = _commentedConfigurationNode.getNode("player-limit", "toggled");
-
-        boolean playerLimit = isPlayerLimitNode.getBoolean();
-
-        return playerLimit;
+        return _configuration.getBoolean("player-limit", "toggled");
     }
 
     public static int getPlayerLimit()
     {
-        ConfigurationNode limitNode = _commentedConfigurationNode.getNode("player-limit", "limit");
-
-        int limit = limitNode.getInt();
-
-        return limit;
+        return _configuration.getInt("player-limit", "limit");
     }
 
     public static int getAttackTime()
     {
-        ConfigurationNode attackTimeNode = _commentedConfigurationNode.getNode("attack-time");
-
-        int attackTime = attackTimeNode.getInt();
-
-        return attackTime;
+        return _configuration.getInt("attack-time");
     }
 
     public static String getPrefixOption()
     {
-        ConfigurationNode prefixNode = _commentedConfigurationNode.getNode("faction-prefix");
-
-        String prefix = prefixNode.getString();
-
-        return prefix;
+        return _configuration.getString("faction-prefix");
     }
 
-    public static Boolean shouldDisplayRank()
+    public static boolean shouldDisplayRank()
     {
-        ConfigurationNode rankNode = _commentedConfigurationNode.getNode("faction-rank");
-
-        Boolean rank = rankNode.getBoolean();
-
-        return rank;
+        return _configuration.getBoolean("faction-rank");
     }
 
     public static boolean getCreateByItems()
     {
-        ConfigurationNode createByItemsNode = _commentedConfigurationNode.getNode("creating-by-items", "toggled");
-
-        boolean createByItems = createByItemsNode.getBoolean();
-
-        return createByItems;
+        return _configuration.getBoolean("creating-by-items", "toggled");
     }
 
     public static HashMap<String, Integer> getRequiredItemsToCreate()
     {
-        ConfigurationNode itemsNode = _commentedConfigurationNode.getNode("creating-by-items", "items");
+        List<String> itemsList = _configuration.getListOfStrings("creating-by-items", "items");
 
-        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();
 
         for (String itemWithAmount : itemsList)
@@ -247,90 +146,58 @@ public class MainLogic
 
     public static boolean shouldSpawnAtHomeAfterDeath()
     {
-        ConfigurationNode spawnAfterDeathNode = _commentedConfigurationNode.getNode("spawn", "spawn-at-home-after-death");
-
-        boolean spawnAfterDeath = spawnAfterDeathNode.getBoolean();
-
-        return spawnAfterDeath;
+        return _configuration.getBoolean("spawn", "spawn-at-home-after-death");
     }
 
     public static boolean shouldAttackOnlyAtNight()
     {
-        ConfigurationNode attackOnlyAtNightNode = _commentedConfigurationNode.getNode("attack-only-at-night");
-
-        boolean attackAtNight = attackOnlyAtNightNode.getBoolean();
-
-        return attackAtNight;
+        return _configuration.getBoolean("attack-only-at-night");
     }
 
     public static boolean canHomeBetweenWorlds()
     {
-        ConfigurationNode canHomeBetweenWorldsNode = _commentedConfigurationNode.getNode("home-from-other-worlds");
-
-        boolean canHomeBetweenWorlds = canHomeBetweenWorldsNode.getBoolean();
-
-        return canHomeBetweenWorlds;
+        return _configuration.getBoolean("home-from-other-worlds");
     }
 
     public static int getHomeDelayTime()
     {
-        ConfigurationNode homeDelayTimeNode = _commentedConfigurationNode.getNode("home-delay");
+        return _configuration.getInt("home-delay");
+    }
 
-        int homeDelay = homeDelayTimeNode.getInt();
-
-        return homeDelay;
+    public static int getHomeCooldown()
+    {
+        return _configuration.getInt("home-cooldown");
     }
 
     public static boolean isDelayedClaimingToggled()
     {
-        ConfigurationNode isDelayedClaimingToggledNode = _commentedConfigurationNode.getNode("delayed-claim", "toggled");
-
-        boolean isToggled = isDelayedClaimingToggledNode.getBoolean();
-
-        return isToggled;
+        return _configuration.getBoolean("delayed-claim", "toggled");
     }
 
     public static int getClaimingDelay()
     {
-        ConfigurationNode claimingDelayNode = _commentedConfigurationNode.getNode("delayed-claim", "claiming-time");
-
-        int claimingDelay = claimingDelayNode.getInt();
-
-        return claimingDelay;
+        return _configuration.getInt("delayed-claim", "claiming-time");
     }
 
     public static boolean shouldBlockHomeAfterDeathInOwnFaction()
     {
-        ConfigurationNode blockHomeNode = _commentedConfigurationNode.getNode("block-home-after-death-in-own-faction", "toggled");
-
-        boolean blockHome = blockHomeNode.getBoolean();
-
-        return blockHome;
+        return _configuration.getBoolean("block-home-after-death-in-own-faction", "toggled");
     }
 
     public static int getHomeBlockTimeAfterDeath()
     {
-        ConfigurationNode blockHomeTimeNode = _commentedConfigurationNode.getNode("block-home-after-death-in-own-faction", "time");
-
-        int blockHomeTime = blockHomeTimeNode.getInt();
-
-        return blockHomeTime;
+        return _configuration.getInt("block-home-after-death-in-own-faction", "time");
     }
 
     public static boolean shouldClaimByItems()
     {
-        ConfigurationNode claimByItemsNode = _commentedConfigurationNode.getNode("claiming-by-items", "toggled");
-
-        boolean claimByItems = claimByItemsNode.getBoolean();
-
-        return claimByItems;
+        return _configuration.getBoolean("claiming-by-items", "toggled");
     }
 
     public static HashMap<String, Integer> getRequiredItemsToClaim()
     {
-        ConfigurationNode itemsNode = _commentedConfigurationNode.getNode("claiming-by-items", "items");
+        List<String> itemsList = _configuration.getListOfStrings("claiming-by-items", "items");
 
-        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();
 
         for (String itemWithAmount : itemsList)
@@ -348,49 +215,16 @@ public class MainLogic
 
     public static double getAttackMinPowerPercentage()
     {
-        ConfigurationNode attackMinPowerPercentageMode = _commentedConfigurationNode.getNode("attack-min-power-percentage");
-
-        Object attackMinPowerPercentage = attackMinPowerPercentageMode.getValue();
-
-        if (attackMinPowerPercentage instanceof Integer)
-        {
-            return ((Integer)attackMinPowerPercentage).doubleValue() / 100;
-        }
-        else if(attackMinPowerPercentage instanceof Double)
-        {
-            return (Double) attackMinPowerPercentage / 100;
-        }
-
-        return 0.2;
+        return _configuration.getDouble("attack-min-power-percentage");
     }
-
-    private static Function<Object,String> objectToStringTransformer = input ->
-    {
-        if (input instanceof String)
-        {
-            return (String) input;
-        }
-        else
-        {
-            return null;
-        }
-    };
 
     public static boolean isPVPLoggerActive()
     {
-        ConfigurationNode isPVPLoggerActiveNode = _commentedConfigurationNode.getNode("pvp-logger", "active");
-
-        boolean isActive = isPVPLoggerActiveNode.getBoolean();
-
-        return isActive;
+        return _configuration.getBoolean("pvp-logger", "active");
     }
 
     public static int getPVPLoggerTime()
     {
-        ConfigurationNode pvpLoggerTimeNode = _commentedConfigurationNode.getNode("pvp-logger", "time");
-
-        int pvpLoggerTime = pvpLoggerTimeNode.getInt();
-
-        return pvpLoggerTime;
+        return _configuration.getInt("pvp-logger", "time");
     }
 }

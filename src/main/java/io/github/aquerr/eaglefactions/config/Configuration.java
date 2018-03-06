@@ -9,12 +9,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Created by Aquerr on 2017-07-12.
  */
 public class Configuration
 {
+    //TODO: This class should have only one instance. Rework it to singleton.
+
     public Configuration(Path configDir)
     {
         setup(configDir);
@@ -61,7 +65,6 @@ public class Configuration
 
     private void setupMainLogic(Configuration configuration)
     {
-        //TODO: Try to send the config class to main logic.
         MainLogic.setup(configuration);
     }
 
@@ -78,25 +81,68 @@ public class Configuration
         }
     }
 
-    public void save()
+//    public void save()
+//    {
+//        try
+//        {
+//            configLoader.save(configNode);
+//        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
+
+//    public Path getConfigPath()
+//    {
+//        return configPath;
+//    }
+
+    public int getInt(Object... nodePath)
     {
-        try
-        {
-            configLoader.save(configNode);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        return configNode.getNode(nodePath).getInt();
     }
 
-    public CommentedConfigurationNode get()
+    public double getDouble(Object... nodePath)
     {
-        return configNode;
+        Object value = configNode.getNode(nodePath).getValue();
+
+        if (value instanceof Integer)
+        {
+            int number = ((Integer) value).intValue();
+            return (double) number;
+        }
+        else if(value instanceof Double)
+        {
+            return ((Double) value).doubleValue();
+        }
+        else return 0;
     }
 
-    public Path getConfigPath()
+    public boolean getBoolean(Object... nodePath)
     {
-        return configPath;
+        return configNode.getNode(nodePath).getBoolean();
     }
+
+    public String getString(Object... nodePath)
+    {
+        return configNode.getNode(nodePath).getString();
+    }
+
+    public List<String> getListOfStrings(Object... nodePath)
+    {
+        return configNode.getNode(nodePath).getList(objectToStringTransformer);
+    }
+
+    private static Function<Object,String> objectToStringTransformer = input ->
+    {
+        if (input instanceof String)
+        {
+            return (String) input;
+        }
+        else
+        {
+            return null;
+        }
+    };
 }
