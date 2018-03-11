@@ -22,7 +22,7 @@ public abstract class PluginPermissions
     public static final String LeaveCommand = "eaglefactions.player.leave";
     public static final String ListCommand = "eaglefactions.player.list";
     public static final String KickCommand = "eaglefactions.player.kick";
-    public static final String FriendlyFireCommand = "eaglefactions.player.friendlyfire";
+    //public static final String FriendlyFireCommand = "eaglefactions.player.friendlyfire";
     public static final String ChatCommand = "eaglefactions.player.chat";
     public static final String TopCommand = "eaglefactions.player.top";
 

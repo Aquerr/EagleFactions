@@ -40,6 +40,7 @@ public class EagleFactions
     public static List<String> AttackedFactions = new ArrayList<>();
     public static List<UUID> BlockedHome = new ArrayList<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
+    public static Map<UUID, Integer> HomeCooldownPlayers = new HashMap<>();
 
     private Configuration _configuration;
 
