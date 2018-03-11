@@ -27,10 +27,18 @@ public class DisbandCommand implements CommandExecutor
             {
                 if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    FactionLogic.disbandFaction(playerFactionName);
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
+                    boolean didSucceed = FactionLogic.disbandFaction(playerFactionName);
 
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                    if (didSucceed)
+                    {
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
+
+                        if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Something went wrong..."));
+                    }
 
                     return CommandResult.success();
                 }
@@ -39,10 +47,18 @@ public class DisbandCommand implements CommandExecutor
                 {
                     try
                     {
-                        FactionLogic.disbandFaction(playerFactionName);
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
+                        boolean didSucceed = FactionLogic.disbandFaction(playerFactionName);
 
-                        if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                        if (didSucceed)
+                        {
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
+
+                            if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                        }
+                        else
+                        {
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Something went wrong..."));
+                        }
 
                         return CommandResult.success();
                     }

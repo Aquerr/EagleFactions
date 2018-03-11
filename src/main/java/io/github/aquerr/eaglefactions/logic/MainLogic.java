@@ -1,217 +1,134 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import io.github.aquerr.eaglefactions.config.ConfigAccess;
-import io.github.aquerr.eaglefactions.config.IConfig;
-import io.github.aquerr.eaglefactions.config.MainConfig;
-import javafx.util.Pair;
-import ninja.leaping.configurate.ConfigurationNode;
-import sun.java2d.pipe.SpanShapeRenderer;
+import io.github.aquerr.eaglefactions.config.Configuration;
 
 import java.math.BigDecimal;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 
 public class MainLogic
 {
-    private static IConfig mainConfig = MainConfig.getConfig();
+    private static Configuration _configuration;
 
-    public static boolean getAllianceFriendlyFire()
+    public static void setup(Configuration configuration)
     {
-        ConfigurationNode friendlyFireNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "friendlyFire", "alliance");
+        _configuration = configuration;
+    }
 
-        Boolean friendlyFire = friendlyFireNode.getBoolean();
+    public static boolean isFactionFriendlyFire()
+    {
+        return _configuration.getBoolean("friendlyfire-faction");
+    }
 
-        return friendlyFire;
+    public static boolean isAllianceFriendlyFire()
+    {
+        return _configuration.getBoolean("friendlyfire-alliance");
     }
 
     public static BigDecimal getGlobalMaxPower()
     {
-        ConfigurationNode maxPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "maxpower");
-
-        BigDecimal maxPower = new BigDecimal(maxPowerNode.getString());
-
-        return maxPower;
+        return new BigDecimal(_configuration.getString("power", "max-power"));
     }
 
     public static BigDecimal getStartingPower()
     {
-        ConfigurationNode startingPowerNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "startpower");
-
-        BigDecimal startPower = new BigDecimal(startingPowerNode.getString());
-
-        return startPower;
+        return new BigDecimal(_configuration.getString("power", "start-power"));
     }
 
     public static BigDecimal getPowerIncrement()
     {
-        ConfigurationNode powerIncrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "increment");
-
-        BigDecimal incrementPower = new BigDecimal(powerIncrementNode.getString());
-
-        return incrementPower;
+        return new BigDecimal(_configuration.getString("power", "increment"));
     }
 
     public static BigDecimal getPowerDecrement()
     {
-        ConfigurationNode powerDecrementNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "decrement");
-
-        BigDecimal decrementPower = new BigDecimal(powerDecrementNode.getString());
-
-        return decrementPower;
+        return new BigDecimal(_configuration.getString("power", "decrement"));
     }
 
     public static BigDecimal getKillAward()
     {
-        ConfigurationNode killAwardNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "killaward");
-
-        BigDecimal killAward = new BigDecimal(killAwardNode.getString());
-
-        return killAward;
+        return new BigDecimal(_configuration.getString("power", "killaward"));
     }
 
     public static BigDecimal getPunishment()
     {
-        ConfigurationNode punishmentNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "power", "punishment");
-
-        BigDecimal punishment = new BigDecimal(punishmentNode.getString());
-
-        return punishment;
+        return new BigDecimal(_configuration.getString("power", "punishment"));
     }
 
     public static int getMaxNameLength()
     {
-        ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "name", "maxlength");
-
-        int maxLength = maxLengthNode.getInt();
-
-        return maxLength;
+        return _configuration.getInt("name", "max-length");
     }
 
     public static int getMinNameLength()
     {
-        ConfigurationNode minLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "name", "minlength");
-
-        int minLength = minLengthNode.getInt();
-
-        return minLength;
+        return _configuration.getInt("name", "min-length");
     }
 
     public static int getMaxTagLength()
     {
-        ConfigurationNode maxLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "tag", "maxlength");
-
-        int maxLength = maxLengthNode.getInt();
-
-        return maxLength;
+        return _configuration.getInt("tag", "max-length");
     }
 
     public static int getMinTagLength()
     {
-        ConfigurationNode minLengthNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "tag", "minlength");
-
-        int minLength = minLengthNode.getInt();
-
-        return minLength;
+        return _configuration.getInt("tag", "min-length");
     }
 
     public static boolean getMobSpawning()
     {
-        ConfigurationNode mobSpawningNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "spawn", "mobs");
-
-        boolean mobSpawning = mobSpawningNode.getBoolean();
-
-        return mobSpawning;
+        return _configuration.getBoolean("spawn", "mobs");
     }
 
     public static boolean getBlockEnteringFactions()
     {
-        ConfigurationNode mobSpawningNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "blockEnteringFactions");
-
-        boolean mobSpawning = mobSpawningNode.getBoolean();
-
-        return mobSpawning;
+        return _configuration.getBoolean("block-entering-faction-while-offline");
     }
 
     public static boolean requireConnectedClaims()
     {
-        ConfigurationNode requireConnectedClaimsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "connectedClaims");
-
-        boolean requireConnectedClaims = requireConnectedClaimsNode.getBoolean();
-
-        return requireConnectedClaims;
+        return _configuration.getBoolean("connected-claims");
     }
 
     public static boolean shouldBlockSafeZoneFromWarZone()
     {
-        ConfigurationNode blockSafeZoneFromWarZoneNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "blockSafeZoneWhileInWarZone");
-
-        boolean blockSafeZoneFromWarZone = blockSafeZoneFromWarZoneNode.getBoolean();
-
-        return blockSafeZoneFromWarZone;
+        return _configuration.getBoolean("block-safezone-from-warzone");
     }
 
     public static boolean isPlayerLimit()
     {
-        ConfigurationNode isPlayerLimitNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "playerlimit", "playerlimit");
-
-        boolean playerLimit = isPlayerLimitNode.getBoolean();
-
-        return playerLimit;
+        return _configuration.getBoolean("player-limit", "toggled");
     }
 
     public static int getPlayerLimit()
     {
-        ConfigurationNode limitNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "playerlimit", "limit");
-
-        int limit = limitNode.getInt();
-
-        return limit;
+        return _configuration.getInt("player-limit", "limit");
     }
 
     public static int getAttackTime()
     {
-        ConfigurationNode attackTimeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "attacktime");
-
-        int attackTime = attackTimeNode.getInt();
-
-        return attackTime;
+        return _configuration.getInt("attack-time");
     }
 
     public static String getPrefixOption()
     {
-        ConfigurationNode prefixNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "factionprefix");
-
-        String prefix = prefixNode.getString();
-
-        return prefix;
+        return _configuration.getString("faction-prefix");
     }
 
-    public static Boolean shouldDisplayRank()
+    public static boolean shouldDisplayRank()
     {
-        ConfigurationNode rankNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "chat", "factionrank");
-
-        Boolean rank = rankNode.getBoolean();
-
-        return rank;
+        return _configuration.getBoolean("faction-rank");
     }
 
     public static boolean getCreateByItems()
     {
-        ConfigurationNode createByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "createbyitems");
-
-        boolean createByItems = createByItemsNode.getBoolean();
-
-        return createByItems;
+        return _configuration.getBoolean("creating-by-items", "toggled");
     }
 
     public static HashMap<String, Integer> getRequiredItemsToCreate()
     {
-        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "factioncreation", "items");
+        List<String> itemsList = _configuration.getListOfStrings("creating-by-items", "items");
 
-        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();
 
         for (String itemWithAmount : itemsList)
@@ -229,81 +146,58 @@ public class MainLogic
 
     public static boolean shouldSpawnAtHomeAfterDeath()
     {
-        ConfigurationNode spawnAfterDeathNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "spawn", "spawnAtHomeAfterDeath");
-
-        boolean spawnAfterDeath = spawnAfterDeathNode.getBoolean();
-
-        return spawnAfterDeath;
+        return _configuration.getBoolean("spawn", "spawn-at-home-after-death");
     }
 
     public static boolean shouldAttackOnlyAtNight()
     {
-        ConfigurationNode attackOnlyAtNightNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "gameplay", "attackOnlyAtNight");
-
-        boolean attackAtNight = attackOnlyAtNightNode.getBoolean();
-
-        return attackAtNight;
+        return _configuration.getBoolean("attack-only-at-night");
     }
 
     public static boolean canHomeBetweenWorlds()
     {
-        ConfigurationNode canHomeBetweenWorldsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "teleportBetweenWorlds");
+        return _configuration.getBoolean("home-from-other-worlds");
+    }
 
-        boolean canHomeBetweenWorlds = canHomeBetweenWorldsNode.getBoolean();
+    public static int getHomeDelayTime()
+    {
+        return _configuration.getInt("home-delay");
+    }
 
-        return canHomeBetweenWorlds;
+    public static int getHomeCooldown()
+    {
+        return _configuration.getInt("home-cooldown");
     }
 
     public static boolean isDelayedClaimingToggled()
     {
-        ConfigurationNode isDelayedClaimingToggledNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Delayed_Claim");
-
-        boolean isToggled = isDelayedClaimingToggledNode.getBoolean();
-
-        return isToggled;
+        return _configuration.getBoolean("delayed-claim", "toggled");
     }
 
     public static int getClaimingDelay()
     {
-        ConfigurationNode claimingDelayNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_Time");
-
-        int claimingDelay = claimingDelayNode.getInt();
-
-        return claimingDelay;
+        return _configuration.getInt("delayed-claim", "claiming-time");
     }
 
     public static boolean shouldBlockHomeAfterDeathInOwnFaction()
     {
-        ConfigurationNode blockHomeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Turned_On");
-
-        boolean blockHome = blockHomeNode.getBoolean();
-
-        return blockHome;
+        return _configuration.getBoolean("block-home-after-death-in-own-faction", "toggled");
     }
 
     public static int getHomeBlockTimeAfterDeath()
     {
-        ConfigurationNode blockHomeTimeNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "home", "Block_Home_After_Death_In_Own_Faction", "Time");
-
-        int blockHomeTime = blockHomeTimeNode.getInt();
-
-        return blockHomeTime;
+        return _configuration.getInt("block-home-after-death-in-own-faction", "time");
     }
 
     public static boolean shouldClaimByItems()
     {
-        ConfigurationNode claimByItemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Turned_On");
-
-        boolean claimByItems = claimByItemsNode.getBoolean();
-
-        return claimByItems;
+        return _configuration.getBoolean("claiming-by-items", "toggled");
     }
 
     public static HashMap<String, Integer> getRequiredItemsToClaim()
     {
-        ConfigurationNode itemsNode = ConfigAccess.getConfig(mainConfig).getNode("eaglefactions", "claims", "Claiming_By_Items", "Items");
+        List<String> itemsList = _configuration.getListOfStrings("claiming-by-items", "items");
 
-        List<String> itemsList = itemsNode.getList(objectToStringTransformer);
         HashMap<String, Integer> items = new HashMap<>();
 
         for (String itemWithAmount : itemsList)
@@ -319,15 +213,23 @@ public class MainLogic
         return items;
     }
 
-    private static Function<Object,String> objectToStringTransformer = input ->
+    public static double getAttackMinPowerPercentage()
     {
-        if (input instanceof String)
-        {
-            return (String) input;
-        }
-        else
-        {
-            return null;
-        }
-    };
+        return _configuration.getDouble("attack-min-power-percentage");
+    }
+
+    public static boolean isPVPLoggerActive()
+    {
+        return _configuration.getBoolean("pvp-logger", "active");
+    }
+
+    public static int getPVPLoggerTime()
+    {
+        return _configuration.getInt("pvp-logger", "time");
+    }
+
+    public static boolean isBlockDestroyingDisabled()
+    {
+        return _configuration.getBoolean("disable-block-destroy");
+    }
 }
