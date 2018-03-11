@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.aquerr.eaglefactions'
-version = '1.0-SNAPSHOT'
+version = '1.11.2-v0.9.11'
 description = 'A factions plugin that will make managing your battle-server easier. :)'
 
 dependencies {

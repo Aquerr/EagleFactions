@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -36,30 +37,22 @@ public class BlockBreakListener
                      {
                          if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
                          {
-                          //   EagleFactions.getEagleFactions().getLogger().info("Player has permissions in SafeZone");
                              return;
                          }
                          else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
                          {
-                          //   EagleFactions.getEagleFactions().getLogger().info("Player has permissions in WarZone");
                              return;
                          }
                          else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
                          {
-                          //   EagleFactions.getEagleFactions().getLogger().info("Player's land");
                              return;
                          }
                          else
                          {
-                          //   EagleFactions.getEagleFactions().getLogger().info("No permissions");
                              event.setCancelled(true);
                              player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
                              return;
                          }
-                     }
-                     else
-                     {
-                         return;
                      }
                  }
             }
@@ -72,6 +65,11 @@ public class BlockBreakListener
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
                 if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone"))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                else if (MainLogic.isBlockDestroyingDisabled() && FactionLogic.isClaimed(world.getUniqueId(), claim))
                 {
                     event.setCancelled(true);
                     return;

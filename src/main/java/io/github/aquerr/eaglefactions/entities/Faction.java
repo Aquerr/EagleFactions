@@ -18,6 +18,7 @@ public class Faction
     public String Leader;
     public List<String> Officers;
     public List<String> Claims;
+    public String Home;
 
     public Faction(String factionName, String factionTag, String factionLeader)
     {
@@ -30,5 +31,6 @@ public class Faction
         this.Officers = new ArrayList<>();
         this.Alliances = new ArrayList<>();
         this.Enemies = new ArrayList<>();
+        this.Home = "";
     }
 }
