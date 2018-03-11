@@ -1,18 +1,19 @@
 package io.github.aquerr.eaglefactions;
 
-import io.github.aquerr.eaglefactions.commands.*;
-
 import com.google.inject.Inject;
-import io.github.aquerr.eaglefactions.config.FactionsConfig;
-import io.github.aquerr.eaglefactions.config.MainConfig;
+import io.github.aquerr.eaglefactions.commands.*;
+import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
+import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -20,20 +21,16 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
 @Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = PluginInfo.Author)
 public class EagleFactions
 {
-
-    public static Map<List<String>, CommandSpec> Subcommands;
+    public static Map<List<String>, CommandSpec> Subcommands = new HashMap<List<String>, CommandSpec>();
     public static List<Invite> InviteList = new ArrayList<>();
     public static List<AllyInvite> AllayInviteList = new ArrayList<>();
     public static List<RemoveEnemy> RemoveEnemyList = new ArrayList<>();
@@ -43,6 +40,9 @@ public class EagleFactions
     public static List<String> AttackedFactions = new ArrayList<>();
     public static List<UUID> BlockedHome = new ArrayList<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
+    public static Map<UUID, Integer> HomeCooldownPlayers = new HashMap<>();
+
+    private Configuration _configuration;
 
     @Inject
     private Logger _logger;
@@ -53,8 +53,8 @@ public class EagleFactions
 
     @Inject
     @ConfigDir(sharedRoot = false)
-    private Path configDir;
-    public Path getConfigDir(){return configDir;}
+    private Path _configDir;
+    public Path getConfigDir(){return _configDir;}
 
 //    @Inject
 //    private Game game;
@@ -66,7 +66,6 @@ public class EagleFactions
     {
         eagleFactions = this;
 
-       //Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions is loading..."));
        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
 
        SetupConfigs();
@@ -81,63 +80,33 @@ public class EagleFactions
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "EagleFactions", TextColors.WHITE, " is ready to use!"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Thank you for choosing this plugin!"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Current version: " + PluginInfo.Version));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with EagleFactions! :D"));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE,"Have a great time with Eagle Factions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
+
+        if (!VersionChecker.isLatest(PluginInfo.Version))
+        {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.Name, TextColors.GOLD, " is available online!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN,"=========================================="));
+        }
     }
 
     private void SetupConfigs()
     {
-        getLogger().info("Setting up configs...");
-
-        //Create config directory for EagleFactions.
-        try
-        {
-            Files.createDirectories(configDir);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        // Create data directory for EagleFactions
-        if (!Files.exists(configDir.resolve("data")))
-        {
-            try
-            {
-                Files.createDirectories(configDir.resolve("data"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (!Files.exists(configDir.resolve("players")))
-        {
-            try
-            {
-                Files.createDirectories(configDir.resolve("players"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
         // Create configs
-        MainConfig.getConfig().setup();
-        FactionsConfig.getConfig().setup();
+        _configuration = new Configuration(_configDir);
+
+        FactionLogic.setupFactionLogic(_configDir);
+        PowerService.setup(_configDir);
+
+        //PVPLogger
+        PVPLogger.setupPVPLogger();
     }
 
     private void InitializeCommands()
     {
-        getLogger ().info ("Initializing commands...");
-
-        Subcommands = new HashMap<List<String>, CommandSpec>();
-
         //Help command should display all possible commands in plugin.
         Subcommands.put (Arrays.asList ("help"), CommandSpec.builder ()
                 .description (Text.of ("Help"))
@@ -278,11 +247,11 @@ public class EagleFactions
                 .build());
 
         //Friendly Fire command.
-        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
-                .description(Text.of("Allow/Deny friendly fire in the faction"))
-                .permission(PluginPermissions.FriendlyFireCommand)
-                .executor(new FriendlyFireCommand())
-                .build());
+//        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
+//                .description(Text.of("Allow/Deny friendly fire in the faction"))
+//                .permission(PluginPermissions.FriendlyFireCommand)
+//                .executor(new FriendlyFireCommand())
+//                .build());
 
         //Claim command.
         Subcommands.put(Arrays.asList("claim"), CommandSpec.builder()
@@ -422,8 +391,6 @@ public class EagleFactions
 
     private void RegisterListeners()
     {
-        getLogger ().info ("Registering listeners...");
-
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
@@ -434,5 +401,12 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
         Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
+        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
+        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
+    }
+
+    public Configuration getConfiguration()
+    {
+        return this._configuration;
     }
 }
