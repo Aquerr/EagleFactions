@@ -227,4 +227,9 @@ public class MainLogic
     {
         return _configuration.getInt("pvp-logger", "time");
     }
+
+    public static boolean isBlockDestroyingDisabled()
+    {
+        return _configuration.getBoolean("disable-block-destroy");
+    }
 }

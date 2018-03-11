@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -64,6 +65,11 @@ public class BlockBreakListener
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
                 if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone"))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                else if (MainLogic.isBlockDestroyingDisabled() && FactionLogic.isClaimed(world.getUniqueId(), claim))
                 {
                     event.setCancelled(true);
                     return;

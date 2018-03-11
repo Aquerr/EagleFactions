@@ -41,7 +41,7 @@ public class HomeCommand implements CommandExecutor
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Home command is currently on cooldown! You need to wait ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()), TextColors.RED, " seconds to be able to use it again!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Home command is currently on cooldown! You need to wait ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " seconds ", TextColors.RED, "to be able to use it again!"));
                         return CommandResult.success();
                     }
                     else if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.contains(player.getUniqueId()))
