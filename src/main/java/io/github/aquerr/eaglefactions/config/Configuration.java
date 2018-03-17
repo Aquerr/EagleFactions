@@ -60,12 +60,6 @@ public class Configuration
         configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
 
         load();
-        setupMainLogic(this);
-    }
-
-    private void setupMainLogic(Configuration configuration)
-    {
-        MainLogic.setup(configuration);
     }
 
     public void load()
