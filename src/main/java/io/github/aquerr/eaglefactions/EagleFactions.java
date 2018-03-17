@@ -64,7 +64,7 @@ public class EagleFactions
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
     {
-        eagleFactions = this;
+       eagleFactions = this;
 
        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
 

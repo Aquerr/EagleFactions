@@ -50,7 +50,7 @@ Recommended downloads will be **available** when version of the plugin hits **1.
 
 Plugin creator: [Aquerr](https://github.com/Aquerr)
 
-Logo by: Joxu ( #jx )
+Logo by: joxuk
 
 ## Thanks
 
