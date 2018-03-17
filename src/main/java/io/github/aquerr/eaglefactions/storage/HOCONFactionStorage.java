@@ -27,17 +27,27 @@ public class HOCONFactionStorage implements IStorage
     {
         try
         {
-            filePath = Paths.get(configDir.resolve("data") + "/factions.conf");
+            Path dataPath = configDir.resolve("data");
+
+            if (!Files.exists(dataPath))
+            {
+                Files.createDirectory(dataPath);
+            }
+
+            filePath = dataPath.resolve("factions.conf");
 
             if (!Files.exists(filePath))
             {
                 Files.createFile(filePath);
 
+                configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 precreate();
             }
-
-            configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
-            load();
+            else
+            {
+                configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
+                load();
+            }
         }
         catch (IOException exception)
         {
@@ -47,6 +57,7 @@ public class HOCONFactionStorage implements IStorage
 
     private void precreate()
     {
+        load();
         getStorage().getNode("factions").setComment("This file stores all data about factions");
 
         getStorage().getNode("factions", "WarZone", "claims").setValue(new ArrayList<>());
@@ -57,7 +68,7 @@ public class HOCONFactionStorage implements IStorage
         getStorage().getNode("factions", "SafeZone", "members").setValue(new ArrayList<>());
         getStorage().getNode("factions", "SafeZone", "power").setValue(9999);
 
-        load();
+        saveChanges();
     }
 
     @Override
