@@ -33,17 +33,19 @@ public class BlockBreakListener
                      World world = player.getWorld();
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-                     if(FactionLogic.isClaimed(world.getUniqueId(), claim))
+                     String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
+
+                     if(!factionName.equals(""))
                      {
-                         if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                         if(factionName.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
                          {
                              return;
                          }
-                         else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                         else if(factionName.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
                          {
                              return;
                          }
-                         else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                         else if(factionName.equals(playerFactionName))
                          {
                              return;
                          }
@@ -64,15 +66,25 @@ public class BlockBreakListener
                 World world = transaction.getFinal().getLocation().get().getExtent();
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-                if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone"))
+                String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
+
+                if (!factionName.equals(""))
                 {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if (MainLogic.isBlockDestroyingDisabled() && FactionLogic.isClaimed(world.getUniqueId(), claim))
-                {
-                    event.setCancelled(true);
-                    return;
+                    if(!factionName.equals("SafeZone") && !factionName.equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    else if(factionName.equals("SafeZone"))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    else if (factionName.equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
             }
         }

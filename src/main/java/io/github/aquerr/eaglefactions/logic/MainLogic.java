@@ -232,4 +232,9 @@ public class MainLogic
     {
         return _configuration.getBoolean("disable-block-destroy");
     }
+
+    public static boolean isBlockDestroyingInWarZoneDisabled()
+    {
+        return _configuration.getBoolean("disable-block-destroy-warzone");
+    }
 }

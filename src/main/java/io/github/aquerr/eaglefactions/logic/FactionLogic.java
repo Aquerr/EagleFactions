@@ -375,8 +375,7 @@ public class FactionLogic
     {
         for (Faction faction: getFactions())
         {
-
-            if(!faction.Claims.isEmpty() && faction.Claims != null)
+            if(!faction.Claims.isEmpty())
             {
                 for (String claim: faction.Claims)
                 {
