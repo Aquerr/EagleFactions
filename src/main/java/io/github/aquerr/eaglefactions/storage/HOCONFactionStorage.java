@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +153,7 @@ public class HOCONFactionStorage implements IStorage
             faction.Alliances = alliancesList;
             faction.Enemies = enemiesList;
             faction.Claims = claimsList;
-            faction.Power = PowerService.getFactionPower(faction); //Get power from all players in faction.
+            faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
 
             return faction;
         }

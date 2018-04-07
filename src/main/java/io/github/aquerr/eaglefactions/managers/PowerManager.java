@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.services;
+package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class PowerService
+public class PowerManager
 {
     //private static IConfig factionsConfig = FactionsConfig.getConfig();
 
@@ -157,14 +157,14 @@ public class PowerService
 
         if(faction.Leader != null && !faction.Leader.equals(""))
         {
-            factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(faction.Leader)));
+            factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(faction.Leader)));
         }
 
         if(faction.Officers != null && !faction.Officers.isEmpty())
         {
             for (String officer: faction.Officers)
             {
-                factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(officer)));
+                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(officer)));
             }
         }
 
@@ -172,7 +172,7 @@ public class PowerService
         {
             for (String member: faction.Members)
             {
-                factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(member)));
+                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(member)));
             }
         }
 
@@ -213,7 +213,7 @@ public class PowerService
 
             BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-            if(PowerService.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerService.getPlayerMaxPower(playerUUID).doubleValue())
+            if(PowerManager.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerManager.getPlayerMaxPower(playerUUID).doubleValue())
             {
                 if(isKillAward)
                 {
@@ -263,15 +263,15 @@ public class PowerService
             @Override
             public void accept(Task task)
             {
-                if (!PlayerService.isPlayerOnline(playerUUID)) task.cancel();
+                if (!PlayerManager.isPlayerOnline(playerUUID)) task.cancel();
 
-                if(PowerService.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerService.getPlayerMaxPower(playerUUID).doubleValue())
+                if(PowerManager.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerManager.getPlayerMaxPower(playerUUID).doubleValue())
                 {
-                    PowerService.addPower(playerUUID, false);
+                    PowerManager.addPower(playerUUID, false);
                 }
                 else
                 {
-                    PowerService.setPower(playerUUID, PowerService.getPlayerMaxPower(playerUUID));
+                    PowerManager.setPower(playerUUID, PowerManager.getPlayerMaxPower(playerUUID));
                 }
             }
         }).submit(EagleFactions.getEagleFactions());
@@ -279,7 +279,7 @@ public class PowerService
 
     public static void decreasePower(UUID playerUUID)
     {
-        if(PowerService.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
+        if(PowerManager.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
         {
             Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -301,7 +301,7 @@ public class PowerService
         }
         else
         {
-            PowerService.setPower(playerUUID, BigDecimal.ZERO);
+            PowerManager.setPower(playerUUID, BigDecimal.ZERO);
         }
     }
 

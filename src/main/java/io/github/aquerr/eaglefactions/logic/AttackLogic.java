@@ -96,14 +96,14 @@ public class AttackLogic
 
     public static void informAboutAttack(String factionName)
     {
-        List<Player> playersList = FactionLogic.getPlayersOnline(factionName);
+        List<Player> playersList = FactionLogic.getOnlinePlayers(factionName);
 
         playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is under ", TextColors.RED, "attack", TextColors.RESET, "!")));
     }
 
     public static void informAboutDestroying(String factionName)
     {
-        List<Player> playersList = FactionLogic.getPlayersOnline(factionName);
+        List<Player> playersList = FactionLogic.getOnlinePlayers(factionName);
 
         playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "One of your claims has been ", TextColors.RED, "destroyed", TextColors.RESET, " by an enemy!")));
     }

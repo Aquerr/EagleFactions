@@ -10,8 +10,9 @@ import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -99,8 +100,9 @@ public class EagleFactions
         // Create configs
         _configuration = new Configuration(_configDir);
 
-        FactionLogic.setupFactionLogic(_configDir);
-        PowerService.setup(_configDir);
+        FactionLogic.setup(_configDir);
+        PlayerManager.setup(_configDir);
+        PowerManager.setup(_configDir);
 
         //PVPLogger
         _pvpLogger = new PVPLogger();

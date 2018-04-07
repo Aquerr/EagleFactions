@@ -2,8 +2,8 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -26,16 +26,16 @@ public class PlayerJoinListener
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "A new version of ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " is available!"));
             }
 
-            if(PowerService.checkIfPlayerExists(player.getUniqueId()))
+            if(PowerManager.checkIfPlayerExists(player.getUniqueId()))
             {
-                PowerService.increasePower(player.getUniqueId());
+                PowerManager.increasePower(player.getUniqueId());
                 return;
             }
             else
             {
                 //Create player file and set power.
-                PowerService.addPlayer(player.getUniqueId());
-                PlayerService.setPlayerChunkPosition(player.getUniqueId(), player.getLocation().getChunkPosition());
+                PowerManager.addPlayer(player.getUniqueId());
+                PlayerManager.setPlayerBlockPosition(player.getUniqueId(), player.getLocation().getChunkPosition());
                 return;
             }
         }

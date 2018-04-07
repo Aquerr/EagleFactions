@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.services.PlayerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.spongepowered.api.Sponge;
@@ -33,7 +33,7 @@ public class FactionLogic
 {
     private static IStorage factionsStorage;
 
-    public static void setupFactionLogic(Path configDir)
+    public static void setup(Path configDir)
     {
         //TODO: Choose which storage should be used. (HOCON, MySQL etc.)
         factionsStorage = new HOCONFactionStorage(configDir);
@@ -64,7 +64,7 @@ public class FactionLogic
         return null;
     }
 
-    public static String getFactionNameByChunk(UUID worldUUID ,Vector3i chunk)
+    public static String getFactionNameByChunk(UUID worldUUID, Vector3i chunk)
     {
         for(Faction faction: getFactions())
         {
@@ -77,7 +77,7 @@ public class FactionLogic
         return "";
     }
 
-    public static Faction getFaction(String factionName)
+    public static @Nullable Faction getFaction(String factionName)
     {
         Faction faction = factionsStorage.getFaction(factionName);
 
@@ -121,7 +121,7 @@ public class FactionLogic
         {
             return faction.Members;
         }
-        else return new ArrayList<String>();
+        else return new ArrayList<>();
     }
 
     
@@ -146,31 +146,31 @@ public class FactionLogic
         return factionPlayers;
     }
     
-    public static List<Player> getPlayersOnline(String factionName)
+    public static List<Player> getOnlinePlayers(String factionName)
     {
         Faction faction = getFaction(factionName);
 
     	List<Player> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = faction.Leader;
-    	if (!faction.Leader.equals("") && PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
+    	if (!faction.Leader.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(factionLeader)))
     	{
-    		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(factionLeader)).get());
+    		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(factionLeader)).get());
     	}
         
         for (String uuid : faction.Officers)
         {
-        	if (!uuid.equals("") && PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	if (!uuid.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
+        		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
         for (String uuid : faction.Members)
         {
-        	if (!uuid.equals("") && PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	if (!uuid.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
+        		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
@@ -216,12 +216,9 @@ public class FactionLogic
 
     public static void joinFaction(UUID playerUUID, String factionName)
     {
-        List<String> memberList = new ArrayList<>(getMembers(factionName));
-        memberList.add(playerUUID.toString());
-
         Faction faction = getFaction(factionName);
 
-        faction.Members = memberList;
+        faction.Members.add(playerUUID.toString());
 
         factionsStorage.addOrUpdateFaction(faction);
     }
@@ -491,17 +488,17 @@ public class FactionLogic
     {
         if(FactionLogic.getLeader(factionName) != null && !FactionLogic.getLeader(factionName).equals(""))
         {
-            if(PlayerService.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
         }
 
         for (String playerUUID: getOfficers(factionName))
         {
-            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
         }
 
         for (String playerUUID: getMembers(factionName))
         {
-            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
         }
 
         return false;

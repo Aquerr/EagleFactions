@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.services;
+package io.github.aquerr.eaglefactions.managers;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
@@ -11,6 +11,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -19,8 +22,23 @@ import java.util.UUID;
 /**
  * Created by Aquerr on 2017-08-04.
  */
-public class PlayerService
+public class PlayerManager
 {
+    private static Path playersPath;
+
+    public static void setup(Path configDir)
+    {
+        try
+        {
+            playersPath = configDir.resolve("players");
+            if (!Files.exists(playersPath)) Files.createDirectory(playersPath);
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
+    }
+
     public static Optional<String> getPlayerName(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
@@ -58,9 +76,9 @@ public class PlayerService
         else return false;
     }
 
-    public static Vector3i getPlayerChunkPosition(UUID playerUUID)
+    public static @Nullable Vector3i getPlayerBlockPosition(UUID playerUUID)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -84,7 +102,7 @@ public class PlayerService
             }
             else
             {
-                return new Vector3i(0,0,0);
+                return null;
             }
         }
         catch (Exception exception)
@@ -94,9 +112,9 @@ public class PlayerService
         return null;
     }
 
-    public static void setPlayerChunkPosition(UUID playerUUID, Vector3i chunk)
+    public static void setPlayerBlockPosition(UUID playerUUID, @Nullable Vector3i chunk)
     {
-        Path playerFile = Paths.get(EagleFactions.getEagleFactions ().getConfigDir().resolve("players") +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
         try
         {

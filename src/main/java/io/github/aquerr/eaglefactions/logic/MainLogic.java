@@ -215,7 +215,7 @@ public class MainLogic
 
     public static double getAttackMinPowerPercentage()
     {
-        return _configuration.getDouble("attack-min-power-percentage");
+        return _configuration.getDouble("attack-min-power-percentage") / 100;
     }
 
     public static boolean isPVPLoggerActive()
