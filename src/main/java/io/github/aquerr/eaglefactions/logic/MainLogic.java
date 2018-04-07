@@ -50,9 +50,9 @@ public class MainLogic
         return new BigDecimal(_configuration.getString("power", "killaward"));
     }
 
-    public static BigDecimal getPunishment()
+    public static BigDecimal getPenalty()
     {
-        return new BigDecimal(_configuration.getString("power", "punishment"));
+        return new BigDecimal(_configuration.getString("power", "penalty"));
     }
 
     public static int getMaxNameLength()

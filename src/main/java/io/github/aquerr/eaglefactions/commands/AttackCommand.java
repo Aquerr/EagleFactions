@@ -82,14 +82,13 @@ public class AttackCommand implements CommandExecutor
                                  if(PowerService.getFactionMaxPower(faction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
                                  {
                                      int attackTime = MainLogic.getAttackTime();
-
-                                     AttackLogic.blockClaiming(faction.Name);
                                      Vector3i attackedClaim = player.getLocation().getChunkPosition();
-                                     int seconds = 0;
 
                                      AttackLogic.informAboutAttack(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedClaim));
                                      player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
-                                     AttackLogic.attack(player, attackedClaim, seconds);
+
+                                     AttackLogic.blockClaiming(faction.Name);
+                                     AttackLogic.attack(player, attackedClaim);
                                      return;
                                  }
                                  else

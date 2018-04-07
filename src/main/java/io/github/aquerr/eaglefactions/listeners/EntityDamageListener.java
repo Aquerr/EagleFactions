@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
-import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.services.PowerService;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -67,12 +67,12 @@ public class EntityDamageListener
                                         }
                                         else
                                         {
-                                            //If friendlyfire is on and damage will kill attackedPlayer then punish the player.
+                                            //If friendlyfire is on and damage will kill attackedPlayer then penalty the player.
                                             if(event.willCauseDeath())
                                             {
-                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPunishment()) + "\n",
+                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPenalty()) + "\n",
                                                         TextColors.GRAY, "Current power: ", String.valueOf(PowerService.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerService.getPlayerMaxPower(player.getUniqueId()))));
-                                                PowerService.punish(player.getUniqueId());
+                                                PowerService.penalty(player.getUniqueId());
                                                 return;
                                             }
                                         }
@@ -85,18 +85,18 @@ public class EntityDamageListener
                                     }
                                     else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && MainLogic.isAllianceFriendlyFire())
                                     {
-                                        if(PVPLogger.isActive()) PVPLogger.addOrUpdatePlayer(attackedPlayer);
+                                        if(EagleFactions.getEagleFactions().getPVPLogger().isActive()) EagleFactions.getEagleFactions().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
                                         if(event.willCauseDeath())
                                         {
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPunishment()) + "\n",
+                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPenalty()) + "\n",
                                                     TextColors.GRAY, "Current power: ", String.valueOf(PowerService.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerService.getPlayerMaxPower(player.getUniqueId()))));
-                                            PowerService.punish(player.getUniqueId());
+                                            PowerService.penalty(player.getUniqueId());
                                             return;
                                         }
                                     }
                                     else
                                     {
-                                        if(PVPLogger.isActive()) PVPLogger.addOrUpdatePlayer(attackedPlayer);
+                                        if(EagleFactions.getEagleFactions().getPVPLogger().isActive()) EagleFactions.getEagleFactions().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
                                         if(event.willCauseDeath())
                                         {
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been increased by ", TextColors.GOLD, String.valueOf(MainLogic.getKillAward()) + "\n",
@@ -108,7 +108,7 @@ public class EntityDamageListener
                                 }
                                 else
                                 {
-                                    if(PVPLogger.isActive()) PVPLogger.addOrUpdatePlayer(attackedPlayer);
+                                    if(EagleFactions.getEagleFactions().getPVPLogger().isActive()) EagleFactions.getEagleFactions().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
                                     if(event.willCauseDeath())
                                     {
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been increased by ", TextColors.GOLD, String.valueOf(MainLogic.getKillAward()) + "\n",

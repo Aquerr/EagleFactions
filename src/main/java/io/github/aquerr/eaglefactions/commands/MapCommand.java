@@ -212,7 +212,7 @@ public class MapCommand implements CommandExecutor
                     {
                         if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
-                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
+                            if(!EagleFactions.AttackedFactions.containsKey(playerFactionName))
                             {
                                 if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                                 {

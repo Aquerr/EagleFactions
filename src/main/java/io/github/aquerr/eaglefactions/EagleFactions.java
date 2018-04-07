@@ -37,12 +37,13 @@ public class EagleFactions
     public static List<UUID> AutoClaimList = new ArrayList<>();
     public static List<UUID> AutoMapList = new ArrayList<>();
     public static List<UUID> AdminList = new ArrayList<>();
-    public static List<String> AttackedFactions = new ArrayList<>();
-    public static List<UUID> BlockedHome = new ArrayList<>();
+    public static Map<String, Integer> AttackedFactions = new HashMap<>();
+    public static Map<UUID, Integer> BlockedHome = new HashMap<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
     public static Map<UUID, Integer> HomeCooldownPlayers = new HashMap<>();
 
     private Configuration _configuration;
+    private PVPLogger _pvpLogger;
 
     @Inject
     private Logger _logger;
@@ -102,7 +103,7 @@ public class EagleFactions
         PowerService.setup(_configDir);
 
         //PVPLogger
-        PVPLogger.setupPVPLogger();
+        _pvpLogger = new PVPLogger();
     }
 
     private void InitializeCommands()
@@ -408,5 +409,10 @@ public class EagleFactions
     public Configuration getConfiguration()
     {
         return this._configuration;
+    }
+
+    public PVPLogger getPVPLogger()
+    {
+        return this._pvpLogger;
     }
 }

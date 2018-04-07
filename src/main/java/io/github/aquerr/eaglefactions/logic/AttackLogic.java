@@ -12,73 +12,86 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class AttackLogic
 {
-    public static void attack(Player player, Vector3i attackedChunk, int seconds)
+    public static void attack(Player player, Vector3i attackedChunk)
     {
-        if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
-        {
-            if(seconds == MainLogic.getAttackTime())
-            {
-                informAboutDestroying(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk));
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
-                
-                FactionLogic.removeClaim(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk), player.getWorld().getUniqueId(), attackedChunk);
-            }
-            else
-            {
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
-                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-                taskBuilder.execute(new Runnable()
-                {
-                     @Override
-                     public void run()
-                     {
-                                  attack(player, attackedChunk, seconds + 1);
-                     }
+        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-                }).delay(1, TimeUnit.SECONDS).name("EagleFactions - Attack").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
-            }
-        }
-        else
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
         {
-            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
-        }
+            int seconds = 1;
+
+            @Override
+            public void accept(Task task)
+            {
+                if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+                {
+                    if(seconds == MainLogic.getAttackTime())
+                    {
+                        informAboutDestroying(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
+
+                        FactionLogic.removeClaim(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk), player.getWorld().getUniqueId(), attackedChunk);
+                        task.cancel();
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                        seconds++;
+                    }
+                }
+                else
+                {
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+                    task.cancel();
+                }
+            }
+        }).submit(EagleFactions.getEagleFactions());
     }
 
     public static void blockClaiming(String factionName)
     {
-        if(!EagleFactions.AttackedFactions.contains(factionName)) EagleFactions.AttackedFactions.add(factionName);
-
-        restoreClaiming(factionName);
-    }
-
-    public static void restoreClaiming(String factionName)
-    {
-        if(Sponge.getScheduler().getScheduledTasks(EagleFactions.getEagleFactions()).stream().anyMatch(x->x.getName().equals("EagleFactions - Restore Claiming for " + factionName)))
+        if(EagleFactions.AttackedFactions.containsKey(factionName))
         {
-            Task scheduledTask = (Task)Sponge.getScheduler().getTasksByName("EagleFactions - Restore Claiming for " + factionName).toArray()[0];
-            scheduledTask.cancel();
-
-            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder().name("EagleFactions - Restore Claiming for " + factionName);
-            taskBuilder.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if(EagleFactions.AttackedFactions.contains(factionName)) EagleFactions.AttackedFactions.remove(factionName);
-                }
-            }).delay(2, TimeUnit.MINUTES).submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+            EagleFactions.AttackedFactions.replace(factionName, 120);
         }
         else
         {
-            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder().name("EagleFactions - Restore Claiming for " + factionName);
-            taskBuilder.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if(EagleFactions.AttackedFactions.contains(factionName)) EagleFactions.AttackedFactions.remove(factionName);
-                }
-            }).delay(2, TimeUnit.MINUTES).submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+            EagleFactions.AttackedFactions.put(factionName, 120);
+            runClaimingRestorer(factionName);
         }
+    }
+
+    public static void runClaimingRestorer(String factionName)
+    {
+
+        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        {
+            @Override
+            public void accept(Task task)
+            {
+
+                if(EagleFactions.AttackedFactions.containsKey(factionName))
+                {
+                    int seconds = EagleFactions.AttackedFactions.get(factionName);
+
+                    if (seconds <= 0)
+                    {
+                        EagleFactions.AttackedFactions.remove(factionName);
+                        task.cancel();
+                    }
+                    else
+                    {
+                        EagleFactions.AttackedFactions.replace(factionName, seconds, seconds - 1);
+                    }
+                }
+            }
+        }).submit(EagleFactions.getEagleFactions());
     }
 
     public static void informAboutAttack(String factionName)
@@ -97,36 +110,42 @@ public class AttackLogic
 
     public static void blockHome(UUID playerUUID)
     {
-        if(!EagleFactions.BlockedHome.contains(playerUUID)) EagleFactions.BlockedHome.add(playerUUID);
-
-        restoreHomeUsage(playerUUID);
-    }
-
-    public static void restoreHomeUsage(UUID playerUUID)
-    {
-        if(Sponge.getScheduler().getScheduledTasks(EagleFactions.getEagleFactions()).stream().anyMatch(x->x.getName().equals("EagleFactions - Restore Claiming for " + playerUUID)))
+        if(EagleFactions.BlockedHome.containsKey(playerUUID))
         {
-            Task scheduledTask = (Task)Sponge.getScheduler().getTasksByName("EagleFactions - Restore Home for " + playerUUID).toArray()[0];
-            scheduledTask.cancel();
-
-            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder().name("EagleFactions - Restore Home for " + playerUUID);
-            taskBuilder.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if(EagleFactions.BlockedHome.contains(playerUUID)) EagleFactions.BlockedHome.remove(playerUUID);
-                }
-            }).delay(MainLogic.getHomeBlockTimeAfterDeath(), TimeUnit.SECONDS).submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+            EagleFactions.BlockedHome.replace(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
         }
         else
         {
-            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder().name("EagleFactions - Restore Home for " + playerUUID);
-            taskBuilder.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if(EagleFactions.BlockedHome.contains(playerUUID)) EagleFactions.BlockedHome.remove(playerUUID);
-                }
-            }).delay(MainLogic.getHomeBlockTimeAfterDeath(), TimeUnit.SECONDS).submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+            EagleFactions.BlockedHome.put(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
+            runHomeUsageRestorer(playerUUID);
         }
+    }
+
+    public static void runHomeUsageRestorer(UUID playerUUID)
+    {
+        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        {
+            @Override
+            public void accept(Task task)
+            {
+                if (EagleFactions.BlockedHome.containsKey(playerUUID))
+                {
+                    int seconds = EagleFactions.BlockedHome.get(playerUUID);
+
+                    if (seconds <= 0)
+                    {
+                        EagleFactions.BlockedHome.remove(playerUUID);
+                        task.cancel();
+                    }
+                    else
+                    {
+                        EagleFactions.BlockedHome.replace(playerUUID, seconds, seconds - 1);
+                    }
+                }
+            }
+        }).submit(EagleFactions.getEagleFactions());
     }
 
 }

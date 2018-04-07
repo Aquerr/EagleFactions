@@ -1,11 +1,11 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
 import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.spongepowered.api.Sponge;
@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -531,42 +532,43 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static void addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk, int seconds)
+    private static Consumer<Task> addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
     {
-        if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+        return new Consumer<Task>()
         {
-            if (seconds >= MainLogic.getClaimingDelay())
+            int seconds = 1;
+
+            @Override
+            public void accept(Task task)
             {
-                if (MainLogic.shouldClaimByItems())
+                if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                    else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                    if (seconds >= MainLogic.getClaimingDelay())
+                    {
+                        if (MainLogic.shouldClaimByItems())
+                        {
+                            if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                            else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                        }
+                        else
+                        {
+                            addClaim(playerFactionName, worldUUID, chunk);
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                        }
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                        seconds++;
+                    }
                 }
                 else
                 {
-                    addClaim(playerFactionName, worldUUID, chunk);
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+                    task.cancel();
                 }
             }
-            else
-            {
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
-                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-                taskBuilder.execute(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        addClaimWithDelay(player, playerFactionName, worldUUID, chunk, seconds + 1);
-                    }
-
-                }).delay(1, TimeUnit.SECONDS).name("EagleFactions - Claim").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
-            }
-        }
-        else
-        {
-            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
-        }
+        };
     }
 
     public static void startClaiming(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
@@ -574,7 +576,10 @@ public class FactionLogic
         if (MainLogic.isDelayedClaimingToggled())
         {
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
-            addClaimWithDelay(player, playerFactionName, worldUUID, chunk, 0);
+
+            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, playerFactionName, worldUUID, chunk)).submit(EagleFactions.getEagleFactions());
         }
         else
         {

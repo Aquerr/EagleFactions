@@ -8,80 +8,87 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class PVPLogger
 {
-    private static List<UUID> AttackedPlayers = new ArrayList<>();
-    private static boolean _isActive;
-    private static int _blockTime;
+    private Map<UUID, Integer> _attackedPlayers;
+    private boolean _isActive;
+    private int _blockTime;
 
-    public static void setupPVPLogger()
+    public void PVPLogger()
     {
+        _attackedPlayers = new HashMap<>();
         _isActive = MainLogic.isPVPLoggerActive();
         _blockTime = MainLogic.getPVPLoggerTime();
     }
 
-    public static boolean isActive()
+    public boolean isActive()
     {
         return _isActive;
     }
 
-    public static int getBlockTime()
+    public int getBlockTime()
     {
         return _blockTime;
     }
 
-    public static boolean addOrUpdatePlayer(Player player)
+    public void addOrUpdatePlayer(Player player)
     {
         //Update player's time if it already in a list.
 
-        Optional<Task> optionalTask = Sponge.getScheduler().getScheduledTasks().stream().filter(x->x.getName().equals("EagleFactions - PVPLogger for " + player.getUniqueId().toString())).findFirst();
-
-        if (optionalTask.isPresent())
+        if (_attackedPlayers.containsKey(player.getUniqueId()))
         {
-            optionalTask.get().cancel();
-
-            return addOrUpdatePlayer(player);
+            _attackedPlayers.replace(player.getUniqueId(), getBlockTime());
         }
         else
         {
-            AttackedPlayers.add(player.getUniqueId());
+            _attackedPlayers.put(player.getUniqueId(), getBlockTime());
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "PVPLogger has turned on! You will die if you disconnect in " + getBlockTime() + "s!"));
 
-            Task.Builder allowLogging = Sponge.getScheduler().createTaskBuilder();
-
-            allowLogging.execute(new Runnable()
+            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+            taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
             {
                 @Override
-                public void run()
+                public void accept(Task task)
                 {
-                    AttackedPlayers.remove(player.getUniqueId());
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "PVPLogger has turned off for you! You can now disconnect safely."));
-                }
-            }).delay(getBlockTime(), TimeUnit.SECONDS).submit(EagleFactions.getEagleFactions());
+                    if (_attackedPlayers.containsKey(player.getUniqueId()))
+                    {
+                        int seconds = _attackedPlayers.get(player.getUniqueId());
 
-            return true;
+                        if (seconds <= 0)
+                        {
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "PVPLogger has turned off for you! You can now disconnect safely."));
+                            task.cancel();
+                        }
+                        else
+                        {
+                            _attackedPlayers.replace(player.getUniqueId(), seconds, seconds - 1);
+                        }
+                    }
+                    else
+                    {
+                        task.cancel();
+                    }
+                }
+            }).submit(EagleFactions.getEagleFactions());
         }
     }
 
-    public static boolean isPlayerBlocked(Player player)
+    public boolean isPlayerBlocked(Player player)
     {
-        if (AttackedPlayers.contains(player.getUniqueId())) return true;
+        if (_attackedPlayers.containsKey(player.getUniqueId())) return true;
 
         return false;
     }
 
-    public static void removePlayer(Player player)
+    public void removePlayer(Player player)
     {
-        Optional<Task> optionalTask = Sponge.getScheduler().getScheduledTasks().stream().filter(x->x.getName().equals("EagleFactions - PVPLogger for " + player.getUniqueId().toString())).findFirst();
-
-        if (optionalTask.isPresent()) optionalTask.get().cancel();
-
-        AttackedPlayers.remove(player.getUniqueId());
+        if (_attackedPlayers.containsKey(player.getUniqueId()))
+        {
+            _attackedPlayers.remove(player.getUniqueId());
+        }
     }
 }
