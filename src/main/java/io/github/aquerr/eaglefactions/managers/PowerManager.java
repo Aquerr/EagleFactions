@@ -189,9 +189,20 @@ public class PowerManager
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            BigDecimal playerMaxPower =  new BigDecimal(playerNode.getNode("maxpower").getString());
+            Object value = playerNode.getNode("maxpower").getValue();
 
-            return playerMaxPower;
+            if (value != null)
+            {
+                BigDecimal playerMaxPower =  new BigDecimal(value.toString());
+
+                return playerMaxPower;
+            }
+            else
+            {
+                playerNode.getNode("maxpower").setValue(MainLogic.getGlobalMaxPower());
+
+                return MainLogic.getGlobalMaxPower();
+            }
         }
         catch (Exception exception)
         {
