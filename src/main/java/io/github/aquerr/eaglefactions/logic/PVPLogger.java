@@ -4,6 +4,9 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -17,12 +20,14 @@ public class PVPLogger
     private Map<UUID, Integer> _attackedPlayers;
     private boolean _isActive;
     private int _blockTime;
+    private boolean _shouldBlockCommands;
 
     public void PVPLogger()
     {
         _attackedPlayers = new HashMap<>();
         _isActive = MainLogic.isPVPLoggerActive();
         _blockTime = MainLogic.getPVPLoggerTime();
+        _shouldBlockCommands = MainLogic.blockCommandsWhileInFight();
     }
 
     public boolean isActive()
@@ -33,6 +38,16 @@ public class PVPLogger
     public int getBlockTime()
     {
         return _blockTime;
+    }
+
+    public boolean shouldBlockCommands()
+    {
+        return _shouldBlockCommands;
+    }
+
+    public boolean shouldBlockCommands(Player player)
+    {
+        return shouldBlockCommands() && isPlayerBlocked(player);
     }
 
     public void addOrUpdatePlayer(Player player)
@@ -90,5 +105,10 @@ public class PVPLogger
         {
             _attackedPlayers.remove(player.getUniqueId());
         }
+    }
+
+    public int getPlayerBlockTime(Player player)
+    {
+        return _attackedPlayers.getOrDefault(player.getUniqueId(), 0);
     }
 }

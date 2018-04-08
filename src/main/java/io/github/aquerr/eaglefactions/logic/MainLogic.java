@@ -237,4 +237,9 @@ public class MainLogic
     {
         return _configuration.getBoolean("disable-block-destroy-warzone");
     }
+
+    public static boolean blockCommandsWhileInFight()
+    {
+        return _configuration.getBoolean("block-commands-while-in-fight");
+    }
 }

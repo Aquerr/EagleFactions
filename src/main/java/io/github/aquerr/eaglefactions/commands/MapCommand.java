@@ -16,7 +16,6 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import sun.java2d.loops.GeneralRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
