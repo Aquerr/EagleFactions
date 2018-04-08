@@ -249,13 +249,6 @@ public class EagleFactions
                 .executor(new OfficerCommand())
                 .build());
 
-        //Friendly Fire command.
-//        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
-//                .description(Text.of("Allow/Deny friendly fire in the faction"))
-//                .permission(PluginPermissions.FriendlyFireCommand)
-//                .executor(new FriendlyFireCommand())
-//                .build());
-
         //Claim command.
         Subcommands.put(Arrays.asList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))

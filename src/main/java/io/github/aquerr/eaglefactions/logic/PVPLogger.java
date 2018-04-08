@@ -20,14 +20,14 @@ public class PVPLogger
     private Map<UUID, Integer> _attackedPlayers;
     private boolean _isActive;
     private int _blockTime;
-    private boolean _shouldBlockCommands;
+    private List<String> _blockedCommandsDuringFight;
 
-    public void PVPLogger()
+    public PVPLogger()
     {
         _attackedPlayers = new HashMap<>();
         _isActive = MainLogic.isPVPLoggerActive();
         _blockTime = MainLogic.getPVPLoggerTime();
-        _shouldBlockCommands = MainLogic.blockCommandsWhileInFight();
+        _blockedCommandsDuringFight = MainLogic.getBlockedCommandsDuringFight();
     }
 
     public boolean isActive()
@@ -40,14 +40,24 @@ public class PVPLogger
         return _blockTime;
     }
 
-    public boolean shouldBlockCommands()
+    public boolean shouldBlockCommand(Player player, String command)
     {
-        return _shouldBlockCommands;
-    }
+        if (isPlayerBlocked(player))
+        {
+            if (command.charAt(0) == '/')
+            {
+                command = command.substring(1);
+            }
 
-    public boolean shouldBlockCommands(Player player)
-    {
-        return shouldBlockCommands() && isPlayerBlocked(player);
+            command = command.toLowerCase();
+
+            if (command.equals("*") || _blockedCommandsDuringFight.contains(command))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void addOrUpdatePlayer(Player player)

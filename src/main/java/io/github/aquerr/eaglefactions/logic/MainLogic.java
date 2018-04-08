@@ -238,8 +238,8 @@ public class MainLogic
         return _configuration.getBoolean("disable-block-destroy-warzone");
     }
 
-    public static boolean blockCommandsWhileInFight()
+    public static List<String> getBlockedCommandsDuringFight()
     {
-        return _configuration.getBoolean("block-commands-while-in-fight");
+        return _configuration.getListOfStrings("pvp-logger", "blocked-commands-during-fight");
     }
 }

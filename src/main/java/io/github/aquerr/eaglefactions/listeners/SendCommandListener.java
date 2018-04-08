@@ -15,7 +15,7 @@ public class SendCommandListener
     @Listener(order = Order.EARLY)
     public void onCommandSend(SendCommandEvent event, @Root Player player)
     {
-        if (EagleFactions.getEagleFactions().getPVPLogger().isActive() && EagleFactions.getEagleFactions().getPVPLogger().shouldBlockCommands(player))
+        if (EagleFactions.getEagleFactions().getPVPLogger().isActive() && EagleFactions.getEagleFactions().getPVPLogger().shouldBlockCommand(player, event.getCommand() + " " + event.getArguments()))
         {
             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't use commands while being in a fight!"));
             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Time left: ", TextColors.YELLOW, EagleFactions.getEagleFactions().getPVPLogger().getPlayerBlockTime(player) + "seconds"));
