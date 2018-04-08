@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -28,15 +27,12 @@ public class PlayerJoinListener
 
             if(PowerManager.checkIfPlayerExists(player.getUniqueId()))
             {
-                PowerManager.increasePower(player.getUniqueId());
-                return;
+                PowerManager.startIncreasingPower(player.getUniqueId());
             }
             else
             {
                 //Create player file and set power.
                 PowerManager.addPlayer(player.getUniqueId());
-                PlayerManager.setPlayerBlockPosition(player.getUniqueId(), player.getLocation().getChunkPosition());
-                return;
             }
         }
     }

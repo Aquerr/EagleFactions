@@ -265,7 +265,7 @@ public class PowerManager
         }
     }
 
-    public static void increasePower(UUID playerUUID)
+    public static void startIncreasingPower(UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

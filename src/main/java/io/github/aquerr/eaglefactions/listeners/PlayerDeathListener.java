@@ -26,7 +26,10 @@ public class PlayerDeathListener
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPowerDecrement()) + "\n",
                     TextColors.GRAY, "Current power: ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
 
-            PlayerManager.setPlayerBlockPosition(player.getUniqueId(), null);
+            if (FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("WarZone"))
+            {
+                PlayerManager.setDeathInWarZone(player.getUniqueId(), true);
+            }
 
             if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction())
             {
@@ -35,9 +38,6 @@ public class PlayerDeathListener
                     AttackLogic.blockHome(player.getUniqueId());
                 }
             }
-
-            return;
         }
-        else return;
     }
 }
