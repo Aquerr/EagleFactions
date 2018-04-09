@@ -24,10 +24,14 @@ public class PVPLogger
 
     public PVPLogger()
     {
-        _attackedPlayers = new HashMap<>();
         _isActive = MainLogic.isPVPLoggerActive();
-        _blockTime = MainLogic.getPVPLoggerTime();
-        _blockedCommandsDuringFight = MainLogic.getBlockedCommandsDuringFight();
+
+        if (_isActive)
+        {
+            _attackedPlayers = new HashMap<>();
+            _blockTime = MainLogic.getPVPLoggerTime();
+            _blockedCommandsDuringFight = MainLogic.getBlockedCommandsDuringFight();
+        }
     }
 
     public boolean isActive()
@@ -40,20 +44,28 @@ public class PVPLogger
         return _blockTime;
     }
 
-    public boolean shouldBlockCommand(Player player, String command)
+    public boolean shouldBlockCommand(Player player, String usedCommand)
     {
         if (isPlayerBlocked(player))
         {
-            if (command.charAt(0) == '/')
+            if (usedCommand.charAt(0) == '/')
             {
-                command = command.substring(1);
+                usedCommand = usedCommand.substring(1);
             }
 
-            command = command.toLowerCase();
+            usedCommand = usedCommand.toLowerCase();
 
-            if (command.equals("*") || _blockedCommandsDuringFight.contains(command))
+            for (String blockedCommand : _blockedCommandsDuringFight)
             {
-                return true;
+                if (blockedCommand.charAt(0) == '/')
+                {
+                    blockedCommand = blockedCommand.substring(1);
+                }
+
+                if (blockedCommand.equals("*") || usedCommand.equals(blockedCommand) || usedCommand.startsWith(blockedCommand))
+                {
+                    return true;
+                }
             }
         }
 
