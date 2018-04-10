@@ -374,6 +374,13 @@ public class EagleFactions
                 .executor(new SetLeaderCommand())
                 .build());
 
+        //Flags Command
+        Subcommands.put(Arrays.asList("flags"), CommandSpec.builder()
+                .description(Text.of("Set flags/privileges for members in faction."))
+                .permission(PluginPermissions.FlagsCommand)
+                .executor(new FlagsCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))

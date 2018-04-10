@@ -4,7 +4,9 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionFlagType;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
+import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
@@ -667,5 +669,16 @@ public class FactionLogic
             return true;
         }
         else return false;
+    }
+
+    public static void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagType factionFlagType, Boolean toggled)
+    {
+        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = faction.Flags;
+
+        flags.get(factionMemberType).replace(factionFlagType, !toggled);
+
+        faction.Flags = flags;
+
+        factionsStorage.addOrUpdateFaction(faction);
     }
 }

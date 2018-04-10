@@ -1,6 +1,8 @@
 package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionFlagType;
+import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -10,10 +12,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class HOCONFactionStorage implements IStorage
@@ -83,6 +82,7 @@ public class HOCONFactionStorage implements IStorage
             configNode.getNode(new Object[]{"factions", faction.Name, "enemies"}).setValue(faction.Enemies);
             configNode.getNode(new Object[]{"factions", faction.Name, "alliances"}).setValue(faction.Alliances);
             configNode.getNode(new Object[]{"factions", faction.Name, "claims"}).setValue(faction.Claims);
+            configNode.getNode(new Object[]{"factions", faction.Name, "flags"}).setValue(faction.Flags);
 
             return saveChanges();
         }
@@ -127,15 +127,17 @@ public class HOCONFactionStorage implements IStorage
             List<String> enemiesList = new ArrayList<>();
             List<String> alliancesList = new ArrayList<>();
             List<String> claimsList = new ArrayList<>();
+            Map<FactionMemberType, Map<FactionFlagType, Boolean>> flagsMap = new HashMap<>();
 
             Object tagObject = configNode.getNode(new Object[]{"factions", factionName, "tag"}).getValue();
             Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "leader"}).getValue();
             Object officersObject = configNode.getNode(new Object[]{"factions", factionName, "officers"}).getValue();
-            Object homeObject = configNode.getNode(new Object[]{"factions", factionName, "home"}).getValue(); //TODO: Add new home property in Faction class.
+            Object homeObject = configNode.getNode(new Object[]{"factions", factionName, "home"}).getValue();
             Object membersObject = configNode.getNode(new Object[]{"factions", factionName, "members"}).getValue();
             Object enemiesObject = configNode.getNode(new Object[]{"factions", factionName, "enemies"}).getValue();
             Object alliancesObject = configNode.getNode(new Object[]{"factions", factionName, "alliances"}).getValue();
             Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "claims"}).getValue();
+            Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = configNode.getNode(new Object[]{"factions", factionName, "flags"}).getValue(flagsTransformer);
 
             if (tagObject != null) tag = String.valueOf(tagObject);
             if (leaderObject != null) leader = String.valueOf(leaderObject);
@@ -145,6 +147,7 @@ public class HOCONFactionStorage implements IStorage
             if (alliancesObject != null) alliancesList = (List<String>)alliancesObject;
             if (claimsObject != null) claimsList = (List<String>)claimsObject;
             if (homeObject != null) home = String.valueOf(homeObject);
+            if (flags != null) flagsMap = flags;
 
             Faction faction = new Faction(factionName, tag, leader);
             faction.Home = home;
@@ -154,6 +157,7 @@ public class HOCONFactionStorage implements IStorage
             faction.Enemies = enemiesList;
             faction.Claims = claimsList;
             faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
+            faction.Flags = flagsMap;
 
             return faction;
         }
@@ -230,21 +234,30 @@ public class HOCONFactionStorage implements IStorage
         return configNode;
     }
 
-    private Function<Object, Faction> objectToFactionTransformer = new Function<Object, Faction>()
+    private Function<Object, Map<FactionMemberType, Map<FactionFlagType, Boolean>>> flagsTransformer = input ->
     {
-        @Override
-        public Faction apply(Object input)
+        if (input != null)
         {
-            if (input != null)
+            Map<FactionMemberType, Map<FactionFlagType, Boolean>> resultMap = new HashMap<>();
+
+            Map<Object, Object> memberMap = (Map<Object, Object>) input;
+
+            for (Map.Entry<Object, Object> memberEntry : memberMap.entrySet())
             {
-                Map<String, String> map = (Map<String, String>)input;
+                Map<Object, Object> flagMap = (Map<Object, Object>)memberEntry.getValue();
+                Map<FactionFlagType, Boolean> helpMap = new HashMap<>();
 
-                map.get("key");
+                for (Map.Entry<Object, Object> flagEntry : flagMap.entrySet())
+                {
+                    helpMap.put(FactionFlagType.valueOf(flagEntry.getKey().toString().toUpperCase()), (Boolean)flagEntry.getValue());
+                }
 
-                return null;
+                resultMap.put(FactionMemberType.valueOf(memberEntry.getKey().toString().toUpperCase()), helpMap);
             }
 
-            return null;
+            return resultMap;
         }
+
+        return null;
     };
 }
