@@ -4,13 +4,13 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.FlagChecker;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
@@ -33,20 +33,21 @@ public class BlockBreakListener
                      World world = player.getWorld();
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-                     String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
+                     String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
 
-                     if(!factionName.equals(""))
+                     if(!chunkFactionName.equals(""))
                      {
-                         if(factionName.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                         if(chunkFactionName.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
                          {
                              return;
                          }
-                         else if(factionName.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                         else if(chunkFactionName.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
                          {
                              return;
                          }
-                         else if(factionName.equals(playerFactionName))
+                         else if(chunkFactionName.equals(playerFactionName))
                          {
+                             FlagChecker.canBreakBlock(player, playerFactionName, chunkFactionName);
                              return;
                          }
                          else
