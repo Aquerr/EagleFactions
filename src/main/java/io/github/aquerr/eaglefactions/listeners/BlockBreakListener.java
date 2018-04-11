@@ -47,7 +47,12 @@ public class BlockBreakListener
                          }
                          else if(chunkFactionName.equals(playerFactionName))
                          {
-                             FlagChecker.canBreakBlock(player, playerFactionName, chunkFactionName);
+                             boolean canBreakBlock = FlagChecker.canBreakBlock(player, playerFactionName, chunkFactionName);
+                             if (!canBreakBlock)
+                             {
+                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to destroy blocks here!"));
+                                 event.setCancelled(true);
+                             }
                              return;
                          }
                          else

@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.FlagChecker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
@@ -45,6 +46,12 @@ public class PlayerInteractListener
                     }
                     else if(chunkFactionName.equals(playerFactionName))
                     {
+                        boolean canInteract = FlagChecker.canInteract(player, playerFactionName, chunkFactionName);
+                        if (!canInteract)
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to interact here!"));
+                            event.setCancelled(true);
+                        }
                         return;
                     }
                     else
