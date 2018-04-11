@@ -15,6 +15,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.List;
 import java.util.Map;
@@ -62,44 +63,54 @@ public class FlagsCommand implements CommandExecutor
         Text.Builder textBuilder = Text.builder();
         Text.Builder flagTextBuilder;
 
-        textBuilder.append(Text.of("WHO | USE | PLACE | DESTROY " + "\n"));
+        textBuilder.append(Text.of(TextColors.AQUA, "------------------------------" + "\n"));
+        //textBuilder.append(Text.of(TextColors.AQUA, "______________________________" + "\n"));
+        textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
+        textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
+
 
         for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())
         {
+            textBuilder.append(Text.of("\n"));
+
             Map<FactionFlagType, Boolean> memberFlags = memberEntry.getValue();
 
-            textBuilder.append(Text.of(memberEntry.getKey().toString() + " | "));
+            textBuilder.append(Text.of(TextColors.AQUA,"| " + memberEntry.getKey().toString()));
 
             for (Map.Entry<FactionFlagType, Boolean> flagEntry : memberFlags.entrySet())
             {
+                textBuilder.append(Text.of(TextColors.AQUA, " | "));
+
                 Boolean flagValue = flagEntry.getValue();
                 flagTextBuilder = Text.builder();
-                flagTextBuilder.append(Text.of(flagValue.toString().toUpperCase()));
+                flagTextBuilder.append(Text.of(flagValue.toString()));
                 flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagValue)));
-                flagTextBuilder.onHover(TextActions.showText(Text.of("Click to change value")));
+                flagTextBuilder.onHover(TextActions.showText(Text.of("Set to " + String.valueOf(!flagValue).toUpperCase())));
+
+                if (flagValue.booleanValue())
+                {
+                    flagTextBuilder.color(TextColors.GREEN);
+                }
+                else
+                {
+                    flagTextBuilder.color(TextColors.RED);
+                }
 
                 textBuilder.append(flagTextBuilder.build());
-                textBuilder.append(Text.of(" | "));
             }
-
-            textBuilder.append(Text.of("\n"));
         }
 
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.AQUA, "Displaying permissions flags..."));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Permissions flags for " + faction.Name + ":"));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Click on the permission you want to change."));
         player.sendMessage(textBuilder.build());
     }
 
     private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagType factionFlagType, Boolean toggled)
     {
-
-        return new Consumer<CommandSource>()
+        return commandSource ->
         {
-            @Override
-            public void accept(CommandSource commandSource)
-            {
-                FactionLogic.toggleFlag(faction, factionMemberType, factionFlagType, toggled);
-                showFlags((Player)commandSource, faction);
-            }
+            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagType, toggled);
+            showFlags((Player)commandSource, faction);
         };
     }
 }
