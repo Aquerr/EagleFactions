@@ -258,7 +258,7 @@ public class EagleFactions
 
         //Unclaim command.
         Subcommands.put(Arrays.asList("unclaim"), CommandSpec.builder()
-                .description(Text.of("Unclaim a land caputred by your faction."))
+                .description(Text.of("Unclaim a land captured by your faction."))
                 .permission(PluginPermissions.UnclaimCommand)
                 .executor(new UnclaimCommand())
                 .build());
@@ -286,7 +286,7 @@ public class EagleFactions
 
         //Home command
         Subcommands.put(Arrays.asList("home"), CommandSpec.builder()
-                .description(Text.of("Teleport to faciton's home"))
+                .description(Text.of("Teleport to faction's home"))
                 .permission(PluginPermissions.HomeCommand)
                 .executor(new HomeCommand())
                 .build());
