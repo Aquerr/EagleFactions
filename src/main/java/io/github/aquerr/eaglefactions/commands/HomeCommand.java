@@ -109,6 +109,7 @@ public class HomeCommand implements CommandExecutor
                         player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
                         startHomeCooldown(player.getUniqueId());
+                        task.cancel();
                     }
                     else
                     {
@@ -119,6 +120,7 @@ public class HomeCommand implements CommandExecutor
                 else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You did move! Teleporting has been cancelled!"));
+                    task.cancel();
                 }
             }
         }).submit(EagleFactions.getEagleFactions());
