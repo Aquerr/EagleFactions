@@ -1,10 +1,9 @@
 package io.github.aquerr.eaglefactions.entities;
 
+import io.github.aquerr.eaglefactions.managers.FlagManager;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Aquerr on 2017-07-13.
@@ -23,6 +22,7 @@ public class Faction
     public String Home;
     public Map<FactionMemberType, Map<FactionFlagType, Boolean>> Flags;
 
+    //Constructor used while creating a new faction.
     public Faction(String factionName, String factionTag, String factionLeader)
     {
         this.Name = factionName;
@@ -35,34 +35,22 @@ public class Faction
         this.Alliances = new ArrayList<>();
         this.Enemies = new ArrayList<>();
         this.Home = "";
+        this.Flags = FlagManager.getDefaultFactionFlags();
+    }
 
-        Map<FactionMemberType, Map<FactionFlagType, Boolean>> map = new HashMap<>();
-        Map<FactionFlagType, Boolean> leaderMap = new HashMap<>();
-        Map<FactionFlagType, Boolean> officerMap = new HashMap<>();
-        Map<FactionFlagType, Boolean> membersMap = new HashMap<>();
-        Map<FactionFlagType, Boolean> allyMap = new HashMap<>();
-
-        leaderMap.put(FactionFlagType.USE, true);
-        leaderMap.put(FactionFlagType.PLACE, true);
-        leaderMap.put(FactionFlagType.DESTROY, true);
-
-        officerMap.put(FactionFlagType.USE, true);
-        officerMap.put(FactionFlagType.PLACE, true);
-        officerMap.put(FactionFlagType.DESTROY, true);
-
-        membersMap.put(FactionFlagType.USE, true);
-        membersMap.put(FactionFlagType.PLACE, true);
-        membersMap.put(FactionFlagType.DESTROY, true);
-
-        allyMap.put(FactionFlagType.USE, true);
-        allyMap.put(FactionFlagType.PLACE, false);
-        allyMap.put(FactionFlagType.DESTROY, false);
-
-        map.put(FactionMemberType.LEADER, leaderMap);
-        map.put(FactionMemberType.OFFICER, officerMap);
-        map.put(FactionMemberType.MEMBER, membersMap);
-        map.put(FactionMemberType.ALLY, allyMap);
-
-        this.Flags = map;
+    //Constructor used while getting a faction from storage.
+    public Faction(String factionName, String factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, String home, Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags)
+    {
+        this.Name = factionName;
+        this.Tag = factionTag;
+        this.Leader = factionLeader;
+        this.Power = new BigDecimal("0.0");
+        this.Members = members;
+        this.Claims = claims;
+        this.Officers = officers;
+        this.Alliances = alliances;
+        this.Enemies = enemies;
+        this.Home = home;
+        this.Flags = flags;
     }
 }

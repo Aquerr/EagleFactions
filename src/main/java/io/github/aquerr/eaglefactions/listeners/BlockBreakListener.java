@@ -4,7 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.FlagChecker;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -47,7 +47,7 @@ public class BlockBreakListener
                          }
                          else if(chunkFactionName.equals(playerFactionName))
                          {
-                             boolean canBreakBlock = FlagChecker.canBreakBlock(player, playerFactionName, chunkFactionName);
+                             boolean canBreakBlock = FlagManager.canBreakBlock(player, playerFactionName, chunkFactionName);
                              if (!canBreakBlock)
                              {
                                  player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to destroy blocks here!"));

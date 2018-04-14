@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.FlagChecker;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -43,7 +43,7 @@ public class PlayerBlockPlaceListener
                      }
                      else if(chunkFactionName.equals(playerFactionName))
                      {
-                         boolean canPlaceBlock = FlagChecker.canPlaceBlock(player, playerFactionName, chunkFactionName);
+                         boolean canPlaceBlock = FlagManager.canPlaceBlock(player, playerFactionName, chunkFactionName);
                          if (!canPlaceBlock)
                          {
                              player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to place blocks here!"));

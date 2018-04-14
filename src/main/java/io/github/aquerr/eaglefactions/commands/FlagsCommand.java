@@ -15,9 +15,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -63,10 +61,11 @@ public class FlagsCommand implements CommandExecutor
         Text.Builder textBuilder = Text.builder();
         Text.Builder flagTextBuilder;
 
-        textBuilder.append(Text.of(TextColors.AQUA, "------------------------------" + "\n"));
-        //textBuilder.append(Text.of(TextColors.AQUA, "______________________________" + "\n"));
+        //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------" + "\n"));
+        //textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
+        //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
+
         textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
-        textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
 
 
         for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())

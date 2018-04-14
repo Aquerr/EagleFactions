@@ -1,11 +1,16 @@
-package io.github.aquerr.eaglefactions.logic;
+package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagType;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.entity.living.player.Player;
 
-public class FlagChecker
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class FlagManager
 {
     public static boolean canBreakBlock(Player player, String playerFactionName, String chunkFactionName)
     {
@@ -47,5 +52,37 @@ public class FlagChecker
         }
 
         return false;
+    }
+
+    public static Map<FactionMemberType, Map<FactionFlagType, Boolean>> getDefaultFactionFlags()
+    {
+        Map<FactionMemberType, Map<FactionFlagType, Boolean>> map = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> leaderMap = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> officerMap = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> membersMap = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> allyMap = new LinkedHashMap<>();
+
+        leaderMap.put(FactionFlagType.USE, true);
+        leaderMap.put(FactionFlagType.PLACE, true);
+        leaderMap.put(FactionFlagType.DESTROY, true);
+
+        officerMap.put(FactionFlagType.USE, true);
+        officerMap.put(FactionFlagType.PLACE, true);
+        officerMap.put(FactionFlagType.DESTROY, true);
+
+        membersMap.put(FactionFlagType.USE, true);
+        membersMap.put(FactionFlagType.PLACE, true);
+        membersMap.put(FactionFlagType.DESTROY, true);
+
+        allyMap.put(FactionFlagType.USE, true);
+        allyMap.put(FactionFlagType.PLACE, false);
+        allyMap.put(FactionFlagType.DESTROY, false);
+
+        map.put(FactionMemberType.LEADER, leaderMap);
+        map.put(FactionMemberType.OFFICER, officerMap);
+        map.put(FactionMemberType.MEMBER, membersMap);
+        map.put(FactionMemberType.ALLY, allyMap);
+
+        return map;
     }
 }
