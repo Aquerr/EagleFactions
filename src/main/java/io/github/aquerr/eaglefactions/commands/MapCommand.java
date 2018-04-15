@@ -16,7 +16,6 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import sun.java2d.loops.GeneralRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -212,7 +211,7 @@ public class MapCommand implements CommandExecutor
                     {
                         if (FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
                         {
-                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
+                            if(!EagleFactions.AttackedFactions.containsKey(playerFactionName))
                             {
                                 if(!FactionLogic.getClaims(playerFactionName).isEmpty())
                                 {

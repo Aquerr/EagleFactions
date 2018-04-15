@@ -49,6 +49,7 @@ public abstract class PluginPermissions
 
     public static final String CoordsCommand = "eaglefactions.player.coords";
     public static final String AttackCommand = "eaglefactions.player.attack";
+    public static final String FlagsCommand = "eaglefactions.player.flags";
 
     public static final String AdminCommand = "eaglefactions.admin.adminmode";
 
@@ -57,4 +58,9 @@ public abstract class PluginPermissions
 
     public static final String ReloadCommand = "eaglefactions.admin.reload";
     public static final String VersionNotify = "eaglefactions.admin.version.notify";
+
+    public static final String SAFE_ZONE_BUILD = "eaglefactions.safezone.build";
+    public static final String WAR_ZONE_BUILD = "eaglefactions.warzone.build";
+    public static final String SAFE_ZONE_INTERACT = "eaglefactions.safezone.interact";
+    public static final String WAR_ZONE_INTERACT = "eaglefactions.warzone.interact";
 }

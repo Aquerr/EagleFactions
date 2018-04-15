@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.command.CommandException;
@@ -28,18 +29,23 @@ public class ClaimCommand implements CommandExecutor
 
             if(playerFactionName != null)
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+
+                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
+
+                    if(chunkFactionName.equals(""))
                     {
-                        if(FactionLogic.getFaction(playerFactionName).Power.doubleValue() > FactionLogic.getClaims(playerFactionName).size())
+
+                        if(playerFaction.Power.doubleValue() > playerFaction.Claims.size())
                         {
-                            if(!EagleFactions.AttackedFactions.contains(playerFactionName))
+                            if(!EagleFactions.AttackedFactions.containsKey(playerFactionName))
                             {
-                                if(!FactionLogic.getClaims(playerFactionName).isEmpty())
+                                if(!playerFaction.Claims.isEmpty())
                                 {
                                     if(playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
                                     {
@@ -56,18 +62,6 @@ public class ClaimCommand implements CommandExecutor
                                             {
                                                 FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
-//                                                if (MainLogic.isDelayedClaimingToggled())
-//                                                {
-//                                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
-//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
-//                                                }
-//                                                else
-//                                                {
-//                                                    FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
-//
-//                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-//                                                    return CommandResult.success();
-//                                                }
                                             }
                                             else
                                             {

@@ -1,6 +1,6 @@
-package io.github.aquerr.eaglefactions.services;
+package io.github.aquerr.eaglefactions.managers;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -17,8 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-public class PowerService
+public class PowerManager
 {
     //private static IConfig factionsConfig = FactionsConfig.getConfig();
 
@@ -156,14 +157,14 @@ public class PowerService
 
         if(faction.Leader != null && !faction.Leader.equals(""))
         {
-            factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(faction.Leader)));
+            factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(faction.Leader)));
         }
 
         if(faction.Officers != null && !faction.Officers.isEmpty())
         {
             for (String officer: faction.Officers)
             {
-                factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(officer)));
+                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(officer)));
             }
         }
 
@@ -171,7 +172,7 @@ public class PowerService
         {
             for (String member: faction.Members)
             {
-                factionMaxPower = factionMaxPower.add(PowerService.getPlayerMaxPower(UUID.fromString(member)));
+                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(member)));
             }
         }
 
@@ -188,9 +189,20 @@ public class PowerService
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            BigDecimal playerMaxPower =  new BigDecimal(playerNode.getNode("maxpower").getString());
+            Object value = playerNode.getNode("maxpower").getValue();
 
-            return playerMaxPower;
+            if (value != null)
+            {
+                BigDecimal playerMaxPower =  new BigDecimal(value.toString());
+
+                return playerMaxPower;
+            }
+            else
+            {
+                playerNode.getNode("maxpower").setValue(MainLogic.getGlobalMaxPower());
+
+                return MainLogic.getGlobalMaxPower();
+            }
         }
         catch (Exception exception)
         {
@@ -212,7 +224,7 @@ public class PowerService
 
             BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-            if(PowerService.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerService.getPlayerMaxPower(playerUUID).doubleValue())
+            if(PowerManager.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerManager.getPlayerMaxPower(playerUUID).doubleValue())
             {
                 if(isKillAward)
                 {
@@ -253,34 +265,32 @@ public class PowerService
         }
     }
 
-    public static void increasePower(UUID playerUUID)
+    public static void startIncreasingPower(UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.execute(new Runnable()
+        taskBuilder.interval(1, TimeUnit.MINUTES).execute(new Consumer<Task>()
         {
             @Override
-            public void run()
+            public void accept(Task task)
             {
-                if(!PlayerService.isPlayerOnline(playerUUID)) return;
+                if (!PlayerManager.isPlayerOnline(playerUUID)) task.cancel();
 
-                if(PowerService.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerService.getPlayerMaxPower(playerUUID).doubleValue())
+                if(PowerManager.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerManager.getPlayerMaxPower(playerUUID).doubleValue())
                 {
-                    PowerService.addPower(playerUUID, false);
-                    increasePower(playerUUID);
+                    PowerManager.addPower(playerUUID, false);
                 }
                 else
                 {
-                    PowerService.setPower(playerUUID, PowerService.getPlayerMaxPower(playerUUID));
-                    increasePower(playerUUID);
+                    PowerManager.setPower(playerUUID, PowerManager.getPlayerMaxPower(playerUUID));
                 }
             }
-        }).delay(1, TimeUnit.MINUTES).name("Eaglefactions - Increase power scheduler").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+        }).submit(EagleFactions.getEagleFactions());
     }
 
     public static void decreasePower(UUID playerUUID)
     {
-        if(PowerService.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
+        if(PowerManager.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
         {
             Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -302,11 +312,11 @@ public class PowerService
         }
         else
         {
-            PowerService.setPower(playerUUID, BigDecimal.ZERO);
+            PowerManager.setPower(playerUUID, BigDecimal.ZERO);
         }
     }
 
-    public static void punish(UUID playerUUID)
+    public static void penalty(UUID playerUUID)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -318,11 +328,11 @@ public class PowerService
 
             BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-            BigDecimal punishment = MainLogic.getPunishment();
+            BigDecimal penalty = MainLogic.getPenalty();
 
-            if(playerPower.doubleValue() - punishment.doubleValue() > 0)
+            if(playerPower.doubleValue() - penalty.doubleValue() > 0)
             {
-                playerNode.getNode("power").setValue(playerPower.subtract(punishment));
+                playerNode.getNode("power").setValue(playerPower.subtract(penalty));
             }
             else
             {

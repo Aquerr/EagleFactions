@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -62,34 +62,36 @@ public class AttackCommand implements CommandExecutor
 
         if(playerFactionName != null)
         {
-            if(FactionLogic.isClaimed(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()))
+            Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+
+            String chunkFactionName = FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+            if(chunkFactionName != null)
             {
-                if(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone") || FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("WarZone"))
+                if(chunkFactionName.equals("SafeZone") || chunkFactionName.equals("WarZone"))
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction!"));
                     return;
                 }
                 else
                 {
-                    if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        Faction faction = FactionLogic.getFaction(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
+                        Faction attackedFaction = FactionLogic.getFaction(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
 
-                        if (!FactionLogic.getFactionName(player.getUniqueId()).equals(faction.Name))
+                        if (!playerFaction.Name.equals(attackedFaction.Name))
                         {
-                             if(!FactionLogic.getAlliances(playerFactionName).contains(faction.Name))
+                             if(!playerFaction.Alliances.contains(attackedFaction.Name))
                              {
-                                 if(PowerService.getFactionMaxPower(faction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerService.getFactionPower(faction).doubleValue() && PowerService.getFactionPower(FactionLogic.getFaction(playerFactionName)).doubleValue() > PowerService.getFactionPower(faction).doubleValue())
+                                 if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= attackedFaction.Power.doubleValue() && playerFaction.Power.doubleValue() > attackedFaction.Power.doubleValue())
                                  {
                                      int attackTime = MainLogic.getAttackTime();
-
-                                     AttackLogic.blockClaiming(faction.Name);
                                      Vector3i attackedClaim = player.getLocation().getChunkPosition();
-                                     int seconds = 0;
 
-                                     AttackLogic.informAboutAttack(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedClaim));
+                                     AttackLogic.informAboutAttack(attackedFaction.Name);
                                      player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
-                                     AttackLogic.attack(player, attackedClaim, seconds);
+
+                                     AttackLogic.blockClaiming(attackedFaction.Name);
+                                     AttackLogic.attack(player, attackedClaim);
                                      return;
                                  }
                                  else

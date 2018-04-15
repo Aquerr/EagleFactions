@@ -4,84 +4,133 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class PVPLogger
 {
-    private static List<UUID> AttackedPlayers = new ArrayList<>();
-    private static boolean _isActive;
-    private static int _blockTime;
+    private Map<UUID, Integer> _attackedPlayers;
+    private boolean _isActive;
+    private int _blockTime;
+    private List<String> _blockedCommandsDuringFight;
 
-    public static void setupPVPLogger()
+    public PVPLogger()
     {
         _isActive = MainLogic.isPVPLoggerActive();
-        _blockTime = MainLogic.getPVPLoggerTime();
+
+        if (_isActive)
+        {
+            _attackedPlayers = new HashMap<>();
+            _blockTime = MainLogic.getPVPLoggerTime();
+            _blockedCommandsDuringFight = MainLogic.getBlockedCommandsDuringFight();
+        }
     }
 
-    public static boolean isActive()
+    public boolean isActive()
     {
         return _isActive;
     }
 
-    public static int getBlockTime()
+    public int getBlockTime()
     {
         return _blockTime;
     }
 
-    public static boolean addOrUpdatePlayer(Player player)
+    public boolean shouldBlockCommand(Player player, String usedCommand)
     {
-        //Update player's time if it already in a list.
-
-        Optional<Task> optionalTask = Sponge.getScheduler().getScheduledTasks().stream().filter(x->x.getName().equals("EagleFactions - PVPLogger for " + player.getUniqueId().toString())).findFirst();
-
-        if (optionalTask.isPresent())
+        if (isPlayerBlocked(player))
         {
-            optionalTask.get().cancel();
-
-            return addOrUpdatePlayer(player);
-        }
-        else
-        {
-            AttackedPlayers.add(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "PVPLogger has turned on! You will die if you disconnect in " + getBlockTime() + "s!"));
-
-            Task.Builder allowLogging = Sponge.getScheduler().createTaskBuilder();
-
-            allowLogging.execute(new Runnable()
+            if (usedCommand.charAt(0) == '/')
             {
-                @Override
-                public void run()
+                usedCommand = usedCommand.substring(1);
+            }
+
+            usedCommand = usedCommand.toLowerCase();
+
+            for (String blockedCommand : _blockedCommandsDuringFight)
+            {
+                if (blockedCommand.charAt(0) == '/')
                 {
-                    AttackedPlayers.remove(player.getUniqueId());
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "PVPLogger has turned off for you! You can now disconnect safely."));
+                    blockedCommand = blockedCommand.substring(1);
                 }
-            }).delay(getBlockTime(), TimeUnit.SECONDS).submit(EagleFactions.getEagleFactions());
 
-            return true;
+                if (blockedCommand.equals("*") || usedCommand.equals(blockedCommand) || usedCommand.startsWith(blockedCommand))
+                {
+                    return true;
+                }
+            }
         }
-    }
-
-    public static boolean isPlayerBlocked(Player player)
-    {
-        if (AttackedPlayers.contains(player.getUniqueId())) return true;
 
         return false;
     }
 
-    public static void removePlayer(Player player)
+    public void addOrUpdatePlayer(Player player)
     {
-        Optional<Task> optionalTask = Sponge.getScheduler().getScheduledTasks().stream().filter(x->x.getName().equals("EagleFactions - PVPLogger for " + player.getUniqueId().toString())).findFirst();
+        //Update player's time if it already in a list.
 
-        if (optionalTask.isPresent()) optionalTask.get().cancel();
+        if (_attackedPlayers.containsKey(player.getUniqueId()))
+        {
+            _attackedPlayers.replace(player.getUniqueId(), getBlockTime());
+        }
+        else
+        {
+            _attackedPlayers.put(player.getUniqueId(), getBlockTime());
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "PVPLogger has turned on! You will die if you disconnect in " + getBlockTime() + "s!"));
 
-        AttackedPlayers.remove(player.getUniqueId());
+            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+            taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+            {
+                @Override
+                public void accept(Task task)
+                {
+                    if (_attackedPlayers.containsKey(player.getUniqueId()))
+                    {
+                        int seconds = _attackedPlayers.get(player.getUniqueId());
+
+                        if (seconds <= 0)
+                        {
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "PVPLogger has turned off for you! You can now disconnect safely."));
+                            task.cancel();
+                        }
+                        else
+                        {
+                            _attackedPlayers.replace(player.getUniqueId(), seconds, seconds - 1);
+                        }
+                    }
+                    else
+                    {
+                        task.cancel();
+                    }
+                }
+            }).submit(EagleFactions.getEagleFactions());
+        }
+    }
+
+    public boolean isPlayerBlocked(Player player)
+    {
+        if (_attackedPlayers.containsKey(player.getUniqueId())) return true;
+
+        return false;
+    }
+
+    public void removePlayer(Player player)
+    {
+        if (_attackedPlayers.containsKey(player.getUniqueId()))
+        {
+            _attackedPlayers.remove(player.getUniqueId());
+        }
+    }
+
+    public int getPlayerBlockTime(Player player)
+    {
+        return _attackedPlayers.getOrDefault(player.getUniqueId(), 0);
     }
 }

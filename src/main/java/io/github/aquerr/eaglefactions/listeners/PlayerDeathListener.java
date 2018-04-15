@@ -4,8 +4,8 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
-import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -21,12 +21,15 @@ public class PlayerDeathListener
         {
             Player player = (Player)event.getTargetEntity();
 
-            PowerService.decreasePower(player.getUniqueId());
+            PowerManager.decreasePower(player.getUniqueId());
 
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPowerDecrement()) + "\n",
-                    TextColors.GRAY, "Current power: ", String.valueOf(PowerService.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerService.getPlayerMaxPower(player.getUniqueId()))));
+                    TextColors.GRAY, "Current power: ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
 
-            PlayerService.setPlayerChunkPosition(player.getUniqueId(), null);
+            if (FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("WarZone"))
+            {
+                PlayerManager.setDeathInWarZone(player.getUniqueId(), true);
+            }
 
             if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction())
             {
@@ -35,9 +38,6 @@ public class PlayerDeathListener
                     AttackLogic.blockHome(player.getUniqueId());
                 }
             }
-
-            return;
         }
-        else return;
     }
 }

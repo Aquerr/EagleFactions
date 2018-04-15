@@ -3,7 +3,9 @@ package io.github.aquerr.eaglefactions.listeners;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -19,7 +21,6 @@ public class PlayerBlockPlaceListener
     @Listener
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
-
         if(!EagleFactions.AdminList.contains(player.getUniqueId()))
         {
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
@@ -28,23 +29,26 @@ public class PlayerBlockPlaceListener
              {
                  World world = player.getWorld();
                  Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+                 String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
 
-                 if(FactionLogic.isClaimed(world.getUniqueId(), claim))
+                 if(!chunkFactionName.equals(""))
                  {
-                     if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                     if(chunkFactionName.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                      {
-                    //     EagleFactions.getEagleFactions().getLogger().info("Player has permissions in SafeZone");
-
                          return;
                      }
-                     else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                     else if(chunkFactionName.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                      {
-                     //    EagleFactions.getEagleFactions().getLogger().info("Player has permissions in WarZone");
-
                          return;
                      }
-                     else if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim).equals(playerFactionName))
+                     else if(chunkFactionName.equals(playerFactionName))
                      {
+                         boolean canPlaceBlock = FlagManager.canPlaceBlock(player, playerFactionName, chunkFactionName);
+                         if (!canPlaceBlock)
+                         {
+                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to place blocks here!"));
+                             event.setCancelled(true);
+                         }
                          return;
                      }
                      else
@@ -54,7 +58,6 @@ public class PlayerBlockPlaceListener
                          return;
                      }
                  }
-                 else return;
              }
         }
         return;

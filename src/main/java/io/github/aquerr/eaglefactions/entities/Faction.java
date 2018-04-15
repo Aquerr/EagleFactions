@@ -1,8 +1,9 @@
 package io.github.aquerr.eaglefactions.entities;
 
+import io.github.aquerr.eaglefactions.managers.FlagManager;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Aquerr on 2017-07-13.
@@ -19,7 +20,9 @@ public class Faction
     public List<String> Officers;
     public List<String> Claims;
     public String Home;
+    public Map<FactionMemberType, Map<FactionFlagType, Boolean>> Flags;
 
+    //Constructor used while creating a new faction.
     public Faction(String factionName, String factionTag, String factionLeader)
     {
         this.Name = factionName;
@@ -32,5 +35,22 @@ public class Faction
         this.Alliances = new ArrayList<>();
         this.Enemies = new ArrayList<>();
         this.Home = "";
+        this.Flags = FlagManager.getDefaultFactionFlags();
+    }
+
+    //Constructor used while getting a faction from storage.
+    public Faction(String factionName, String factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, String home, Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags)
+    {
+        this.Name = factionName;
+        this.Tag = factionTag;
+        this.Leader = factionLeader;
+        this.Power = new BigDecimal("0.0");
+        this.Members = members;
+        this.Claims = claims;
+        this.Officers = officers;
+        this.Alliances = alliances;
+        this.Enemies = enemies;
+        this.Home = home;
+        this.Flags = flags;
     }
 }

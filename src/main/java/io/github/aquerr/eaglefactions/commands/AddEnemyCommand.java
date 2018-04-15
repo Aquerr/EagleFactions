@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PlayerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -74,7 +74,7 @@ public class AddEnemyCommand implements CommandExecutor
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now ", TextColors.RED, "enemies ", TextColors.WHITE, "with " + enemyFactionName));
 
                                     //TODO: Check if player is online
-                                    Player enemyFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
+                                    Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has declared you a ", TextColors.RED, "War!"));
 
                                     CommandResult.success();

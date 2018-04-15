@@ -10,8 +10,9 @@ import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -37,12 +38,13 @@ public class EagleFactions
     public static List<UUID> AutoClaimList = new ArrayList<>();
     public static List<UUID> AutoMapList = new ArrayList<>();
     public static List<UUID> AdminList = new ArrayList<>();
-    public static List<String> AttackedFactions = new ArrayList<>();
-    public static List<UUID> BlockedHome = new ArrayList<>();
+    public static Map<String, Integer> AttackedFactions = new HashMap<>();
+    public static Map<UUID, Integer> BlockedHome = new HashMap<>();
     public static Map<UUID, ChatEnum> ChatList = new HashMap<>();
     public static Map<UUID, Integer> HomeCooldownPlayers = new HashMap<>();
 
     private Configuration _configuration;
+    private PVPLogger _pvpLogger;
 
     @Inject
     private Logger _logger;
@@ -98,11 +100,12 @@ public class EagleFactions
         // Create configs
         _configuration = new Configuration(_configDir);
 
-        FactionLogic.setupFactionLogic(_configDir);
-        PowerService.setup(_configDir);
+        FactionLogic.setup(_configDir);
+        PlayerManager.setup(_configDir);
+        PowerManager.setup(_configDir);
 
         //PVPLogger
-        PVPLogger.setupPVPLogger();
+        _pvpLogger = new PVPLogger();
     }
 
     private void InitializeCommands()
@@ -246,13 +249,6 @@ public class EagleFactions
                 .executor(new OfficerCommand())
                 .build());
 
-        //Friendly Fire command.
-//        Subcommands.put(Arrays.asList("friendlyfire"), CommandSpec.builder()
-//                .description(Text.of("Allow/Deny friendly fire in the faction"))
-//                .permission(PluginPermissions.FriendlyFireCommand)
-//                .executor(new FriendlyFireCommand())
-//                .build());
-
         //Claim command.
         Subcommands.put(Arrays.asList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))
@@ -262,7 +258,7 @@ public class EagleFactions
 
         //Unclaim command.
         Subcommands.put(Arrays.asList("unclaim"), CommandSpec.builder()
-                .description(Text.of("Unclaim a land caputred by your faction."))
+                .description(Text.of("Unclaim a land captured by your faction."))
                 .permission(PluginPermissions.UnclaimCommand)
                 .executor(new UnclaimCommand())
                 .build());
@@ -290,7 +286,7 @@ public class EagleFactions
 
         //Home command
         Subcommands.put(Arrays.asList("home"), CommandSpec.builder()
-                .description(Text.of("Teleport to faciton's home"))
+                .description(Text.of("Teleport to faction's home"))
                 .permission(PluginPermissions.HomeCommand)
                 .executor(new HomeCommand())
                 .build());
@@ -378,6 +374,13 @@ public class EagleFactions
                 .executor(new SetLeaderCommand())
                 .build());
 
+        //Flags Command
+        Subcommands.put(Arrays.asList("flags"), CommandSpec.builder()
+                .description(Text.of("Set flags/privileges for members in faction."))
+                .permission(PluginPermissions.FlagsCommand)
+                .executor(new FlagsCommand())
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder ()
                 .description (Text.of ("Help Command"))
@@ -402,11 +405,18 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
         Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
-//        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
+        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
+
+        Sponge.getEventManager().registerListeners(this, new SendCommandListener());
     }
 
     public Configuration getConfiguration()
     {
         return this._configuration;
+    }
+
+    public PVPLogger getPVPLogger()
+    {
+        return this._pvpLogger;
     }
 }

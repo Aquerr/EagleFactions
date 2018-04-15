@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -33,7 +33,7 @@ public class ListCommand implements CommandExecutor
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "- " + tag + faction.Name + " (" + faction.Power + "/" + PowerService.getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, "- " + tag + faction.Name + " (" + faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
                             .build())
                     .build();
 
