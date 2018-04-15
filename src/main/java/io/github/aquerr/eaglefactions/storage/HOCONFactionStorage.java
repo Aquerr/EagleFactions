@@ -273,20 +273,6 @@ public class HOCONFactionStorage implements IStorage
         flagMap.put(FactionMemberType.ALLY, allyMap);
 
         return flagMap;
-
-//        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flagMap = configNode.getNode(new Object[]{"factions", factionName, "flags"}).getValue(flagsTransformer);
-//
-//        if (flagMap != null && areFlagsComplete(flagMap))
-//        {
-//            return sortFlags(flagMap);
-//        }
-//        else
-//        {
-//            //TODO: Sort map here...
-//            configNode.getNode(new Object[]{"factions", factionName, "flags"}).setValue(FlagManager.getDefaultFactionFlags());
-//            saveChanges();
-//            return FlagManager.getDefaultFactionFlags();
-//        }
     }
 
     private List<String> getFactionClaims(String factionName)
@@ -417,67 +403,6 @@ public class HOCONFactionStorage implements IStorage
         }
     }
 
-//    private boolean areFlagsComplete(Map<FactionMemberType,Map<FactionFlagType,Boolean>> flags)
-//    {
-//        if (!flags.containsKey(FactionMemberType.LEADER))
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            if (!flags.get(FactionMemberType.LEADER).containsKey(FactionFlagType.USE)
-//                    || !flags.get(FactionMemberType.LEADER).containsKey(FactionFlagType.PLACE)
-//                    || !flags.get(FactionMemberType.LEADER).containsKey(FactionFlagType.DESTROY))
-//            {
-//                return false;
-//            }
-//        }
-//
-//        if (!flags.containsKey(FactionMemberType.OFFICER))
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            if (!flags.get(FactionMemberType.OFFICER).containsKey(FactionFlagType.USE)
-//                    || !flags.get(FactionMemberType.OFFICER).containsKey(FactionFlagType.PLACE)
-//                    || !flags.get(FactionMemberType.OFFICER).containsKey(FactionFlagType.DESTROY))
-//            {
-//                return false;
-//            }
-//        }
-//
-//        if (!flags.containsKey(FactionMemberType.MEMBER))
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            if (!flags.get(FactionMemberType.MEMBER).containsKey(FactionFlagType.USE)
-//                    || !flags.get(FactionMemberType.MEMBER).containsKey(FactionFlagType.PLACE)
-//                    || !flags.get(FactionMemberType.MEMBER).containsKey(FactionFlagType.DESTROY))
-//            {
-//                return false;
-//            }
-//        }
-//
-//        if (!flags.containsKey(FactionMemberType.ALLY))
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            if (!flags.get(FactionMemberType.ALLY).containsKey(FactionFlagType.USE)
-//                    || !flags.get(FactionMemberType.ALLY).containsKey(FactionFlagType.PLACE)
-//                    || !flags.get(FactionMemberType.ALLY).containsKey(FactionFlagType.DESTROY))
-//            {
-//                return false;
-//            }
-//        }
-//
-//        return true;
-//    }
-
     @Override
     public List<Faction> getFactions()
     {
@@ -541,64 +466,4 @@ public class HOCONFactionStorage implements IStorage
     {
         return configNode;
     }
-
-//    private Function<Object, Map<FactionMemberType, Map<FactionFlagType, Boolean>>> flagsTransformer = input ->
-//    {
-//        if (input != null && ((Map<Object, Object>)input).size() >= 4)
-//        {
-//            Map<FactionMemberType, Map<FactionFlagType, Boolean>> resultMap = new LinkedHashMap<>();
-//
-//            Map<Object, Object> memberMap = (Map<Object, Object>) input;
-//
-//            for (Map.Entry<Object, Object> memberEntry : memberMap.entrySet())
-//            {
-//                Map<Object, Object> flagMap = (Map<Object, Object>)memberEntry.getValue();
-//                Map<FactionFlagType, Boolean> helpMap = new HashMap<>();
-//
-//                for (Map.Entry<Object, Object> flagEntry : flagMap.entrySet())
-//                {
-//                    helpMap.put(FactionFlagType.valueOf(flagEntry.getKey().toString().toUpperCase()), (Boolean)flagEntry.getValue());
-//                }
-//
-//                resultMap.put(FactionMemberType.valueOf(memberEntry.getKey().toString().toUpperCase()), helpMap);
-//            }
-//
-//            return resultMap;
-//        }
-//
-//        return null;
-//    };
-//
-//    private Map<FactionMemberType, Map<FactionFlagType, Boolean>> sortFlags(Map<FactionMemberType, Map<FactionFlagType, Boolean>> flagsToSort)
-//    {
-//        Map<FactionMemberType, Map<FactionFlagType, Boolean>> sortedFlags = new LinkedHashMap<>();
-//
-//        Map<FactionFlagType, Boolean> leaderMap = new LinkedHashMap<>();
-//        Map<FactionFlagType, Boolean> officersMap = new LinkedHashMap<>();
-//        Map<FactionFlagType, Boolean> membersMap = new LinkedHashMap<>();
-//        Map<FactionFlagType, Boolean> allyMap = new LinkedHashMap<>();
-//
-//        leaderMap.put(FactionFlagType.USE, flagsToSort.get(FactionMemberType.LEADER).get(FactionFlagType.USE));
-//        leaderMap.put(FactionFlagType.PLACE, flagsToSort.get(FactionMemberType.LEADER).get(FactionFlagType.PLACE));
-//        leaderMap.put(FactionFlagType.DESTROY, flagsToSort.get(FactionMemberType.LEADER).get(FactionFlagType.DESTROY));
-//
-//        officersMap.put(FactionFlagType.USE, flagsToSort.get(FactionMemberType.OFFICER).get(FactionFlagType.USE));
-//        officersMap.put(FactionFlagType.PLACE, flagsToSort.get(FactionMemberType.OFFICER).get(FactionFlagType.PLACE));
-//        officersMap.put(FactionFlagType.DESTROY, flagsToSort.get(FactionMemberType.OFFICER).get(FactionFlagType.DESTROY));
-//
-//        membersMap.put(FactionFlagType.USE, flagsToSort.get(FactionMemberType.MEMBER).get(FactionFlagType.USE));
-//        membersMap.put(FactionFlagType.PLACE, flagsToSort.get(FactionMemberType.MEMBER).get(FactionFlagType.PLACE));
-//        membersMap.put(FactionFlagType.DESTROY, flagsToSort.get(FactionMemberType.MEMBER).get(FactionFlagType.DESTROY));
-//
-//        allyMap.put(FactionFlagType.USE, flagsToSort.get(FactionMemberType.ALLY).get(FactionFlagType.USE));
-//        allyMap.put(FactionFlagType.PLACE, flagsToSort.get(FactionMemberType.ALLY).get(FactionFlagType.PLACE));
-//        allyMap.put(FactionFlagType.DESTROY, flagsToSort.get(FactionMemberType.ALLY).get(FactionFlagType.DESTROY));
-//
-//        sortedFlags.put(FactionMemberType.LEADER, leaderMap);
-//        sortedFlags.put(FactionMemberType.OFFICER, officersMap);
-//        sortedFlags.put(FactionMemberType.MEMBER, membersMap);
-//        sortedFlags.put(FactionMemberType.ALLY, allyMap);
-//
-//        return sortedFlags;
-//    }
 }

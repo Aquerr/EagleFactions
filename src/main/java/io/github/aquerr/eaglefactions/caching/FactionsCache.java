@@ -2,16 +2,13 @@ package io.github.aquerr.eaglefactions.caching;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-@Singleton
 public class FactionsCache
 {
     private static List<Faction> _factionsList = new ArrayList<>();
