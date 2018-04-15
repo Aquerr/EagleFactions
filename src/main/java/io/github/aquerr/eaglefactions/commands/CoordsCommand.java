@@ -83,7 +83,7 @@ public class CoordsCommand implements CommandExecutor
                         if(member.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of("Officer: " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of("Member: " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
