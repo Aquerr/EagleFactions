@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PlayerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -45,7 +45,7 @@ public class CoordsCommand implements CommandExecutor
 
                 if (!FactionLogic.getLeader(factionName).equals(""))
                 {
-                    Optional<Player> leader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(factionName)));
+                    Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(factionName)));
 
                     if(leader.isPresent())
                     {
@@ -61,7 +61,7 @@ public class CoordsCommand implements CommandExecutor
                 {
                     for (String officerName: FactionLogic.getOfficers(factionName))
                     {
-                        Optional<Player> officer = PlayerService.getPlayer(UUID.fromString(officerName));
+                        Optional<Player> officer = PlayerManager.getPlayer(UUID.fromString(officerName));
 
                         if(officer.isPresent())
                         {
@@ -78,12 +78,12 @@ public class CoordsCommand implements CommandExecutor
                 {
                     for (String memberName: FactionLogic.getMembers(factionName))
                     {
-                        Optional<Player> member = PlayerService.getPlayer(UUID.fromString(memberName));
+                        Optional<Player> member = PlayerManager.getPlayer(UUID.fromString(memberName));
 
                         if(member.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of("Officer: " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of("Member: " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);

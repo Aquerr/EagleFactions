@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PlayerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -77,7 +77,7 @@ public class AddAllyCommand implements CommandExecutor
                                 AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFactionName);
 
                                 //TODO: Check if player is online
-                                Player invitedFactionLeader = PlayerService.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
+                                Player invitedFactionLeader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
 
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {

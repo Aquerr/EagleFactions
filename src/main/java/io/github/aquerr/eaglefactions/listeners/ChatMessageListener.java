@@ -4,7 +4,6 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -16,7 +15,6 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class ChatMessageListener
 {
@@ -63,13 +61,13 @@ public class ChatMessageListener
 
                     for (String allianceName : FactionLogic.getAlliances(factionName))
                     {
-                        for (Player factionPlayer : FactionLogic.getPlayersOnline(allianceName))
+                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(allianceName))
                         {
                             receivers.add(factionPlayer);
                         }
                     }
 
-                    for (Player factionPlayer : FactionLogic.getPlayersOnline(factionName))
+                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(factionName))
                     {
                         receivers.add(factionPlayer);
                     }
@@ -84,7 +82,7 @@ public class ChatMessageListener
 
                     Set<MessageReceiver> receivers = new HashSet<>();
 
-                    for (Player factionPlayer : FactionLogic.getPlayersOnline(factionName))
+                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(factionName))
                     {
                         receivers.add(factionPlayer);
                     }

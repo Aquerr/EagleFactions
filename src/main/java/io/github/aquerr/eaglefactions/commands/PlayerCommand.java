@@ -2,8 +2,8 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -68,10 +68,10 @@ public class PlayerCommand implements CommandExecutor
             //TODO: Show if player is online or offline.
 
             Text info = Text.builder()
-                    .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerService.getPlayerName(player.getUniqueId()).get() + "\n"))
+                    .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerManager.getPlayerName(player.getUniqueId()).get() + "\n"))
                     .append(Text.of(TextColors.AQUA, "Last Played: ", TextColors.GOLD, formattedDate + "\n"))
                     .append(Text.of(TextColors.AQUA, "Faction: ", TextColors.GOLD, playerFactionName + "\n"))
-                    .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, PowerService.getPlayerPower(player.getUniqueId()) + "/" + PowerService.getPlayerMaxPower(player.getUniqueId())))
+                    .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, PowerManager.getPlayerPower(player.getUniqueId()) + "/" + PowerManager.getPlayerMaxPower(player.getUniqueId())))
                     .build();
 
             playerInfo.add(info);
