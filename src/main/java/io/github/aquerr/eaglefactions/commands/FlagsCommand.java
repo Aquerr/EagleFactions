@@ -65,7 +65,7 @@ public class FlagsCommand implements CommandExecutor
         //textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
         //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
 
-        textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
+        textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY"));
 
 
         for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())

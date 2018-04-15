@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage;
 
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagType;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -86,6 +87,8 @@ public class HOCONFactionStorage implements IStorage
             configNode.getNode(new Object[]{"factions", faction.Name, "claims"}).setValue(faction.Claims);
             configNode.getNode(new Object[]{"factions", faction.Name, "flags"}).setValue(faction.Flags);
 
+            FactionsCache.addOrUpdateFactionCache(faction);
+
             return saveChanges();
         }
         catch (Exception exception)
@@ -102,6 +105,7 @@ public class HOCONFactionStorage implements IStorage
         try
         {
             configNode.getNode("factions").removeChild(factionName);
+            FactionsCache.removeFactionCache(factionName);
             return true;
         }
         catch (Exception exception)
@@ -116,6 +120,11 @@ public class HOCONFactionStorage implements IStorage
     {
         try
         {
+            if (FactionsCache.getFactionsList().stream().anyMatch(x->x.Name == factionName))
+            {
+                return FactionsCache.getFactionCache(factionName);
+            }
+
             if (configNode.getNode("factions", factionName).getValue() == null)
             {
                 return null;
@@ -135,6 +144,8 @@ public class HOCONFactionStorage implements IStorage
 
             //TODO: Refactor this code so that the power can be sended to the faction constructor like other parameters.
             faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
+
+            FactionsCache.addOrUpdateFactionCache(faction);
 
             return faction;
         }

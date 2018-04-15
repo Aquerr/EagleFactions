@@ -23,8 +23,6 @@ public class PlayerInteractListener
     {
         if(!EagleFactions.AdminList.contains(player.getUniqueId()))
         {
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
             if(event.getInteractionPoint().isPresent())
             {
                 World world = player.getWorld();
@@ -32,6 +30,7 @@ public class PlayerInteractListener
                 Location<World> location = new Location(world, vector3d);
                 Vector3i claim = location.getChunkPosition();
 
+                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
                 String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
 
                 if(!chunkFactionName.equals(""))

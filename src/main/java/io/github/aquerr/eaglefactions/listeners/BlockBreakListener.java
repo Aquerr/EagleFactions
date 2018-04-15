@@ -26,12 +26,12 @@ public class BlockBreakListener
 
             if(!EagleFactions.AdminList.contains(player.getUniqueId()))
             {
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-
                  for (Transaction<BlockSnapshot> transaction : event.getTransactions())
                  {
                      World world = player.getWorld();
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+
+                     String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
                      String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
 
