@@ -2,12 +2,6 @@
 
 # Eagle Factions
 
-API 7.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.12.2%2Fapi-7.0.0)](https://travis-ci.org/Aquerr/EagleFactions)
-
-API 6.0.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.11.2%2Fapi-6.0.0)](https://travis-ci.org/Aquerr/EagleFactions)
-
-API 5.1.0 branch build status: [![Build Status](https://travis-ci.org/Aquerr/EagleFactions.svg?branch=1.10.2%2Fapi-5.1.0)](https://travis-ci.org/Aquerr/EagleFactions)
-
 Current version: 0.9.13
 
 ## General
@@ -39,7 +33,7 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 
 ## Links
 
-* [Download Links](https://github.com/Aquerr/EagleFactions/releases) **(Alpha Builds)**
+* [Download Links](https://github.com/Aquerr/EagleFactions/releases)
 * [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * [Permissions](https://github.com/Aquerr/EagleFactions/wiki/Permissions)
 * ~~Ore~~ (not yet available)
