@@ -14,13 +14,12 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -598,7 +597,7 @@ public class FactionLogic
     private static boolean addClaimByItems(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
     {
         HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
-        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        Inventory inventory = player.getInventory();
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
@@ -661,7 +660,7 @@ public class FactionLogic
                         }
                     }
 
-                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
+                    inventory.query(itemStack.getItem()).poll(itemStack.getQuantity());
                 }
             }
 
