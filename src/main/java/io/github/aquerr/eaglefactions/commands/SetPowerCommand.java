@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -56,7 +56,7 @@ public class SetPowerCommand implements CommandExecutor
     {
         BigDecimal newPower = new BigDecimal(power);
 
-        PowerService.setPower(player.getUniqueId(), newPower);
+        PowerManager.setPower(player.getUniqueId(), newPower);
 
         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
     }

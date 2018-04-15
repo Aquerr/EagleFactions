@@ -4,8 +4,8 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -94,14 +94,14 @@ public class InfoCommand implements CommandExecutor
         List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
-        if(faction.Leader != null && !faction.Leader.equals("")) leaderName = PlayerService.getPlayerName(UUID.fromString(faction.Leader)).get();
+        if(faction.Leader != null && !faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
 
         String membersList = "";
         if(!faction.Members.isEmpty() && faction.Members != null)
         {
             for (String member: faction.Members)
             {
-                membersList += PlayerService.getPlayerName(UUID.fromString(member)).get() + ", ";
+                membersList += PlayerManager.getPlayerName(UUID.fromString(member)).get() + ", ";
             }
             membersList = membersList.substring(0, membersList.length() - 2);
         }
@@ -111,7 +111,7 @@ public class InfoCommand implements CommandExecutor
         {
             for (String officer: faction.Officers)
             {
-                officersList += PlayerService.getPlayerName(UUID.fromString(officer)).get() + ", ";
+                officersList += PlayerManager.getPlayerName(UUID.fromString(officer)).get() + ", ";
             }
             officersList = officersList.substring(0, officersList.length() - 2);
         }
@@ -145,7 +145,7 @@ public class InfoCommand implements CommandExecutor
                 .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.BLUE, alliancesList + "\n"))
                 .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, "Members: ", TextColors.GREEN, membersList + "\n"))
-                .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, faction.Power + "/" + PowerService.getFactionMaxPower(faction) + "\n"))
+                .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
                 .append(Text.of(TextColors.AQUA, "Claims: ", TextColors.GOLD, String.valueOf(FactionLogic.getClaims(factionName).size()) + "/" + String.valueOf(faction.Power.intValue())))
                 .build();
 

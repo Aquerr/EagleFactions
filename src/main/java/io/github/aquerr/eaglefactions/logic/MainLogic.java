@@ -50,9 +50,9 @@ public class MainLogic
         return new BigDecimal(_configuration.getString("power", "killaward"));
     }
 
-    public static BigDecimal getPunishment()
+    public static BigDecimal getPenalty()
     {
-        return new BigDecimal(_configuration.getString("power", "punishment"));
+        return new BigDecimal(_configuration.getString("power", "penalty"));
     }
 
     public static int getMaxNameLength()
@@ -215,7 +215,7 @@ public class MainLogic
 
     public static double getAttackMinPowerPercentage()
     {
-        return _configuration.getDouble("attack-min-power-percentage");
+        return _configuration.getDouble("attack-min-power-percentage") / 100;
     }
 
     public static boolean isPVPLoggerActive()
@@ -231,5 +231,15 @@ public class MainLogic
     public static boolean isBlockDestroyingDisabled()
     {
         return _configuration.getBoolean("disable-block-destroy");
+    }
+
+    public static boolean isBlockDestroyingInWarZoneDisabled()
+    {
+        return _configuration.getBoolean("disable-block-destroy-warzone");
+    }
+
+    public static List<String> getBlockedCommandsDuringFight()
+    {
+        return _configuration.getListOfStrings("pvp-logger", "blocked-commands-during-fight");
     }
 }

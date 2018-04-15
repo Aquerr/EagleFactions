@@ -1,20 +1,21 @@
 package io.github.aquerr.eaglefactions.storage;
 
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.entities.FactionFlagType;
+import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class HOCONFactionStorage implements IStorage
@@ -84,6 +85,9 @@ public class HOCONFactionStorage implements IStorage
             configNode.getNode(new Object[]{"factions", faction.Name, "enemies"}).setValue(faction.Enemies);
             configNode.getNode(new Object[]{"factions", faction.Name, "alliances"}).setValue(faction.Alliances);
             configNode.getNode(new Object[]{"factions", faction.Name, "claims"}).setValue(faction.Claims);
+            configNode.getNode(new Object[]{"factions", faction.Name, "flags"}).setValue(faction.Flags);
+
+            FactionsCache.addOrUpdateFactionCache(faction);
 
             return saveChanges();
         }
@@ -101,6 +105,7 @@ public class HOCONFactionStorage implements IStorage
         try
         {
             configNode.getNode("factions").removeChild(factionName);
+            FactionsCache.removeFactionCache(factionName);
             return true;
         }
         catch (Exception exception)
@@ -115,46 +120,32 @@ public class HOCONFactionStorage implements IStorage
     {
         try
         {
+            if (FactionsCache.getFactionsList().stream().anyMatch(x->x.Name == factionName))
+            {
+                return FactionsCache.getFactionCache(factionName);
+            }
+
             if (configNode.getNode("factions", factionName).getValue() == null)
             {
                 return null;
             }
 
-            String tag = "";
-            String leader = "";
-            String home = "";
-            List<String> officersList = new ArrayList<>();
-            List<String> membersList = new ArrayList<>();
-            List<String> enemiesList = new ArrayList<>();
-            List<String> alliancesList = new ArrayList<>();
-            List<String> claimsList = new ArrayList<>();
+            String tag = getFactionTag(factionName);
+            String leader = getFactionLeader(factionName);
+            String home = getFactionHome(factionName);
+            List<String> officers = getFactionOfficers(factionName);
+            List<String> members = getFactionMembers(factionName);
+            List<String> alliances = getFactionAlliances(factionName);
+            List<String> enemies = getFactionEnemies(factionName);
+            List<String> claims = getFactionClaims(factionName);
+            Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = getFactionFlags(factionName);
 
-            Object tagObject = configNode.getNode(new Object[]{"factions", factionName, "tag"}).getValue();
-            Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "leader"}).getValue();
-            Object officersObject = configNode.getNode(new Object[]{"factions", factionName, "officers"}).getValue();
-            Object homeObject = configNode.getNode(new Object[]{"factions", factionName, "home"}).getValue(); //TODO: Add new home property in Faction class.
-            Object membersObject = configNode.getNode(new Object[]{"factions", factionName, "members"}).getValue();
-            Object enemiesObject = configNode.getNode(new Object[]{"factions", factionName, "enemies"}).getValue();
-            Object alliancesObject = configNode.getNode(new Object[]{"factions", factionName, "alliances"}).getValue();
-            Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "claims"}).getValue();
+            Faction faction = new Faction(factionName, tag, leader, members, claims, officers, alliances, enemies, home, flags);
 
-            if (tagObject != null) tag = String.valueOf(tagObject);
-            if (leaderObject != null) leader = String.valueOf(leaderObject);
-            if (officersObject != null) officersList = (List<String>)officersObject;
-            if (membersObject != null) membersList = (List<String>)membersObject;
-            if (enemiesObject != null) enemiesList = (List<String>)enemiesObject;
-            if (alliancesObject != null) alliancesList = (List<String>)alliancesObject;
-            if (claimsObject != null) claimsList = (List<String>)claimsObject;
-            if (homeObject != null) home = String.valueOf(homeObject);
+            //TODO: Refactor this code so that the power can be sended to the faction constructor like other parameters.
+            faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
 
-            Faction faction = new Faction(factionName, tag, leader);
-            faction.Home = home;
-            faction.Officers = officersList;
-            faction.Members = membersList;
-            faction.Alliances = alliancesList;
-            faction.Enemies = enemiesList;
-            faction.Claims = claimsList;
-            faction.Power = PowerService.getFactionPower(faction); //Get power from all players in faction.
+            FactionsCache.addOrUpdateFactionCache(faction);
 
             return faction;
         }
@@ -165,6 +156,251 @@ public class HOCONFactionStorage implements IStorage
 
         //If it was not possible to get a faction then return null.
         return null;
+    }
+
+    private Map<FactionMemberType,Map<FactionFlagType,Boolean>> getFactionFlags(String factionName)
+    {
+        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flagMap = new LinkedHashMap<>();
+
+        Map<FactionFlagType, Boolean> leaderMap = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> officerMap = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> membersMap = new LinkedHashMap<>();
+        Map<FactionFlagType, Boolean> allyMap = new LinkedHashMap<>();
+
+        //Get leader flags
+        Object leaderUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).getValue();
+        Object leaderPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).getValue();
+        Object leaderDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).getValue();
+
+        if (leaderUSE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).setValue(true);
+            leaderUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).getValue();
+        }
+        if (leaderPLACE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).setValue(true);
+            leaderPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).getValue();
+        }
+        if (leaderDESTROY == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).setValue(true);
+            leaderDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).getValue();
+        }
+
+        //Get officer flags
+        Object officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).getValue();
+        Object officerPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).getValue();
+        Object officerDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).getValue();
+
+        if (officerUSE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).setValue(true);
+            officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).getValue();
+        }
+        if (officerPLACE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).setValue(true);
+            officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).getValue();
+        }
+        if (officerDESTROY == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).setValue(true);
+            officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).getValue();
+        }
+
+        //Get member flags
+        Object memberUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).getValue();
+        Object memberPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).getValue();
+        Object memberDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).getValue();
+
+        if (memberUSE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).setValue(true);
+            memberUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).getValue();
+        }
+        if (memberPLACE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).setValue(true);
+            memberPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).getValue();
+        }
+        if (memberDESTROY == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).setValue(true);
+            memberDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).getValue();
+        }
+
+        //Get member flags
+        Object allyUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).getValue();
+        Object allyPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).getValue();
+        Object allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getValue();
+
+        if (allyUSE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).setValue(true);
+            allyUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).getValue();
+        }
+        if (allyPLACE == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).setValue(false);
+            allyPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).getValue();
+        }
+        if (allyDESTROY == null)
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).setValue(false);
+            allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getValue();
+        }
+
+        leaderMap.put(FactionFlagType.USE, (boolean)leaderUSE);
+        leaderMap.put(FactionFlagType.PLACE, (boolean)leaderPLACE);
+        leaderMap.put(FactionFlagType.DESTROY, (boolean)leaderDESTROY);
+
+        officerMap.put(FactionFlagType.USE, (boolean)officerUSE);
+        officerMap.put(FactionFlagType.PLACE, (boolean)officerPLACE);
+        officerMap.put(FactionFlagType.DESTROY, (boolean)officerDESTROY);
+
+        membersMap.put(FactionFlagType.USE, (boolean)memberUSE);
+        membersMap.put(FactionFlagType.PLACE, (boolean)memberPLACE);
+        membersMap.put(FactionFlagType.DESTROY, (boolean)memberDESTROY);
+
+        allyMap.put(FactionFlagType.USE, (boolean)allyUSE);
+        allyMap.put(FactionFlagType.PLACE, (boolean)allyPLACE);
+        allyMap.put(FactionFlagType.DESTROY, (boolean)allyDESTROY);
+
+        flagMap.put(FactionMemberType.LEADER, leaderMap);
+        flagMap.put(FactionMemberType.OFFICER, officerMap);
+        flagMap.put(FactionMemberType.MEMBER, membersMap);
+        flagMap.put(FactionMemberType.ALLY, allyMap);
+
+        return flagMap;
+    }
+
+    private List<String> getFactionClaims(String factionName)
+    {
+        Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "claims"}).getValue();
+
+        if (claimsObject != null)
+        {
+            return (List<String>)claimsObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "claims"}).setValue(new ArrayList<>());
+            saveChanges();
+            return new ArrayList<>();
+        }
+    }
+
+    private List<String> getFactionEnemies(String factionName)
+    {
+        Object enemiesObject = configNode.getNode(new Object[]{"factions", factionName, "enemies"}).getValue();
+
+        if (enemiesObject != null)
+        {
+            return (List<String>)enemiesObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "enemies"}).setValue(new ArrayList<>());
+            saveChanges();
+            return new ArrayList<>();
+        }
+    }
+
+    private List<String> getFactionAlliances(String factionName)
+    {
+        Object alliancesObject = configNode.getNode(new Object[]{"factions", factionName, "alliances"}).getValue();
+
+        if (alliancesObject != null)
+        {
+            return (List<String>)alliancesObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "alliances"}).setValue(new ArrayList<>());
+            saveChanges();
+            return new ArrayList<>();
+        }
+    }
+
+    private List<String> getFactionMembers(String factionName)
+    {
+        Object membersObject = configNode.getNode(new Object[]{"factions", factionName, "members"}).getValue();
+
+        if (membersObject != null)
+        {
+            return (List<String>)membersObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new ArrayList<>());
+            saveChanges();
+            return new ArrayList<>();
+        }
+    }
+
+    private String getFactionHome(String factionName)
+    {
+        Object homeObject = configNode.getNode(new Object[]{"factions", factionName, "home"}).getValue();
+
+        if (homeObject != null)
+        {
+            return String.valueOf(homeObject);
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "home"}).setValue("");
+            saveChanges();
+            return "";
+        }
+    }
+
+    private List<String> getFactionOfficers(String factionName)
+    {
+        Object officersObject = configNode.getNode(new Object[]{"factions", factionName, "officers"}).getValue();
+
+        if (officersObject != null)
+        {
+            return (List<String>)officersObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "officers"}).setValue(new ArrayList<>());
+            saveChanges();
+            return new ArrayList<>();
+        }
+    }
+
+    private String getFactionLeader(String factionName)
+    {
+        Object tagObject = configNode.getNode(new Object[]{"factions", factionName, "leader"}).getValue();
+
+        if (tagObject != null)
+        {
+            return String.valueOf(tagObject);
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "leader"}).setValue("");
+            saveChanges();
+            return "";
+        }
+    }
+
+    private String getFactionTag(String factionName)
+    {
+        Object tagObject = configNode.getNode(new Object[]{"factions", factionName, "tag"}).getValue();
+
+        if (tagObject != null)
+        {
+            return String.valueOf(tagObject);
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "tag"}).setValue("");
+            saveChanges();
+            return "";
+        }
     }
 
     @Override
@@ -230,22 +466,4 @@ public class HOCONFactionStorage implements IStorage
     {
         return configNode;
     }
-
-    private Function<Object, Faction> objectToFactionTransformer = new Function<Object, Faction>()
-    {
-        @Override
-        public Faction apply(Object input)
-        {
-            if (input != null)
-            {
-                Map<String, String> map = (Map<String, String>)input;
-
-                map.get("key");
-
-                return null;
-            }
-
-            return null;
-        }
-    };
 }

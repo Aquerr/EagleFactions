@@ -1,19 +1,22 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionFlagType;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.services.PlayerService;
-import io.github.aquerr.eaglefactions.services.PowerService;
+import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -23,7 +26,7 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -32,7 +35,7 @@ public class FactionLogic
 {
     private static IStorage factionsStorage;
 
-    public static void setupFactionLogic(Path configDir)
+    public static void setup(Path configDir)
     {
         //TODO: Choose which storage should be used. (HOCON, MySQL etc.)
         factionsStorage = new HOCONFactionStorage(configDir);
@@ -63,7 +66,7 @@ public class FactionLogic
         return null;
     }
 
-    public static String getFactionNameByChunk(UUID worldUUID ,Vector3i chunk)
+    public static String getFactionNameByChunk(UUID worldUUID, Vector3i chunk)
     {
         for(Faction faction: getFactions())
         {
@@ -76,7 +79,7 @@ public class FactionLogic
         return "";
     }
 
-    public static Faction getFaction(String factionName)
+    public static @Nullable Faction getFaction(String factionName)
     {
         Faction faction = factionsStorage.getFaction(factionName);
 
@@ -120,7 +123,7 @@ public class FactionLogic
         {
             return faction.Members;
         }
-        else return new ArrayList<String>();
+        else return new ArrayList<>();
     }
 
     
@@ -145,31 +148,31 @@ public class FactionLogic
         return factionPlayers;
     }
     
-    public static List<Player> getPlayersOnline(String factionName)
+    public static List<Player> getOnlinePlayers(String factionName)
     {
         Faction faction = getFaction(factionName);
 
     	List<Player> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = faction.Leader;
-    	if (!faction.Leader.equals("") && PlayerService.isPlayerOnline(UUID.fromString(factionLeader)))
+    	if (!faction.Leader.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(factionLeader)))
     	{
-    		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(factionLeader)).get());
+    		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(factionLeader)).get());
     	}
         
         for (String uuid : faction.Officers)
         {
-        	if (!uuid.equals("") && PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	if (!uuid.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
+        		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
         for (String uuid : faction.Members)
         {
-        	if (!uuid.equals("") && PlayerService.isPlayerOnline(UUID.fromString(uuid)))
+        	if (!uuid.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(uuid)))
         	{
-        		factionPlayers.add(PlayerService.getPlayer(UUID.fromString(uuid)).get());
+        		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(uuid)).get());
         	}
         }
         
@@ -215,12 +218,9 @@ public class FactionLogic
 
     public static void joinFaction(UUID playerUUID, String factionName)
     {
-        List<String> memberList = new ArrayList<>(getMembers(factionName));
-        memberList.add(playerUUID.toString());
-
         Faction faction = getFaction(factionName);
 
-        faction.Members = memberList;
+        faction.Members.add(playerUUID.toString());
 
         factionsStorage.addOrUpdateFaction(faction);
     }
@@ -375,8 +375,7 @@ public class FactionLogic
     {
         for (Faction faction: getFactions())
         {
-
-            if(!faction.Claims.isEmpty() && faction.Claims != null)
+            if(!faction.Claims.isEmpty())
             {
                 for (String claim: faction.Claims)
                 {
@@ -491,17 +490,17 @@ public class FactionLogic
     {
         if(FactionLogic.getLeader(factionName) != null && !FactionLogic.getLeader(factionName).equals(""))
         {
-            if(PlayerService.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
         }
 
         for (String playerUUID: getOfficers(factionName))
         {
-            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
         }
 
         for (String playerUUID: getMembers(factionName))
         {
-            if(PlayerService.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
         }
 
         return false;
@@ -532,42 +531,43 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static void addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk, int seconds)
+    private static Consumer<Task> addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
     {
-        if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+        return new Consumer<Task>()
         {
-            if (seconds >= MainLogic.getClaimingDelay())
+            int seconds = 1;
+
+            @Override
+            public void accept(Task task)
             {
-                if (MainLogic.shouldClaimByItems())
+                if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                    else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                    if (seconds >= MainLogic.getClaimingDelay())
+                    {
+                        if (MainLogic.shouldClaimByItems())
+                        {
+                            if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                            else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
+                        }
+                        else
+                        {
+                            addClaim(playerFactionName, worldUUID, chunk);
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                        }
+                    }
+                    else
+                    {
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                        seconds++;
+                    }
                 }
                 else
                 {
-                    addClaim(playerFactionName, worldUUID, chunk);
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+                    task.cancel();
                 }
             }
-            else
-            {
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
-                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-                taskBuilder.execute(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        addClaimWithDelay(player, playerFactionName, worldUUID, chunk, seconds + 1);
-                    }
-
-                }).delay(1, TimeUnit.SECONDS).name("EagleFactions - Claim").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
-            }
-        }
-        else
-        {
-            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
-        }
+        };
     }
 
     public static void startClaiming(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
@@ -575,7 +575,10 @@ public class FactionLogic
         if (MainLogic.isDelayedClaimingToggled())
         {
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claiming has been started! Stay in the chunk for ", TextColors.GOLD, MainLogic.getClaimingDelay() + " seconds", TextColors.GREEN, " to claim it!"));
-            addClaimWithDelay(player, playerFactionName, worldUUID, chunk, 0);
+
+            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, playerFactionName, worldUUID, chunk)).submit(EagleFactions.getEagleFactions());
         }
         else
         {
@@ -595,7 +598,7 @@ public class FactionLogic
     private static boolean addClaimByItems(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
     {
         HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
-        Inventory inventory = player.getInventory();
+        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
@@ -616,9 +619,8 @@ public class FactionLogic
                 {
                     if (itemType.get().getBlock().isPresent())
                     {
-                        List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                         int variant = Integer.parseInt(idAndVariant[2]);
-                        BlockState blockState = (BlockState) blockStateList.toArray()[variant];
+                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
                         itemStack = ItemStack.builder().fromBlockState(blockState).build();
                     }
                 }
@@ -653,14 +655,13 @@ public class FactionLogic
                     {
                         if (itemType.get().getBlock().isPresent())
                         {
-                            List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                             int variant = Integer.parseInt(idAndVariant[2]);
-                            BlockState blockState = (BlockState) blockStateList.toArray()[variant];
+                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
                             itemStack = ItemStack.builder().fromBlockState(blockState).build();
                         }
                     }
 
-                    inventory.query(itemStack.getItem()).poll(itemStack.getQuantity());
+                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
                 }
             }
 
@@ -668,5 +669,16 @@ public class FactionLogic
             return true;
         }
         else return false;
+    }
+
+    public static void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagType factionFlagType, Boolean toggled)
+    {
+        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = faction.Flags;
+
+        flags.get(factionMemberType).replace(factionFlagType, !toggled);
+
+        faction.Flags = flags;
+
+        factionsStorage.addOrUpdateFaction(faction);
     }
 }
