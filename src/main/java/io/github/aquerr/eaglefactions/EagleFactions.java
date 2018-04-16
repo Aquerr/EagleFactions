@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
@@ -103,6 +104,8 @@ public class EagleFactions
         FactionLogic.setup(_configDir);
         PlayerManager.setup(_configDir);
         PowerManager.setup(_configDir);
+
+        MessageLoader messageLoader = new MessageLoader(_configDir);
 
         //PVPLogger
         _pvpLogger = new PVPLogger();
