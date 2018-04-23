@@ -242,4 +242,9 @@ public class MainLogic
     {
         return _configuration.getListOfStrings("pvp-logger", "blocked-commands-during-fight");
     }
+
+    public static String getLanguageFileName()
+    {
+        return _configuration.getString("language-file");
+    }
 }
