@@ -87,7 +87,7 @@ public class AttackCommand implements CommandExecutor
                                      int attackTime = MainLogic.getAttackTime();
                                      Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
-                                     AttackLogic.informAboutAttack(attackedFaction.Name);
+                                     AttackLogic.informAboutAttack(attackedFaction);
                                      player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
 
                                      AttackLogic.blockClaiming(attackedFaction.Name);

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -24,16 +25,18 @@ public class UnclaimallCommand implements CommandExecutor
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
             //Check if player is in the faction.
-            if(playerFactionName != null)
+            if(playerFactionName != "")
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+
+                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    if(FactionLogic.getHome(playerFactionName) != null)
+                    if(FactionLogic.getHome(playerFaction) != null)
                     {
                         FactionLogic.setHome(null, playerFactionName, null);
                     }
 
-                    FactionLogic.removeClaims(playerFactionName);
+                    FactionLogic.removeClaims(playerFaction);
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Successfully removed all claims!"));
 
                     return CommandResult.success();

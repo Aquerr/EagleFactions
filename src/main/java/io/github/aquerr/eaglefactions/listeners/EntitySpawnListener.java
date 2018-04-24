@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -40,9 +41,12 @@ public class EntitySpawnListener
                 {
                     Player player = (Player)entity;
 
-                    if(FactionLogic.getFactionName(player.getUniqueId()) != null)
+                    String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+
+                    if(playerFactionName != "")
                     {
-                        FactionHome factionHome = FactionLogic.getHome(FactionLogic.getFactionName(player.getUniqueId()));
+                        Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+                        FactionHome factionHome = FactionLogic.getHome(playerFaction);
                         if(factionHome != null)
                         {
                             event.setCancelled(true);

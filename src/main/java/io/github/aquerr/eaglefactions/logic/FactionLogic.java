@@ -148,10 +148,8 @@ public class FactionLogic
         return factionPlayers;
     }
     
-    public static List<Player> getOnlinePlayers(String factionName)
+    public static List<Player> getOnlinePlayers(Faction faction)
     {
-        Faction faction = getFaction(factionName);
-
     	List<Player> factionPlayers = new ArrayList<>();
     	
     	String factionLeader = faction.Leader;
@@ -353,18 +351,18 @@ public class FactionLogic
         return faction.Claims;
     }
 
-    public static void addClaim(String factionName, UUID worldUUID, Vector3i claimedChunk)
+    public static void addClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
     {
-        Faction faction = getFaction(factionName);
+        //Faction faction = getFaction(faction);
 
         faction.Claims.add(worldUUID.toString() + "|" + claimedChunk.toString());
 
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static void removeClaim(String factionName, UUID worldUUID, Vector3i claimedChunk)
+    public static void removeClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
     {
-        Faction faction = getFaction(factionName);
+        //Faction faction = getFaction(factionName);
 
         faction.Claims.remove(worldUUID.toString() + "|" + claimedChunk.toString());
 
@@ -389,9 +387,9 @@ public class FactionLogic
         return false;
     }
 
-    public static boolean isClaimConnected(String factionName, UUID worldUUID, Vector3i chunk)
+    public static boolean isClaimConnected(Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        List<String> claimsList = getClaims(factionName);
+        List<String> claimsList = faction.Claims;
 
         for (String object: claimsList)
         {
@@ -437,10 +435,8 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static @Nullable FactionHome getHome(String factionName)
+    public static @Nullable FactionHome getHome(Faction faction)
     {
-        Faction faction = getFaction(factionName);
-
         if(faction.Home != null && !faction.Home.equals(""))
         {
             String homeString = faction.Home;
@@ -506,10 +502,8 @@ public class FactionLogic
         return false;
     }
 
-    public static void removeClaims(String factionName)
+    public static void removeClaims(Faction faction)
     {
-        Faction faction = getFaction(factionName);
-
         faction.Claims = new ArrayList<>();
 
         factionsStorage.addOrUpdateFaction(faction);
@@ -531,7 +525,7 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    private static Consumer<Task> addClaimWithDelay(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    private static Consumer<Task> addClaimWithDelay(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
         return new Consumer<Task>()
         {
@@ -546,12 +540,12 @@ public class FactionLogic
                     {
                         if (MainLogic.shouldClaimByItems())
                         {
-                            if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                            if (addClaimByItems(player, faction, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                             else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
                         }
                         else
                         {
-                            addClaim(playerFactionName, worldUUID, chunk);
+                            addClaim(faction, worldUUID, chunk);
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                         }
                     }
@@ -570,7 +564,7 @@ public class FactionLogic
         };
     }
 
-    public static void startClaiming(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    public static void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
         if (MainLogic.isDelayedClaimingToggled())
         {
@@ -578,24 +572,24 @@ public class FactionLogic
 
             Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, playerFactionName, worldUUID, chunk)).submit(EagleFactions.getEagleFactions());
+            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactions.getEagleFactions());
         }
         else
         {
             if (MainLogic.shouldClaimByItems())
             {
-                if (addClaimByItems(player, playerFactionName, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
+                if (addClaimByItems(player, faction, worldUUID, chunk)) player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                 else player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to claim a territory!"));
             }
             else
             {
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
-                addClaim(playerFactionName, worldUUID, chunk);
+                addClaim(faction, worldUUID, chunk);
             }
         }
     }
 
-    private static boolean addClaimByItems(Player player, String playerFactionName, UUID worldUUID, Vector3i chunk)
+    private static boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
         HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
         PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
@@ -665,7 +659,7 @@ public class FactionLogic
                 }
             }
 
-            addClaim(playerFactionName, worldUUID, chunk);
+            addClaim(faction, worldUUID, chunk);
             return true;
         }
         else return false;

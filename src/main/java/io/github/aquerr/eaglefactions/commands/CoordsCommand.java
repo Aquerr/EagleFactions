@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
@@ -28,24 +29,24 @@ public class CoordsCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String factionName = FactionLogic.getFactionName(player.getUniqueId());
+            Faction playerFaction = FactionLogic.getFaction(FactionLogic.getFactionName(player.getUniqueId()));
 
             List<Text> teamCoords = new ArrayList<>();
 
-            if(factionName != null)
+            if(playerFaction != null)
             {
-                if(FactionLogic.getHome(factionName) != null)
+                if(FactionLogic.getHome(playerFaction) != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of("Faction's Home: " + FactionLogic.getHome(factionName).toString()))
+                            .append(Text.of("Faction's Home: " + FactionLogic.getHome(playerFaction).toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
                 }
 
-                if (!FactionLogic.getLeader(factionName).equals(""))
+                if (!playerFaction.Leader.equals(""))
                 {
-                    Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(factionName)));
+                    Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader));
 
                     if(leader.isPresent())
                     {
@@ -57,9 +58,9 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!FactionLogic.getOfficers(factionName).isEmpty())
+                if(!playerFaction.Officers.isEmpty())
                 {
-                    for (String officerName: FactionLogic.getOfficers(factionName))
+                    for (String officerName: playerFaction.Officers)
                     {
                         Optional<Player> officer = PlayerManager.getPlayer(UUID.fromString(officerName));
 
@@ -74,9 +75,9 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!FactionLogic.getMembers(factionName).isEmpty())
+                if(!playerFaction.Members.isEmpty())
                 {
-                    for (String memberName: FactionLogic.getMembers(factionName))
+                    for (String memberName: playerFaction.Members)
                     {
                         Optional<Player> member = PlayerManager.getPlayer(UUID.fromString(memberName));
 

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.entity.living.player.Player;
@@ -21,10 +22,11 @@ public class ChatMessageListener
     @Listener
     public void onChatMessage(MessageChannelEvent.Chat event, @Root Player player)
     {
-        if(FactionLogic.getFactionName(player.getUniqueId()) != null)
+        if(FactionLogic.getFactionName(player.getUniqueId()) != "")
         {
             MessageChannel messageChannel = event.getOriginalChannel();
             String factionName = FactionLogic.getFactionName(player.getUniqueId());
+            Faction playerFaction = FactionLogic.getFaction(factionName);
 
             Text.Builder formattedMessage = Text.builder();
 
@@ -59,15 +61,15 @@ public class ChatMessageListener
 
                     //TODO: Add option to style prefixes by user form config file.
 
-                    for (String allianceName : FactionLogic.getAlliances(factionName))
+                    for (String allianceName : playerFaction.Alliances)
                     {
-                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(allianceName))
+                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(FactionLogic.getFaction(allianceName)))
                         {
                             receivers.add(factionPlayer);
                         }
                     }
 
-                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(factionName))
+                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(playerFaction))
                     {
                         receivers.add(factionPlayer);
                     }
@@ -82,7 +84,7 @@ public class ChatMessageListener
 
                     Set<MessageReceiver> receivers = new HashSet<>();
 
-                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(factionName))
+                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(playerFaction))
                     {
                         receivers.add(factionPlayer);
                     }
@@ -102,11 +104,11 @@ public class ChatMessageListener
             //Get faction prefix from Eagle Factions.
             if(MainLogic.getPrefixOption().equals("tag"))
             {
-                if(!FactionLogic.getFactionTag(factionName).equals("") && FactionLogic.getFactionTag(factionName) != null)
+                if(!playerFaction.Tag.equals("") && playerFaction.Tag != null)
                 {
                     //Get faction's tag
                     Text factionTag = Text.builder()
-                            .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
+                            .append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
                             .build();
 
                     factionAndRankPrefix.append(factionTag);
@@ -125,7 +127,7 @@ public class ChatMessageListener
             if(MainLogic.shouldDisplayRank())
             {
                 //Get leader prefix.
-                if(FactionLogic.getLeader(factionName).equals(player.getUniqueId().toString()))
+                if(playerFaction.Leader.equals(player.getUniqueId().toString()))
                 {
                     Text leaderPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
@@ -135,7 +137,7 @@ public class ChatMessageListener
                 }
 
                 //Get officer prefix.
-                if(FactionLogic.getOfficers(factionName).contains(player.getUniqueId().toString()))
+                if(playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     Text officerPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))

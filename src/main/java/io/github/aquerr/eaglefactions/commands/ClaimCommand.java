@@ -49,7 +49,7 @@ public class ClaimCommand implements CommandExecutor
                                 {
                                     if(playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
                                     {
-                                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+                                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
 
                                         return CommandResult.success();
@@ -58,9 +58,9 @@ public class ClaimCommand implements CommandExecutor
                                     {
                                         if(MainLogic.requireConnectedClaims())
                                         {
-                                            if(FactionLogic.isClaimConnected(playerFactionName, world.getUniqueId(), chunk))
+                                            if(FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
+                                                FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
                                             }
                                             else
@@ -70,14 +70,14 @@ public class ClaimCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
+                                            FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                             return CommandResult.success();
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.startClaiming(player, playerFactionName, world.getUniqueId(), chunk);
+                                    FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                     return CommandResult.success();
                                 }
                             }
@@ -104,7 +104,7 @@ public class ClaimCommand implements CommandExecutor
 
                     if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        FactionLogic.addClaim(playerFactionName, world.getUniqueId(), chunk);
+                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));
                         return CommandResult.success();

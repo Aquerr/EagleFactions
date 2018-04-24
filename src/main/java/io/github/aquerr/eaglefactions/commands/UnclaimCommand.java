@@ -27,6 +27,7 @@ public class UnclaimCommand implements CommandExecutor
             Player player = (Player)source;
 
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Faction playerFaction = FactionLogic.getFaction(playerFactionName);
 
             //Check if player has admin mode.
             if(EagleFactions.AdminList.contains(player.getUniqueId()))
@@ -37,14 +38,14 @@ public class UnclaimCommand implements CommandExecutor
                 if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
                 {
                     //Check if faction's home was set in this claim. If yes then remove it.
-                    if(FactionLogic.getHome(playerFactionName) != null)
+                    if(FactionLogic.getHome(playerFaction) != null)
                     {
-                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName).BlockPosition);
+                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFaction).BlockPosition);
 
                         if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
                     }
 
-                    FactionLogic.removeClaim(playerFactionName, world.getUniqueId() ,chunk);
+                    FactionLogic.removeClaim(playerFaction, world.getUniqueId() ,chunk);
 
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                     return CommandResult.success();
@@ -57,9 +58,9 @@ public class UnclaimCommand implements CommandExecutor
             }
 
             //Check if player is in the faction.
-            if(playerFactionName != null)
+            if(playerFactionName != "")
             {
-                if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
@@ -69,15 +70,15 @@ public class UnclaimCommand implements CommandExecutor
                         //TODO: Check if claimed land will stay connected
 
                         //Check if faction's home was set in this claim. If yes then remove it.
-                        if(FactionLogic.getHome(playerFactionName) != null)
+                        if(FactionLogic.getHome(playerFaction) != null)
                         {
-                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFactionName).BlockPosition);
+                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFaction).BlockPosition);
 
                             if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
                         }
 
 
-                        FactionLogic.removeClaim(playerFactionName, world.getUniqueId(), chunk);
+                        FactionLogic.removeClaim(playerFaction, world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                         return CommandResult.success();

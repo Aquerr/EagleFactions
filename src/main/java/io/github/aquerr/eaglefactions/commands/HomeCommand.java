@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -34,9 +35,10 @@ public class HomeCommand implements CommandExecutor
             Player player = (Player)source;
             String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
 
-            if(playerFactionName != null)
+            if(playerFactionName != "")
             {
-                if(FactionLogic.getHome(playerFactionName) != null)
+                Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+                if(FactionLogic.getHome(playerFaction) != null)
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
@@ -50,7 +52,7 @@ public class HomeCommand implements CommandExecutor
                     }
                     else
                     {
-                        FactionHome factionHome = FactionLogic.getHome(playerFactionName);
+                        FactionHome factionHome = FactionLogic.getHome(playerFaction);
 
                         if(MainLogic.canHomeBetweenWorlds())
                         {

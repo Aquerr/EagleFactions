@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.logic;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -31,10 +32,13 @@ public class AttackLogic
                 {
                     if(seconds == MainLogic.getAttackTime())
                     {
-                        informAboutDestroying(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk));
+                        String chunkFactionName = FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk);
+                        Faction chunkFaction = FactionLogic.getFaction(chunkFactionName);
+
+                        informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
 
-                        FactionLogic.removeClaim(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk), player.getWorld().getUniqueId(), attackedChunk);
+                        FactionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
                         task.cancel();
                     }
                     else
@@ -94,16 +98,16 @@ public class AttackLogic
         }).submit(EagleFactions.getEagleFactions());
     }
 
-    public static void informAboutAttack(String factionName)
+    public static void informAboutAttack(Faction faction)
     {
-        List<Player> playersList = FactionLogic.getOnlinePlayers(factionName);
+        List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
 
         playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is under ", TextColors.RED, "attack", TextColors.RESET, "!")));
     }
 
-    public static void informAboutDestroying(String factionName)
+    public static void informAboutDestroying(Faction faction)
     {
-        List<Player> playersList = FactionLogic.getOnlinePlayers(factionName);
+        List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
 
         playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "One of your claims has been ", TextColors.RED, "destroyed", TextColors.RESET, " by an enemy!")));
     }
