@@ -21,6 +21,7 @@ import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class MapCommand implements CommandExecutor
@@ -42,6 +43,9 @@ public class MapCommand implements CommandExecutor
 
     private void generateMap(Player player)
     {
+//        List<String> factionsClaims = FactionLogic.getFactions().stream().flatMap(x->{
+//            return x.Claims;
+//        });
         Faction playerFaction = FactionLogic.getFaction(FactionLogic.getFactionName(player.getUniqueId()));
 
         World world = player.getWorld();
@@ -85,62 +89,62 @@ public class MapCommand implements CommandExecutor
 
                 Vector3i chunk = playerPosition.add(column, 0, row);
 
-                String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
+                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
-                if (chunkFactionName != "")
+                if (optionalChunkFaction.isPresent())
                 {
                     if (playerFaction != null)
                     {
-                        if (chunkFactionName.equals(playerFaction.Name))
+                        if (optionalChunkFaction.get().Name.equals(playerFaction.Name))
                         {
                             textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                                playerFaction = chunkFactionName;
-                        } else if (playerFaction.Alliances.contains(chunkFactionName))
+                        } else if (playerFaction.Alliances.contains(optionalChunkFaction.get().Name))
                         {
                             textBuilder.append(allianceMark);
-                            if (!allianceFactions.contains(chunkFactionName))
+                            if (!allianceFactions.contains(optionalChunkFaction.get().Name))
                             {
-                                allianceFactions += chunkFactionName + ", ";
+                                allianceFactions += optionalChunkFaction.get().Name + ", ";
                             }
-                        } else if (playerFaction.Enemies.contains(chunkFactionName))
+                        } else if (playerFaction.Enemies.contains(optionalChunkFaction.get().Name))
                         {
                             textBuilder.append(enemyMark);
-                            if (!enemyFactions.contains(chunkFactionName))
+                            if (!enemyFactions.contains(optionalChunkFaction.get().Name))
                             {
-                                enemyFactions += chunkFactionName + ", ";
+                                enemyFactions += optionalChunkFaction.get().Name + ", ";
                             }
                         } else
                         {
-                            if (chunkFactionName.equals("SafeZone"))
+                            if (optionalChunkFaction.get().Name.equals("SafeZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                            } else if (chunkFactionName.equals("WarZone"))
+                            } else if (optionalChunkFaction.get().Name.equals("WarZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                             } else
                             {
                                 textBuilder.append(normalFactionMark);
                             }
-                            if (!normalFactions.contains(chunkFactionName))
+                            if (!normalFactions.contains(optionalChunkFaction.get().Name))
                             {
-                                normalFactions += chunkFactionName + ", ";
+                                normalFactions += optionalChunkFaction.get().Name + ", ";
                             }
                         }
                     } else
                     {
-                        if (chunkFactionName.equals("SafeZone"))
+                        if (optionalChunkFaction.get().Name.equals("SafeZone"))
                         {
                             textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                        } else if (chunkFactionName.equals("WarZone"))
+                        } else if (optionalChunkFaction.get().Name.equals("WarZone"))
                         {
                             textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                         } else
                         {
                             textBuilder.append(normalFactionMark);
                         }
-                        if (!normalFactions.contains(chunkFactionName))
+                        if (!normalFactions.contains(optionalChunkFaction.get().Name))
                         {
-                            normalFactions += chunkFactionName + ", ";
+                            normalFactions += optionalChunkFaction.get().Name + ", ";
                         }
                     }
                 } else
@@ -162,11 +166,11 @@ public class MapCommand implements CommandExecutor
 
         String playerPositionClaim = "none";
 
-        String playerPositionFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), playerPosition);
+        Optional<Faction> optionalPlayerPositionFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), playerPosition);
 
-        if (playerPositionFactionName != "")
+        if (optionalPlayerPositionFaction.isPresent())
         {
-            playerPositionClaim = playerPositionFactionName;
+            playerPositionClaim = optionalPlayerPositionFaction.get().Name;
         }
 
         //Print map
@@ -202,12 +206,13 @@ public class MapCommand implements CommandExecutor
     private Consumer<CommandSource> claimByMap(Player player, Vector3i chunk)
     {
         //Because faction could have changed we need to get it again here.
-        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-        Faction playerFaction = FactionLogic.getFaction(playerFactionName);
-        World world = player.getWorld();
 
         return consumer ->
         {
+            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+            World world = player.getWorld();
+
             if(playerFactionName != "")
             {
                 if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))

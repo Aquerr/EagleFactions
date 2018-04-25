@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -14,6 +15,8 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public class BlockBreakListener
 {
@@ -31,23 +34,23 @@ public class BlockBreakListener
                      World world = player.getWorld();
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-                     String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                     Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-                     String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
+                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
 
-                     if(!chunkFactionName.equals(""))
+                     if(optionalChunkFaction.isPresent())
                      {
-                         if(chunkFactionName.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                         if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
                          {
                              return;
                          }
-                         else if(chunkFactionName.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                         else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
                          {
                              return;
                          }
-                         else if(chunkFactionName.equals(playerFactionName))
+                         else if(optionalPlayerFaction.isPresent() && optionalChunkFaction.get().Name.equals(optionalPlayerFaction.get().Name))
                          {
-                             boolean canBreakBlock = FlagManager.canBreakBlock(player, playerFactionName, chunkFactionName);
+                             boolean canBreakBlock = FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get());
                              if (!canBreakBlock)
                              {
                                  player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to destroy blocks here!"));
@@ -72,21 +75,21 @@ public class BlockBreakListener
                 World world = transaction.getFinal().getLocation().get().getExtent();
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-                String factionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), claim);
+                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
 
-                if (!factionName.equals(""))
+                if (optionalChunkFaction.isPresent())
                 {
-                    if(!factionName.equals("SafeZone") && !factionName.equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
+                    if(!optionalChunkFaction.get().Name.equals("SafeZone") && !optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if(factionName.equals("SafeZone"))
+                    else if(optionalChunkFaction.get().Name.equals("SafeZone"))
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if (factionName.equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                    else if (optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
                     {
                         event.setCancelled(true);
                         return;

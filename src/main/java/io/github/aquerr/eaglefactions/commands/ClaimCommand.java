@@ -36,7 +36,7 @@ public class ClaimCommand implements CommandExecutor
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    String chunkFactionName = FactionLogic.getFactionNameByChunk(world.getUniqueId(), chunk);
+                    String chunkFactionName = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
                     if(chunkFactionName.equals(""))
                     {

@@ -12,26 +12,25 @@ import java.util.Map;
 
 public class FlagManager
 {
-    public static boolean canBreakBlock(Player player, String playerFactionName, String chunkFactionName)
+    public static boolean canBreakBlock(Player player, Faction playerFaction, Faction chunkFaction)
     {
-        return checkFlag(player, playerFactionName, chunkFactionName, FactionFlagType.DESTROY);
+        return checkFlag(player, playerFaction, chunkFaction, FactionFlagType.DESTROY);
     }
 
-    public static boolean canPlaceBlock(Player player, String playerFactionName, String chunkFactionName)
+    public static boolean canPlaceBlock(Player player, Faction playerFactionName, Faction chunkFaction)
     {
-        return checkFlag(player, playerFactionName, chunkFactionName, FactionFlagType.PLACE);
+        return checkFlag(player, playerFactionName, chunkFaction, FactionFlagType.PLACE);
     }
 
-    public static boolean canInteract(Player player, String playerFactionName, String chunkFactionName)
+    public static boolean canInteract(Player player, Faction playerFactionName, Faction chunkFaction)
     {
-        return checkFlag(player, playerFactionName, chunkFactionName, FactionFlagType.USE);
+        return checkFlag(player, playerFactionName, chunkFaction, FactionFlagType.USE);
     }
 
-    private static boolean checkFlag(Player player, String playerFactionName, String chunkFactionName, FactionFlagType flagType)
+    private static boolean checkFlag(Player player, Faction playerFaction, Faction chunkFaction, FactionFlagType flagType)
     {
-        Faction chunkFaction = FactionLogic.getFaction(chunkFactionName);
 
-        if (playerFactionName.equals(chunkFactionName))
+        if (playerFaction.Name.equals(chunkFaction.Name))
         {
             if (chunkFaction.Leader.equals(player.getUniqueId().toString()))
             {
@@ -46,7 +45,7 @@ public class FlagManager
                 return chunkFaction.Flags.get(FactionMemberType.MEMBER).get(flagType);
             }
         }
-        else if(FactionLogic.getFaction(playerFactionName).Alliances.contains(chunkFaction.Name))
+        else if(playerFaction.Alliances.contains(chunkFaction.Name))
         {
             return chunkFaction.Flags.get(FactionMemberType.ALLY).get(flagType);
         }

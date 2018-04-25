@@ -18,8 +18,8 @@ public class FireBlockPlaceListener
 //        {
 //            event.getLocations().forEach(x ->
 //            {
-//                if (FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
-//                        FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
+//                if (FactionLogic.getFactionByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
+//                        FactionLogic.getFactionByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
 //                {
 //                    event.setCancelled(true);
 //                    return;
@@ -31,8 +31,8 @@ public class FireBlockPlaceListener
 //        {
 //            event.getLocations().forEach(x ->
 //            {
-//                if (FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
-//                        FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
+//                if (FactionLogic.getFactionByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
+//                        FactionLogic.getFactionByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
 //                {
 //                    event.setCancelled(true);
 //                    return;
@@ -53,8 +53,8 @@ public class FireBlockPlaceListener
                 event.getTransactions().forEach(x->
                 {
                     if (x.getFinal().getState().getType() == BlockTypes.FIRE
-                            && (FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("SafeZone"))
-                            || FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("WarZone"))
+                            && (FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("SafeZone"))
+                            || FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("WarZone"))
                     {
                         event.setCancelled(true);
                     }
@@ -66,8 +66,8 @@ public class FireBlockPlaceListener
             event.getTransactions().forEach(x->
             {
                 if (x.getFinal().getState().getType() == BlockTypes.FIRE
-                        && (FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("SafeZone"))
-                        || FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("WarZone"))
+                        && (FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("SafeZone"))
+                        || FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("WarZone"))
                 {
                     event.setCancelled(true);
                 }

@@ -11,6 +11,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -32,8 +33,8 @@ public class AttackLogic
                 {
                     if(seconds == MainLogic.getAttackTime())
                     {
-                        String chunkFactionName = FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk);
-                        Faction chunkFaction = FactionLogic.getFaction(chunkFactionName);
+                        //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
+                        Faction chunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
 
                         informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));

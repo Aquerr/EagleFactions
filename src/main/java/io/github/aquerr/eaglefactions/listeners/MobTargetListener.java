@@ -12,7 +12,7 @@ public class MobTargetListener
     {
         if (event.getTarget().isPresent() && event.getTarget().get() instanceof Player)
         {
-            if (FactionLogic.getFactionNameByChunk(event.getTarget().get().getWorld().getUniqueId(), event.getTarget().get().getLocation().getChunkPosition()).equals("SafeZone"))
+            if (FactionLogic.getFactionByChunk(event.getTarget().get().getWorld().getUniqueId(), event.getTarget().get().getLocation().getChunkPosition()).equals("SafeZone"))
             {
                 event.setCancelled(true);
                 return;

@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -66,17 +67,38 @@ public class FactionLogic
         return null;
     }
 
-    public static String getFactionNameByChunk(UUID worldUUID, Vector3i chunk)
+    public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
+    {
+        for (Faction faction : getFactions())
+        {
+            if (faction.Leader == playerUUID.toString())
+            {
+                return Optional.of(faction);
+            }
+            else if(faction.Officers.contains(playerUUID.toString()))
+            {
+                return Optional.of(faction);
+            }
+            else if(faction.Members.contains(playerUUID.toString()))
+            {
+                return Optional.of(faction);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<Faction> getFactionByChunk(UUID worldUUID, Vector3i chunk)
     {
         for(Faction faction: getFactions())
         {
             if(faction.Claims.contains(worldUUID.toString() + "|" + chunk.toString()))
             {
-                return faction.Name;
+                return Optional.of(faction);
             }
         }
 
-        return "";
+        return Optional.empty();
     }
 
     public static @Nullable Faction getFaction(String factionName)
@@ -190,7 +212,7 @@ public class FactionLogic
         return namesList;
     }
 
-    public static String getRealFactionName(String rawFactionName)
+    public static @Nullable String getRealFactionName(String rawFactionName)
     {
         List<String> factionsNames = getFactionsNames();
 
@@ -351,6 +373,22 @@ public class FactionLogic
         return faction.Claims;
     }
 
+    public static List<String> getAllClaims()
+    {
+        List<String> claimsList = new ArrayList<>();
+
+        for (Faction faction : getFactions())
+        {
+            claimsList.addAll(faction.Claims);
+        }
+
+        return claimsList;
+
+//        List<String> claimsList = getFactions().stream().map(x->x.Claims).flatMap(List::stream).collect(Collectors.toList());
+//
+//        return claimsList;
+    }
+
     public static void addClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
     {
         //Faction faction = getFaction(faction);
@@ -371,17 +409,11 @@ public class FactionLogic
 
     public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
-        for (Faction faction: getFactions())
+        for (String claim: getAllClaims())
         {
-            if(!faction.Claims.isEmpty())
+            if(claim.equalsIgnoreCase(worldUUID.toString() + "|" + chunk.toString()))
             {
-                for (String claim: faction.Claims)
-                {
-                    if(claim.equalsIgnoreCase(worldUUID.toString() + "|" + chunk.toString()))
-                    {
-                        return true;
-                    }
-                }
+                return true;
             }
         }
         return false;

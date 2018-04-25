@@ -64,7 +64,7 @@ public class AttackCommand implements CommandExecutor
         {
             Faction playerFaction = FactionLogic.getFaction(playerFactionName);
 
-            String chunkFactionName = FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+            String chunkFactionName = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
             if(chunkFactionName != null)
             {
                 if(chunkFactionName.equals("SafeZone") || chunkFactionName.equals("WarZone"))
@@ -76,7 +76,7 @@ public class AttackCommand implements CommandExecutor
                 {
                     if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        Faction attackedFaction = FactionLogic.getFaction(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
+                        Faction attackedFaction = FactionLogic.getFaction(FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
 
                         if (!playerFaction.Name.equals(attackedFaction.Name))
                         {

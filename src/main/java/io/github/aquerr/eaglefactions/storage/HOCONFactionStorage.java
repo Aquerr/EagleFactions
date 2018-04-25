@@ -43,8 +43,7 @@ public class HOCONFactionStorage implements IStorage
 
                 configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 precreate();
-            }
-            else
+            } else
             {
                 configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 load();
@@ -116,34 +115,20 @@ public class HOCONFactionStorage implements IStorage
     }
 
     @Override
-    public @Nullable Faction getFaction(String factionName)
+    public @Nullable
+    Faction getFaction(String factionName)
     {
         try
         {
-            if (FactionsCache.getFactionsList().stream().anyMatch(x->x.Name == factionName))
-            {
-                return FactionsCache.getFactionCache(factionName);
-            }
+            Faction factionCache = FactionsCache.getFactionCache(factionName);
+            if (factionCache != null) return factionCache;
 
             if (configNode.getNode("factions", factionName).getValue() == null)
             {
                 return null;
             }
 
-            String tag = getFactionTag(factionName);
-            String leader = getFactionLeader(factionName);
-            String home = getFactionHome(factionName);
-            List<String> officers = getFactionOfficers(factionName);
-            List<String> members = getFactionMembers(factionName);
-            List<String> alliances = getFactionAlliances(factionName);
-            List<String> enemies = getFactionEnemies(factionName);
-            List<String> claims = getFactionClaims(factionName);
-            Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = getFactionFlags(factionName);
-
-            Faction faction = new Faction(factionName, tag, leader, members, claims, officers, alliances, enemies, home, flags);
-
-            //TODO: Refactor this code so that the power can be sended to the faction constructor like other parameters.
-            faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
+            Faction faction = createFactionObject(factionName);
 
             FactionsCache.addOrUpdateFactionCache(faction);
 
@@ -158,7 +143,27 @@ public class HOCONFactionStorage implements IStorage
         return null;
     }
 
-    private Map<FactionMemberType,Map<FactionFlagType,Boolean>> getFactionFlags(String factionName)
+    private Faction createFactionObject(String factionName)
+    {
+        String tag = getFactionTag(factionName);
+        String leader = getFactionLeader(factionName);
+        String home = getFactionHome(factionName);
+        List<String> officers = getFactionOfficers(factionName);
+        List<String> members = getFactionMembers(factionName);
+        List<String> alliances = getFactionAlliances(factionName);
+        List<String> enemies = getFactionEnemies(factionName);
+        List<String> claims = getFactionClaims(factionName);
+        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = getFactionFlags(factionName);
+
+        Faction faction = new Faction(factionName, tag, leader, members, claims, officers, alliances, enemies, home, flags);
+
+        //TODO: Refactor this code so that the power can be sent to the faction constructor like other parameters.
+        faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
+
+        return faction;
+    }
+
+    private Map<FactionMemberType, Map<FactionFlagType, Boolean>> getFactionFlags(String factionName)
     {
         Map<FactionMemberType, Map<FactionFlagType, Boolean>> flagMap = new LinkedHashMap<>();
 
@@ -251,21 +256,21 @@ public class HOCONFactionStorage implements IStorage
             allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getValue();
         }
 
-        leaderMap.put(FactionFlagType.USE, (boolean)leaderUSE);
-        leaderMap.put(FactionFlagType.PLACE, (boolean)leaderPLACE);
-        leaderMap.put(FactionFlagType.DESTROY, (boolean)leaderDESTROY);
+        leaderMap.put(FactionFlagType.USE, (boolean) leaderUSE);
+        leaderMap.put(FactionFlagType.PLACE, (boolean) leaderPLACE);
+        leaderMap.put(FactionFlagType.DESTROY, (boolean) leaderDESTROY);
 
-        officerMap.put(FactionFlagType.USE, (boolean)officerUSE);
-        officerMap.put(FactionFlagType.PLACE, (boolean)officerPLACE);
-        officerMap.put(FactionFlagType.DESTROY, (boolean)officerDESTROY);
+        officerMap.put(FactionFlagType.USE, (boolean) officerUSE);
+        officerMap.put(FactionFlagType.PLACE, (boolean) officerPLACE);
+        officerMap.put(FactionFlagType.DESTROY, (boolean) officerDESTROY);
 
-        membersMap.put(FactionFlagType.USE, (boolean)memberUSE);
-        membersMap.put(FactionFlagType.PLACE, (boolean)memberPLACE);
-        membersMap.put(FactionFlagType.DESTROY, (boolean)memberDESTROY);
+        membersMap.put(FactionFlagType.USE, (boolean) memberUSE);
+        membersMap.put(FactionFlagType.PLACE, (boolean) memberPLACE);
+        membersMap.put(FactionFlagType.DESTROY, (boolean) memberDESTROY);
 
-        allyMap.put(FactionFlagType.USE, (boolean)allyUSE);
-        allyMap.put(FactionFlagType.PLACE, (boolean)allyPLACE);
-        allyMap.put(FactionFlagType.DESTROY, (boolean)allyDESTROY);
+        allyMap.put(FactionFlagType.USE, (boolean) allyUSE);
+        allyMap.put(FactionFlagType.PLACE, (boolean) allyPLACE);
+        allyMap.put(FactionFlagType.DESTROY, (boolean) allyDESTROY);
 
         flagMap.put(FactionMemberType.LEADER, leaderMap);
         flagMap.put(FactionMemberType.OFFICER, officerMap);
@@ -281,9 +286,8 @@ public class HOCONFactionStorage implements IStorage
 
         if (claimsObject != null)
         {
-            return (List<String>)claimsObject;
-        }
-        else
+            return (List<String>) claimsObject;
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "claims"}).setValue(new ArrayList<>());
             saveChanges();
@@ -297,9 +301,8 @@ public class HOCONFactionStorage implements IStorage
 
         if (enemiesObject != null)
         {
-            return (List<String>)enemiesObject;
-        }
-        else
+            return (List<String>) enemiesObject;
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "enemies"}).setValue(new ArrayList<>());
             saveChanges();
@@ -313,9 +316,8 @@ public class HOCONFactionStorage implements IStorage
 
         if (alliancesObject != null)
         {
-            return (List<String>)alliancesObject;
-        }
-        else
+            return (List<String>) alliancesObject;
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "alliances"}).setValue(new ArrayList<>());
             saveChanges();
@@ -329,9 +331,8 @@ public class HOCONFactionStorage implements IStorage
 
         if (membersObject != null)
         {
-            return (List<String>)membersObject;
-        }
-        else
+            return (List<String>) membersObject;
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new ArrayList<>());
             saveChanges();
@@ -346,8 +347,7 @@ public class HOCONFactionStorage implements IStorage
         if (homeObject != null)
         {
             return String.valueOf(homeObject);
-        }
-        else
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "home"}).setValue("");
             saveChanges();
@@ -361,9 +361,8 @@ public class HOCONFactionStorage implements IStorage
 
         if (officersObject != null)
         {
-            return (List<String>)officersObject;
-        }
-        else
+            return (List<String>) officersObject;
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "officers"}).setValue(new ArrayList<>());
             saveChanges();
@@ -378,8 +377,7 @@ public class HOCONFactionStorage implements IStorage
         if (tagObject != null)
         {
             return String.valueOf(tagObject);
-        }
-        else
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "leader"}).setValue("");
             saveChanges();
@@ -394,8 +392,7 @@ public class HOCONFactionStorage implements IStorage
         if (tagObject != null)
         {
             return String.valueOf(tagObject);
-        }
-        else
+        } else
         {
             configNode.getNode(new Object[]{"factions", factionName, "tag"}).setValue("");
             saveChanges();
@@ -406,32 +403,23 @@ public class HOCONFactionStorage implements IStorage
     @Override
     public List<Faction> getFactions()
     {
-        if (getStorage().getNode("factions").getValue() != null)
+        List<Faction> factionList = FactionsCache.getFactionsList();
+
+        final Set<Object> keySet = getStorage().getNode("factions").getChildrenMap().keySet();
+
+        for (Object object : keySet)
         {
-            try
+            if (object instanceof String)
             {
-                List<Faction> factionList = new ArrayList<>();
-
-                final Set<Object> keySet = getStorage().getNode("factions").getChildrenMap().keySet();
-
-                for (Object object : keySet)
+                if (factionList.stream().noneMatch(x -> x.Name.equals(String.valueOf(object))))
                 {
-                    if(object instanceof String)
-                    {
-                        Faction faction = getFaction(String.valueOf(object));
-
-                        if (faction != null) factionList.add(faction);
-                    }
+                    Faction faction = createFactionObject(String.valueOf(object));
+                    FactionsCache.addOrUpdateFactionCache(faction);
                 }
-
-                return factionList;
-            }
-            catch (Exception exception)
-            {
-                exception.printStackTrace();
             }
         }
-        return new ArrayList<>();
+
+        return FactionsCache.getFactionsList();
     }
 
     @Override

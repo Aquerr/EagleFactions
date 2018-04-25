@@ -17,6 +17,8 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Optional;
+
 public class EntitySpawnListener
 {
     @Listener
@@ -41,12 +43,11 @@ public class EntitySpawnListener
                 {
                     Player player = (Player)entity;
 
-                    String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                    Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-                    if(playerFactionName != "")
+                    if(optionalPlayerFaction.isPresent())
                     {
-                        Faction playerFaction = FactionLogic.getFaction(playerFactionName);
-                        FactionHome factionHome = FactionLogic.getHome(playerFaction);
+                        FactionHome factionHome = FactionLogic.getHome(optionalPlayerFaction.get());
                         if(factionHome != null)
                         {
                             event.setCancelled(true);

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
@@ -14,6 +15,8 @@ import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public class EntityDamageListener
 {
@@ -28,7 +31,7 @@ public class EntityDamageListener
                     World world = attackedPlayer.getWorld();
 
                     //Block all damage an attacked player would get if location is a SafeZone.
-                    if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition()).equals("SafeZone"))
+                    if(FactionLogic.getFactionByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition()).equals("SafeZone"))
                     {
                         event.setBaseDamage(0);
                         event.setCancelled(true);
@@ -44,7 +47,7 @@ public class EntityDamageListener
                             Player player = (Player) entityDamageSource.getSource();
 
                             //Block all damage a player could deal if location is SafeZone.
-                            if(FactionLogic.getFactionNameByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
+                            if(FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
                             {
                                 event.setBaseDamage(0);
                                 event.setCancelled(true);
@@ -53,21 +56,44 @@ public class EntityDamageListener
                             else //If player is is not in a SafeZone.
                             {
                                 //Check if player is in a faction.
-                                if(FactionLogic.getFactionName(player.getUniqueId()) != null)
+                                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                                if(optionalPlayerFaction.isPresent())
                                 {
-                                    //Check if players are in the same faction
-                                    if(FactionLogic.getFactionName(player.getUniqueId()).equals(FactionLogic.getFactionName(attackedPlayer.getUniqueId())))
+                                    //Check if attackedPlayer is in a faction.
+                                    Optional<Faction> optionalAttackedPlayerFaction = FactionLogic.getFactionByPlayerUUID(attackedPlayer.getUniqueId());
+                                    if(optionalAttackedPlayerFaction.isPresent())
                                     {
-                                        //If friendlyfire is off the block the damage.
-                                        if(!MainLogic.isFactionFriendlyFire())
+                                        //Check if players are in the same faction
+                                        if(optionalPlayerFaction.get().Name.equals(optionalAttackedPlayerFaction.get().Name))
+                                        {
+                                            //If friendlyfire is off the block the damage.
+                                            if(!MainLogic.isFactionFriendlyFire())
+                                            {
+                                                event.setBaseDamage(0);
+                                                event.setCancelled(true);
+                                                return;
+                                            }
+                                            else
+                                            {
+                                                //If friendlyfire is on and damage will kill attackedPlayer then penalty the player.
+                                                if(event.willCauseDeath())
+                                                {
+                                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPenalty()) + "\n",
+                                                            TextColors.GRAY, "Current power: ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
+                                                    PowerManager.penalty(player.getUniqueId());
+                                                    return;
+                                                }
+                                            }
+                                        }//Check if players are in the alliance.
+                                        else if(optionalPlayerFaction.get().Alliances.contains(optionalAttackedPlayerFaction.get().Name) && !MainLogic.isAllianceFriendlyFire())
                                         {
                                             event.setBaseDamage(0);
                                             event.setCancelled(true);
                                             return;
                                         }
-                                        else
+                                        else if(optionalPlayerFaction.get().Alliances.contains(optionalAttackedPlayerFaction.get().Name) && MainLogic.isAllianceFriendlyFire())
                                         {
-                                            //If friendlyfire is on and damage will kill attackedPlayer then penalty the player.
+                                            if(EagleFactions.getEagleFactions().getPVPLogger().isActive()) EagleFactions.getEagleFactions().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
                                             if(event.willCauseDeath())
                                             {
                                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPenalty()) + "\n",
@@ -76,22 +102,16 @@ public class EntityDamageListener
                                                 return;
                                             }
                                         }
-                                    }//Check if players are in the alliance.
-                                    else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && !MainLogic.isAllianceFriendlyFire())
-                                    {
-                                        event.setBaseDamage(0);
-                                        event.setCancelled(true);
-                                        return;
-                                    }
-                                    else if(FactionLogic.getAlliances(FactionLogic.getFactionName(player.getUniqueId())).contains(FactionLogic.getFactionName(attackedPlayer.getUniqueId())) && MainLogic.isAllianceFriendlyFire())
-                                    {
-                                        if(EagleFactions.getEagleFactions().getPVPLogger().isActive()) EagleFactions.getEagleFactions().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
-                                        if(event.willCauseDeath())
+                                        else
                                         {
-                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPenalty()) + "\n",
-                                                    TextColors.GRAY, "Current power: ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
-                                            PowerManager.penalty(player.getUniqueId());
-                                            return;
+                                            if(EagleFactions.getEagleFactions().getPVPLogger().isActive()) EagleFactions.getEagleFactions().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
+                                            if(event.willCauseDeath())
+                                            {
+                                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been increased by ", TextColors.GOLD, String.valueOf(MainLogic.getKillAward()) + "\n",
+                                                        TextColors.GRAY, "Current power: ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
+                                                PowerManager.addPower(player.getUniqueId(), true);
+                                                return;
+                                            }
                                         }
                                     }
                                     else

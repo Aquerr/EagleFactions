@@ -15,6 +15,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class ChatMessageListener
@@ -22,11 +23,12 @@ public class ChatMessageListener
     @Listener
     public void onChatMessage(MessageChannelEvent.Chat event, @Root Player player)
     {
-        if(FactionLogic.getFactionName(player.getUniqueId()) != "")
+        Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+
+        if(optionalPlayerFaction.isPresent())
         {
             MessageChannel messageChannel = event.getOriginalChannel();
-            String factionName = FactionLogic.getFactionName(player.getUniqueId());
-            Faction playerFaction = FactionLogic.getFaction(factionName);
+            Faction playerFaction = optionalPlayerFaction.get();
 
             Text.Builder formattedMessage = Text.builder();
 
@@ -118,7 +120,7 @@ public class ChatMessageListener
             {
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
-                        .append(Text.of("[" ,TextColors.GREEN, factionName, TextColors.RESET, "]"))
+                        .append(Text.of("[" ,TextColors.GREEN, playerFaction.Name, TextColors.RESET, "]"))
                         .build();
 
                 factionAndRankPrefix.append(factionNamePrefix);
