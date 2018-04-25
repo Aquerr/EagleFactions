@@ -71,7 +71,7 @@ public class FactionLogic
     {
         for (Faction faction : getFactions())
         {
-            if (faction.Leader == playerUUID.toString())
+            if (faction.Leader.equals(playerUUID.toString()))
             {
                 return Optional.of(faction);
             }
@@ -448,16 +448,11 @@ public class FactionLogic
         return false;
     }
 
-    public static void setHome(@Nullable UUID worldUUID ,String factionName, @Nullable Vector3i home)
+    public static void setHome(@Nullable UUID worldUUID , Faction faction, @Nullable Vector3i home)
     {
-        //TODO: Add new property for home in faction class.
-        Faction faction = getFaction(factionName);
-
-        if(home != null)
+        if(home != null && worldUUID != null)
         {
-            String newHome = worldUUID.toString() + "|" + home.toString();
-
-            faction.Home = newHome;
+            faction.Home = new FactionHome(worldUUID, home);
         }
         else
         {
@@ -467,32 +462,10 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static @Nullable FactionHome getHome(Faction faction)
-    {
-        if(faction.Home != null && !faction.Home.equals(""))
-        {
-            String homeString = faction.Home;
-            String splitter = "\\|";
-
-            String worldUUIDString = homeString.split(splitter)[0];
-            String vectorsString = homeString.split(splitter)[1];
-
-            String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
-
-             int x = Integer.valueOf(vectors[0]);
-             int y = Integer.valueOf(vectors[1]);
-             int z = Integer.valueOf(vectors[2]);
-
-             Vector3i blockPosition = Vector3i.from(x, y, z);
-             UUID worldUUID = UUID.fromString(worldUUIDString);
-
-             return new FactionHome(worldUUID, blockPosition);
-        }
-        else
-        {
-            return null;
-        }
-    }
+//    public static @Nullable FactionHome getHome(Faction faction)
+//    {
+//
+//    }
 
     public static List<String> getFactionsTags()
     {

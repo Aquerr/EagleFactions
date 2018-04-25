@@ -17,6 +17,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.Optional;
+
 public class AttackCommand implements CommandExecutor
 {
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
@@ -58,16 +60,16 @@ public class AttackCommand implements CommandExecutor
 
     private void attackChunk(Player player)
     {
-        String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+        Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-        if(playerFactionName != null)
+        if(optionalPlayerFaction.isPresent())
         {
-            Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+            Faction playerFaction = optionalPlayerFaction.get();
 
-            String chunkFactionName = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-            if(chunkFactionName != null)
+            Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+            if(optionalChunkFaction.isPresent())
             {
-                if(chunkFactionName.equals("SafeZone") || chunkFactionName.equals("WarZone"))
+                if(optionalChunkFaction.get().Name.equals("SafeZone") || optionalChunkFaction.get().Name.equals("WarZone"))
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction!"));
                     return;
@@ -76,7 +78,7 @@ public class AttackCommand implements CommandExecutor
                 {
                     if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        Faction attackedFaction = FactionLogic.getFaction(FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()));
+                        Faction attackedFaction = optionalChunkFaction.get();
 
                         if (!playerFaction.Name.equals(attackedFaction.Name))
                         {

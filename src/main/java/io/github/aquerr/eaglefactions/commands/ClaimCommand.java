@@ -16,6 +16,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
+import java.util.Optional;
+
 public class ClaimCommand implements CommandExecutor
 {
     @Override
@@ -25,29 +27,28 @@ public class ClaimCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if(playerFactionName != null)
+            if(optionalPlayerFaction.isPresent())
             {
-                Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+                Faction playerFaction = optionalPlayerFaction.get();
 
                 if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    String chunkFactionName = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
-                    if(chunkFactionName.equals(""))
+                    if(!optionalChunkFaction.isPresent())
                     {
-
                         if(playerFaction.Power.doubleValue() > playerFaction.Claims.size())
                         {
-                            if(!EagleFactions.AttackedFactions.containsKey(playerFactionName))
+                            if(!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
                             {
                                 if(!playerFaction.Claims.isEmpty())
                                 {
-                                    if(playerFactionName.equals("SafeZone") || playerFactionName.equals("WarZone"))
+                                    if(playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
                                     {
                                         FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " has been successfully ", TextColors.GOLD, "claimed", TextColors.WHITE, "!"));

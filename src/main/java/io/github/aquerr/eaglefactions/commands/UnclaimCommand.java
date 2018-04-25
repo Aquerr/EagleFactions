@@ -17,6 +17,8 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Optional;
+
 public class UnclaimCommand implements CommandExecutor
 {
     @Override
@@ -26,8 +28,7 @@ public class UnclaimCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-            Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
             //Check if player has admin mode.
             if(EagleFactions.AdminList.contains(player.getUniqueId()))
@@ -35,17 +36,21 @@ public class UnclaimCommand implements CommandExecutor
                 World world = player.getWorld();
                 Vector3i chunk = player.getLocation().getChunkPosition();
 
-                if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
-                {
-                    //Check if faction's home was set in this claim. If yes then remove it.
-                    if(FactionLogic.getHome(playerFaction) != null)
-                    {
-                        Location homeLocation = world.getLocation(FactionLogic.getHome(playerFaction).BlockPosition);
+                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
-                        if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
+                if (optionalChunkFaction.isPresent())
+                {
+                    if (optionalChunkFaction.get().Home != null)
+                    {
+                        if (world.getUniqueId().equals(optionalChunkFaction.get().Home.WorldUUID))
+                        {
+                            Location homeLocation = world.getLocation(optionalChunkFaction.get().Home.BlockPosition);
+
+                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                        }
                     }
 
-                    FactionLogic.removeClaim(playerFaction, world.getUniqueId() ,chunk);
+                    FactionLogic.removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
 
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
                     return CommandResult.success();
@@ -58,36 +63,49 @@ public class UnclaimCommand implements CommandExecutor
             }
 
             //Check if player is in the faction.
-            if(playerFactionName != "")
+            if(optionalPlayerFaction.isPresent())
             {
+                Faction playerFaction = optionalPlayerFaction.get();
+
                 if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if(FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+
+                    if (optionalChunkFaction.isPresent())
                     {
-                        //TODO: Check if claimed land will stay connected
+                        Faction chunkFaction = optionalChunkFaction.get();
 
-                        //Check if faction's home was set in this claim. If yes then remove it.
-                        if(FactionLogic.getHome(playerFaction) != null)
+                        if (chunkFaction.Name.equals(playerFaction.Name))
                         {
-                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFaction).BlockPosition);
+                            if (optionalChunkFaction.get().Home != null)
+                            {
+                                if (world.getUniqueId().equals(optionalChunkFaction.get().Home.WorldUUID))
+                                {
+                                    Location homeLocation = world.getLocation(optionalChunkFaction.get().Home.BlockPosition);
 
-                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
+                                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                                }
+                            }
+
+                            FactionLogic.removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
+                            return CommandResult.success();
                         }
-
-
-                        FactionLogic.removeClaim(playerFaction, world.getUniqueId(), chunk);
-
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Land has been successfully ", TextColors.GOLD, "unclaimed", TextColors.WHITE, "!"));
-                        return CommandResult.success();
+                        else
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "This land does not belong to your faction!"));
+                            return CommandResult.success();
+                        }
                     }
                     else
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed!"));
+                        return CommandResult.success();
                     }
-
                 }
                 else
                 {

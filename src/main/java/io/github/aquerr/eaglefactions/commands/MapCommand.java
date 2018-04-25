@@ -205,16 +205,17 @@ public class MapCommand implements CommandExecutor
 
     private Consumer<CommandSource> claimByMap(Player player, Vector3i chunk)
     {
-        //Because faction could have changed we need to get it again here.
-
         return consumer ->
         {
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-            Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+            //Because faction could have changed we need to get it again here.
+
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
             World world = player.getWorld();
 
-            if(playerFactionName != "")
+            if(optionalPlayerFaction.isPresent())
             {
+                Faction playerFaction = optionalPlayerFaction.get();
+
                 if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
@@ -268,13 +269,16 @@ public class MapCommand implements CommandExecutor
                     else
                     {
                         //Check if faction's home was set in this claim. If yes then remove it.
-                        if (FactionLogic.getHome(playerFaction) != null)
+                        if (playerFaction.Home != null)
                         {
-                            Location homeLocation = world.getLocation(FactionLogic.getHome(playerFaction).BlockPosition);
-
-                            if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
+                            if (world.getUniqueId().equals(playerFaction.Home.WorldUUID))
                             {
-                                FactionLogic.setHome(world.getUniqueId(), playerFactionName, null);
+                                Location homeLocation = world.getLocation(playerFaction.Home.BlockPosition);
+
+                                if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
+                                {
+                                    FactionLogic.setHome(world.getUniqueId(), playerFaction, null);
+                                }
                             }
                         }
 

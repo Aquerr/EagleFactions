@@ -35,10 +35,10 @@ public class CoordsCommand implements CommandExecutor
 
             if(playerFaction != null)
             {
-                if(FactionLogic.getHome(playerFaction) != null)
+                if(playerFaction.Home != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of("Faction's Home: " + FactionLogic.getHome(playerFaction).toString()))
+                            .append(Text.of("Faction's Home: " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
                             .build();
 
                     teamCoords.add(textBuilder);

@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.storage;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagType;
+import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
@@ -79,12 +80,20 @@ public class HOCONFactionStorage implements IStorage
             configNode.getNode(new Object[]{"factions", faction.Name, "tag"}).setValue(faction.Tag);
             configNode.getNode(new Object[]{"factions", faction.Name, "leader"}).setValue(faction.Leader);
             configNode.getNode(new Object[]{"factions", faction.Name, "officers"}).setValue(faction.Officers);
-            configNode.getNode(new Object[]{"factions", faction.Name, "home"}).setValue(faction.Home);
             configNode.getNode(new Object[]{"factions", faction.Name, "members"}).setValue(faction.Members);
             configNode.getNode(new Object[]{"factions", faction.Name, "enemies"}).setValue(faction.Enemies);
             configNode.getNode(new Object[]{"factions", faction.Name, "alliances"}).setValue(faction.Alliances);
             configNode.getNode(new Object[]{"factions", faction.Name, "claims"}).setValue(faction.Claims);
             configNode.getNode(new Object[]{"factions", faction.Name, "flags"}).setValue(faction.Flags);
+
+            if (faction.Home == null)
+            {
+                configNode.getNode(new Object[]{"factions", faction.Name, "home"}).setValue(faction.Home);
+            }
+            else
+            {
+                configNode.getNode(new Object[]{"factions", faction.Name, "home"}).setValue(faction.Home.WorldUUID.toString() + '|' + faction.Home.BlockPosition.toString());
+            }
 
             FactionsCache.addOrUpdateFactionCache(faction);
 
@@ -115,8 +124,7 @@ public class HOCONFactionStorage implements IStorage
     }
 
     @Override
-    public @Nullable
-    Faction getFaction(String factionName)
+    public @Nullable Faction getFaction(String factionName)
     {
         try
         {
@@ -147,7 +155,7 @@ public class HOCONFactionStorage implements IStorage
     {
         String tag = getFactionTag(factionName);
         String leader = getFactionLeader(factionName);
-        String home = getFactionHome(factionName);
+        FactionHome home = getFactionHome(factionName);
         List<String> officers = getFactionOfficers(factionName);
         List<String> members = getFactionMembers(factionName);
         List<String> alliances = getFactionAlliances(factionName);
@@ -302,7 +310,8 @@ public class HOCONFactionStorage implements IStorage
         if (enemiesObject != null)
         {
             return (List<String>) enemiesObject;
-        } else
+        }
+        else
         {
             configNode.getNode(new Object[]{"factions", factionName, "enemies"}).setValue(new ArrayList<>());
             saveChanges();
@@ -317,7 +326,8 @@ public class HOCONFactionStorage implements IStorage
         if (alliancesObject != null)
         {
             return (List<String>) alliancesObject;
-        } else
+        }
+        else
         {
             configNode.getNode(new Object[]{"factions", factionName, "alliances"}).setValue(new ArrayList<>());
             saveChanges();
@@ -332,7 +342,8 @@ public class HOCONFactionStorage implements IStorage
         if (membersObject != null)
         {
             return (List<String>) membersObject;
-        } else
+        }
+        else
         {
             configNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new ArrayList<>());
             saveChanges();
@@ -340,18 +351,24 @@ public class HOCONFactionStorage implements IStorage
         }
     }
 
-    private String getFactionHome(String factionName)
+    private FactionHome getFactionHome(String factionName)
     {
         Object homeObject = configNode.getNode(new Object[]{"factions", factionName, "home"}).getValue();
 
         if (homeObject != null)
         {
-            return String.valueOf(homeObject);
-        } else
+            if (String.valueOf(homeObject).equals(""))
+            {
+                return null;
+            }
+            else return new FactionHome(String.valueOf(homeObject));
+
+        }
+        else
         {
             configNode.getNode(new Object[]{"factions", factionName, "home"}).setValue("");
             saveChanges();
-            return "";
+            return null;
         }
     }
 
@@ -362,7 +379,8 @@ public class HOCONFactionStorage implements IStorage
         if (officersObject != null)
         {
             return (List<String>) officersObject;
-        } else
+        }
+        else
         {
             configNode.getNode(new Object[]{"factions", factionName, "officers"}).setValue(new ArrayList<>());
             saveChanges();

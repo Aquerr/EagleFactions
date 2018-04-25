@@ -21,6 +21,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -33,12 +34,13 @@ public class HomeCommand implements CommandExecutor
         if(source instanceof Player)
         {
             Player player = (Player)source;
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if(playerFactionName != "")
+            if(optionalPlayerFaction.isPresent())
             {
-                Faction playerFaction = FactionLogic.getFaction(playerFactionName);
-                if(FactionLogic.getHome(playerFaction) != null)
+                Faction playerFaction = optionalPlayerFaction.get();
+
+                if(playerFaction.Home != null)
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
@@ -52,19 +54,17 @@ public class HomeCommand implements CommandExecutor
                     }
                     else
                     {
-                        FactionHome factionHome = FactionLogic.getHome(playerFaction);
-
                         if(MainLogic.canHomeBetweenWorlds())
                         {
                             source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Stay still for ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " seconds", TextColors.RESET, "!"));
-                            teleportHome(player, player.getLocation().getBlockPosition(), factionHome);
+                            teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
                         }
                         else
                         {
-                            if(player.getWorld().getUniqueId().equals(factionHome.WorldUUID))
+                            if(player.getWorld().getUniqueId().equals(playerFaction.Home.WorldUUID))
                             {
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Stay still for ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " seconds", TextColors.RESET, "!"));
-                                teleportHome(player, player.getLocation().getBlockPosition(), factionHome);
+                                teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
                             }
                             else
                             {

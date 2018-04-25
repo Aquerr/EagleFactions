@@ -31,7 +31,7 @@ public class EntitySpawnListener
 
             if(entity instanceof Hostile)
             {
-                if((MainLogic.getMobSpawning() == false) && FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
+                if(!MainLogic.getMobSpawning() && FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
                 {
                     event.setCancelled(true);
                     return;
@@ -47,7 +47,7 @@ public class EntitySpawnListener
 
                     if(optionalPlayerFaction.isPresent())
                     {
-                        FactionHome factionHome = FactionLogic.getHome(optionalPlayerFaction.get());
+                        FactionHome factionHome = optionalPlayerFaction.get().Home;
                         if(factionHome != null)
                         {
                             event.setCancelled(true);

@@ -12,7 +12,27 @@ public class FactionHome
 
     public FactionHome(@Nullable UUID worldUUID, @Nullable Vector3i blockPosition)
     {
-        BlockPosition = blockPosition;
-        WorldUUID = worldUUID;
+        this.BlockPosition = blockPosition;
+        this.WorldUUID = worldUUID;
+    }
+
+    public FactionHome(String homeString)
+    {
+        String splitter = "\\|";
+        String worldUUIDString = homeString.split(splitter)[0];
+        String vectorsString = homeString.split(splitter)[1];
+
+        String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+
+        int x = Integer.valueOf(vectors[0]);
+        int y = Integer.valueOf(vectors[1]);
+        int z = Integer.valueOf(vectors[2]);
+
+        Vector3i blockPosition = Vector3i.from(x, y, z);
+
+        UUID worldUUID = UUID.fromString(worldUUIDString);
+        this.BlockPosition = blockPosition;
+        this.WorldUUID = worldUUID;
+
     }
 }

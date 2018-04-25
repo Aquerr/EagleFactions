@@ -13,6 +13,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.Optional;
+
 public class UnclaimallCommand implements CommandExecutor
 {
     @Override
@@ -22,18 +24,18 @@ public class UnclaimallCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
             //Check if player is in the faction.
-            if(playerFactionName != "")
+            if(optionalPlayerFaction.isPresent())
             {
-                Faction playerFaction = FactionLogic.getFaction(playerFactionName);
+                Faction playerFaction = optionalPlayerFaction.get();
 
                 if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    if(FactionLogic.getHome(playerFaction) != null)
+                    if(playerFaction.Home != null)
                     {
-                        FactionLogic.setHome(null, playerFactionName, null);
+                        FactionLogic.setHome(null, playerFaction, null);
                     }
 
                     FactionLogic.removeClaims(playerFaction);
