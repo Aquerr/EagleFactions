@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.caching;
 
-import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 
