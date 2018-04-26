@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -25,34 +26,26 @@ public class AttackCommand implements CommandExecutor
     {
         if(source instanceof Player)
         {
+            Player player = (Player)source;
             if(MainLogic.shouldAttackOnlyAtNight())
             {
-                if(Sponge.getServer().getDefaultWorld().isPresent())
+                if((player.getWorld().getProperties().getWorldTime() % 24000L) >= 12000)
                 {
-                    if((Sponge.getServer().getDefaultWorld().get().getWorldTime() % 24000L) >= 12000)
-                    {
-                        Player player = (Player)source;
-                        attackChunk(player);
-                    }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can attack someone's territory only at night!"));
-                    }
+                    attackChunk(player);
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Unexpected error! Default world is not a normal type world..."));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CAN_ATTACK_SOMEONES_TERRITORY_ONLY_AT_NIGHT));
                 }
             }
             else
             {
-                Player player = (Player)source;
                 attackChunk(player);
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -71,7 +64,7 @@ public class AttackCommand implements CommandExecutor
             {
                 if(optionalChunkFaction.get().Name.equals("SafeZone") || optionalChunkFaction.get().Name.equals("WarZone"))
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION));
                     return;
                 }
                 else
@@ -90,7 +83,7 @@ public class AttackCommand implements CommandExecutor
                                      Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
                                      AttackLogic.informAboutAttack(attackedFaction);
-                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Attack on the chunk has been started! Stay in the chunk for ", TextColors.GOLD, attackTime + " seconds", TextColors.GREEN, " to destroy it!"));
+                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
 
                                      AttackLogic.blockClaiming(attackedFaction.Name);
                                      AttackLogic.attack(player, attackedClaim);
@@ -98,33 +91,33 @@ public class AttackCommand implements CommandExecutor
                                  }
                                  else
                                  {
-                                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! Their power is too high!"));
+                                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.THEIR_POWER_IS_TO_HIGH));
                                  }
                              }
                              else
                              {
-                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack this faction! You are in the alliance with it!"));
+                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.YOU_ARE_IN_THE_SAME_ALLIANCE));
                              }
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't attack yourself! :)"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_YOURSELF));
                         }
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place does not belongs to anyone!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
             }
         }
         else
         {
-            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to do this!"));
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
         }
     }
 }

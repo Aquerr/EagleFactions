@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
@@ -37,7 +38,7 @@ public class AddAllyCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 String rawFactionName = optionalFactionName.get();
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
                 String invitedFactionName = FactionLogic.getRealFactionName(rawFactionName);
 
                 if (invitedFactionName == null)
@@ -46,15 +47,17 @@ public class AddAllyCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                if (playerFactionName != null)
+                if (optionalPlayerFaction.isPresent())
                 {
+                    Faction playerFaction = optionalPlayerFaction.get();
+
                     if (EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if (!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))
+                        if (!playerFaction.Enemies.contains(invitedFactionName))
                         {
-                            if (!FactionLogic.getAlliances(playerFactionName).contains(invitedFactionName))
+                            if (!playerFaction.Alliances.contains(invitedFactionName))
                             {
-                                FactionLogic.addAlly(playerFactionName, invitedFactionName);
+                                FactionLogic.addAlly(playerFaction.Name, invitedFactionName);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
                             }
                             else
@@ -69,34 +72,34 @@ public class AddAllyCommand implements CommandExecutor
                         return CommandResult.success();
                     }
 
-                    if (FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                    if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        if(!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))
+                        if(!playerFaction.Enemies.contains(invitedFactionName))
                         {
-                            if(!FactionLogic.getAlliances(playerFactionName).contains(invitedFactionName))
+                            if(!playerFaction.Alliances.contains(invitedFactionName))
                             {
-                                AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFactionName);
+                                AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFaction.Name);
 
                                 //TODO: Check if player is online
-                                Player invitedFactionLeader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
+                                Player invitedFactionLeader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader)).get();
 
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    FactionLogic.addAlly(playerFactionName, invitedFactionName);
+                                    FactionLogic.addAlly(playerFaction.Name, invitedFactionName);
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, invitedFactionName + "!"));
 
-                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE));
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE));
 
                                     EagleFactions.AllayInviteList.remove(checkInvite);
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    AllyInvite invite = new AllyInvite(playerFactionName, invitedFactionName);
+                                    AllyInvite invite = new AllyInvite(playerFaction.Name, invitedFactionName);
                                     EagleFactions.AllayInviteList.add(invite);
 
-                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
-                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally add " + playerFactionName, TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION));
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally add " + playerFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION));
 
                                     //TODO: Send message about invitation to officers.
 
