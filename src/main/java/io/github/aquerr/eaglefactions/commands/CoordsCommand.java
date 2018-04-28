@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -38,7 +39,7 @@ public class CoordsCommand implements CommandExecutor
                 if(playerFaction.Home != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of("Faction's Home: " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
+                            .append(Text.of( PluginMessages.FACTIONS_HOME + ": " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
@@ -51,7 +52,7 @@ public class CoordsCommand implements CommandExecutor
                     if(leader.isPresent())
                     {
                         Text textBuilder = Text.builder()
-                                .append(Text.of("Leader: " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
+                                .append(Text.of(PluginMessages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
                                 .build();
 
                         teamCoords.add(textBuilder);
@@ -67,7 +68,7 @@ public class CoordsCommand implements CommandExecutor
                         if(officer.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of("Officer: " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(PluginMessages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -84,7 +85,7 @@ public class CoordsCommand implements CommandExecutor
                         if(member.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of("Member: " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(PluginMessages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -93,19 +94,19 @@ public class CoordsCommand implements CommandExecutor
                 }
 
                 PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Team Coords")).contents(teamCoords);
+                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
                 paginationBuilder.sendTo(source);
 
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

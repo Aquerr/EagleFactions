@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -31,13 +32,13 @@ public class DisbandCommand implements CommandExecutor
 
                     if (didSucceed)
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
                         if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Something went wrong..."));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
                     }
 
                     return CommandResult.success();
@@ -51,13 +52,13 @@ public class DisbandCommand implements CommandExecutor
 
                         if (didSucceed)
                         {
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN,"Faction has been disbanded!"));
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
                             if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Something went wrong..."));
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
                         }
 
                         return CommandResult.success();
@@ -69,17 +70,17 @@ public class DisbandCommand implements CommandExecutor
                 }
                 else if(FactionLogic.getMembers(playerFactionName).contains(player.getUniqueId().toString()))
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You need to be the leader to disband a faction!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are not in the faction!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

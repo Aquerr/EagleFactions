@@ -43,9 +43,7 @@ public class MapCommand implements CommandExecutor
 
     private void generateMap(Player player)
     {
-//        List<String> factionsClaims = FactionLogic.getFactions().stream().flatMap(x->{
-//            return x.Claims;
-//        });
+        List<String> claimsList = FactionLogic.getAllClaims();
         Faction playerFaction = FactionLogic.getFaction(FactionLogic.getFactionName(player.getUniqueId()));
 
         World world = player.getWorld();
@@ -89,16 +87,16 @@ public class MapCommand implements CommandExecutor
 
                 Vector3i chunk = playerPosition.add(column, 0, row);
 
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
-
-                if (optionalChunkFaction.isPresent())
+                if (claimsList.contains(world.getUniqueId().toString() + '|' + chunk.toString()))
                 {
+                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+
                     if (playerFaction != null)
                     {
                         if (optionalChunkFaction.get().Name.equals(playerFaction.Name))
                         {
                             textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
-//                                playerFaction = chunkFactionName;
+//                            playerFaction = optionalChunkFaction.get();
                         } else if (playerFaction.Alliances.contains(optionalChunkFaction.get().Name))
                         {
                             textBuilder.append(allianceMark);

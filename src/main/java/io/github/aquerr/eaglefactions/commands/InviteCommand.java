@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -33,21 +34,22 @@ public class InviteCommand implements CommandExecutor
             {
                 Player senderPlayer = (Player)source;
                 Player invitedPlayer = optionalInvitedPlayer.get();
-                String senderFactionName = FactionLogic.getFactionName(senderPlayer.getUniqueId());
+                Optional<Faction> optionalSenderFaction = FactionLogic.getFactionByPlayerUUID(senderPlayer.getUniqueId());
 
-                if(senderFactionName != null)
+                if(optionalSenderFaction.isPresent())
                 {
+                    Faction senderFaction = optionalSenderFaction.get();
+
                     if(MainLogic.isPlayerLimit())
                     {
                         int playerCount = 0;
-                        Faction faction = FactionLogic.getFaction(senderFactionName);
-                        playerCount += faction.Leader.equals("") ? 0 : 1;
-                        playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
-                        playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
+                        playerCount += senderFaction.Leader.equals("") ? 0 : 1;
+                        playerCount += senderFaction.Officers.isEmpty() ? 0 : senderFaction.Officers.size();
+                        playerCount += senderFaction.Members.isEmpty() ? 0 : senderFaction.Members.size();
 
                         if(playerCount >= MainLogic.getPlayerLimit())
                         {
-                            senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't invite more players to your faction. Faction's player limit has been reached!"));
+                            senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + PluginMessages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
                             return CommandResult.success();
                         }
                     }
@@ -56,13 +58,13 @@ public class InviteCommand implements CommandExecutor
                     {
                         try
                         {
-                            Invite invite = new Invite(senderFactionName, invitedPlayer.getUniqueId());
+                            Invite invite = new Invite(senderFaction.Name, invitedPlayer.getUniqueId());
                             EagleFactions.InviteList.add(invite);
 
-                            invitedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, senderFactionName, TextColors.GREEN, " has sent you an invite! You have 2 minutes to accept it!" +
-                                    " Type ", TextColors.GOLD, "/f join " + senderFactionName, TextColors.WHITE, " to join."));
+                            invitedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, senderFaction.Name, TextColors.GREEN, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE + " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                    " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f join " + senderFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_JOIN));
 
-                            senderPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You invited ", TextColors.GOLD, invitedPlayer.getName(), TextColors.GREEN, " to your faction."));
+                            senderPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_INVITED + " ", TextColors.GOLD, invitedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.TO_YOUR_FACTION));
 
                             //TODO: Create a separate listener for removing invitations.
 
@@ -78,7 +80,7 @@ public class InviteCommand implements CommandExecutor
                                         EagleFactions.InviteList.remove(invite);
                                     }
                                 }
-                            }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+                            }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(EagleFactions.getEagleFactions());
 
                             return CommandResult.success();
                         }
@@ -90,23 +92,23 @@ public class InviteCommand implements CommandExecutor
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Player is already in a faction!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PLAYER_IS_ALREADY_IN_A_FACTION));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to invite players!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f invite <player>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f invite <player>"));
         }
 
         return CommandResult.success();

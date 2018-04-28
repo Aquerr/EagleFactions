@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandMapping;
@@ -44,50 +45,50 @@ public class HomeCommand implements CommandExecutor
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "Home command is currently on cooldown! You need to wait ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " seconds ", TextColors.RED, "to be able to use it again!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " " + PluginMessages.SECONDS + " ", TextColors.RED, PluginMessages.TO_BE_ABLE_TO_USE_IT_AGAIN));
                         return CommandResult.success();
                     }
                     else if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, "You can't teleport to faction's home because you died recently died in your faction's land!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
                         return CommandResult.success();
                     }
                     else
                     {
                         if(MainLogic.canHomeBetweenWorlds())
                         {
-                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Stay still for ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " seconds", TextColors.RESET, "!"));
+                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                             teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
                         }
                         else
                         {
                             if(player.getWorld().getUniqueId().equals(playerFaction.Home.WorldUUID))
                             {
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Stay still for ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " seconds", TextColors.RESET, "!"));
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                                 teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, "Faction's home is not in this world."));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD));
                             }
                         }
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Faction's home is not set!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.FACTIONS_HOME_IS_NOT_SET));
                 }
 
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -109,7 +110,7 @@ public class HomeCommand implements CommandExecutor
                     if (seconds >= MainLogic.getHomeDelayTime())
                     {
                         player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "You were teleported to faction's home!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
                         startHomeCooldown(player.getUniqueId());
                         task.cancel();
                     }
@@ -121,7 +122,7 @@ public class HomeCommand implements CommandExecutor
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You did move! Teleporting has been cancelled!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
                     task.cancel();
                 }
             }

@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagType;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -16,7 +17,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.security.PublicKey;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class FlagsCommand implements CommandExecutor
@@ -28,11 +31,11 @@ public class FlagsCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if (playerFactionName != null)
+            if (optionalPlayerFaction.isPresent())
             {
-                Faction faction = FactionLogic.getFaction(playerFactionName);
+                Faction faction = optionalPlayerFaction.get();
 
                 if (faction.Leader.equals(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
@@ -40,17 +43,17 @@ public class FlagsCommand implements CommandExecutor
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be a faction's leader to use this command!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to do this!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -65,7 +68,7 @@ public class FlagsCommand implements CommandExecutor
         //textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
         //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
 
-        textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY"));
+        textBuilder.append(Text.of(TextColors.AQUA, "|   " + PluginMessages.WHO + "    |  " + PluginMessages.USE + "  | " + PluginMessages.PLACE + " | " + PluginMessages.DESTROY));
 
 
         for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())
@@ -84,7 +87,7 @@ public class FlagsCommand implements CommandExecutor
                 flagTextBuilder = Text.builder();
                 flagTextBuilder.append(Text.of(flagValue.toString()));
                 flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagValue)));
-                flagTextBuilder.onHover(TextActions.showText(Text.of("Set to " + String.valueOf(!flagValue).toUpperCase())));
+                flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagValue).toUpperCase())));
 
                 if (flagValue.booleanValue())
                 {
@@ -99,8 +102,8 @@ public class FlagsCommand implements CommandExecutor
             }
         }
 
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Permissions flags for " + faction.Name + ":"));
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Click on the permission you want to change."));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.Name + ":"));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
         player.sendMessage(textBuilder.build());
     }
 
