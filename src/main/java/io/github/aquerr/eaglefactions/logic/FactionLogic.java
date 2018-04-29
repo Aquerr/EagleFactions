@@ -64,7 +64,7 @@ public class FactionLogic
                 return faction.Name;
             }
         }
-        return null;
+        return "";
     }
 
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)

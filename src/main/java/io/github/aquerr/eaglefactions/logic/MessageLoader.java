@@ -42,6 +42,7 @@ public class MessageLoader
             try
             {
                 Files.copy(inputStream, messagesFilePath);
+                inputStream.close();
             }
             catch (IOException e)
             {

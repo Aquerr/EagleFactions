@@ -157,4 +157,33 @@ public class PluginMessages
     public static String YOU_WERE_KICKED_FROM_THE_FACTION;
     public static String YOU_CANT_KICK_THIS_PLAYER;
     public static String THIS_PLAYER_IS_NOT_IN_YOUR_FACTION;
+
+    //Leave
+    public static String YOU_LEFT_FACTION;
+    public static String YOU_CANT_LEAVE_YOUR_FACTION_BECAUSE_YOU_ARE_ITS_LEADER;
+    public static String DISBAND_YOUR_FACTION_OR_SET_SOMEONE_AS_LEADER;
+
+    //List
+    public static String FACTIONS_LIST;
+
+    //Map
+    public static String FACTIONS_MAP_HEADER;
+    public static String FACTIONS_MAP_FOOTER;
+    public static String YOUR_FACTION;
+    public static String FACTIONS;
+    public static String CURRENTLY_STANDING_AT;
+    public static String WHICH_IS_CLAIMED_BY;
+    public static String LAND_HAS_BEEN_SUCCESSFULLY;
+    public static String UNCLAIMED;
+
+    //Maxpower
+    public static String YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS;
+    public static String PLAYERS_MAXPOWER_HAS_BEEN_CHANGED;
+
+    //Officer
+    public static String YOU_CANT_SET_FACTIONS_LEADER_AS_OFFICER;
+    public static String YOU_ADDED;
+    public static String YOU_REMOVED;
+    public static String AS_YOUR_NEW;
+    public static String FROM_YOUR;
 }

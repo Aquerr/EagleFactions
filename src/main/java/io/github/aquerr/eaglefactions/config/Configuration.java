@@ -53,6 +53,7 @@ public class Configuration
             try
             {
                 Files.copy(inputStream, configPath);
+                inputStream.close();
             }
             catch (IOException e)
             {
