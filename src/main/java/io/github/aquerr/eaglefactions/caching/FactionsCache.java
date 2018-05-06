@@ -51,7 +51,7 @@ public class FactionsCache
 
     public static @Nullable Faction getFactionCache(String factionName)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name == factionName).findFirst();
+        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equalsIgnoreCase(factionName)).findFirst();
 
         if (optionalFaction.isPresent())
         {

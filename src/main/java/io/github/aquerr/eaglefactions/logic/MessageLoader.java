@@ -13,16 +13,11 @@ import java.nio.file.Path;
 
 public class MessageLoader
 {
-    private Path messagesFilePath;
-
-//    private String ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND;
-//    private String YOU_NEED_TO_BE_LEADER;
-
     public MessageLoader(Path configDir)
     {
         //TODO: Consider having language option in main config file.
         String messagesFileName = MainLogic.getLanguageFileName();
-        messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
+        Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
         if (!Files.exists(configDir.resolve("messages")))
         {

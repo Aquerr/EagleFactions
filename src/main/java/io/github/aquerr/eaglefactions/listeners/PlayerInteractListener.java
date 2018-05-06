@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -30,7 +31,7 @@ public class PlayerInteractListener
             {
                 World world = player.getWorld();
                 Vector3d vector3d = event.getInteractionPoint().get();
-                Location<World> location = new Location(world, vector3d);
+                Location location = new Location(world, vector3d);
                 Vector3i claim = location.getChunkPosition();
 
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
@@ -51,7 +52,7 @@ public class PlayerInteractListener
                         boolean canInteract = FlagManager.canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get());
                         if (!canInteract)
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to interact here!"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
                             event.setCancelled(true);
                         }
                         return;
@@ -59,7 +60,7 @@ public class PlayerInteractListener
                     else
                     {
                         event.setCancelled(true);
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to do this!"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
                         return;
                     }
                 }

@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -37,7 +38,7 @@ public class SetHomeCommand implements CommandExecutor
                 {
                     Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
                     FactionLogic.setHome(world.getUniqueId(), playerFaction, home);
-                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
+                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
 
                     return CommandResult.success();
                 }
@@ -49,28 +50,28 @@ public class SetHomeCommand implements CommandExecutor
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
                         FactionLogic.setHome(world.getUniqueId(), playerFaction, home);
-                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction home has been set!"));
+                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This place is not claimed! You can set home only in claimed land!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLACE_IS_NOT_CLAIMED_YOU_CAN_SET_HOME_ONLY_IN_CLAIMED_CLAND));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                 }
 
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

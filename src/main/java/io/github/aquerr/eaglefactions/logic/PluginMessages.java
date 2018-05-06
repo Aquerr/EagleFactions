@@ -54,6 +54,12 @@ public class PluginMessages
     public static String YOU_ARE_IN_THE_SAME_ALLIANCE;
     public static String YOU_CANT_ATTACK_YOURSELF;
     public static String THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE;
+    public static String CLAIM_DESTROYED;
+    public static String YOUR_FACTION_IS_UNDER;
+    public static String ATTACK;
+    public static String ONE_OF_YOUR_CLAIMS_HAS_BEEN;
+    public static String DESTROYED;
+    public static String BY_AN_ENEMY;
 
     //Chat
     public static String CHANGED_CHAT_TO;
@@ -72,6 +78,10 @@ public class PluginMessages
     public static String TO_BE_ABLE_TO_CLAIM_AGAIN;
     public static String YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS;
     public static String THIS_PLACE_IS_ALREADY_CLAIMED;
+    public static String YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY;
+    public static String YOU_MOVED_FROM_THE_CHUNK;
+    public static String CLAIMING_HAS_BEEN_STARTED;
+    public static String TO_CLAIM_IT;
 
     //Coords
     public static String TEAM_COORDS;
@@ -112,7 +122,7 @@ public class PluginMessages
     //Help
     public static String EAGLEFACTIONS_COMMAND_LIST;
 
-    //Help
+    //Home
     public static String HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN;
     public static String TO_BE_ABLE_TO_USE_IT_AGAIN;
     public static String YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND;
@@ -122,6 +132,7 @@ public class PluginMessages
     public static String YOU_WERE_TELEPORTED_TO_FACTIONS_HOME;
     public static String YOU_MOVED;
     public static String TELEPORTING_HAS_BEEN_CANCELLED;
+    public static String COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET;
 
     //Info
     public static String YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION;
@@ -186,4 +197,69 @@ public class PluginMessages
     public static String YOU_REMOVED;
     public static String AS_YOUR_NEW;
     public static String FROM_YOUR;
+
+    //Player
+    public static String PLAYER_INFO;
+    public static String LAST_PLAYED;
+    public static String THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER;
+
+    //Reload
+    public static String CONFIGS_HAS_BEEN_RELOADED;
+
+    //Ally
+    public static String YOU_DISBANDED_YOUR_ALLIANCE_WITH;
+    public static String YOUR_FACTION_IS_NOT_IN_THE_ALLIANCE_WITH;
+
+    //Enemy
+    public static String YOU_REMOVED_WAR_STATE_WITH;
+    public static String YOU_ARE_NOT_IN_THE_WAR_WITH_THIS_FACTION;
+    public static String YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM;
+    public static String TO_ACCEPT_IT;
+    public static String YOU_REQUESTED_END_OF_WAR_WITH_FACTION;
+    public static String WANTS_TO_END_THE;
+    public static String WAR;
+    public static String WITH_YOUR_FACTION;
+
+    //Home
+    public static String FACTION_HOME_HAS_BEEN_SET;
+    public static String THIS_PLACE_IS_NOT_CLAIMED_YOU_CAN_SET_HOME_ONLY_IN_CLAIMED_CLAND;
+
+    //SetLeader
+    public static String YOU_SET;
+    public static String YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION;
+
+    //Setpower
+    public static String PLAYERS_POWER_HAS_BEEN_CHANGED;
+
+    //Unclaim
+    public static String SUCCESSFULLY_REMOVED_ALL_CLAIMS;
+
+    //Version
+    public static String VERSION;
+
+    //World
+    public static String YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE;
+    public static String THIS_LAND_BELONGS_TO_SOMEONE_ELSE;
+    public static String YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE;
+    public static String YOU_DONT_HAVE_ACCESS_TO_DO_THIS;
+    public static String YOU_CANT_ENTER_THIS_FACTION;
+    public static String NONE_OF_THIS_FACTIONS_PLAYERS_ARE_ONLINE;
+    public static String YOU_CANT_ENTER_SAFEZONE_WHEN_YOU_ARE_IN_WARZONE;
+    public static String YOU_HAVE_ENTERED_FACTION;
+    public static String YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT;
+    public static String TIME_LEFT;
+
+    public static String PVPLOGGER_HAS_TURNED_ON;
+    public static String PVPLOGGER_HAS_TURNED_OFF;
+    public static String YOU_WILL_DIE_IF_YOU_DISCONNECT_IN;
+    public static String YOU_CAN_NOW_DISCONNECT_SAFELY;
+
+    //PowerFlow
+    public static String YOUR_POWER_HAS_BEEN_DECREASED_BY;
+    public static String YOUR_POWER_HAS_BEEN_INCREASED_BY;
+    public static String CURRENT_POWER;
+
+    //Version
+    public static String A_NEW_VERSION_OF;
+    public static String IS_AVAILABLE;
 }

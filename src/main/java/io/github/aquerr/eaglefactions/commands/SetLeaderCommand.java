@@ -2,7 +2,9 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -23,76 +25,68 @@ public class SetLeaderCommand implements CommandExecutor
 
         if (optionalNewLeaderPlayer.isPresent())
         {
-            if(source instanceof Player)
+            if (source instanceof Player)
             {
-                Player player = (Player)source;
+                Player player = (Player) source;
                 Player newLeaderPlayer = optionalNewLeaderPlayer.get();
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalNewLeaderPlayerFaction = FactionLogic.getFactionByPlayerUUID(newLeaderPlayer.getUniqueId());
 
-                if(playerFactionName != null)
+                if (optionalPlayerFaction.isPresent())
                 {
-                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                    Faction playerFaction = optionalPlayerFaction.get();
+
+                    if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().Name.equals(playerFaction.Name))
                     {
-                        if(FactionLogic.getFactionName(newLeaderPlayer.getUniqueId()).equals(playerFactionName))
+                        if (EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if(!FactionLogic.getLeader(playerFactionName).equals(newLeaderPlayer.getUniqueId().toString()))
+                            if (!playerFaction.Leader.equals(newLeaderPlayer.getUniqueId().toString()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFactionName);
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You set ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
+                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.Name);
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_SET + " ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.LEADER, TextColors.WHITE, "!"));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are already a leader of this faction!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
                             }
-                        }
-                        else
-                        {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This player is not in your team!"));
+
+                            return CommandResult.success();
                         }
 
-                        return CommandResult.success();
-                    }
-
-                    if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()))
-                    {
-                        if(FactionLogic.getFactionName(newLeaderPlayer.getUniqueId()).equals(playerFactionName))
+                        if (playerFaction.Leader.equals(player.getUniqueId().toString()))
                         {
-                            if(!FactionLogic.getLeader(playerFactionName).equals(newLeaderPlayer.getUniqueId().toString()))
+                            if (!playerFaction.Leader.equals(newLeaderPlayer.getUniqueId().toString()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFactionName);
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "You set ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
-                                return CommandResult.success();
+                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.Name);
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_SET + " ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are already a leader of this faction!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
                             }
-                        }
-                        else
-                        {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This player is not in your team!"));
-                        }
 
+                            return CommandResult.success();
+                        }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader to do this!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f setleader <player>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f setleader <player>"));
         }
 
         return CommandResult.success();

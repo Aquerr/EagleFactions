@@ -106,7 +106,7 @@ public class ChatMessageListener
             //Get faction prefix from Eagle Factions.
             if(MainLogic.getPrefixOption().equals("tag"))
             {
-                if(!playerFaction.Tag.equals("") && playerFaction.Tag != null)
+                if(!playerFaction.Tag.equals(""))
                 {
                     //Get faction's tag
                     Text factionTag = Text.builder()

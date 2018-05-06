@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -22,7 +23,7 @@ public class PlayerJoinListener
 
             if (player.hasPermission(PluginPermissions.VersionNotify) && !VersionChecker.isLatest(PluginInfo.Version))
             {
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "A new version of ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " is available!"));
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + PluginMessages.IS_AVAILABLE));
             }
 
             if(PowerManager.checkIfPlayerExists(player.getUniqueId()))

@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -53,7 +54,7 @@ public class BlockBreakListener
                              boolean canBreakBlock = FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get());
                              if (!canBreakBlock)
                              {
-                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, "You don't have privileges to destroy blocks here!"));
+                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                  event.setCancelled(true);
                              }
                              return;
@@ -61,7 +62,7 @@ public class BlockBreakListener
                          else
                          {
                              event.setCancelled(true);
-                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This land belongs to someone else!"));
+                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
                              return;
                          }
                      }

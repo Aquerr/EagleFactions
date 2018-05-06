@@ -84,11 +84,7 @@ public class Configuration
                 {
                     Object o = method.invoke(null);
                 }
-                catch (IllegalAccessException e)
-                {
-                    e.printStackTrace();
-                }
-                catch (InvocationTargetException e)
+                catch (IllegalAccessException | InvocationTargetException e)
                 {
                     e.printStackTrace();
                 }
@@ -122,11 +118,6 @@ public class Configuration
         }
     }
 
-//    public Path getConfigPath()
-//    {
-//        return configPath;
-//    }
-
     public int getInt(int defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getInt(defaultValue);
@@ -138,12 +129,12 @@ public class Configuration
 
         if (value instanceof Integer)
         {
-            int number = ((Integer) value).intValue();
+            int number = (Integer) value;
             return (double) number;
         }
         else if(value instanceof Double)
         {
-            return ((Double) value).doubleValue();
+            return (Double) value;
         }
         else return 0;
     }

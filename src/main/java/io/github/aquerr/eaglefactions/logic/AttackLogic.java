@@ -37,7 +37,7 @@ public class AttackLogic
                         Faction chunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
 
                         informAboutDestroying(chunkFaction);
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
 
                         FactionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
                         task.cancel();
@@ -50,7 +50,7 @@ public class AttackLogic
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
                     task.cancel();
                 }
             }
@@ -103,14 +103,14 @@ public class AttackLogic
     {
         List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
 
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is under ", TextColors.RED, "attack", TextColors.RESET, "!")));
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_UNDER + " ", TextColors.RED, PluginMessages.ATTACK, TextColors.RESET, "!")));
     }
 
     public static void informAboutDestroying(Faction faction)
     {
         List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
 
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "One of your claims has been ", TextColors.RED, "destroyed", TextColors.RESET, " by an enemy!")));
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.ONE_OF_YOUR_CLAIMS_HAS_BEEN + " ", TextColors.RED, PluginMessages.DESTROYED, TextColors.RESET, " " + PluginMessages.BY_AN_ENEMY)));
     }
 
     public static void blockHome(UUID playerUUID)

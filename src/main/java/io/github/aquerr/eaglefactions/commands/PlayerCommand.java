@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
@@ -69,21 +70,21 @@ public class PlayerCommand implements CommandExecutor
             //TODO: Show if player is online or offline.
 
             Text info = Text.builder()
-                    .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, PlayerManager.getPlayerName(player.getUniqueId()).get() + "\n"))
-                    .append(Text.of(TextColors.AQUA, "Last Played: ", TextColors.GOLD, formattedDate + "\n"))
-                    .append(Text.of(TextColors.AQUA, "Faction: ", TextColors.GOLD, playerFactionName + "\n"))
-                    .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, PowerManager.getPlayerPower(player.getUniqueId()) + "/" + PowerManager.getPlayerMaxPower(player.getUniqueId())))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, PlayerManager.getPlayerName(player.getUniqueId()).get() + "\n"))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, PowerManager.getPlayerPower(player.getUniqueId()) + "/" + PowerManager.getPlayerMaxPower(player.getUniqueId())))
                     .build();
 
             playerInfo.add(info);
 
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-            PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Player Info")).padding(Text.of("=")).contents(playerInfo);
+            PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
             paginationBuilder.sendTo(source);
         }
         else
         {
-            player.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "This player has not played on this server!"));
+            player.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
         }
     }
 }
