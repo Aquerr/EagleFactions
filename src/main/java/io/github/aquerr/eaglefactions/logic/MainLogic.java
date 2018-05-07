@@ -249,4 +249,9 @@ public class MainLogic
     {
         return _configuration.getString("english.conf", "language-file");
     }
+
+    public static boolean areColoredTagsAllowed()
+    {
+        return _configuration.getBoolean(true, "colored-tags-allowed");
+    }
 }
