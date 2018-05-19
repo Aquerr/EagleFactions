@@ -1,6 +1,8 @@
 package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.managers.FlagManager;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -11,7 +13,7 @@ import java.util.*;
 public class Faction
 {
     public String Name;
-    public String Tag;
+    public Text Tag;
     public BigDecimal Power;
     public List<String> Members;
     public List<String> Alliances;
@@ -26,7 +28,7 @@ public class Faction
     public Faction(String factionName, String factionTag, String factionLeader)
     {
         this.Name = factionName;
-        this.Tag = factionTag;
+        this.Tag = Text.of(TextColors.GREEN, factionTag);
         this.Leader = factionLeader;
         this.Power = new BigDecimal("0.0");
         this.Members = new ArrayList<>();
@@ -39,7 +41,7 @@ public class Faction
     }
 
     //Constructor used while getting a faction from storage.
-    public Faction(String factionName, String factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags)
+    public Faction(String factionName, Text factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags)
     {
         this.Name = factionName;
         this.Tag = factionTag;

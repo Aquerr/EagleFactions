@@ -19,6 +19,7 @@ import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 
@@ -458,7 +459,7 @@ public class FactionLogic
 
         for (Faction faction: factionsList)
         {
-            factionsTags.add(faction.Tag);
+            factionsTags.add(faction.Tag.toPlain());
         }
 
         return factionsTags;
@@ -651,6 +652,14 @@ public class FactionLogic
         flags.get(factionMemberType).replace(factionFlagType, !toggled);
 
         faction.Flags = flags;
+
+        factionsStorage.addOrUpdateFaction(faction);
+    }
+
+    public static void changeTagColor(Faction faction, TextColor textColor)
+    {
+        Text text = Text.of(textColor, faction.Tag.toPlainSingle());
+        faction.Tag = text;
 
         factionsStorage.addOrUpdateFaction(faction);
     }

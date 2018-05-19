@@ -262,4 +262,7 @@ public class PluginMessages
     //Version
     public static String A_NEW_VERSION_OF;
     public static String IS_AVAILABLE;
+
+    //Tagcolor
+    public static String TAG_COLOR_HAS_BEEN_CHANGED;
 }

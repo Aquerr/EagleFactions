@@ -29,14 +29,14 @@ public class LeaveCommand implements CommandExecutor
 
             if(optionalPlayerFaction.isPresent())
             {
-                if(!optionalPlayerFaction.get().equals(player.getUniqueId().toString()))
+                if(!optionalPlayerFaction.get().Leader.equals(player.getUniqueId().toString()))
                 {
                     FactionLogic.leaveFaction(player.getUniqueId(), optionalPlayerFaction.get().Name);
 
                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_LEFT_FACTION + " ", TextColors.GOLD, optionalPlayerFaction.get().Name));
 
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                    EagleFactions.AutoClaimList.remove(player.getUniqueId());
 
                     return CommandResult.success();
                 }

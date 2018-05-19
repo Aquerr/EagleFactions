@@ -1,9 +1,10 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import io.github.aquerr.eaglefactions.config.Configuration;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -253,5 +254,17 @@ public class MainLogic
     public static boolean areColoredTagsAllowed()
     {
         return _configuration.getBoolean(true, "colored-tags-allowed");
+    }
+
+    public static Text getFactionPrefixStart()
+    {
+        String prefix = _configuration.getString("[", "faction-prefix-start");
+        return TextSerializers.FORMATTING_CODE.deserialize(prefix);
+    }
+
+    public static Text getFactionPrefixEnd()
+    {
+        String prefix = _configuration.getString("]", "faction-prefix-end");
+        return TextSerializers.FORMATTING_CODE.deserialize(prefix);
     }
 }

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
@@ -18,6 +19,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -48,9 +50,9 @@ public class CreateCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-                if (playerFactionName == null)
+                if (!optionalPlayerFaction.isPresent())
                 {
                     if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
                     {
@@ -72,7 +74,7 @@ public class CreateCommand implements CommandExecutor
                         }
                     }
 
-                    if (!FactionLogic.getFactionsNames().stream().anyMatch(x -> x.equalsIgnoreCase(factionName)))
+                    if (FactionLogic.getFactionsNames().stream().noneMatch(x -> x.equalsIgnoreCase(factionName)))
                     {
                         //Check name length
                         if(factionName.length() > MainLogic.getMaxNameLength())

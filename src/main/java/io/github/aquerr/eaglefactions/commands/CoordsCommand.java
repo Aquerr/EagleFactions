@@ -30,12 +30,13 @@ public class CoordsCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Faction playerFaction = FactionLogic.getFaction(FactionLogic.getFactionName(player.getUniqueId()));
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
             List<Text> teamCoords = new ArrayList<>();
 
-            if(playerFaction != null)
+            if(optionalPlayerFaction.isPresent())
             {
+                Faction playerFaction = optionalPlayerFaction.get();
                 if(playerFaction.Home != null)
                 {
                     Text textBuilder = Text.builder()

@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage;
 
+import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagType;
@@ -10,6 +11,8 @@ import io.github.aquerr.eaglefactions.managers.PowerManager;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -77,7 +80,7 @@ public class HOCONFactionStorage implements IStorage
     {
         try
         {
-            configNode.getNode(new Object[]{"factions", faction.Name, "tag"}).setValue(faction.Tag);
+            configNode.getNode(new Object[]{"factions", faction.Name, "tag"}).setValue(TypeToken.of(Text.class), faction.Tag);
             configNode.getNode(new Object[]{"factions", faction.Name, "leader"}).setValue(faction.Leader);
             configNode.getNode(new Object[]{"factions", faction.Name, "officers"}).setValue(faction.Officers);
             configNode.getNode(new Object[]{"factions", faction.Name, "members"}).setValue(faction.Members);
@@ -153,7 +156,7 @@ public class HOCONFactionStorage implements IStorage
 
     private Faction createFactionObject(String factionName)
     {
-        String tag = getFactionTag(factionName);
+        Text tag = getFactionTag(factionName);
         String leader = getFactionLeader(factionName);
         FactionHome home = getFactionHome(factionName);
         List<String> officers = getFactionOfficers(factionName);
@@ -390,12 +393,13 @@ public class HOCONFactionStorage implements IStorage
 
     private String getFactionLeader(String factionName)
     {
-        Object tagObject = configNode.getNode(new Object[]{"factions", factionName, "leader"}).getValue();
+        Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "leader"}).getValue();
 
-        if (tagObject != null)
+        if (leaderObject != null)
         {
-            return String.valueOf(tagObject);
-        } else
+            return String.valueOf(leaderObject);
+        }
+        else
         {
             configNode.getNode(new Object[]{"factions", factionName, "leader"}).setValue("");
             saveChanges();
@@ -403,18 +407,34 @@ public class HOCONFactionStorage implements IStorage
         }
     }
 
-    private String getFactionTag(String factionName)
+    private Text getFactionTag(String factionName)
     {
-        Object tagObject = configNode.getNode(new Object[]{"factions", factionName, "tag"}).getValue();
+        Object tagObject = null;
+        try
+        {
+            tagObject = configNode.getNode(new Object[]{"factions", factionName, "tag"}).getValue(TypeToken.of(Text.class));
+        }
+        catch (ObjectMappingException e)
+        {
+            e.printStackTrace();
+        }
 
         if (tagObject != null)
         {
-            return String.valueOf(tagObject);
-        } else
+            return (Text)tagObject;
+        }
+        else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "tag"}).setValue("");
+            try
+            {
+                configNode.getNode(new Object[]{"factions", factionName, "tag"}).setValue(TypeToken.of(Text.class), Text.of(""));
+            }
+            catch (ObjectMappingException e)
+            {
+                e.printStackTrace();
+            }
             saveChanges();
-            return "";
+            return Text.of("");
         }
     }
 

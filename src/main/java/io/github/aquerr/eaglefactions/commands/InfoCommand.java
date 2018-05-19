@@ -37,9 +37,9 @@ public class InfoCommand implements CommandExecutor
         if (optionalFactionName.isPresent())
         {
             String rawFactionName = optionalFactionName.get();
-            String factionName = FactionLogic.getRealFactionName(rawFactionName);
+            Faction faction = FactionLogic.getFaction(rawFactionName);
 
-            if (factionName == null)
+            if (faction == null)
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName + "!"));
             }
@@ -48,17 +48,17 @@ public class InfoCommand implements CommandExecutor
                 if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
+                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(faction.Name)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
                     }
-                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && !FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
+                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && !FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(faction.Name)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
                     }
                     else
                     {
-                        showFactionInfo(source, factionName);
+                        showFactionInfo(source, faction.Name);
                     }
                 }
                 else
@@ -67,7 +67,7 @@ public class InfoCommand implements CommandExecutor
                 }
             }
         }
-        else if(source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()) != null)
+        else if(source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
         {
             //Check permissions
             if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf))
@@ -140,11 +140,11 @@ public class InfoCommand implements CommandExecutor
 
         Text info = Text.builder()
                 .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, faction.Name + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.TAG + ": ", TextColors.GOLD, faction.Tag + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.TAG + ": "), faction.Tag.toBuilder().color(TextColors.GOLD).build(), Text.of("\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.RED, enemiesList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(FactionLogic.getClaims(factionName).size()) + "/" + String.valueOf(faction.Power.intValue())))

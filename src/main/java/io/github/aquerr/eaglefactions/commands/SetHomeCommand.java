@@ -45,7 +45,9 @@ public class SetHomeCommand implements CommandExecutor
 
                 if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
-                    if(FactionLogic.isClaimed(world.getUniqueId(), player.getLocation().getChunkPosition()))
+                    Optional<Faction> chunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
+
+                    if(chunkFaction.isPresent() && chunkFaction.get().Name.equals(playerFaction.Name))
                     {
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
@@ -54,20 +56,18 @@ public class SetHomeCommand implements CommandExecutor
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLACE_IS_NOT_CLAIMED_YOU_CAN_SET_HOME_ONLY_IN_CLAIMED_CLAND));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
                     }
                 }
                 else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                 }
-
             }
             else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
-
         }
         else
         {
