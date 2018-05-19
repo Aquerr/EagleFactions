@@ -27,7 +27,7 @@ public class ChatCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            if (FactionLogic.getFactionName(player.getUniqueId()) != null)
+            if (!FactionLogic.getFactionName(player.getUniqueId()).equals(""))
             {
                 if(optionalChatType.isPresent())
                 {

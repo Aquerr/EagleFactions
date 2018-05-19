@@ -32,7 +32,7 @@ public class JoinCommand implements CommandExecutor
                 Player player = (Player)source;
                 String rawFactionName = optionalFactionName.get();
 
-                if(FactionLogic.getFactionName(player.getUniqueId()) == null)
+                if(FactionLogic.getFactionName(player.getUniqueId()).equals(""))
                 {
                     String factionName = FactionLogic.getRealFactionName(rawFactionName);
                     if (factionName == null)
