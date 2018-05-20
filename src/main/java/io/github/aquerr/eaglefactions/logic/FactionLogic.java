@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -46,26 +45,6 @@ public class FactionLogic
     public static void reload()
     {
         factionsStorage.load();
-    }
-
-    public static String getFactionName(UUID playerUUID)
-    {
-        for (Faction faction : FactionLogic.getFactions())
-        {
-            if(faction.Members.contains(playerUUID.toString()))
-            {
-                return faction.Name;
-            }
-            else if(faction.Leader.equals(playerUUID.toString()))
-            {
-                return faction.Name;
-            }
-            else if(faction.Officers.contains(playerUUID.toString()))
-            {
-                return faction.Name;
-            }
-        }
-        return "";
     }
 
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
@@ -91,7 +70,7 @@ public class FactionLogic
 
     public static Optional<Faction> getFactionByChunk(UUID worldUUID, Vector3i chunk)
     {
-        for(Faction faction: getFactions())
+        for(Faction faction : getFactions())
         {
             if(faction.Claims.contains(worldUUID.toString() + "|" + chunk.toString()))
             {
@@ -102,7 +81,7 @@ public class FactionLogic
         return Optional.empty();
     }
 
-    public static @Nullable Faction getFaction(String factionName)
+    public static @Nullable Faction getFactionByName(String factionName)
     {
         Faction faction = factionsStorage.getFaction(factionName);
 
@@ -116,7 +95,7 @@ public class FactionLogic
 
     public static String getLeader(String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         if (faction != null)
         {
@@ -128,7 +107,7 @@ public class FactionLogic
 
     public static List<String> getOfficers(String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         if (faction != null)
         {
@@ -140,7 +119,7 @@ public class FactionLogic
 
     public static List<String> getMembers(String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         if (faction != null)
         {
@@ -151,7 +130,7 @@ public class FactionLogic
 
     public static List<UUID> getPlayers(String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
     	List<UUID> factionPlayers = new ArrayList<>();
 
@@ -204,7 +183,7 @@ public class FactionLogic
         List<Faction> factions = getFactions();
         List<String> namesList = new ArrayList<>();
 
-        for(Faction faction: factions)
+        for(Faction faction : factions)
         {
             namesList.add(faction.Name);
         }
@@ -238,7 +217,7 @@ public class FactionLogic
 
     public static void joinFaction(UUID playerUUID, String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         faction.Members.add(playerUUID.toString());
 
@@ -247,7 +226,7 @@ public class FactionLogic
 
     public static void leaveFaction(UUID playerUUID, String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         if(faction.Members.contains(playerUUID.toString()))
         {
@@ -260,8 +239,8 @@ public class FactionLogic
 
     public static void addAlly(String playerFactionName, String invitedFactionName)
     {
-        Faction playerFaction = getFaction(playerFactionName);
-        Faction invitedFaction = getFaction(invitedFactionName);
+        Faction playerFaction = getFactionByName(playerFactionName);
+        Faction invitedFaction = getFactionByName(invitedFactionName);
 
         playerFaction.Alliances.add(invitedFactionName);
         invitedFaction.Alliances.add(playerFactionName);
@@ -272,15 +251,15 @@ public class FactionLogic
 
     public static List<String> getAlliances(String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         return faction.Alliances;
     }
 
     public static void removeAlly(String playerFactionName, String removedFactionName)
     {
-        Faction playerFaction = getFaction(playerFactionName);
-        Faction removedFaction = getFaction(removedFactionName);
+        Faction playerFaction = getFactionByName(playerFactionName);
+        Faction removedFaction = getFactionByName(removedFactionName);
 
         playerFaction.Alliances.remove(removedFactionName);
         removedFaction.Alliances.remove(playerFactionName);
@@ -291,8 +270,8 @@ public class FactionLogic
 
     public static void addEnemy(String playerFactionName, String enemyFactionName)
     {
-        Faction playerFaction = getFaction(playerFactionName);
-        Faction enemyFaction = getFaction(enemyFactionName);
+        Faction playerFaction = getFactionByName(playerFactionName);
+        Faction enemyFaction = getFactionByName(enemyFactionName);
 
         playerFaction.Enemies.add(enemyFactionName);
         enemyFaction.Enemies.add(playerFactionName);
@@ -303,8 +282,8 @@ public class FactionLogic
 
     public static void removeEnemy(String playerFactionName, String enemyFactionName)
     {
-        Faction playerFaction = getFaction(playerFactionName);
-        Faction enemyFaction = getFaction(enemyFactionName);
+        Faction playerFaction = getFactionByName(playerFactionName);
+        Faction enemyFaction = getFactionByName(enemyFactionName);
 
         playerFaction.Enemies.remove(enemyFactionName);
         enemyFaction.Enemies.remove(playerFactionName);
@@ -315,7 +294,7 @@ public class FactionLogic
 
     public static void addOfficerAndRemoveMember(String newOfficerUUIDAsString, String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         faction.Officers.add(newOfficerUUIDAsString);
         faction.Members.remove(newOfficerUUIDAsString);
@@ -325,7 +304,7 @@ public class FactionLogic
 
     public static void removeOfficerAndSetAsMember(String officerNameAsString, String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         faction.Officers.remove(officerNameAsString);
         faction.Members.add(officerNameAsString);
@@ -335,7 +314,7 @@ public class FactionLogic
 
     public static void setLeader(UUID newLeaderUUID, String playerFactionName)
     {
-        Faction faction = getFaction(playerFactionName);
+        Faction faction = getFactionByName(playerFactionName);
 
         if (!faction.Leader.equals(""))
         {
@@ -358,7 +337,7 @@ public class FactionLogic
 
     public static List<String> getClaims(String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         return faction.Claims;
     }
@@ -373,16 +352,10 @@ public class FactionLogic
         }
 
         return claimsList;
-
-//        List<String> claimsList = getFactions().stream().map(x->x.Claims).flatMap(List::stream).collect(Collectors.toList());
-//
-//        return claimsList;
     }
 
     public static void addClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
     {
-        //Faction faction = getFaction(faction);
-
         faction.Claims.add(worldUUID.toString() + "|" + claimedChunk.toString());
 
         factionsStorage.addOrUpdateFaction(faction);
@@ -390,8 +363,6 @@ public class FactionLogic
 
     public static void removeClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
     {
-        //Faction faction = getFaction(factionName);
-
         faction.Claims.remove(worldUUID.toString() + "|" + claimedChunk.toString());
 
         factionsStorage.addOrUpdateFaction(faction);
@@ -494,7 +465,7 @@ public class FactionLogic
 
     public static void kickPlayer(UUID playerUUID, String factionName)
     {
-        Faction faction = getFaction(factionName);
+        Faction faction = getFactionByName(factionName);
 
         if(faction.Members.contains(playerUUID.toString()))
         {

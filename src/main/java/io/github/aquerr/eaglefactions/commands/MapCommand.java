@@ -44,7 +44,7 @@ public class MapCommand implements CommandExecutor
     private void generateMap(Player player)
     {
         List<String> claimsList = FactionLogic.getAllClaims();
-        Faction playerFaction = FactionLogic.getFaction(FactionLogic.getFactionName(player.getUniqueId()));
+        Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
         World world = player.getWorld();
 
@@ -91,8 +91,10 @@ public class MapCommand implements CommandExecutor
                 {
                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
-                    if (playerFaction != null)
+                    if (optionalPlayerFaction.isPresent())
                     {
+                        Faction playerFaction = optionalPlayerFaction.get();
+
                         if (optionalChunkFaction.get().Name.equals(playerFaction.Name))
                         {
                             textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
@@ -145,12 +147,13 @@ public class MapCommand implements CommandExecutor
                             normalFactions += optionalChunkFaction.get().Name + ", ";
                         }
                     }
-                } else
+                }
+                else
                 {
                     if (!MainLogic.isDelayedClaimingToggled() &&
                             (EagleFactions.AdminList.contains(player.getUniqueId()) ||
-                                    (playerFaction != null &&
-                                            (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString())))))
+                                    (optionalPlayerFaction.isPresent() &&
+                                            (optionalPlayerFaction.get().Leader.equals(player.getUniqueId().toString()) || optionalPlayerFaction.get().Officers.contains(player.getUniqueId().toString())))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     } else
@@ -180,9 +183,9 @@ public class MapCommand implements CommandExecutor
         player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_MAP_FOOTER));
 
         //Print factions on map
-        if (playerFaction != null)
+        if (optionalPlayerFaction.isPresent())
         {
-            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, playerFaction.Name));
+            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().Name));
         }
         if (!normalFactions.isEmpty())
         {

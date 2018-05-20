@@ -30,13 +30,14 @@ public class OfficerCommand implements CommandExecutor
                 Player player = (Player)source;
                 Player newOfficerPlayer = optionalNewOfficerPlayer.get();
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalNewOfficerFaction = FactionLogic.getFactionByPlayerUUID(newOfficerPlayer.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
                     if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(FactionLogic.getFactionName(newOfficerPlayer.getUniqueId()).equals(playerFaction.Name))
+                        if(optionalNewOfficerFaction.isPresent() && optionalNewOfficerFaction.get().Name.equals(playerFaction.Name))
                         {
                             if(!playerFaction.Leader.equals(newOfficerPlayer.getUniqueId().toString()))
                             {
@@ -66,7 +67,7 @@ public class OfficerCommand implements CommandExecutor
 
                     if(playerFaction.Leader.equals(player.getUniqueId().toString()))
                     {
-                        if(FactionLogic.getFactionName(newOfficerPlayer.getUniqueId()).equals(playerFaction.Name))
+                        if(optionalNewOfficerFaction.isPresent() && optionalNewOfficerFaction.get().Name.equals(playerFaction.Name))
                         {
                             if(!playerFaction.Leader.equals(newOfficerPlayer.getUniqueId().toString()))
                             {

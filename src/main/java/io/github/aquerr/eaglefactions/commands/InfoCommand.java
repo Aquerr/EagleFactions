@@ -37,7 +37,7 @@ public class InfoCommand implements CommandExecutor
         if (optionalFactionName.isPresent())
         {
             String rawFactionName = optionalFactionName.get();
-            Faction faction = FactionLogic.getFaction(rawFactionName);
+            Faction faction = FactionLogic.getFactionByName(rawFactionName);
 
             if (faction == null)
             {
@@ -48,17 +48,17 @@ public class InfoCommand implements CommandExecutor
                 if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(faction.Name)))
+                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
                     }
-                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && !FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(faction.Name)))
+                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
                     }
                     else
                     {
-                        showFactionInfo(source, faction.Name);
+                        showFactionInfo(source, faction);
                     }
                 }
                 else
@@ -72,7 +72,7 @@ public class InfoCommand implements CommandExecutor
             //Check permissions
             if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf))
             {
-                showFactionInfo(source, FactionLogic.getFactionName(((Player)source).getUniqueId()));
+                showFactionInfo(source, FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
             }
             else
             {
@@ -88,10 +88,8 @@ public class InfoCommand implements CommandExecutor
         return CommandResult.success();
     }
 
-    private void showFactionInfo(CommandSource source, String factionName)
+    private void showFactionInfo(CommandSource source, Faction faction)
     {
-        Faction faction = FactionLogic.getFaction(factionName);
-
         List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
@@ -147,7 +145,7 @@ public class InfoCommand implements CommandExecutor
                 .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(FactionLogic.getClaims(factionName).size()) + "/" + String.valueOf(faction.Power.intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.Claims.size()) + "/" + String.valueOf(faction.Power.intValue())))
                 .build();
 
         factionInfo.add(info);

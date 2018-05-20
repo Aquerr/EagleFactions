@@ -54,7 +54,7 @@ public class InviteCommand implements CommandExecutor
                         }
                     }
 
-                    if(FactionLogic.getFactionName(invitedPlayer.getUniqueId()).equals(""))
+                    if(!FactionLogic.getFactionByPlayerUUID(invitedPlayer.getUniqueId()).isPresent())
                     {
                         try
                         {

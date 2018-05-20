@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
@@ -16,7 +17,6 @@ import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,8 +60,9 @@ public class PlayerCommand implements CommandExecutor
         {
             List<Text> playerInfo = new ArrayList<Text>();
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
-            if(playerFactionName == null) playerFactionName = "";
+            String playerFactionName = "";
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            if(optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().Name;
 
             Date lastPlayed = Date.from(player.getJoinData().lastPlayed().get());
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");

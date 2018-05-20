@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -30,7 +31,7 @@ public class RemoveAllyCommand implements CommandExecutor
             if(source instanceof Player)
             {
                 Player player = (Player)source;
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
                 String rawFactionName = optionalFactionName.get();
                 String removedFaction = FactionLogic.getRealFactionName(rawFactionName);
@@ -42,13 +43,15 @@ public class RemoveAllyCommand implements CommandExecutor
                 }
                 else
                 {
-                    if(playerFactionName != null)
+                    if(optionalPlayerFaction.isPresent())
                     {
+                        Faction playerFaction = optionalPlayerFaction.get();
+
                         if(EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if(!FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
+                            if(!playerFaction.Alliances.contains(removedFaction))
                             {
-                                FactionLogic.removeAlly(playerFactionName, removedFaction);
+                                FactionLogic.removeAlly(playerFaction.Name, removedFaction);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
                             }
                             else
@@ -59,11 +62,11 @@ public class RemoveAllyCommand implements CommandExecutor
                             return CommandResult.success();
                         }
 
-                        if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                        if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                         {
-                            if(FactionLogic.getAlliances(playerFactionName).contains(removedFaction))
+                            if(playerFaction.Alliances.contains(removedFaction))
                             {
-                                FactionLogic.removeAlly(playerFactionName, removedFaction);
+                                FactionLogic.removeAlly(playerFaction.Name, removedFaction);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction, TextColors.GREEN, "!"));
                                 return CommandResult.success();
                             }

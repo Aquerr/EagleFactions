@@ -36,8 +36,9 @@ public class KickCommand implements CommandExecutor
                     if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
                         Player selectedPlayer = optionalSelectedPlayer.get();
+                        Optional<Faction> optionalSelectedPlayerFaction = FactionLogic.getFactionByPlayerUUID(selectedPlayer.getUniqueId());
 
-                        if(FactionLogic.getFactionName(selectedPlayer.getUniqueId()).equals(playerFaction.Name))
+                        if(optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().Name.equals(playerFaction.Name))
                         {
                             if(!playerFaction.Leader.equals(selectedPlayer.getUniqueId().toString()))
                             {

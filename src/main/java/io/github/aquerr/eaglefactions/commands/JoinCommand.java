@@ -32,7 +32,7 @@ public class JoinCommand implements CommandExecutor
                 Player player = (Player)source;
                 String rawFactionName = optionalFactionName.get();
 
-                if(FactionLogic.getFactionName(player.getUniqueId()).equals(""))
+                if(!FactionLogic.getFactionByPlayerUUID(player.getUniqueId()).isPresent())
                 {
                     String factionName = FactionLogic.getRealFactionName(rawFactionName);
                     if (factionName == null)
@@ -60,7 +60,7 @@ public class JoinCommand implements CommandExecutor
                                     if(MainLogic.isPlayerLimit())
                                     {
                                         int playerCount = 0;
-                                        Faction faction = FactionLogic.getFaction(factionName);
+                                        Faction faction = FactionLogic.getFactionByName(factionName);
                                         playerCount += faction.Leader.equals("") ? 0 : 1;
                                         playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
                                         playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();

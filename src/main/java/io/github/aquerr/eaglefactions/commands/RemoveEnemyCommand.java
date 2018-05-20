@@ -36,7 +36,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                 Player player = (Player) source;
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-                Faction enemyFaction = FactionLogic.getFaction(optionalEnemyFactionName.get());
+                Faction enemyFaction = FactionLogic.getFactionByName(optionalEnemyFactionName.get());
 
                 if (enemyFaction == null)
                 {

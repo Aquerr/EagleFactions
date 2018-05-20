@@ -13,7 +13,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -66,7 +65,7 @@ public class ChatMessageListener
 
                     for (String allianceName : playerFaction.Alliances)
                     {
-                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(FactionLogic.getFaction(allianceName)))
+                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(FactionLogic.getFactionByName(allianceName)))
                         {
                             receivers.add(factionPlayer);
                         }
