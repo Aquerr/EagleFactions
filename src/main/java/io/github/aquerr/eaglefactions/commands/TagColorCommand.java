@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -23,6 +24,12 @@ public class TagColorCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
+        if (!MainLogic.areColoredTagsAllowed())
+        {
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.TAG_COLORING_IS_TURNED_OFF_ON_THIS_SERVER));
+            return CommandResult.success();
+        }
+
         Optional<TextColor> optionalColor = context.<TextColor>getOne("color");
 
         if (optionalColor.isPresent())
