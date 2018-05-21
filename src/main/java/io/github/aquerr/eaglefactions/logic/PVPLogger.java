@@ -98,6 +98,7 @@ public class PVPLogger
                         if (seconds <= 0)
                         {
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
+                            _attackedPlayers.remove(player.getUniqueId());
                             task.cancel();
                         }
                         else

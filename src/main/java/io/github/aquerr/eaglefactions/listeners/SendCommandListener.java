@@ -19,7 +19,7 @@ public class SendCommandListener
         if (EagleFactions.getEagleFactions().getPVPLogger().isActive() && EagleFactions.getEagleFactions().getPVPLogger().shouldBlockCommand(player, event.getCommand() + " " + event.getArguments()))
         {
             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT));
-            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.TIME_LEFT + " ", TextColors.YELLOW, EagleFactions.getEagleFactions().getPVPLogger().getPlayerBlockTime(player) + PluginMessages.SECONDS));
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.TIME_LEFT + " ", TextColors.YELLOW, EagleFactions.getEagleFactions().getPVPLogger().getPlayerBlockTime(player) + " " + PluginMessages.SECONDS));
             event.setCancelled(true);
             return;
         }
