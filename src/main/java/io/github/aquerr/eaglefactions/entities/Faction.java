@@ -22,7 +22,7 @@ public class Faction
     public List<String> Officers;
     public List<String> Claims;
     public FactionHome Home;
-    public Map<FactionMemberType, Map<FactionFlagType, Boolean>> Flags;
+    public Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> Flags;
 
     //Constructor used while creating a new faction.
     public Faction(String factionName, String factionTag, String factionLeader)
@@ -41,7 +41,7 @@ public class Faction
     }
 
     //Constructor used while getting a faction from storage.
-    public Faction(String factionName, Text factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags)
+    public Faction(String factionName, Text factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
     {
         this.Name = factionName;
         this.Tag = factionTag;

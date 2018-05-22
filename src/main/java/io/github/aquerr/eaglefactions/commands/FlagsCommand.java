@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagType;
+import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
@@ -17,7 +17,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.security.PublicKey;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -63,13 +62,13 @@ public class FlagsCommand implements CommandExecutor
     {
         Text.Builder textBuilder = Text.builder();
         
-        for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())
+        for (Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.Flags.entrySet())
         {
-            Map<FactionFlagType, Boolean> memberFlags = memberEntry.getValue();
+            Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
 
-            textBuilder.append(Text.of(TextColors.AQUA, memberEntry.getKey().toString() + ":"));
+            textBuilder.append(Text.of(TextColors.AQUA, memberEntry.getKey().toString() + ": "));
 
-            for (Map.Entry<FactionFlagType, Boolean> flagEntry : memberFlags.entrySet())
+            for (Map.Entry<FactionFlagTypes, Boolean> flagEntry : memberFlags.entrySet())
             {
                 Text.Builder flagTextBuilder = Text.builder();
 
@@ -85,22 +84,26 @@ public class FlagsCommand implements CommandExecutor
                 flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagEntry.getValue())));
                 flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
 
+                textBuilder.append(flagTextBuilder.build());
                 textBuilder.append(Text.of(" | "));
             }
 
             textBuilder.append(Text.of("\n"));
         }
 
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.Name + ":"));
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE + "\n"));
+        //player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.Name + ":"));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
+        player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = Has not permission for"));
+        player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = Has permission for"));
+        player.sendMessage(Text.of("=============================="));
         player.sendMessage(textBuilder.build());
     }
 
-    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagType factionFlagType, Boolean toggled)
+    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean toggled)
     {
         return commandSource ->
         {
-            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagType, toggled);
+            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagTypes, toggled);
             showFlags((Player)commandSource, faction);
         };
     }

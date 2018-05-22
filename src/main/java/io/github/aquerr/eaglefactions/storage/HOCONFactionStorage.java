@@ -3,10 +3,9 @@ package io.github.aquerr.eaglefactions.storage;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagType;
+import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -16,11 +15,9 @@ import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Function;
 
 public class HOCONFactionStorage implements IStorage
 {
@@ -164,7 +161,7 @@ public class HOCONFactionStorage implements IStorage
         List<String> alliances = getFactionAlliances(factionName);
         List<String> enemies = getFactionEnemies(factionName);
         List<String> claims = getFactionClaims(factionName);
-        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flags = getFactionFlags(factionName);
+        Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
         Faction faction = new Faction(factionName, tag, leader, members, claims, officers, alliances, enemies, home, flags);
 
@@ -174,14 +171,17 @@ public class HOCONFactionStorage implements IStorage
         return faction;
     }
 
-    private Map<FactionMemberType, Map<FactionFlagType, Boolean>> getFactionFlags(String factionName)
+    private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFactionFlags(String factionName)
     {
-        Map<FactionMemberType, Map<FactionFlagType, Boolean>> flagMap = new LinkedHashMap<>();
+        Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
 
-        Map<FactionFlagType, Boolean> leaderMap = new LinkedHashMap<>();
-        Map<FactionFlagType, Boolean> officerMap = new LinkedHashMap<>();
-        Map<FactionFlagType, Boolean> membersMap = new LinkedHashMap<>();
-        Map<FactionFlagType, Boolean> allyMap = new LinkedHashMap<>();
+        //TODO: Get the entire map from file if it is possible and handle CLAIM and INVITE map here.
+        //TODO: Use TreeMap instead of LinkedHashMap to sort the map.
+
+        Map<FactionFlagTypes, Boolean> leaderMap = new LinkedHashMap<>();
+        Map<FactionFlagTypes, Boolean> officerMap = new LinkedHashMap<>();
+        Map<FactionFlagTypes, Boolean> membersMap = new LinkedHashMap<>();
+        Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
 
         //Get leader flags
         Object leaderUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).getValue();
@@ -267,21 +267,21 @@ public class HOCONFactionStorage implements IStorage
             allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getValue();
         }
 
-        leaderMap.put(FactionFlagType.USE, (boolean) leaderUSE);
-        leaderMap.put(FactionFlagType.PLACE, (boolean) leaderPLACE);
-        leaderMap.put(FactionFlagType.DESTROY, (boolean) leaderDESTROY);
+        leaderMap.put(FactionFlagTypes.USE, (boolean) leaderUSE);
+        leaderMap.put(FactionFlagTypes.PLACE, (boolean) leaderPLACE);
+        leaderMap.put(FactionFlagTypes.DESTROY, (boolean) leaderDESTROY);
 
-        officerMap.put(FactionFlagType.USE, (boolean) officerUSE);
-        officerMap.put(FactionFlagType.PLACE, (boolean) officerPLACE);
-        officerMap.put(FactionFlagType.DESTROY, (boolean) officerDESTROY);
+        officerMap.put(FactionFlagTypes.USE, (boolean) officerUSE);
+        officerMap.put(FactionFlagTypes.PLACE, (boolean) officerPLACE);
+        officerMap.put(FactionFlagTypes.DESTROY, (boolean) officerDESTROY);
 
-        membersMap.put(FactionFlagType.USE, (boolean) memberUSE);
-        membersMap.put(FactionFlagType.PLACE, (boolean) memberPLACE);
-        membersMap.put(FactionFlagType.DESTROY, (boolean) memberDESTROY);
+        membersMap.put(FactionFlagTypes.USE, (boolean) memberUSE);
+        membersMap.put(FactionFlagTypes.PLACE, (boolean) memberPLACE);
+        membersMap.put(FactionFlagTypes.DESTROY, (boolean) memberDESTROY);
 
-        allyMap.put(FactionFlagType.USE, (boolean) allyUSE);
-        allyMap.put(FactionFlagType.PLACE, (boolean) allyPLACE);
-        allyMap.put(FactionFlagType.DESTROY, (boolean) allyDESTROY);
+        allyMap.put(FactionFlagTypes.USE, (boolean) allyUSE);
+        allyMap.put(FactionFlagTypes.PLACE, (boolean) allyPLACE);
+        allyMap.put(FactionFlagTypes.DESTROY, (boolean) allyDESTROY);
 
         flagMap.put(FactionMemberType.LEADER, leaderMap);
         flagMap.put(FactionMemberType.OFFICER, officerMap);
