@@ -62,48 +62,37 @@ public class FlagsCommand implements CommandExecutor
     private void showFlags(Player player, Faction faction)
     {
         Text.Builder textBuilder = Text.builder();
-        Text.Builder flagTextBuilder;
-
-        //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------" + "\n"));
-        //textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
-        //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
-
-        textBuilder.append(Text.of(TextColors.AQUA, "|   " + PluginMessages.WHO + "    |  " + PluginMessages.USE + "  | " + PluginMessages.PLACE + " | " + PluginMessages.DESTROY));
-
-
+        
         for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())
         {
-            textBuilder.append(Text.of("\n"));
-
             Map<FactionFlagType, Boolean> memberFlags = memberEntry.getValue();
 
-            textBuilder.append(Text.of(TextColors.AQUA,"| " + memberEntry.getKey().toString()));
+            textBuilder.append(Text.of(TextColors.AQUA, memberEntry.getKey().toString() + ":"));
 
             for (Map.Entry<FactionFlagType, Boolean> flagEntry : memberFlags.entrySet())
             {
-                textBuilder.append(Text.of(TextColors.AQUA, " | "));
+                Text.Builder flagTextBuilder = Text.builder();
 
-                Boolean flagValue = flagEntry.getValue();
-                flagTextBuilder = Text.builder();
-                flagTextBuilder.append(Text.of(flagValue.toString()));
-                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagValue)));
-                flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagValue).toUpperCase())));
-
-                if (flagValue.booleanValue())
+                if(flagEntry.getValue())
                 {
-                    flagTextBuilder.color(TextColors.GREEN);
+                    flagTextBuilder.append(Text.of(TextColors.GREEN, flagEntry.getKey().toString()));
                 }
                 else
                 {
-                    flagTextBuilder.color(TextColors.RED);
+                    flagTextBuilder.append(Text.of(TextColors.RED, flagEntry.getKey().toString()));
                 }
 
-                textBuilder.append(flagTextBuilder.build());
+                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagEntry.getValue())));
+                flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
+
+                textBuilder.append(Text.of(" | "));
             }
+
+            textBuilder.append(Text.of("\n"));
         }
 
         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.Name + ":"));
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE + "\n"));
         player.sendMessage(textBuilder.build());
     }
 
