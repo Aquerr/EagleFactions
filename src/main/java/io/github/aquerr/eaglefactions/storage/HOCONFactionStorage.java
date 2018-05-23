@@ -175,8 +175,9 @@ public class HOCONFactionStorage implements IStorage
     {
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
 
-        //TODO: Get the entire map from file if it is possible and handle CLAIM and INVITE map here.
-        //TODO: Use TreeMap instead of LinkedHashMap to sort the map.
+        //Use TreeMap instead of LinkedHashMap to sort the map if needed.
+
+        //TODO: Add map for recruit rank.
 
         Map<FactionFlagTypes, Boolean> leaderMap = new LinkedHashMap<>();
         Map<FactionFlagTypes, Boolean> officerMap = new LinkedHashMap<>();
@@ -184,104 +185,58 @@ public class HOCONFactionStorage implements IStorage
         Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
 
         //Get leader flags
-        Object leaderUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).getValue();
-        Object leaderPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).getValue();
-        Object leaderDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).getValue();
-
-        if (leaderUSE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).setValue(true);
-            leaderUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).getValue();
-        }
-        if (leaderPLACE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).setValue(true);
-            leaderPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).getValue();
-        }
-        if (leaderDESTROY == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).setValue(true);
-            leaderDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).getValue();
-        }
+        boolean leaderUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "USE"}).getBoolean(true);
+        boolean leaderPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "PLACE"}).getBoolean(true);
+        boolean leaderDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "DESTROY"}).getBoolean(true);
+        boolean leaderCLAIM = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "CLAIM"}).getBoolean(true);
+        boolean leaderATTACK = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "ATTACK"}).getBoolean(true);
+        boolean leaderINVITE = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "INVITE"}).getBoolean(true);
 
         //Get officer flags
-        Object officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).getValue();
-        Object officerPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).getValue();
-        Object officerDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).getValue();
-
-        if (officerUSE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).setValue(true);
-            officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).getValue();
-        }
-        if (officerPLACE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).setValue(true);
-            officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).getValue();
-        }
-        if (officerDESTROY == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).setValue(true);
-            officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).getValue();
-        }
+        boolean officerUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "USE"}).getBoolean(true);
+        boolean officerPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "PLACE"}).getBoolean(true);
+        boolean officerDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "DESTROY"}).getBoolean(true);
+        boolean officerCLAIM = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "CLAIM"}).getBoolean(true);
+        boolean officerATTACK = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "ATTACK"}).getBoolean(true);
+        boolean officerINVITE = configNode.getNode(new Object[]{"factions", factionName, "flags", "OFFICER", "INVITE"}).getBoolean(true);
 
         //Get member flags
-        Object memberUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).getValue();
-        Object memberPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).getValue();
-        Object memberDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).getValue();
+        boolean memberUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).getBoolean(true);
+        boolean memberPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).getBoolean(true);
+        boolean memberDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).getBoolean(true);
+        boolean memberCLAIM = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "CLAIM"}).getBoolean(false);
+        boolean memberATTACK = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "ATTACK"}).getBoolean(false);
+        boolean memberINVITE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "INVITE"}).getBoolean(true);
 
-        if (memberUSE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).setValue(true);
-            memberUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "USE"}).getValue();
-        }
-        if (memberPLACE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).setValue(true);
-            memberPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "PLACE"}).getValue();
-        }
-        if (memberDESTROY == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).setValue(true);
-            memberDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "DESTROY"}).getValue();
-        }
+        //Get ally flags
+        boolean allyUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).getBoolean(true);
+        boolean allyPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).getBoolean(false);
+        boolean allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getBoolean(false);
 
-        //Get member flags
-        Object allyUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).getValue();
-        Object allyPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).getValue();
-        Object allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getValue();
+        leaderMap.put(FactionFlagTypes.USE, leaderUSE);
+        leaderMap.put(FactionFlagTypes.PLACE, leaderPLACE);
+        leaderMap.put(FactionFlagTypes.DESTROY, leaderDESTROY);
+        leaderMap.put(FactionFlagTypes.CLAIM, leaderCLAIM);
+        leaderMap.put(FactionFlagTypes.ATTACK, leaderATTACK);
+        leaderMap.put(FactionFlagTypes.INVITE, leaderINVITE);
 
-        if (allyUSE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).setValue(true);
-            allyUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).getValue();
-        }
-        if (allyPLACE == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).setValue(false);
-            allyPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "PLACE"}).getValue();
-        }
-        if (allyDESTROY == null)
-        {
-            configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).setValue(false);
-            allyDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "DESTROY"}).getValue();
-        }
+        officerMap.put(FactionFlagTypes.USE, officerUSE);
+        officerMap.put(FactionFlagTypes.PLACE, officerPLACE);
+        officerMap.put(FactionFlagTypes.DESTROY, officerDESTROY);
+        officerMap.put(FactionFlagTypes.CLAIM, officerCLAIM);
+        officerMap.put(FactionFlagTypes.ATTACK, officerATTACK);
+        officerMap.put(FactionFlagTypes.INVITE, officerINVITE);
 
-        leaderMap.put(FactionFlagTypes.USE, (boolean) leaderUSE);
-        leaderMap.put(FactionFlagTypes.PLACE, (boolean) leaderPLACE);
-        leaderMap.put(FactionFlagTypes.DESTROY, (boolean) leaderDESTROY);
+        membersMap.put(FactionFlagTypes.USE, memberUSE);
+        membersMap.put(FactionFlagTypes.PLACE, memberPLACE);
+        membersMap.put(FactionFlagTypes.DESTROY, memberDESTROY);
+        membersMap.put(FactionFlagTypes.CLAIM, memberCLAIM);
+        membersMap.put(FactionFlagTypes.ATTACK, memberATTACK);
+        membersMap.put(FactionFlagTypes.INVITE, memberINVITE);
 
-        officerMap.put(FactionFlagTypes.USE, (boolean) officerUSE);
-        officerMap.put(FactionFlagTypes.PLACE, (boolean) officerPLACE);
-        officerMap.put(FactionFlagTypes.DESTROY, (boolean) officerDESTROY);
-
-        membersMap.put(FactionFlagTypes.USE, (boolean) memberUSE);
-        membersMap.put(FactionFlagTypes.PLACE, (boolean) memberPLACE);
-        membersMap.put(FactionFlagTypes.DESTROY, (boolean) memberDESTROY);
-
-        allyMap.put(FactionFlagTypes.USE, (boolean) allyUSE);
-        allyMap.put(FactionFlagTypes.PLACE, (boolean) allyPLACE);
-        allyMap.put(FactionFlagTypes.DESTROY, (boolean) allyDESTROY);
+        allyMap.put(FactionFlagTypes.USE, allyUSE);
+        allyMap.put(FactionFlagTypes.PLACE, allyPLACE);
+        allyMap.put(FactionFlagTypes.DESTROY, allyDESTROY);
 
         flagMap.put(FactionMemberType.LEADER, leaderMap);
         flagMap.put(FactionMemberType.OFFICER, officerMap);
