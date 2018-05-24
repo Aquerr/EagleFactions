@@ -29,7 +29,16 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * Internal Faction Chat
 * Custom ranks in factions **(not implemented yet)**
 * PVP-Logger
+* Plugin Messages' Translations
 * Fully configurable
+
+## Translations
+
+Eagle Factions provides option for changing its language.
+
+You can see all available translations [here](https://github.com/Aquerr/EagleFactions/tree/1.12.2/api-7.0.0/src/main/resources/messages).
+
+If there is no translation for your language you can make your own and add it as a pull request.
 
 ## Links
 
