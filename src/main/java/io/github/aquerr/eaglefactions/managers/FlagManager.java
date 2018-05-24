@@ -15,40 +15,43 @@ public class FlagManager
         return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.DESTROY);
     }
 
-    public static boolean canPlaceBlock(Player player, Faction playerFactionName, Faction chunkFaction)
+    public static boolean canPlaceBlock(Player player, Faction playerFaction, Faction chunkFaction)
     {
-        return checkFlag(player, playerFactionName, chunkFaction, FactionFlagTypes.PLACE);
+        return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.PLACE);
     }
 
-    public static boolean canInteract(Player player, Faction playerFactionName, Faction chunkFaction)
+    public static boolean canInteract(Player player, Faction playerFaction, Faction chunkFaction)
     {
-        return checkFlag(player, playerFactionName, chunkFaction, FactionFlagTypes.USE);
+        return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.USE);
+    }
+
+    public static boolean canClaim(Player player, Faction playerFaction)
+    {
+        return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
+    }
+
+    public static boolean canInvite(Player player, Faction playerFaction)
+    {
+        return checkFlag(player, playerFaction, FactionFlagTypes.INVITE);
+    }
+
+    private static boolean checkFlag(Player player, Faction playerFaction, FactionFlagTypes flagTypes)
+    {
+        FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
+
+        return playerFaction.Flags.get(memberType).get(flagTypes);
     }
 
     private static boolean checkFlag(Player player, Faction playerFaction, Faction chunkFaction, FactionFlagTypes flagType)
     {
-
-        if (playerFaction.Name.equals(chunkFaction.Name))
-        {
-            if (chunkFaction.Leader.equals(player.getUniqueId().toString()))
-            {
-                return chunkFaction.Flags.get(FactionMemberType.LEADER).get(flagType);
-            }
-            else if(chunkFaction.Officers.contains(player.getUniqueId().toString()))
-            {
-                return chunkFaction.Flags.get(FactionMemberType.OFFICER).get(flagType);
-            }
-            else if(chunkFaction.Members.contains(player.getUniqueId().toString()))
-            {
-                return chunkFaction.Flags.get(FactionMemberType.MEMBER).get(flagType);
-            }
-        }
-        else if(playerFaction.Alliances.contains(chunkFaction.Name))
+        if(playerFaction.Alliances.contains(chunkFaction.Name))
         {
             return chunkFaction.Flags.get(FactionMemberType.ALLY).get(flagType);
         }
 
-        return false;
+        FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
+
+        return chunkFaction.Flags.get(memberType).get(flagType);
     }
 
     public static Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getDefaultFactionFlags()
