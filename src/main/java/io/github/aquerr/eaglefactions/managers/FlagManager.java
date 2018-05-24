@@ -30,6 +30,11 @@ public class FlagManager
         return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
     }
 
+    public static boolean canAttack(Player player, Faction playerFaction)
+    {
+        return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
+    }
+
     public static boolean canInvite(Player player, Faction playerFaction)
     {
         return checkFlag(player, playerFaction, FactionFlagTypes.INVITE);

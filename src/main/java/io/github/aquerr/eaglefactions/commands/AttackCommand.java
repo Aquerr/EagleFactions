@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -69,35 +70,35 @@ public class AttackCommand implements CommandExecutor
                 }
                 else
                 {
-                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                    if (FlagManager.canAttack(player, playerFaction))
                     {
                         Faction attackedFaction = optionalChunkFaction.get();
 
                         if (!playerFaction.Name.equals(attackedFaction.Name))
                         {
-                             if(!playerFaction.Alliances.contains(attackedFaction.Name))
-                             {
-                                 if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= attackedFaction.Power.doubleValue() && playerFaction.Power.doubleValue() > attackedFaction.Power.doubleValue())
-                                 {
-                                     int attackTime = MainLogic.getAttackTime();
-                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();
+                            if(!playerFaction.Alliances.contains(attackedFaction.Name))
+                            {
+                                if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= attackedFaction.Power.doubleValue() && playerFaction.Power.doubleValue() > attackedFaction.Power.doubleValue())
+                                {
+                                    int attackTime = MainLogic.getAttackTime();
+                                    Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
-                                     AttackLogic.informAboutAttack(attackedFaction);
-                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
+                                    AttackLogic.informAboutAttack(attackedFaction);
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
 
-                                     AttackLogic.blockClaiming(attackedFaction.Name);
-                                     AttackLogic.attack(player, attackedClaim);
-                                     return;
-                                 }
-                                 else
-                                 {
-                                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.THEIR_POWER_IS_TO_HIGH));
-                                 }
-                             }
-                             else
-                             {
-                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.YOU_ARE_IN_THE_SAME_ALLIANCE));
-                             }
+                                    AttackLogic.blockClaiming(attackedFaction.Name);
+                                    AttackLogic.attack(player, attackedClaim);
+                                    return;
+                                }
+                                else
+                                {
+                                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.THEIR_POWER_IS_TO_HIGH));
+                                }
+                            }
+                            else
+                            {
+                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.YOU_ARE_IN_THE_SAME_ALLIANCE));
+                            }
                         }
                         else
                         {
@@ -106,7 +107,7 @@ public class AttackCommand implements CommandExecutor
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_ATTACK_LANDS));
                     }
                 }
             }

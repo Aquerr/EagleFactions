@@ -118,6 +118,10 @@ public class PluginMessages
     public static String SET_TO;
     public static String PERMISSIONS_FLAGS_FOR;
     public static String CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE;
+    public static String PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS;
+    public static String PLAYERS_WITH_YOUR_RANK_CANT_ATTACK_LANDS;
+    public static String PLAYERS_WITH_YOUR_RANK_CANT_UNCLAIM_LANDS;
+    public static String PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION;
 
     //Help
     public static String EAGLEFACTIONS_COMMAND_LIST;
