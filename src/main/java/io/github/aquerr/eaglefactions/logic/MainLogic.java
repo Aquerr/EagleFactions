@@ -5,9 +5,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class MainLogic
 {
@@ -266,5 +264,45 @@ public class MainLogic
     {
         String prefix = _configuration.getString("]", "faction-prefix-end");
         return TextSerializers.FORMATTING_CODE.deserialize(prefix);
+    }
+
+    public static List<String> getClaimableWorldNames()
+    {
+        return _configuration.getListOfStrings(Collections.singletonList("world"), "worlds", "CLAIMABLE");
+    }
+
+    public static List<String> getNotClaimableWorldNames()
+    {
+        return _configuration.getListOfStrings(Collections.singletonList("city_world"), "worlds", "NOT_CLAIMABLE");
+    }
+
+    public static List<String> getSafeZoneWorldNames()
+    {
+        return _configuration.getListOfStrings(Collections.singletonList("safezone_world"), "worlds", "SAFE_ZONE");
+    }
+
+    public static List<String> getWarZoneWorldNames()
+    {
+        return _configuration.getListOfStrings(Collections.singletonList("warzone_world"), "worlds", "WAR_ZONE");
+    }
+
+    public static List<String> getDetectedWorldNames()
+    {
+        List<String> detectedWorldNames = new ArrayList<>();
+
+        detectedWorldNames.addAll(getClaimableWorldNames());
+        detectedWorldNames.addAll(getNotClaimableWorldNames());
+        detectedWorldNames.addAll(getSafeZoneWorldNames());
+        detectedWorldNames.addAll(getWarZoneWorldNames());
+
+        return detectedWorldNames;
+    }
+
+    public static boolean addWorld(String worldName)
+    {
+        List<String> claimableWorldNames = getClaimableWorldNames();
+        claimableWorldNames.add(worldName);
+
+        return _configuration.setListOfStrings(claimableWorldNames, "worlds", "CLAIMABLE");
     }
 }

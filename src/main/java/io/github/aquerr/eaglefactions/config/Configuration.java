@@ -1,10 +1,12 @@
 package io.github.aquerr.eaglefactions.config;
 
+import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,6 +154,21 @@ public class Configuration
     public List<String> getListOfStrings(List<String> defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getList(objectToStringTransformer, defaultValue);
+    }
+
+    public boolean setListOfStrings(List<String> listOfStrings, Object... nodePath)
+    {
+        try
+        {
+            configNode.getNode(nodePath).setValue(TypeToken.of(List.class), listOfStrings);
+            save();
+            return true;
+        }
+        catch (ObjectMappingException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private static Function<Object,String> objectToStringTransformer = input ->

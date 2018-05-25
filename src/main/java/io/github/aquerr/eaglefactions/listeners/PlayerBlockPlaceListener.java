@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -32,6 +33,16 @@ public class PlayerBlockPlaceListener
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
              {
                  World world = player.getWorld();
+
+                 if (MainLogic.getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                 {
+                     return;
+                 }
+                 if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                 {
+                     return;
+                 }
+
                  Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
                  Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
 
@@ -64,7 +75,6 @@ public class PlayerBlockPlaceListener
                  }
              }
         }
-        return;
     }
 
 }

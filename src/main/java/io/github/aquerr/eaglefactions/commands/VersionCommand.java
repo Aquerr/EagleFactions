@@ -17,6 +17,6 @@ public class VersionCommand implements CommandExecutor
     {
         source.sendMessage (Text.of (TextColors.AQUA, PluginInfo.Name, TextColors.WHITE, " - " + PluginMessages.VERSION + " ", PluginInfo.Version));
 
-        return CommandResult.success ();
+        return CommandResult.success();
     }
 }

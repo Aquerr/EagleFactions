@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.entity.living.player.Player;
@@ -30,6 +31,16 @@ public class PlayerInteractListener
             if(event.getInteractionPoint().isPresent())
             {
                 World world = player.getWorld();
+
+                if (MainLogic.getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+                {
+                    return;
+                }
+                if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+                {
+                    return;
+                }
+
                 Vector3d vector3d = event.getInteractionPoint().get();
                 Location location = new Location(world, vector3d);
                 Vector3i claim = location.getChunkPosition();

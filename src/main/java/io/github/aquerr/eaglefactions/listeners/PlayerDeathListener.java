@@ -30,14 +30,15 @@ public class PlayerDeathListener
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(MainLogic.getPowerDecrement()) + "\n",
                     TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
 
-            if (FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("WarZone"))
+            Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+
+            if (MainLogic.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().Name.equals("WarZone")))
             {
                 PlayerManager.setDeathInWarZone(player.getUniqueId(), true);
             }
 
             if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction())
             {
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
                 if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().Name.equals(optionalPlayerFaction.get().Name))

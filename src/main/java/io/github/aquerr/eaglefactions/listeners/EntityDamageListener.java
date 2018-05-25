@@ -31,8 +31,16 @@ public class EntityDamageListener
                     Player attackedPlayer = (Player) event.getTargetEntity();
                     World world = attackedPlayer.getWorld();
 
+                    if (MainLogic.getSafeZoneWorldNames().contains(world.getName()))
+                    {
+                        event.setBaseDamage(0);
+                        event.setCancelled(true);
+                        return;
+                    }
+
                     //Block all damage an attacked player would get if location is a SafeZone.
-                    if(FactionLogic.getFactionByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition()).equals("SafeZone"))
+                    Optional<Faction> chunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
+                    if(chunkFaction.isPresent() && chunkFaction.get().Name.equals("SafeZone"))
                     {
                         event.setBaseDamage(0);
                         event.setCancelled(true);
@@ -48,7 +56,8 @@ public class EntityDamageListener
                             Player player = (Player) entityDamageSource.getSource();
 
                             //Block all damage a player could deal if location is SafeZone.
-                            if(FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition()).equals("SafeZone"))
+                            Optional<Faction> playerChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
+                            if(playerChunkFaction.isPresent() && playerChunkFaction.get().Name.equals("SafeZone"))
                             {
                                 event.setBaseDamage(0);
                                 event.setCancelled(true);
@@ -143,6 +152,5 @@ public class EntityDamageListener
                     }
                 }
         }
-        return;
     }
 }

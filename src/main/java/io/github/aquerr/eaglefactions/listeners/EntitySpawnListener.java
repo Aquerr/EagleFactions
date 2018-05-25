@@ -32,10 +32,19 @@ public class EntitySpawnListener
 
             if(entity instanceof Hostile)
             {
-                if(!MainLogic.getMobSpawning() && FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
+                if (!MainLogic.getMobSpawning())
                 {
-                    event.setCancelled(true);
-                    return;
+                    if (MainLogic.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if(FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
             }
             else if(entity instanceof Player)

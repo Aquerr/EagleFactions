@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
@@ -34,6 +35,12 @@ public class PlayerJoinListener
             {
                 //Create player file and set power.
                 PowerManager.addPlayer(player.getUniqueId());
+            }
+
+            //Check if the world that player is connecting to is already in the config file
+            if (!MainLogic.getDetectedWorldNames().contains(player.getWorld().getName()))
+            {
+                MainLogic.addWorld(player.getWorld().getName());
             }
         }
     }

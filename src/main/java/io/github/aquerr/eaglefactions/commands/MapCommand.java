@@ -32,8 +32,16 @@ public class MapCommand implements CommandExecutor
         if (source instanceof Player)
         {
             Player player = (Player) source;
-            generateMap(player);
-        } else
+            if (MainLogic.getClaimableWorldNames().contains(player.getWorld().getName()))
+            {
+                generateMap(player);
+            }
+            else
+            {
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_VIEW_MAP_IN_THIS_WORLD));
+            }
+        }
+        else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }

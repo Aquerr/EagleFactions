@@ -8,7 +8,6 @@ import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -26,13 +25,12 @@ public class ClaimCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
-
+            Player player = (Player) source;
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if(optionalPlayerFaction.isPresent())
+            if (optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
@@ -43,69 +41,72 @@ public class ClaimCommand implements CommandExecutor
 
                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
-                    if(!optionalChunkFaction.isPresent())
+                    if (MainLogic.getClaimableWorldNames().contains(player.getWorld().getName()))
                     {
-                        if(playerFaction.Power.doubleValue() > playerFaction.Claims.size())
+                        if (!optionalChunkFaction.isPresent())
                         {
-                            if(!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
+                            if (playerFaction.Power.doubleValue() > playerFaction.Claims.size())
                             {
-                                if(!playerFaction.Claims.isEmpty())
+                                if (!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
                                 {
-                                    if(playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
+                                    if (!playerFaction.Claims.isEmpty())
                                     {
-                                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
-                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-
-                                        return CommandResult.success();
-                                    }
-                                    else
-                                    {
-                                        if(MainLogic.requireConnectedClaims())
+                                        if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
                                         {
-                                            if(FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
+                                            FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+
+                                            return CommandResult.success();
+                                        }
+                                        else
+                                        {
+                                            if (MainLogic.requireConnectedClaims())
+                                            {
+                                                if (FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
+                                                {
+                                                    FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                                    return CommandResult.success();
+                                                }
+                                                else
+                                                {
+                                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.CLAIMS_NEED_TO_BE_CONNECTED));
+                                                }
+                                            }
+                                            else
                                             {
                                                 FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
                                             }
-                                            else
-                                            {
-                                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.CLAIMS_NEED_TO_BE_CONNECTED));
-                                            }
                                         }
-                                        else
-                                        {
-                                            FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
-                                            return CommandResult.success();
-                                        }
+                                    }
+                                    else
+                                    {
+                                        FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                        return CommandResult.success();
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
-                                    return CommandResult.success();
+                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_IS_UNDER_ATTACK + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.GOLD, PluginMessages.TWO_MINUTES, TextColors.RED, " " + PluginMessages.TO_BE_ABLE_TO_CLAIM_AGAIN));
                                 }
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_IS_UNDER_ATTACK + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.GOLD, PluginMessages.TWO_MINUTES, TextColors.RED, " " + PluginMessages.TO_BE_ABLE_TO_CLAIM_AGAIN));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
                         }
                     }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
-                    }
                 }
-                else if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                else if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if(!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
                         FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
 

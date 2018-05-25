@@ -82,6 +82,7 @@ public class PluginMessages
     public static String YOU_MOVED_FROM_THE_CHUNK;
     public static String CLAIMING_HAS_BEEN_STARTED;
     public static String TO_CLAIM_IT;
+    public static String YOU_CANT_CLAIM_LAND_IN_THIS_WORLD;
 
     //Coords
     public static String TEAM_COORDS;
@@ -190,6 +191,7 @@ public class PluginMessages
     public static String WHICH_IS_CLAIMED_BY;
     public static String LAND_HAS_BEEN_SUCCESSFULLY;
     public static String UNCLAIMED;
+    public static String YOU_CANT_VIEW_MAP_IN_THIS_WORLD;
 
     //Maxpower
     public static String YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS;
