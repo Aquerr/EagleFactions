@@ -1,11 +1,7 @@
 package io.github.aquerr.eaglefactions.managers;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.sun.istack.internal.NotNull;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -130,7 +126,7 @@ public class PlayerManager
         return false;
     }
 
-    public static @Nullable FactionMemberType getFactionMemberType(@NotNull Player factionPlayer, @NotNull Faction faction)
+    public static @Nullable FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
     {
         if (faction.Leader.equals(factionPlayer.getUniqueId().toString()))
         {
