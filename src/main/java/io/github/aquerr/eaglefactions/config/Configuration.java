@@ -79,7 +79,7 @@ public class Configuration
         Method[] methods = MainLogic.class.getDeclaredMethods();
         for (Method method: methods)
         {
-            if (!method.getName().equals("setup"))
+            if (!method.getName().equals("setup") && !method.getName().equals("addWorld"))
             {
 
                 try

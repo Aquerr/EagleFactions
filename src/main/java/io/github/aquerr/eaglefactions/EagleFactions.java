@@ -253,6 +253,14 @@ public class EagleFactions
                 .executor(new OfficerCommand())
                 .build());
 
+        //Member command.
+        Subcommands.put(Collections.singletonList("member"), CommandSpec.builder()
+                .description(Text.of("Add or remove member"))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .permission(PluginPermissions.MemberCommand)
+                .executor(new MemberCommand())
+                .build());
+
         //Claim command.
         Subcommands.put(Collections.singletonList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))

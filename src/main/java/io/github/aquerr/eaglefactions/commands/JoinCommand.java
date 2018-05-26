@@ -64,6 +64,7 @@ public class JoinCommand implements CommandExecutor
                                         playerCount += faction.Leader.equals("") ? 0 : 1;
                                         playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
                                         playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
+                                        playerCount += faction.Recruits.isEmpty() ? 0 : faction.Recruits.size();
 
                                         if(playerCount >= MainLogic.getPlayerLimit())
                                         {

@@ -72,7 +72,7 @@ public class DisbandCommand implements CommandExecutor
                         exception.printStackTrace();
                     }
                 }
-                else if(playerFaction.Members.contains(player.getUniqueId().toString()))
+                else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }

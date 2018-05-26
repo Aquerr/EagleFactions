@@ -268,22 +268,22 @@ public class MainLogic
 
     public static List<String> getClaimableWorldNames()
     {
-        return _configuration.getListOfStrings(Collections.singletonList("world"), "worlds", "CLAIMABLE");
+        return _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE");
     }
 
     public static List<String> getNotClaimableWorldNames()
     {
-        return _configuration.getListOfStrings(Collections.singletonList("city_world"), "worlds", "NOT_CLAIMABLE");
+        return _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE");
     }
 
     public static List<String> getSafeZoneWorldNames()
     {
-        return _configuration.getListOfStrings(Collections.singletonList("safezone_world"), "worlds", "SAFE_ZONE");
+        return _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE");
     }
 
     public static List<String> getWarZoneWorldNames()
     {
-        return _configuration.getListOfStrings(Collections.singletonList("warzone_world"), "worlds", "WAR_ZONE");
+        return _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
     }
 
     public static List<String> getDetectedWorldNames()
@@ -298,11 +298,11 @@ public class MainLogic
         return detectedWorldNames;
     }
 
-    public static boolean addWorld(String worldName)
+    public static void addWorld(String worldName)
     {
         List<String> claimableWorldNames = getClaimableWorldNames();
         claimableWorldNames.add(worldName);
 
-        return _configuration.setListOfStrings(claimableWorldNames, "worlds", "CLAIMABLE");
+        _configuration.setListOfStrings(claimableWorldNames, "worlds", "CLAIMABLE");
     }
 }

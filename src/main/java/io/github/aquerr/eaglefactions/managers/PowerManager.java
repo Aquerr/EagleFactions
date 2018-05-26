@@ -138,6 +138,14 @@ public class PowerManager
                 factionPower = factionPower.add(memberPower);
             }
         }
+        if(faction.Recruits != null && !faction.Recruits.isEmpty())
+        {
+            for (String recruit: faction.Recruits)
+            {
+                BigDecimal recruitPower = getPlayerPower(UUID.fromString(recruit));
+                factionPower = factionPower.add(recruitPower);
+            }
+        }
 
         return factionPower;
     }
@@ -173,6 +181,14 @@ public class PowerManager
             for (String member: faction.Members)
             {
                 factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(member)));
+            }
+        }
+
+        if(faction.Recruits != null && !faction.Recruits.isEmpty())
+        {
+            for (String recruit: faction.Recruits)
+            {
+                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(UUID.fromString(recruit)));
             }
         }
 

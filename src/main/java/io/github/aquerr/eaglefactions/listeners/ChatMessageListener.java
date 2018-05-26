@@ -65,16 +65,10 @@ public class ChatMessageListener
 
                     for (String allianceName : playerFaction.Alliances)
                     {
-                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(FactionLogic.getFactionByName(allianceName)))
-                        {
-                            receivers.add(factionPlayer);
-                        }
+                        receivers.addAll(FactionLogic.getOnlinePlayers(FactionLogic.getFactionByName(allianceName)));
                     }
 
-                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(playerFaction))
-                    {
-                        receivers.add(factionPlayer);
-                    }
+                    receivers.addAll(FactionLogic.getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
                 }
@@ -86,10 +80,7 @@ public class ChatMessageListener
 
                     Set<MessageReceiver> receivers = new HashSet<>();
 
-                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(playerFaction))
-                    {
-                        receivers.add(factionPlayer);
-                    }
+                    receivers.addAll(FactionLogic.getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
                 }
@@ -106,7 +97,7 @@ public class ChatMessageListener
             //Get faction prefix from Eagle Factions.
             if(MainLogic.getPrefixOption().equals("tag"))
             {
-                if(!playerFaction.Tag.equals(""))
+                if(!playerFaction.Tag.toPlainSingle().equals(""))
                 {
                     if (MainLogic.areColoredTagsAllowed())
                     {
@@ -185,17 +176,15 @@ public class ChatMessageListener
 
     private Text getAlliancePrefix()
     {
-        Text alliancePrefix = Text.builder()
+        return Text.builder()
                 .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.BLUE, "Alliance", TextColors.RESET), MainLogic.getFactionPrefixEnd())
                 .build();
-        return alliancePrefix;
     }
 
     private Text getFactionPrefix()
     {
-        Text factionPrefix = Text.builder()
+        return Text.builder()
                 .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, "Faction", TextColors.RESET), MainLogic.getFactionPrefixEnd())
                 .build();
-        return factionPrefix;
     }
 }

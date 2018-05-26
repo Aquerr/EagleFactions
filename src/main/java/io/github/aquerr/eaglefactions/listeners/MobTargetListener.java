@@ -16,7 +16,7 @@ public class MobTargetListener
         if (event.getTarget().isPresent() && event.getTarget().get() instanceof Player)
         {
             Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(event.getTarget().get().getWorld().getUniqueId(), ((Player) event.getTarget().get()).getLocation().getChunkPosition());
-            if (optionalChunkFaction.isPresent() && optionalChunkFaction.get().equals("SafeZone"))
+            if (optionalChunkFaction.isPresent() && optionalChunkFaction.get().Name.equals("SafeZone"))
             {
                 event.setCancelled(true);
                 return;

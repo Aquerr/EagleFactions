@@ -49,6 +49,7 @@ public class InviteCommand implements CommandExecutor
                             playerCount += senderFaction.Leader.equals("") ? 0 : 1;
                             playerCount += senderFaction.Officers.isEmpty() ? 0 : senderFaction.Officers.size();
                             playerCount += senderFaction.Members.isEmpty() ? 0 : senderFaction.Members.size();
+                            playerCount += senderFaction.Recruits.isEmpty() ? 0 : senderFaction.Recruits.size();
 
                             if(playerCount >= MainLogic.getPlayerLimit())
                             {

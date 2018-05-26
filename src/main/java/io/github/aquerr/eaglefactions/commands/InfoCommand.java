@@ -95,6 +95,16 @@ public class InfoCommand implements CommandExecutor
         String leaderName = "";
         if(!faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
 
+        String recruitList = "";
+        if(!faction.Recruits.isEmpty())
+        {
+            for (String recruit: faction.Recruits)
+            {
+                recruitList += PlayerManager.getPlayerName(UUID.fromString(recruit)).get() + ", ";
+            }
+            recruitList = recruitList.substring(0, recruitList.length() - 2);
+        }
+
         String membersList = "";
         if(!faction.Members.isEmpty())
         {
@@ -144,6 +154,7 @@ public class InfoCommand implements CommandExecutor
                 .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.Claims.size()) + "/" + String.valueOf(faction.Power.intValue())))
                 .build();

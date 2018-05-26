@@ -94,6 +94,24 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
+                if(!playerFaction.Recruits.isEmpty())
+                {
+                    for (String recruitName: playerFaction.Recruits)
+                    {
+                        Optional<Player> recruit = PlayerManager.getPlayer(UUID.fromString(recruitName));
+
+                        if(recruit.isPresent())
+                        {
+                            Text textBuilder = Text.builder()
+                                    .append(Text.of(PluginMessages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
+                                    .build();
+
+                            teamCoords.add(textBuilder);
+                        }
+                    }
+                }
+
+
                 PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
                 PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
                 paginationBuilder.sendTo(source);

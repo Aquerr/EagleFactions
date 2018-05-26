@@ -63,6 +63,10 @@ public class FactionLogic
             {
                 return Optional.of(faction);
             }
+            else if(faction.Recruits.contains(playerUUID.toString()))
+            {
+                return Optional.of(faction);
+            }
         }
 
         return Optional.empty();
@@ -117,37 +121,42 @@ public class FactionLogic
         return new ArrayList<>();
     }
 
-    public static List<String> getMembers(String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
+//    public static List<String> getMembers(String factionName)
+//    {
+//        Faction faction = getFactionByName(factionName);
+//
+//        if (faction != null)
+//        {
+//            return faction.Members;
+//        }
+//        else return new ArrayList<>();
+//    }
 
-        if (faction != null)
-        {
-            return faction.Members;
-        }
-        else return new ArrayList<>();
-    }
-
-    public static List<UUID> getPlayers(String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-    	List<UUID> factionPlayers = new ArrayList<>();
-
-    	factionPlayers.add(UUID.fromString(faction.Leader));
-        
-        for (String uuid : faction.Officers)
-        {
-        	factionPlayers.add(UUID.fromString(uuid));
-        }
-        
-        for (String uuid : faction.Members)
-        {
-        	factionPlayers.add(UUID.fromString(uuid));
-        }
-        
-        return factionPlayers;
-    }
+//    public static List<UUID> getPlayers(String factionName)
+//    {
+//        Faction faction = getFactionByName(factionName);
+//
+//    	List<UUID> factionPlayers = new ArrayList<>();
+//
+//    	factionPlayers.add(UUID.fromString(faction.Leader));
+//
+//        for (String uuid : faction.Officers)
+//        {
+//        	factionPlayers.add(UUID.fromString(uuid));
+//        }
+//
+//        for (String uuid : faction.Members)
+//        {
+//        	factionPlayers.add(UUID.fromString(uuid));
+//        }
+//
+//        for (String uuid : faction.Recruits)
+//        {
+//            factionPlayers.add(UUID.fromString(uuid));
+//        }
+//
+//        return factionPlayers;
+//    }
     
     public static List<Player> getOnlinePlayers(Faction faction)
     {
@@ -173,6 +182,14 @@ public class FactionLogic
         	{
         		factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(uuid)).get());
         	}
+        }
+
+        for (String uuid : faction.Recruits)
+        {
+            if (!uuid.equals("") && PlayerManager.isPlayerOnline(UUID.fromString(uuid)))
+            {
+                factionPlayers.add(PlayerManager.getPlayer(UUID.fromString(uuid)).get());
+            }
         }
         
         return factionPlayers;
@@ -219,7 +236,7 @@ public class FactionLogic
     {
         Faction faction = getFactionByName(factionName);
 
-        faction.Members.add(playerUUID.toString());
+        faction.Recruits.add(playerUUID.toString());
 
         factionsStorage.addOrUpdateFaction(faction);
     }
@@ -228,7 +245,11 @@ public class FactionLogic
     {
         Faction faction = getFactionByName(factionName);
 
-        if(faction.Members.contains(playerUUID.toString()))
+        if (faction.Recruits.contains(playerUUID.toString()))
+        {
+            faction.Recruits.remove(playerUUID.toString());
+        }
+        else if(faction.Members.contains(playerUUID.toString()))
         {
             faction.Members.remove(playerUUID.toString());
         }
@@ -331,16 +352,21 @@ public class FactionLogic
             faction.Members.remove(newLeaderUUID.toString());
             faction.Leader = newLeaderUUID.toString();
         }
+        else if(faction.Recruits.contains(newLeaderUUID.toString()))
+        {
+            faction.Recruits.remove(newLeaderUUID.toString());
+            faction.Leader = newLeaderUUID.toString();
+        }
 
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static List<String> getClaims(String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        return faction.Claims;
-    }
+//    public static List<String> getClaims(String factionName)
+//    {
+//        Faction faction = getFactionByName(factionName);
+//
+//        return faction.Claims;
+//    }
 
     public static List<String> getAllClaims()
     {
@@ -436,19 +462,24 @@ public class FactionLogic
         return factionsTags;
     }
 
-    public static boolean hasOnlinePlayers(String factionName)
+    public static boolean hasOnlinePlayers(Faction faction)
     {
-        if(FactionLogic.getLeader(factionName) != null && !FactionLogic.getLeader(factionName).equals(""))
+        if(faction.Leader != null && !faction.Leader.equals(""))
         {
-            if(PlayerManager.isPlayerOnline(UUID.fromString(FactionLogic.getLeader(factionName)))) return true;
+            if(PlayerManager.isPlayerOnline(UUID.fromString(faction.Leader))) return true;
         }
 
-        for (String playerUUID: getOfficers(factionName))
+        for (String playerUUID : faction.Officers)
         {
             if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
         }
 
-        for (String playerUUID: getMembers(factionName))
+        for (String playerUUID : faction.Members)
+        {
+            if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
+        }
+
+        for (String playerUUID : faction.Recruits)
         {
             if(PlayerManager.isPlayerOnline(UUID.fromString(playerUUID))) return true;
         }
@@ -467,7 +498,11 @@ public class FactionLogic
     {
         Faction faction = getFactionByName(factionName);
 
-        if(faction.Members.contains(playerUUID.toString()))
+        if (faction.Recruits.contains(playerUUID.toString()))
+        {
+            faction.Recruits.remove(playerUUID.toString());
+        }
+        else if(faction.Members.contains(playerUUID.toString()))
         {
             faction.Members.remove(playerUUID.toString());
         }
@@ -631,6 +666,26 @@ public class FactionLogic
     {
         Text text = Text.of(textColor, faction.Tag.toPlainSingle());
         faction.Tag = text;
+
+        factionsStorage.addOrUpdateFaction(faction);
+    }
+
+    public static void addMemberAndRemoveRecruit(String newMemberUUIDAsString, String factionName)
+    {
+        Faction faction = getFactionByName(factionName);
+
+        faction.Members.add(newMemberUUIDAsString);
+        faction.Recruits.remove(newMemberUUIDAsString);
+
+        factionsStorage.addOrUpdateFaction(faction);
+    }
+
+    public static void addRecruitAndRemoveMember(String newRecruitUUIDAsString, String factionName)
+    {
+        Faction faction = getFactionByName(factionName);
+
+        faction.Recruits.add(newRecruitUUIDAsString);
+        faction.Members.remove(newRecruitUUIDAsString);
 
         factionsStorage.addOrUpdateFaction(faction);
     }

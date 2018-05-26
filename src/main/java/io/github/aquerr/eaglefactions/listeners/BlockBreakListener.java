@@ -33,6 +33,18 @@ public class BlockBreakListener
                  for (Transaction<BlockSnapshot> transaction : event.getTransactions())
                  {
                      World world = player.getWorld();
+
+                     if (MainLogic.getSafeZoneWorldNames().contains(world.getName()))
+                     {
+                         event.setCancelled(true);
+                         return;
+                     }
+                     else if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                     {
+                         event.setCancelled(true);
+                         return;
+                     }
+
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
                      Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());

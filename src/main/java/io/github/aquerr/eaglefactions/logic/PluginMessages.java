@@ -90,6 +90,7 @@ public class PluginMessages
     public static String LEADER;
     public static String OFFICER;
     public static String MEMBER;
+    public static String RECRUIT;
 
     //Creation
     public static String YOU_CANT_USE_THIS_FACTION_NAME;
@@ -148,6 +149,7 @@ public class PluginMessages
     public static String OFFICERS;
     public static String ALLIANCES;
     public static String MEMBERS;
+    public static String RECRUITS;
     public static String POWER;
     public static String CLAIMS;
     public static String FACTION_INFO;
@@ -203,6 +205,12 @@ public class PluginMessages
     public static String YOU_REMOVED;
     public static String AS_YOUR_NEW;
     public static String FROM_YOUR;
+
+    //Member
+    public static String YOU_PROMOTED;
+    public static String YOU_DEMOTED;
+    public static String TO;
+    public static String YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER;
 
     //Player
     public static String PLAYER_INFO;

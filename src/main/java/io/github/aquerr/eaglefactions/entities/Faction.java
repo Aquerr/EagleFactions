@@ -15,6 +15,7 @@ public class Faction
     public String Name;
     public Text Tag;
     public BigDecimal Power;
+    public List<String> Recruits;
     public List<String> Members;
     public List<String> Alliances;
     public List<String> Enemies;
@@ -31,6 +32,7 @@ public class Faction
         this.Tag = Text.of(TextColors.GREEN, factionTag);
         this.Leader = factionLeader;
         this.Power = new BigDecimal("0.0");
+        this.Recruits = new ArrayList<>();
         this.Members = new ArrayList<>();
         this.Claims = new ArrayList<>();
         this.Officers = new ArrayList<>();
@@ -41,12 +43,13 @@ public class Faction
     }
 
     //Constructor used while getting a faction from storage.
-    public Faction(String factionName, Text factionTag, String factionLeader, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+    public Faction(String factionName, Text factionTag, String factionLeader, List<String> recruits, List<String> members, List<String> claims, List<String> officers, List<String> alliances, List<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
     {
         this.Name = factionName;
         this.Tag = factionTag;
         this.Leader = factionLeader;
         this.Power = new BigDecimal("0.0");
+        this.Recruits = recruits;
         this.Members = members;
         this.Claims = claims;
         this.Officers = officers;

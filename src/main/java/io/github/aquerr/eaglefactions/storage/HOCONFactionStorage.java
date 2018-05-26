@@ -81,6 +81,7 @@ public class HOCONFactionStorage implements IStorage
             configNode.getNode(new Object[]{"factions", faction.Name, "leader"}).setValue(faction.Leader);
             configNode.getNode(new Object[]{"factions", faction.Name, "officers"}).setValue(faction.Officers);
             configNode.getNode(new Object[]{"factions", faction.Name, "members"}).setValue(faction.Members);
+            configNode.getNode(new Object[]{"factions", faction.Name, "recruits"}).setValue(faction.Recruits);
             configNode.getNode(new Object[]{"factions", faction.Name, "enemies"}).setValue(faction.Enemies);
             configNode.getNode(new Object[]{"factions", faction.Name, "alliances"}).setValue(faction.Alliances);
             configNode.getNode(new Object[]{"factions", faction.Name, "claims"}).setValue(faction.Claims);
@@ -158,12 +159,13 @@ public class HOCONFactionStorage implements IStorage
         FactionHome home = getFactionHome(factionName);
         List<String> officers = getFactionOfficers(factionName);
         List<String> members = getFactionMembers(factionName);
+        List<String> recruits = getFactionRecruits(factionName);
         List<String> alliances = getFactionAlliances(factionName);
         List<String> enemies = getFactionEnemies(factionName);
         List<String> claims = getFactionClaims(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
-        Faction faction = new Faction(factionName, tag, leader, members, claims, officers, alliances, enemies, home, flags);
+        Faction faction = new Faction(factionName, tag, leader, recruits, members, claims, officers, alliances, enemies, home, flags);
 
         //TODO: Refactor this code so that the power can be sent to the faction constructor like other parameters.
         faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
@@ -182,6 +184,7 @@ public class HOCONFactionStorage implements IStorage
         Map<FactionFlagTypes, Boolean> leaderMap = new LinkedHashMap<>();
         Map<FactionFlagTypes, Boolean> officerMap = new LinkedHashMap<>();
         Map<FactionFlagTypes, Boolean> membersMap = new LinkedHashMap<>();
+        Map<FactionFlagTypes, Boolean> recruitMap = new LinkedHashMap<>();
         Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
 
         //Get leader flags
@@ -207,6 +210,14 @@ public class HOCONFactionStorage implements IStorage
         boolean memberCLAIM = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "CLAIM"}).getBoolean(false);
         boolean memberATTACK = configNode.getNode(new Object[]{"factions", factionName, "flags", "LEADER", "ATTACK"}).getBoolean(false);
         boolean memberINVITE = configNode.getNode(new Object[]{"factions", factionName, "flags", "MEMBER", "INVITE"}).getBoolean(true);
+
+        //Get recruit flags
+        boolean recruitUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "RECRUIT", "USE"}).getBoolean(true);
+        boolean recruitPLACE = configNode.getNode(new Object[]{"factions", factionName, "flags", "RECRUIT", "PLACE"}).getBoolean(true);
+        boolean recruitDESTROY = configNode.getNode(new Object[]{"factions", factionName, "flags", "RECRUIT", "DESTROY"}).getBoolean(true);
+        boolean recruitCLAIM = configNode.getNode(new Object[]{"factions", factionName, "flags", "RECRUIT", "CLAIM"}).getBoolean(false);
+        boolean recruitATTACK = configNode.getNode(new Object[]{"factions", factionName, "flags", "RECRUIT", "ATTACK"}).getBoolean(false);
+        boolean recruitINVITE = configNode.getNode(new Object[]{"factions", factionName, "flags", "RECRUIT", "INVITE"}).getBoolean(false);
 
         //Get ally flags
         boolean allyUSE = configNode.getNode(new Object[]{"factions", factionName, "flags", "ALLY", "USE"}).getBoolean(true);
@@ -234,6 +245,13 @@ public class HOCONFactionStorage implements IStorage
         membersMap.put(FactionFlagTypes.ATTACK, memberATTACK);
         membersMap.put(FactionFlagTypes.INVITE, memberINVITE);
 
+        recruitMap.put(FactionFlagTypes.USE, recruitUSE);
+        recruitMap.put(FactionFlagTypes.PLACE, recruitPLACE);
+        recruitMap.put(FactionFlagTypes.DESTROY, recruitDESTROY);
+        recruitMap.put(FactionFlagTypes.CLAIM, recruitCLAIM);
+        recruitMap.put(FactionFlagTypes.ATTACK, recruitATTACK);
+        recruitMap.put(FactionFlagTypes.INVITE, recruitINVITE);
+
         allyMap.put(FactionFlagTypes.USE, allyUSE);
         allyMap.put(FactionFlagTypes.PLACE, allyPLACE);
         allyMap.put(FactionFlagTypes.DESTROY, allyDESTROY);
@@ -241,6 +259,7 @@ public class HOCONFactionStorage implements IStorage
         flagMap.put(FactionMemberType.LEADER, leaderMap);
         flagMap.put(FactionMemberType.OFFICER, officerMap);
         flagMap.put(FactionMemberType.MEMBER, membersMap);
+        flagMap.put(FactionMemberType.RECRUIT, recruitMap);
         flagMap.put(FactionMemberType.ALLY, allyMap);
 
         return flagMap;
@@ -304,6 +323,22 @@ public class HOCONFactionStorage implements IStorage
         else
         {
             configNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new ArrayList<>());
+            saveChanges();
+            return new ArrayList<>();
+        }
+    }
+
+    private List<String> getFactionRecruits(String factionName)
+    {
+        Object recruitsObject = configNode.getNode(new Object[]{"factions", factionName, "recruits"}).getValue();
+
+        if (recruitsObject != null)
+        {
+            return (List<String>) recruitsObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "recruits"}).setValue(new ArrayList<>());
             saveChanges();
             return new ArrayList<>();
         }

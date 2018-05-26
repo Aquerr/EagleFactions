@@ -41,6 +41,7 @@ public abstract class PluginPermissions
 
     public static final String SetLeaderCommand = "eaglefactions.player.setleader";
     public static final String OfficerCommand = "eaglefactions.player.officer";
+    public static final String MemberCommand = "eaglefactions.player.member";
     public static final String SetHomeCommand = "eaglefactions.player.sethome";
     public static final String HomeCommand = "eaglefactions.player.home";
 
