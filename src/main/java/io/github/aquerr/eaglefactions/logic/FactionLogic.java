@@ -344,7 +344,7 @@ public class FactionLogic
 
         if (faction.Officers.contains(newLeaderUUID.toString()))
         {
-            faction.Officers.remove(newLeaderUUID);
+            faction.Officers.remove(newLeaderUUID.toString());
             faction.Leader = newLeaderUUID.toString();
         }
         else if(faction.Members.contains(newLeaderUUID.toString()))

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -93,8 +94,8 @@ public class FlagsCommand implements CommandExecutor
 
         //player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.Name + ":"));
         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
-        player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = Has not permission for"));
-        player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = Has permission for"));
+        player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = " + PluginMessages.HAS_NOT_PERMISSIONS_FOR));
+        player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = " + PluginMessages.HAS_PERMISSIONS_FOR));
         player.sendMessage(Text.of("=============================="));
         player.sendMessage(textBuilder.build());
     }

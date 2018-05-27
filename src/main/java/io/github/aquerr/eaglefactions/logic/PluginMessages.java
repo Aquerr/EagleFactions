@@ -113,17 +113,19 @@ public class PluginMessages
     public static String SOMETHING_WENT_WRONG;
 
     //Flags
-    public static String WHO;
+    //public static String WHO;
     public static String USE;
-    public static String PLACE;
-    public static String DESTROY;
+    //public static String PLACE;
+    //public static String DESTROY;
     public static String SET_TO;
-    public static String PERMISSIONS_FLAGS_FOR;
+    //public static String PERMISSIONS_FLAGS_FOR;
     public static String CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE;
     public static String PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS;
     public static String PLAYERS_WITH_YOUR_RANK_CANT_ATTACK_LANDS;
     public static String PLAYERS_WITH_YOUR_RANK_CANT_UNCLAIM_LANDS;
     public static String PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION;
+    public static String HAS_NOT_PERMISSIONS_FOR;
+    public static String HAS_PERMISSIONS_FOR;
 
     //Help
     public static String EAGLEFACTIONS_COMMAND_LIST;
@@ -208,7 +210,7 @@ public class PluginMessages
 
     //Member
     public static String YOU_PROMOTED;
-    public static String YOU_DEMOTED;
+    //public static String YOU_DEMOTED;
     public static String TO;
     public static String YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER;
 
@@ -236,7 +238,7 @@ public class PluginMessages
 
     //Home
     public static String FACTION_HOME_HAS_BEEN_SET;
-    public static String THIS_PLACE_IS_NOT_CLAIMED_YOU_CAN_SET_HOME_ONLY_IN_CLAIMED_CLAND;
+    //public static String THIS_PLACE_IS_NOT_CLAIMED_YOU_CAN_SET_HOME_ONLY_IN_CLAIMED_CLAND;
 
     //SetLeader
     public static String YOU_SET;

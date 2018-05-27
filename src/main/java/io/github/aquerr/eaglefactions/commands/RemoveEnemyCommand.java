@@ -70,7 +70,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                                 if (EagleFactions.RemoveEnemyList.contains(checkRemove))
                                 {
                                     FactionLogic.removeEnemy(enemyFaction.Name, playerFaction.Name);
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction + "!"));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.Name + "!"));
                                     EagleFactions.RemoveEnemyList.remove(checkRemove);
                                 }
                                 else if (!EagleFactions.RemoveEnemyList.contains(checkRemove))
@@ -81,7 +81,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                                     Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(enemyFaction.Leader)).get();
 
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
-                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f remove enemy " + playerFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_IT));
+                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f enemy remove " + playerFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_IT));
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REQUESTED_END_OF_WAR_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.Name, TextColors.RESET, "!"));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();

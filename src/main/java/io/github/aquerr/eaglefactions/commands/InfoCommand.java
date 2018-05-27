@@ -155,8 +155,8 @@ public class InfoCommand implements CommandExecutor
                 .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.Claims.size()) + "/" + String.valueOf(faction.Power.intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.Claims.size()) + "/" + String.valueOf(PowerManager.getFactionPower(faction).intValue())))
                 .build();
 
         factionInfo.add(info);

@@ -56,10 +56,9 @@ public class PlayerBlockPlaceListener
                      {
                          return;
                      }
-                     else if(optionalPlayerFaction.isPresent() && optionalChunkFaction.get().Name.equals(optionalPlayerFaction.get().Name))
+                     else if(optionalPlayerFaction.isPresent())
                      {
-                         boolean canPlaceBlock = FlagManager.canPlaceBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get());
-                         if (!canPlaceBlock)
+                         if (!FlagManager.canPlaceBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                          {
                              player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                              event.setCancelled(true);
@@ -70,7 +69,6 @@ public class PlayerBlockPlaceListener
                      {
                          event.setCancelled(true);
                          player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
-                         return;
                      }
                  }
              }

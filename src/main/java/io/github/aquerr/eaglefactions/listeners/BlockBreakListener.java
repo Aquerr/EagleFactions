@@ -61,15 +61,14 @@ public class BlockBreakListener
                          {
                              return;
                          }
-                         else if(optionalPlayerFaction.isPresent() && optionalChunkFaction.get().Name.equals(optionalPlayerFaction.get().Name))
+                         else if(optionalPlayerFaction.isPresent())
                          {
-                             boolean canBreakBlock = FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get());
-                             if (!canBreakBlock)
+                             if (!FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                              {
                                  player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                  event.setCancelled(true);
+                                 return;
                              }
-                             return;
                          }
                          else
                          {

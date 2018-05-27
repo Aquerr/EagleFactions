@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -230,7 +231,7 @@ public class MapCommand implements CommandExecutor
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
                     if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (playerFaction.Power.doubleValue() > playerFaction.Claims.size())
+                        if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.Claims.size())
                         {
                             if (!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
                             {

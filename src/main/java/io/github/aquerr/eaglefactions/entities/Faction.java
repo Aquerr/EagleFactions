@@ -14,7 +14,7 @@ public class Faction
 {
     public String Name;
     public Text Tag;
-    public BigDecimal Power;
+    //public BigDecimal Power;
     public List<String> Recruits;
     public List<String> Members;
     public List<String> Alliances;
@@ -31,7 +31,7 @@ public class Faction
         this.Name = factionName;
         this.Tag = Text.of(TextColors.GREEN, factionTag);
         this.Leader = factionLeader;
-        this.Power = new BigDecimal("0.0");
+        //this.Power = new BigDecimal("0.0");
         this.Recruits = new ArrayList<>();
         this.Members = new ArrayList<>();
         this.Claims = new ArrayList<>();
@@ -48,7 +48,7 @@ public class Faction
         this.Name = factionName;
         this.Tag = factionTag;
         this.Leader = factionLeader;
-        this.Power = new BigDecimal("0.0");
+        //this.Power = new BigDecimal("0.0");
         this.Recruits = recruits;
         this.Members = members;
         this.Claims = claims;

@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.managers.PowerManager;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class FactionsCache
 
     public static void addOrUpdateFactionCache(Faction faction)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name == faction.Name).findFirst();
+        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equals(faction.Name)).findFirst();
 
         if (optionalFaction.isPresent())
         {
@@ -40,7 +41,7 @@ public class FactionsCache
 
     public static void removeFactionCache(String factionName)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name == factionName).findFirst();
+        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equals(factionName)).findFirst();
 
         if (optionalFaction.isPresent())
         {
@@ -57,10 +58,10 @@ public class FactionsCache
         {
             Faction faction = optionalFaction.get();
 
-            //Update power and cache
-            faction.Power = PowerManager.getFactionPower(faction);
-            _factionsList.remove(faction);
-            _factionsList.add(faction);
+//            //Update power and cache
+//            faction.Power = PowerManager.getFactionPower(faction);
+//            _factionsList.remove(faction);
+//            _factionsList.add(faction);
 
             //Return faction
             return faction;

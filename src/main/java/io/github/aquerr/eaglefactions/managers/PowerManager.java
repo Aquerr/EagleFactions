@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -349,10 +351,12 @@ public class PowerManager
             if(playerPower.doubleValue() - penalty.doubleValue() > 0)
             {
                 playerNode.getNode("power").setValue(playerPower.subtract(penalty));
+//                updateFactionPower(playerUUID, penalty, false);
             }
             else
             {
                 playerNode.getNode("power").setValue(0.0);
+//                updateFactionPower(playerUUID, penalty, false);
             }
 
             configLoader.save(playerNode);
@@ -381,4 +385,14 @@ public class PowerManager
             exception.printStackTrace();
         }
     }
+
+//    public static void updateFactionPower(UUID playerUUID, BigDecimal power, boolean increment)
+//    {
+//        Optional<Faction> optionalFaction = FactionLogic.getFactionByPlayerUUID(playerUUID);
+//
+//        if (optionalFaction.isPresent())
+//        {
+//
+//        }
+//    }
 }

@@ -78,7 +78,7 @@ public class AttackCommand implements CommandExecutor
                         {
                             if(!playerFaction.Alliances.contains(attackedFaction.Name))
                             {
-                                if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= attackedFaction.Power.doubleValue() && playerFaction.Power.doubleValue() > attackedFaction.Power.doubleValue())
+                                if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerManager.getFactionPower(attackedFaction).doubleValue() && PowerManager.getFactionPower(playerFaction).doubleValue() > PowerManager.getFactionPower(attackedFaction).doubleValue())
                                 {
                                     int attackTime = MainLogic.getAttackTime();
                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();

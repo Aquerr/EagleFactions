@@ -26,7 +26,7 @@ public class TopCommand implements CommandExecutor
         List<Text> helpList = new ArrayList<>();
         int index = 0;
 
-        factionsList.sort((o1, o2) -> o2.Power.compareTo(o1.Power));
+        factionsList.sort((o1, o2) -> PowerManager.getFactionPower(o2).compareTo(PowerManager.getFactionPower(o1)));
 
         //This should show only top 10 factions on the server.
 
@@ -41,7 +41,7 @@ public class TopCommand implements CommandExecutor
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.Name + " (" + faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.Name + " (" + PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
                             .build())
                     .build();
 

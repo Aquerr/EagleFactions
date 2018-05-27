@@ -168,7 +168,7 @@ public class HOCONFactionStorage implements IStorage
         Faction faction = new Faction(factionName, tag, leader, recruits, members, claims, officers, alliances, enemies, home, flags);
 
         //TODO: Refactor this code so that the power can be sent to the faction constructor like other parameters.
-        faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
+        //faction.Power = PowerManager.getFactionPower(faction); //Get power from all players in faction.
 
         return faction;
     }
