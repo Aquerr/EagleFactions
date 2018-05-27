@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.logic;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -10,6 +11,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -31,10 +33,13 @@ public class AttackLogic
                 {
                     if(seconds == MainLogic.getAttackTime())
                     {
-                        informAboutDestroying(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk));
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Claim destroyed!"));
+                        //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
+                        Faction chunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
 
-                        FactionLogic.removeClaim(FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), attackedChunk), player.getWorld().getUniqueId(), attackedChunk);
+                        informAboutDestroying(chunkFaction);
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
+
+                        FactionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
                         task.cancel();
                     }
                     else
@@ -45,7 +50,7 @@ public class AttackLogic
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You moved from the chunk!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
                     task.cancel();
                 }
             }
@@ -94,18 +99,18 @@ public class AttackLogic
         }).submit(EagleFactions.getEagleFactions());
     }
 
-    public static void informAboutAttack(String factionName)
+    public static void informAboutAttack(Faction faction)
     {
-        List<Player> playersList = FactionLogic.getOnlinePlayers(factionName);
+        List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
 
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is under ", TextColors.RED, "attack", TextColors.RESET, "!")));
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_UNDER + " ", TextColors.RED, PluginMessages.ATTACK, TextColors.RESET, "!")));
     }
 
-    public static void informAboutDestroying(String factionName)
+    public static void informAboutDestroying(Faction faction)
     {
-        List<Player> playersList = FactionLogic.getOnlinePlayers(factionName);
+        List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
 
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, "One of your claims has been ", TextColors.RED, "destroyed", TextColors.RESET, " by an enemy!")));
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.ONE_OF_YOUR_CLAIMS_HAS_BEEN + " ", TextColors.RED, PluginMessages.DESTROYED, TextColors.RESET, " " + PluginMessages.BY_AN_ENEMY)));
     }
 
     public static void blockHome(UUID playerUUID)

@@ -1,9 +1,11 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.entity.living.player.Player;
@@ -11,6 +13,8 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.Optional;
 
 public class PlayerDeathListener
 {
@@ -23,17 +27,21 @@ public class PlayerDeathListener
 
             PowerManager.decreasePower(player.getUniqueId());
 
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your power has been decreased by ", TextColors.GOLD, String.valueOf(MainLogic.getPowerDecrement()) + "\n",
-                    TextColors.GRAY, "Current power: ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(MainLogic.getPowerDecrement()) + "\n",
+                    TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(PowerManager.getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(PowerManager.getPlayerMaxPower(player.getUniqueId()))));
 
-            if (FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals("WarZone"))
+            Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+
+            if (MainLogic.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().Name.equals("WarZone")))
             {
                 PlayerManager.setDeathInWarZone(player.getUniqueId(), true);
             }
 
             if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction())
             {
-                if (FactionLogic.getFactionNameByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition()).equals(FactionLogic.getFactionName(player.getUniqueId())))
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+
+                if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().Name.equals(optionalPlayerFaction.get().Name))
                 {
                     AttackLogic.blockHome(player.getUniqueId());
                 }

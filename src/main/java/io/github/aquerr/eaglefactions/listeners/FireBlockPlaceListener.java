@@ -1,46 +1,17 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
+import java.util.Optional;
+
 public class FireBlockPlaceListener
 {
-//    @Listener
-//    public void onIgnition(ChangeBlockEvent.Pre event)
-//    {
-//        //TODO: Check if this will work for fire from lightning strike.
-//
-//        if (event.getCause().containsNamed(NamedCause.IGNITER))
-//        {
-//            event.getLocations().forEach(x ->
-//            {
-//                if (FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
-//                        FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
-//                {
-//                    event.setCancelled(true);
-//                    return;
-//                }
-//            });
-//        }
-//
-//        if (event.getCause().containsNamed(NamedCause.FIRE_SPREAD))
-//        {
-//            event.getLocations().forEach(x ->
-//            {
-//                if (FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("SafeZone") ||
-//                        FactionLogic.getFactionNameByChunk(event.getTargetWorld().getUniqueId(), x.getChunkPosition()).equals("WarZone"))
-//                {
-//                    event.setCancelled(true);
-//                    return;
-//                }
-//            });
-//        }
-//    }
-
     @Listener
     public void onIgnite(ChangeBlockEvent.Place event)
     {
@@ -52,9 +23,11 @@ public class FireBlockPlaceListener
             {
                 event.getTransactions().forEach(x->
                 {
+                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
+
                     if (x.getFinal().getState().getType() == BlockTypes.FIRE
-                            && (FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("SafeZone"))
-                            || FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("WarZone"))
+                            && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().Name.equals("SafeZone")
+                            || optionalChunkFaction.get().Name.equals("WarZone")))
                     {
                         event.setCancelled(true);
                     }
@@ -65,9 +38,11 @@ public class FireBlockPlaceListener
         {
             event.getTransactions().forEach(x->
             {
+                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
+
                 if (x.getFinal().getState().getType() == BlockTypes.FIRE
-                        && (FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("SafeZone"))
-                        || FactionLogic.getFactionNameByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition()).equals("WarZone"))
+                        && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().Name.equals("SafeZone")
+                        || optionalChunkFaction.get().Name.equals("WarZone")))
                 {
                     event.setCancelled(true);
                 }

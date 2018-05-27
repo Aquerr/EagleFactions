@@ -2,10 +2,12 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagType;
+import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -17,6 +19,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class FlagsCommand implements CommandExecutor
@@ -28,11 +31,11 @@ public class FlagsCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if (playerFactionName != null)
+            if (optionalPlayerFaction.isPresent())
             {
-                Faction faction = FactionLogic.getFaction(playerFactionName);
+                Faction faction = optionalPlayerFaction.get();
 
                 if (faction.Leader.equals(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
@@ -40,17 +43,17 @@ public class FlagsCommand implements CommandExecutor
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be a faction's leader to use this command!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to do this!"));
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -59,56 +62,49 @@ public class FlagsCommand implements CommandExecutor
     private void showFlags(Player player, Faction faction)
     {
         Text.Builder textBuilder = Text.builder();
-        Text.Builder flagTextBuilder;
-
-        //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------" + "\n"));
-        //textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY |"));
-        //textBuilder.append(Text.of(TextColors.AQUA, "------------------------------"));
-
-        textBuilder.append(Text.of(TextColors.AQUA, "|   WHO    |  USE  | PLACE | DESTROY"));
-
-
-        for (Map.Entry<FactionMemberType, Map<FactionFlagType, Boolean>> memberEntry : faction.Flags.entrySet())
+        
+        for (Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.Flags.entrySet())
         {
-            textBuilder.append(Text.of("\n"));
+            Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
 
-            Map<FactionFlagType, Boolean> memberFlags = memberEntry.getValue();
+            textBuilder.append(Text.of(TextColors.AQUA, memberEntry.getKey().toString() + ": "));
 
-            textBuilder.append(Text.of(TextColors.AQUA,"| " + memberEntry.getKey().toString()));
-
-            for (Map.Entry<FactionFlagType, Boolean> flagEntry : memberFlags.entrySet())
+            for (Map.Entry<FactionFlagTypes, Boolean> flagEntry : memberFlags.entrySet())
             {
-                textBuilder.append(Text.of(TextColors.AQUA, " | "));
+                Text.Builder flagTextBuilder = Text.builder();
 
-                Boolean flagValue = flagEntry.getValue();
-                flagTextBuilder = Text.builder();
-                flagTextBuilder.append(Text.of(flagValue.toString()));
-                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagValue)));
-                flagTextBuilder.onHover(TextActions.showText(Text.of("Set to " + String.valueOf(!flagValue).toUpperCase())));
-
-                if (flagValue.booleanValue())
+                if(flagEntry.getValue())
                 {
-                    flagTextBuilder.color(TextColors.GREEN);
+                    flagTextBuilder.append(Text.of(TextColors.GREEN, flagEntry.getKey().toString()));
                 }
                 else
                 {
-                    flagTextBuilder.color(TextColors.RED);
+                    flagTextBuilder.append(Text.of(TextColors.RED, flagEntry.getKey().toString()));
                 }
 
+                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagEntry.getValue())));
+                flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
+
                 textBuilder.append(flagTextBuilder.build());
+                textBuilder.append(Text.of(" | "));
             }
+
+            textBuilder.append(Text.of("\n"));
         }
 
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Permissions flags for " + faction.Name + ":"));
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Click on the permission you want to change."));
+        //player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.Name + ":"));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
+        player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = " + PluginMessages.HAS_NOT_PERMISSIONS_FOR));
+        player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = " + PluginMessages.HAS_PERMISSIONS_FOR));
+        player.sendMessage(Text.of("=============================="));
         player.sendMessage(textBuilder.build());
     }
 
-    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagType factionFlagType, Boolean toggled)
+    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean toggled)
     {
         return commandSource ->
         {
-            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagType, toggled);
+            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagTypes, toggled);
             showFlags((Player)commandSource, faction);
         };
     }

@@ -1,8 +1,10 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandException;
@@ -16,6 +18,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -42,17 +45,17 @@ public class CreateCommand implements CommandExecutor
 
                 if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't use this faction name!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_USE_THIS_FACTION_NAME));
                     return CommandResult.success();
                 }
 
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-                if (playerFactionName == null)
+                if (!optionalPlayerFaction.isPresent())
                 {
                     if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is already taken!"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
                         return CommandResult.success();
                     }
                     else
@@ -60,27 +63,27 @@ public class CreateCommand implements CommandExecutor
                         //Check tag length
                         if(factionTag.length() > MainLogic.getMaxTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too long! (Max " + MainLogic.getMaxTagLength() + " chars)"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
                         if(factionTag.length() < MainLogic.getMinTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction tag is too short! (Min " + MainLogic.getMinTagLength() + " chars)"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
                     }
 
-                    if (!FactionLogic.getFactionsNames().stream().anyMatch(x -> x.equalsIgnoreCase(factionName)))
+                    if (FactionLogic.getFactionsNames().stream().noneMatch(x -> x.equalsIgnoreCase(factionName)))
                     {
                         //Check name length
                         if(factionName.length() > MainLogic.getMaxNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too long! (Max " + MainLogic.getMaxNameLength() + " chars)"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
                         if(factionName.length() < MainLogic.getMinNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Provided faction name is too short! (Min " + MainLogic.getMinNameLength() + " chars)"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
 
@@ -91,29 +94,29 @@ public class CreateCommand implements CommandExecutor
                         else
                         {
                             FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
                             return CommandResult.success();
                         }
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Faction with the same name already exists!"));
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS));
                     }
                 } else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are already in a faction. You must leave or disband your faction first."));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_ALREADY_IN_A_FACTION + " " + PluginMessages.YOU_MUST_LEAVE_OR_DISBAND_YOUR_FACTION_FIRST));
                 }
 
 
             } else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f create <tag> <faction name>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f create <tag> <faction name>"));
         }
 
         return CommandResult.success();
@@ -155,7 +158,7 @@ public class CreateCommand implements CommandExecutor
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have enough resources to create a faction!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
                     break;
                 }
             }
@@ -191,7 +194,7 @@ public class CreateCommand implements CommandExecutor
             }
 
             FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction " + factionName + " has been created!"));
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
             return CommandResult.success();
         }
         return CommandResult.success();

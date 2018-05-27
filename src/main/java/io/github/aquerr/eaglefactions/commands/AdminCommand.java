@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -23,19 +24,19 @@ public class AdminCommand implements CommandExecutor
             if(EagleFactions.AdminList.contains(player.getUniqueId()))
             {
                 EagleFactions.AdminList.remove(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "Admin Mode", TextColors.WHITE, " has been turned ", TextColors.GOLD, "off"));
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
                 return CommandResult.success();
             }
             else
             {
                 EagleFactions.AdminList.add(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "Admin Mode", TextColors.WHITE, " has been turned ", TextColors.GOLD, "on"));
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
                 return CommandResult.success();
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

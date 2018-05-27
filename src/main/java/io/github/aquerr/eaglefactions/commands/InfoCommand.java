@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
@@ -36,68 +37,76 @@ public class InfoCommand implements CommandExecutor
         if (optionalFactionName.isPresent())
         {
             String rawFactionName = optionalFactionName.get();
-            String factionName = FactionLogic.getRealFactionName(rawFactionName);
+            Faction faction = FactionLogic.getFactionByName(rawFactionName);
 
-            if (factionName == null)
+            if (faction == null)
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName + "!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName + "!"));
             }
             else
             {
                 if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
+                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to view information about your faction!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
                     }
-                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && !FactionLogic.getFactionName(((Player)source).getUniqueId()).equals(factionName)))
+                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to view information about other factions!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
                     }
                     else
                     {
-                        showFactionInfo(source, factionName);
+                        showFactionInfo(source, faction);
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have permissions to use this command!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND));
                 }
             }
         }
-        else if(source instanceof Player && FactionLogic.getFactionName(((Player)source).getUniqueId()) != null)
+        else if(source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
         {
             //Check permissions
             if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf))
             {
-                showFactionInfo(source, FactionLogic.getFactionName(((Player)source).getUniqueId()));
+                showFactionInfo(source, FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You don't have access to view information about your faction!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f info <faction name>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f info <faction name>"));
         }
 
         return CommandResult.success();
     }
 
-    private void showFactionInfo(CommandSource source, String factionName)
+    private void showFactionInfo(CommandSource source, Faction faction)
     {
-        Faction faction = FactionLogic.getFaction(factionName);
-
         List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
-        if(faction.Leader != null && !faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
+        if(!faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
+
+        String recruitList = "";
+        if(!faction.Recruits.isEmpty())
+        {
+            for (String recruit: faction.Recruits)
+            {
+                recruitList += PlayerManager.getPlayerName(UUID.fromString(recruit)).get() + ", ";
+            }
+            recruitList = recruitList.substring(0, recruitList.length() - 2);
+        }
 
         String membersList = "";
-        if(!faction.Members.isEmpty() && faction.Members != null)
+        if(!faction.Members.isEmpty())
         {
             for (String member: faction.Members)
             {
@@ -107,7 +116,7 @@ public class InfoCommand implements CommandExecutor
         }
 
         String officersList = "";
-        if(!faction.Officers.isEmpty() && faction.Officers != null)
+        if(!faction.Officers.isEmpty())
         {
             for (String officer: faction.Officers)
             {
@@ -117,7 +126,7 @@ public class InfoCommand implements CommandExecutor
         }
 
         String alliancesList = "";
-        if(!faction.Alliances.isEmpty() && faction.Alliances != null)
+        if(!faction.Alliances.isEmpty())
         {
             for (String alliance: faction.Alliances)
             {
@@ -127,7 +136,7 @@ public class InfoCommand implements CommandExecutor
         }
 
         String enemiesList = "";
-        if(!faction.Enemies.isEmpty() && faction.Enemies != null)
+        if(!faction.Enemies.isEmpty())
         {
             for (String enemy: faction.Enemies)
             {
@@ -138,21 +147,22 @@ public class InfoCommand implements CommandExecutor
 
 
         Text info = Text.builder()
-                .append(Text.of(TextColors.AQUA, "Name: ", TextColors.GOLD, faction.Name + "\n"))
-                .append(Text.of(TextColors.AQUA, "Tag: ", TextColors.GOLD, faction.Tag + "\n"))
-                .append(Text.of(TextColors.AQUA, "Leader: ", TextColors.GOLD, leaderName + "\n"))
-                .append(Text.of(TextColors.AQUA, "Officers: ", TextColors.GOLD, officersList + "\n"))
-                .append(Text.of(TextColors.AQUA, "Alliances: ", TextColors.BLUE, alliancesList + "\n"))
-                .append(Text.of(TextColors.AQUA, "Enemies: ", TextColors.RED, enemiesList + "\n"))
-                .append(Text.of(TextColors.AQUA, "Members: ", TextColors.GREEN, membersList + "\n"))
-                .append(Text.of(TextColors.AQUA, "Power: ", TextColors.GOLD, faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, "Claims: ", TextColors.GOLD, String.valueOf(FactionLogic.getClaims(factionName).size()) + "/" + String.valueOf(faction.Power.intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, faction.Name + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.TAG + ": "), faction.Tag.toBuilder().color(TextColors.GOLD).build(), Text.of("\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.Claims.size()) + "/" + String.valueOf(PowerManager.getFactionPower(faction).intValue())))
                 .build();
 
         factionInfo.add(info);
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Faction Info")).contents(factionInfo);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTION_INFO)).contents(factionInfo);
         paginationBuilder.sendTo(source);
     }
 }

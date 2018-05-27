@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -35,7 +36,7 @@ public class SetPowerCommand implements CommandExecutor
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You need to toggle faction admin mode to do this!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
                 }
             }
             else
@@ -45,8 +46,8 @@ public class SetPowerCommand implements CommandExecutor
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f setpower <player> <power>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f setpower <player> <power>"));
         }
 
         return CommandResult.success();
@@ -58,6 +59,6 @@ public class SetPowerCommand implements CommandExecutor
 
         PowerManager.setPower(player.getUniqueId(), newPower);
 
-        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Player's power has been changed!"));
+        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PLAYERS_POWER_HAS_BEEN_CHANGED));
     }
 }
