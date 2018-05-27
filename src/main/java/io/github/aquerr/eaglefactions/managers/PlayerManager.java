@@ -1,8 +1,7 @@
 package io.github.aquerr.eaglefactions.managers;
 
-import com.flowpowered.math.vector.Vector3i;
-import io.github.aquerr.eaglefactions.EagleFactions;
-import ninja.leaping.configurate.ConfigurationNode;
+import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -76,69 +75,6 @@ public class PlayerManager
         else return false;
     }
 
-//    public static @Nullable Vector3i getPlayerBlockPosition(UUID playerUUID)
-//    {
-//        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-//
-//        try
-//        {
-//            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-//            CommentedConfigurationNode playerNode = configLoader.load();
-//            ConfigurationNode chunkPositionNode = playerNode.getNode("chunkPosition");
-//
-//            if(chunkPositionNode.getValue() != null)
-//            {
-//                String object = chunkPositionNode.getString();
-//
-//                String vectors[] = object.replace("(", "").replace(")", "").replace(" ", "").split(",");
-//
-//                int x = Integer.valueOf(vectors[0]);
-//                int y = Integer.valueOf(vectors[1]);
-//                int z = Integer.valueOf(vectors[2]);
-//
-//                Vector3i chunk = Vector3i.from(x, y, z);
-//
-//                return chunk;
-//            }
-//            else
-//            {
-//                return null;
-//            }
-//        }
-//        catch (Exception exception)
-//        {
-//            exception.printStackTrace();
-//        }
-//        return null;
-//    }
-
-//    public static void setPlayerBlockPosition(UUID playerUUID, @Nullable Vector3i chunk)
-//    {
-//        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-//
-//        try
-//        {
-//            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-//
-//            CommentedConfigurationNode playerNode = configLoader.load();
-//
-//            if(chunk != null)
-//            {
-//                playerNode.getNode("chunkPosition").setValue(chunk.toString());
-//            }
-//            else
-//            {
-//                playerNode.getNode("chunkPosition").setValue(null);
-//            }
-//
-//            configLoader.save(playerNode);
-//        }
-//        catch (Exception exception)
-//        {
-//            exception.printStackTrace();
-//        }
-//    }
-
     public static void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
@@ -188,5 +124,31 @@ public class PlayerManager
         }
 
         return false;
+    }
+
+    public static @Nullable FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
+    {
+        if (faction.Leader.equals(factionPlayer.getUniqueId().toString()))
+        {
+            return FactionMemberType.LEADER;
+        }
+        else if(faction.Members.contains(factionPlayer.getUniqueId().toString()))
+        {
+            return FactionMemberType.MEMBER;
+        }
+        else if (faction.Officers.contains(factionPlayer.getUniqueId().toString()))
+        {
+            return FactionMemberType.OFFICER;
+        }
+        else if (faction.Recruits.contains(factionPlayer.getUniqueId().toString()))
+        {
+            return FactionMemberType.RECRUIT;
+        }
+        else if (faction.Alliances.contains(factionPlayer.getUniqueId().toString()))
+        {
+            return FactionMemberType.ALLY;
+        }
+
+        return null;
     }
 }

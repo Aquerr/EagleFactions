@@ -6,6 +6,8 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -33,80 +35,89 @@ public class InviteCommand implements CommandExecutor
             {
                 Player senderPlayer = (Player)source;
                 Player invitedPlayer = optionalInvitedPlayer.get();
-                String senderFactionName = FactionLogic.getFactionName(senderPlayer.getUniqueId());
+                Optional<Faction> optionalSenderFaction = FactionLogic.getFactionByPlayerUUID(senderPlayer.getUniqueId());
 
-                if(senderFactionName != null)
+                if(optionalSenderFaction.isPresent())
                 {
-                    if(MainLogic.isPlayerLimit())
+                    Faction senderFaction = optionalSenderFaction.get();
+
+                    if (FlagManager.canInvite(senderPlayer, senderFaction))
                     {
-                        int playerCount = 0;
-                        Faction faction = FactionLogic.getFaction(senderFactionName);
-                        playerCount += faction.Leader.equals("") ? 0 : 1;
-                        playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
-                        playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
-
-                        if(playerCount >= MainLogic.getPlayerLimit())
+                        if(MainLogic.isPlayerLimit())
                         {
-                            senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You can't invite more players to your faction. Faction's player limit has been reached!"));
-                            return CommandResult.success();
-                        }
-                    }
+                            int playerCount = 0;
+                            playerCount += senderFaction.Leader.equals("") ? 0 : 1;
+                            playerCount += senderFaction.Officers.isEmpty() ? 0 : senderFaction.Officers.size();
+                            playerCount += senderFaction.Members.isEmpty() ? 0 : senderFaction.Members.size();
+                            playerCount += senderFaction.Recruits.isEmpty() ? 0 : senderFaction.Recruits.size();
 
-                    if(FactionLogic.getFactionName(invitedPlayer.getUniqueId()) == null)
-                    {
-                        try
-                        {
-                            Invite invite = new Invite(senderFactionName, invitedPlayer.getUniqueId());
-                            EagleFactions.InviteList.add(invite);
-
-                            invitedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction ", TextColors.GOLD, senderFactionName, TextColors.GREEN, " has sent you an invite! You have 2 minutes to accept it!" +
-                                    " Type ", TextColors.GOLD, "/f join " + senderFactionName, TextColors.WHITE, " to join."));
-
-                            senderPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, "You invited ", TextColors.GOLD, invitedPlayer.getName(), TextColors.GREEN, " to your faction."));
-
-                            //TODO: Create a separate listener for removing invitations.
-
-                            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-
-                            taskBuilder.execute(new Runnable()
+                            if(playerCount >= MainLogic.getPlayerLimit())
                             {
-                                @Override
-                                public void run()
-                                {
-                                    if(EagleFactions.InviteList.contains(invite) && EagleFactions.InviteList != null)
-                                    {
-                                        EagleFactions.InviteList.remove(invite);
-                                    }
-                                }
-                            }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
-
-                            return CommandResult.success();
+                                senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + PluginMessages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
+                                return CommandResult.success();
+                            }
                         }
-                        catch (Exception exception)
+
+                        if(!FactionLogic.getFactionByPlayerUUID(invitedPlayer.getUniqueId()).isPresent())
                         {
-                            exception.printStackTrace();
-                        }
+                            try
+                            {
+                                Invite invite = new Invite(senderFaction.Name, invitedPlayer.getUniqueId());
+                                EagleFactions.InviteList.add(invite);
 
+                                invitedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, senderFaction.Name, TextColors.GREEN, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE + " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                        " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f join " + senderFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_JOIN));
+
+                                senderPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_INVITED + " ", TextColors.GOLD, invitedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.TO_YOUR_FACTION));
+
+                                //TODO: Create a separate listener for removing invitations.
+
+                                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+
+                                taskBuilder.execute(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        if(EagleFactions.InviteList.contains(invite) && EagleFactions.InviteList != null)
+                                        {
+                                            EagleFactions.InviteList.remove(invite);
+                                        }
+                                    }
+                                }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(EagleFactions.getEagleFactions());
+
+                                return CommandResult.success();
+                            }
+                            catch (Exception exception)
+                            {
+                                exception.printStackTrace();
+                            }
+
+                        }
+                        else
+                        {
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PLAYER_IS_ALREADY_IN_A_FACTION));
+                        }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Player is already in a faction!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to invite players!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f invite <player>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f invite <player>"));
         }
 
         return CommandResult.success();

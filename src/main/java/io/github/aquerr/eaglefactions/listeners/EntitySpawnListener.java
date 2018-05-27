@@ -1,9 +1,11 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -15,6 +17,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public class EntitySpawnListener
 {
@@ -28,10 +32,19 @@ public class EntitySpawnListener
 
             if(entity instanceof Hostile)
             {
-                if((MainLogic.getMobSpawning() == false) && FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
+                if (!MainLogic.getMobSpawning())
                 {
-                    event.setCancelled(true);
-                    return;
+                    if (MainLogic.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if(FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
             }
             else if(entity instanceof Player)
@@ -40,9 +53,11 @@ public class EntitySpawnListener
                 {
                     Player player = (Player)entity;
 
-                    if(FactionLogic.getFactionName(player.getUniqueId()) != null)
+                    Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+
+                    if(optionalPlayerFaction.isPresent())
                     {
-                        FactionHome factionHome = FactionLogic.getHome(FactionLogic.getFactionName(player.getUniqueId()));
+                        FactionHome factionHome = optionalPlayerFaction.get().Home;
                         if(factionHome != null)
                         {
                             event.setCancelled(true);
@@ -52,7 +67,7 @@ public class EntitySpawnListener
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Could not spawn at faction's home! Home may not be set!"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET));
                         }
                     }
                 }

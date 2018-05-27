@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -28,45 +30,46 @@ public class CoordsCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            String factionName = FactionLogic.getFactionName(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
             List<Text> teamCoords = new ArrayList<>();
 
-            if(factionName != null)
+            if(optionalPlayerFaction.isPresent())
             {
-                if(FactionLogic.getHome(factionName) != null)
+                Faction playerFaction = optionalPlayerFaction.get();
+                if(playerFaction.Home != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of("Faction's Home: " + FactionLogic.getHome(factionName).toString()))
+                            .append(Text.of( PluginMessages.FACTIONS_HOME + ": " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
                 }
 
-                if (!FactionLogic.getLeader(factionName).equals(""))
+                if (!playerFaction.Leader.equals(""))
                 {
-                    Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(factionName)));
+                    Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader));
 
                     if(leader.isPresent())
                     {
                         Text textBuilder = Text.builder()
-                                .append(Text.of("Leader: " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
+                                .append(Text.of(PluginMessages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
                                 .build();
 
                         teamCoords.add(textBuilder);
                     }
                 }
 
-                if(!FactionLogic.getOfficers(factionName).isEmpty())
+                if(!playerFaction.Officers.isEmpty())
                 {
-                    for (String officerName: FactionLogic.getOfficers(factionName))
+                    for (String officerName: playerFaction.Officers)
                     {
                         Optional<Player> officer = PlayerManager.getPlayer(UUID.fromString(officerName));
 
                         if(officer.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of("Officer: " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(PluginMessages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -74,16 +77,16 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!FactionLogic.getMembers(factionName).isEmpty())
+                if(!playerFaction.Members.isEmpty())
                 {
-                    for (String memberName: FactionLogic.getMembers(factionName))
+                    for (String memberName: playerFaction.Members)
                     {
                         Optional<Player> member = PlayerManager.getPlayer(UUID.fromString(memberName));
 
                         if(member.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of("Member: " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(PluginMessages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -91,20 +94,38 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
+                if(!playerFaction.Recruits.isEmpty())
+                {
+                    for (String recruitName: playerFaction.Recruits)
+                    {
+                        Optional<Player> recruit = PlayerManager.getPlayer(UUID.fromString(recruitName));
+
+                        if(recruit.isPresent())
+                        {
+                            Text textBuilder = Text.builder()
+                                    .append(Text.of(PluginMessages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
+                                    .build();
+
+                            teamCoords.add(textBuilder);
+                        }
+                    }
+                }
+
+
                 PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Team Coords")).contents(teamCoords);
+                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
                 paginationBuilder.sendTo(source);
 
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

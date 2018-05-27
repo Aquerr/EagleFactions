@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -26,14 +28,16 @@ public class ListCommand implements CommandExecutor
         HashSet<Faction> factionsList = new HashSet<>(FactionLogic.getFactions());
         List<Text> helpList = new ArrayList<>();
 
+        Text tagPrefix = MainLogic.getFactionPrefixStart();
+        Text tagSufix = MainLogic.getFactionPrefixEnd();
+
         for(Faction faction: factionsList)
         {
-            String tag = "";
-            if(faction.Tag != null && !faction.Tag.equals("")) tag = "[" + faction.Tag + "] ";
+            Text tag = Text.builder().append(tagPrefix).append(faction.Tag).append(tagSufix, Text.of(" ")).build();
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "- " + tag + faction.Name + " (" + faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, "- ")).append(tag).append(Text.of(faction.Name, " (", PowerManager.getFactionPower(faction), "/", PowerManager.getFactionMaxPower(faction), ")"))
                             .build())
                     .build();
 
@@ -41,7 +45,7 @@ public class ListCommand implements CommandExecutor
         }
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions List")).padding(Text.of("-")).contents(helpList);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success();

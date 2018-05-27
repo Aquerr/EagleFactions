@@ -3,7 +3,9 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -36,67 +38,72 @@ public class AddAllyCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 String rawFactionName = optionalFactionName.get();
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
                 String invitedFactionName = FactionLogic.getRealFactionName(rawFactionName);
 
                 if (invitedFactionName == null)
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
                     return CommandResult.success();
                 }
 
-                if (playerFactionName != null)
+                if (optionalPlayerFaction.isPresent())
                 {
+                    Faction playerFaction = optionalPlayerFaction.get();
+
                     if (EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if (!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))
+                        if (!playerFaction.Enemies.contains(invitedFactionName))
                         {
-                            if (!FactionLogic.getAlliances(playerFactionName).contains(invitedFactionName))
+                            if (!playerFaction.Alliances.contains(invitedFactionName))
                             {
-                                FactionLogic.addAlly(playerFactionName, invitedFactionName);
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction has been added to the alliance!"));
+                                FactionLogic.addAlly(playerFaction.Name, invitedFactionName);
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
                             }
                             else
                             {
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are in alliance with this faction!"));
+                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_IN_ALLIANCE_WITH_THIS_FACTION));
                             }
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are in WAR with this faction! Send a request for peace to this faction first!"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + PluginMessages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
                         }
                         return CommandResult.success();
                     }
 
-                    if (FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                    if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        if(!FactionLogic.getEnemies(playerFactionName).contains(invitedFactionName))
+                        if(!playerFaction.Enemies.contains(invitedFactionName))
                         {
-                            if(!FactionLogic.getAlliances(playerFactionName).contains(invitedFactionName))
+                            if(!playerFaction.Alliances.contains(invitedFactionName))
                             {
-                                AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFactionName);
+                                AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFaction.Name);
 
                                 //TODO: Check if player is online
-                                Player invitedFactionLeader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(invitedFactionName))).get();
+                                Player invitedFactionLeader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader)).get();
 
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    FactionLogic.addAlly(playerFactionName, invitedFactionName);
+                                    FactionLogic.addAlly(playerFaction.Name, invitedFactionName);
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "You have accepted an invitation from ", TextColors.GOLD, invitedFactionName + "!"));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, invitedFactionName + "!"));
 
-                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " accepted your invite to the alliance."));
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE));
 
                                     EagleFactions.AllayInviteList.remove(checkInvite);
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    AllyInvite invite = new AllyInvite(playerFactionName, invitedFactionName);
+                                    AllyInvite invite = new AllyInvite(playerFaction.Name, invitedFactionName);
                                     EagleFactions.AllayInviteList.add(invite);
 
-                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has sent you an invite to the ", TextColors.AQUA, "alliance, ", TextColors.WHITE, "! You have 2 minutes to accept it!" +
-                                            " Type ", TextColors.GOLD, "/f ally add " + playerFactionName, TextColors.WHITE, " to accept it."));
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, "You invited faction ", TextColors.GOLD, invitedFactionName, TextColors.WHITE, " to the alliance."));
+                                    invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally add " + playerFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION));
+
+                                    //TODO: Send message about invitation to officers.
+
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, invitedFactionName, TextColors.WHITE, " " + PluginMessages.TO_THE_ALLIANCE));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -118,33 +125,33 @@ public class AddAllyCommand implements CommandExecutor
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are in alliance with this faction!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_IN_ALLIANCE_WITH_THIS_FACTION));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You are in WAR with this faction! Send a request for peace to this faction first!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + PluginMessages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
                         }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f ally add <faction name>"));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f ally add <faction name>"));
             return CommandResult.success();
         }
 

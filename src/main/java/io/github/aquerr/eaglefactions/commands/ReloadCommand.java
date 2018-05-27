@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -21,7 +22,7 @@ public class ReloadCommand implements CommandExecutor
             EagleFactions.getEagleFactions().getConfiguration().load();
             FactionLogic.reload();
 
-            source.sendMessage(Text.of(PluginInfo.PluginPrefix, "Configs have been reloaded!"));
+            source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));
         }
         catch (Exception exception)
         {

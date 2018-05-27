@@ -2,7 +2,9 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -29,91 +31,92 @@ public class AddEnemyCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
-                String playerFactionName = FactionLogic.getFactionName(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
                 String enemyFactionName = FactionLogic.getRealFactionName(rawFactionName);
 
                 if (enemyFactionName == null)
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
+                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
                     return CommandResult.success();
                 }
 
-                if(playerFactionName != null)
+                if(optionalPlayerFaction.isPresent())
                 {
+                    Faction playerFaction = optionalPlayerFaction.get();
+
                     if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(!FactionLogic.getAlliances(playerFactionName).contains(enemyFactionName))
+                        if(!playerFaction.Alliances.contains(enemyFactionName))
                         {
-                            if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                            if(!playerFaction.Enemies.contains(enemyFactionName))
                             {
-                                FactionLogic.addEnemy(playerFactionName, enemyFactionName);
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, "Faction has been added to the enemies!"));
+                                FactionLogic.addEnemy(playerFaction.Name, enemyFactionName);
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is already your enemy!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_ALREADY_YOUR_ENEMY));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is your ally! Remove alliance first to declare a war!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
                         }
                         return CommandResult.success();
                     }
 
-                    if(FactionLogic.getLeader(playerFactionName).equals(player.getUniqueId().toString()) || FactionLogic.getOfficers(playerFactionName).contains(player.getUniqueId().toString()))
+                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
                         if(FactionLogic.getFactionsNames().contains(enemyFactionName))
                         {
-                            if(!FactionLogic.getAlliances(playerFactionName).contains(enemyFactionName))
+                            if(!playerFaction.Alliances.contains(enemyFactionName))
                             {
-                                if(!FactionLogic.getEnemies(playerFactionName).contains(enemyFactionName))
+                                if(!playerFaction.Enemies.contains(enemyFactionName))
                                 {
-                                    FactionLogic.addEnemy(playerFactionName, enemyFactionName);
+                                    FactionLogic.addEnemy(playerFaction.Name, enemyFactionName);
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, "Your faction is now ", TextColors.RED, "enemies ", TextColors.WHITE, "with " + enemyFactionName));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFactionName));
 
                                     //TODO: Check if player is online
                                     Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
-                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, "Faction ", TextColors.GOLD, playerFactionName, TextColors.WHITE, " has declared you a ", TextColors.RED, "War!"));
+                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
 
-                                    CommandResult.success();
+                                    return CommandResult.success();
                                 }
                                 else
                                 {
-                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is already your enemy!"));
+                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_ALREADY_YOUR_ENEMY));
                                 }
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "This faction is your ally! Remove alliance first to declare a war!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "There is no faction called ", TextColors.GOLD, enemyFactionName + "!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, enemyFactionName + "!"));
                         }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be the faction leader or officer to do this!"));
+                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must be in a faction in order to use this command!"));
+                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, "Only in-game players can use this command!"));
+                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Wrong command arguments!"));
-            source.sendMessage(Text.of(TextColors.RED, "Usage: /f enemy add <faction name>"));
-            return CommandResult.success();
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f enemy add <faction name>"));
         }
 
         return CommandResult.success();

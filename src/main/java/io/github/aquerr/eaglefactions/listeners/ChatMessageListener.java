@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import org.spongepowered.api.entity.living.player.Player;
@@ -14,6 +15,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class ChatMessageListener
@@ -21,10 +23,12 @@ public class ChatMessageListener
     @Listener
     public void onChatMessage(MessageChannelEvent.Chat event, @Root Player player)
     {
-        if(FactionLogic.getFactionName(player.getUniqueId()) != null)
+        Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+
+        if(optionalPlayerFaction.isPresent())
         {
             MessageChannel messageChannel = event.getOriginalChannel();
-            String factionName = FactionLogic.getFactionName(player.getUniqueId());
+            Faction playerFaction = optionalPlayerFaction.get();
 
             Text.Builder formattedMessage = Text.builder();
 
@@ -59,18 +63,12 @@ public class ChatMessageListener
 
                     //TODO: Add option to style prefixes by user form config file.
 
-                    for (String allianceName : FactionLogic.getAlliances(factionName))
+                    for (String allianceName : playerFaction.Alliances)
                     {
-                        for (Player factionPlayer : FactionLogic.getOnlinePlayers(allianceName))
-                        {
-                            receivers.add(factionPlayer);
-                        }
+                        receivers.addAll(FactionLogic.getOnlinePlayers(FactionLogic.getFactionByName(allianceName)));
                     }
 
-                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(factionName))
-                    {
-                        receivers.add(factionPlayer);
-                    }
+                    receivers.addAll(FactionLogic.getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
                 }
@@ -82,10 +80,7 @@ public class ChatMessageListener
 
                     Set<MessageReceiver> receivers = new HashSet<>();
 
-                    for (Player factionPlayer : FactionLogic.getOnlinePlayers(factionName))
-                    {
-                        receivers.add(factionPlayer);
-                    }
+                    receivers.addAll(FactionLogic.getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
                 }
@@ -102,21 +97,35 @@ public class ChatMessageListener
             //Get faction prefix from Eagle Factions.
             if(MainLogic.getPrefixOption().equals("tag"))
             {
-                if(!FactionLogic.getFactionTag(factionName).equals("") && FactionLogic.getFactionTag(factionName) != null)
+                if(!playerFaction.Tag.toPlainSingle().equals(""))
                 {
-                    //Get faction's tag
-                    Text factionTag = Text.builder()
-                            .append(Text.of("[" ,TextColors.GREEN, FactionLogic.getFactionTag(factionName), TextColors.RESET, "]"))
-                            .build();
+                    if (MainLogic.areColoredTagsAllowed())
+                    {
+                        //Get faction's tag
+                        Text factionTag = Text.builder()
+                                //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
+                                .append(MainLogic.getFactionPrefixStart(), playerFaction.Tag, MainLogic.getFactionPrefixEnd())
+                                .build();
 
-                    factionAndRankPrefix.append(factionTag);
+                        factionAndRankPrefix.append(factionTag);
+                    }
+                    else
+                    {
+                        //Get faction's tag
+                        Text factionTag = Text.builder()
+                                //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
+                                .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.Tag), MainLogic.getFactionPrefixEnd())
+                                .build();
+
+                        factionAndRankPrefix.append(factionTag);
+                    }
                 }
             }
             else if (MainLogic.getPrefixOption().equals("name"))
             {
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
-                        .append(Text.of("[" ,TextColors.GREEN, factionName, TextColors.RESET, "]"))
+                        .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.Name, TextColors.RESET), MainLogic.getFactionPrefixEnd())
                         .build();
 
                 factionAndRankPrefix.append(factionNamePrefix);
@@ -125,7 +134,7 @@ public class ChatMessageListener
             if(MainLogic.shouldDisplayRank())
             {
                 //Get leader prefix.
-                if(FactionLogic.getLeader(factionName).equals(player.getUniqueId().toString()))
+                if(playerFaction.Leader.equals(player.getUniqueId().toString()))
                 {
                     Text leaderPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
@@ -135,7 +144,7 @@ public class ChatMessageListener
                 }
 
                 //Get officer prefix.
-                if(FactionLogic.getOfficers(factionName).contains(player.getUniqueId().toString()))
+                if(playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     Text officerPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
@@ -167,17 +176,15 @@ public class ChatMessageListener
 
     private Text getAlliancePrefix()
     {
-        Text alliancePrefix = Text.builder()
-                .append(Text.of("[", TextColors.BLUE, "Alliance", TextColors.RESET, "]"))
+        return Text.builder()
+                .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.BLUE, "Alliance", TextColors.RESET), MainLogic.getFactionPrefixEnd())
                 .build();
-        return alliancePrefix;
     }
 
     private Text getFactionPrefix()
     {
-        Text factionPrefix = Text.builder()
-                .append(Text.of("[", TextColors.GREEN, "Faction", TextColors.RESET, "]"))
+        return Text.builder()
+                .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, "Faction", TextColors.RESET), MainLogic.getFactionPrefixEnd())
                 .build();
-        return factionPrefix;
     }
 }

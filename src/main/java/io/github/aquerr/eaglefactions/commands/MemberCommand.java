@@ -16,46 +16,45 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class OfficerCommand implements CommandExecutor
+public class MemberCommand implements CommandExecutor
 {
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<Player> optionalNewOfficerPlayer = context.<Player>getOne("player");
+        Optional<Player> optionalNewMemberPlayer = context.<Player>getOne("player");
 
-        if (optionalNewOfficerPlayer.isPresent())
+        if (optionalNewMemberPlayer.isPresent())
         {
             if(source instanceof Player)
             {
                 Player player = (Player)source;
-                Player newOfficerPlayer = optionalNewOfficerPlayer.get();
+                Player newMemberPlayer = optionalNewMemberPlayer.get();
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalNewOfficerFaction = FactionLogic.getFactionByPlayerUUID(newOfficerPlayer.getUniqueId());
+                Optional<Faction> optionalNewMemberFaction = FactionLogic.getFactionByPlayerUUID(newMemberPlayer.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
                     if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(optionalNewOfficerFaction.isPresent() && optionalNewOfficerFaction.get().Name.equals(playerFaction.Name))
+                        if(optionalNewMemberFaction.isPresent() && optionalNewMemberFaction.get().Name.equals(playerFaction.Name))
                         {
-                            if(!playerFaction.Leader.equals(newOfficerPlayer.getUniqueId().toString()))
+                            if(!playerFaction.Leader.equals(newMemberPlayer.getUniqueId().toString()))
                             {
-                                if(playerFaction.Members.contains(newOfficerPlayer.getUniqueId().toString()))
+                                if(playerFaction.Officers.contains(newMemberPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId().toString(), playerFaction.Name);
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_ADDED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.OFFICER, TextColors.WHITE, "!"));
+                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
-                                else if (playerFaction.Officers.contains(newOfficerPlayer.getUniqueId().toString()))
+                                else if (playerFaction.Recruits.contains(newMemberPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId().toString(), playerFaction.Name);
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
+                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.TO + " ", TextColors.BLUE, PluginMessages.MEMBERS, TextColors.WHITE, "!"));
                                 }
-                                //TODO: Add promotion from recruit rank.
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_SET_FACTIONS_LEADER_AS_OFFICER));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER));
                             }
                         }
                         else
@@ -68,24 +67,24 @@ public class OfficerCommand implements CommandExecutor
 
                     if(playerFaction.Leader.equals(player.getUniqueId().toString()))
                     {
-                        if(optionalNewOfficerFaction.isPresent() && optionalNewOfficerFaction.get().Name.equals(playerFaction.Name))
+                        if(optionalNewMemberFaction.isPresent() && optionalNewMemberFaction.get().Name.equals(playerFaction.Name))
                         {
-                            if(!playerFaction.Leader.equals(newOfficerPlayer.getUniqueId().toString()))
+                            if(!playerFaction.Leader.equals(newMemberPlayer.getUniqueId().toString()))
                             {
-                                if(!playerFaction.Officers.contains(newOfficerPlayer.getUniqueId().toString()))
+                                if(playerFaction.Officers.contains(newMemberPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId().toString(), playerFaction.Name);
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_ADDED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.OFFICER, TextColors.WHITE, "!"));
+                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
-                                else
+                                else if (playerFaction.Recruits.contains(newMemberPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId().toString(), playerFaction.Name);
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
+                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.TO + " ", TextColors.BLUE, PluginMessages.MEMBERS, TextColors.WHITE, "!"));
                                 }
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_SET_FACTIONS_LEADER_AS_OFFICER));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER));
                             }
                         }
                         else
@@ -112,7 +111,7 @@ public class OfficerCommand implements CommandExecutor
         else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f officer <player>"));
+            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f member <player>"));
         }
 
         return CommandResult.success();

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -25,7 +26,7 @@ public class TopCommand implements CommandExecutor
         List<Text> helpList = new ArrayList<>();
         int index = 0;
 
-        factionsList.sort((o1, o2) -> o2.Power.compareTo(o1.Power));
+        factionsList.sort((o1, o2) -> PowerManager.getFactionPower(o2).compareTo(PowerManager.getFactionPower(o1)));
 
         //This should show only top 10 factions on the server.
 
@@ -40,7 +41,7 @@ public class TopCommand implements CommandExecutor
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.Name + " (" + faction.Power + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.Name + " (" + PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
                             .build())
                     .build();
 
@@ -48,7 +49,7 @@ public class TopCommand implements CommandExecutor
         }
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, "Factions List")).padding(Text.of("-")).contents(helpList);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success();
