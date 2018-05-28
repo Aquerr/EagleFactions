@@ -34,6 +34,8 @@ public class ChatMessageListener
 
             Text.Builder factionAndRankPrefix = Text.builder();
             Text.Builder otherPrefixesAndPlayer = Text.builder();
+            Text.Builder factionPrefixText = Text.builder();
+            Text.Builder rankPrefixText = Text.builder();
             //Text.Builder playerText = Text.builder();
             Text.Builder message = Text.builder();
 
@@ -107,7 +109,7 @@ public class ChatMessageListener
                                 .append(MainLogic.getFactionPrefixStart(), playerFaction.Tag, MainLogic.getFactionPrefixEnd())
                                 .build();
 
-                        factionAndRankPrefix.append(factionTag);
+                        factionPrefixText.append(factionTag);
                     }
                     else
                     {
@@ -117,7 +119,7 @@ public class ChatMessageListener
                                 .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.Tag), MainLogic.getFactionPrefixEnd())
                                 .build();
 
-                        factionAndRankPrefix.append(factionTag);
+                        factionPrefixText.append(factionTag);
                     }
                 }
             }
@@ -128,7 +130,7 @@ public class ChatMessageListener
                         .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.Name, TextColors.RESET), MainLogic.getFactionPrefixEnd())
                         .build();
 
-                factionAndRankPrefix.append(factionNamePrefix);
+                factionPrefixText.append(factionNamePrefix);
             }
 
             if(MainLogic.shouldDisplayRank())
@@ -140,7 +142,7 @@ public class ChatMessageListener
                             .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
                             .build();
 
-                    factionAndRankPrefix.append(leaderPrefix);
+                    rankPrefixText.append(leaderPrefix);
                 }
 
                 //Get officer prefix.
@@ -150,8 +152,19 @@ public class ChatMessageListener
                             .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
                             .build();
 
-                    factionAndRankPrefix.append(officerPrefix);
+                    rankPrefixText.append(officerPrefix);
                 }
+            }
+
+            if (MainLogic.isFactionPrefixFirstInChat())
+            {
+                factionAndRankPrefix.append(factionPrefixText.build());
+                factionAndRankPrefix.append(rankPrefixText.build());
+            }
+            else
+            {
+                factionAndRankPrefix.append(rankPrefixText.build());
+                factionAndRankPrefix.append(factionPrefixText.build());
             }
 
             //Add faction tag and faction rank

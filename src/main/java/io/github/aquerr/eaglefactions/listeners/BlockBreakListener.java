@@ -65,7 +65,7 @@ public class BlockBreakListener
                          {
                              if (!FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                              {
-                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                  event.setCancelled(true);
                                  return;
                              }

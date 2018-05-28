@@ -298,6 +298,11 @@ public class MainLogic
         return detectedWorldNames;
     }
 
+    public static boolean isFactionPrefixFirstInChat()
+    {
+        return _configuration.getBoolean(true, "faction-prefix-first-in-chat");
+    }
+
     public static void addWorld(String worldName)
     {
         List<String> claimableWorldNames = getClaimableWorldNames();
