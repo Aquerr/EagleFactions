@@ -62,7 +62,7 @@ public class PlayerInteractListener
                     {
                         if (!FlagManager.canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
                             event.setCancelled(true);
                         }
                     }
