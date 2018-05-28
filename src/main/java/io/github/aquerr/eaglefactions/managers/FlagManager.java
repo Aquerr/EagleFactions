@@ -49,14 +49,20 @@ public class FlagManager
 
     private static boolean checkFlag(Player player, Faction playerFaction, Faction chunkFaction, FactionFlagTypes flagType)
     {
-        if(playerFaction.Alliances.contains(chunkFaction.Name))
+        if (playerFaction.Name.equals(chunkFaction.Name))
+        {
+            FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
+
+            return chunkFaction.Flags.get(memberType).get(flagType);
+        }
+        else if (playerFaction.Alliances.contains(chunkFaction.Name))
         {
             return chunkFaction.Flags.get(FactionMemberType.ALLY).get(flagType);
         }
-
-        FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
-
-        return chunkFaction.Flags.get(memberType).get(flagType);
+        else
+        {
+            return false;
+        }
     }
 
     public static Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getDefaultFactionFlags()
