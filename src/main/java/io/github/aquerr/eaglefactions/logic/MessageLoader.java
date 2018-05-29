@@ -33,30 +33,30 @@ public class MessageLoader
             }
         }
 
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
-        try
-        {
-            Files.copy(inputStream, messagesFilePath, StandardCopyOption.REPLACE_EXISTING);
-            inputStream.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-//        if (!Files.exists(messagesFilePath))
+//        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
+//        try
 //        {
-//            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
-//            try
-//            {
-//                Files.copy(inputStream, messagesFilePath);
-//                inputStream.close();
-//            }
-//            catch (IOException e)
-//            {
-//                e.printStackTrace();
-//            }
+//            Files.copy(inputStream, messagesFilePath, StandardCopyOption.REPLACE_EXISTING);
+//            inputStream.close();
 //        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+
+        if (!Files.exists(messagesFilePath))
+        {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
+            try
+            {
+                Files.copy(inputStream, messagesFilePath);
+                inputStream.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
 
         ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(messagesFilePath).build();
         ConfigurationNode configNode;
@@ -78,7 +78,7 @@ public class MessageLoader
 
         for (Field messageField : messageFields)
         {
-            String message = configNode.getNode(messageField.getName()).getString();
+            String message = configNode.getNode(messageField.getName()).getString("MISSING_CONTENT");
 
             try
             {
