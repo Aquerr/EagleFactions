@@ -2,8 +2,8 @@ plugins {
     id 'org.spongepowered.plugin' version '0.8.1'
 }
 
-group = 'io.github.aquerr.eaglefactions'
-version = '1.12.2-v0.9.15'
+group = pluginGroup
+version = pluginVersion
 description = 'A factions plugin that will make managing your battle-server easier. :)'
 
 dependencies {

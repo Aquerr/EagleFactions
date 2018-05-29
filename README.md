@@ -2,7 +2,7 @@
 
 # Eagle Factions
 
-Current version: 0.9.15
+Current version: 0.9.16
 
 ## General
 Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using "power". Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
