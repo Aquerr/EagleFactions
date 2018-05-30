@@ -82,7 +82,7 @@ public class PluginMessages
     public static String YOU_MOVED_FROM_THE_CHUNK;
     public static String CLAIMING_HAS_BEEN_STARTED;
     public static String TO_CLAIM_IT;
-    public static String YOU_CANT_CLAIM_LAND_IN_THIS_WORLD;
+    //public static String YOU_CANT_CLAIM_LAND_IN_THIS_WORLD;
 
     //Coords
     public static String TEAM_COORDS;

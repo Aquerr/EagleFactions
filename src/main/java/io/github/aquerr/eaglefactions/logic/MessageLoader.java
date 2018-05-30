@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -17,7 +18,6 @@ public class MessageLoader
 {
     public MessageLoader(Path configDir)
     {
-        //TODO: Consider having language option in main config file.
         String messagesFileName = MainLogic.getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
@@ -33,38 +33,27 @@ public class MessageLoader
             }
         }
 
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
-        try
+        if (!Files.exists(messagesFilePath))
         {
-            Files.copy(inputStream, messagesFilePath, StandardCopyOption.REPLACE_EXISTING);
-            inputStream.close();
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
+            try
+            {
+                Files.copy(inputStream, messagesFilePath);
+                inputStream.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-//        if (!Files.exists(messagesFilePath))
-//        {
-//            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
-//            try
-//            {
-//                Files.copy(inputStream, messagesFilePath);
-//                inputStream.close();
-//            }
-//            catch (IOException e)
-//            {
-//                e.printStackTrace();
-//            }
-//        }
 
         ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(messagesFilePath).build();
         ConfigurationNode configNode;
 
         try
         {
-            configNode = configLoader.load();
-            loadPluginMessages(configNode);
+            configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
+            loadPluginMessages(configNode, configLoader);
         }
         catch (IOException e)
         {
@@ -72,19 +61,39 @@ public class MessageLoader
         }
     }
 
-    private void loadPluginMessages(ConfigurationNode configNode)
+    private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader configLoader)
     {
         Field[] messageFields = PluginMessages.class.getFields();
+        boolean missingNodes = false;
 
         for (Field messageField : messageFields)
         {
-            String message = configNode.getNode(messageField.getName()).getString();
+            Object object = configNode.getNode(messageField.getName()).getString("MISSING_MESSAGE");
+
+            if (object.equals("MISSING_MESSAGE"))
+            {
+                missingNodes = true;
+            }
+
+            String message = object.toString();
 
             try
             {
                 messageField.set(PluginMessages.class.getClass(), message);
             }
             catch (IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        if (missingNodes)
+        {
+            try
+            {
+                configLoader.save(configNode);
+            }
+            catch (IOException e)
             {
                 e.printStackTrace();
             }
