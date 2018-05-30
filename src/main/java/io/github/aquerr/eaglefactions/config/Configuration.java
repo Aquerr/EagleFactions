@@ -158,17 +158,9 @@ public class Configuration
 
     public boolean setListOfStrings(List<String> listOfStrings, Object... nodePath)
     {
-        try
-        {
-            configNode.getNode(nodePath).setValue(TypeToken.of(List.class), listOfStrings);
-            save();
-            return true;
-        }
-        catch (ObjectMappingException e)
-        {
-            e.printStackTrace();
-            return false;
-        }
+        configNode.getNode(nodePath).setValue(listOfStrings);
+        save();
+        return true;
     }
 
     private static Function<Object,String> objectToStringTransformer = input ->

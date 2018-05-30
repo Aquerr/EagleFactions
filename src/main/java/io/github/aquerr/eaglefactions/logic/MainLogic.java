@@ -305,7 +305,7 @@ public class MainLogic
 
     public static void addWorld(String worldName)
     {
-        List<String> claimableWorldNames = getClaimableWorldNames();
+        List<String> claimableWorldNames = new ArrayList<>(getClaimableWorldNames());
         claimableWorldNames.add(worldName);
 
         _configuration.setListOfStrings(claimableWorldNames, "worlds", "CLAIMABLE");
