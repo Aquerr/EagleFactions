@@ -70,10 +70,10 @@ public class PlayerInteractListener
                     {
                         event.setCancelled(true);
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
-                        return;
                     }
                 }
             }
         }
+        return;
     }
 }
