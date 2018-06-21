@@ -32,9 +32,9 @@ public class AddEnemyCommand implements CommandExecutor
                 Player player = (Player)source;
                 String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                String enemyFactionName = FactionLogic.getRealFactionName(rawFactionName);
+                Faction enemyFaction = FactionLogic.getFactionByName(rawFactionName);
 
-                if (enemyFactionName == null)
+                if (enemyFaction == null)
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
                     return CommandResult.success();
@@ -46,11 +46,11 @@ public class AddEnemyCommand implements CommandExecutor
 
                     if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(!playerFaction.Alliances.contains(enemyFactionName))
+                        if(!playerFaction.Alliances.contains(enemyFaction.Name))
                         {
-                            if(!playerFaction.Enemies.contains(enemyFactionName))
+                            if(!playerFaction.Enemies.contains(enemyFaction.Name))
                             {
-                                FactionLogic.addEnemy(playerFaction.Name, enemyFactionName);
+                                FactionLogic.addEnemy(playerFaction.Name, enemyFaction.Name);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
                             }
                             else
@@ -67,18 +67,18 @@ public class AddEnemyCommand implements CommandExecutor
 
                     if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        if(FactionLogic.getFactionsNames().contains(enemyFactionName))
+                        if(FactionLogic.getFactionsNames().contains(enemyFaction.Name.toLowerCase()))
                         {
-                            if(!playerFaction.Alliances.contains(enemyFactionName))
+                            if(!playerFaction.Alliances.contains(enemyFaction.Name))
                             {
-                                if(!playerFaction.Enemies.contains(enemyFactionName))
+                                if(!playerFaction.Enemies.contains(enemyFaction.Name))
                                 {
-                                    FactionLogic.addEnemy(playerFaction.Name, enemyFactionName);
+                                    FactionLogic.addEnemy(playerFaction.Name, enemyFaction.Name);
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFactionName));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.Name));
 
                                     //TODO: Check if player is online
-                                    Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(FactionLogic.getLeader(enemyFactionName))).get();
+                                    Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(enemyFaction.Leader)).get();
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
 
                                     return CommandResult.success();
@@ -95,7 +95,7 @@ public class AddEnemyCommand implements CommandExecutor
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, enemyFactionName + "!"));
+                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, enemyFaction + "!"));
                         }
                     }
                     else

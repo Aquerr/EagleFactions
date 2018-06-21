@@ -74,7 +74,7 @@ public class CreateCommand implements CommandExecutor
                         }
                     }
 
-                    if (FactionLogic.getFactionsNames().stream().noneMatch(x -> x.equalsIgnoreCase(factionName)))
+                    if (!FactionLogic.getFactionsNames().contains(factionName.toLowerCase()))
                     {
                         //Check name length
                         if(factionName.length() > MainLogic.getMaxNameLength())

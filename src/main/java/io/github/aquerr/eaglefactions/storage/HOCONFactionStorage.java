@@ -6,7 +6,6 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.managers.PowerManager;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class HOCONFactionStorage implements IStorage
 {
@@ -47,11 +45,13 @@ public class HOCONFactionStorage implements IStorage
 
                 configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 precreate();
-            } else
+            }
+            else
             {
                 configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 load();
             }
+            prepareFactionsCache();
         }
         catch (IOException exception)
         {
@@ -118,6 +118,7 @@ public class HOCONFactionStorage implements IStorage
         {
             configNode.getNode("factions").removeChild(factionName);
             FactionsCache.removeFactionCache(factionName);
+            saveChanges();
             return true;
         }
         catch (Exception exception)
@@ -180,8 +181,6 @@ public class HOCONFactionStorage implements IStorage
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
 
         //Use TreeMap instead of LinkedHashMap to sort the map if needed.
-
-        //TODO: Add map for recruit rank.
 
         Map<FactionFlagTypes, Boolean> leaderMap = new LinkedHashMap<>();
         Map<FactionFlagTypes, Boolean> officerMap = new LinkedHashMap<>();
@@ -431,28 +430,24 @@ public class HOCONFactionStorage implements IStorage
         }
     }
 
-    @Override
-    public List<Faction> getFactions()
+    private void prepareFactionsCache()
     {
-        //TODO: Optimize this code as much as possible.
-
-        List<String> factionList = FactionsCache.getFactionsList().stream().map(x->x.Name).collect(Collectors.toList());
-
         final Set<Object> keySet = getStorage().getNode("factions").getChildrenMap().keySet();
 
         for (Object object : keySet)
         {
             if (object instanceof String)
             {
-                if (!factionList.contains(object))
-                {
-                    Faction faction = createFactionObject(String.valueOf(object));
-                    FactionsCache.addOrUpdateFactionCache(faction);
-                }
+                Faction faction = createFactionObject(String.valueOf(object));
+                FactionsCache.addOrUpdateFactionCache(faction);
             }
         }
+    }
 
-        return FactionsCache.getFactionsList();
+    @Override
+    public Map<String, Faction> getFactionsMap()
+    {
+        return FactionsCache.getFactionsMap();
     }
 
     @Override

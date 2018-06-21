@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 
-import java.util.List;
+import java.util.Map;
 
 public interface IStorage
 {
@@ -12,7 +12,7 @@ public interface IStorage
 
     Faction getFaction(String factionName);
 
-    List<Faction> getFactions();
+    Map<String, Faction> getFactionsMap();
 
     void load();
 }

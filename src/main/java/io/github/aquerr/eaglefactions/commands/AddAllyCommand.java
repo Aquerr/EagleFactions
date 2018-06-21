@@ -39,9 +39,9 @@ public class AddAllyCommand implements CommandExecutor
                 Player player = (Player)source;
                 String rawFactionName = optionalFactionName.get();
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                String invitedFactionName = FactionLogic.getRealFactionName(rawFactionName);
+                Faction invitedFaction = FactionLogic.getFactionByName(rawFactionName);
 
-                if (invitedFactionName == null)
+                if (invitedFaction == null)
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
                     return CommandResult.success();
@@ -53,11 +53,11 @@ public class AddAllyCommand implements CommandExecutor
 
                     if (EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if (!playerFaction.Enemies.contains(invitedFactionName))
+                        if (!playerFaction.Enemies.contains(invitedFaction.Name))
                         {
-                            if (!playerFaction.Alliances.contains(invitedFactionName))
+                            if (!playerFaction.Alliances.contains(invitedFaction.Name))
                             {
-                                FactionLogic.addAlly(playerFaction.Name, invitedFactionName);
+                                FactionLogic.addAlly(playerFaction.Name, invitedFaction.Name);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
                             }
                             else
@@ -74,20 +74,20 @@ public class AddAllyCommand implements CommandExecutor
 
                     if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        if(!playerFaction.Enemies.contains(invitedFactionName))
+                        if(!playerFaction.Enemies.contains(invitedFaction.Name))
                         {
-                            if(!playerFaction.Alliances.contains(invitedFactionName))
+                            if(!playerFaction.Alliances.contains(invitedFaction.Name))
                             {
-                                AllyInvite checkInvite = new AllyInvite(invitedFactionName, playerFaction.Name);
+                                AllyInvite checkInvite = new AllyInvite(invitedFaction.Name, playerFaction.Name);
 
                                 //TODO: Check if player is online
                                 Player invitedFactionLeader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader)).get();
 
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    FactionLogic.addAlly(playerFaction.Name, invitedFactionName);
+                                    FactionLogic.addAlly(playerFaction.Name, invitedFaction.Name);
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, invitedFactionName + "!"));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, invitedFaction.Name + "!"));
 
                                     invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE));
 
@@ -95,7 +95,7 @@ public class AddAllyCommand implements CommandExecutor
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    AllyInvite invite = new AllyInvite(playerFaction.Name, invitedFactionName);
+                                    AllyInvite invite = new AllyInvite(playerFaction.Name, invitedFaction.Name);
                                     EagleFactions.AllayInviteList.add(invite);
 
                                     invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
@@ -103,7 +103,7 @@ public class AddAllyCommand implements CommandExecutor
 
                                     //TODO: Send message about invitation to officers.
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, invitedFactionName, TextColors.WHITE, " " + PluginMessages.TO_THE_ALLIANCE));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.WHITE, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, invitedFaction, TextColors.WHITE, " " + PluginMessages.TO_THE_ALLIANCE));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

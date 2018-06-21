@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.logic;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
@@ -36,9 +37,8 @@ public class FactionLogic
 {
     private static IStorage factionsStorage;
 
-    public static void setup(Path configDir)
+    public FactionLogic(Path configDir)
     {
-        //TODO: Choose which storage should be used. (HOCON, MySQL etc.)
         factionsStorage = new HOCONFactionStorage(configDir);
     }
 
@@ -49,7 +49,7 @@ public class FactionLogic
 
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
     {
-        for (Faction faction : getFactions())
+        for (Faction faction : getFactions().values())
         {
             if (faction.Leader.equals(playerUUID.toString()))
             {
@@ -74,7 +74,7 @@ public class FactionLogic
 
     public static Optional<Faction> getFactionByChunk(UUID worldUUID, Vector3i chunk)
     {
-        for(Faction faction : getFactions())
+        for(Faction faction : getFactions().values())
         {
             if(faction.Claims.contains(worldUUID.toString() + "|" + chunk.toString()))
             {
@@ -121,43 +121,6 @@ public class FactionLogic
         return new ArrayList<>();
     }
 
-//    public static List<String> getMembers(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//        if (faction != null)
-//        {
-//            return faction.Members;
-//        }
-//        else return new ArrayList<>();
-//    }
-
-//    public static List<UUID> getPlayers(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//    	List<UUID> factionPlayers = new ArrayList<>();
-//
-//    	factionPlayers.add(UUID.fromString(faction.Leader));
-//
-//        for (String uuid : faction.Officers)
-//        {
-//        	factionPlayers.add(UUID.fromString(uuid));
-//        }
-//
-//        for (String uuid : faction.Members)
-//        {
-//        	factionPlayers.add(UUID.fromString(uuid));
-//        }
-//
-//        for (String uuid : faction.Recruits)
-//        {
-//            factionPlayers.add(UUID.fromString(uuid));
-//        }
-//
-//        return factionPlayers;
-//    }
-    
     public static List<Player> getOnlinePlayers(Faction faction)
     {
     	List<Player> factionPlayers = new ArrayList<>();
@@ -195,29 +158,21 @@ public class FactionLogic
         return factionPlayers;
     }
     
-    public static List<String> getFactionsNames()
+    public static Set<String> getFactionsNames()
     {
-        List<Faction> factions = getFactions();
-        List<String> namesList = new ArrayList<>();
-
-        for(Faction faction : factions)
-        {
-            namesList.add(faction.Name);
-        }
-
-        return namesList;
+        return getFactions().keySet();
     }
 
-    public static @Nullable String getRealFactionName(String rawFactionName)
-    {
-        List<String> factionsNames = getFactionsNames();
+//    public static @Nullable String getRealFactionName(String rawFactionName)
+//    {
+//        List<String> factionsNames = getFactionsNames();
+//
+//        return factionsNames.stream().filter(x->x.equalsIgnoreCase(rawFactionName)).findFirst().orElse(null);
+//    }
 
-        return factionsNames.stream().filter(x->x.equalsIgnoreCase(rawFactionName)).findFirst().orElse(null);
-    }
-
-    public static List<Faction> getFactions()
+    public static Map<String, Faction> getFactions()
     {
-        return factionsStorage.getFactions();
+        return FactionsCache.getFactionsMap();
     }
 
     public static void createFaction(String factionName,String factionTag, UUID playerUUID)
@@ -372,7 +327,7 @@ public class FactionLogic
     {
         List<String> claimsList = new ArrayList<>();
 
-        for (Faction faction : getFactions())
+        for (Faction faction : getFactions().values())
         {
             claimsList.addAll(faction.Claims);
         }
@@ -451,7 +406,7 @@ public class FactionLogic
 
     public static List<String> getFactionsTags()
     {
-        List<Faction> factionsList = getFactions();
+        List<Faction> factionsList = new ArrayList<>(getFactions().values());
         List<String> factionsTags = new ArrayList<>();
 
         for (Faction faction: factionsList)

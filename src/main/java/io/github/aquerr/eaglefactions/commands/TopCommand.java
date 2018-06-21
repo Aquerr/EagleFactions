@@ -22,7 +22,7 @@ public class TopCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        List<Faction> factionsList = new ArrayList<>(FactionLogic.getFactions());
+        List<Faction> factionsList = new ArrayList<>(FactionLogic.getFactions().values());
         List<Text> helpList = new ArrayList<>();
         int index = 0;
 
@@ -30,7 +30,7 @@ public class TopCommand implements CommandExecutor
 
         //This should show only top 10 factions on the server.
 
-        for(Faction faction: factionsList)
+        for(Faction faction : factionsList)
         {
             if(faction.Name.equalsIgnoreCase("safezone") || faction.Name.equalsIgnoreCase("warzone")) continue;
             if(index == 11) break;

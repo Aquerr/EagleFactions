@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
@@ -53,11 +54,11 @@ public class BlockBreakListener
 
                      if(optionalChunkFaction.isPresent())
                      {
-                         if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                         if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                          {
                              return;
                          }
-                         else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                         else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                          {
                              return;
                          }

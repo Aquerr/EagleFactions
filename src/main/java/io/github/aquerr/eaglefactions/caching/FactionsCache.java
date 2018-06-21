@@ -1,70 +1,56 @@
 package io.github.aquerr.eaglefactions.caching;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.managers.PowerManager;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class FactionsCache
 {
-    private static List<Faction> _factionsList = new ArrayList<>();
+    private static Map<String, Faction> factions = new HashMap<>();
 
     private FactionsCache()
     {
 
     }
 
-    public static List<Faction> getFactionsList()
+    public static Map<String, Faction> getFactionsMap()
     {
-        return _factionsList;
+        return factions;
     }
 
     public static void addOrUpdateFactionCache(Faction faction)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equals(faction.Name)).findFirst();
+        Faction factionToUpdate = factions.get(faction.Name.toLowerCase());
 
-        if (optionalFaction.isPresent())
+        if (factionToUpdate != null)
         {
-            Faction factionToUpdate = optionalFaction.get();
-            _factionsList.remove(factionToUpdate);
-            _factionsList.add(faction);
+            factions.remove(factionToUpdate.Name.toLowerCase());
+            factions.put(faction.Name.toLowerCase(), faction);
         }
         else
         {
-            _factionsList.add(faction);
+            factions.put(faction.Name.toLowerCase(), faction);
         }
     }
 
     public static void removeFactionCache(String factionName)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equals(factionName)).findFirst();
+        Faction factionToRemove = factions.get(factionName.toLowerCase());
 
-        if (optionalFaction.isPresent())
+        if (factionToRemove != null)
         {
-            Faction factionToRemove = optionalFaction.get();
-            _factionsList.remove(factionToRemove);
+            factions.remove(factionToRemove.Name.toLowerCase());
         }
     }
 
     public static @Nullable Faction getFactionCache(String factionName)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equalsIgnoreCase(factionName)).findFirst();
+        Faction optionalFaction = factions.get(factionName.toLowerCase());
 
-        if (optionalFaction.isPresent())
+        if (optionalFaction != null)
         {
-            Faction faction = optionalFaction.get();
-
-//            //Update power and cache
-//            faction.Power = PowerManager.getFactionPower(faction);
-//            _factionsList.remove(faction);
-//            _factionsList.add(faction);
-
-            //Return faction
-            return faction;
+            return optionalFaction;
         }
 
         return null;
