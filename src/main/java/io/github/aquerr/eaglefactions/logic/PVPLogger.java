@@ -4,9 +4,6 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.command.SendCommandEvent;
-import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -111,7 +108,7 @@ public class PVPLogger
                         task.cancel();
                     }
                 }
-            }).submit(EagleFactions.getEagleFactions());
+            }).submit(EagleFactions.getPlugin());
         }
     }
 

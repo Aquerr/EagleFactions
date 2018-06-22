@@ -10,7 +10,6 @@ import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -126,7 +125,7 @@ public class HomeCommand implements CommandExecutor
                     task.cancel();
                 }
             }
-        }).submit(EagleFactions.getEagleFactions());
+        }).submit(EagleFactions.getPlugin());
     }
 
     private void startHomeCooldown(UUID playerUUID)
@@ -152,6 +151,6 @@ public class HomeCommand implements CommandExecutor
                     EagleFactions.HomeCooldownPlayers.replace(playerUUID, seconds, seconds - 1);
                 }
             }
-        }).submit(EagleFactions.getEagleFactions());
+        }).submit(EagleFactions.getPlugin());
     }
 }

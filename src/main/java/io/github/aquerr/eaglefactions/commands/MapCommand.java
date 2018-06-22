@@ -23,6 +23,7 @@ import org.spongepowered.api.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class MapCommand implements CommandExecutor
@@ -52,7 +53,7 @@ public class MapCommand implements CommandExecutor
 
     private void generateMap(Player player)
     {
-        List<String> claimsList = FactionLogic.getAllClaims();
+        Set<String> claimsList = FactionLogic.getAllClaims();
         Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
         World world = player.getWorld();

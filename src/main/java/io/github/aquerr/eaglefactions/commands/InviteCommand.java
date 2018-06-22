@@ -84,7 +84,7 @@ public class InviteCommand implements CommandExecutor
                                             EagleFactions.InviteList.remove(invite);
                                         }
                                     }
-                                }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(EagleFactions.getEagleFactions());
+                                }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(EagleFactions.getPlugin());
 
                                 return CommandResult.success();
                             }

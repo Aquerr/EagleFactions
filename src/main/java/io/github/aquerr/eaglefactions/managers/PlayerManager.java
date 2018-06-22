@@ -24,6 +24,7 @@ import java.util.UUID;
 public class PlayerManager
 {
     private static Path playersPath;
+    private static UserStorageService userStorageService;
 
     public static void setup(Path configDir)
     {
@@ -31,6 +32,10 @@ public class PlayerManager
         {
             playersPath = configDir.resolve("players");
             if (!Files.exists(playersPath)) Files.createDirectory(playersPath);
+
+            Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
+            optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
+
         }
         catch (IOException exception)
         {
@@ -54,7 +59,6 @@ public class PlayerManager
 
     private static Optional<User> getUser(UUID playerUUID)
     {
-        UserStorageService userStorageService = Sponge.getServiceManager().provideUnchecked(UserStorageService.class);
         Optional<User> oUser = userStorageService.get(playerUUID);
 
         if(oUser.isPresent())

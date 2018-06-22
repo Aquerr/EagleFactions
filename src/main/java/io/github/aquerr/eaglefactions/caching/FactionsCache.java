@@ -7,7 +7,8 @@ import java.util.*;
 
 public class FactionsCache
 {
-    private static Map<String, Faction> factions = new HashMap<>();
+    private static Map<String, Faction> factionsCacheMap = new HashMap<>();
+    private static Set<String> claimsCacheList = new HashSet<>();
 
     private FactionsCache()
     {
@@ -16,37 +17,48 @@ public class FactionsCache
 
     public static Map<String, Faction> getFactionsMap()
     {
-        return factions;
+        return factionsCacheMap;
     }
 
     public static void addOrUpdateFactionCache(Faction faction)
     {
-        Faction factionToUpdate = factions.get(faction.Name.toLowerCase());
+        Faction factionToUpdate = factionsCacheMap.get(faction.Name.toLowerCase());
 
         if (factionToUpdate != null)
         {
-            factions.remove(factionToUpdate.Name.toLowerCase());
-            factions.put(faction.Name.toLowerCase(), faction);
+            factionsCacheMap.replace(factionToUpdate.Name.toLowerCase(), faction);
+
+            for(String claim : factionToUpdate.Claims)
+            {
+                claimsCacheList.remove(claim);
+            }
         }
         else
         {
-            factions.put(faction.Name.toLowerCase(), faction);
+            factionsCacheMap.put(faction.Name.toLowerCase(), faction);
+        }
+
+        if(!faction.Claims.isEmpty())
+        {
+            claimsCacheList.addAll(faction.Claims);
         }
     }
 
     public static void removeFactionCache(String factionName)
     {
-        Faction factionToRemove = factions.get(factionName.toLowerCase());
+        Faction faction = factionsCacheMap.get(factionName.toLowerCase());
+        factionsCacheMap.remove(factionName.toLowerCase());
 
-        if (factionToRemove != null)
+        for(String claim : faction.Claims)
         {
-            factions.remove(factionToRemove.Name.toLowerCase());
+            claimsCacheList.remove(claim);
         }
     }
 
-    public static @Nullable Faction getFactionCache(String factionName)
+    @Nullable
+    public static Faction getFactionCache(String factionName)
     {
-        Faction optionalFaction = factions.get(factionName.toLowerCase());
+        Faction optionalFaction = factionsCacheMap.get(factionName.toLowerCase());
 
         if (optionalFaction != null)
         {
@@ -54,5 +66,10 @@ public class FactionsCache
         }
 
         return null;
+    }
+
+    public static Set<String> getAllClaims()
+    {
+        return claimsCacheList;
     }
 }

@@ -316,23 +316,16 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-//    public static List<String> getClaims(String factionName)
+//    public static List<String> getAllClaims(String factionName)
 //    {
 //        Faction faction = getFactionByName(factionName);
 //
 //        return faction.Claims;
 //    }
 
-    public static List<String> getAllClaims()
+    public static Set<String> getAllClaims()
     {
-        List<String> claimsList = new ArrayList<>();
-
-        for (Faction faction : getFactions().values())
-        {
-            claimsList.addAll(faction.Claims);
-        }
-
-        return claimsList;
+        return FactionsCache.getAllClaims();
     }
 
     public static void addClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
@@ -351,7 +344,7 @@ public class FactionLogic
 
     public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
-        for (String claim: getAllClaims())
+        for (String claim : getAllClaims())
         {
             if(claim.equalsIgnoreCase(worldUUID.toString() + "|" + chunk.toString()))
             {
@@ -513,7 +506,7 @@ public class FactionLogic
 
             Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactions.getEagleFactions());
+            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactions.getPlugin());
         }
         else
         {

@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -19,7 +18,7 @@ public class ReloadCommand implements CommandExecutor
     {
         try
         {
-            EagleFactions.getEagleFactions().getConfiguration().load();
+            EagleFactions.getPlugin().getConfiguration().load();
             FactionLogic.reload();
 
             source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));

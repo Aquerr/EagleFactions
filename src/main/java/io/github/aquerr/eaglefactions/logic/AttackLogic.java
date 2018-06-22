@@ -11,7 +11,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -54,7 +53,7 @@ public class AttackLogic
                     task.cancel();
                 }
             }
-        }).submit(EagleFactions.getEagleFactions());
+        }).submit(EagleFactions.getPlugin());
     }
 
     public static void blockClaiming(String factionName)
@@ -96,7 +95,7 @@ public class AttackLogic
                     }
                 }
             }
-        }).submit(EagleFactions.getEagleFactions());
+        }).submit(EagleFactions.getPlugin());
     }
 
     public static void informAboutAttack(Faction faction)
@@ -150,7 +149,7 @@ public class AttackLogic
                     }
                 }
             }
-        }).submit(EagleFactions.getEagleFactions());
+        }).submit(EagleFactions.getPlugin());
     }
 
 }

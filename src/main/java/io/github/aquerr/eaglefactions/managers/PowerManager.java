@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -16,7 +15,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -303,7 +301,7 @@ public class PowerManager
                     PowerManager.setPower(playerUUID, PowerManager.getPlayerMaxPower(playerUUID));
                 }
             }
-        }).submit(EagleFactions.getEagleFactions());
+        }).submit(EagleFactions.getPlugin());
     }
 
     public static void decreasePower(UUID playerUUID)

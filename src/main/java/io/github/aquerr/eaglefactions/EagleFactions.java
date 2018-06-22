@@ -22,6 +22,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -58,7 +59,7 @@ public class EagleFactions
 
     private static EagleFactions eagleFactions;
 
-    public static EagleFactions getEagleFactions()
+    public static EagleFactions getPlugin()
     {
         return eagleFactions;
     }
