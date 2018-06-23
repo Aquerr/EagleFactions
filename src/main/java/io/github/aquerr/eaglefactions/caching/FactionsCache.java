@@ -19,6 +19,7 @@ public class FactionsCache
     private Map<String, Faction> playerUUIDMap = new HashMap<>();
     private Map<UUID, Map<Vector3i, String>> claims = new HashMap<>();
     private LinkedList<Faction> saveQueue = new LinkedList<>();
+    private LinkedList<String> deleteQueue = new LinkedList<>();
     private IStorage factionsStorage;
 
     private static FactionsCache instance;
@@ -112,6 +113,12 @@ public class FactionsCache
                 addOrSetClaim(worldUUID, chunk, faction.Name.toLowerCase());
             }
         }
+        saveFaction(faction);
+        deleteQueue.removeIf(x -> x.equals(faction.Name));
+        if (!MainLogic.isPeriodicSaving())
+        {
+            doSave();
+        }
     }
 
     public void removePlayer(UUID uuid)
@@ -141,6 +148,13 @@ public class FactionsCache
                 playerUUIDMap.remove(player);
             }
             playerUUIDMap.remove(optionalFaction.get().Leader);
+            removeAllClaims(factionName);
+            deleteQueue.add(optionalFaction.get().Name);
+            saveQueue.removeIf(x -> x.Name.equals(faction));
+            if (!MainLogic.isPeriodicSaving())
+            {
+                doSave();
+            }
         }
         saveQueue.removeIf(x -> x.Name.equals(factionName));
     }
@@ -190,9 +204,21 @@ public class FactionsCache
 
     public void doSave()
     {
-        while (saveQueue.size() > 0)
+        if (saveQueue.size() > 0)
         {
-            factionsStorage.addOrUpdateFaction(saveQueue.poll());
+            if (MainLogic.isPeriodicSaving())
+            {
+                EagleFactions.getPlugin().getLogger().info("Doing periodic save of factions data. (" + saveQueue.size() + " factions updated)");
+            }
+            while (saveQueue.size() > 0)
+            {
+                factionsStorage.addOrUpdateFaction(saveQueue.poll());
+            }
+            while (deleteQueue.size() > 0)
+            {
+                factionsStorage.removeFaction(deleteQueue.poll());
+            }
+            factionsStorage.saveChanges();
         }
     }
 

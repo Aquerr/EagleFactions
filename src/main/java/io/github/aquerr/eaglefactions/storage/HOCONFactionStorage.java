@@ -94,8 +94,7 @@ public class HOCONFactionStorage implements IStorage
             {
                 configNode.getNode(new Object[]{"factions", faction.Name, "home"}).setValue(faction.Home.WorldUUID.toString() + '|' + faction.Home.BlockPosition.toString());
             }
-
-            return saveChanges();
+            return true;
         } catch (Exception exception)
         {
             exception.printStackTrace();
@@ -428,7 +427,7 @@ public class HOCONFactionStorage implements IStorage
         }
     }
 
-    private boolean saveChanges()
+    public boolean saveChanges()
     {
         try
         {

@@ -12,5 +12,7 @@ public interface IStorage
 
     Faction getFaction(String factionName);
 
+    boolean saveChanges();
+
     void load();
 }
