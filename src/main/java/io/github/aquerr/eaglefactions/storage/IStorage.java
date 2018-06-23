@@ -12,7 +12,5 @@ public interface IStorage
 
     Faction getFaction(String factionName);
 
-    Map<String, Faction> getFactionsMap();
-
     void load();
 }
