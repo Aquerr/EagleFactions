@@ -35,6 +35,6 @@ hs_err_pid*
 .checkstyle
 .factorypath
 ./eclipse
-.iml
-.ipr
-.iws
+*.iml
+*.ipr
+*.iws
