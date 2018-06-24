@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -54,7 +55,7 @@ public class ClaimCommand implements CommandExecutor
                                     {
                                         if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
                                         {
-                                            FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                                            FactionsCache.getInstance().addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
 
                                             return CommandResult.success();
@@ -107,9 +108,9 @@ public class ClaimCommand implements CommandExecutor
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    if (!FactionsCache.getInstance().getClaimOwner(world.getUniqueId(), chunk).isPresent())
                     {
-                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                        FactionsCache.getInstance().addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         return CommandResult.success();

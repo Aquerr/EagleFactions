@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
@@ -53,7 +54,7 @@ public class UnclaimCommand implements CommandExecutor
                         }
                     }
 
-                    FactionLogic.removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+                    FactionsCache.getInstance().removeClaim(world.getUniqueId(), chunk);
 
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     return CommandResult.success();
@@ -93,7 +94,7 @@ public class UnclaimCommand implements CommandExecutor
                                 }
                             }
 
-                            FactionLogic.removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+                            FactionsCache.getInstance().removeClaim(world.getUniqueId(), chunk);
 
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                             return CommandResult.success();

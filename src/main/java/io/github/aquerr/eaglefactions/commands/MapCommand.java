@@ -226,7 +226,7 @@ public class MapCommand implements CommandExecutor
                 if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
-                    if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    if (!FactionsCache.getInstance().getClaimOwner(world.getUniqueId(), chunk).isPresent())
                     {
                         if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.Claims.size())
                         {
@@ -236,7 +236,7 @@ public class MapCommand implements CommandExecutor
                                 {
                                     if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
                                     {
-                                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                                        FactionsCache.getInstance().addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                                     } else
                                     {
@@ -282,7 +282,7 @@ public class MapCommand implements CommandExecutor
                             }
                         }
 
-                        FactionLogic.removeClaim(playerFaction, world.getUniqueId(), chunk);
+                        FactionsCache.getInstance().removeClaim(world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     }

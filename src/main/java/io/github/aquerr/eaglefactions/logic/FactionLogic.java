@@ -31,17 +31,6 @@ import java.util.function.Consumer;
  */
 public class FactionLogic
 {
-    //private static IStorage factionsStorage;
-
-//    public FactionLogic(Path configDir)
-//    {
-//        factionsStorage = new HOCONFactionStorage(configDir);
-//    }
-
-//    public static void reload()
-//    {
-//        factionsStorage.load();
-//    }
 
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
     {
@@ -265,16 +254,6 @@ public class FactionLogic
         FactionsCache.getInstance().saveFaction(faction);
     }
 
-    public static void addClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
-    {
-        FactionsCache.getInstance().addOrSetClaim(worldUUID, claimedChunk, faction.Name);
-    }
-
-    public static void removeClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
-    {
-        FactionsCache.getInstance().removeClaim(worldUUID, claimedChunk);
-    }
-
     public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
         return FactionsCache.getInstance().getClaimOwner(worldUUID, chunk).isPresent();
@@ -370,7 +349,7 @@ public class FactionLogic
                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
                         } else
                         {
-                            addClaim(faction, worldUUID, chunk);
+                            FactionsCache.getInstance().addOrSetClaim(worldUUID, chunk, faction.Name);
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         }
                     } else
@@ -407,7 +386,7 @@ public class FactionLogic
             } else
             {
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                addClaim(faction, worldUUID, chunk);
+                FactionsCache.getInstance().addOrSetClaim(worldUUID, chunk, faction.Name);
             }
         }
     }
@@ -481,7 +460,7 @@ public class FactionLogic
                 }
             }
 
-            addClaim(faction, worldUUID, chunk);
+            FactionsCache.getInstance().addOrSetClaim(worldUUID, chunk, faction.Name);
             return true;
         } else return false;
     }
