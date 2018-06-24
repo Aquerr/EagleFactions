@@ -55,14 +55,18 @@ public class FactionsCache
         Optional<String> previousClaim = getClaimOwner(world, chunk);
         if (previousClaim.isPresent())
         {
-            getFaction(previousClaim.get()).get().Claims.remove(world.toString() + "|" + chunk.toString());
+            Faction previous = getFaction(previousClaim.get()).get();
+            previous.Claims.remove(world.toString() + "|" + chunk.toString());
+            saveFaction(previous);
         }
         if (!claims.containsKey(world))
         {
             claims.put(world, new HashMap<>());
         }
         claims.get(world).put(chunk, faction.toLowerCase());
-        getFaction(faction).get().Claims.add(world.toString() + "|" + chunk.toString());
+        Faction newFaction = getFaction(faction).get();
+        newFaction.Claims.add(world.toString() + "|" + chunk.toString());
+        saveFaction(newFaction);
     }
 
     public Optional<String> removeClaim(UUID world, Vector3i chunk)
@@ -161,7 +165,7 @@ public class FactionsCache
 
     public void removeAllClaims(String faction)
     {
-        claims.values().forEach(a -> a.values().remove(faction.toLowerCase()));
+        claims.values().forEach(a -> a.values().removeIf(x -> x.equals(faction.toLowerCase())));
     }
 
     public Optional<Faction> getFaction(String factionName)

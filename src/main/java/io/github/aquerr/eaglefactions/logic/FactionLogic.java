@@ -16,6 +16,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -32,16 +33,19 @@ import java.util.function.Consumer;
 public class FactionLogic
 {
 
+    @Deprecated
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
     {
         return FactionsCache.getInstance().getFactionByPlayer(playerUUID);
     }
 
+    @Deprecated
     public static Optional<Faction> getFactionByChunk(UUID worldUUID, Vector3i chunk)
     {
         return FactionsCache.getInstance().getFactionByChunk(worldUUID, chunk);
     }
 
+    @Deprecated
     public static @Nullable
     Faction getFactionByName(String factionName)
     {
@@ -134,6 +138,7 @@ public class FactionLogic
 
         faction.Recruits.add(playerUUID.toString());
 
+        FactionsCache.getInstance().updatePlayer(playerUUID.toString(), factionName);
         FactionsCache.getInstance().saveFaction(faction);
     }
 
@@ -149,8 +154,8 @@ public class FactionLogic
             faction.Members.remove(playerUUID.toString());
         } else faction.Officers.remove(playerUUID.toString());
 
-        FactionsCache.getInstance().saveFaction(faction);
         FactionsCache.getInstance().removePlayer(playerUUID);
+        FactionsCache.getInstance().saveFaction(faction);
     }
 
     public static void addAlly(String playerFactionName, String invitedFactionName)
@@ -254,11 +259,6 @@ public class FactionLogic
         FactionsCache.getInstance().saveFaction(faction);
     }
 
-    public static boolean isClaimed(UUID worldUUID, Vector3i chunk)
-    {
-        return FactionsCache.getInstance().getClaimOwner(worldUUID, chunk).isPresent();
-    }
-
     public static boolean isClaimConnected(Faction faction, UUID worldUUID, Vector3i chunk)
     {
         Optional<String> chunkA = FactionsCache.getInstance().getClaimOwner(worldUUID, chunk.add(1, 0, 0));
@@ -308,8 +308,8 @@ public class FactionLogic
 
     public static void removeClaims(Faction faction)
     {
-        faction.Claims = new ArrayList<>();
         FactionsCache.getInstance().removeAllClaims(faction.Name);
+        faction.Claims = new ArrayList<>();
     }
 
     public static void kickPlayer(UUID playerUUID, String factionName)
@@ -322,10 +322,12 @@ public class FactionLogic
         } else if (faction.Members.contains(playerUUID.toString()))
         {
             faction.Members.remove(playerUUID.toString());
-        } else faction.Officers.remove(playerUUID.toString());
+        } else {
+            faction.Officers.remove(playerUUID.toString());
+        }
 
-        FactionsCache.getInstance().saveFaction(faction);
         FactionsCache.getInstance().removePlayer(playerUUID);
+        FactionsCache.getInstance().saveFaction(faction);
     }
 
     private static Consumer<Task> addClaimWithDelay(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
