@@ -36,7 +36,7 @@ public class TagColorCommand implements CommandExecutor
         {
             if (source instanceof Player)
             {
-                Player player = (Player)source;
+                Player player = (Player) source;
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
                 if (optionalPlayerFaction.isPresent())
@@ -46,23 +46,19 @@ public class TagColorCommand implements CommandExecutor
                     {
                         FactionLogic.changeTagColor(playerFaction, optionalColor.get());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.TAG_COLOR_HAS_BEEN_CHANGED));
-                    }
-                    else
+                    } else
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
-            }
-            else
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f tagcolor <color>"));

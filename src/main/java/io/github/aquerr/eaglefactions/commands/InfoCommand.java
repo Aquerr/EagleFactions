@@ -42,44 +42,37 @@ public class InfoCommand implements CommandExecutor
             if (faction == null)
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName + "!"));
-            }
-            else
+            } else
             {
-                if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
+                if (source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
+                    if ((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).get().Name.equals(faction.Name)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
-                    }
-                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
+                    } else if ((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).get().Name.equals(faction.Name)))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
-                    }
-                    else
+                    } else
                     {
                         showFactionInfo(source, faction);
                     }
-                }
-                else
+                } else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND));
                 }
             }
-        }
-        else if(source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
+        } else if (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent())
         {
             //Check permissions
-            if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf))
+            if (source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf))
             {
-                showFactionInfo(source, FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
-            }
-            else
+                showFactionInfo(source, FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).get());
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f info <faction name>"));
@@ -93,12 +86,12 @@ public class InfoCommand implements CommandExecutor
         List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
-        if(!faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
+        if (!faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
 
         String recruitList = "";
-        if(!faction.Recruits.isEmpty())
+        if (!faction.Recruits.isEmpty())
         {
-            for (String recruit: faction.Recruits)
+            for (String recruit : faction.Recruits)
             {
                 recruitList += PlayerManager.getPlayerName(UUID.fromString(recruit)).get() + ", ";
             }
@@ -106,9 +99,9 @@ public class InfoCommand implements CommandExecutor
         }
 
         String membersList = "";
-        if(!faction.Members.isEmpty())
+        if (!faction.Members.isEmpty())
         {
-            for (String member: faction.Members)
+            for (String member : faction.Members)
             {
                 membersList += PlayerManager.getPlayerName(UUID.fromString(member)).get() + ", ";
             }
@@ -116,9 +109,9 @@ public class InfoCommand implements CommandExecutor
         }
 
         String officersList = "";
-        if(!faction.Officers.isEmpty())
+        if (!faction.Officers.isEmpty())
         {
-            for (String officer: faction.Officers)
+            for (String officer : faction.Officers)
             {
                 officersList += PlayerManager.getPlayerName(UUID.fromString(officer)).get() + ", ";
             }
@@ -126,9 +119,9 @@ public class InfoCommand implements CommandExecutor
         }
 
         String alliancesList = "";
-        if(!faction.Alliances.isEmpty())
+        if (!faction.Alliances.isEmpty())
         {
-            for (String alliance: faction.Alliances)
+            for (String alliance : faction.Alliances)
             {
                 alliancesList += alliance + ", ";
             }
@@ -136,9 +129,9 @@ public class InfoCommand implements CommandExecutor
         }
 
         String enemiesList = "";
-        if(!faction.Enemies.isEmpty())
+        if (!faction.Enemies.isEmpty())
         {
-            for (String enemy: faction.Enemies)
+            for (String enemy : faction.Enemies)
             {
                 enemiesList += enemy + ", ";
             }

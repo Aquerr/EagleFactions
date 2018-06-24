@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -36,8 +37,7 @@ public class PlayerManager
             Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
             optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
 
-        }
-        catch (IOException exception)
+        } catch (IOException exception)
         {
             exception.printStackTrace();
         }
@@ -61,27 +61,25 @@ public class PlayerManager
     {
         Optional<User> oUser = userStorageService.get(playerUUID);
 
-        if(oUser.isPresent())
+        if (oUser.isPresent())
         {
             return oUser;
-        }
-        else return Optional.empty();
+        } else return Optional.empty();
     }
 
     public static boolean isPlayerOnline(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
 
-        if(oUser.isPresent())
+        if (oUser.isPresent())
         {
             return oUser.get().isOnline();
-        }
-        else return false;
+        } else return false;
     }
 
     public static void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath + "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -92,8 +90,7 @@ public class PlayerManager
             playerNode.getNode("death-in-warzone").setValue(didDieInWarZone);
 
             configLoader.save(playerNode);
-        }
-        catch (IOException exception)
+        } catch (IOException exception)
         {
             exception.printStackTrace();
         }
@@ -101,7 +98,7 @@ public class PlayerManager
 
     public static boolean lastDeathAtWarZone(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = Paths.get(playersPath + "/" + playerUUID.toString() + ".conf");
 
         try
         {
@@ -113,16 +110,14 @@ public class PlayerManager
 
             if (value != null)
             {
-                return (boolean)value;
-            }
-            else
+                return (boolean) value;
+            } else
             {
                 playerNode.getNode("death-in-warzone").setValue(false);
                 configLoader.save(playerNode);
                 return false;
             }
-        }
-        catch (IOException exception)
+        } catch (IOException exception)
         {
             exception.printStackTrace();
         }
@@ -130,27 +125,34 @@ public class PlayerManager
         return false;
     }
 
-    public static @Nullable FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
+    public static @Nullable
+    FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
     {
         if (faction.Leader.equals(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.LEADER;
-        }
-        else if(faction.Members.contains(factionPlayer.getUniqueId().toString()))
+        } else if (faction.Members.contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.MEMBER;
-        }
-        else if (faction.Officers.contains(factionPlayer.getUniqueId().toString()))
+        } else if (faction.Officers.contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.OFFICER;
-        }
-        else if (faction.Recruits.contains(factionPlayer.getUniqueId().toString()))
+        } else if (faction.Recruits.contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.RECRUIT;
-        }
-        else if (faction.Alliances.contains(factionPlayer.getUniqueId().toString()))
+        } else
         {
-            return FactionMemberType.ALLY;
+            Optional<Faction> playerFaction = FactionsCache.getInstance().getFactionByPlayer(factionPlayer.getUniqueId());
+            if (playerFaction.isPresent())
+            {
+                for (String ally : faction.Alliances)
+                {
+                    if (playerFaction.get().Alliances.contains(ally))
+                    {
+                        return FactionMemberType.ALLY;
+                    }
+                }
+            }
         }
 
         return null;

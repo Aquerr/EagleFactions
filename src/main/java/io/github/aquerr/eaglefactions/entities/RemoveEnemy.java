@@ -2,24 +2,23 @@ package io.github.aquerr.eaglefactions.entities;
 
 public class RemoveEnemy
 {
+    public String FactionName;
+    public String EnemyFactionName;
+
     public RemoveEnemy(String factionName, String enemyFaction)
     {
         this.FactionName = factionName;
         this.EnemyFactionName = enemyFaction;
     }
 
-    public String FactionName;
-    public String EnemyFactionName;
-
-
     @Override
-    public boolean equals (Object removeEnemy)
+    public boolean equals(Object removeEnemy)
     {
-        if(!(removeEnemy instanceof RemoveEnemy))
+        if (!(removeEnemy instanceof RemoveEnemy))
         {
             return false;
         }
-        if(removeEnemy == this)
+        if (removeEnemy == this)
         {
             return true;
         }

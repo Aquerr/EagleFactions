@@ -23,7 +23,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
@@ -47,28 +46,24 @@ public class EagleFactions
     public static Map<UUID, Integer> BlockedHome;
     public static Map<UUID, ChatEnum> ChatList;
     public static Map<UUID, Integer> HomeCooldownPlayers;
-
+    private static EagleFactions eagleFactions;
     private Configuration _configuration;
     private PVPLogger _pvpLogger;
-
     @Inject
     private Logger _logger;
-
-    public Logger getLogger()
-    {
-        return _logger;
-    }
-
-    private static EagleFactions eagleFactions;
+    @Inject
+    @ConfigDir(sharedRoot = false)
+    private Path _configDir;
 
     public static EagleFactions getPlugin()
     {
         return eagleFactions;
     }
 
-    @Inject
-    @ConfigDir(sharedRoot = false)
-    private Path _configDir;
+    public Logger getLogger()
+    {
+        return _logger;
+    }
 
     public Path getConfigDir()
     {
@@ -116,7 +111,7 @@ public class EagleFactions
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
 
-        if(!VersionChecker.isLatest(PluginInfo.Version))
+        if (!VersionChecker.isLatest(PluginInfo.Version))
         {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.Name, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
@@ -127,7 +122,8 @@ public class EagleFactions
     }
 
     @Listener
-    public void onServerStop(GameStoppingServerEvent event){
+    public void onServerStop(GameStoppingServerEvent event)
+    {
         FactionsCache.getInstance().doSave();
     }
 

@@ -24,13 +24,13 @@ public class Invite
     }
 
     @Override
-    public boolean equals (Object allyInvite)
+    public boolean equals(Object allyInvite)
     {
-        if(!(allyInvite instanceof Invite))
+        if (!(allyInvite instanceof Invite))
         {
             return false;
         }
-        if(allyInvite == this)
+        if (allyInvite == this)
         {
             return true;
         }

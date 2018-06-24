@@ -26,52 +26,49 @@ public class PlayerBlockPlaceListener
     @Listener
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
-        if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+        if (!EagleFactions.AdminList.contains(player.getUniqueId()))
         {
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-             {
-                 World world = player.getWorld();
+            {
+                World world = player.getWorld();
 
-                 if (MainLogic.getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
-                 {
-                     return;
-                 }
-                 if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
-                 {
-                     return;
-                 }
+                if (MainLogic.getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                {
+                    return;
+                }
+                if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                {
+                    return;
+                }
 
-                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-                 Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
+                Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
+                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
 
-                 if(optionalChunkFaction.isPresent())
-                 {
-                     if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
-                     {
-                         return;
-                     }
-                     else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
-                     {
-                         return;
-                     }
-                     else if(optionalPlayerFaction.isPresent())
-                     {
-                         if (!FlagManager.canPlaceBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
-                         {
-                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
-                             event.setCancelled(true);
-                         }
-                         return;
-                     }
-                     else
-                     {
-                         event.setCancelled(true);
-                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
-                     }
-                 }
-             }
+                if (optionalChunkFaction.isPresent())
+                {
+                    if (optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                    {
+                        return;
+                    } else if (optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                    {
+                        return;
+                    } else if (optionalPlayerFaction.isPresent())
+                    {
+                        if (!FlagManager.canPlaceBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                        {
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                            event.setCancelled(true);
+                        }
+                        return;
+                    } else
+                    {
+                        event.setCancelled(true);
+                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
+                    }
+                }
+            }
         }
     }
 

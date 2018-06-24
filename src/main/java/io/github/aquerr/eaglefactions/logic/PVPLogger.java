@@ -8,7 +8,10 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -76,8 +79,7 @@ public class PVPLogger
         if (_attackedPlayers.containsKey(player.getUniqueId()))
         {
             _attackedPlayers.replace(player.getUniqueId(), getBlockTime());
-        }
-        else
+        } else
         {
             _attackedPlayers.put(player.getUniqueId(), getBlockTime());
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.PVPLOGGER_HAS_TURNED_ON + " " + PluginMessages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + PluginMessages.SECONDS + "!"));
@@ -97,13 +99,11 @@ public class PVPLogger
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
                             _attackedPlayers.remove(player.getUniqueId());
                             task.cancel();
-                        }
-                        else
+                        } else
                         {
                             _attackedPlayers.replace(player.getUniqueId(), seconds, seconds - 1);
                         }
-                    }
-                    else
+                    } else
                     {
                         task.cancel();
                     }

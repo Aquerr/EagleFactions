@@ -9,10 +9,8 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 public class MessageLoader
 {
@@ -26,8 +24,7 @@ public class MessageLoader
             try
             {
                 Files.createDirectory(configDir.resolve("messages"));
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 e.printStackTrace();
             }
@@ -40,8 +37,7 @@ public class MessageLoader
             {
                 Files.copy(inputStream, messagesFilePath);
                 inputStream.close();
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 e.printStackTrace();
             }
@@ -54,8 +50,7 @@ public class MessageLoader
         {
             configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
             loadPluginMessages(configNode, configLoader);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -80,8 +75,7 @@ public class MessageLoader
             try
             {
                 messageField.set(PluginMessages.class.getClass(), message);
-            }
-            catch (IllegalAccessException e)
+            } catch (IllegalAccessException e)
             {
                 e.printStackTrace();
             }
@@ -92,8 +86,7 @@ public class MessageLoader
             try
             {
                 configLoader.save(configNode);
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 e.printStackTrace();
             }

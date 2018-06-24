@@ -5,24 +5,23 @@ package io.github.aquerr.eaglefactions.entities;
  */
 public class AllyInvite
 {
+    public String FactionName;
+    public String InvitedFaction;
+
     public AllyInvite(String factionName, String invitedFaction)
     {
         this.FactionName = factionName;
         this.InvitedFaction = invitedFaction;
     }
 
-    public String FactionName;
-    public String InvitedFaction;
-
-
     @Override
-    public boolean equals (Object allyInvite)
+    public boolean equals(Object allyInvite)
     {
-        if(!(allyInvite instanceof AllyInvite))
+        if (!(allyInvite instanceof AllyInvite))
         {
             return false;
         }
-        if(allyInvite == this)
+        if (allyInvite == this)
         {
             return true;
         }

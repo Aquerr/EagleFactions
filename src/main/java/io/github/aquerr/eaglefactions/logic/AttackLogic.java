@@ -29,9 +29,9 @@ public class AttackLogic
             @Override
             public void accept(Task task)
             {
-                if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+                if (attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if(seconds == MainLogic.getAttackTime())
+                    if (seconds == MainLogic.getAttackTime())
                     {
                         //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
                         Faction chunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
@@ -41,14 +41,12 @@ public class AttackLogic
 
                         FactionsCache.getInstance().removeClaim(player.getWorld().getUniqueId(), attackedChunk);
                         task.cancel();
-                    }
-                    else
+                    } else
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
                         seconds++;
                     }
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
                     task.cancel();
@@ -59,11 +57,10 @@ public class AttackLogic
 
     public static void blockClaiming(String factionName)
     {
-        if(EagleFactions.AttackedFactions.containsKey(factionName))
+        if (EagleFactions.AttackedFactions.containsKey(factionName))
         {
             EagleFactions.AttackedFactions.replace(factionName, 120);
-        }
-        else
+        } else
         {
             EagleFactions.AttackedFactions.put(factionName, 120);
             runClaimingRestorer(factionName);
@@ -81,7 +78,7 @@ public class AttackLogic
             public void accept(Task task)
             {
 
-                if(EagleFactions.AttackedFactions.containsKey(factionName))
+                if (EagleFactions.AttackedFactions.containsKey(factionName))
                 {
                     int seconds = EagleFactions.AttackedFactions.get(factionName);
 
@@ -89,8 +86,7 @@ public class AttackLogic
                     {
                         EagleFactions.AttackedFactions.remove(factionName);
                         task.cancel();
-                    }
-                    else
+                    } else
                     {
                         EagleFactions.AttackedFactions.replace(factionName, seconds, seconds - 1);
                     }
@@ -115,11 +111,10 @@ public class AttackLogic
 
     public static void blockHome(UUID playerUUID)
     {
-        if(EagleFactions.BlockedHome.containsKey(playerUUID))
+        if (EagleFactions.BlockedHome.containsKey(playerUUID))
         {
             EagleFactions.BlockedHome.replace(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
-        }
-        else
+        } else
         {
             EagleFactions.BlockedHome.put(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
             runHomeUsageRestorer(playerUUID);
@@ -143,8 +138,7 @@ public class AttackLogic
                     {
                         EagleFactions.BlockedHome.remove(playerUUID);
                         task.cancel();
-                    }
-                    else
+                    } else
                     {
                         EagleFactions.BlockedHome.replace(playerUUID, seconds, seconds - 1);
                     }

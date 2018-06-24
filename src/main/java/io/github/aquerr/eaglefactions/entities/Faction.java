@@ -4,8 +4,9 @@ import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Aquerr on 2017-07-13.

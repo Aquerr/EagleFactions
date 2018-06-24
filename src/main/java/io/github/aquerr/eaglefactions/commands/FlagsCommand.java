@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -29,7 +28,7 @@ public class FlagsCommand implements CommandExecutor
     {
         if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
 
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
@@ -40,20 +39,17 @@ public class FlagsCommand implements CommandExecutor
                 if (faction.Leader.equals(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     showFlags(player, faction);
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
-            }
-            else
+            } else
             {
                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -62,7 +58,7 @@ public class FlagsCommand implements CommandExecutor
     private void showFlags(Player player, Faction faction)
     {
         Text.Builder textBuilder = Text.builder();
-        
+
         for (Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.Flags.entrySet())
         {
             Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
@@ -73,11 +69,10 @@ public class FlagsCommand implements CommandExecutor
             {
                 Text.Builder flagTextBuilder = Text.builder();
 
-                if(flagEntry.getValue())
+                if (flagEntry.getValue())
                 {
                     flagTextBuilder.append(Text.of(TextColors.GREEN, flagEntry.getKey().toString()));
-                }
-                else
+                } else
                 {
                     flagTextBuilder.append(Text.of(TextColors.RED, flagEntry.getKey().toString()));
                 }
@@ -105,7 +100,7 @@ public class FlagsCommand implements CommandExecutor
         return commandSource ->
         {
             FactionLogic.toggleFlag(faction, factionMemberType, factionFlagTypes, toggled);
-            showFlags((Player)commandSource, faction);
+            showFlags((Player) commandSource, faction);
         };
     }
 }

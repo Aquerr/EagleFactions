@@ -25,24 +25,24 @@ public class KickCommand implements CommandExecutor
 
         if (optionalSelectedPlayer.isPresent())
         {
-            if(source instanceof Player)
+            if (source instanceof Player)
             {
-                Player player = (Player)source;
+                Player player = (Player) source;
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-                if(optionalPlayerFaction.isPresent())
+                if (optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
-                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                    if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
                         Player selectedPlayer = optionalSelectedPlayer.get();
                         Optional<Faction> optionalSelectedPlayerFaction = FactionLogic.getFactionByPlayerUUID(selectedPlayer.getUniqueId());
 
-                        if(optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().Name.equals(playerFaction.Name))
+                        if (optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().Name.equals(playerFaction.Name))
                         {
-                            if(!playerFaction.Leader.equals(selectedPlayer.getUniqueId().toString()))
+                            if (!playerFaction.Leader.equals(selectedPlayer.getUniqueId().toString()))
                             {
-                                if(!playerFaction.Officers.contains(selectedPlayer.getUniqueId().toString()) || playerFaction.Leader.equals(player.getUniqueId().toString()))
+                                if (!playerFaction.Officers.contains(selectedPlayer.getUniqueId().toString()) || playerFaction.Leader.equals(player.getUniqueId().toString()))
                                 {
                                     FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFaction.Name);
 
@@ -51,41 +51,35 @@ public class KickCommand implements CommandExecutor
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_KICKED + " ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.FROM_THE_FACTION));
                                     selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
 
-                                    if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
+                                    if (EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId()))
+                                        EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
 
                                     return CommandResult.success();
-                                }
-                                else
+                                } else
                                 {
                                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
                                 }
-                            }
-                            else
+                            } else
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
                             }
-                        }
-                        else
+                        } else
                         {
                             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
                         }
-                    }
-                    else
+                    } else
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
-                }
-                else
+                } else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
-            }
-            else
+            } else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f kick <player>"));

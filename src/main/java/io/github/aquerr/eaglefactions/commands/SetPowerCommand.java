@@ -33,18 +33,15 @@ public class SetPowerCommand implements CommandExecutor
                 if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     setPower(optionalSelectedPlayer.get(), optionalPower.get());
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
                 }
-            }
-            else
+            } else
             {
                 setPower(optionalSelectedPlayer.get(), optionalPower.get());
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f setpower <player> <power>"));

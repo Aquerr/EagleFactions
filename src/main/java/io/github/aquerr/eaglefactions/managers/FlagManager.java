@@ -54,12 +54,10 @@ public class FlagManager
             FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
 
             return chunkFaction.Flags.get(memberType).get(flagType);
-        }
-        else if (playerFaction.Alliances.contains(chunkFaction.Name))
+        } else if (playerFaction.Alliances.contains(chunkFaction.Name))
         {
             return chunkFaction.Flags.get(FactionMemberType.ALLY).get(flagType);
-        }
-        else
+        } else
         {
             return false;
         }

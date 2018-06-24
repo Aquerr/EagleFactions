@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
@@ -16,7 +15,8 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TopCommand implements CommandExecutor
 {
@@ -31,14 +31,14 @@ public class TopCommand implements CommandExecutor
 
         //This should show only top 10 factions on the server.
 
-        for(Faction faction : factionsList)
+        for (Faction faction : factionsList)
         {
-            if(faction.Name.equalsIgnoreCase("safezone") || faction.Name.equalsIgnoreCase("warzone")) continue;
-            if(index == 11) break;
+            if (faction.Name.equalsIgnoreCase("safezone") || faction.Name.equalsIgnoreCase("warzone")) continue;
+            if (index == 11) break;
 
             index++;
             String tag = "";
-            if(faction.Tag != null && !faction.Tag.equals("")) tag = "[" + faction.Tag + "] ";
+            if (faction.Tag != null && !faction.Tag.equals("")) tag = "[" + faction.Tag + "] ";
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()

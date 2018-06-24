@@ -23,64 +23,57 @@ public class ChatCommand implements CommandExecutor
     {
         Optional<ChatEnum> optionalChatType = context.<ChatEnum>getOne("chat");
 
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
 
             if (FactionLogic.getFactionByPlayerUUID(player.getUniqueId()).isPresent())
             {
-                if(optionalChatType.isPresent())
+                if (optionalChatType.isPresent())
                 {
-                    if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
+                    if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
                     {
                         if (optionalChatType.get().equals(ChatEnum.Global))
                         {
                             EagleFactions.ChatList.remove(player.getUniqueId());
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.GLOBAL_CHAT, TextColors.RESET, "!"));
-                        }
-                        else
+                        } else
                         {
                             EagleFactions.ChatList.replace(player.getUniqueId(), EagleFactions.ChatList.get(player.getUniqueId()), optionalChatType.get());
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
                         }
-                    }
-                    else
+                    } else
                     {
                         EagleFactions.ChatList.put(player.getUniqueId(), optionalChatType.get());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
                     }
-                }
-                else
+                } else
                 {
                     //If player is in alliance chat or faction chat.
-                    if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
+                    if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
                     {
-                        if(EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
+                        if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
                         {
                             EagleFactions.ChatList.replace(player.getUniqueId(), ChatEnum.Alliance, ChatEnum.Faction);
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.FACTION_CHAT, TextColors.RESET, "!"));
-                        }
-                        else
+                        } else
                         {
                             EagleFactions.ChatList.remove(player.getUniqueId());
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.GLOBAL_CHAT, TextColors.RESET, "!"));
                         }
-                    }
-                    else
+                    } else
                     {
                         EagleFactions.ChatList.put(player.getUniqueId(), ChatEnum.Alliance);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.ALLIANCE_CHAT, TextColors.RESET, "!"));
                     }
                 }
-            }
-            else
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
         return CommandResult.success();
     }

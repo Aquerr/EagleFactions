@@ -1,12 +1,10 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,14 +22,24 @@ public class Configuration
 {
     //TODO: This class should have only one instance. Rework it to singleton.
 
+    private static Function<Object, String> objectToStringTransformer = input ->
+    {
+        if (input instanceof String)
+        {
+            return (String) input;
+        } else
+        {
+            return null;
+        }
+    };
+    private Path configPath;
+    private ConfigurationLoader<CommentedConfigurationNode> configLoader;
+    private CommentedConfigurationNode configNode;
+
     public Configuration(Path configDir)
     {
         setup(configDir);
     }
-
-    private Path configPath;
-    private ConfigurationLoader<CommentedConfigurationNode> configLoader;
-    private CommentedConfigurationNode configNode;
 
     public void setup(Path configDir)
     {
@@ -40,8 +48,7 @@ public class Configuration
             try
             {
                 Files.createDirectory(configDir);
-            }
-            catch (IOException exception)
+            } catch (IOException exception)
             {
                 exception.printStackTrace();
             }
@@ -56,16 +63,14 @@ public class Configuration
             {
                 Files.copy(inputStream, configPath);
                 inputStream.close();
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 e.printStackTrace();
             }
 
             configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
             load();
-        }
-        else
+        } else
         {
             configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
             load();
@@ -77,7 +82,7 @@ public class Configuration
     private void checkNodes()
     {
         Method[] methods = MainLogic.class.getDeclaredMethods();
-        for (Method method: methods)
+        for (Method method : methods)
         {
             if (!method.getName().equals("setup") && !method.getName().equals("addWorld"))
             {
@@ -85,8 +90,7 @@ public class Configuration
                 try
                 {
                     Object o = method.invoke(null);
-                }
-                catch (IllegalAccessException | InvocationTargetException e)
+                } catch (IllegalAccessException | InvocationTargetException e)
                 {
                     e.printStackTrace();
                 }
@@ -101,8 +105,7 @@ public class Configuration
         {
             configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
             MainLogic.setup(this);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -113,8 +116,7 @@ public class Configuration
         try
         {
             configLoader.save(configNode);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -133,12 +135,10 @@ public class Configuration
         {
             int number = (Integer) value;
             return (double) number;
-        }
-        else if(value instanceof Double)
+        } else if (value instanceof Double)
         {
             return (Double) value;
-        }
-        else return 0;
+        } else return 0;
     }
 
     public boolean getBoolean(boolean defaultValue, Object... nodePath)
@@ -162,16 +162,4 @@ public class Configuration
         save();
         return true;
     }
-
-    private static Function<Object,String> objectToStringTransformer = input ->
-    {
-        if (input instanceof String)
-        {
-            return (String) input;
-        }
-        else
-        {
-            return null;
-        }
-    };
 }

@@ -18,7 +18,7 @@ public class PlayerJoinListener
     public void onPlayerJoin(ClientConnectionEvent.Join event)
     {
 
-        if(event.getCause().root() instanceof Player)
+        if (event.getCause().root() instanceof Player)
         {
             Player player = (Player) event.getCause().root();
 
@@ -27,11 +27,10 @@ public class PlayerJoinListener
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + PluginMessages.IS_AVAILABLE));
             }
 
-            if(PowerManager.checkIfPlayerExists(player.getUniqueId()))
+            if (PowerManager.checkIfPlayerExists(player.getUniqueId()))
             {
                 PowerManager.startIncreasingPower(player.getUniqueId());
-            }
-            else
+            } else
             {
                 //Create player file and set power.
                 PowerManager.addPlayer(player.getUniqueId());

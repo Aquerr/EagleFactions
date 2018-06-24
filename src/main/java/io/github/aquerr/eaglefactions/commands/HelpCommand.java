@@ -27,15 +27,15 @@ public class HelpCommand implements CommandExecutor
         Map<List<String>, CommandSpec> commands = EagleFactions.Subcommands;
         List<Text> helpList = Lists.newArrayList();
 
-        for (List<String> aliases: commands.keySet())
+        for (List<String> aliases : commands.keySet())
         {
             CommandSpec commandSpec = commands.get(aliases);
 
-            if(source instanceof Player)
+            if (source instanceof Player)
             {
-                Player player = (Player)source;
+                Player player = (Player) source;
 
-                if(!commandSpec.testPermission(player))
+                if (!commandSpec.testPermission(player))
                 {
                     continue;
                 }
@@ -43,21 +43,21 @@ public class HelpCommand implements CommandExecutor
 
             Text commandHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
+                            .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[", "").replace("]", "")))
                             .build())
                     .append(Text.builder()
                             .append(Text.of(TextColors.WHITE, " - " + commandSpec.getShortDescription(source).get().toPlain() + "\n"))
                             .build())
                     .append(Text.builder()
-                            .append(Text.of(TextColors.GRAY, PluginMessages.USAGE + " /f " + aliases.toString().replace("[","").replace("]","") + " " + commandSpec.getUsage(source).toPlain()))
+                            .append(Text.of(TextColors.GRAY, PluginMessages.USAGE + " /f " + aliases.toString().replace("[", "").replace("]", "") + " " + commandSpec.getUsage(source).toPlain()))
                             .build())
                     .build();
 
-                   // .append(Text.builder()
-                   //         .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
-                   //         .build())
+            // .append(Text.builder()
+            //         .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
+            //         .build())
 //
-                  //  .build();
+            //  .build();
 
             helpList.add(commandHelp);
         }

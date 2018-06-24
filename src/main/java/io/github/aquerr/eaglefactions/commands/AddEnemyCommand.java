@@ -26,11 +26,11 @@ public class AddEnemyCommand implements CommandExecutor
     {
         Optional<String> optionalFactionName = context.<String>getOne(Text.of("faction name"));
 
-        if(optionalFactionName.isPresent())
+        if (optionalFactionName.isPresent())
         {
-            if(source instanceof Player)
+            if (source instanceof Player)
             {
-                Player player = (Player)source;
+                Player player = (Player) source;
                 String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
                 Faction enemyFaction = FactionLogic.getFactionByName(rawFactionName);
@@ -41,38 +41,36 @@ public class AddEnemyCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                if(optionalPlayerFaction.isPresent())
+                if (optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
 
-                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                    if (EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(!playerFaction.Alliances.contains(enemyFaction.Name))
+                        if (!playerFaction.Alliances.contains(enemyFaction.Name))
                         {
-                            if(!playerFaction.Enemies.contains(enemyFaction.Name))
+                            if (!playerFaction.Enemies.contains(enemyFaction.Name))
                             {
                                 FactionLogic.addEnemy(playerFaction.Name, enemyFaction.Name);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
-                            }
-                            else
+                            } else
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_ALREADY_YOUR_ENEMY));
                             }
-                        }
-                        else
+                        } else
                         {
                             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
                         }
                         return CommandResult.success();
                     }
 
-                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                    if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        if(FactionsCache.getInstance().getFaction(enemyFaction.Name.toLowerCase()).isPresent())
+                        if (FactionsCache.getInstance().getFaction(enemyFaction.Name.toLowerCase()).isPresent())
                         {
-                            if(!playerFaction.Alliances.contains(enemyFaction.Name))
+                            if (!playerFaction.Alliances.contains(enemyFaction.Name))
                             {
-                                if(!playerFaction.Enemies.contains(enemyFaction.Name))
+                                if (!playerFaction.Enemies.contains(enemyFaction.Name))
                                 {
                                     FactionLogic.addEnemy(playerFaction.Name, enemyFaction.Name);
 
@@ -83,38 +81,31 @@ public class AddEnemyCommand implements CommandExecutor
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
 
                                     return CommandResult.success();
-                                }
-                                else
+                                } else
                                 {
                                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_ALREADY_YOUR_ENEMY));
                                 }
-                            }
-                            else
+                            } else
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
                             }
-                        }
-                        else
+                        } else
                         {
                             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, enemyFaction + "!"));
                         }
-                    }
-                    else
+                    } else
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
-                }
-                else
+                } else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
-            }
-            else
+            } else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f enemy add <faction name>"));

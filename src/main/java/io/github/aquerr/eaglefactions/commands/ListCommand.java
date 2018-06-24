@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
@@ -18,9 +17,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ListCommand implements CommandExecutor
 {
@@ -33,7 +30,7 @@ public class ListCommand implements CommandExecutor
         Text tagPrefix = MainLogic.getFactionPrefixStart();
         Text tagSufix = MainLogic.getFactionPrefixEnd();
 
-        for(Faction faction : factionsList)
+        for (Faction faction : factionsList)
         {
             Text tag = Text.builder().append(tagPrefix).append(faction.Tag).append(tagSufix, Text.of(" ")).build();
 

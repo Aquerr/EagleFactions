@@ -17,26 +17,24 @@ public class AutoMapCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
 
-            if(EagleFactions.AutoMapList.contains(player.getUniqueId()))
+            if (EagleFactions.AutoMapList.contains(player.getUniqueId()))
             {
                 EagleFactions.AutoMapList.remove(player.getUniqueId());
 
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoMap", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
                 return CommandResult.success();
-            }
-            else
+            } else
             {
                 EagleFactions.AutoMapList.add(player.getUniqueId());
 
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoMap", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
                 return CommandResult.success();
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }

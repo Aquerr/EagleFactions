@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class FactionsCache
 {
 
+    private static FactionsCache instance;
     private List<Faction> factionsList = new LinkedList<>();
     private Map<String, Faction> factionNameMap = new HashMap<>();
     private Map<String, Faction> playerUUIDMap = new HashMap<>();
@@ -21,8 +22,6 @@ public class FactionsCache
     private LinkedList<Faction> saveQueue = new LinkedList<>();
     private LinkedList<String> deleteQueue = new LinkedList<>();
     private IStorage factionsStorage;
-
-    private static FactionsCache instance;
 
 
     private FactionsCache()
@@ -127,7 +126,7 @@ public class FactionsCache
 
     public void removePlayer(UUID uuid)
     {
-        playerUUIDMap.remove(uuid);
+        playerUUIDMap.remove(uuid.toString());
     }
 
     public void updatePlayer(String player, String newFaction)

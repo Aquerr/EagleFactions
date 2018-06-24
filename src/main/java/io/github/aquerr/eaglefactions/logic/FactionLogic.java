@@ -16,7 +16,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
-import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -322,7 +321,8 @@ public class FactionLogic
         } else if (faction.Members.contains(playerUUID.toString()))
         {
             faction.Members.remove(playerUUID.toString());
-        } else {
+        } else
+        {
             faction.Officers.remove(playerUUID.toString());
         }
 

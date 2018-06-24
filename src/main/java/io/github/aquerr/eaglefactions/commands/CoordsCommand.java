@@ -26,21 +26,21 @@ public class CoordsCommand implements CommandExecutor
 {
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
 
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
             List<Text> teamCoords = new ArrayList<>();
 
-            if(optionalPlayerFaction.isPresent())
+            if (optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
-                if(playerFaction.Home != null)
+                if (playerFaction.Home != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of( PluginMessages.FACTIONS_HOME + ": " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
+                            .append(Text.of(PluginMessages.FACTIONS_HOME + ": " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
@@ -50,7 +50,7 @@ public class CoordsCommand implements CommandExecutor
                 {
                     Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader));
 
-                    if(leader.isPresent())
+                    if (leader.isPresent())
                     {
                         Text textBuilder = Text.builder()
                                 .append(Text.of(PluginMessages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
@@ -60,13 +60,13 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!playerFaction.Officers.isEmpty())
+                if (!playerFaction.Officers.isEmpty())
                 {
-                    for (String officerName: playerFaction.Officers)
+                    for (String officerName : playerFaction.Officers)
                     {
                         Optional<Player> officer = PlayerManager.getPlayer(UUID.fromString(officerName));
 
-                        if(officer.isPresent())
+                        if (officer.isPresent())
                         {
                             Text textBuilder = Text.builder()
                                     .append(Text.of(PluginMessages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
@@ -77,13 +77,13 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!playerFaction.Members.isEmpty())
+                if (!playerFaction.Members.isEmpty())
                 {
-                    for (String memberName: playerFaction.Members)
+                    for (String memberName : playerFaction.Members)
                     {
                         Optional<Player> member = PlayerManager.getPlayer(UUID.fromString(memberName));
 
-                        if(member.isPresent())
+                        if (member.isPresent())
                         {
                             Text textBuilder = Text.builder()
                                     .append(Text.of(PluginMessages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
@@ -94,13 +94,13 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!playerFaction.Recruits.isEmpty())
+                if (!playerFaction.Recruits.isEmpty())
                 {
-                    for (String recruitName: playerFaction.Recruits)
+                    for (String recruitName : playerFaction.Recruits)
                     {
                         Optional<Player> recruit = PlayerManager.getPlayer(UUID.fromString(recruitName));
 
-                        if(recruit.isPresent())
+                        if (recruit.isPresent())
                         {
                             Text textBuilder = Text.builder()
                                     .append(Text.of(PluginMessages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
@@ -116,16 +116,14 @@ public class CoordsCommand implements CommandExecutor
                 PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
                 paginationBuilder.sendTo(source);
 
-            }
-            else
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
-        }
-        else
+        } else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

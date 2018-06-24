@@ -21,9 +21,9 @@ public class PlayerDeathListener
     @Listener
     public void onPlayerDeath(DestructEntityEvent.Death event)
     {
-        if(event.getTargetEntity() instanceof Player)
+        if (event.getTargetEntity() instanceof Player)
         {
-            Player player = (Player)event.getTargetEntity();
+            Player player = (Player) event.getTargetEntity();
 
             PowerManager.decreasePower(player.getUniqueId());
 

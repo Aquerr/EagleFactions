@@ -58,7 +58,7 @@ public class MainLogic
 
     public static int getMaxNameLength()
     {
-        return _configuration.getInt(30,"name", "max-length");
+        return _configuration.getInt(30, "name", "max-length");
     }
 
     public static int getMinNameLength()
@@ -78,7 +78,7 @@ public class MainLogic
 
     public static boolean getMobSpawning()
     {
-        return _configuration.getBoolean(false,"spawn", "mobs");
+        return _configuration.getBoolean(false, "spawn", "mobs");
     }
 
     public static boolean getBlockEnteringFactions()

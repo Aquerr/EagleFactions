@@ -31,61 +31,54 @@ public class HomeCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if(optionalPlayerFaction.isPresent())
+            if (optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.Home != null)
+                if (playerFaction.Home != null)
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " " + PluginMessages.SECONDS + " ", TextColors.RED, PluginMessages.TO_BE_ABLE_TO_USE_IT_AGAIN));
                         return CommandResult.success();
-                    }
-                    else if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
+                    } else if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
                         return CommandResult.success();
-                    }
-                    else
+                    } else
                     {
-                        if(MainLogic.canHomeBetweenWorlds())
+                        if (MainLogic.canHomeBetweenWorlds())
                         {
                             source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                             teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
-                        }
-                        else
+                        } else
                         {
-                            if(player.getWorld().getUniqueId().equals(playerFaction.Home.WorldUUID))
+                            if (player.getWorld().getUniqueId().equals(playerFaction.Home.WorldUUID))
                             {
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                                 teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
-                            }
-                            else
+                            } else
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD));
                             }
                         }
                     }
-                }
-                else
+                } else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.FACTIONS_HOME_IS_NOT_SET));
                 }
 
-            }
-            else
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
@@ -112,14 +105,12 @@ public class HomeCommand implements CommandExecutor
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
                         startHomeCooldown(player.getUniqueId());
                         task.cancel();
-                    }
-                    else
+                    } else
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
                         seconds++;
                     }
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
                     task.cancel();
@@ -143,7 +134,7 @@ public class HomeCommand implements CommandExecutor
                 {
                     int seconds = EagleFactions.HomeCooldownPlayers.get(playerUUID);
 
-                    if(seconds < 1)
+                    if (seconds < 1)
                     {
                         EagleFactions.HomeCooldownPlayers.remove(playerUUID);
                         task.cancel();

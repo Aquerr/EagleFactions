@@ -20,7 +20,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -36,7 +35,7 @@ public class CreateCommand implements CommandExecutor
         Optional<String> optionalFactionName = context.<String>getOne("faction name");
         Optional<String> optionalFactionTag = context.<String>getOne("tag");
 
-        if(optionalFactionName.isPresent() && optionalFactionTag.isPresent())
+        if (optionalFactionName.isPresent() && optionalFactionTag.isPresent())
         {
             String factionName = optionalFactionName.get();
             String factionTag = optionalFactionTag.get();
@@ -55,20 +54,19 @@ public class CreateCommand implements CommandExecutor
 
                 if (!optionalPlayerFaction.isPresent())
                 {
-                    if(FactionsCache.getInstance().getFactions().stream().anyMatch(x -> x.Tag.toPlain().equalsIgnoreCase(factionTag)))
+                    if (FactionsCache.getInstance().getFactions().stream().anyMatch(x -> x.Tag.toPlain().equalsIgnoreCase(factionTag)))
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
                         return CommandResult.success();
-                    }
-                    else
+                    } else
                     {
                         //Check tag length
-                        if(factionTag.length() > MainLogic.getMaxTagLength())
+                        if (factionTag.length() > MainLogic.getMaxTagLength())
                         {
                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if(factionTag.length() < MainLogic.getMinTagLength())
+                        if (factionTag.length() < MainLogic.getMinTagLength())
                         {
                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
@@ -78,12 +76,12 @@ public class CreateCommand implements CommandExecutor
                     if (!FactionsCache.getInstance().getFaction(factionName.toLowerCase()).isPresent())
                     {
                         //Check name length
-                        if(factionName.length() > MainLogic.getMaxNameLength())
+                        if (factionName.length() > MainLogic.getMaxNameLength())
                         {
                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if(factionName.length() < MainLogic.getMinNameLength())
+                        if (factionName.length() < MainLogic.getMinNameLength())
                         {
                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
@@ -92,15 +90,13 @@ public class CreateCommand implements CommandExecutor
                         if (MainLogic.getCreateByItems())
                         {
                             return createByItems(factionName, factionTag, player);
-                        }
-                        else
+                        } else
                         {
                             FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
                             return CommandResult.success();
                         }
-                    }
-                    else
+                    } else
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS));
                     }
@@ -114,8 +110,7 @@ public class CreateCommand implements CommandExecutor
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f create <tag> <faction name>"));
@@ -138,7 +133,7 @@ public class CreateCommand implements CommandExecutor
             String itemId = idAndVariant[0] + ":" + idAndVariant[1];
             Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
-            if(itemType.isPresent())
+            if (itemType.isPresent())
             {
                 ItemStack itemStack = ItemStack.builder()
                         .itemType(itemType.get()).build();
@@ -157,8 +152,7 @@ public class CreateCommand implements CommandExecutor
                 if (inventory.contains(itemStack))
                 {
                     foundItems += 1;
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
                     break;
@@ -175,7 +169,7 @@ public class CreateCommand implements CommandExecutor
 
                 Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
-                if(itemType.isPresent())
+                if (itemType.isPresent())
                 {
                     ItemStack itemStack = ItemStack.builder()
                             .itemType(itemType.get()).build();

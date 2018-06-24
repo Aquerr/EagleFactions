@@ -21,26 +21,26 @@ public class DisbandCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
 
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if(optionalPlayerFaction.isPresent())
+            if (optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
-                if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     boolean didSucceed = FactionLogic.disbandFaction(playerFaction.Name);
 
                     if (didSucceed)
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
-                        if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
-                    }
-                    else
+                        if (EagleFactions.AutoClaimList.contains(player.getUniqueId()))
+                            EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                    } else
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
                     }
@@ -48,7 +48,7 @@ public class DisbandCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()))
+                if (playerFaction.Leader.equals(player.getUniqueId().toString()))
                 {
                     try
                     {
@@ -56,35 +56,31 @@ public class DisbandCommand implements CommandExecutor
 
                         if (didSucceed)
                         {
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
-                            if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
-                        }
-                        else
+                            if (EagleFactions.AutoClaimList.contains(player.getUniqueId()))
+                                EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                        } else
                         {
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
                         }
 
                         return CommandResult.success();
-                    }
-                    catch (Exception exception)
+                    } catch (Exception exception)
                     {
                         exception.printStackTrace();
                     }
-                }
-                else
+                } else
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
-            }
-            else
+            } else
             {
                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

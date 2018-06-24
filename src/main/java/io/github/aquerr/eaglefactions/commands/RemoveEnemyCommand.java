@@ -42,8 +42,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, optionalEnemyFactionName.get() + "!"));
                     return CommandResult.success();
-                }
-                else
+                } else
                 {
                     if (optionalPlayerFaction.isPresent())
                     {
@@ -54,8 +53,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                             {
                                 FactionLogic.removeEnemy(enemyFaction.Name, playerFaction.Name);
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_REMOVED_WAR_STATE_WITH + " ", TextColors.GOLD, enemyFaction, TextColors.GREEN, "!"));
-                            }
-                            else
+                            } else
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_NOT_IN_THE_WAR_WITH_THIS_FACTION));
                             }
@@ -72,8 +70,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                                     FactionLogic.removeEnemy(enemyFaction.Name, playerFaction.Name);
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.Name + "!"));
                                     EagleFactions.RemoveEnemyList.remove(checkRemove);
-                                }
-                                else if (!EagleFactions.RemoveEnemyList.contains(checkRemove))
+                                } else if (!EagleFactions.RemoveEnemyList.contains(checkRemove))
                                 {
                                     RemoveEnemy removeEnemy = new RemoveEnemy(playerFaction.Name, enemyFaction.Name);
                                     EagleFactions.RemoveEnemyList.add(removeEnemy);
@@ -100,30 +97,25 @@ public class RemoveEnemyCommand implements CommandExecutor
 
                                     return CommandResult.success();
                                 }
-                            }
-                            else
+                            } else
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_NOT_IN_THE_WAR_WITH_THIS_FACTION));
                             }
 
-                        }
-                        else
+                        } else
                         {
                             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                         }
-                    }
-                    else
+                    } else
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                     }
                 }
-            }
-            else
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f enemy remove <faction name>"));

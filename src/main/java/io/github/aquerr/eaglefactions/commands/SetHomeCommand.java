@@ -23,18 +23,18 @@ public class SetHomeCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if (source instanceof Player)
         {
-            Player player = (Player)source;
+            Player player = (Player) source;
 
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-            if(optionalPlayerFaction.isPresent())
+            if (optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
                 World world = player.getWorld();
 
-                if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                if (EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
                     FactionLogic.setHome(world.getUniqueId(), playerFaction, home);
@@ -43,33 +43,29 @@ public class SetHomeCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     Optional<Faction> chunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
 
-                    if(chunkFaction.isPresent() && chunkFaction.get().Name.equals(playerFaction.Name))
+                    if (chunkFaction.isPresent() && chunkFaction.get().Name.equals(playerFaction.Name))
                     {
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
                         FactionLogic.setHome(world.getUniqueId(), playerFaction, home);
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
-                    }
-                    else
+                    } else
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
                     }
-                }
-                else
+                } else
                 {
                     source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                 }
-            }
-            else
+            } else
             {
                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
-        }
-        else
+        } else
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }

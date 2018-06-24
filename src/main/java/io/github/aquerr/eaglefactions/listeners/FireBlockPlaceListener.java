@@ -17,11 +17,11 @@ public class FireBlockPlaceListener
     {
         if (event.getCause().root() instanceof Player)
         {
-            Player player = (Player)event.getCause().root();
+            Player player = (Player) event.getCause().root();
 
             if (!EagleFactions.AdminList.contains(player.getUniqueId()))
             {
-                event.getTransactions().forEach(x->
+                event.getTransactions().forEach(x ->
                 {
                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
 
@@ -33,10 +33,9 @@ public class FireBlockPlaceListener
                     }
                 });
             }
-        }
-        else
+        } else
         {
-            event.getTransactions().forEach(x->
+            event.getTransactions().forEach(x ->
             {
                 Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
 

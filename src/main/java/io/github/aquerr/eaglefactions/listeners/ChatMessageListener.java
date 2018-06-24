@@ -25,7 +25,7 @@ public class ChatMessageListener
     {
         Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
 
-        if(optionalPlayerFaction.isPresent())
+        if (optionalPlayerFaction.isPresent())
         {
             MessageChannel messageChannel = event.getOriginalChannel();
             Faction playerFaction = optionalPlayerFaction.get();
@@ -73,8 +73,7 @@ public class ChatMessageListener
                     receivers.addAll(FactionLogic.getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
-                }
-                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
+                } else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
                 {
                     message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                     chatTypePrefix.append(getFactionPrefix());
@@ -89,17 +88,16 @@ public class ChatMessageListener
 
                 //Add chatType to formattedMessage
                 formattedMessage.append(chatTypePrefix.build());
-            }
-            else
+            } else
             {
                 //If player is chatting in global chat then directly get raw message from event.
                 message.append(event.getMessage().getChildren().get(1));
             }
 
             //Get faction prefix from Eagle Factions.
-            if(MainLogic.getPrefixOption().equals("tag"))
+            if (MainLogic.getPrefixOption().equals("tag"))
             {
-                if(!playerFaction.Tag.toPlainSingle().equals(""))
+                if (!playerFaction.Tag.toPlainSingle().equals(""))
                 {
                     if (MainLogic.areColoredTagsAllowed())
                     {
@@ -110,8 +108,7 @@ public class ChatMessageListener
                                 .build();
 
                         factionPrefixText.append(factionTag);
-                    }
-                    else
+                    } else
                     {
                         //Get faction's tag
                         Text factionTag = Text.builder()
@@ -122,8 +119,7 @@ public class ChatMessageListener
                         factionPrefixText.append(factionTag);
                     }
                 }
-            }
-            else if (MainLogic.getPrefixOption().equals("name"))
+            } else if (MainLogic.getPrefixOption().equals("name"))
             {
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
@@ -133,10 +129,10 @@ public class ChatMessageListener
                 factionPrefixText.append(factionNamePrefix);
             }
 
-            if(MainLogic.shouldDisplayRank())
+            if (MainLogic.shouldDisplayRank())
             {
                 //Get leader prefix.
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()))
+                if (playerFaction.Leader.equals(player.getUniqueId().toString()))
                 {
                     Text leaderPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
@@ -146,7 +142,7 @@ public class ChatMessageListener
                 }
 
                 //Get officer prefix.
-                if(playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if (playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     Text officerPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
@@ -160,8 +156,7 @@ public class ChatMessageListener
             {
                 factionAndRankPrefix.append(factionPrefixText.build());
                 factionAndRankPrefix.append(rankPrefixText.build());
-            }
-            else
+            } else
             {
                 factionAndRankPrefix.append(rankPrefixText.build());
                 factionAndRankPrefix.append(factionPrefixText.build());

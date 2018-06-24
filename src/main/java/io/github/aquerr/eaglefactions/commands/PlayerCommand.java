@@ -38,16 +38,15 @@ public class PlayerCommand implements CommandExecutor
         //TODO: Add check if provided player has played on this server.
         //player.hasPlayedBefore() is not a solution for this problem.
 
-        if(optionalPlayer.isPresent())
+        if (optionalPlayer.isPresent())
         {
             Player player = optionalPlayer.get();
             showPlayerInfo(source, player);
-        }
-        else
+        } else
         {
-            if(source instanceof Player)
+            if (source instanceof Player)
             {
-                Player player = (Player)source;
+                Player player = (Player) source;
                 showPlayerInfo(source, player);
             }
         }
@@ -56,13 +55,13 @@ public class PlayerCommand implements CommandExecutor
 
     private void showPlayerInfo(CommandSource source, Player player)
     {
-        if(player.hasPlayedBefore())
+        if (player.hasPlayedBefore())
         {
             List<Text> playerInfo = new ArrayList<Text>();
 
             String playerFactionName = "";
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-            if(optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().Name;
+            if (optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().Name;
 
             Date lastPlayed = Date.from(player.getJoinData().lastPlayed().get());
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -82,10 +81,9 @@ public class PlayerCommand implements CommandExecutor
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
             paginationBuilder.sendTo(source);
-        }
-        else
+        } else
         {
-            player.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
+            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
         }
     }
 }

@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.parsers;
 
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -30,8 +29,7 @@ public class FactionNameArgument extends CommandElement
         if (args.hasNext())
         {
             return args.next();
-        }
-        else
+        } else
         {
             return null;
         }
@@ -47,7 +45,7 @@ public class FactionNameArgument extends CommandElement
         if (args.hasNext())
         {
             String charSequence = args.nextIfPresent().get();
-            return list.stream().filter(x->x.contains(charSequence)).collect(Collectors.toList());
+            return list.stream().filter(x -> x.contains(charSequence)).collect(Collectors.toList());
         }
 
         return list;
