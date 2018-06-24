@@ -101,6 +101,16 @@ public class MainLogic
         return _configuration.getBoolean(false, "player-limit", "toggled");
     }
 
+    public static boolean isPeriodicSaving()
+    {
+        return _configuration.getBoolean(true, "saving", "periodic");
+    }
+
+    public static int getSaveDelay()
+    {
+        return _configuration.getInt(10, "saving", "delay");
+    }
+
     public static int getPlayerLimit()
     {
         return _configuration.getInt(15, "player-limit", "limit");

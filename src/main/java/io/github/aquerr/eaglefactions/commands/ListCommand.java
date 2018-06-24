@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -26,7 +27,7 @@ public class ListCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Set<Faction> factionsList = new HashSet<Faction>(FactionLogic.getFactions().values());
+        List<Faction> factionsList = FactionsCache.getInstance().getFactions();
         List<Text> helpList = new ArrayList<>();
 
         Text tagPrefix = MainLogic.getFactionPrefixStart();

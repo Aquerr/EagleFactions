@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions;
 
 import com.google.inject.Inject;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.*;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
@@ -23,6 +24,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -119,13 +121,21 @@ public class EagleFactions
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.Name, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         }
+
+        //Make sure that the faction cache is initialized.
+        FactionsCache.getInstance();
+    }
+
+    @Listener
+    public void onServerStop(GameStoppingServerEvent event){
+        FactionsCache.getInstance().doSave();
     }
 
     private void SetupConfigs()
     {
         // Create configs
         _configuration = new Configuration(_configDir);
-        FactionLogic factionLogic = new FactionLogic(_configDir);
+        FactionLogic factionLogic = new FactionLogic();
 
         PlayerManager.setup(_configDir);
         PowerManager.setup(_configDir);

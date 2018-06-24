@@ -19,7 +19,7 @@ public class ReloadCommand implements CommandExecutor
         try
         {
             EagleFactions.getPlugin().getConfiguration().load();
-            FactionLogic.reload();
+            //FactionLogic.reload();
 
             source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));
         }

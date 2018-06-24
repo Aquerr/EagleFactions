@@ -25,7 +25,7 @@ public class VersionChecker
     public static boolean isLatest(String version)
     {
         String latest = "https://api.github.com/repos/Aquerr/EagleFactions/releases";
-        String currentTag = "https://api.github.com/repos/Aquerr/EagleFactions/releases/tags/v" + version;
+        String currentTag = "https://api.github.com/repos/Kittycraft/EagleFactions/releases/tags/v" + version;
 
         String latestJsonData = sendRequest(latest);
         String currentJsonData = sendRequest(currentTag);

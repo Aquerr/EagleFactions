@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -54,7 +55,7 @@ public class CreateCommand implements CommandExecutor
 
                 if (!optionalPlayerFaction.isPresent())
                 {
-                    if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
+                    if(FactionsCache.getInstance().getFactions().stream().anyMatch(x -> x.Tag.toPlain().equalsIgnoreCase(factionTag)))
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
                         return CommandResult.success();
@@ -74,7 +75,7 @@ public class CreateCommand implements CommandExecutor
                         }
                     }
 
-                    if (!FactionLogic.getFactionsNames().contains(factionName.toLowerCase()))
+                    if (!FactionsCache.getInstance().getFaction(factionName.toLowerCase()).isPresent())
                     {
                         //Check name length
                         if(factionName.length() > MainLogic.getMaxNameLength())
