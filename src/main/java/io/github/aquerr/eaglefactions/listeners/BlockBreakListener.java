@@ -1,17 +1,19 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.text.Text;
@@ -20,10 +22,15 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class BlockBreakListener
+@Singleton
+public class BlockBreakListener extends GenericListener
 {
+
     @Inject
-    private FactionsCache cache;
+    public BlockBreakListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    {
+        super(cache, settings, eagleFactions, eventManager);
+    }
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event)
@@ -45,7 +52,7 @@ public class BlockBreakListener
             world = event.getTransactions().get(0).getFinal().getLocation().get().getExtent();
         }
 
-        if (MainLogic.getSafeZoneWorldNames().contains(world.getName()) || (MainLogic.getWarZoneWorldNames().contains(world.getName()) && MainLogic.isBlockDestroyingInWarZoneDisabled()))
+        if (settings.getSafeZoneWorldNames().contains(world.getName()) || (settings.getWarZoneWorldNames().contains(world.getName()) && settings.isBlockDestroyingInWarZoneDisabled()))
         {
             event.setCancelled(true);
             return;
@@ -78,7 +85,7 @@ public class BlockBreakListener
                     }
                 } else
                 {
-                    if (!optionalChunkFaction.get().Name.equals("SafeZone") && !optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
+                    if (!optionalChunkFaction.get().Name.equals("SafeZone") && !optionalChunkFaction.get().Name.equals("WarZone") && settings.isBlockDestroyingDisabled())
                     {
                         event.setCancelled(true);
                         return;
@@ -86,7 +93,7 @@ public class BlockBreakListener
                     {
                         event.setCancelled(true);
                         return;
-                    } else if (optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                    } else if (optionalChunkFaction.get().Name.equals("WarZone") && settings.isBlockDestroyingInWarZoneDisabled())
                     {
                         event.setCancelled(true);
                         return;

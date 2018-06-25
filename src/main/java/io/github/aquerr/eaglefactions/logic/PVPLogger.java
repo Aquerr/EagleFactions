@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.config.Settings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -17,20 +19,25 @@ import java.util.function.Consumer;
 
 public class PVPLogger
 {
+
+    private Settings settings;
+
     private Map<UUID, Integer> _attackedPlayers;
     private boolean _isActive;
     private int _blockTime;
     private List<String> _blockedCommandsDuringFight;
 
-    public PVPLogger()
+    @Inject
+    public PVPLogger(Settings settings)
     {
-        _isActive = MainLogic.isPVPLoggerActive();
+        this.settings = settings;
+        _isActive = settings.isPVPLoggerActive();
 
         if (_isActive)
         {
             _attackedPlayers = new HashMap<>();
-            _blockTime = MainLogic.getPVPLoggerTime();
-            _blockedCommandsDuringFight = MainLogic.getBlockedCommandsDuringFight();
+            _blockTime = settings.getPVPLoggerTime();
+            _blockedCommandsDuringFight = settings.getBlockedCommandsDuringFight();
         }
     }
 

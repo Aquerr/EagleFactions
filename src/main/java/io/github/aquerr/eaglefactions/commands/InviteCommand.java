@@ -1,11 +1,12 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.Sponge;
@@ -24,6 +25,10 @@ import java.util.concurrent.TimeUnit;
 
 public class InviteCommand implements CommandExecutor
 {
+
+    @Inject
+    private Settings settings;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -43,7 +48,7 @@ public class InviteCommand implements CommandExecutor
 
                     if (FlagManager.canInvite(senderPlayer, senderFaction))
                     {
-                        if (MainLogic.isPlayerLimit())
+                        if (settings.isPlayerLimit())
                         {
                             int playerCount = 0;
                             playerCount += senderFaction.Leader.equals("") ? 0 : 1;
@@ -51,7 +56,7 @@ public class InviteCommand implements CommandExecutor
                             playerCount += senderFaction.Members.isEmpty() ? 0 : senderFaction.Members.size();
                             playerCount += senderFaction.Recruits.isEmpty() ? 0 : senderFaction.Recruits.size();
 
-                            if (playerCount >= MainLogic.getPlayerLimit())
+                            if (playerCount >= settings.getPlayerLimit())
                             {
                                 senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + PluginMessages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
                                 return CommandResult.success();

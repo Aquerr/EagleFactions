@@ -5,9 +5,9 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
@@ -29,6 +29,10 @@ import java.util.function.Consumer;
 
 public class MapCommand implements CommandExecutor
 {
+
+    @Inject
+    private Settings settings;
+
     @Inject
     private FactionsCache cache;
 
@@ -38,7 +42,7 @@ public class MapCommand implements CommandExecutor
         if (source instanceof Player)
         {
             Player player = (Player) source;
-            if (MainLogic.getClaimableWorldNames().contains(player.getWorld().getName()))
+            if (settings.getClaimableWorldNames().contains(player.getWorld().getName()))
             {
                 generateMap(player);
             } else
@@ -160,7 +164,7 @@ public class MapCommand implements CommandExecutor
                     }
                 } else
                 {
-                    if (!MainLogic.isDelayedClaimingToggled() &&
+                    if (!settings.isDelayedClaimingToggled() &&
                             (EagleFactions.AdminList.contains(player.getUniqueId()) ||
                                     (optionalPlayerFaction.isPresent() &&
                                             (optionalPlayerFaction.get().Leader.equals(player.getUniqueId().toString()) || optionalPlayerFaction.get().Officers.contains(player.getUniqueId().toString())))))
@@ -244,7 +248,7 @@ public class MapCommand implements CommandExecutor
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                                     } else
                                     {
-                                        if (MainLogic.requireConnectedClaims())
+                                        if (settings.requireConnectedClaims())
                                         {
                                             if (FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
                                             {

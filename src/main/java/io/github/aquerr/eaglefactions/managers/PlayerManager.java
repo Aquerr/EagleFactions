@@ -1,6 +1,8 @@
 package io.github.aquerr.eaglefactions.managers;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -23,6 +25,7 @@ import java.util.UUID;
 /**
  * Created by Aquerr on 2017-08-04.
  */
+@Singleton
 public class PlayerManager
 {
     @Inject
@@ -31,7 +34,8 @@ public class PlayerManager
     private static Path playersPath;
     private static UserStorageService userStorageService;
 
-    public static void setup(Path configDir)
+    @Inject
+    public PlayerManager(@Named("config dir") Path configDir)
     {
         try
         {

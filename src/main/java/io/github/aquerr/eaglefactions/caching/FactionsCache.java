@@ -6,7 +6,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.spongepowered.api.scheduler.Task;
 
@@ -24,20 +24,20 @@ public class FactionsCache
     private LinkedList<String> deleteQueue = new LinkedList<>();
     private Provider<IStorage> factionsStorage;
 
+    private Settings settings;
+
+
 
     @Inject
-    public FactionsCache(Provider<IStorage> factionsStorage)
+    public FactionsCache(Provider<IStorage> factionsStorage, Settings settings)
     {
-        System.out.println("Got to the cache init!");
+        this.settings = settings;
         this.factionsStorage = factionsStorage;
         //this.factionsStorage = new HOCONFactionStorage(EagleFactions.getPlugin().getConfigDir(), this);
-        System.out.println("About to get mainlogic!");
-        if (MainLogic.isPeriodicSaving())
+        if (settings.isPeriodicSaving())
         {
-            Task.builder().execute(task -> doSave()).interval(MainLogic.getSaveDelay(), TimeUnit.MINUTES);
+            Task.builder().execute(task -> doSave()).interval(settings.getSaveDelay(), TimeUnit.MINUTES);
         }
-        System.out.println("Got main logic!");
-
     }
 
     public List<Faction> getFactions()
@@ -115,7 +115,7 @@ public class FactionsCache
         }
         saveFaction(faction);
         deleteQueue.removeIf(x -> x.equals(faction.Name));
-        if (!MainLogic.isPeriodicSaving())
+        if (!settings.isPeriodicSaving())
         {
             doSave();
         }
@@ -151,7 +151,7 @@ public class FactionsCache
             removeAllClaims(factionName);
             deleteQueue.add(optionalFaction.get().Name);
             saveQueue.removeIf(x -> x.Name.equals(faction));
-            if (!MainLogic.isPeriodicSaving())
+            if (!settings.isPeriodicSaving())
             {
                 doSave();
             }
@@ -206,7 +206,7 @@ public class FactionsCache
     {
         if (saveQueue.size() > 0)
         {
-            if (MainLogic.isPeriodicSaving())
+            if (settings.isPeriodicSaving())
             {
                 EagleFactions.getPlugin().getLogger().info("Doing periodic save of factions data. (" + saveQueue.size() + " factions updated)");
             }
@@ -228,7 +228,7 @@ public class FactionsCache
         {
             saveQueue.add(faction);
         }
-        if (!MainLogic.isPeriodicSaving())
+        if (!settings.isPeriodicSaving())
         {
             doSave();
         }

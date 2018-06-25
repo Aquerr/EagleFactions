@@ -5,9 +5,9 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
@@ -28,6 +28,9 @@ public class ClaimCommand implements CommandExecutor
     @Inject
     private FactionsCache cache;
 
+    @Inject
+    private Settings settings;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -47,7 +50,7 @@ public class ClaimCommand implements CommandExecutor
 
                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
 
-                    if (MainLogic.getClaimableWorldNames().contains(player.getWorld().getName()))
+                    if (settings.getClaimableWorldNames().contains(player.getWorld().getName()))
                     {
                         if (!optionalChunkFaction.isPresent())
                         {
@@ -65,7 +68,7 @@ public class ClaimCommand implements CommandExecutor
                                             return CommandResult.success();
                                         } else
                                         {
-                                            if (MainLogic.requireConnectedClaims())
+                                            if (settings.requireConnectedClaims())
                                             {
                                                 if (FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
                                                 {

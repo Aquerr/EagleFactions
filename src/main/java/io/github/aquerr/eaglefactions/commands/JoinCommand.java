@@ -1,11 +1,12 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -20,6 +21,10 @@ import java.util.Optional;
 
 public class JoinCommand implements CommandExecutor
 {
+
+    @Inject
+    private Settings settings;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -56,7 +61,7 @@ public class JoinCommand implements CommandExecutor
                             {
                                 try
                                 {
-                                    if (MainLogic.isPlayerLimit())
+                                    if (settings.isPlayerLimit())
                                     {
                                         int playerCount = 0;
                                         playerCount += faction.Leader.equals("") ? 0 : 1;
@@ -64,7 +69,7 @@ public class JoinCommand implements CommandExecutor
                                         playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
                                         playerCount += faction.Recruits.isEmpty() ? 0 : faction.Recruits.size();
 
-                                        if (playerCount >= MainLogic.getPlayerLimit())
+                                        if (playerCount >= settings.getPlayerLimit())
                                         {
                                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT));
                                             return CommandResult.success();

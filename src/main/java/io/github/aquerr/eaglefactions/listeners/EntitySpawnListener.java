@@ -1,17 +1,20 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.text.Text;
@@ -21,10 +24,15 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class EntitySpawnListener
+@Singleton
+public class EntitySpawnListener extends GenericListener
 {
+
     @Inject
-    private FactionsCache cache;
+    EntitySpawnListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    {
+        super(cache, settings, eagleFactions, eventManager);
+    }
 
     @Listener
     public void onEntitySpawn(SpawnEntityEvent event)
@@ -36,9 +44,9 @@ public class EntitySpawnListener
 
             if (entity instanceof Hostile)
             {
-                if (!MainLogic.getMobSpawning())
+                if (!settings.getMobSpawning())
                 {
-                    if (MainLogic.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
+                    if (settings.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                     {
                         event.setCancelled(true);
                         return;
@@ -52,11 +60,11 @@ public class EntitySpawnListener
                 }
             } else if (entity instanceof Player)
             {
-                if (MainLogic.shouldSpawnAtHomeAfterDeath())
+                if (settings.shouldSpawnAtHomeAfterDeath())
                 {
                     Player player = (Player) entity;
 
-                    Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                    Optional<Faction> optionalPlayerFaction = cache.getFactionByPlayer(player.getUniqueId());
 
                     if (optionalPlayerFaction.isPresent())
                     {
@@ -65,7 +73,7 @@ public class EntitySpawnListener
                         {
                             event.setCancelled(true);
                             World world = Sponge.getServer().getWorld(factionHome.WorldUUID).get();
-                            player.setLocation(new Location<World>(world, factionHome.BlockPosition));
+                            player.setLocation(new Location(world, factionHome.BlockPosition));
                             return;
                         } else
                         {

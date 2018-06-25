@@ -1,17 +1,29 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 import java.util.Optional;
 
-public class FireBlockPlaceListener
+@Singleton
+public class FireBlockPlaceListener extends GenericListener
 {
+    @Inject
+    FireBlockPlaceListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    {
+        super(cache, settings, eagleFactions, eventManager);
+    }
+
     @Listener
     public void onIgnite(ChangeBlockEvent.Place event)
     {

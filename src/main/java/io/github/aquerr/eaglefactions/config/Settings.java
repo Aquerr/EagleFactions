@@ -1,8 +1,7 @@
-package io.github.aquerr.eaglefactions.logic;
+package io.github.aquerr.eaglefactions.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.github.aquerr.eaglefactions.config.Configuration;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -10,136 +9,139 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Singleton
-public class MainLogic
+public class Settings
 {
-    private static Configuration configuration;
+    private Configuration configuration;
 
     @Inject
-    MainLogic(Configuration configuration){
-        MainLogic.configuration = configuration;
+    Settings(Configuration configuration){
+        this.configuration = configuration;
     }
 
-    public static boolean isFactionFriendlyFire()
+    public boolean isFactionFriendlyFire()
     {
         return configuration.getBoolean(false, "friendlyfire-faction");
     }
 
-    public static boolean isAllianceFriendlyFire()
+    public boolean isAllianceFriendlyFire()
     {
         return configuration.getBoolean(false, "friendlyfire-alliance");
     }
 
-    public static BigDecimal getGlobalMaxPower()
+    public BigDecimal getGlobalMaxPower()
     {
         return new BigDecimal(configuration.getString("10.0", "power", "max-power"));
     }
 
-    public static BigDecimal getStartingPower()
+    public BigDecimal getStartingPower()
     {
         return new BigDecimal(configuration.getString("5.0", "power", "start-power"));
     }
 
-    public static BigDecimal getPowerIncrement()
+    public BigDecimal getPowerIncrement()
     {
         return new BigDecimal(configuration.getString("0.04", "power", "increment"));
     }
 
-    public static BigDecimal getPowerDecrement()
+    public BigDecimal getPowerDecrement()
     {
         return new BigDecimal(configuration.getString("2.0", "power", "decrement"));
     }
 
-    public static BigDecimal getKillAward()
+    public BigDecimal getKillAward()
     {
         return new BigDecimal(configuration.getString("2.0", "power", "killaward"));
     }
 
-    public static BigDecimal getPenalty()
+    public BigDecimal getPenalty()
     {
         return new BigDecimal(configuration.getString("1.0", "power", "penalty"));
     }
 
-    public static int getMaxNameLength()
+    public int getMaxNameLength()
     {
         return configuration.getInt(30, "name", "max-length");
     }
 
-    public static int getMinNameLength()
+    public int getMinNameLength()
     {
         return configuration.getInt(3, "name", "min-length");
     }
 
-    public static int getMaxTagLength()
+    public int getMaxTagLength()
     {
         return configuration.getInt(5, "tag", "max-length");
     }
 
-    public static int getMinTagLength()
+    public int getMinTagLength()
     {
         return configuration.getInt(2, "tag", "min-length");
     }
 
-    public static boolean getMobSpawning()
+    public boolean getMobSpawning()
     {
         return configuration.getBoolean(false, "spawn", "mobs");
     }
 
-    public static boolean getBlockEnteringFactions()
+    public boolean getBlockEnteringFactions()
     {
         return configuration.getBoolean(true, "block-entering-faction-while-offline");
     }
 
-    public static boolean requireConnectedClaims()
+    public boolean requireConnectedClaims()
     {
         return configuration.getBoolean(true, "connected-claims");
     }
 
-    public static boolean shouldBlockSafeZoneFromWarZone()
+    public boolean shouldBlockSafeZoneFromWarZone()
     {
         return configuration.getBoolean(false, "block-safezone-from-warzone");
     }
 
-    public static boolean isPlayerLimit()
+    public boolean isPlayerLimit()
     {
         return configuration.getBoolean(false, "player-limit", "toggled");
     }
 
-    public static boolean isPeriodicSaving()
+    public boolean isPeriodicSaving()
     {
+        if(configuration == null){
+            System.out.println("AHHHHH something went wrong!");
+        }
         return configuration.getBoolean(true, "saving", "periodic");
     }
 
-    public static int getSaveDelay()
+    public int getSaveDelay()
     {
         return configuration.getInt(10, "saving", "delay");
     }
 
-    public static int getPlayerLimit()
+    public int getPlayerLimit()
     {
         return configuration.getInt(15, "player-limit", "limit");
     }
 
-    public static int getAttackTime()
+    public int getAttackTime()
     {
         return configuration.getInt(10, "attack-time");
     }
 
-    public static String getPrefixOption()
+    public String getPrefixOption()
     {
         return configuration.getString("tag", "faction-prefix");
     }
 
-    public static boolean shouldDisplayRank()
+    public boolean shouldDisplayRank()
     {
         return configuration.getBoolean(true, "faction-rank");
     }
 
-    public static boolean getCreateByItems()
+    public boolean getCreateByItems()
     {
         return configuration.getBoolean(false, "creating-by-items", "toggled");
     }
 
-    public static HashMap<String, Integer> getRequiredItemsToCreate()
+    public HashMap<String, Integer> getRequiredItemsToCreate()
     {
         List<String> itemsList = configuration.getListOfStrings(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20"), "creating-by-items", "items");
 
@@ -158,57 +160,57 @@ public class MainLogic
         return items;
     }
 
-    public static boolean shouldSpawnAtHomeAfterDeath()
+    public boolean shouldSpawnAtHomeAfterDeath()
     {
         return configuration.getBoolean(false, "spawn", "spawn-at-home-after-death");
     }
 
-    public static boolean shouldAttackOnlyAtNight()
+    public boolean shouldAttackOnlyAtNight()
     {
         return configuration.getBoolean(false, "attack-only-at-night");
     }
 
-    public static boolean canHomeBetweenWorlds()
+    public boolean canHomeBetweenWorlds()
     {
         return configuration.getBoolean(false, "home-from-other-worlds");
     }
 
-    public static int getHomeDelayTime()
+    public int getHomeDelayTime()
     {
         return configuration.getInt(5, "home-delay");
     }
 
-    public static int getHomeCooldown()
+    public int getHomeCooldown()
     {
         return configuration.getInt(60, "home-cooldown");
     }
 
-    public static boolean isDelayedClaimingToggled()
+    public boolean isDelayedClaimingToggled()
     {
         return configuration.getBoolean(false, "delayed-claim", "toggled");
     }
 
-    public static int getClaimingDelay()
+    public int getClaimingDelay()
     {
         return configuration.getInt(10, "delayed-claim", "claiming-time");
     }
 
-    public static boolean shouldBlockHomeAfterDeathInOwnFaction()
+    public boolean shouldBlockHomeAfterDeathInOwnFaction()
     {
         return configuration.getBoolean(false, "block-home-after-death-in-own-faction", "toggled");
     }
 
-    public static int getHomeBlockTimeAfterDeath()
+    public int getHomeBlockTimeAfterDeath()
     {
         return configuration.getInt(60, "block-home-after-death-in-own-faction", "time");
     }
 
-    public static boolean shouldClaimByItems()
+    public boolean shouldClaimByItems()
     {
         return configuration.getBoolean(false, "claiming-by-items", "toggled");
     }
 
-    public static HashMap<String, Integer> getRequiredItemsToClaim()
+    public HashMap<String, Integer> getRequiredItemsToClaim()
     {
         List<String> itemsList = configuration.getListOfStrings(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"), "claiming-by-items", "items");
 
@@ -227,79 +229,79 @@ public class MainLogic
         return items;
     }
 
-    public static double getAttackMinPowerPercentage()
+    public double getAttackMinPowerPercentage()
     {
         return configuration.getDouble(20, "attack-min-power-percentage") / 100;
     }
 
-    public static boolean isPVPLoggerActive()
+    public boolean isPVPLoggerActive()
     {
         return configuration.getBoolean(true, "pvp-logger", "active");
     }
 
-    public static int getPVPLoggerTime()
+    public int getPVPLoggerTime()
     {
         return configuration.getInt(60, "pvp-logger", "time");
     }
 
-    public static boolean isBlockDestroyingDisabled()
+    public boolean isBlockDestroyingDisabled()
     {
         return configuration.getBoolean(false, "disable-block-destroy-claims");
     }
 
-    public static boolean isBlockDestroyingInWarZoneDisabled()
+    public boolean isBlockDestroyingInWarZoneDisabled()
     {
         return configuration.getBoolean(false, "disable-block-destroy-warzone");
     }
 
-    public static List<String> getBlockedCommandsDuringFight()
+    public List<String> getBlockedCommandsDuringFight()
     {
         return configuration.getListOfStrings(Arrays.asList("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
     }
 
-    public static String getLanguageFileName()
+    public String getLanguageFileName()
     {
         return configuration.getString("english.conf", "language-file");
     }
 
-    public static boolean areColoredTagsAllowed()
+    public boolean areColoredTagsAllowed()
     {
         return configuration.getBoolean(true, "colored-tags-allowed");
     }
 
-    public static Text getFactionPrefixStart()
+    public Text getFactionPrefixStart()
     {
         String prefix = configuration.getString("[", "faction-prefix-start");
         return TextSerializers.FORMATTING_CODE.deserialize(prefix);
     }
 
-    public static Text getFactionPrefixEnd()
+    public Text getFactionPrefixEnd()
     {
         String prefix = configuration.getString("]", "faction-prefix-end");
         return TextSerializers.FORMATTING_CODE.deserialize(prefix);
     }
 
-    public static List<String> getClaimableWorldNames()
+    public List<String> getClaimableWorldNames()
     {
         return configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE");
     }
 
-    public static List<String> getNotClaimableWorldNames()
+    public List<String> getNotClaimableWorldNames()
     {
         return configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE");
     }
 
-    public static List<String> getSafeZoneWorldNames()
+    public List<String> getSafeZoneWorldNames()
     {
         return configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE");
     }
 
-    public static List<String> getWarZoneWorldNames()
+    public List<String> getWarZoneWorldNames()
     {
         return configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
     }
 
-    public static List<String> getDetectedWorldNames()
+    public List<String> getDetectedWorldNames()
     {
         List<String> detectedWorldNames = new ArrayList<>();
 
@@ -311,12 +313,12 @@ public class MainLogic
         return detectedWorldNames;
     }
 
-    public static boolean isFactionPrefixFirstInChat()
+    public boolean isFactionPrefixFirstInChat()
     {
         return configuration.getBoolean(true, "faction-prefix-first-in-chat");
     }
 
-    public static void addWorld(String worldName)
+    public void addWorld(String worldName)
     {
         List<String> claimableWorldNames = new ArrayList<>(getClaimableWorldNames());
         claimableWorldNames.add(worldName);

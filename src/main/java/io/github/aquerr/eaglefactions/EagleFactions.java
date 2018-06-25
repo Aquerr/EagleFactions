@@ -1,19 +1,15 @@
 package io.github.aquerr.eaglefactions;
 
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.*;
 import io.github.aquerr.eaglefactions.caching.CacheModule;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.*;
-import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
@@ -59,8 +55,11 @@ public class EagleFactions
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path _configDir;
-//    @Inject
-//    private Configuration _configuration;
+
+    public Path getConfigDir()
+    {
+        return _configDir;
+    }
 
     public static EagleFactions getPlugin()
     {
@@ -71,16 +70,6 @@ public class EagleFactions
     {
         return _logger;
     }
-
-    public Path getConfigDir()
-    {
-        return _configDir;
-    }
-
-//    @Inject
-//    private Game game;
-//    public Game getGame(){return game;}
-
 
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
@@ -100,18 +89,22 @@ public class EagleFactions
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
         Injector injector = Guice.createInjector(new CacheModule());
-        injector.getInstance(MainLogic.class);
         injector.getInstance(IStorage.class);
-        System.out.println("Got a storage instance!");
         cache = injector.getInstance(FactionsCache.class);
-        SetupConfigs();
+        injector.getInstance(FactionLogic.class);
+        injector.getInstance(PlayerManager.class);
+        injector.getInstance(PowerManager.class);
+        injector.getInstance(MessageLoader.class);
+        injector.getInstance(PVPLogger.class);
+
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
 
         InitializeCommands();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Commands loaded..."));
 
-        RegisterListeners();
+//        RegisterListeners(injector);
+        GenericListener.initListeners();
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
@@ -141,20 +134,20 @@ public class EagleFactions
         cache.doSave();
     }
 
-    private void SetupConfigs()
-    {
-        // Create configs
-        //_configuration = new Configuration(_configDir);
-        FactionLogic factionLogic = new FactionLogic();
-
-        PlayerManager.setup(_configDir);
-        PowerManager.setup(_configDir);
-
-        MessageLoader messageLoader = new MessageLoader(_configDir);
-
-        //PVPLogger
-        _pvpLogger = new PVPLogger();
-    }
+//    private void SetupConfigs()
+//    {
+//        // Create configs
+//        //_configuration = new Configuration(_configDir);
+//        FactionLogic factionLogic = new FactionLogic();
+//
+//        PlayerManager.setup(_configDir);
+//        PowerManager.setup(_configDir);
+//
+//        MessageLoader messageLoader = new MessageLoader(_configDir);
+//
+//        //PVPLogger
+//        _pvpLogger = new PVPLogger();
+//    }
 
     private void InitializeCommands()
     {
@@ -456,23 +449,24 @@ public class EagleFactions
         Sponge.getCommandManager().register(this, commandEagleFactions, "factions", "faction", "f");
     }
 
-    private void RegisterListeners()
-    {
-        Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new BlockBreakListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
-        Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
-        Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
-        Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
-        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
-
-        Sponge.getEventManager().registerListeners(this, new SendCommandListener());
-    }
+//    private void RegisterListeners(Injector injector)
+//    {
+//        injector.in
+//        Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
+//        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
+//        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
+//        Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
+//        Sponge.getEventManager().registerListeners(this, new BlockBreakListener());
+//        Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
+//        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
+//        Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
+//        Sponge.getEventManager().registerListeners(this, injector.getInstance(EntitySpawnListener.class));
+//        Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
+//        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
+//        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
+//
+//        Sponge.getEventManager().registerListeners(this, new SendCommandListener());
+//    }
 
     public PVPLogger getPVPLogger()
     {

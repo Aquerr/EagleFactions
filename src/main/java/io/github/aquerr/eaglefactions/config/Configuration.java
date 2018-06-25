@@ -2,13 +2,12 @@ package io.github.aquerr.eaglefactions.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.config.ConfigDir;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +24,6 @@ import java.util.function.Function;
 @Singleton
 public class Configuration
 {
-    //TODO: This class should have only one instance. Rework it to singleton.
-
     private static Function<Object, String> objectToStringTransformer = input ->
     {
         if (input instanceof String)
@@ -42,10 +39,9 @@ public class Configuration
     private CommentedConfigurationNode configNode;
 
     @Inject
-    public Configuration()
+    public Configuration(@Named("config dir") Path configPath)
     {
-        System.out.println("             Made it to config!");
-        setup(EagleFactions.getPlugin().getConfigDir());
+        setup(configPath);
     }
 
     public void setup(Path configDir)
@@ -88,7 +84,7 @@ public class Configuration
 
     private void checkNodes()
     {
-        Method[] methods = MainLogic.class.getDeclaredMethods();
+        Method[] methods = Settings.class.getDeclaredMethods();
         for (Method method : methods)
         {
             if (!method.getName().equals("setup") && !method.getName().equals("addWorld"))
@@ -111,7 +107,7 @@ public class Configuration
         try
         {
             configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
-            //MainLogic.setup(this);
+            //settings.setup(this);
         } catch (IOException e)
         {
             e.printStackTrace();

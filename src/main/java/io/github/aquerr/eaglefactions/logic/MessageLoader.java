@@ -1,5 +1,8 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import io.github.aquerr.eaglefactions.config.Settings;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -14,9 +17,14 @@ import java.nio.file.Path;
 
 public class MessageLoader
 {
-    public MessageLoader(Path configDir)
+
+    private Settings settings;
+
+    @Inject
+    public MessageLoader(@Named("config dir") Path configDir, Settings settings)
     {
-        String messagesFileName = MainLogic.getLanguageFileName();
+        this.settings = settings;
+        String messagesFileName = settings.getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
         if (!Files.exists(configDir.resolve("messages")))

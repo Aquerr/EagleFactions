@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
@@ -25,14 +25,17 @@ public class ListCommand implements CommandExecutor
     @Inject
     private FactionsCache cache;
 
+    @Inject
+    private Settings settings;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         List<Faction> factionsList = cache.getFactions();
         List<Text> helpList = new ArrayList<>();
 
-        Text tagPrefix = MainLogic.getFactionPrefixStart();
-        Text tagSufix = MainLogic.getFactionPrefixEnd();
+        Text tagPrefix = settings.getFactionPrefixStart();
+        Text tagSufix = settings.getFactionPrefixEnd();
 
         for (Faction faction : factionsList)
         {

@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
@@ -32,6 +33,9 @@ import java.util.function.Consumer;
  */
 public class FactionLogic
 {
+
+    @Inject
+    private static Settings settings;
 
     @Inject
     private static FactionsCache cache;
@@ -345,9 +349,9 @@ public class FactionLogic
             {
                 if (chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if (seconds >= MainLogic.getClaimingDelay())
+                    if (seconds >= settings.getClaimingDelay())
                     {
-                        if (MainLogic.shouldClaimByItems())
+                        if (settings.shouldClaimByItems())
                         {
                             if (addClaimByItems(player, faction, worldUUID, chunk))
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
@@ -374,16 +378,16 @@ public class FactionLogic
 
     public static void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        if (MainLogic.isDelayedClaimingToggled())
+        if (settings.isDelayedClaimingToggled())
         {
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, MainLogic.getClaimingDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
+            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, settings.getClaimingDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
 
             Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
             taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactions.getPlugin());
         } else
         {
-            if (MainLogic.shouldClaimByItems())
+            if (settings.shouldClaimByItems())
             {
                 if (addClaimByItems(player, faction, worldUUID, chunk))
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
@@ -399,7 +403,7 @@ public class FactionLogic
 
     private static boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToClaim();
+        HashMap<String, Integer> requiredItems = settings.getRequiredItemsToClaim();
         PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;

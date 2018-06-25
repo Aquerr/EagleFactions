@@ -1,15 +1,28 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 
 import java.util.Optional;
 
-public class MobTargetListener
+@Singleton
+public class MobTargetListener extends GenericListener
 {
+    @Inject
+    MobTargetListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    {
+        super(cache, settings, eagleFactions, eventManager);
+    }
+
     @Listener
     public void onTargetChange(SetAITargetEvent event)
     {

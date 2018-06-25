@@ -1,19 +1,32 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class PlayerJoinListener
+@Singleton
+public class PlayerJoinListener extends GenericListener
 {
+
+    @Inject
+    PlayerJoinListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    {
+        super(cache, settings, eagleFactions, eventManager);
+    }
+
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event)
     {
@@ -37,9 +50,9 @@ public class PlayerJoinListener
             }
 
             //Check if the world that player is connecting to is already in the config file
-            if (!MainLogic.getDetectedWorldNames().contains(player.getWorld().getName()))
+            if (!settings.getDetectedWorldNames().contains(player.getWorld().getName()))
             {
-                MainLogic.addWorld(player.getWorld().getName());
+                settings.addWorld(player.getWorld().getName());
             }
         }
     }

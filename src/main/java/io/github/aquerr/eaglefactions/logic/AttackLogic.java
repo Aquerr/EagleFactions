@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -22,6 +23,9 @@ public class AttackLogic
     @Inject
     private static FactionsCache cache;
 
+    @Inject
+    private static Settings settings;
+
     public static void attack(Player player, Vector3i attackedChunk)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
@@ -35,7 +39,7 @@ public class AttackLogic
             {
                 if (attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if (seconds == MainLogic.getAttackTime())
+                    if (seconds == settings.getAttackTime())
                     {
                         //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
                         Faction chunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
@@ -117,10 +121,10 @@ public class AttackLogic
     {
         if (EagleFactions.BlockedHome.containsKey(playerUUID))
         {
-            EagleFactions.BlockedHome.replace(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
+            EagleFactions.BlockedHome.replace(playerUUID, settings.getHomeBlockTimeAfterDeath());
         } else
         {
-            EagleFactions.BlockedHome.put(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
+            EagleFactions.BlockedHome.put(playerUUID, settings.getHomeBlockTimeAfterDeath());
             runHomeUsageRestorer(playerUUID);
         }
     }

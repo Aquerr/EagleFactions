@@ -1,11 +1,12 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
@@ -22,12 +23,16 @@ import java.util.Optional;
 
 public class AttackCommand implements CommandExecutor
 {
+
+    @Inject
+    private Settings settings;
+
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if (source instanceof Player)
         {
             Player player = (Player) source;
-            if (MainLogic.shouldAttackOnlyAtNight())
+            if (settings.shouldAttackOnlyAtNight())
             {
                 if ((player.getWorld().getProperties().getWorldTime() % 24000L) >= 12000)
                 {
@@ -73,9 +78,9 @@ public class AttackCommand implements CommandExecutor
                         {
                             if (!playerFaction.Alliances.contains(attackedFaction.Name))
                             {
-                                if (PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerManager.getFactionPower(attackedFaction).doubleValue() && PowerManager.getFactionPower(playerFaction).doubleValue() > PowerManager.getFactionPower(attackedFaction).doubleValue())
+                                if (PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * settings.getAttackMinPowerPercentage() >= PowerManager.getFactionPower(attackedFaction).doubleValue() && PowerManager.getFactionPower(playerFaction).doubleValue() > PowerManager.getFactionPower(attackedFaction).doubleValue())
                                 {
-                                    int attackTime = MainLogic.getAttackTime();
+                                    int attackTime = settings.getAttackTime();
                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
                                     AttackLogic.informAboutAttack(attackedFaction);

@@ -3,9 +3,9 @@ package io.github.aquerr.eaglefactions.commands;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -32,6 +32,9 @@ public class CreateCommand implements CommandExecutor
 {
     @Inject
     private FactionsCache cache;
+
+    @Inject
+    private Settings settings;
 
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
@@ -65,14 +68,14 @@ public class CreateCommand implements CommandExecutor
                     } else
                     {
                         //Check tag length
-                        if (factionTag.length() > MainLogic.getMaxTagLength())
+                        if (factionTag.length() > settings.getMaxTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + settings.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if (factionTag.length() < MainLogic.getMinTagLength())
+                        if (factionTag.length() < settings.getMinTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + settings.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
                     }
@@ -80,18 +83,18 @@ public class CreateCommand implements CommandExecutor
                     if (!cache.getFaction(factionName.toLowerCase()).isPresent())
                     {
                         //Check name length
-                        if (factionName.length() > MainLogic.getMaxNameLength())
+                        if (factionName.length() > settings.getMaxNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + settings.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if (factionName.length() < MainLogic.getMinNameLength())
+                        if (factionName.length() < settings.getMinNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + settings.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
 
-                        if (MainLogic.getCreateByItems())
+                        if (settings.getCreateByItems())
                         {
                             return createByItems(factionName, factionTag, player);
                         } else
@@ -125,7 +128,7 @@ public class CreateCommand implements CommandExecutor
 
     private CommandResult createByItems(String factionName, String factionTag, Player player)
     {
-        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToCreate();
+        HashMap<String, Integer> requiredItems = settings.getRequiredItemsToCreate();
         Inventory inventory = player.getInventory();
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
