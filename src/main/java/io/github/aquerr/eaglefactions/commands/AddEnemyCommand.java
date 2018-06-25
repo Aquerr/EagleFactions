@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -21,6 +22,9 @@ import java.util.UUID;
 
 public class AddEnemyCommand implements CommandExecutor
 {
+    @Inject
+    private FactionsCache cache;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -66,7 +70,7 @@ public class AddEnemyCommand implements CommandExecutor
 
                     if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                     {
-                        if (FactionsCache.getInstance().getFaction(enemyFaction.Name.toLowerCase()).isPresent())
+                        if (cache.getFaction(enemyFaction.Name.toLowerCase()).isPresent())
                         {
                             if (!playerFaction.Alliances.contains(enemyFaction.Name))
                             {

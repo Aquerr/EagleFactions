@@ -1,11 +1,12 @@
 package io.github.aquerr.eaglefactions.caching;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
-import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.spongepowered.api.scheduler.Task;
 
@@ -15,33 +16,28 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class FactionsCache
 {
-    private static FactionsCache instance;
     private List<Faction> factionsList = new LinkedList<>();
     private Map<String, Faction> factionNameMap = new HashMap<>();
     private Map<String, Faction> playerUUIDMap = new HashMap<>();
     private Map<UUID, Map<Vector3i, String>> claims = new HashMap<>();
     private LinkedList<Faction> saveQueue = new LinkedList<>();
     private LinkedList<String> deleteQueue = new LinkedList<>();
-    private IStorage factionsStorage;
+    private Provider<IStorage> factionsStorage;
 
 
-    FactionsCache()
+    @Inject
+    public FactionsCache(Provider<IStorage> factionsStorage)
     {
-        instance = this;
-        factionsStorage = new HOCONFactionStorage(EagleFactions.getPlugin().getConfigDir());
+        System.out.println("Got to the cache init!");
+        this.factionsStorage = factionsStorage;
+        //this.factionsStorage = new HOCONFactionStorage(EagleFactions.getPlugin().getConfigDir(), this);
+        System.out.println("About to get mainlogic!");
         if (MainLogic.isPeriodicSaving())
         {
             Task.builder().execute(task -> doSave()).interval(MainLogic.getSaveDelay(), TimeUnit.MINUTES);
         }
-    }
+        System.out.println("Got main logic!");
 
-    public static FactionsCache getInstance()
-    {
-        if (instance == null)
-        {
-            new FactionsCache();
-        }
-        return instance;
     }
 
     public List<Faction> getFactions()
@@ -216,13 +212,13 @@ public class FactionsCache
             }
             while (saveQueue.size() > 0)
             {
-                factionsStorage.addOrUpdateFaction(saveQueue.poll());
+                factionsStorage.get().addOrUpdateFaction(saveQueue.poll());
             }
             while (deleteQueue.size() > 0)
             {
-                factionsStorage.removeFaction(deleteQueue.poll());
+                factionsStorage.get().removeFaction(deleteQueue.poll());
             }
-            factionsStorage.saveChanges();
+            factionsStorage.get().saveChanges();
         }
     }
 

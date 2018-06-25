@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -32,23 +33,26 @@ import java.util.function.Consumer;
 public class FactionLogic
 {
 
+    @Inject
+    private static FactionsCache cache;
+
     @Deprecated
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
     {
-        return FactionsCache.getInstance().getFactionByPlayer(playerUUID);
+        return cache.getFactionByPlayer(playerUUID);
     }
 
     @Deprecated
     public static Optional<Faction> getFactionByChunk(UUID worldUUID, Vector3i chunk)
     {
-        return FactionsCache.getInstance().getFactionByChunk(worldUUID, chunk);
+        return cache.getFactionByChunk(worldUUID, chunk);
     }
 
     @Deprecated
     public static @Nullable
     Faction getFactionByName(String factionName)
     {
-        Optional<Faction> faction = FactionsCache.getInstance().getFaction(factionName);
+        Optional<Faction> faction = cache.getFaction(factionName);
 
         if (faction.isPresent())
         {
@@ -122,12 +126,12 @@ public class FactionLogic
     {
         Faction faction = new Faction(factionName, factionTag, playerUUID.toString());
 
-        FactionsCache.getInstance().addFaction(faction);
+        cache.addFaction(faction);
     }
 
     public static boolean disbandFaction(String factionName)
     {
-        FactionsCache.getInstance().removeFaction(factionName);
+        cache.removeFaction(factionName);
         return true;
     }
 
@@ -137,8 +141,8 @@ public class FactionLogic
 
         faction.Recruits.add(playerUUID.toString());
 
-        FactionsCache.getInstance().updatePlayer(playerUUID.toString(), factionName);
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.updatePlayer(playerUUID.toString(), factionName);
+        cache.saveFaction(faction);
     }
 
     public static void leaveFaction(UUID playerUUID, String factionName)
@@ -153,8 +157,8 @@ public class FactionLogic
             faction.Members.remove(playerUUID.toString());
         } else faction.Officers.remove(playerUUID.toString());
 
-        FactionsCache.getInstance().removePlayer(playerUUID);
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.removePlayer(playerUUID);
+        cache.saveFaction(faction);
     }
 
     public static void addAlly(String playerFactionName, String invitedFactionName)
@@ -165,8 +169,8 @@ public class FactionLogic
         playerFaction.Alliances.add(invitedFactionName);
         invitedFaction.Alliances.add(playerFactionName);
 
-        FactionsCache.getInstance().saveFaction(playerFaction);
-        FactionsCache.getInstance().saveFaction(invitedFaction);
+        cache.saveFaction(playerFaction);
+        cache.saveFaction(invitedFaction);
     }
 
     public static List<String> getAlliances(String factionName)
@@ -184,8 +188,8 @@ public class FactionLogic
         playerFaction.Alliances.remove(removedFactionName);
         removedFaction.Alliances.remove(playerFactionName);
 
-        FactionsCache.getInstance().saveFaction(playerFaction);
-        FactionsCache.getInstance().saveFaction(removedFaction);
+        cache.saveFaction(playerFaction);
+        cache.saveFaction(removedFaction);
     }
 
     public static void addEnemy(String playerFactionName, String enemyFactionName)
@@ -196,8 +200,8 @@ public class FactionLogic
         playerFaction.Enemies.add(enemyFactionName);
         enemyFaction.Enemies.add(playerFactionName);
 
-        FactionsCache.getInstance().saveFaction(playerFaction);
-        FactionsCache.getInstance().saveFaction(enemyFaction);
+        cache.saveFaction(playerFaction);
+        cache.saveFaction(enemyFaction);
     }
 
     public static void removeEnemy(String playerFactionName, String enemyFactionName)
@@ -208,8 +212,8 @@ public class FactionLogic
         playerFaction.Enemies.remove(enemyFactionName);
         enemyFaction.Enemies.remove(playerFactionName);
 
-        FactionsCache.getInstance().saveFaction(playerFaction);
-        FactionsCache.getInstance().saveFaction(enemyFaction);
+        cache.saveFaction(playerFaction);
+        cache.saveFaction(enemyFaction);
     }
 
     public static void addOfficerAndRemoveMember(String newOfficerUUIDAsString, String factionName)
@@ -219,7 +223,7 @@ public class FactionLogic
         faction.Officers.add(newOfficerUUIDAsString);
         faction.Members.remove(newOfficerUUIDAsString);
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static void removeOfficerAndSetAsMember(String officerNameAsString, String factionName)
@@ -229,7 +233,7 @@ public class FactionLogic
         faction.Officers.remove(officerNameAsString);
         faction.Members.add(officerNameAsString);
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static void setLeader(UUID newLeaderUUID, String playerFactionName)
@@ -255,15 +259,15 @@ public class FactionLogic
             faction.Leader = newLeaderUUID.toString();
         }
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static boolean isClaimConnected(Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        Optional<String> chunkA = FactionsCache.getInstance().getClaimOwner(worldUUID, chunk.add(1, 0, 0));
-        Optional<String> chunkB = FactionsCache.getInstance().getClaimOwner(worldUUID, chunk.add(-1, 0, 0));
-        Optional<String> chunkC = FactionsCache.getInstance().getClaimOwner(worldUUID, chunk.add(0, 0, 1));
-        Optional<String> chunkD = FactionsCache.getInstance().getClaimOwner(worldUUID, chunk.add(0, 0, -1));
+        Optional<String> chunkA = cache.getClaimOwner(worldUUID, chunk.add(1, 0, 0));
+        Optional<String> chunkB = cache.getClaimOwner(worldUUID, chunk.add(-1, 0, 0));
+        Optional<String> chunkC = cache.getClaimOwner(worldUUID, chunk.add(0, 0, 1));
+        Optional<String> chunkD = cache.getClaimOwner(worldUUID, chunk.add(0, 0, -1));
         return (chunkA.isPresent() && chunkA.get().equals(faction.Name)) || (chunkB.isPresent() && chunkB.get().equals(faction.Name))
                 || (chunkC.isPresent() && chunkC.get().equals(faction.Name)) || (chunkD.isPresent() && chunkD.get().equals(faction.Name));
     }
@@ -277,7 +281,7 @@ public class FactionLogic
         {
             faction.Home = null;
         }
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static boolean hasOnlinePlayers(Faction faction)
@@ -307,7 +311,7 @@ public class FactionLogic
 
     public static void removeClaims(Faction faction)
     {
-        FactionsCache.getInstance().removeAllClaims(faction.Name);
+        cache.removeAllClaims(faction.Name);
         faction.Claims = new ArrayList<>();
     }
 
@@ -326,8 +330,8 @@ public class FactionLogic
             faction.Officers.remove(playerUUID.toString());
         }
 
-        FactionsCache.getInstance().removePlayer(playerUUID);
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.removePlayer(playerUUID);
+        cache.saveFaction(faction);
     }
 
     private static Consumer<Task> addClaimWithDelay(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
@@ -351,7 +355,7 @@ public class FactionLogic
                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
                         } else
                         {
-                            FactionsCache.getInstance().addOrSetClaim(worldUUID, chunk, faction.Name);
+                            cache.addOrSetClaim(worldUUID, chunk, faction.Name);
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         }
                     } else
@@ -388,7 +392,7 @@ public class FactionLogic
             } else
             {
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                FactionsCache.getInstance().addOrSetClaim(worldUUID, chunk, faction.Name);
+                cache.addOrSetClaim(worldUUID, chunk, faction.Name);
             }
         }
     }
@@ -462,7 +466,7 @@ public class FactionLogic
                 }
             }
 
-            FactionsCache.getInstance().addOrSetClaim(worldUUID, chunk, faction.Name);
+            cache.addOrSetClaim(worldUUID, chunk, faction.Name);
             return true;
         } else return false;
     }
@@ -475,7 +479,7 @@ public class FactionLogic
 
         faction.Flags = flags;
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static void changeTagColor(Faction faction, TextColor textColor)
@@ -483,7 +487,7 @@ public class FactionLogic
         Text text = Text.of(textColor, faction.Tag.toPlainSingle());
         faction.Tag = text;
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static void addMemberAndRemoveRecruit(String newMemberUUIDAsString, String factionName)
@@ -493,7 +497,7 @@ public class FactionLogic
         faction.Members.add(newMemberUUIDAsString);
         faction.Recruits.remove(newMemberUUIDAsString);
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 
     public static void addRecruitAndRemoveMember(String newRecruitUUIDAsString, String factionName)
@@ -503,6 +507,6 @@ public class FactionLogic
         faction.Recruits.add(newRecruitUUIDAsString);
         faction.Members.remove(newRecruitUUIDAsString);
 
-        FactionsCache.getInstance().saveFaction(faction);
+        cache.saveFaction(faction);
     }
 }

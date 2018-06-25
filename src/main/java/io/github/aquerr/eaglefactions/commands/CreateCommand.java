@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
@@ -29,6 +30,9 @@ import java.util.Optional;
  */
 public class CreateCommand implements CommandExecutor
 {
+    @Inject
+    private FactionsCache cache;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -54,7 +58,7 @@ public class CreateCommand implements CommandExecutor
 
                 if (!optionalPlayerFaction.isPresent())
                 {
-                    if (FactionsCache.getInstance().getFactions().stream().anyMatch(x -> x.Tag.toPlain().equalsIgnoreCase(factionTag)))
+                    if (cache.getFactions().stream().anyMatch(x -> x.Tag.toPlain().equalsIgnoreCase(factionTag)))
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
                         return CommandResult.success();
@@ -73,7 +77,7 @@ public class CreateCommand implements CommandExecutor
                         }
                     }
 
-                    if (!FactionsCache.getInstance().getFaction(factionName.toLowerCase()).isPresent())
+                    if (!cache.getFaction(factionName.toLowerCase()).isPresent())
                     {
                         //Check name length
                         if (factionName.length() > MainLogic.getMaxNameLength())

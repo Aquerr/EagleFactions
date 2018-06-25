@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -24,6 +25,9 @@ import java.util.Optional;
 
 public class ClaimCommand implements CommandExecutor
 {
+    @Inject
+    private FactionsCache cache;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -55,7 +59,7 @@ public class ClaimCommand implements CommandExecutor
                                     {
                                         if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
                                         {
-                                            FactionsCache.getInstance().addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
+                                            cache.addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
 
                                             return CommandResult.success();
@@ -100,9 +104,9 @@ public class ClaimCommand implements CommandExecutor
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if (!FactionsCache.getInstance().getClaimOwner(world.getUniqueId(), chunk).isPresent())
+                    if (!cache.getClaimOwner(world.getUniqueId(), chunk).isPresent())
                     {
-                        FactionsCache.getInstance().addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
+                        cache.addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         return CommandResult.success();

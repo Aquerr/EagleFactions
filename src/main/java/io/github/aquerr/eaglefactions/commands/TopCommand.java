@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
@@ -20,10 +21,13 @@ import java.util.List;
 
 public class TopCommand implements CommandExecutor
 {
+    @Inject
+    private FactionsCache cache;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        List<Faction> factionsList = FactionsCache.getInstance().getFactions();
+        List<Faction> factionsList = cache.getFactions();
         List<Text> helpList = new ArrayList<>();
         int index = 0;
 

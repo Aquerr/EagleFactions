@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -24,6 +25,9 @@ import java.util.UUID;
  */
 public class PlayerManager
 {
+    @Inject
+    private static FactionsCache cache;
+
     private static Path playersPath;
     private static UserStorageService userStorageService;
 
@@ -142,7 +146,7 @@ public class PlayerManager
             return FactionMemberType.RECRUIT;
         } else
         {
-            Optional<Faction> playerFaction = FactionsCache.getInstance().getFactionByPlayer(factionPlayer.getUniqueId());
+            Optional<Faction> playerFaction = cache.getFactionByPlayer(factionPlayer.getUniqueId());
             if (playerFaction.isPresent())
             {
                 for (String ally : faction.Alliances)

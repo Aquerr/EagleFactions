@@ -1,6 +1,9 @@
 package io.github.aquerr.eaglefactions.storage;
 
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
@@ -17,16 +20,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+@Singleton
 public class HOCONFactionStorage implements IStorage
 {
+    //private FactionsCache cache;
+
     private Path filePath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
     private boolean needToSave = false;
 
-    public HOCONFactionStorage(Path configDir)
+    @Inject
+    public HOCONFactionStorage(FactionsCache cache)
     {
+        Path configDir = EagleFactions.getPlugin().getConfigDir();
         try
         {
             Path dataPath = configDir.resolve("data");
@@ -49,10 +57,12 @@ public class HOCONFactionStorage implements IStorage
                 configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 load();
             }
-            prepareFactionsCache();
+            prepareFactionsCache(cache);
         } catch (IOException exception)
         {
+            System.out.println("TESTESTEGERGERGERGERGER");
             exception.printStackTrace();
+            System.out.println("TESTESTEGERGERGERGERGER");
         }
     }
 
@@ -401,7 +411,7 @@ public class HOCONFactionStorage implements IStorage
         }
     }
 
-    private void prepareFactionsCache()
+    private void prepareFactionsCache(FactionsCache cache)
     {
         final Set<Object> keySet = getStorage().getNode("factions").getChildrenMap().keySet();
 
@@ -410,7 +420,7 @@ public class HOCONFactionStorage implements IStorage
             if (object instanceof String)
             {
                 Faction faction = createFactionObject(String.valueOf(object));
-                FactionsCache.getInstance().addFaction(faction);
+                cache.addFaction(faction);
             }
         }
     }

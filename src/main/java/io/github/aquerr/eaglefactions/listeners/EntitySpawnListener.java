@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
@@ -22,6 +23,9 @@ import java.util.Optional;
 
 public class EntitySpawnListener
 {
+    @Inject
+    private FactionsCache cache;
+
     @Listener
     public void onEntitySpawn(SpawnEntityEvent event)
     {
@@ -40,7 +44,7 @@ public class EntitySpawnListener
                         return;
                     }
 
-                    if (FactionsCache.getInstance().getClaimOwner(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()).isPresent())
+                    if (cache.getClaimOwner(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()).isPresent())
                     {
                         event.setCancelled(true);
                         return;

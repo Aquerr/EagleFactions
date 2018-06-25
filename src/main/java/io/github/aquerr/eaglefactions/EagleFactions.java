@@ -1,6 +1,9 @@
 package io.github.aquerr.eaglefactions;
 
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import io.github.aquerr.eaglefactions.caching.CacheModule;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.*;
 import io.github.aquerr.eaglefactions.config.Configuration;
@@ -10,11 +13,13 @@ import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
+import io.github.aquerr.eaglefactions.storage.IStorage;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -47,13 +52,15 @@ public class EagleFactions
     public static Map<UUID, ChatEnum> ChatList;
     public static Map<UUID, Integer> HomeCooldownPlayers;
     private static EagleFactions eagleFactions;
-    private Configuration _configuration;
+
     private PVPLogger _pvpLogger;
     @Inject
     private Logger _logger;
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path _configDir;
+//    @Inject
+//    private Configuration _configuration;
 
     public static EagleFactions getPlugin()
     {
@@ -92,9 +99,12 @@ public class EagleFactions
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
-
+        Injector injector = Guice.createInjector(new CacheModule());
+        injector.getInstance(MainLogic.class);
+        injector.getInstance(IStorage.class);
+        System.out.println("Got a storage instance!");
+        cache = injector.getInstance(FactionsCache.class);
         SetupConfigs();
-
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
 
         InitializeCommands();
@@ -118,19 +128,23 @@ public class EagleFactions
         }
 
         //Make sure that the faction cache is initialized.
-        FactionsCache.getInstance();
+//        FactionsCache.getInstance();
+        //injector.getInstance(FactionsCache.class);
     }
+
+
+    private FactionsCache cache;
 
     @Listener
     public void onServerStop(GameStoppingServerEvent event)
     {
-        FactionsCache.getInstance().doSave();
+        cache.doSave();
     }
 
     private void SetupConfigs()
     {
         // Create configs
-        _configuration = new Configuration(_configDir);
+        //_configuration = new Configuration(_configDir);
         FactionLogic factionLogic = new FactionLogic();
 
         PlayerManager.setup(_configDir);
@@ -458,11 +472,6 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new MobTargetListener());
 
         Sponge.getEventManager().registerListeners(this, new SendCommandListener());
-    }
-
-    public Configuration getConfiguration()
-    {
-        return this._configuration;
     }
 
     public PVPLogger getPVPLogger()

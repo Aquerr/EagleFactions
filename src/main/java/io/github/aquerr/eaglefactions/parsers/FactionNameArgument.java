@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.parsers;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 
 public class FactionNameArgument extends CommandElement
 {
+    @Inject
+    private FactionsCache cache;
+
     public FactionNameArgument(@Nullable Text key)
     {
         super(key);
@@ -38,7 +42,7 @@ public class FactionNameArgument extends CommandElement
     @Override
     public List<String> complete(CommandSource src, CommandArgs args, CommandContext context)
     {
-        Set<String> factionNames = FactionsCache.getInstance().getFactionNames();
+        Set<String> factionNames = cache.getFactionNames();
         List<String> list = new ArrayList<>(factionNames);
         Collections.sort(list);
 

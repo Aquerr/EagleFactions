@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -18,6 +19,9 @@ import java.util.function.Consumer;
 
 public class AttackLogic
 {
+    @Inject
+    private static FactionsCache cache;
+
     public static void attack(Player player, Vector3i attackedChunk)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
@@ -39,7 +43,7 @@ public class AttackLogic
                         informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
 
-                        FactionsCache.getInstance().removeClaim(player.getWorld().getUniqueId(), attackedChunk);
+                        cache.removeClaim(player.getWorld().getUniqueId(), attackedChunk);
                         task.cancel();
                     } else
                     {

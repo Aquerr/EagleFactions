@@ -1,10 +1,14 @@
 package io.github.aquerr.eaglefactions.config;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.config.ConfigDir;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +22,7 @@ import java.util.function.Function;
 /**
  * Created by Aquerr on 2017-07-12.
  */
+@Singleton
 public class Configuration
 {
     //TODO: This class should have only one instance. Rework it to singleton.
@@ -36,9 +41,11 @@ public class Configuration
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
-    public Configuration(Path configDir)
+    @Inject
+    public Configuration()
     {
-        setup(configDir);
+        System.out.println("             Made it to config!");
+        setup(EagleFactions.getPlugin().getConfigDir());
     }
 
     public void setup(Path configDir)
@@ -104,7 +111,7 @@ public class Configuration
         try
         {
             configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
-            MainLogic.setup(this);
+            //MainLogic.setup(this);
         } catch (IOException e)
         {
             e.printStackTrace();

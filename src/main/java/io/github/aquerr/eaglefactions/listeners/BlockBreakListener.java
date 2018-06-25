@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
@@ -21,6 +22,9 @@ import java.util.Optional;
 
 public class BlockBreakListener
 {
+    @Inject
+    private FactionsCache cache;
+
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
@@ -34,7 +38,7 @@ public class BlockBreakListener
             {
                 return;
             }
-            optionalPlayerFaction = FactionsCache.getInstance().getFactionByPlayer(cause.getUniqueId());
+            optionalPlayerFaction = cache.getFactionByPlayer(cause.getUniqueId());
             world = cause.getWorld();
         } else
         {
@@ -50,7 +54,7 @@ public class BlockBreakListener
 
         for (Transaction<BlockSnapshot> transaction : event.getTransactions())
         {
-            Optional<Faction> optionalChunkFaction = FactionsCache.getInstance().getFactionByChunk(world.getUniqueId(), transaction.getFinal().getLocation().get().getChunkPosition());
+            Optional<Faction> optionalChunkFaction = cache.getFactionByChunk(world.getUniqueId(), transaction.getFinal().getLocation().get().getChunkPosition());
             if (optionalChunkFaction.isPresent())
             {
                 if (cause != null)

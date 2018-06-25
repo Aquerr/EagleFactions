@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -28,6 +29,9 @@ import java.util.function.Consumer;
 
 public class MapCommand implements CommandExecutor
 {
+    @Inject
+    private FactionsCache cache;
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -94,7 +98,7 @@ public class MapCommand implements CommandExecutor
                 }
 
                 Vector3i chunk = playerPosition.add(column, 0, row);
-                Optional<Faction> optionalChunkFaction = FactionsCache.getInstance().getFactionByChunk(world.getUniqueId(), chunk);
+                Optional<Faction> optionalChunkFaction = cache.getFactionByChunk(world.getUniqueId(), chunk);
                 if (optionalChunkFaction.isPresent())
                 {
 
@@ -226,7 +230,7 @@ public class MapCommand implements CommandExecutor
                 if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
                 {
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
-                    if (!FactionsCache.getInstance().getClaimOwner(world.getUniqueId(), chunk).isPresent())
+                    if (!cache.getClaimOwner(world.getUniqueId(), chunk).isPresent())
                     {
                         if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.Claims.size())
                         {
@@ -236,7 +240,7 @@ public class MapCommand implements CommandExecutor
                                 {
                                     if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
                                     {
-                                        FactionsCache.getInstance().addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
+                                        cache.addOrSetClaim(world.getUniqueId(), chunk, playerFaction.Name);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                                     } else
                                     {
@@ -282,7 +286,7 @@ public class MapCommand implements CommandExecutor
                             }
                         }
 
-                        FactionsCache.getInstance().removeClaim(world.getUniqueId(), chunk);
+                        cache.removeClaim(world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     }
