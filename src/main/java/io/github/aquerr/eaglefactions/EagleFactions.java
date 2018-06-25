@@ -1,9 +1,11 @@
 package io.github.aquerr.eaglefactions;
 
 import com.google.inject.*;
-import io.github.aquerr.eaglefactions.caching.CacheModule;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.*;
+import io.github.aquerr.eaglefactions.commands.Helper.SubcommandFactory;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
@@ -15,6 +17,7 @@ import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
+import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
@@ -34,7 +37,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 @Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = PluginInfo.Author)
-public class EagleFactions
+public class EagleFactions extends AbstractModule
 {
     public static Map<List<String>, CommandSpec> Subcommands;
     public static List<Invite> InviteList;
@@ -50,25 +53,42 @@ public class EagleFactions
     private static EagleFactions eagleFactions;
 
     private PVPLogger _pvpLogger;
+    private Injector injector;
     @Inject
     private Logger _logger;
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path _configDir;
 
+    @Provides
+    @Named("config dir")
     public Path getConfigDir()
     {
         return _configDir;
     }
 
+    @Provides
     public static EagleFactions getPlugin()
     {
         return eagleFactions;
     }
 
+    @Provides
+    @Named("main injector")
+    Injector getInjector(){
+        return injector;
+    }
+
+    @Provides
+    @Named("factions")
     public Logger getLogger()
     {
         return _logger;
+    }
+
+    @Provides
+    List<Invite> getInviteList(){
+        return InviteList;
     }
 
     @Listener
@@ -88,7 +108,7 @@ public class EagleFactions
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
-        Injector injector = Guice.createInjector(new CacheModule());
+        Injector injector = Guice.createInjector(this);
         injector.getInstance(IStorage.class);
         cache = injector.getInstance(FactionsCache.class);
         injector.getInstance(FactionLogic.class);
@@ -96,9 +116,7 @@ public class EagleFactions
         injector.getInstance(PowerManager.class);
         injector.getInstance(MessageLoader.class);
         injector.getInstance(PVPLogger.class);
-
-        //TODO: replace with a better solution
-        injector.getInstance(FactionLogic.class);
+        injector = injector.createChildInjector(injector.getInstance(SubcommandFactory.class));
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
 
@@ -150,26 +168,11 @@ public class EagleFactions
                 .executor(new CreateCommand())
                 .build());
 
-        //Disband faction command.
-        Subcommands.put(Collections.singletonList("disband"), CommandSpec.builder()
-                .description(Text.of("Disband Faction Command"))
-                .permission(PluginPermissions.DisbandCommand)
-                .executor(new DisbandCommandTrial())
-                .build());
-
         //List all factions.
         Subcommands.put(Collections.singletonList("list"), CommandSpec.builder()
                 .description(Text.of("List all factions"))
                 .permission(PluginPermissions.ListCommand)
                 .executor(new ListCommand())
-                .build());
-
-        //Invite a player to the faction.
-        Subcommands.put(Collections.singletonList("invite"), CommandSpec.builder()
-                .description(Text.of("Invites a player to the faction"))
-                .permission(PluginPermissions.InviteCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .executor(new InviteCommand())
                 .build());
 
         //Kick a player from the faction.
@@ -421,19 +424,29 @@ public class EagleFactions
                 .executor(new TagColorCommand())
                 .build());
 
-        //Build all commands
+        //-----------------------------------------------------------------
+        //What will remain once all of the commands have been rewritten:
+
+
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))
-                .executor(new HelpCommand())
-                .children(Subcommands)
+                .executor(injector.getInstance(HelpCommand.class))
+                .children(injector.getInstance(Key.get(HashMap.class, Names.named("subcommands"))))
                 .build();
 
         //Register commands
         Sponge.getCommandManager().register(this, commandEagleFactions, "factions", "faction", "f");
     }
 
+    @Provides
     public PVPLogger getPVPLogger()
     {
-        return this._pvpLogger;
+        return _pvpLogger;
+    }
+
+    @Override
+    protected void configure()
+    {
+        bind(IStorage.class).to(HOCONFactionStorage.class);
     }
 }

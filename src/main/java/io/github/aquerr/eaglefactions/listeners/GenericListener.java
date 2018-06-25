@@ -1,10 +1,8 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.caching.CacheModule;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.config.Settings;
 import org.reflections.Reflections;

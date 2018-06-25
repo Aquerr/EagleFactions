@@ -29,14 +29,13 @@ public class FactionsCache
 
 
     @Inject
-    public FactionsCache(Provider<IStorage> factionsStorage, Settings settings)
+    public FactionsCache(Provider<IStorage> factionsStorage, Settings settings, EagleFactions eagleFactions)
     {
         this.settings = settings;
         this.factionsStorage = factionsStorage;
-        //this.factionsStorage = new HOCONFactionStorage(EagleFactions.getPlugin().getConfigDir(), this);
         if (settings.isPeriodicSaving())
         {
-            Task.builder().execute(task -> doSave()).interval(settings.getSaveDelay(), TimeUnit.MINUTES);
+            Task.builder().execute(task -> doSave()).interval(settings.getSaveDelay(), TimeUnit.MINUTES).submit(eagleFactions);
         }
     }
 

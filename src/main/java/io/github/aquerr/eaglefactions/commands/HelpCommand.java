@@ -1,6 +1,9 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
@@ -19,12 +22,19 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.List;
 import java.util.Map;
 
+@Singleton
 public class HelpCommand implements CommandExecutor
 {
+    private Map<List<String>, CommandSpec> commands;
+
+    @Inject
+    HelpCommand(@Named("subcommands") Map<List<String>, CommandSpec> commands){
+        this.commands = commands;
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Map<List<String>, CommandSpec> commands = EagleFactions.Subcommands;
         List<Text> helpList = Lists.newArrayList();
 
         for (List<String> aliases : commands.keySet())

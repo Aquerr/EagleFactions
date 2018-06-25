@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.command.CommandException;
@@ -18,15 +20,19 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * Gets rid of all of the annoying repetitive checks so a command can contain what it really needs.
  */
 @RequiredRank
-public abstract class FactionPlayerCommand implements CommandExecutor
+public abstract class FactionPlayerCommand extends FactionCommand implements CommandExecutor
 {
-    @Inject
-    protected FactionsCache cache;
+
+    public FactionPlayerCommand(FactionsCache cache, Settings settings, FactionLogic factionLogic, Logger logger)
+    {
+        super(cache, settings, factionLogic, logger);
+    }
 
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException

@@ -40,7 +40,8 @@ public class FactionLogic
     private static FactionsCache cache;
 
     @Inject
-    FactionLogic(Settings settings, FactionsCache cache){
+    FactionLogic(Settings settings, FactionsCache cache)
+    {
         FactionLogic.settings = settings;
         FactionLogic.cache = cache;
     }
@@ -70,28 +71,15 @@ public class FactionLogic
         return null;
     }
 
-    public static String getLeader(String factionName)
+    public int getFactionSize(Faction faction)
     {
-        Faction faction = getFactionByName(factionName);
-
-        if (faction != null)
-        {
-            return faction.Leader;
-        }
-
-        return "";
+        int num = faction.Leader.equals("") ? 0 : 1;
+        num += faction.Officers.size() + faction.Members.size() + faction.Recruits.size();
+        return num;
     }
 
-    public static List<String> getOfficers(String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        if (faction != null)
-        {
-            return faction.Officers;
-        }
-
-        return new ArrayList<>();
+    public void informFaction(Faction faction, Text message){
+        getOnlinePlayers(faction).forEach(p -> p.sendMessage(message));
     }
 
     public static List<Player> getOnlinePlayers(Faction faction)
@@ -138,12 +126,6 @@ public class FactionLogic
         cache.addFaction(faction);
     }
 
-    public static boolean disbandFaction(String factionName)
-    {
-        cache.removeFaction(factionName);
-        return true;
-    }
-
     public static void joinFaction(UUID playerUUID, String factionName)
     {
         Faction faction = getFactionByName(factionName);
@@ -180,13 +162,6 @@ public class FactionLogic
 
         cache.saveFaction(playerFaction);
         cache.saveFaction(invitedFaction);
-    }
-
-    public static List<String> getAlliances(String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        return faction.Alliances;
     }
 
     public static void removeAlly(String playerFactionName, String removedFactionName)
