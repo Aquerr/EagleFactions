@@ -19,9 +19,9 @@ import java.util.Optional;
 public class FireBlockPlaceListener extends GenericListener
 {
     @Inject
-    FireBlockPlaceListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    FireBlockPlaceListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

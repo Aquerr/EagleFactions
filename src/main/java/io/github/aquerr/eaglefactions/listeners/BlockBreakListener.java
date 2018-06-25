@@ -27,9 +27,9 @@ public class BlockBreakListener extends GenericListener
 {
 
     @Inject
-    public BlockBreakListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    public BlockBreakListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

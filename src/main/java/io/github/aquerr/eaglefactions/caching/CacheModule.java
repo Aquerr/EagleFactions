@@ -14,7 +14,6 @@ public class CacheModule extends AbstractModule
     @Override
     protected void configure()
     {
-        //bind(FactionsCache.class).asEagerSingleton();
         bind(IStorage.class).to(HOCONFactionStorage.class);
     }
 

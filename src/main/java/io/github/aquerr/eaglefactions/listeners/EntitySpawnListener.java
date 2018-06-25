@@ -29,9 +29,9 @@ public class EntitySpawnListener extends GenericListener
 {
 
     @Inject
-    EntitySpawnListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    EntitySpawnListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

@@ -30,9 +30,9 @@ public class PlayerInteractListener extends GenericListener
 {
 
     @Inject
-    PlayerInteractListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    PlayerInteractListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

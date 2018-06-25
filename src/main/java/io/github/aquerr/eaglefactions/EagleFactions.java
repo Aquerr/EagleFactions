@@ -97,14 +97,16 @@ public class EagleFactions
         injector.getInstance(MessageLoader.class);
         injector.getInstance(PVPLogger.class);
 
+        //TODO: replace with a better solution
+        injector.getInstance(FactionLogic.class);
+
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
 
         InitializeCommands();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Commands loaded..."));
 
-//        RegisterListeners(injector);
-        GenericListener.initListeners();
+        GenericListener.initListeners(injector);
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
@@ -119,10 +121,6 @@ public class EagleFactions
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.Name, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         }
-
-        //Make sure that the faction cache is initialized.
-//        FactionsCache.getInstance();
-        //injector.getInstance(FactionsCache.class);
     }
 
 
@@ -133,21 +131,6 @@ public class EagleFactions
     {
         cache.doSave();
     }
-
-//    private void SetupConfigs()
-//    {
-//        // Create configs
-//        //_configuration = new Configuration(_configDir);
-//        FactionLogic factionLogic = new FactionLogic();
-//
-//        PlayerManager.setup(_configDir);
-//        PowerManager.setup(_configDir);
-//
-//        MessageLoader messageLoader = new MessageLoader(_configDir);
-//
-//        //PVPLogger
-//        _pvpLogger = new PVPLogger();
-//    }
 
     private void InitializeCommands()
     {
@@ -448,25 +431,6 @@ public class EagleFactions
         //Register commands
         Sponge.getCommandManager().register(this, commandEagleFactions, "factions", "faction", "f");
     }
-
-//    private void RegisterListeners(Injector injector)
-//    {
-//        injector.in
-//        Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
-//        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
-//        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
-//        Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-//        Sponge.getEventManager().registerListeners(this, new BlockBreakListener());
-//        Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
-//        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
-//        Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
-//        Sponge.getEventManager().registerListeners(this, injector.getInstance(EntitySpawnListener.class));
-//        Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
-//        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
-//        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
-//
-//        Sponge.getEventManager().registerListeners(this, new SendCommandListener());
-//    }
 
     public PVPLogger getPVPLogger()
     {

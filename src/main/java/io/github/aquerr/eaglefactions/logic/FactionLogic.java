@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.logic;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -31,14 +32,18 @@ import java.util.function.Consumer;
 /**
  * Created by Aquerr on 2017-07-12.
  */
+@Singleton
 public class FactionLogic
 {
 
-    @Inject
     private static Settings settings;
+    private static FactionsCache cache;
 
     @Inject
-    private static FactionsCache cache;
+    FactionLogic(Settings settings, FactionsCache cache){
+        FactionLogic.settings = settings;
+        FactionLogic.cache = cache;
+    }
 
     @Deprecated
     public static Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)

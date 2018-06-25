@@ -18,9 +18,9 @@ import java.util.Optional;
 public class MobTargetListener extends GenericListener
 {
     @Inject
-    MobTargetListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    MobTargetListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

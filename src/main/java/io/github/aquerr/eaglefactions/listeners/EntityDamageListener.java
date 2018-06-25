@@ -28,9 +28,9 @@ public class EntityDamageListener extends GenericListener
 {
 
     @Inject
-    public EntityDamageListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    public EntityDamageListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

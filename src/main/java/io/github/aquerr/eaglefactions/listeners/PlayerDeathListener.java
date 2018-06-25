@@ -26,9 +26,9 @@ public class PlayerDeathListener extends GenericListener
 {
 
     @Inject
-    PlayerDeathListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    PlayerDeathListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

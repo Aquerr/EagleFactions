@@ -27,9 +27,9 @@ public class ChatMessageListener extends GenericListener
 {
 
     @Inject
-    public ChatMessageListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    public ChatMessageListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener

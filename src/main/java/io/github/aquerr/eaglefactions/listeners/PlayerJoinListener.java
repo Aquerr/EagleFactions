@@ -22,9 +22,9 @@ public class PlayerJoinListener extends GenericListener
 {
 
     @Inject
-    PlayerJoinListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions, EventManager eventManager)
+    PlayerJoinListener(FactionsCache cache, Settings settings, EagleFactions eagleFactions)
     {
-        super(cache, settings, eagleFactions, eventManager);
+        super(cache, settings, eagleFactions);
     }
 
     @Listener
