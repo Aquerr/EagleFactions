@@ -23,7 +23,7 @@ public class JoinCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<String> optionalFactionName = context.<String>getOne("faction name");
+        Optional<String> optionalFactionName = context.getOne("faction name");
 
         if (optionalFactionName.isPresent())
         {

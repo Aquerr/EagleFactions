@@ -164,7 +164,7 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DisbandCommand)
-                .executor(new DisbandCommand())
+                .executor(new DisbandCommandTrial())
                 .build());
 
         //List all factions.

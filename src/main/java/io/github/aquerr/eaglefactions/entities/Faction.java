@@ -7,6 +7,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Created by Aquerr on 2017-07-13.
@@ -58,5 +59,12 @@ public class Faction
         this.Enemies = enemies;
         this.Home = home;
         this.Flags = flags;
+    }
+
+    public void forEachMember(Consumer<String> consumer){
+        consumer.accept(Leader);
+        Officers.forEach(consumer);
+        Members.forEach(consumer);
+        Recruits.forEach(consumer);
     }
 }

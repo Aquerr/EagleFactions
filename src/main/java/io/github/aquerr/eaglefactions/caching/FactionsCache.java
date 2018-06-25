@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.caching;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
@@ -11,9 +12,9 @@ import org.spongepowered.api.scheduler.Task;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class FactionsCache
 {
-
     private static FactionsCache instance;
     private List<Faction> factionsList = new LinkedList<>();
     private Map<String, Faction> factionNameMap = new HashMap<>();
@@ -24,7 +25,7 @@ public class FactionsCache
     private IStorage factionsStorage;
 
 
-    private FactionsCache()
+    FactionsCache()
     {
         instance = this;
         factionsStorage = new HOCONFactionStorage(EagleFactions.getPlugin().getConfigDir());
