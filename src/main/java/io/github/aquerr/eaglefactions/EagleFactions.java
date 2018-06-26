@@ -152,57 +152,20 @@ public class EagleFactions extends AbstractModule
 
     private void InitializeCommands()
     {
-        //Help command should display all possible commands in plugin.
+        //Special case!
         Subcommands.put(Collections.singletonList("help"), CommandSpec.builder()
                 .description(Text.of("Help"))
                 .permission(PluginPermissions.HelpCommand)
                 .executor(new HelpCommand())
                 .build());
 
-        //Create faction command.
-        Subcommands.put(Arrays.asList("c", "create"), CommandSpec.builder()
-                .description(Text.of("Create Faction Command"))
-                .permission(PluginPermissions.CreateCommand)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("tag"))),
-                        GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
-                .executor(new CreateCommand())
-                .build());
+        //TODO: Any subcommands still in this list. If anyone else is also working on this, please remove the Subcommands.put when finished
 
         //List all factions.
         Subcommands.put(Collections.singletonList("list"), CommandSpec.builder()
                 .description(Text.of("List all factions"))
                 .permission(PluginPermissions.ListCommand)
                 .executor(new ListCommand())
-                .build());
-
-        //Kick a player from the faction.
-        Subcommands.put(Collections.singletonList("kick"), CommandSpec.builder()
-                .description(Text.of("Kicks a player from the faction"))
-                .permission(PluginPermissions.KickCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .executor(new KickCommand())
-                .build());
-
-        //Join faction command
-        Subcommands.put(Arrays.asList("j", "join"), CommandSpec.builder()
-                .description(Text.of("Join a specific faction"))
-                .permission(PluginPermissions.JoinCommand)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new JoinCommand())
-                .build());
-
-        //Leave faction command
-        Subcommands.put(Collections.singletonList("leave"), CommandSpec.builder()
-                .description(Text.of("Leave a faction"))
-                .permission(PluginPermissions.LeaveCommand)
-                .executor(new LeaveCommand())
-                .build());
-
-        //Version command
-        Subcommands.put(Arrays.asList("v", "version"), CommandSpec.builder()
-                .description(Text.of("Shows plugin version"))
-                .permission(PluginPermissions.VersionCommand)
-                .executor(new VersionCommand())
                 .build());
 
         //Info command. Shows info about a faction.
@@ -338,13 +301,6 @@ public class EagleFactions extends AbstractModule
                 .description(Text.of("Automap command"))
                 .permission(PluginPermissions.AutoMapCommand)
                 .executor(new AutoMapCommand())
-                .build());
-
-        //Add admin command
-        Subcommands.put(Collections.singletonList("admin"), CommandSpec.builder()
-                .description(Text.of("Toggle admin mode"))
-                .permission(PluginPermissions.AdminCommand)
-                .executor(new AdminCommand())
                 .build());
 
         //Add Coords Command

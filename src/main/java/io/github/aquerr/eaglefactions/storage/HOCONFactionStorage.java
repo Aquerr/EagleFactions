@@ -23,8 +23,6 @@ import java.util.*;
 @Singleton
 public class HOCONFactionStorage implements IStorage
 {
-    //private FactionsCache cache;
-
     private Path filePath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
@@ -60,9 +58,7 @@ public class HOCONFactionStorage implements IStorage
             prepareFactionsCache(cache);
         } catch (IOException exception)
         {
-            System.out.println("TESTESTEGERGERGERGERGER");
             exception.printStackTrace();
-            System.out.println("TESTESTEGERGERGERGERGER");
         }
     }
 

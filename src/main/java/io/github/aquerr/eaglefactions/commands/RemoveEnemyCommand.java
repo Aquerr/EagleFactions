@@ -27,7 +27,7 @@ public class RemoveEnemyCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<String> optionalEnemyFactionName = context.<String>getOne("faction name");
+        Optional<String> optionalEnemyFactionName = context.getOne("faction name");
 
         if (optionalEnemyFactionName.isPresent())
         {

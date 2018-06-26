@@ -1,9 +1,11 @@
 package io.github.aquerr.eaglefactions.commands.Helper;
 
-import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.commands.annotations.AllowedGroups;
+import io.github.aquerr.eaglefactions.commands.annotations.RequiredRank;
+import io.github.aquerr.eaglefactions.commands.annotations.RequiresFaction;
 import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -26,7 +28,9 @@ import java.util.logging.Logger;
  * Gets rid of all of the annoying repetitive checks so a command can contain what it really needs.
  */
 @RequiredRank
-public abstract class FactionPlayerCommand extends FactionCommand implements CommandExecutor
+@RequiresFaction
+@AllowedGroups
+public abstract class FactionPlayerCommand extends FactionCommand
 {
 
     public FactionPlayerCommand(FactionsCache cache, Settings settings, FactionLogic factionLogic, Logger logger)
@@ -37,32 +41,18 @@ public abstract class FactionPlayerCommand extends FactionCommand implements Com
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if (source instanceof Player)
-        {
-            Optional<Faction> faction = cache.getFactionByPlayer(((Player) source).getUniqueId());
-            if (faction.isPresent())
-            {
-                FactionMemberType memberType = PlayerManager.getFactionMemberType((Player) source, faction.get());
-                if (memberType.compareTo(((RequiredRank) this).minimumRank()) <= 0 || EagleFactions.AdminList.contains(((Player) source).getUniqueId()))
-                {
-                    if(executeCommand((Player) source, faction.get(), context)){
-                        return CommandResult.success();
-                    }else{
-                        throw new CommandException(Text.of(TextColors.RED, "Something went wrong in ", getClass().getCanonicalName()));
-                    }
-                }else{
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You need to be a ", TextColors.WHITE,
-                            memberType.toString().toLowerCase(), TextColors.RED, " in your faction to use this command!"));
-                }
-            } else
-            {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+        if(verifyConstraints(source)){
+            if(!executeCommand((Player) source, cache.getFactionByPlayer(((Player) source).getUniqueId()).get(), context)){
+                throw new CommandException(Text.of(TextColors.RED, "Something went wrong in ", getClass().getCanonicalName()));
             }
-        } else
-        {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
         return CommandResult.success();
+    }
+
+    @Override
+    protected boolean executeCommand(CommandSource source, CommandContext context)
+    {
+        return true;
     }
 
     protected abstract boolean executeCommand(Player player, Faction faction, CommandContext context);

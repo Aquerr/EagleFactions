@@ -2,11 +2,8 @@ package io.github.aquerr.eaglefactions.commands.Helper;
 
 import com.google.inject.*;
 import com.google.inject.name.Named;
-import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.commands.HelpCommand;
+import io.github.aquerr.eaglefactions.commands.annotations.Subcommand;
 import org.reflections.Reflections;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;

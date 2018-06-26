@@ -1,7 +1,5 @@
-package io.github.aquerr.eaglefactions.commands.Helper;
+package io.github.aquerr.eaglefactions.commands.enums;
 
-import com.google.inject.Inject;
-import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -12,6 +10,7 @@ public enum BasicCommandArgument
     PLAYER(GenericArguments.player(Text.of("player"))),
     FACTION(new FactionNameArgument(Text.of("faction"))),
     IDENTIFIER(GenericArguments.string(Text.of("identifier"))),
+    FACTION_NAME(GenericArguments.string(Text.of("faction name"))),
     OPTIONAL_PLAYER(GenericArguments.optional(GenericArguments.player(Text.of("optional player")))),
     OPTIONAL_FACTION(GenericArguments.optional(new FactionNameArgument(Text.of("optional faction")))),
     OPTIONAL_IDENTIFIER(GenericArguments.optional(GenericArguments.string(Text.of("optional identifier")))),

@@ -1,6 +1,7 @@
-package io.github.aquerr.eaglefactions.commands.Helper;
+package io.github.aquerr.eaglefactions.commands.annotations;
 
 import io.github.aquerr.eaglefactions.PluginPermissions;
+import io.github.aquerr.eaglefactions.commands.enums.BasicCommandArgument;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,6 +18,6 @@ public @interface Subcommand
 
     BasicCommandArgument[] arguments() default {};
 
-    String permission() default PluginPermissions.AdminCommand;
+    String permission();
 
 }

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.config.enums.GameType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -105,10 +106,13 @@ public class Settings
 
     public boolean isPeriodicSaving()
     {
-        if(configuration == null){
-            System.out.println("AHHHHH something went wrong!");
-        }
         return configuration.getBoolean(true, "saving", "periodic");
+    }
+
+    public GameType getGameType()
+    {
+        //If it errors then no harm done, the server shuts down.
+        return GameType.valueOf(configuration.getString("protection", "game-type").toUpperCase());
     }
 
     public int getSaveDelay()

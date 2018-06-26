@@ -12,6 +12,7 @@ import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
@@ -38,12 +39,14 @@ public class FactionLogic
 
     private static Settings settings;
     private static FactionsCache cache;
+    private Game game;
 
     @Inject
-    FactionLogic(Settings settings, FactionsCache cache)
+    FactionLogic(Settings settings, FactionsCache cache, Game game)
     {
         FactionLogic.settings = settings;
         FactionLogic.cache = cache;
+        this.game = game;
     }
 
     @Deprecated
@@ -76,6 +79,22 @@ public class FactionLogic
         int num = faction.Leader.equals("") ? 0 : 1;
         num += faction.Officers.size() + faction.Members.size() + faction.Recruits.size();
         return num;
+    }
+
+    public Optional<Faction> getFactionByIdentifier(Optional<String> identifier) {
+        if (identifier.isPresent()) {
+            Optional<Faction> faction = cache.getFaction(identifier.get());
+            if (faction.isPresent()) {
+                return faction;
+            }
+
+            Optional<Player> player = Sponge.getGame().getServer().getPlayer(identifier.get());
+            if (player.isPresent()) {
+                return cache.getFactionByPlayer(player.get().getUniqueId());
+            }
+        }
+        return Optional.empty();
+
     }
 
     public void informFaction(Faction faction, Text message){
@@ -133,22 +152,6 @@ public class FactionLogic
         faction.Recruits.add(playerUUID.toString());
 
         cache.updatePlayer(playerUUID.toString(), factionName);
-        cache.saveFaction(faction);
-    }
-
-    public static void leaveFaction(UUID playerUUID, String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        if (faction.Recruits.contains(playerUUID.toString()))
-        {
-            faction.Recruits.remove(playerUUID.toString());
-        } else if (faction.Members.contains(playerUUID.toString()))
-        {
-            faction.Members.remove(playerUUID.toString());
-        } else faction.Officers.remove(playerUUID.toString());
-
-        cache.removePlayer(playerUUID);
         cache.saveFaction(faction);
     }
 

@@ -26,8 +26,6 @@ public class FactionsCache
 
     private Settings settings;
 
-
-
     @Inject
     public FactionsCache(Provider<IStorage> factionsStorage, Settings settings, EagleFactions eagleFactions)
     {

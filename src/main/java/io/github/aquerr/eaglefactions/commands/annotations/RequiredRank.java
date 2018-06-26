@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.commands.Helper;
+package io.github.aquerr.eaglefactions.commands.annotations;
 
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 

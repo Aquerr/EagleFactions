@@ -7,21 +7,16 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.commands.Helper.BasicCommandArgument;
+import io.github.aquerr.eaglefactions.commands.enums.BasicCommandArgument;
 import io.github.aquerr.eaglefactions.commands.Helper.FactionPlayerCommand;
-import io.github.aquerr.eaglefactions.commands.Helper.RequiredRank;
-import io.github.aquerr.eaglefactions.commands.Helper.Subcommand;
+import io.github.aquerr.eaglefactions.commands.annotations.RequiredRank;
+import io.github.aquerr.eaglefactions.commands.annotations.Subcommand;
 import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -38,7 +33,6 @@ import java.util.logging.Logger;
 @Subcommand(aliases = {"invite"}, description = "Invites a player to the faction.", permission = PluginPermissions.InviteCommand, arguments = {BasicCommandArgument.PLAYER})
 public class InviteCommand extends FactionPlayerCommand
 {
-
     private List<Invite> inviteList;
 
     @Inject

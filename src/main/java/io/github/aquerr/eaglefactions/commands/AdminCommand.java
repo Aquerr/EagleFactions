@@ -1,42 +1,73 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.PluginPermissions;
+import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.commands.Helper.FactionCommand;
+import io.github.aquerr.eaglefactions.commands.annotations.AllowedGroups;
+import io.github.aquerr.eaglefactions.commands.annotations.Subcommand;
+import io.github.aquerr.eaglefactions.commands.enums.BasicCommandArgument;
+import io.github.aquerr.eaglefactions.commands.enums.CommandUser;
+import io.github.aquerr.eaglefactions.config.Settings;
+import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class AdminCommand implements CommandExecutor
-{
-    @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
-    {
-        if (source instanceof Player)
-        {
-            Player player = (Player) source;
+import java.util.Optional;
+import java.util.logging.Logger;
 
-            if (EagleFactions.AdminList.contains(player.getUniqueId()))
+@Singleton
+@AllowedGroups(getGroups = {CommandUser.PLAYER, CommandUser.CONSOLE})
+@Subcommand(aliases = {"admin"}, description = "Toggle admin mode", permission = PluginPermissions.AdminCommand, arguments = {BasicCommandArgument.OPTIONAL_PLAYER})
+public class AdminCommand extends FactionCommand
+{
+
+    @Inject
+    public AdminCommand(FactionsCache cache, Settings settings, FactionLogic factionLogic, @Named("factions") Logger logger)
+    {
+        super(cache, settings, factionLogic, logger);
+    }
+
+    @Override
+    protected boolean executeCommand(CommandSource source, CommandContext context)
+    {
+        Optional<Player> optionalPlayer = context.getOne("optional player");
+        if (!optionalPlayer.isPresent())
+        {
+            if (source instanceof Player)
             {
-                EagleFactions.AdminList.remove(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
-                return CommandResult.success();
+                optionalPlayer = Optional.of((Player) this);
             } else
             {
-                EagleFactions.AdminList.add(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
-                return CommandResult.success();
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "You must specify a player to enable admin mode for!"));
+                return true;
+            }
+        }
+
+        if (EagleFactions.AdminList.contains(optionalPlayer.get().getUniqueId()))
+        {
+            EagleFactions.AdminList.remove(optionalPlayer.get().getUniqueId());
+            source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
+            if(!source.equals(optionalPlayer.get())){
+                optionalPlayer.get().sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
             }
         } else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            EagleFactions.AdminList.add(optionalPlayer.get().getUniqueId());
+            source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
+            if(!source.equals(optionalPlayer.get())){
+                optionalPlayer.get().sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
+            }
         }
-
-        return CommandResult.success();
+        return true;
     }
 }
