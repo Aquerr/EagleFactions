@@ -10,7 +10,7 @@ import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
-import io.github.aquerr.eaglefactions.listeners.*;
+import io.github.aquerr.eaglefactions.listeners.GenericListener;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
@@ -19,6 +19,7 @@ import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.storage.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IStorage;
+import io.github.aquerr.eaglefactions.style.StyleModule;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -108,7 +109,7 @@ public class EagleFactions extends AbstractModule
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
-        Injector injector = Guice.createInjector(this);
+        injector = Guice.createInjector(this);
         injector.getInstance(IStorage.class);
         cache = injector.getInstance(FactionsCache.class);
         injector.getInstance(FactionLogic.class);
@@ -116,7 +117,7 @@ public class EagleFactions extends AbstractModule
         injector.getInstance(PowerManager.class);
         injector.getInstance(MessageLoader.class);
         injector.getInstance(PVPLogger.class);
-        injector = injector.createChildInjector(injector.getInstance(SubcommandFactory.class));
+        injector = injector.createChildInjector(injector.getInstance(StyleModule.class), injector.getInstance(SubcommandFactory.class));
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
 

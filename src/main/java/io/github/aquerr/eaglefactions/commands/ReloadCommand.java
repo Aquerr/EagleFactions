@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.google.inject.Inject;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;

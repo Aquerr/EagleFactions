@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.annotations;
 
-import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.commands.enums.BasicCommandArgument;
 
 import java.lang.annotation.ElementType;

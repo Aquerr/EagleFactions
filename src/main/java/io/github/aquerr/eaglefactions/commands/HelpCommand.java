@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;

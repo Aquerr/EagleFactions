@@ -11,7 +11,6 @@ import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;

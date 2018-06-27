@@ -2,8 +2,8 @@ package io.github.aquerr.eaglefactions.commands;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.config.Settings;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;

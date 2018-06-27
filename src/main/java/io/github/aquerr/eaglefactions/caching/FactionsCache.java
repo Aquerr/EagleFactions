@@ -5,8 +5,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.config.Settings;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.storage.IStorage;
 import org.spongepowered.api.scheduler.Task;
 
