@@ -5,7 +5,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.*;
-import io.github.aquerr.eaglefactions.commands.Helper.SubcommandFactory;
+import io.github.aquerr.eaglefactions.commands.assembly.SubcommandFactory;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;

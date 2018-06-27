@@ -6,17 +6,13 @@ import com.google.inject.name.Named;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.commands.Helper.FactionCommand;
+import io.github.aquerr.eaglefactions.commands.assembly.FactionCommand;
 import io.github.aquerr.eaglefactions.commands.annotations.Subcommand;
-import io.github.aquerr.eaglefactions.commands.enums.BasicCommandArgument;
 import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 

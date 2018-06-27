@@ -1,27 +1,20 @@
-package io.github.aquerr.eaglefactions.commands.Helper;
+package io.github.aquerr.eaglefactions.commands.assembly;
 
-import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.annotations.AllowedGroups;
 import io.github.aquerr.eaglefactions.commands.annotations.RequiredRank;
 import io.github.aquerr.eaglefactions.commands.annotations.RequiresFaction;
 import io.github.aquerr.eaglefactions.config.Settings;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Optional;
 import java.util.logging.Logger;
 
 /**

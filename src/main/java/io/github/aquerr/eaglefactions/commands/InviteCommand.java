@@ -8,7 +8,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.commands.enums.BasicCommandArgument;
-import io.github.aquerr.eaglefactions.commands.Helper.FactionPlayerCommand;
+import io.github.aquerr.eaglefactions.commands.assembly.FactionPlayerCommand;
 import io.github.aquerr.eaglefactions.commands.annotations.RequiredRank;
 import io.github.aquerr.eaglefactions.commands.annotations.Subcommand;
 import io.github.aquerr.eaglefactions.config.Settings;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 @Singleton
 @RequiredRank(minimumRank = FactionMemberType.OFFICER)
-@Subcommand(aliases = {"invite"}, description = "Invites a player to the faction.", permission = PluginPermissions.InviteCommand, arguments = {BasicCommandArgument.PLAYER})
+@Subcommand(aliases = {"inv", "invite"}, description = "Invites a player to the faction.", permission = PluginPermissions.InviteCommand, arguments = {BasicCommandArgument.PLAYER})
 public class InviteCommand extends FactionPlayerCommand
 {
     private List<Invite> inviteList;

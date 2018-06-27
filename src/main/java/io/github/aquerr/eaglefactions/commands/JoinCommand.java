@@ -7,7 +7,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.commands.Helper.FactionCommand;
+import io.github.aquerr.eaglefactions.commands.assembly.FactionCommand;
 import io.github.aquerr.eaglefactions.commands.annotations.AllowedGroups;
 import io.github.aquerr.eaglefactions.commands.annotations.RequiresFaction;
 import io.github.aquerr.eaglefactions.commands.annotations.Subcommand;

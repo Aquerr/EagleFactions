@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.commands.Helper;
+package io.github.aquerr.eaglefactions.commands.assembly;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.EagleFactions;
