@@ -12,6 +12,7 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
@@ -41,6 +42,11 @@ public class CreateCommand implements CommandExecutor
             String factionName = optionalFactionName.get();
             String factionTag = optionalFactionTag.get();
 
+            if(!factionName.matches("^[A-Za-z][A-Za-z0-9]*$") || !factionTag.matches("^[A-Za-z][A-Za-z0-9]*$")){
+                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, "Faction name and tag must be alphanumeric!"));
+                return CommandResult.success();
+            }
+
             if (source instanceof Player)
             {
                 Player player = (Player) source;
@@ -55,6 +61,7 @@ public class CreateCommand implements CommandExecutor
 
                 if (!optionalPlayerFaction.isPresent())
                 {
+
                     if(FactionsCache.getInstance().getFactions().stream().anyMatch(x -> x.Tag.toPlain().equalsIgnoreCase(factionTag)))
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
