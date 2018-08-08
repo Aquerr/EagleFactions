@@ -23,8 +23,8 @@ public class ReloadCommand extends AbstractCommand implements CommandExecutor
     {
         try
         {
-            EagleFactions.getPlugin().getConfiguration().load();
-            FactionLogic.reload();
+            EagleFactions.getPlugin().getConfiguration().loadConfiguration();
+            getPlugin().getFactionLogic().reload();
 
             source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));
         }

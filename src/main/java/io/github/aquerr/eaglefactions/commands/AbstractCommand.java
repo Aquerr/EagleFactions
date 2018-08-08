@@ -6,12 +6,12 @@ public abstract class AbstractCommand
 {
     private EagleFactions _eagleFactions;
 
-    protected AbstractCommand(EagleFactions plugin)
+    public AbstractCommand(EagleFactions plugin)
     {
         this._eagleFactions = plugin;
     }
 
-    protected EagleFactions getPlugin()
+    public EagleFactions getPlugin()
     {
         return _eagleFactions;
     }

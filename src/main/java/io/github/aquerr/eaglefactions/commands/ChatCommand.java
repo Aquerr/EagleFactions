@@ -32,7 +32,7 @@ public class ChatCommand extends AbstractCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            if (FactionLogic.getFactionByPlayerUUID(player.getUniqueId()).isPresent())
+            if (getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId()).isPresent())
             {
                 if(optionalChatType.isPresent())
                 {

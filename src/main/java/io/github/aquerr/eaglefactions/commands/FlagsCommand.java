@@ -22,8 +22,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FlagsCommand implements CommandExecutor
+public class FlagsCommand extends AbstractCommand implements CommandExecutor
 {
+    public FlagsCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -31,7 +36,7 @@ public class FlagsCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if (optionalPlayerFaction.isPresent())
             {
@@ -104,7 +109,7 @@ public class FlagsCommand implements CommandExecutor
     {
         return commandSource ->
         {
-            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagTypes, flagValue);
+            getPlugin().getFactionLogic().toggleFlag(faction, factionMemberType, factionFlagTypes, flagValue);
             showFlags((Player)commandSource, faction);
         };
     }

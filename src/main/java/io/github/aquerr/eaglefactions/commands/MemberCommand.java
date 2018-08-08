@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class MemberCommand implements CommandExecutor
+public class MemberCommand extends AbstractCommand implements CommandExecutor
 {
+    public MemberCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -29,8 +34,8 @@ public class MemberCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 Player newMemberPlayer = optionalNewMemberPlayer.get();
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalNewMemberFaction = FactionLogic.getFactionByPlayerUUID(newMemberPlayer.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalNewMemberFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(newMemberPlayer.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {
@@ -43,12 +48,12 @@ public class MemberCommand implements CommandExecutor
                             {
                                 if(playerFaction.getOfficers().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
                                 else if (playerFaction.getRecruits().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.TO + " ", TextColors.BLUE, PluginMessages.MEMBERS, TextColors.WHITE, "!"));
                                 }
                             }
@@ -73,12 +78,12 @@ public class MemberCommand implements CommandExecutor
                             {
                                 if(playerFaction.getOfficers().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
                                 else if (playerFaction.getRecruits().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.TO + " ", TextColors.BLUE, PluginMessages.MEMBERS, TextColors.WHITE, "!"));
                                 }
                             }

@@ -7,8 +7,7 @@ import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -40,12 +39,12 @@ public class BlockBreakListener extends AbstractListener
                  {
                      World world = player.getWorld();
 
-                     if (MainLogic.getSafeZoneWorldNames().contains(world.getName()))
+                     if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
                      {
                          event.setCancelled(true);
                          return;
                      }
-                     else if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                     else if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                      {
                          event.setCancelled(true);
                          return;
@@ -53,9 +52,9 @@ public class BlockBreakListener extends AbstractListener
 
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
 
-                     Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                     Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
+                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
 
                      if(optionalChunkFaction.isPresent())
                      {
@@ -69,7 +68,7 @@ public class BlockBreakListener extends AbstractListener
                          }
                          else if(optionalPlayerFaction.isPresent())
                          {
-                             if (!plugin.getFlagManager().canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                             if (!getPlugin().getFlagManager().canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                              {
                                  player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                  event.setCancelled(true);
@@ -92,23 +91,23 @@ public class BlockBreakListener extends AbstractListener
             {
                 World world = transaction.getFinal().getLocation().get().getExtent();
 
-                if (MainLogic.getSafeZoneWorldNames().contains(world.getName()))
+                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                else if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                 {
                     event.setCancelled(true);
                     return;
                 }
 
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
+                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
 
                 if (optionalChunkFaction.isPresent())
                 {
-                    if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
+                    if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtClaimsDisabled())
                     {
                         event.setCancelled(true);
                         return;
@@ -118,7 +117,7 @@ public class BlockBreakListener extends AbstractListener
                         event.setCancelled(true);
                         return;
                     }
-                    else if (optionalChunkFaction.get().getName().equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                    else if (optionalChunkFaction.get().getName().equals("WarZone") && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                     {
                         event.setCancelled(true);
                         return;

@@ -8,8 +8,13 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
-public class PlayerDisconnectListener
+public class PlayerDisconnectListener extends AbstractListener
 {
+    public PlayerDisconnectListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player)
     {

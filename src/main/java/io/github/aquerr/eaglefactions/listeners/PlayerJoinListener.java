@@ -1,8 +1,9 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
@@ -12,8 +13,13 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class PlayerJoinListener
+public class PlayerJoinListener extends AbstractListener
 {
+    public PlayerJoinListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event)
     {
@@ -27,20 +33,20 @@ public class PlayerJoinListener
                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + PluginMessages.IS_AVAILABLE));
             }
 
-            if(PowerManager.checkIfPlayerExists(player.getUniqueId()))
+            if(getPlugin().getPowerManager().checkIfPlayerExists(player.getUniqueId()))
             {
-                PowerManager.startIncreasingPower(player.getUniqueId());
+                getPlugin().getPowerManager().startIncreasingPower(player.getUniqueId());
             }
             else
             {
                 //Create player file and set power.
-                PowerManager.addPlayer(player.getUniqueId());
+                getPlugin().getPowerManager().addPlayer(player.getUniqueId());
             }
 
             //Check if the world that player is connecting to is already in the config file
-            if (!MainLogic.getDetectedWorldNames().contains(player.getWorld().getName()))
+            if (!getPlugin().getConfiguration().getConfigFileds().getDetectedWorldNames().contains(player.getWorld().getName()))
             {
-                MainLogic.addWorld(player.getWorld().getName());
+                getPlugin().getConfiguration().getConfigFileds().addWorld(player.getWorld().getName());
             }
         }
     }

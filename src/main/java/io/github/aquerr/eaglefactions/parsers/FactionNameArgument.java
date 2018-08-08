@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.parsers;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
@@ -39,7 +40,7 @@ public class FactionNameArgument extends CommandElement
     @Override
     public List<String> complete(CommandSource src, CommandArgs args, CommandContext context)
     {
-        Set<String> factionNames = FactionLogic.getFactionsNames();
+        Set<String> factionNames = EagleFactions.getPlugin().getFactionLogic().getFactionsNames();
         List<String> list = new ArrayList<>(factionNames);
         Collections.sort(list);
 

@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class LeaveCommand implements CommandExecutor
+public class LeaveCommand extends AbstractCommand implements CommandExecutor
 {
+    public LeaveCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -25,13 +30,13 @@ public class LeaveCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if(optionalPlayerFaction.isPresent())
             {
                 if(!optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()))
                 {
-                    FactionLogic.leaveFaction(player.getUniqueId(), optionalPlayerFaction.get().getName());
+                    getPlugin().getFactionLogic().leaveFaction(player.getUniqueId(), optionalPlayerFaction.get().getName());
 
                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_LEFT_FACTION + " ", TextColors.GOLD, optionalPlayerFaction.get().getName()));

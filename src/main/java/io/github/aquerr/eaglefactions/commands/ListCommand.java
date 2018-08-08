@@ -1,8 +1,9 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
@@ -21,16 +22,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ListCommand implements CommandExecutor
+public class ListCommand extends AbstractCommand implements CommandExecutor
 {
+    public ListCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Set<Faction> factionsList = new HashSet<Faction>(FactionLogic.getFactions().values());
+        Set<Faction> factionsList = new HashSet<Faction>(getPlugin().getFactionLogic().getFactions().values());
         List<Text> helpList = new ArrayList<>();
 
-        Text tagPrefix = MainLogic.getFactionPrefixStart();
-        Text tagSufix = MainLogic.getFactionPrefixEnd();
+        Text tagPrefix = getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix();
+        Text tagSufix = getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix();
 
         for(Faction faction : factionsList)
         {
@@ -38,7 +44,7 @@ public class ListCommand implements CommandExecutor
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "- ")).append(tag).append(Text.of(faction.getName(), " (", PowerManager.getFactionPower(faction), "/", PowerManager.getFactionMaxPower(faction), ")"))
+                            .append(Text.of(TextColors.AQUA, "- ")).append(tag).append(Text.of(faction.getName(), " (", getPlugin().getPowerManager().getFactionPower(faction), "/", getPlugin().getPowerManager().getFactionMaxPower(faction), ")"))
                             .build())
                     .build();
 

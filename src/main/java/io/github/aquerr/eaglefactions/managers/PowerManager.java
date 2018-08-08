@@ -1,13 +1,15 @@
 package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.scheduler.Task;
 
 import java.io.IOException;
@@ -21,13 +23,14 @@ import java.util.function.Consumer;
 
 public class PowerManager
 {
-    //private static IConfig factionsConfig = FactionsConfig.getConfig();
+    private ConfigFields _configFields;
+    private CommentedConfigurationNode _factionsNode;
+    private Path playersPath;
 
-    private static CommentedConfigurationNode _factionsNode;
-    private static Path playersPath;
-
-    public static void setup(Path configDir)
+    public PowerManager(IConfiguration configuration, Path configDir)
     {
+        _configFields = configuration.getConfigFileds();
+
         try
         {
             _factionsNode = HoconConfigurationLoader.builder().setPath(Paths.get(configDir.resolve("data") + "/factions.conf")).build().load();
@@ -40,7 +43,7 @@ public class PowerManager
         }
     }
 
-    public static boolean checkIfPlayerExists(UUID playerUUID)
+    public boolean checkIfPlayerExists(UUID playerUUID)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
         if(Files.exists(playerFile))
@@ -53,7 +56,7 @@ public class PowerManager
         }
     }
 
-    public static void addPlayer(UUID playerUUID)
+    public void addPlayer(UUID playerUUID)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -65,8 +68,8 @@ public class PowerManager
 
             CommentedConfigurationNode playerNode = configLoader.load();
 
-            playerNode.getNode("power").setValue(MainLogic.getStartingPower());
-            playerNode.getNode("maxpower").setValue(MainLogic.getGlobalMaxPower());
+            playerNode.getNode("power").setValue(_configFields.getStartingPower());
+            playerNode.getNode("maxpower").setValue(_configFields.getGlobalMaxPower());
             configLoader.save(playerNode);
         }
         catch (Exception exception)
@@ -75,7 +78,7 @@ public class PowerManager
         }
     }
 
-    public static BigDecimal getPlayerPower(UUID playerUUID)
+    public BigDecimal getPlayerPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -106,7 +109,7 @@ public class PowerManager
         return BigDecimal.ZERO;
     }
 
-    public static BigDecimal getFactionPower(Faction faction)
+    public BigDecimal getFactionPower(Faction faction)
     {
         if(faction.getName().equals("SafeZone") || faction.getName().equals("WarZone"))
         {
@@ -150,7 +153,7 @@ public class PowerManager
         return factionPower;
     }
 
-    public static BigDecimal getFactionMaxPower(Faction faction)
+    public BigDecimal getFactionMaxPower(Faction faction)
     {
         if(faction.getName().equals("SafeZone") || faction.getName().equals("WarZone"))
         {
@@ -165,14 +168,14 @@ public class PowerManager
 
         if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
         {
-            factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(faction.getLeader()));
+            factionMaxPower = factionMaxPower.add(getPlayerMaxPower(faction.getLeader()));
         }
 
         if(faction.getOfficers() != null && !faction.getOfficers().isEmpty())
         {
             for (UUID officer : faction.getOfficers())
             {
-                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(officer));
+                factionMaxPower = factionMaxPower.add(getPlayerMaxPower(officer));
             }
         }
 
@@ -180,7 +183,7 @@ public class PowerManager
         {
             for (UUID member : faction.getMembers())
             {
-                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(member));
+                factionMaxPower = factionMaxPower.add(getPlayerMaxPower(member));
             }
         }
 
@@ -188,14 +191,14 @@ public class PowerManager
         {
             for (UUID recruit: faction.getRecruits())
             {
-                factionMaxPower = factionMaxPower.add(PowerManager.getPlayerMaxPower(recruit));
+                factionMaxPower = factionMaxPower.add(getPlayerMaxPower(recruit));
             }
         }
 
         return factionMaxPower;
     }
 
-    public static BigDecimal getPlayerMaxPower(UUID playerUUID)
+    public BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -215,9 +218,9 @@ public class PowerManager
             }
             else
             {
-                playerNode.getNode("maxpower").setValue(MainLogic.getGlobalMaxPower());
+                playerNode.getNode("maxpower").setValue(_configFields.getGlobalMaxPower());
 
-                return MainLogic.getGlobalMaxPower();
+                return _configFields.getGlobalMaxPower();
             }
         }
         catch (Exception exception)
@@ -228,7 +231,7 @@ public class PowerManager
         return BigDecimal.ZERO;
     }
 
-    public static void addPower(UUID playerUUID, boolean isKillAward)
+    public void addPower(UUID playerUUID, boolean isKillAward)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -240,16 +243,16 @@ public class PowerManager
 
             BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-            if(PowerManager.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerManager.getPlayerMaxPower(playerUUID).doubleValue())
+            if(getPlayerPower(playerUUID).add(_configFields.getPowerIncrement()).doubleValue() < getPlayerMaxPower(playerUUID).doubleValue())
             {
                 if(isKillAward)
                 {
-                    BigDecimal killAward = MainLogic.getKillAward();
+                    BigDecimal killAward = _configFields.getKillAward();
                     playerNode.getNode("power").setValue(playerPower.add(killAward));
                 }
                 else
                 {
-                    playerNode.getNode("power").setValue(playerPower.add(MainLogic.getPowerIncrement()));
+                    playerNode.getNode("power").setValue(playerPower.add(_configFields.getPowerIncrement()));
                 }
 
                 configLoader.save(playerNode);
@@ -262,7 +265,7 @@ public class PowerManager
 
     }
 
-    public static void setPower(UUID playerUUID, BigDecimal power)
+    public void setPower(UUID playerUUID, BigDecimal power)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -281,7 +284,7 @@ public class PowerManager
         }
     }
 
-    public static void startIncreasingPower(UUID playerUUID)
+    public void startIncreasingPower(UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -292,21 +295,21 @@ public class PowerManager
             {
                 if (!PlayerManager.isPlayerOnline(playerUUID)) task.cancel();
 
-                if(PowerManager.getPlayerPower(playerUUID).add(MainLogic.getPowerIncrement()).doubleValue() < PowerManager.getPlayerMaxPower(playerUUID).doubleValue())
+                if(getPlayerPower(playerUUID).add(_configFields.getPowerIncrement()).doubleValue() < getPlayerMaxPower(playerUUID).doubleValue())
                 {
-                    PowerManager.addPower(playerUUID, false);
+                    addPower(playerUUID, false);
                 }
                 else
                 {
-                    PowerManager.setPower(playerUUID, PowerManager.getPlayerMaxPower(playerUUID));
+                    setPower(playerUUID, getPlayerMaxPower(playerUUID));
                 }
             }
         }).submit(EagleFactions.getPlugin());
     }
 
-    public static void decreasePower(UUID playerUUID)
+    public void decreasePower(UUID playerUUID)
     {
-        if(PowerManager.getPlayerPower(playerUUID).subtract(MainLogic.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
+        if(getPlayerPower(playerUUID).subtract(_configFields.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
         {
             Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -318,7 +321,7 @@ public class PowerManager
 
                 BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-                playerNode.getNode("power").setValue(playerPower.subtract(MainLogic.getPowerDecrement()));
+                playerNode.getNode("power").setValue(playerPower.subtract(_configFields.getPowerDecrement()));
                 configLoader.save(playerNode);
             }
             catch (Exception exception)
@@ -328,11 +331,11 @@ public class PowerManager
         }
         else
         {
-            PowerManager.setPower(playerUUID, BigDecimal.ZERO);
+            setPower(playerUUID, BigDecimal.ZERO);
         }
     }
 
-    public static void penalty(UUID playerUUID)
+    public void penalty(UUID playerUUID)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -344,7 +347,7 @@ public class PowerManager
 
             BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
 
-            BigDecimal penalty = MainLogic.getPenalty();
+            BigDecimal penalty = _configFields.getPenalty();
 
             if(playerPower.doubleValue() - penalty.doubleValue() > 0)
             {
@@ -365,7 +368,7 @@ public class PowerManager
         }
     }
 
-    public static void setMaxPower(UUID playerUUID, BigDecimal power)
+    public void setMaxPower(UUID playerUUID, BigDecimal power)
     {
         Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
 
@@ -383,14 +386,4 @@ public class PowerManager
             exception.printStackTrace();
         }
     }
-
-//    public static void updateFactionPower(UUID playerUUID, BigDecimal power, boolean increment)
-//    {
-//        Optional<Faction> optionalFaction = FactionLogic.getFactionByPlayerUUID(playerUUID);
-//
-//        if (optionalFaction.isPresent())
-//        {
-//
-//        }
-//    }
 }

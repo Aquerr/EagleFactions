@@ -56,6 +56,7 @@ public class HOCONFactionStorage implements IStorage
             }
             prepareFactionsCache();
             storageThread = new Thread(handleFactionsSaving());
+            storageThread.start();
         }
         catch(IOException exception)
         {
@@ -352,7 +353,7 @@ public class HOCONFactionStorage implements IStorage
 
         if(claimsObject != null)
         {
-            return (Set<String>) claimsObject;
+            return new HashSet<>((List<String>) claimsObject);
         }
         else
         {
@@ -368,7 +369,7 @@ public class HOCONFactionStorage implements IStorage
 
         if(enemiesObject != null)
         {
-            return (Set<String>) enemiesObject;
+            return new HashSet<>((List<String>) enemiesObject);
         }
         else
         {
@@ -384,7 +385,7 @@ public class HOCONFactionStorage implements IStorage
 
         if(alliancesObject != null)
         {
-            return (Set<String>) alliancesObject;
+            return new HashSet<>((List<String>) alliancesObject);
         }
         else
         {

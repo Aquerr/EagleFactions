@@ -33,7 +33,7 @@ public class UnclaimCommand extends AbstractCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             //Check if player has admin mode.
             if(EagleFactions.AdminList.contains(player.getUniqueId()))
@@ -41,7 +41,7 @@ public class UnclaimCommand extends AbstractCommand implements CommandExecutor
                 World world = player.getWorld();
                 Vector3i chunk = player.getLocation().getChunkPosition();
 
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
                 if (optionalChunkFaction.isPresent())
                 {
@@ -51,11 +51,11 @@ public class UnclaimCommand extends AbstractCommand implements CommandExecutor
                         {
                             Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
 
-                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
                         }
                     }
 
-                    FactionLogic.removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+                    getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
 
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     return CommandResult.success();
@@ -77,7 +77,7 @@ public class UnclaimCommand extends AbstractCommand implements CommandExecutor
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
                     if (optionalChunkFaction.isPresent())
                     {
@@ -91,11 +91,11 @@ public class UnclaimCommand extends AbstractCommand implements CommandExecutor
                                 {
                                     Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
 
-                                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
                                 }
                             }
 
-                            FactionLogic.removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+                            getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
 
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                             return CommandResult.success();

@@ -11,8 +11,13 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class SendCommandListener
+public class SendCommandListener extends AbstractListener
 {
+    public SendCommandListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener(order = Order.EARLY)
     public void onCommandSend(SendCommandEvent event, @Root Player player)
     {

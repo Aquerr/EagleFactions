@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
@@ -32,7 +32,7 @@ public class AttackCommand extends AbstractCommand implements CommandExecutor
         if(source instanceof Player)
         {
             Player player = (Player)source;
-            if(MainLogic.shouldAttackOnlyAtNight())
+            if(getPlugin().getConfiguration().getConfigFileds().canAttackOnlyAtNight())
             {
                 if((player.getWorld().getProperties().getWorldTime() % 24000L) >= 12000)
                 {
@@ -58,13 +58,13 @@ public class AttackCommand extends AbstractCommand implements CommandExecutor
 
     private void attackChunk(Player player)
     {
-        Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+        Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
         if(optionalPlayerFaction.isPresent())
         {
             Faction playerFaction = optionalPlayerFaction.get();
 
-            Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+            Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
             if(optionalChunkFaction.isPresent())
             {
                 if(optionalChunkFaction.get().getName().equals("SafeZone") || optionalChunkFaction.get().getName().equals("WarZone"))
@@ -82,16 +82,16 @@ public class AttackCommand extends AbstractCommand implements CommandExecutor
                         {
                             if(!playerFaction.getAlliances().contains(attackedFaction.getName()))
                             {
-                                if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerManager.getFactionPower(attackedFaction).doubleValue() && PowerManager.getFactionPower(playerFaction).doubleValue() > PowerManager.getFactionPower(attackedFaction).doubleValue())
+                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction).doubleValue() * getPlugin().getConfiguration().getConfigFileds().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue() && getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue())
                                 {
-                                    int attackTime = MainLogic.getAttackTime();
+                                    int attackTime = getPlugin().getConfiguration().getConfigFileds().getAttackTime();
                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
-                                    AttackLogic.informAboutAttack(attackedFaction);
+                                    getPlugin().getAttackLogic().informAboutAttack(attackedFaction);
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
 
-                                    AttackLogic.blockClaiming(attackedFaction.getName());
-                                    AttackLogic.attack(player, attackedClaim);
+                                    getPlugin().getAttackLogic().blockClaiming(attackedFaction.getName());
+                                    getPlugin().getAttackLogic().attack(player, attackedClaim);
                                     return;
                                 }
                                 else

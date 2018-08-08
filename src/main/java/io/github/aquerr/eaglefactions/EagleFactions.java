@@ -3,11 +3,13 @@ package io.github.aquerr.eaglefactions;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.commands.*;
 import io.github.aquerr.eaglefactions.config.Configuration;
+import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.entities.AllyInvite;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
 import io.github.aquerr.eaglefactions.listeners.*;
+import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
@@ -23,7 +25,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -47,11 +48,13 @@ public class EagleFactions
     public static Map<UUID, ChatEnum> ChatList;
     public static Map<UUID, Integer> HomeCooldownPlayers;
 
-    private Configuration _configuration;
+    private IConfiguration _configuration;
     private PVPLogger _pvpLogger;
     private PlayerManager _playerManager;
     private FlagManager _flagManager;
     private PowerManager _powerManager;
+    private AttackLogic _attackLogic;
+    private FactionLogic _factionLogic;
 
     @Inject
     private Logger _logger;
@@ -97,9 +100,6 @@ public class EagleFactions
         ChatList = new HashMap<>();
         HomeCooldownPlayers = new HashMap<>();
 
-        _playerManager = new PlayerManager();
-        _powerManager = new PowerManager();
-        _flagManager = new FlagManager();
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
@@ -107,6 +107,10 @@ public class EagleFactions
         SetupConfigs();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
+
+        SetupManagers();
+
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Managers loaded..."));
 
         InitializeCommands();
 
@@ -129,19 +133,25 @@ public class EagleFactions
         }
     }
 
+    private void SetupManagers()
+    {
+        _playerManager = new PlayerManager(_configDir);
+        _powerManager = new PowerManager(_configuration, _configDir);
+        _flagManager = new FlagManager();
+        _factionLogic = new FactionLogic(_configuration, _configDir);
+        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFileds());
+
+    }
+
     private void SetupConfigs()
     {
         // Create configs
         _configuration = new Configuration(_configDir);
-        FactionLogic factionLogic = new FactionLogic(_configDir);
 
-        PlayerManager.setup(_configDir);
-        PowerManager.setup(_configDir);
-
-        MessageLoader messageLoader = new MessageLoader(_configDir);
+        MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
 
         //PVPLogger
-        _pvpLogger = new PVPLogger();
+        _pvpLogger = new PVPLogger(getConfiguration());
     }
 
     private void InitializeCommands()
@@ -150,7 +160,7 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("help"), CommandSpec.builder()
                 .description(Text.of("Help"))
                 .permission(PluginPermissions.HelpCommand)
-                .executor(new HelpCommand())
+                .executor(new HelpCommand(this))
                 .build());
 
         //Create faction command.
@@ -159,21 +169,21 @@ public class EagleFactions
                 .permission(PluginPermissions.CreateCommand)
                 .arguments(GenericArguments.optional(GenericArguments.string(Text.of("tag"))),
                         GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
-                .executor(new CreateCommand())
+                .executor(new CreateCommand(this))
                 .build());
 
         //Disband faction command.
         Subcommands.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DisbandCommand)
-                .executor(new DisbandCommand())
+                .executor(new DisbandCommand(this))
                 .build());
 
         //List all factions.
         Subcommands.put(Collections.singletonList("list"), CommandSpec.builder()
                 .description(Text.of("List all factions"))
                 .permission(PluginPermissions.ListCommand)
-                .executor(new ListCommand())
+                .executor(new ListCommand(this))
                 .build());
 
         //Invite a player to the faction.
@@ -189,7 +199,7 @@ public class EagleFactions
                 .description(Text.of("Kicks a player from the faction"))
                 .permission(PluginPermissions.KickCommand)
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .executor(new KickCommand())
+                .executor(new KickCommand(this))
                 .build());
 
         //Join faction command
@@ -197,28 +207,28 @@ public class EagleFactions
                 .description(Text.of("Join a specific faction"))
                 .permission(PluginPermissions.JoinCommand)
                 .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new JoinCommand())
+                .executor(new JoinCommand(this))
                 .build());
 
         //Leave faction command
         Subcommands.put(Collections.singletonList("leave"), CommandSpec.builder()
                 .description(Text.of("Leave a faction"))
                 .permission(PluginPermissions.LeaveCommand)
-                .executor(new LeaveCommand())
+                .executor(new LeaveCommand(this))
                 .build());
 
         //Version command
         Subcommands.put(Arrays.asList("v", "version"), CommandSpec.builder()
                 .description(Text.of("Shows plugin version"))
                 .permission(PluginPermissions.VersionCommand)
-                .executor(new VersionCommand())
+                .executor(new VersionCommand(this))
                 .build());
 
         //Info command. Shows info about a faction.
         Subcommands.put(Arrays.asList("i", "info"), CommandSpec.builder()
                 .description(Text.of("Show info about a faction"))
                 .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new InfoCommand())
+                .executor(new InfoCommand(this))
                 .build());
 
         //Player command. Shows info about a player. (its factions etc.)
@@ -226,7 +236,7 @@ public class EagleFactions
                 .description(Text.of("Show info about a player"))
                 .permission(PluginPermissions.PlayerCommand)
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .executor(new PlayerCommand())
+                .executor(new PlayerCommand(this))
                 .build());
 
         //Build add ally command.
@@ -234,7 +244,7 @@ public class EagleFactions
                 .description(Text.of("Invite faction to the alliance"))
                 .permission(PluginPermissions.AddAllyCommand)
                 .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new AddAllyCommand())
+                .executor(new AddAllyCommand(this))
                 .build();
 
         //Build remove ally command.
@@ -242,7 +252,7 @@ public class EagleFactions
                 .description(Text.of("Remove faction from the alliance"))
                 .permission(PluginPermissions.RemoveAllyCommand)
                 .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new RemoveAllyCommand())
+                .executor(new RemoveAllyCommand(this))
                 .build();
 
         //Build alliance commands.
@@ -258,7 +268,7 @@ public class EagleFactions
                 .description(Text.of("Set faction as enemy"))
                 .permission(PluginPermissions.AddEnemyCommand)
                 .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new AddEnemyCommand())
+                .executor(new AddEnemyCommand(this))
                 .build();
 
         //Build remove enemy command.
@@ -266,7 +276,7 @@ public class EagleFactions
                 .description(Text.of("Remove faction from the enemies"))
                 .permission(PluginPermissions.RemoveEnemyCommand)
                 .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new RemoveEnemyCommand())
+                .executor(new RemoveEnemyCommand(this))
                 .build();
 
         //Build enemy commands.
@@ -282,7 +292,7 @@ public class EagleFactions
                 .description(Text.of("Add or Remove officer"))
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .permission(PluginPermissions.OfficerCommand)
-                .executor(new OfficerCommand())
+                .executor(new OfficerCommand(this))
                 .build());
 
         //Member command.
@@ -290,7 +300,7 @@ public class EagleFactions
                 .description(Text.of("Add or remove member"))
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .permission(PluginPermissions.MemberCommand)
-                .executor(new MemberCommand())
+                .executor(new MemberCommand(this))
                 .build());
 
         //Claim command.
@@ -311,56 +321,56 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("unclaimall"), CommandSpec.builder()
                 .description(Text.of("Remove all claims"))
                 .permission(PluginPermissions.UnclaimAllCommand)
-                .executor(new UnclaimallCommand())
+                .executor(new UnclaimallCommand(this))
                 .build());
 
         //Map command
         Subcommands.put(Collections.singletonList("map"), CommandSpec.builder()
                 .description(Text.of("Turn on/off factions map"))
                 .permission(PluginPermissions.MapCommand)
-                .executor(new MapCommand())
+                .executor(new MapCommand(this))
                 .build());
 
         //Sethome command
         Subcommands.put(Collections.singletonList("sethome"), CommandSpec.builder()
                 .description(Text.of("Set faction's home"))
                 .permission(PluginPermissions.SetHomeCommand)
-                .executor(new SetHomeCommand())
+                .executor(new SetHomeCommand(this))
                 .build());
 
         //Home command
         Subcommands.put(Collections.singletonList("home"), CommandSpec.builder()
                 .description(Text.of("Teleport to faction's home"))
                 .permission(PluginPermissions.HomeCommand)
-                .executor(new HomeCommand())
+                .executor(new HomeCommand(this))
                 .build());
 
         //Add autoclaim command.
         Subcommands.put(Collections.singletonList("autoclaim"), CommandSpec.builder()
                 .description(Text.of("Autoclaim Command"))
                 .permission(PluginPermissions.AutoClaimCommand)
-                .executor(new AutoClaimCommand())
+                .executor(new AutoClaimCommand(this))
                 .build());
 
         //Add automap command
         Subcommands.put(Collections.singletonList("automap"), CommandSpec.builder()
                 .description(Text.of("Automap command"))
                 .permission(PluginPermissions.AutoMapCommand)
-                .executor(new AutoMapCommand())
+                .executor(new AutoMapCommand(this))
                 .build());
 
         //Add admin command
         Subcommands.put(Collections.singletonList("admin"), CommandSpec.builder()
                 .description(Text.of("Toggle admin mode"))
                 .permission(PluginPermissions.AdminCommand)
-                .executor(new AdminCommand())
+                .executor(new AdminCommand(this))
                 .build());
 
         //Add Coords Command
         Subcommands.put(Collections.singletonList("coords"), CommandSpec.builder()
                 .description(Text.of("Show your teammates coords"))
                 .permission(PluginPermissions.CoordsCommand)
-                .executor(new CoordsCommand())
+                .executor(new CoordsCommand(this))
                 .build());
 
         //Add SetPower Command
@@ -369,7 +379,7 @@ public class EagleFactions
                 .permission(PluginPermissions.SetPowerCommand)
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
                         GenericArguments.optional(GenericArguments.string(Text.of("power"))))
-                .executor(new SetPowerCommand())
+                .executor(new SetPowerCommand(this))
                 .build());
 
         //Add MaxPower Command
@@ -378,7 +388,7 @@ public class EagleFactions
                 .permission(PluginPermissions.MaxPowerCommand)
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
                         GenericArguments.optional(GenericArguments.string(Text.of("power"))))
-                .executor(new MaxPowerCommand())
+                .executor(new MaxPowerCommand(this))
                 .build());
 
         //Add Attack Command
@@ -392,7 +402,7 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("reload"), CommandSpec.builder()
                 .description(Text.of("Reload config file"))
                 .permission(PluginPermissions.ReloadCommand)
-                .executor(new ReloadCommand())
+                .executor(new ReloadCommand(this))
                 .build());
 
         //Chat Command
@@ -400,14 +410,14 @@ public class EagleFactions
                 .description(Text.of("Chat command"))
                 .permission(PluginPermissions.ChatCommand)
                 .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
-                .executor(new ChatCommand())
+                .executor(new ChatCommand(this))
                 .build());
 
         //Top Command
         Subcommands.put(Collections.singletonList("top"), CommandSpec.builder()
                 .description(Text.of("Top Command"))
                 .permission(PluginPermissions.TopCommand)
-                .executor(new TopCommand())
+                .executor(new TopCommand(this))
                 .build());
 
         //Setleader Command
@@ -415,14 +425,14 @@ public class EagleFactions
                 .description(Text.of("Set someone as leader (removes you as a leader if you are one)"))
                 .permission(PluginPermissions.SetLeaderCommand)
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .executor(new SetLeaderCommand())
+                .executor(new SetLeaderCommand(this))
                 .build());
 
         //Flags Command
         Subcommands.put(Collections.singletonList("flags"), CommandSpec.builder()
                 .description(Text.of("Set flags/privileges for members in faction."))
                 .permission(PluginPermissions.FlagsCommand)
-                .executor(new FlagsCommand())
+                .executor(new FlagsCommand(this))
                 .build());
 
         //TagColor Command
@@ -430,13 +440,13 @@ public class EagleFactions
                 .description(Text.of("Change faction's tag color"))
                 .permission(PluginPermissions.TagColorCommand)
                 .arguments(GenericArguments.optional(GenericArguments.catalogedElement(Text.of("color"), TextColor.class)))
-                .executor(new TagColorCommand())
+                .executor(new TagColorCommand(this))
                 .build());
 
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))
-                .executor(new HelpCommand())
+                .executor(new HelpCommand(this))
                 .children(Subcommands)
                 .build();
 
@@ -446,21 +456,21 @@ public class EagleFactions
 
     private void RegisterListeners()
     {
-        Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
+        Sponge.getEventManager().registerListeners(this, new EntityDamageListener(this));
+        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener(this));
+        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener(this));
         Sponge.getEventManager().registerListeners(this, new BlockBreakListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener(this));
-        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
+        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener(this));
         Sponge.getEventManager().registerListeners(this, new ChatMessageListener(this));
-        Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
-        Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
-        Sponge.getEventManager().registerListeners(this, new SendCommandListener());
+        Sponge.getEventManager().registerListeners(this, new EntitySpawnListener(this));
+        Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener(this));
+        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener(this));
+        Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
     }
 
-    public Configuration getConfiguration()
+    public IConfiguration getConfiguration()
     {
         return this._configuration;
     }
@@ -483,5 +493,15 @@ public class EagleFactions
     public PowerManager getPowerManager()
     {
         return _powerManager;
+    }
+
+    public AttackLogic getAttackLogic()
+    {
+        return _attackLogic;
+    }
+
+    public FactionLogic getFactionLogic()
+    {
+        return _factionLogic;
     }
 }

@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -39,7 +39,7 @@ public class InviteCommand extends AbstractCommand implements CommandExecutor
             {
                 Player senderPlayer = (Player)source;
                 Player invitedPlayer = optionalInvitedPlayer.get();
-                Optional<Faction> optionalSenderFaction = FactionLogic.getFactionByPlayerUUID(senderPlayer.getUniqueId());
+                Optional<Faction> optionalSenderFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(senderPlayer.getUniqueId());
 
                 if(optionalSenderFaction.isPresent())
                 {
@@ -47,7 +47,7 @@ public class InviteCommand extends AbstractCommand implements CommandExecutor
 
                     if (this.getPlugin().getFlagManager().canInvite(senderPlayer, senderFaction))
                     {
-                        if(MainLogic.isPlayerLimit())
+                        if(getPlugin().getConfiguration().getConfigFileds().isPlayerLimit())
                         {
                             int playerCount = 0;
                             playerCount += senderFaction.getLeader().toString().equals("") ? 0 : 1;
@@ -55,14 +55,14 @@ public class InviteCommand extends AbstractCommand implements CommandExecutor
                             playerCount += senderFaction.getMembers().isEmpty() ? 0 : senderFaction.getMembers().size();
                             playerCount += senderFaction.getRecruits().isEmpty() ? 0 : senderFaction.getRecruits().size();
 
-                            if(playerCount >= MainLogic.getPlayerLimit())
+                            if(playerCount >= getPlugin().getConfiguration().getConfigFileds().getPlayerLimit())
                             {
                                 senderPlayer.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + PluginMessages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
                                 return CommandResult.success();
                             }
                         }
 
-                        if(!FactionLogic.getFactionByPlayerUUID(invitedPlayer.getUniqueId()).isPresent())
+                        if(!getPlugin().getFactionLogic().getFactionByPlayerUUID(invitedPlayer.getUniqueId()).isPresent())
                         {
                             try
                             {

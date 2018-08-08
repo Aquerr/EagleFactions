@@ -5,20 +5,31 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
+import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class ClaimCommand extends AbstractCommand implements CommandExecutor
 {
@@ -33,7 +44,7 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
         if (source instanceof Player)
         {
             Player player = (Player) source;
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if (optionalPlayerFaction.isPresent())
             {
@@ -44,13 +55,13 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
-                    if (MainLogic.getClaimableWorldNames().contains(player.getWorld().getName()))
+                    if (getPlugin().getConfiguration().getConfigFileds().getClaimableWorldNames().contains(player.getWorld().getName()))
                     {
                         if (!optionalChunkFaction.isPresent())
                         {
-                            if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
+                            if (getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
                             {
                                 if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                                 {
@@ -58,18 +69,18 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                                     {
                                         if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
                                         {
-                                            FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                                            getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
 
                                             return CommandResult.success();
                                         }
                                         else
                                         {
-                                            if (MainLogic.requireConnectedClaims())
+                                            if (getPlugin().getConfiguration().getConfigFileds().requireConnectedClaims())
                                             {
-                                                if (FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
+                                                if (getPlugin().getFactionLogic().isClaimConnected(playerFaction, world.getUniqueId(), chunk))
                                                 {
-                                                    FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                                    getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                                     return CommandResult.success();
                                                 }
                                                 else
@@ -79,14 +90,14 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                                             }
                                             else
                                             {
-                                                FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                                getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                                 return CommandResult.success();
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                        getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                         return CommandResult.success();
                                     }
                                 }
@@ -111,9 +122,9 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
-                    if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    if (!getPlugin().getFactionLogic().isClaimed(world.getUniqueId(), chunk))
                     {
-                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                        getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         return CommandResult.success();

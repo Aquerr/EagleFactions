@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class KickCommand implements CommandExecutor
+public class KickCommand extends AbstractCommand implements CommandExecutor
 {
+    public KickCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -28,7 +33,7 @@ public class KickCommand implements CommandExecutor
             if(source instanceof Player)
             {
                 Player player = (Player)source;
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {
@@ -36,7 +41,7 @@ public class KickCommand implements CommandExecutor
                     if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                     {
                         Player selectedPlayer = optionalSelectedPlayer.get();
-                        Optional<Faction> optionalSelectedPlayerFaction = FactionLogic.getFactionByPlayerUUID(selectedPlayer.getUniqueId());
+                        Optional<Faction> optionalSelectedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(selectedPlayer.getUniqueId());
 
                         if(optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().getName().equals(playerFaction.getName()))
                         {
@@ -44,14 +49,14 @@ public class KickCommand implements CommandExecutor
                             {
                                 if(!playerFaction.getOfficers().contains(selectedPlayer.getUniqueId()) || playerFaction.getLeader().equals(player.getUniqueId()))
                                 {
-                                    FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
 
                                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
 
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_KICKED + " ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.FROM_THE_FACTION));
                                     selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
 
-                                    if(EagleFactions.AutoClaimList.contains(selectedPlayer.getUniqueId())) EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
+                                    EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
 
                                     return CommandResult.success();
                                 }

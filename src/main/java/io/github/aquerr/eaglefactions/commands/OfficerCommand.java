@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class OfficerCommand implements CommandExecutor
+public class OfficerCommand extends AbstractCommand implements CommandExecutor
 {
+    public OfficerCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -29,8 +34,8 @@ public class OfficerCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 Player newOfficerPlayer = optionalNewOfficerPlayer.get();
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalNewOfficerFaction = FactionLogic.getFactionByPlayerUUID(newOfficerPlayer.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalNewOfficerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(newOfficerPlayer.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {
@@ -43,12 +48,12 @@ public class OfficerCommand implements CommandExecutor
                             {
                                 if(playerFaction.getMembers().contains(newOfficerPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_ADDED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.OFFICER, TextColors.WHITE, "!"));
                                 }
                                 else if (playerFaction.getOfficers().contains(newOfficerPlayer.getUniqueId().toString()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
                                 //TODO: Add promotion from recruit rank.
@@ -74,12 +79,12 @@ public class OfficerCommand implements CommandExecutor
                             {
                                 if(!playerFaction.getOfficers().contains(newOfficerPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().addOfficerAndRemoveMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_ADDED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.OFFICER, TextColors.WHITE, "!"));
                                 }
                                 else
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().removeOfficerAndSetAsMember(newOfficerPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newOfficerPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
                             }

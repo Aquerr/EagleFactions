@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
@@ -27,8 +28,13 @@ import java.util.UUID;
 /**
  * Created by Aquerr on 2017-08-03.
  */
-public class InfoCommand implements CommandExecutor
+public class InfoCommand extends AbstractCommand implements CommandExecutor
 {
+    public InfoCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -37,7 +43,7 @@ public class InfoCommand implements CommandExecutor
         if (optionalFactionName.isPresent())
         {
             String rawFactionName = optionalFactionName.get();
-            Faction faction = FactionLogic.getFactionByName(rawFactionName);
+            Faction faction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
 
             if (faction == null)
             {
@@ -48,11 +54,11 @@ public class InfoCommand implements CommandExecutor
                 if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
+                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
                     }
-                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
+                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
                     }
@@ -67,12 +73,12 @@ public class InfoCommand implements CommandExecutor
                 }
             }
         }
-        else if(source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
+        else if(source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
         {
             //Check permissions
             if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf))
             {
-                showFactionInfo(source, FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
+                showFactionInfo(source, getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
             }
             else
             {
@@ -155,8 +161,8 @@ public class InfoCommand implements CommandExecutor
                 .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.getClaims().size()) + "/" + String.valueOf(PowerManager.getFactionPower(faction).intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getFactionPower(faction) + "/" + getPlugin().getPowerManager().getFactionMaxPower(faction) + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.getClaims().size()) + "/" + String.valueOf(getPlugin().getPowerManager().getFactionPower(faction).intValue())))
                 .build();
 
         factionInfo.add(info);

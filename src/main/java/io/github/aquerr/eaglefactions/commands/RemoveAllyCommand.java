@@ -19,8 +19,13 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2017-08-04.
  */
-public class RemoveAllyCommand implements CommandExecutor
+public class RemoveAllyCommand extends AbstractCommand implements CommandExecutor
 {
+    public RemoveAllyCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -31,10 +36,10 @@ public class RemoveAllyCommand implements CommandExecutor
             if(source instanceof Player)
             {
                 Player player = (Player)source;
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                 String rawFactionName = optionalFactionName.get();
-                Faction removedFaction = FactionLogic.getFactionByName(rawFactionName);
+                Faction removedFaction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
 
                 if (removedFaction == null)
                 {
@@ -51,7 +56,7 @@ public class RemoveAllyCommand implements CommandExecutor
                         {
                             if(!playerFaction.getAlliances().contains(removedFaction.getName()))
                             {
-                                FactionLogic.removeAlly(playerFaction.getName(), removedFaction.getName());
+                                getPlugin().getFactionLogic().removeAlly(playerFaction.getName(), removedFaction.getName());
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.getName(), TextColors.GREEN, "!"));
                             }
                             else
@@ -66,7 +71,7 @@ public class RemoveAllyCommand implements CommandExecutor
                         {
                             if(playerFaction.getAlliances().contains(removedFaction.getName()))
                             {
-                                FactionLogic.removeAlly(playerFaction.getName(), removedFaction.getName());
+                                getPlugin().getFactionLogic().removeAlly(playerFaction.getName(), removedFaction.getName());
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.getName(), TextColors.GREEN, "!"));
                                 return CommandResult.success();
                             }

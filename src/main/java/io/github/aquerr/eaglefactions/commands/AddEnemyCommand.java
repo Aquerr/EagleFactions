@@ -18,8 +18,13 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.Optional;
 import java.util.UUID;
 
-public class AddEnemyCommand implements CommandExecutor
+public class AddEnemyCommand extends AbstractCommand implements CommandExecutor
 {
+    public AddEnemyCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -31,8 +36,8 @@ public class AddEnemyCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                Faction enemyFaction = FactionLogic.getFactionByName(rawFactionName);
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                Faction enemyFaction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
 
                 if (enemyFaction == null)
                 {
@@ -50,7 +55,7 @@ public class AddEnemyCommand implements CommandExecutor
                         {
                             if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
-                                FactionLogic.addEnemy(playerFaction.getName(), enemyFaction.getName());
+                                getPlugin().getFactionLogic().addEnemy(playerFaction.getName(), enemyFaction.getName());
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
                             }
                             else
@@ -67,13 +72,13 @@ public class AddEnemyCommand implements CommandExecutor
 
                     if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                     {
-                        if(FactionLogic.getFactionsNames().contains(enemyFaction.getName().toLowerCase()))
+                        if(getPlugin().getFactionLogic().getFactionsNames().contains(enemyFaction.getName().toLowerCase()))
                         {
                             if(!playerFaction.getAlliances().contains(enemyFaction.getName()))
                             {
                                 if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
                                 {
-                                    FactionLogic.addEnemy(playerFaction.getName(), enemyFaction.getName());
+                                    getPlugin().getFactionLogic().addEnemy(playerFaction.getName(), enemyFaction.getName());
 
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.getName()));
 

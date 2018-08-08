@@ -7,9 +7,8 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
@@ -37,11 +36,11 @@ public class PlayerInteractListener extends AbstractListener
             {
                 World world = player.getWorld();
 
-                if (MainLogic.getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
                 {
                     return;
                 }
-                if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+                if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                 {
                     return;
                 }
@@ -50,8 +49,8 @@ public class PlayerInteractListener extends AbstractListener
                 Location location = new Location<>(world, vector3d);
                 Vector3i claim = location.getChunkPosition();
 
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
 
                 if(optionalChunkFaction.isPresent())
                 {
@@ -65,7 +64,7 @@ public class PlayerInteractListener extends AbstractListener
                     }
                     else if (optionalPlayerFaction.isPresent())
                     {
-                        if (!plugin.getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                        if (!getPlugin().getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                         {
                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
                             event.setCancelled(true);

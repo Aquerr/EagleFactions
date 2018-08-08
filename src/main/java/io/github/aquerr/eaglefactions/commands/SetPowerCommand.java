@@ -62,7 +62,7 @@ public class SetPowerCommand extends AbstractCommand implements CommandExecutor
     {
         BigDecimal newPower = new BigDecimal(power);
 
-        PowerManager.setPower(player.getUniqueId(), newPower);
+        getPlugin().getPowerManager().setPower(player.getUniqueId(), newPower);
 
         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PLAYERS_POWER_HAS_BEEN_CHANGED));
     }

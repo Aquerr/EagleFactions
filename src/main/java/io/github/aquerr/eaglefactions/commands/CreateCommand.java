@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -20,7 +20,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -56,11 +55,11 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                 if (!optionalPlayerFaction.isPresent())
                 {
-                    if(FactionLogic.getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
+                    if(getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
                     {
                         player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
                         return CommandResult.success();
@@ -68,39 +67,39 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                     else
                     {
                         //Check tag length
-                        if(factionTag.length() > MainLogic.getMaxTagLength())
+                        if(factionTag.length() > getPlugin().getConfiguration().getConfigFileds().getMaxTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFileds().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if(factionTag.length() < MainLogic.getMinTagLength())
+                        if(factionTag.length() < getPlugin().getConfiguration().getConfigFileds().getMinTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFileds().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
                     }
 
-                    if (!FactionLogic.getFactionsNames().contains(factionName.toLowerCase()))
+                    if (!getPlugin().getFactionLogic().getFactionsNames().contains(factionName.toLowerCase()))
                     {
                         //Check name length
-                        if(factionName.length() > MainLogic.getMaxNameLength())
+                        if(factionName.length() > getPlugin().getConfiguration().getConfigFileds().getMaxNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + MainLogic.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFileds().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if(factionName.length() < MainLogic.getMinNameLength())
+                        if(factionName.length() < getPlugin().getConfiguration().getConfigFileds().getMinNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + MainLogic.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFileds().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
 
-                        if (MainLogic.getCreateByItems())
+                        if (getPlugin().getConfiguration().getConfigFileds().getFactionCreationByItems())
                         {
                             return createByItems(factionName, factionTag, player);
                         }
                         else
                         {
-                            FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
+                            getPlugin().getFactionLogic().createFaction(factionName, factionTag, player.getUniqueId());
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
                             return CommandResult.success();
                         }
@@ -131,7 +130,7 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
 
     private CommandResult createByItems(String factionName, String factionTag, Player player)
     {
-        HashMap<String, Integer> requiredItems = MainLogic.getRequiredItemsToCreate();
+        HashMap<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFileds().getRequiredItemsToCreateFaction();
         Inventory inventory = player.getInventory();
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
@@ -200,7 +199,7 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                 }
             }
 
-            FactionLogic.createFaction(factionName, factionTag, player.getUniqueId());
+            getPlugin().getFactionLogic().createFaction(factionName, factionTag, player.getUniqueId());
             player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
             return CommandResult.success();
         }

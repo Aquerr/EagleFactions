@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -22,15 +23,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CoordsCommand implements CommandExecutor
+public class CoordsCommand extends AbstractCommand implements CommandExecutor
 {
+    public CoordsCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if(source instanceof Player)
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             List<Text> teamCoords = new ArrayList<>();
 

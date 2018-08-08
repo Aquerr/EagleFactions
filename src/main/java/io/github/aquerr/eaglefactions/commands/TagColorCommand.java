@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -18,13 +18,17 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class TagColorCommand implements CommandExecutor
+public class TagColorCommand extends AbstractCommand implements CommandExecutor
 {
+    public TagColorCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
 
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if (!MainLogic.areColoredTagsAllowed())
+        if (!getPlugin().getConfiguration().getConfigFileds().canColorTags())
         {
             source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.TAG_COLORING_IS_TURNED_OFF_ON_THIS_SERVER));
             return CommandResult.success();
@@ -37,14 +41,14 @@ public class TagColorCommand implements CommandExecutor
             if (source instanceof Player)
             {
                 Player player = (Player)source;
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                 if (optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
                     if (playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        FactionLogic.changeTagColor(playerFaction, optionalColor.get());
+                        getPlugin().getFactionLogic().changeTagColor(playerFaction, optionalColor.get());
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.TAG_COLOR_HAS_BEEN_CHANGED));
                     }
                     else

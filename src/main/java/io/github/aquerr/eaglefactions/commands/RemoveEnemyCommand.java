@@ -22,8 +22,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class RemoveEnemyCommand implements CommandExecutor
+public class RemoveEnemyCommand extends AbstractCommand implements CommandExecutor
 {
+    public RemoveEnemyCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -34,9 +39,9 @@ public class RemoveEnemyCommand implements CommandExecutor
             if (source instanceof Player)
             {
                 Player player = (Player) source;
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-                Faction enemyFaction = FactionLogic.getFactionByName(optionalEnemyFactionName.get());
+                Faction enemyFaction = getPlugin().getFactionLogic().getFactionByName(optionalEnemyFactionName.get());
 
                 if (enemyFaction == null)
                 {
@@ -52,7 +57,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                         {
                             if (playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
-                                FactionLogic.removeEnemy(enemyFaction.getName(), playerFaction.getName());
+                                getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_REMOVED_WAR_STATE_WITH + " ", TextColors.GOLD, enemyFaction, TextColors.GREEN, "!"));
                             }
                             else
@@ -69,7 +74,7 @@ public class RemoveEnemyCommand implements CommandExecutor
                                 RemoveEnemy checkRemove = new RemoveEnemy(enemyFaction.getName(), playerFaction.getName());
                                 if (EagleFactions.RemoveEnemyList.contains(checkRemove))
                                 {
-                                    FactionLogic.removeEnemy(enemyFaction.getName(), playerFaction.getName());
+                                    getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName() + "!"));
                                     EagleFactions.RemoveEnemyList.remove(checkRemove);
                                 }

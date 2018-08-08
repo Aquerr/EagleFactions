@@ -26,7 +26,7 @@ public class PlayerManager
     private static Path playersPath;
     private static UserStorageService userStorageService;
 
-    public static void setup(Path configDir)
+    public PlayerManager(Path configDir)
     {
         try
         {
@@ -124,19 +124,19 @@ public class PlayerManager
 
     public static @Nullable FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
     {
-        if (faction.getLeader().equals(factionPlayer.getUniqueId().toString()))
+        if (faction.getLeader().equals(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.LEADER;
         }
-        else if(faction.getMembers().contains(factionPlayer.getUniqueId().toString()))
+        else if(faction.getMembers().contains(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.MEMBER;
         }
-        else if (faction.getOfficers().contains(factionPlayer.getUniqueId().toString()))
+        else if (faction.getOfficers().contains(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.OFFICER;
         }
-        else if (faction.getRecruits().contains(factionPlayer.getUniqueId().toString()))
+        else if (faction.getRecruits().contains(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.RECRUIT;
         }

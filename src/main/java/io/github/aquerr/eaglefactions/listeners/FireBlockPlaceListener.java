@@ -10,8 +10,13 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 import java.util.Optional;
 
-public class FireBlockPlaceListener
+public class FireBlockPlaceListener extends AbstractListener
 {
+    public FireBlockPlaceListener(EagleFactions eagleFactions)
+    {
+        super(eagleFactions);
+    }
+
     @Listener
     public void onIgnite(ChangeBlockEvent.Place event)
     {
@@ -23,7 +28,7 @@ public class FireBlockPlaceListener
             {
                 event.getTransactions().forEach(x->
                 {
-                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
+                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
 
                     if (x.getFinal().getState().getType() == BlockTypes.FIRE
                             && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().getName().equals("SafeZone")
@@ -38,7 +43,7 @@ public class FireBlockPlaceListener
         {
             event.getTransactions().forEach(x->
             {
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
+                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
 
                 if (x.getFinal().getState().getType() == BlockTypes.FIRE
                         && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().getName().equals("SafeZone")

@@ -3,6 +3,9 @@ package io.github.aquerr.eaglefactions.logic;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.config.Configuration;
+import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -17,7 +20,16 @@ import java.util.function.Consumer;
 
 public class AttackLogic
 {
-    public static void attack(Player player, Vector3i attackedChunk)
+    private ConfigFields _configFields;
+    private FactionLogic _factionLogic;
+
+    public AttackLogic(FactionLogic factionLogic, ConfigFields configFields)
+    {
+        _configFields = configFields;
+        _factionLogic = factionLogic;
+    }
+
+    public void attack(Player player, Vector3i attackedChunk)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -30,15 +42,15 @@ public class AttackLogic
             {
                 if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if(seconds == MainLogic.getAttackTime())
+                    if(seconds == _configFields.getAttackTime())
                     {
                         //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
-                        Faction chunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
+                        Faction chunkFaction = _factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
 
                         informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
 
-                        FactionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
+                        _factionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
                         task.cancel();
                     }
                     else
@@ -56,7 +68,7 @@ public class AttackLogic
         }).submit(EagleFactions.getPlugin());
     }
 
-    public static void blockClaiming(String factionName)
+    public void blockClaiming(String factionName)
     {
         if(EagleFactions.AttackedFactions.containsKey(factionName))
         {
@@ -69,7 +81,7 @@ public class AttackLogic
         }
     }
 
-    public static void runClaimingRestorer(String factionName)
+    public void runClaimingRestorer(String factionName)
     {
 
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
@@ -98,34 +110,34 @@ public class AttackLogic
         }).submit(EagleFactions.getPlugin());
     }
 
-    public static void informAboutAttack(Faction faction)
+    public void informAboutAttack(Faction faction)
     {
-        List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
+        List<Player> playersList = _factionLogic.getOnlinePlayers(faction);
 
         playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_UNDER + " ", TextColors.RED, PluginMessages.ATTACK, TextColors.RESET, "!")));
     }
 
-    public static void informAboutDestroying(Faction faction)
+    public void informAboutDestroying(Faction faction)
     {
-        List<Player> playersList = FactionLogic.getOnlinePlayers(faction);
+        List<Player> playersList = _factionLogic.getOnlinePlayers(faction);
 
         playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.ONE_OF_YOUR_CLAIMS_HAS_BEEN + " ", TextColors.RED, PluginMessages.DESTROYED, TextColors.RESET, " " + PluginMessages.BY_AN_ENEMY)));
     }
 
-    public static void blockHome(UUID playerUUID)
+    public void blockHome(UUID playerUUID)
     {
         if(EagleFactions.BlockedHome.containsKey(playerUUID))
         {
-            EagleFactions.BlockedHome.replace(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
+            EagleFactions.BlockedHome.replace(playerUUID, _configFields.getHomeBlockTimeAfterDeathInOwnFaction());
         }
         else
         {
-            EagleFactions.BlockedHome.put(playerUUID, MainLogic.getHomeBlockTimeAfterDeath());
+            EagleFactions.BlockedHome.put(playerUUID, _configFields.getHomeBlockTimeAfterDeathInOwnFaction());
             runHomeUsageRestorer(playerUUID);
         }
     }
 
-    public static void runHomeUsageRestorer(UUID playerUUID)
+    public void runHomeUsageRestorer(UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

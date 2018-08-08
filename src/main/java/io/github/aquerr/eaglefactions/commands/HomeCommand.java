@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -26,15 +26,20 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class HomeCommand implements CommandExecutor
+public class HomeCommand extends AbstractCommand implements CommandExecutor
 {
+    public HomeCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if(source instanceof Player)
         {
             Player player = (Player)source;
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if(optionalPlayerFaction.isPresent())
             {
@@ -47,23 +52,23 @@ public class HomeCommand implements CommandExecutor
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " " + PluginMessages.SECONDS + " ", TextColors.RED, PluginMessages.TO_BE_ABLE_TO_USE_IT_AGAIN));
                         return CommandResult.success();
                     }
-                    else if (MainLogic.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
+                    else if (getPlugin().getConfiguration().getConfigFileds().shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
                     {
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
                         return CommandResult.success();
                     }
                     else
                     {
-                        if(MainLogic.canHomeBetweenWorlds())
+                        if(getPlugin().getConfiguration().getConfigFileds().canHomeBetweenWorlds())
                         {
-                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
+                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFileds().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                             teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                         }
                         else
                         {
                             if(player.getWorld().getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                             {
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFileds().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                                 teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                             }
                             else
@@ -106,7 +111,7 @@ public class HomeCommand implements CommandExecutor
             {
                 if (player.getLocation().getBlockPosition().equals(lastBlockPosition))
                 {
-                    if (seconds >= MainLogic.getHomeDelayTime())
+                    if (seconds >= getPlugin().getConfiguration().getConfigFileds().getHomeDelayTime())
                     {
                         player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
@@ -130,7 +135,7 @@ public class HomeCommand implements CommandExecutor
 
     private void startHomeCooldown(UUID playerUUID)
     {
-        EagleFactions.HomeCooldownPlayers.put(playerUUID, MainLogic.getHomeCooldown());
+        EagleFactions.HomeCooldownPlayers.put(playerUUID, getPlugin().getConfiguration().getConfigFileds().getHomeCooldown());
 
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

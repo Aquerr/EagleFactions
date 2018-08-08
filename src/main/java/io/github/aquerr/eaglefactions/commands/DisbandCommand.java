@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class DisbandCommand implements CommandExecutor
+public class DisbandCommand extends AbstractCommand implements CommandExecutor
 {
+    public DisbandCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -25,14 +30,14 @@ public class DisbandCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if(optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
                 if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    boolean didSucceed = FactionLogic.disbandFaction(playerFaction.getName());
+                    boolean didSucceed = getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
 
                     if (didSucceed)
                     {
@@ -52,13 +57,13 @@ public class DisbandCommand implements CommandExecutor
                 {
                     try
                     {
-                        boolean didSucceed = FactionLogic.disbandFaction(playerFaction.getName());
+                        boolean didSucceed = getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
 
                         if (didSucceed)
                         {
                             player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
-                            if(EagleFactions.AutoClaimList.contains(player.getUniqueId())) EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                            EagleFactions.AutoClaimList.remove(player.getUniqueId());
                         }
                         else
                         {

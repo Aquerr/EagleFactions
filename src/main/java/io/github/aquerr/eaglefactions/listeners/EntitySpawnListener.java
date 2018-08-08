@@ -1,12 +1,12 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Hostile;
@@ -20,8 +20,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class EntitySpawnListener
+public class EntitySpawnListener extends AbstractListener
 {
+    public EntitySpawnListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onEntitySpawn(SpawnEntityEvent event)
     {
@@ -32,15 +37,15 @@ public class EntitySpawnListener
 
             if(entity instanceof Hostile)
             {
-                if (!MainLogic.getMobSpawning())
+                if (!getPlugin().getConfiguration().getConfigFileds().getMobSpawning())
                 {
-                    if (MainLogic.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
+                    if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                     {
                         event.setCancelled(true);
                         return;
                     }
 
-                    if(FactionLogic.isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
+                    if(getPlugin().getFactionLogic().isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
                     {
                         event.setCancelled(true);
                         return;
@@ -49,11 +54,11 @@ public class EntitySpawnListener
             }
             else if(entity instanceof Player)
             {
-                if(MainLogic.shouldSpawnAtHomeAfterDeath())
+                if(getPlugin().getConfiguration().getConfigFileds().shouldSpawnAtHomeAfterDeath())
                 {
                     Player player = (Player)entity;
 
-                    Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+                    Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                     if(optionalPlayerFaction.isPresent())
                     {
