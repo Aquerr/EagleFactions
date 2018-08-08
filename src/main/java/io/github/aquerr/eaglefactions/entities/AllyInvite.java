@@ -5,15 +5,24 @@ package io.github.aquerr.eaglefactions.entities;
  */
 public class AllyInvite
 {
+    private String factionName;
+    private String invitedFaction;
+
     public AllyInvite(String factionName, String invitedFaction)
     {
-        this.FactionName = factionName;
-        this.InvitedFaction = invitedFaction;
+        this.factionName = factionName;
+        this.invitedFaction = invitedFaction;
     }
 
-    public String FactionName;
-    public String InvitedFaction;
+    public String getFactionName()
+    {
+        return factionName;
+    }
 
+    public String getInvitedFaction()
+    {
+        return invitedFaction;
+    }
 
     @Override
     public boolean equals (Object allyInvite)
@@ -26,12 +35,12 @@ public class AllyInvite
         {
             return true;
         }
-        return this.FactionName.equals(((AllyInvite) allyInvite).FactionName) && this.InvitedFaction.equals(((AllyInvite) allyInvite).InvitedFaction);
+        return this.factionName.equals(((AllyInvite) allyInvite).factionName) && this.invitedFaction.equals(((AllyInvite) allyInvite).invitedFaction);
     }
 
     @Override
     public int hashCode()
     {
-        return FactionName.length();
+        return factionName.length();
     }
 }

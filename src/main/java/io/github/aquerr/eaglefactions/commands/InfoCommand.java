@@ -48,11 +48,11 @@ public class InfoCommand implements CommandExecutor
                 if(source.hasPermission(PluginPermissions.InfoCommand) || source.hasPermission(PluginPermissions.InfoCommandSelf) || source.hasPermission(PluginPermissions.InfoCommandOthers))
                 {
                     //Check permissions
-                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
+                    if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandSelf)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
                     }
-                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().Name.equals(faction.Name)))
+                    else if((!source.hasPermission(PluginPermissions.InfoCommand) && !source.hasPermission(PluginPermissions.InfoCommandOthers)) && (source instanceof Player && FactionLogic.getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !FactionLogic.getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
                     {
                         source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
                     }
@@ -93,42 +93,42 @@ public class InfoCommand implements CommandExecutor
         List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
-        if(!faction.Leader.equals("")) leaderName = PlayerManager.getPlayerName(UUID.fromString(faction.Leader)).get();
+        if(!faction.getLeader().toString().equals("")) leaderName = PlayerManager.getPlayerName(faction.getLeader()).get();
 
         String recruitList = "";
-        if(!faction.Recruits.isEmpty())
+        if(!faction.getRecruits().isEmpty())
         {
-            for (String recruit: faction.Recruits)
+            for (UUID recruit : faction.getRecruits())
             {
-                recruitList += PlayerManager.getPlayerName(UUID.fromString(recruit)).get() + ", ";
+                recruitList += PlayerManager.getPlayerName(recruit).get() + ", ";
             }
             recruitList = recruitList.substring(0, recruitList.length() - 2);
         }
 
         String membersList = "";
-        if(!faction.Members.isEmpty())
+        if(!faction.getMembers().isEmpty())
         {
-            for (String member: faction.Members)
+            for (UUID member: faction.getMembers())
             {
-                membersList += PlayerManager.getPlayerName(UUID.fromString(member)).get() + ", ";
+                membersList += PlayerManager.getPlayerName(member).get() + ", ";
             }
             membersList = membersList.substring(0, membersList.length() - 2);
         }
 
         String officersList = "";
-        if(!faction.Officers.isEmpty())
+        if(!faction.getOfficers().isEmpty())
         {
-            for (String officer: faction.Officers)
+            for (UUID officer: faction.getOfficers())
             {
-                officersList += PlayerManager.getPlayerName(UUID.fromString(officer)).get() + ", ";
+                officersList += PlayerManager.getPlayerName(officer).get() + ", ";
             }
             officersList = officersList.substring(0, officersList.length() - 2);
         }
 
         String alliancesList = "";
-        if(!faction.Alliances.isEmpty())
+        if(!faction.getAlliances().isEmpty())
         {
-            for (String alliance: faction.Alliances)
+            for (String alliance: faction.getAlliances())
             {
                 alliancesList += alliance + ", ";
             }
@@ -136,9 +136,9 @@ public class InfoCommand implements CommandExecutor
         }
 
         String enemiesList = "";
-        if(!faction.Enemies.isEmpty())
+        if(!faction.getEnemies().isEmpty())
         {
-            for (String enemy: faction.Enemies)
+            for (String enemy: faction.getEnemies())
             {
                 enemiesList += enemy + ", ";
             }
@@ -147,8 +147,8 @@ public class InfoCommand implements CommandExecutor
 
 
         Text info = Text.builder()
-                .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, faction.Name + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.TAG + ": "), faction.Tag.toBuilder().color(TextColors.GOLD).build(), Text.of("\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, faction.getName() + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.TAG + ": "), faction.getTag().toBuilder().color(TextColors.GOLD).build(), Text.of("\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
@@ -156,7 +156,7 @@ public class InfoCommand implements CommandExecutor
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.Claims.size()) + "/" + String.valueOf(PowerManager.getFactionPower(faction).intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.getClaims().size()) + "/" + String.valueOf(PowerManager.getFactionPower(faction).intValue())))
                 .build();
 
         factionInfo.add(info);

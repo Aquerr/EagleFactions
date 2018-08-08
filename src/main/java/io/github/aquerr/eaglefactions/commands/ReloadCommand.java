@@ -11,8 +11,13 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.text.Text;
 
-public class ReloadCommand implements CommandExecutor
+public class ReloadCommand extends AbstractCommand implements CommandExecutor
 {
+    public ReloadCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {

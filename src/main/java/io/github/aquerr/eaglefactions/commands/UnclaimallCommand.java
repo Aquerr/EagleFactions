@@ -32,9 +32,9 @@ public class UnclaimallCommand implements CommandExecutor
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    if(playerFaction.Home != null)
+                    if(playerFaction.getHome() != null)
                     {
                         FactionLogic.setHome(null, playerFaction, null);
                     }

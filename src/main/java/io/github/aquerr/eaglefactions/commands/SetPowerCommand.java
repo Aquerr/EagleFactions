@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-public class SetPowerCommand implements CommandExecutor
+public class SetPowerCommand extends AbstractCommand implements CommandExecutor
 {
+    public SetPowerCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {

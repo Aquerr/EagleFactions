@@ -32,7 +32,7 @@ public class DisbandCommand implements CommandExecutor
                 Faction playerFaction = optionalPlayerFaction.get();
                 if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    boolean didSucceed = FactionLogic.disbandFaction(playerFaction.Name);
+                    boolean didSucceed = FactionLogic.disbandFaction(playerFaction.getName());
 
                     if (didSucceed)
                     {
@@ -48,11 +48,11 @@ public class DisbandCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()))
                 {
                     try
                     {
-                        boolean didSucceed = FactionLogic.disbandFaction(playerFaction.Name);
+                        boolean didSucceed = FactionLogic.disbandFaction(playerFaction.getName());
 
                         if (didSucceed)
                         {

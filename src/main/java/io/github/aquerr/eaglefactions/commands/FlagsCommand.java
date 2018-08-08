@@ -37,7 +37,7 @@ public class FlagsCommand implements CommandExecutor
             {
                 Faction faction = optionalPlayerFaction.get();
 
-                if (faction.Leader.equals(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                if (faction.getLeader().equals(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     showFlags(player, faction);
                 }
@@ -63,7 +63,7 @@ public class FlagsCommand implements CommandExecutor
     {
         Text.Builder textBuilder = Text.builder();
         
-        for (Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.Flags.entrySet())
+        for (Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.getFlags().entrySet())
         {
             Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
 
@@ -82,7 +82,7 @@ public class FlagsCommand implements CommandExecutor
                     flagTextBuilder.append(Text.of(TextColors.RED, flagEntry.getKey().toString()));
                 }
 
-                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), flagEntry.getValue())));
+                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), !flagEntry.getValue())));
                 flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
 
                 textBuilder.append(flagTextBuilder.build());
@@ -100,11 +100,11 @@ public class FlagsCommand implements CommandExecutor
         player.sendMessage(textBuilder.build());
     }
 
-    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean toggled)
+    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean flagValue)
     {
         return commandSource ->
         {
-            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagTypes, toggled);
+            FactionLogic.toggleFlag(faction, factionMemberType, factionFlagTypes, flagValue);
             showFlags((Player)commandSource, faction);
         };
     }

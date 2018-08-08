@@ -40,7 +40,7 @@ public class HomeCommand implements CommandExecutor
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.Home != null)
+                if(playerFaction.getHome() != null)
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
@@ -57,14 +57,14 @@ public class HomeCommand implements CommandExecutor
                         if(MainLogic.canHomeBetweenWorlds())
                         {
                             source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
-                            teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
+                            teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                         }
                         else
                         {
-                            if(player.getWorld().getUniqueId().equals(playerFaction.Home.WorldUUID))
+                            if(player.getWorld().getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                             {
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, MainLogic.getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
-                                teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.Home);
+                                teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                             }
                             else
                             {
@@ -108,7 +108,7 @@ public class HomeCommand implements CommandExecutor
                 {
                     if (seconds >= MainLogic.getHomeDelayTime())
                     {
-                        player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.WorldUUID).get(), factionHome.BlockPosition));
+                        player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
                         startHomeCooldown(player.getUniqueId());
                         task.cancel();

@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-public class MaxPowerCommand implements CommandExecutor
+public class MaxPowerCommand extends AbstractCommand implements CommandExecutor
 {
+    public MaxPowerCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {

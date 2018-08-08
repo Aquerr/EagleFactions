@@ -43,11 +43,11 @@ public class SetHomeCommand implements CommandExecutor
                     return CommandResult.success();
                 }
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     Optional<Faction> chunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
 
-                    if(chunkFaction.isPresent() && chunkFaction.get().Name.equals(playerFaction.Name))
+                    if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
                     {
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 

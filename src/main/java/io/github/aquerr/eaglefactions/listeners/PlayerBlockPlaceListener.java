@@ -21,8 +21,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class PlayerBlockPlaceListener
+public class PlayerBlockPlaceListener extends AbstractListener
 {
+    public PlayerBlockPlaceListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
@@ -48,17 +53,17 @@ public class PlayerBlockPlaceListener
 
                  if(optionalChunkFaction.isPresent())
                  {
-                     if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                     if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                      {
                          return;
                      }
-                     else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                     else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                      {
                          return;
                      }
                      else if(optionalPlayerFaction.isPresent())
                      {
-                         if (!FlagManager.canPlaceBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                         if (!plugin.getFlagManager().canPlaceBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                          {
                              player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                              event.setCancelled(true);

@@ -50,9 +50,9 @@ public class RemoveEnemyCommand implements CommandExecutor
                         Faction playerFaction = optionalPlayerFaction.get();
                         if (EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if (playerFaction.Enemies.contains(enemyFaction.Name))
+                            if (playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
-                                FactionLogic.removeEnemy(enemyFaction.Name, playerFaction.Name);
+                                FactionLogic.removeEnemy(enemyFaction.getName(), playerFaction.getName());
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_REMOVED_WAR_STATE_WITH + " ", TextColors.GOLD, enemyFaction, TextColors.GREEN, "!"));
                             }
                             else
@@ -62,27 +62,27 @@ public class RemoveEnemyCommand implements CommandExecutor
                             return CommandResult.success();
                         }
 
-                        if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                        if (playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                         {
-                            if (playerFaction.Enemies.contains(enemyFaction.Name))
+                            if (playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
-                                RemoveEnemy checkRemove = new RemoveEnemy(enemyFaction.Name, playerFaction.Name);
+                                RemoveEnemy checkRemove = new RemoveEnemy(enemyFaction.getName(), playerFaction.getName());
                                 if (EagleFactions.RemoveEnemyList.contains(checkRemove))
                                 {
-                                    FactionLogic.removeEnemy(enemyFaction.Name, playerFaction.Name);
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.Name + "!"));
+                                    FactionLogic.removeEnemy(enemyFaction.getName(), playerFaction.getName());
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName() + "!"));
                                     EagleFactions.RemoveEnemyList.remove(checkRemove);
                                 }
                                 else if (!EagleFactions.RemoveEnemyList.contains(checkRemove))
                                 {
-                                    RemoveEnemy removeEnemy = new RemoveEnemy(playerFaction.Name, enemyFaction.Name);
+                                    RemoveEnemy removeEnemy = new RemoveEnemy(playerFaction.getName(), enemyFaction.getName());
                                     EagleFactions.RemoveEnemyList.add(removeEnemy);
 
-                                    Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(enemyFaction.Leader)).get();
+                                    Player enemyFactionLeader = PlayerManager.getPlayer(enemyFaction.getLeader()).get();
 
-                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
-                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f enemy remove " + playerFaction.Name, TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_IT));
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REQUESTED_END_OF_WAR_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.Name, TextColors.RESET, "!"));
+                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                            " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f enemy remove " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_IT));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REQUESTED_END_OF_WAR_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.RESET, "!"));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

@@ -1,15 +1,14 @@
 package io.github.aquerr.eaglefactions.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -21,8 +20,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class AttackCommand implements CommandExecutor
+public class AttackCommand extends AbstractCommand implements CommandExecutor
 {
+    public AttackCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if(source instanceof Player)
@@ -63,20 +67,20 @@ public class AttackCommand implements CommandExecutor
             Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
             if(optionalChunkFaction.isPresent())
             {
-                if(optionalChunkFaction.get().Name.equals("SafeZone") || optionalChunkFaction.get().Name.equals("WarZone"))
+                if(optionalChunkFaction.get().getName().equals("SafeZone") || optionalChunkFaction.get().getName().equals("WarZone"))
                 {
                     player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION));
                     return;
                 }
                 else
                 {
-                    if (FlagManager.canAttack(player, playerFaction))
+                    if (this.getPlugin().getFlagManager().canAttack(player, playerFaction))
                     {
                         Faction attackedFaction = optionalChunkFaction.get();
 
-                        if (!playerFaction.Name.equals(attackedFaction.Name))
+                        if (!playerFaction.getName().equals(attackedFaction.getName()))
                         {
-                            if(!playerFaction.Alliances.contains(attackedFaction.Name))
+                            if(!playerFaction.getAlliances().contains(attackedFaction.getName()))
                             {
                                 if(PowerManager.getFactionMaxPower(attackedFaction).doubleValue() * MainLogic.getAttackMinPowerPercentage() >= PowerManager.getFactionPower(attackedFaction).doubleValue() && PowerManager.getFactionPower(playerFaction).doubleValue() > PowerManager.getFactionPower(attackedFaction).doubleValue())
                                 {
@@ -86,7 +90,7 @@ public class AttackCommand implements CommandExecutor
                                     AttackLogic.informAboutAttack(attackedFaction);
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
 
-                                    AttackLogic.blockClaiming(attackedFaction.Name);
+                                    AttackLogic.blockClaiming(attackedFaction.getName());
                                     AttackLogic.attack(player, attackedClaim);
                                     return;
                                 }

@@ -37,18 +37,18 @@ public class MemberCommand implements CommandExecutor
                     Faction playerFaction = optionalPlayerFaction.get();
                     if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(optionalNewMemberFaction.isPresent() && optionalNewMemberFaction.get().Name.equals(playerFaction.Name))
+                        if(optionalNewMemberFaction.isPresent() && optionalNewMemberFaction.get().getName().equals(playerFaction.getName()))
                         {
-                            if(!playerFaction.Leader.equals(newMemberPlayer.getUniqueId().toString()))
+                            if(!playerFaction.getLeader().equals(newMemberPlayer.getUniqueId()))
                             {
-                                if(playerFaction.Officers.contains(newMemberPlayer.getUniqueId().toString()))
+                                if(playerFaction.getOfficers().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
-                                else if (playerFaction.Recruits.contains(newMemberPlayer.getUniqueId().toString()))
+                                else if (playerFaction.getRecruits().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.TO + " ", TextColors.BLUE, PluginMessages.MEMBERS, TextColors.WHITE, "!"));
                                 }
                             }
@@ -65,20 +65,20 @@ public class MemberCommand implements CommandExecutor
                         return CommandResult.success();
                     }
 
-                    if(playerFaction.Leader.equals(player.getUniqueId().toString()))
+                    if(playerFaction.getLeader().equals(player.getUniqueId()))
                     {
-                        if(optionalNewMemberFaction.isPresent() && optionalNewMemberFaction.get().Name.equals(playerFaction.Name))
+                        if(optionalNewMemberFaction.isPresent() && optionalNewMemberFaction.get().getName().equals(playerFaction.getName()))
                         {
-                            if(!playerFaction.Leader.equals(newMemberPlayer.getUniqueId().toString()))
+                            if(!playerFaction.getLeader().equals(newMemberPlayer.getUniqueId()))
                             {
-                                if(playerFaction.Officers.contains(newMemberPlayer.getUniqueId().toString()))
+                                if(playerFaction.getOfficers().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    FactionLogic.removeOfficerAndSetAsMember(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REMOVED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.FROM_YOUR + " ", TextColors.BLUE, PluginMessages.OFFICERS, TextColors.WHITE, "!"));
                                 }
-                                else if (playerFaction.Recruits.contains(newMemberPlayer.getUniqueId().toString()))
+                                else if (playerFaction.getRecruits().contains(newMemberPlayer.getUniqueId()))
                                 {
-                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId().toString(), playerFaction.Name);
+                                    FactionLogic.addMemberAndRemoveRecruit(newMemberPlayer.getUniqueId(), playerFaction.getName());
                                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, newMemberPlayer.getName(), TextColors.WHITE, " " + PluginMessages.TO + " ", TextColors.BLUE, PluginMessages.MEMBERS, TextColors.WHITE, "!"));
                                 }
                             }

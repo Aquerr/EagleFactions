@@ -32,16 +32,16 @@ public class TopCommand implements CommandExecutor
 
         for(Faction faction : factionsList)
         {
-            if(faction.Name.equalsIgnoreCase("safezone") || faction.Name.equalsIgnoreCase("warzone")) continue;
+            if(faction.getName().equalsIgnoreCase("safezone") || faction.getName().equalsIgnoreCase("warzone")) continue;
             if(index == 11) break;
 
             index++;
             String tag = "";
-            if(faction.Tag != null && !faction.Tag.equals("")) tag = "[" + faction.Tag + "] ";
+            if(faction.getTag() != null && !faction.getTag().equals("")) tag = "[" + faction.getTag() + "] ";
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.Name + " (" + PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.getName() + " (" + PowerManager.getFactionPower(faction) + "/" + PowerManager.getFactionMaxPower(faction) + ")"))
                             .build())
                     .build();
 

@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -27,8 +28,13 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class CreateCommand implements CommandExecutor
+public class CreateCommand extends AbstractCommand implements CommandExecutor
 {
+    public CreateCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {

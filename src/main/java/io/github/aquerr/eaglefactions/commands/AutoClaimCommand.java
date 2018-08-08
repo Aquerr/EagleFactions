@@ -31,7 +31,7 @@ public class AutoClaimCommand implements CommandExecutor
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
                     {

@@ -49,30 +49,30 @@ public class RemoveAllyCommand implements CommandExecutor
 
                         if(EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if(!playerFaction.Alliances.contains(removedFaction.Name))
+                            if(!playerFaction.getAlliances().contains(removedFaction.getName()))
                             {
-                                FactionLogic.removeAlly(playerFaction.Name, removedFaction.Name);
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.Name, TextColors.GREEN, "!"));
+                                FactionLogic.removeAlly(playerFaction.getName(), removedFaction.getName());
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.getName(), TextColors.GREEN, "!"));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_IS_NOT_IN_THE_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.Name + "!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_IS_NOT_IN_THE_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.getName() + "!"));
                             }
 
                             return CommandResult.success();
                         }
 
-                        if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                        if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                         {
-                            if(playerFaction.Alliances.contains(removedFaction.Name))
+                            if(playerFaction.getAlliances().contains(removedFaction.getName()))
                             {
-                                FactionLogic.removeAlly(playerFaction.Name, removedFaction.Name);
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.Name, TextColors.GREEN, "!"));
+                                FactionLogic.removeAlly(playerFaction.getName(), removedFaction.getName());
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.getName(), TextColors.GREEN, "!"));
                                 return CommandResult.success();
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_IS_NOT_IN_THE_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.Name + "!"));
+                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOUR_FACTION_IS_NOT_IN_THE_ALLIANCE_WITH + " ", TextColors.GOLD, removedFaction.getName() + "!"));
                             }
                         }
                         else

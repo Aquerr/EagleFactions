@@ -45,25 +45,25 @@ public class JoinCommand implements CommandExecutor
                         //If player has admin mode then force join.
                         if(EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            FactionLogic.joinFaction(player.getUniqueId(), faction.Name);
-                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.Name));
+                            FactionLogic.joinFaction(player.getUniqueId(), faction.getName());
+                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
 
                             return CommandResult.success();
                         }
 
                         for (Invite invite: EagleFactions.InviteList)
                         {
-                            if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(faction.Name))
+                            if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(faction.getName()))
                             {
                                 try
                                 {
                                     if(MainLogic.isPlayerLimit())
                                     {
                                         int playerCount = 0;
-                                        playerCount += faction.Leader.equals("") ? 0 : 1;
-                                        playerCount += faction.Officers.isEmpty() ? 0 : faction.Officers.size();
-                                        playerCount += faction.Members.isEmpty() ? 0 : faction.Members.size();
-                                        playerCount += faction.Recruits.isEmpty() ? 0 : faction.Recruits.size();
+                                        playerCount += faction.getLeader().toString().equals("") ? 0 : 1;
+                                        playerCount += faction.getOfficers().isEmpty() ? 0 : faction.getOfficers().size();
+                                        playerCount += faction.getMembers().isEmpty() ? 0 : faction.getMembers().size();
+                                        playerCount += faction.getRecruits().isEmpty() ? 0 : faction.getRecruits().size();
 
                                         if(playerCount >= MainLogic.getPlayerLimit())
                                         {
@@ -73,11 +73,11 @@ public class JoinCommand implements CommandExecutor
                                     }
 
                                     //TODO: Create a listener which will notify all players in faction that someone has joined.
-                                    FactionLogic.joinFaction(player.getUniqueId(), faction.Name);
+                                    FactionLogic.joinFaction(player.getUniqueId(), faction.getName());
 
-                                    EagleFactions.InviteList.remove(new Invite(faction.Name, player.getUniqueId()));
+                                    EagleFactions.InviteList.remove(new Invite(faction.getName(), player.getUniqueId()));
 
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.Name));
+                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
                                     return CommandResult.success();
                                 }
                                 catch (Exception exception)

@@ -7,8 +7,10 @@ import java.util.*;
 
 public class FactionsCache
 {
+    //TODO: Add a second thread for saving factions' data.
+
     private static Map<String, Faction> factionsCacheMap = new HashMap<>();
-    private static Set<String> claimsCacheList = new HashSet<>();
+    private static Set<String> claimsCacheSet = new HashSet<>();
 
     private FactionsCache()
     {
@@ -22,25 +24,25 @@ public class FactionsCache
 
     public static void addOrUpdateFactionCache(Faction faction)
     {
-        Faction factionToUpdate = factionsCacheMap.get(faction.Name.toLowerCase());
+        Faction factionToUpdate = factionsCacheMap.get(faction.getName().toLowerCase());
 
         if (factionToUpdate != null)
         {
-            factionsCacheMap.replace(factionToUpdate.Name.toLowerCase(), faction);
+            factionsCacheMap.replace(factionToUpdate.getName().toLowerCase(), faction);
 
-            for(String claim : factionToUpdate.Claims)
+            for(String claim : factionToUpdate.getClaims())
             {
-                claimsCacheList.remove(claim);
+                claimsCacheSet.remove(claim);
             }
         }
         else
         {
-            factionsCacheMap.put(faction.Name.toLowerCase(), faction);
+            factionsCacheMap.put(faction.getName().toLowerCase(), faction);
         }
 
-        if(!faction.Claims.isEmpty())
+        if(!faction.getClaims().isEmpty())
         {
-            claimsCacheList.addAll(faction.Claims);
+            claimsCacheSet.addAll(faction.getClaims());
         }
     }
 
@@ -49,9 +51,9 @@ public class FactionsCache
         Faction faction = factionsCacheMap.get(factionName.toLowerCase());
         factionsCacheMap.remove(factionName.toLowerCase());
 
-        for(String claim : faction.Claims)
+        for(String claim : faction.getClaims())
         {
-            claimsCacheList.remove(claim);
+            claimsCacheSet.remove(claim);
         }
     }
 
@@ -70,6 +72,6 @@ public class FactionsCache
 
     public static Set<String> getAllClaims()
     {
-        return claimsCacheList;
+        return claimsCacheSet;
     }
 }

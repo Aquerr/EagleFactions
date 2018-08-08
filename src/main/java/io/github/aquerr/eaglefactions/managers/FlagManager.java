@@ -10,54 +10,54 @@ import java.util.Map;
 
 public class FlagManager
 {
-    public static boolean canBreakBlock(Player player, Faction playerFaction, Faction chunkFaction)
+    public boolean canBreakBlock(Player player, Faction playerFaction, Faction chunkFaction)
     {
         return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.DESTROY);
     }
 
-    public static boolean canPlaceBlock(Player player, Faction playerFaction, Faction chunkFaction)
+    public boolean canPlaceBlock(Player player, Faction playerFaction, Faction chunkFaction)
     {
         return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.PLACE);
     }
 
-    public static boolean canInteract(Player player, Faction playerFaction, Faction chunkFaction)
+    public boolean canInteract(Player player, Faction playerFaction, Faction chunkFaction)
     {
         return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.USE);
     }
 
-    public static boolean canClaim(Player player, Faction playerFaction)
+    public boolean canClaim(Player player, Faction playerFaction)
     {
         return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
     }
 
-    public static boolean canAttack(Player player, Faction playerFaction)
+    public boolean canAttack(Player player, Faction playerFaction)
     {
         return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
     }
 
-    public static boolean canInvite(Player player, Faction playerFaction)
+    public boolean canInvite(Player player, Faction playerFaction)
     {
         return checkFlag(player, playerFaction, FactionFlagTypes.INVITE);
     }
 
-    private static boolean checkFlag(Player player, Faction playerFaction, FactionFlagTypes flagTypes)
+    private boolean checkFlag(Player player, Faction playerFaction, FactionFlagTypes flagTypes)
     {
         FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
 
-        return playerFaction.Flags.get(memberType).get(flagTypes);
+        return playerFaction.getFlags().get(memberType).get(flagTypes);
     }
 
-    private static boolean checkFlag(Player player, Faction playerFaction, Faction chunkFaction, FactionFlagTypes flagType)
+    private boolean checkFlag(Player player, Faction playerFaction, Faction chunkFaction, FactionFlagTypes flagType)
     {
-        if (playerFaction.Name.equals(chunkFaction.Name))
+        if (playerFaction.getName().equals(chunkFaction.getName()))
         {
             FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
 
-            return chunkFaction.Flags.get(memberType).get(flagType);
+            return chunkFaction.getFlags().get(memberType).get(flagType);
         }
-        else if (playerFaction.Alliances.contains(chunkFaction.Name))
+        else if (playerFaction.getAlliances().contains(chunkFaction.getName()))
         {
-            return chunkFaction.Flags.get(FactionMemberType.ALLY).get(flagType);
+            return chunkFaction.getFlags().get(FactionMemberType.ALLY).get(flagType);
         }
         else
         {

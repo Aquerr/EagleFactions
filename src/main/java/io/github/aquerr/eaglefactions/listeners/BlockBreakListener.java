@@ -20,8 +20,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class BlockBreakListener
+public class BlockBreakListener extends AbstractListener
 {
+    public BlockBreakListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
@@ -54,17 +59,17 @@ public class BlockBreakListener
 
                      if(optionalChunkFaction.isPresent())
                      {
-                         if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                         if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                          {
                              return;
                          }
-                         else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                         else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                          {
                              return;
                          }
                          else if(optionalPlayerFaction.isPresent())
                          {
-                             if (!FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                             if (!plugin.getFlagManager().canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                              {
                                  player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                  event.setCancelled(true);
@@ -103,17 +108,17 @@ public class BlockBreakListener
 
                 if (optionalChunkFaction.isPresent())
                 {
-                    if(!optionalChunkFaction.get().Name.equals("SafeZone") && !optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
+                    if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if(optionalChunkFaction.get().Name.equals("SafeZone"))
+                    else if(optionalChunkFaction.get().getName().equals("SafeZone"))
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if (optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                    else if (optionalChunkFaction.get().getName().equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
                     {
                         event.setCancelled(true);
                         return;

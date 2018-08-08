@@ -21,8 +21,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class PlayerInteractListener
+public class PlayerInteractListener extends AbstractListener
 {
+    public PlayerInteractListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onPlayerInteract(HandInteractEvent event, @Root Player player)
     {
@@ -42,7 +47,7 @@ public class PlayerInteractListener
                 }
 
                 Vector3d vector3d = event.getInteractionPoint().get();
-                Location location = new Location(world, vector3d);
+                Location location = new Location<>(world, vector3d);
                 Vector3i claim = location.getChunkPosition();
 
                 Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
@@ -50,17 +55,17 @@ public class PlayerInteractListener
 
                 if(optionalChunkFaction.isPresent())
                 {
-                    if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+                    if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
                     {
                         return;
                     }
-                    else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+                    else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                     {
                         return;
                     }
                     else if (optionalPlayerFaction.isPresent())
                     {
-                        if (!FlagManager.canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                        if (!plugin.getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                         {
                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
                             event.setCancelled(true);

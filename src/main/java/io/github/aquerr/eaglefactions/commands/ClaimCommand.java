@@ -7,7 +7,6 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MainLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -21,8 +20,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class ClaimCommand implements CommandExecutor
+public class ClaimCommand extends AbstractCommand implements CommandExecutor
 {
+    public ClaimCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -35,7 +39,7 @@ public class ClaimCommand implements CommandExecutor
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if (FlagManager.canClaim(player, playerFaction))
+                if (this.getPlugin().getFlagManager().canClaim(player, playerFaction))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
@@ -46,13 +50,13 @@ public class ClaimCommand implements CommandExecutor
                     {
                         if (!optionalChunkFaction.isPresent())
                         {
-                            if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.Claims.size())
+                            if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
                             {
-                                if (!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
+                                if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                                 {
-                                    if (!playerFaction.Claims.isEmpty())
+                                    if (!playerFaction.getClaims().isEmpty())
                                     {
-                                        if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
+                                        if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
                                         {
                                             FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
                                             player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));

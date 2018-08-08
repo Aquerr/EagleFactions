@@ -105,56 +105,56 @@ public class MapCommand implements CommandExecutor
                     {
                         Faction playerFaction = optionalPlayerFaction.get();
 
-                        if (optionalChunkFaction.get().Name.equals(playerFaction.Name))
+                        if (optionalChunkFaction.get().getName().equals(playerFaction.getName()))
                         {
                             textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                            playerFaction = optionalChunkFaction.get();
-                        } else if (playerFaction.Alliances.contains(optionalChunkFaction.get().Name))
+                        } else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
                         {
                             textBuilder.append(allianceMark);
-                            if (!allianceFactions.contains(optionalChunkFaction.get().Name))
+                            if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                allianceFactions += optionalChunkFaction.get().Name + ", ";
+                                allianceFactions += optionalChunkFaction.get().getName() + ", ";
                             }
-                        } else if (playerFaction.Enemies.contains(optionalChunkFaction.get().Name))
+                        } else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
                         {
                             textBuilder.append(enemyMark);
-                            if (!enemyFactions.contains(optionalChunkFaction.get().Name))
+                            if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                enemyFactions += optionalChunkFaction.get().Name + ", ";
+                                enemyFactions += optionalChunkFaction.get().getName() + ", ";
                             }
                         } else
                         {
-                            if (optionalChunkFaction.get().Name.equals("SafeZone"))
+                            if (optionalChunkFaction.get().getName().equals("SafeZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                            } else if (optionalChunkFaction.get().Name.equals("WarZone"))
+                            } else if (optionalChunkFaction.get().getName().equals("WarZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                             } else
                             {
                                 textBuilder.append(normalFactionMark);
                             }
-                            if (!normalFactions.contains(optionalChunkFaction.get().Name))
+                            if (!normalFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                normalFactions += optionalChunkFaction.get().Name + ", ";
+                                normalFactions += optionalChunkFaction.get().getName() + ", ";
                             }
                         }
                     } else
                     {
-                        if (optionalChunkFaction.get().Name.equals("SafeZone"))
+                        if (optionalChunkFaction.get().getName().equals("SafeZone"))
                         {
                             textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                        } else if (optionalChunkFaction.get().Name.equals("WarZone"))
+                        } else if (optionalChunkFaction.get().getName().equals("WarZone"))
                         {
                             textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                         } else
                         {
                             textBuilder.append(normalFactionMark);
                         }
-                        if (!normalFactions.contains(optionalChunkFaction.get().Name))
+                        if (!normalFactions.contains(optionalChunkFaction.get().getName()))
                         {
-                            normalFactions += optionalChunkFaction.get().Name + ", ";
+                            normalFactions += optionalChunkFaction.get().getName() + ", ";
                         }
                     }
                 }
@@ -163,7 +163,7 @@ public class MapCommand implements CommandExecutor
                     if (!MainLogic.isDelayedClaimingToggled() &&
                             (EagleFactions.AdminList.contains(player.getUniqueId()) ||
                                     (optionalPlayerFaction.isPresent() &&
-                                            (optionalPlayerFaction.get().Leader.equals(player.getUniqueId().toString()) || optionalPlayerFaction.get().Officers.contains(player.getUniqueId().toString())))))
+                                            (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId().toString())))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     } else
@@ -181,7 +181,7 @@ public class MapCommand implements CommandExecutor
 
         if (optionalPlayerPositionFaction.isPresent())
         {
-            playerPositionClaim = optionalPlayerPositionFaction.get().Name;
+            playerPositionClaim = optionalPlayerPositionFaction.get().getName();
         }
 
         //Print map
@@ -195,7 +195,7 @@ public class MapCommand implements CommandExecutor
         //Print factions on map
         if (optionalPlayerFaction.isPresent())
         {
-            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().Name));
+            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().getName()));
         }
         if (!normalFactions.isEmpty())
         {
@@ -227,18 +227,18 @@ public class MapCommand implements CommandExecutor
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if (playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
                     if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.Claims.size())
+                        if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
                         {
-                            if (!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
+                            if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                             {
-                                if (!playerFaction.Claims.isEmpty())
+                                if (!playerFaction.getClaims().isEmpty())
                                 {
-                                    if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
+                                    if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
                                     {
                                         FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
@@ -280,11 +280,11 @@ public class MapCommand implements CommandExecutor
                     else
                     {
                         //Check if faction's home was set in this claim. If yes then remove it.
-                        if (playerFaction.Home != null)
+                        if (playerFaction.getHome() != null)
                         {
-                            if (world.getUniqueId().equals(playerFaction.Home.WorldUUID))
+                            if (world.getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                             {
-                                Location homeLocation = world.getLocation(playerFaction.Home.BlockPosition);
+                                Location homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
 
                                 if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                                 {

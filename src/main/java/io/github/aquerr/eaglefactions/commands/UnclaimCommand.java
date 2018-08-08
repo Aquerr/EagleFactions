@@ -5,9 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -16,14 +14,18 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class UnclaimCommand implements CommandExecutor
+public class UnclaimCommand extends AbstractCommand implements CommandExecutor
 {
+    public UnclaimCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -43,11 +45,11 @@ public class UnclaimCommand implements CommandExecutor
 
                 if (optionalChunkFaction.isPresent())
                 {
-                    if (optionalChunkFaction.get().Home != null)
+                    if (optionalChunkFaction.get().getHome() != null)
                     {
-                        if (world.getUniqueId().equals(optionalChunkFaction.get().Home.WorldUUID))
+                        if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                         {
-                            Location homeLocation = world.getLocation(optionalChunkFaction.get().Home.BlockPosition);
+                            Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
 
                             if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
                         }
@@ -70,7 +72,7 @@ public class UnclaimCommand implements CommandExecutor
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if (FlagManager.canClaim(player, playerFaction))
+                if (this.getPlugin().getFlagManager().canClaim(player, playerFaction))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();
@@ -81,13 +83,13 @@ public class UnclaimCommand implements CommandExecutor
                     {
                         Faction chunkFaction = optionalChunkFaction.get();
 
-                        if (chunkFaction.Name.equals(playerFaction.Name))
+                        if (chunkFaction.getName().equals(playerFaction.getName()))
                         {
-                            if (optionalChunkFaction.get().Home != null)
+                            if (optionalChunkFaction.get().getHome() != null)
                             {
-                                if (world.getUniqueId().equals(optionalChunkFaction.get().Home.WorldUUID))
+                                if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                                 {
-                                    Location homeLocation = world.getLocation(optionalChunkFaction.get().Home.BlockPosition);
+                                    Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
 
                                     if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) FactionLogic.setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
                                 }

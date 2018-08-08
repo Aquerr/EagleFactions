@@ -57,12 +57,12 @@ public class EntitySpawnListener
 
                     if(optionalPlayerFaction.isPresent())
                     {
-                        FactionHome factionHome = optionalPlayerFaction.get().Home;
+                        FactionHome factionHome = optionalPlayerFaction.get().getHome();
                         if(factionHome != null)
                         {
                             event.setCancelled(true);
-                            World world = Sponge.getServer().getWorld(factionHome.WorldUUID).get();
-                            player.setLocation(new Location<World>(world, factionHome.BlockPosition));
+                            World world = Sponge.getServer().getWorld(factionHome.getWorldUUID()).get();
+                            player.setLocation(new Location<World>(world, factionHome.getBlockPosition()));
                             return;
                         }
                         else

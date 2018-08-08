@@ -19,8 +19,13 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.List;
 import java.util.Map;
 
-public class HelpCommand implements CommandExecutor
+public class HelpCommand extends AbstractCommand implements CommandExecutor
 {
+    public HelpCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {

@@ -36,13 +36,13 @@ public class SetLeaderCommand implements CommandExecutor
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
 
-                    if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().Name.equals(playerFaction.Name))
+                    if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
                         if (EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if (!playerFaction.Leader.equals(newLeaderPlayer.getUniqueId().toString()))
+                            if (!playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.Name);
+                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_SET + " ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.LEADER, TextColors.WHITE, "!"));
                             }
                             else
@@ -53,11 +53,11 @@ public class SetLeaderCommand implements CommandExecutor
                             return CommandResult.success();
                         }
 
-                        if (playerFaction.Leader.equals(player.getUniqueId().toString()))
+                        if (playerFaction.getLeader().equals(player.getUniqueId()))
                         {
-                            if (!playerFaction.Leader.equals(newLeaderPlayer.getUniqueId().toString()))
+                            if (!playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.Name);
+                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_SET + " ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
                             }
                             else

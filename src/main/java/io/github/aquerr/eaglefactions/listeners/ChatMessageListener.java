@@ -18,8 +18,13 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class ChatMessageListener
+public class ChatMessageListener extends AbstractListener
 {
+    public ChatMessageListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onChatMessage(MessageChannelEvent.Chat event, @Root Player player)
     {
@@ -65,7 +70,7 @@ public class ChatMessageListener
 
                     //TODO: Add option to style prefixes by user form config file.
 
-                    for (String allianceName : playerFaction.Alliances)
+                    for (String allianceName : playerFaction.getAlliances())
                     {
                         receivers.addAll(FactionLogic.getOnlinePlayers(FactionLogic.getFactionByName(allianceName)));
                     }
@@ -99,14 +104,14 @@ public class ChatMessageListener
             //Get faction prefix from Eagle Factions.
             if(MainLogic.getPrefixOption().equals("tag"))
             {
-                if(!playerFaction.Tag.toPlainSingle().equals(""))
+                if(!playerFaction.getTag().toPlainSingle().equals(""))
                 {
                     if (MainLogic.areColoredTagsAllowed())
                     {
                         //Get faction's tag
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                                .append(MainLogic.getFactionPrefixStart(), playerFaction.Tag, MainLogic.getFactionPrefixEnd())
+                                .append(MainLogic.getFactionPrefixStart(), playerFaction.getTag(), MainLogic.getFactionPrefixEnd())
                                 .build();
 
                         factionPrefixText.append(factionTag);
@@ -116,7 +121,7 @@ public class ChatMessageListener
                         //Get faction's tag
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                                .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.Tag), MainLogic.getFactionPrefixEnd())
+                                .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.getTag()), MainLogic.getFactionPrefixEnd())
                                 .build();
 
                         factionPrefixText.append(factionTag);
@@ -127,7 +132,7 @@ public class ChatMessageListener
             {
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
-                        .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.Name, TextColors.RESET), MainLogic.getFactionPrefixEnd())
+                        .append(MainLogic.getFactionPrefixStart(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), MainLogic.getFactionPrefixEnd())
                         .build();
 
                 factionPrefixText.append(factionNamePrefix);
@@ -136,7 +141,7 @@ public class ChatMessageListener
             if(MainLogic.shouldDisplayRank())
             {
                 //Get leader prefix.
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()))
                 {
                     Text leaderPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
@@ -146,7 +151,7 @@ public class ChatMessageListener
                 }
 
                 //Get officer prefix.
-                if(playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if(playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     Text officerPrefix = Text.builder()
                             .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))

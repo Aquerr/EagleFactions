@@ -40,7 +40,7 @@ public class EntityDamageListener
 
                     //Block all damage an attacked player would get if location is a SafeZone.
                     Optional<Faction> chunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
-                    if(chunkFaction.isPresent() && chunkFaction.get().Name.equals("SafeZone"))
+                    if(chunkFaction.isPresent() && chunkFaction.get().getName().equals("SafeZone"))
                     {
                         event.setBaseDamage(0);
                         event.setCancelled(true);
@@ -57,7 +57,7 @@ public class EntityDamageListener
 
                             //Block all damage a player could deal if location is SafeZone.
                             Optional<Faction> playerChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
-                            if(playerChunkFaction.isPresent() && playerChunkFaction.get().Name.equals("SafeZone"))
+                            if(playerChunkFaction.isPresent() && playerChunkFaction.get().getName().equals("SafeZone"))
                             {
                                 event.setBaseDamage(0);
                                 event.setCancelled(true);
@@ -74,7 +74,7 @@ public class EntityDamageListener
                                     if(optionalAttackedPlayerFaction.isPresent())
                                     {
                                         //Check if players are in the same faction
-                                        if(optionalPlayerFaction.get().Name.equals(optionalAttackedPlayerFaction.get().Name))
+                                        if(optionalPlayerFaction.get().getName().equals(optionalAttackedPlayerFaction.get().getName()))
                                         {
                                             //If friendlyfire is off the block the damage.
                                             if(!MainLogic.isFactionFriendlyFire())
@@ -95,13 +95,13 @@ public class EntityDamageListener
                                                 }
                                             }
                                         }//Check if players are in the alliance.
-                                        else if(optionalPlayerFaction.get().Alliances.contains(optionalAttackedPlayerFaction.get().Name) && !MainLogic.isAllianceFriendlyFire())
+                                        else if(optionalPlayerFaction.get().getAlliances().contains(optionalAttackedPlayerFaction.get().getName()) && !MainLogic.isAllianceFriendlyFire())
                                         {
                                             event.setBaseDamage(0);
                                             event.setCancelled(true);
                                             return;
                                         }
-                                        else if(optionalPlayerFaction.get().Alliances.contains(optionalAttackedPlayerFaction.get().Name) && MainLogic.isAllianceFriendlyFire())
+                                        else if(optionalPlayerFaction.get().getAlliances().contains(optionalAttackedPlayerFaction.get().getName()) && MainLogic.isAllianceFriendlyFire())
                                         {
                                             if(EagleFactions.getPlugin().getPVPLogger().isActive()) EagleFactions.getPlugin().getPVPLogger().addOrUpdatePlayer(attackedPlayer);
                                             if(event.willCauseDeath())

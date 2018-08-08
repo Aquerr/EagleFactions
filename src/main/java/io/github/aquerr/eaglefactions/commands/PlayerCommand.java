@@ -62,7 +62,7 @@ public class PlayerCommand implements CommandExecutor
 
             String playerFactionName = "";
             Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-            if(optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().Name;
+            if(optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().getName();
 
             Date lastPlayed = Date.from(player.getJoinData().lastPlayed().get());
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");

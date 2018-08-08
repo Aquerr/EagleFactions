@@ -33,18 +33,18 @@ public class KickCommand implements CommandExecutor
                 if(optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
-                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                    if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                     {
                         Player selectedPlayer = optionalSelectedPlayer.get();
                         Optional<Faction> optionalSelectedPlayerFaction = FactionLogic.getFactionByPlayerUUID(selectedPlayer.getUniqueId());
 
-                        if(optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().Name.equals(playerFaction.Name))
+                        if(optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().getName().equals(playerFaction.getName()))
                         {
-                            if(!playerFaction.Leader.equals(selectedPlayer.getUniqueId().toString()))
+                            if(!playerFaction.getLeader().equals(selectedPlayer.getUniqueId()))
                             {
-                                if(!playerFaction.Officers.contains(selectedPlayer.getUniqueId().toString()) || playerFaction.Leader.equals(player.getUniqueId().toString()))
+                                if(!playerFaction.getOfficers().contains(selectedPlayer.getUniqueId()) || playerFaction.getLeader().equals(player.getUniqueId()))
                                 {
-                                    FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFaction.Name);
+                                    FactionLogic.kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
 
                                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
 

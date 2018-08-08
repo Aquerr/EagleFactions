@@ -46,11 +46,11 @@ public class AddEnemyCommand implements CommandExecutor
 
                     if(EagleFactions.AdminList.contains(player.getUniqueId()))
                     {
-                        if(!playerFaction.Alliances.contains(enemyFaction.Name))
+                        if(!playerFaction.getAlliances().contains(enemyFaction.getName()))
                         {
-                            if(!playerFaction.Enemies.contains(enemyFaction.Name))
+                            if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
-                                FactionLogic.addEnemy(playerFaction.Name, enemyFaction.Name);
+                                FactionLogic.addEnemy(playerFaction.getName(), enemyFaction.getName());
                                 player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
                             }
                             else
@@ -65,21 +65,21 @@ public class AddEnemyCommand implements CommandExecutor
                         return CommandResult.success();
                     }
 
-                    if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                    if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                     {
-                        if(FactionLogic.getFactionsNames().contains(enemyFaction.Name.toLowerCase()))
+                        if(FactionLogic.getFactionsNames().contains(enemyFaction.getName().toLowerCase()))
                         {
-                            if(!playerFaction.Alliances.contains(enemyFaction.Name))
+                            if(!playerFaction.getAlliances().contains(enemyFaction.getName()))
                             {
-                                if(!playerFaction.Enemies.contains(enemyFaction.Name))
+                                if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
                                 {
-                                    FactionLogic.addEnemy(playerFaction.Name, enemyFaction.Name);
+                                    FactionLogic.addEnemy(playerFaction.getName(), enemyFaction.getName());
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.Name));
+                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.getName()));
 
                                     //TODO: Check if player is online
-                                    Player enemyFactionLeader = PlayerManager.getPlayer(UUID.fromString(enemyFaction.Leader)).get();
-                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.Name, TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
+                                    Player enemyFactionLeader = PlayerManager.getPlayer(enemyFaction.getLeader()).get();
+                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
 
                                     return CommandResult.success();
                                 }

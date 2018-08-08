@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
@@ -48,6 +49,9 @@ public class EagleFactions
 
     private Configuration _configuration;
     private PVPLogger _pvpLogger;
+    private PlayerManager _playerManager;
+    private FlagManager _flagManager;
+    private PowerManager _powerManager;
 
     @Inject
     private Logger _logger;
@@ -92,6 +96,10 @@ public class EagleFactions
         BlockedHome = new HashMap<>();
         ChatList = new HashMap<>();
         HomeCooldownPlayers = new HashMap<>();
+
+        _playerManager = new PlayerManager();
+        _powerManager = new PowerManager();
+        _flagManager = new FlagManager();
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
@@ -173,7 +181,7 @@ public class EagleFactions
                 .description(Text.of("Invites a player to the faction"))
                 .permission(PluginPermissions.InviteCommand)
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .executor(new InviteCommand())
+                .executor(new InviteCommand(this))
                 .build());
 
         //Kick a player from the faction.
@@ -289,14 +297,14 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))
                 .permission(PluginPermissions.ClaimCommand)
-                .executor(new ClaimCommand())
+                .executor(new ClaimCommand(this))
                 .build());
 
         //Unclaim command.
         Subcommands.put(Collections.singletonList("unclaim"), CommandSpec.builder()
                 .description(Text.of("Unclaim a land captured by your faction."))
                 .permission(PluginPermissions.UnclaimCommand)
-                .executor(new UnclaimCommand())
+                .executor(new UnclaimCommand(this))
                 .build());
 
         //Add Unclaimall Command
@@ -377,7 +385,7 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("attack"), CommandSpec.builder()
                 .description(Text.of("Destroy a claim"))
                 .permission(PluginPermissions.AttackCommand)
-                .executor(new AttackCommand())
+                .executor(new AttackCommand(this))
                 .build());
 
         //Reload Command
@@ -441,16 +449,14 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener());
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener());
-        Sponge.getEventManager().registerListeners(this, new BlockBreakListener());
-        Sponge.getEventManager().registerListeners(this, new PlayerInteractListener());
+        Sponge.getEventManager().registerListeners(this, new PlayerBlockPlaceListener(this));
+        Sponge.getEventManager().registerListeners(this, new BlockBreakListener(this));
+        Sponge.getEventManager().registerListeners(this, new PlayerInteractListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
-        Sponge.getEventManager().registerListeners(this, new ChatMessageListener());
+        Sponge.getEventManager().registerListeners(this, new ChatMessageListener(this));
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener());
         Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener());
         Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener());
-        Sponge.getEventManager().registerListeners(this, new MobTargetListener());
-
         Sponge.getEventManager().registerListeners(this, new SendCommandListener());
     }
 
@@ -462,5 +468,20 @@ public class EagleFactions
     public PVPLogger getPVPLogger()
     {
         return this._pvpLogger;
+    }
+
+    public FlagManager getFlagManager()
+    {
+        return _flagManager;
+    }
+
+    public PlayerManager getPlayerManager()
+    {
+        return _playerManager;
+    }
+
+    public PowerManager getPowerManager()
+    {
+        return _powerManager;
     }
 }

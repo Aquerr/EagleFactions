@@ -61,22 +61,14 @@ public class PlayerManager
     {
         Optional<User> oUser = userStorageService.get(playerUUID);
 
-        if(oUser.isPresent())
-        {
-            return oUser;
-        }
-        else return Optional.empty();
+        return oUser;
     }
 
     public static boolean isPlayerOnline(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
 
-        if(oUser.isPresent())
-        {
-            return oUser.get().isOnline();
-        }
-        else return false;
+        return oUser.map(User::isOnline).orElse(false);
     }
 
     public static void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
@@ -132,23 +124,23 @@ public class PlayerManager
 
     public static @Nullable FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
     {
-        if (faction.Leader.equals(factionPlayer.getUniqueId().toString()))
+        if (faction.getLeader().equals(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.LEADER;
         }
-        else if(faction.Members.contains(factionPlayer.getUniqueId().toString()))
+        else if(faction.getMembers().contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.MEMBER;
         }
-        else if (faction.Officers.contains(factionPlayer.getUniqueId().toString()))
+        else if (faction.getOfficers().contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.OFFICER;
         }
-        else if (faction.Recruits.contains(factionPlayer.getUniqueId().toString()))
+        else if (faction.getRecruits().contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.RECRUIT;
         }
-        else if (faction.Alliances.contains(factionPlayer.getUniqueId().toString()))
+        else if (faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.ALLY;
         }
