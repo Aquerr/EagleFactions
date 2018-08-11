@@ -2,30 +2,22 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
-import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class AddAllyCommand extends AbstractCommand implements CommandExecutor
@@ -86,7 +78,7 @@ public class AddAllyCommand extends AbstractCommand implements CommandExecutor
                         {
                             if(!playerFaction.getAlliances().contains(invitedFaction.getName()))
                             {
-                                AllyInvite checkInvite = new AllyInvite(invitedFaction.getName(), playerFaction.getName());
+                                AllyRequest checkInvite = new AllyRequest(invitedFaction.getName(), playerFaction.getName());
 
                                 //TODO: Check if player is online
                                 Player invitedFactionLeader = PlayerManager.getPlayer(playerFaction.getLeader()).get();
@@ -103,7 +95,7 @@ public class AddAllyCommand extends AbstractCommand implements CommandExecutor
                                 }
                                 else if(!EagleFactions.AllayInviteList.contains(checkInvite))
                                 {
-                                    AllyInvite invite = new AllyInvite(playerFaction.getName(), invitedFaction.getName());
+                                    AllyRequest invite = new AllyRequest(playerFaction.getName(), invitedFaction.getName());
                                     EagleFactions.AllayInviteList.add(invite);
 
                                     invitedFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +

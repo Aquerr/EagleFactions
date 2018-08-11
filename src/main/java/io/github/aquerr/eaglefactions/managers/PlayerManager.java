@@ -11,10 +11,13 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,6 +72,35 @@ public class PlayerManager
         Optional<User> oUser = getUser(playerUUID);
 
         return oUser.map(User::isOnline).orElse(false);
+    }
+
+    public static List<Player> getServerPlayers()
+    {
+        try
+        {
+            List<Player> playerList = new ArrayList<>();
+
+            File playerDirectory = new File(playersPath.toUri());
+            File[] playerFiles = playerDirectory.listFiles();
+
+            for(File playerFile : playerFiles)
+            {
+                String uuid = trimFileExtension(playerFile.getName());
+                if(uuid.split("-").length == 5)
+                {
+                    Optional<Player> optionalPlayer = getPlayer(UUID.fromString(uuid));
+                    optionalPlayer.ifPresent(playerList::add);
+                }
+            }
+
+            return playerList;
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+        }
+
+        return new ArrayList<>();
     }
 
     public static void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
@@ -146,5 +178,23 @@ public class PlayerManager
         }
 
         return null;
+    }
+
+    private static String trimFileExtension(String str) {
+        // Handle null case specially.
+
+        if (str == null) return null;
+
+        // Get position of last '.'.
+
+        int pos = str.lastIndexOf(".");
+
+        // If there wasn't any '.' just return the string as is.
+
+        if (pos == -1) return str;
+
+        // Otherwise return the string, up to the dot.
+
+        return str.substring(0, pos);
     }
 }

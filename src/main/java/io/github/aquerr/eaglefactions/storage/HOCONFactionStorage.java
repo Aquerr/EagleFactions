@@ -68,6 +68,7 @@ public class HOCONFactionStorage implements IStorage
     {
         return () ->
         {
+            int sleep = 1000;
             while(true)
             {
                 if(_factionsToSaveList.size() > 0)
@@ -76,13 +77,15 @@ public class HOCONFactionStorage implements IStorage
                     {
                         saveFaction(_factionsToSaveList.get(0));
                         _factionsToSaveList.remove(0);
+                        sleep = 1000;
                     }
                 }
                 else
                 {
                     try
                     {
-                        storageThread.wait(1000);
+                        Thread.sleep(sleep);
+                        sleep *= 2;
                     }
                     catch(InterruptedException e)
                     {

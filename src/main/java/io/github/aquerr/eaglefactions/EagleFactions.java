@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.commands.*;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.config.IConfiguration;
-import io.github.aquerr.eaglefactions.entities.AllyInvite;
+import io.github.aquerr.eaglefactions.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Invite;
-import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
+import io.github.aquerr.eaglefactions.entities.StopWarRequest;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -17,6 +17,7 @@ import io.github.aquerr.eaglefactions.managers.FlagManager;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
+import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -38,8 +39,8 @@ public class EagleFactions
 {
     public static Map<List<String>, CommandSpec> Subcommands;
     public static List<Invite> InviteList;
-    public static List<AllyInvite> AllayInviteList;
-    public static List<RemoveEnemy> RemoveEnemyList;
+    public static List<AllyRequest> AllayInviteList;
+    public static List<StopWarRequest> stopWarRequestList;
     public static List<UUID> AutoClaimList;
     public static List<UUID> AutoMapList;
     public static List<UUID> AdminList;
@@ -56,13 +57,13 @@ public class EagleFactions
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
 
-    @Inject
-    private Logger _logger;
-
-    public Logger getLogger()
-    {
-        return _logger;
-    }
+//    @Inject
+//    private Logger _logger;
+//
+//    public Logger getLogger()
+//    {
+//        return _logger;
+//    }
 
     private static EagleFactions eagleFactions;
 
@@ -91,7 +92,7 @@ public class EagleFactions
         Subcommands = new HashMap<>();
         InviteList = new ArrayList<>();
         AllayInviteList = new ArrayList<>();
-        RemoveEnemyList = new ArrayList<>();
+        stopWarRequestList = new ArrayList<>();
         AutoClaimList = new ArrayList<>();
         AutoMapList = new ArrayList<>();
         AdminList = new ArrayList<>();
@@ -149,6 +150,7 @@ public class EagleFactions
         _configuration = new Configuration(_configDir);
 
         MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
+//        messageLoader.loadPluginMessages();
 
         //PVPLogger
         _pvpLogger = new PVPLogger(getConfiguration());
@@ -198,7 +200,7 @@ public class EagleFactions
         Subcommands.put(Collections.singletonList("kick"), CommandSpec.builder()
                 .description(Text.of("Kicks a player from the faction"))
                 .permission(PluginPermissions.KickCommand)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(new FactionPlayerArgument(Text.of("player")))
                 .executor(new KickCommand(this))
                 .build());
 

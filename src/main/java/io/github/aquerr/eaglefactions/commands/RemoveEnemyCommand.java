@@ -3,8 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.RemoveEnemy;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.entities.StopWarRequest;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
@@ -19,7 +18,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class RemoveEnemyCommand extends AbstractCommand implements CommandExecutor
@@ -71,17 +69,17 @@ public class RemoveEnemyCommand extends AbstractCommand implements CommandExecut
                         {
                             if (playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
-                                RemoveEnemy checkRemove = new RemoveEnemy(enemyFaction.getName(), playerFaction.getName());
-                                if (EagleFactions.RemoveEnemyList.contains(checkRemove))
+                                StopWarRequest checkRemove = new StopWarRequest(enemyFaction.getName(), playerFaction.getName());
+                                if (EagleFactions.stopWarRequestList.contains(checkRemove))
                                 {
                                     getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName() + "!"));
-                                    EagleFactions.RemoveEnemyList.remove(checkRemove);
+                                    EagleFactions.stopWarRequestList.remove(checkRemove);
                                 }
-                                else if (!EagleFactions.RemoveEnemyList.contains(checkRemove))
+                                else if (!EagleFactions.stopWarRequestList.contains(checkRemove))
                                 {
-                                    RemoveEnemy removeEnemy = new RemoveEnemy(playerFaction.getName(), enemyFaction.getName());
-                                    EagleFactions.RemoveEnemyList.add(removeEnemy);
+                                    StopWarRequest stopWarRequest = new StopWarRequest(playerFaction.getName(), enemyFaction.getName());
+                                    EagleFactions.stopWarRequestList.add(stopWarRequest);
 
                                     Player enemyFactionLeader = PlayerManager.getPlayer(enemyFaction.getLeader()).get();
 
@@ -96,9 +94,9 @@ public class RemoveEnemyCommand extends AbstractCommand implements CommandExecut
                                         @Override
                                         public void run()
                                         {
-                                            if (EagleFactions.RemoveEnemyList.contains(removeEnemy) && EagleFactions.RemoveEnemyList != null)
+                                            if (EagleFactions.stopWarRequestList.contains(stopWarRequest) && EagleFactions.stopWarRequestList != null)
                                             {
-                                                EagleFactions.RemoveEnemyList.remove(removeEnemy);
+                                                EagleFactions.stopWarRequestList.remove(stopWarRequest);
                                             }
                                         }
                                     }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());

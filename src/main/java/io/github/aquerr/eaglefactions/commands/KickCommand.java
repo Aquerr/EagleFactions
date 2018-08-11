@@ -45,30 +45,48 @@ public class KickCommand extends AbstractCommand implements CommandExecutor
 
                         if(optionalSelectedPlayerFaction.isPresent() && optionalSelectedPlayerFaction.get().getName().equals(playerFaction.getName()))
                         {
-                            if(!playerFaction.getLeader().equals(selectedPlayer.getUniqueId()))
-                            {
-                                if(!playerFaction.getOfficers().contains(selectedPlayer.getUniqueId()) || playerFaction.getLeader().equals(player.getUniqueId()))
-                                {
-                                    getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
-
-                                    //TODO: Add listener that will inform players in a faction that someone has left their faction.
-
-                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_KICKED + " ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.FROM_THE_FACTION));
-                                    selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
-
-                                    EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
-
-                                    return CommandResult.success();
-                                }
-                                else
-                                {
-                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
-                                }
-                            }
-                            else
+                            if(playerFaction.getLeader().equals(selectedPlayer.getUniqueId()) || (playerFaction.getOfficers().contains(player.getUniqueId()) && playerFaction.getOfficers().contains(selectedPlayer.getUniqueId())))
                             {
                                 source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
                             }
+                            else
+                            {
+                                getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
+
+                                //TODO: Add listener that will inform players in a faction that someone has left their faction.
+
+                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_KICKED + " ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.FROM_THE_FACTION));
+                                selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
+
+                                EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
+
+                                return CommandResult.success();
+                            }
+
+//                            if(!playerFaction.getLeader().equals(selectedPlayer.getUniqueId()))
+//                            {
+//                                if(!playerFaction.getOfficers().contains(selectedPlayer.getUniqueId()) || playerFaction.getLeader().equals(player.getUniqueId()))
+//                                {
+//                                    getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
+//
+//                                    //TODO: Add listener that will inform players in a faction that someone has left their faction.
+//
+//                                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_KICKED + " ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.FROM_THE_FACTION));
+//                                    selectedPlayer.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
+//
+//                                    EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
+//
+//                                    return CommandResult.success();
+//                                }
+//                                else
+//                                {
+//                                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
+//                                }
+//                            }
+//                            else
+//                            {
+//                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
+//                            }
                         }
                         else
                         {
