@@ -210,7 +210,8 @@ public class PluginMessages
 
     //Member
     public static String YOU_PROMOTED;
-    //public static String YOU_DEMOTED;
+    public static String YOU_CANT_PROMOTE_THIS_PLAYER_MORE;
+    public static String YOU_DEMOTED;
     public static String TO;
     public static String YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER;
 

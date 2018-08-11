@@ -679,4 +679,16 @@ public class FactionLogic
 
         factionsStorage.addOrUpdateFaction(faction);
     }
+
+    public static FactionMemberType promotePlayer(Faction playerFaction, FactionMemberType promotedByPlayerType, Player promotedPlayer)
+    {
+        if(playerFaction.Recruits.contains(promotedPlayer.getUniqueId().toString()))
+        {
+            //TODO: Add logic for handling player promoting here.
+
+            return FactionMemberType.RECRUIT;
+        }
+
+        return FactionMemberType.RECRUIT;
+    }
 }
