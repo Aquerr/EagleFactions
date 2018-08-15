@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.storage;
+package io.github.aquerr.eaglefactions.storage.hocon;
 
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -19,7 +20,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 
-public class HOCONFactionStorage implements IStorage
+public class HOCONFactionStorage implements IFactionStorage
 {
     private Path filePath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
@@ -85,7 +86,8 @@ public class HOCONFactionStorage implements IStorage
                     try
                     {
                         Thread.sleep(sleep);
-                        sleep *= 2;
+                        if(sleep < 60000)
+                            sleep *= 2;
                     }
                     catch(InterruptedException e)
                     {
@@ -483,7 +485,7 @@ public class HOCONFactionStorage implements IStorage
         {
             configNode.getNode(new Object[]{"factions", factionName, "leader"}).setValue("");
             needToSave = true;
-            return null;
+            return new UUID(0,0);
         }
     }
 

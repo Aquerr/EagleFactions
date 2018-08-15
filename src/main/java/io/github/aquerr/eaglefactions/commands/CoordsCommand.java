@@ -54,7 +54,7 @@ public class CoordsCommand extends AbstractCommand implements CommandExecutor
 
                 if (!playerFaction.getLeader().toString().equals(""))
                 {
-                    Optional<Player> leader = PlayerManager.getPlayer(playerFaction.getLeader());
+                    Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(playerFaction.getLeader());
 
                     if(leader.isPresent())
                     {
@@ -70,7 +70,7 @@ public class CoordsCommand extends AbstractCommand implements CommandExecutor
                 {
                     for (UUID officerUUID: playerFaction.getOfficers())
                     {
-                        Optional<Player> officer = PlayerManager.getPlayer(officerUUID);
+                        Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
 
                         if(officer.isPresent())
                         {
@@ -87,7 +87,7 @@ public class CoordsCommand extends AbstractCommand implements CommandExecutor
                 {
                     for (UUID memberUUID: playerFaction.getMembers())
                     {
-                        Optional<Player> member = PlayerManager.getPlayer(memberUUID);
+                        Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
 
                         if(member.isPresent())
                         {
@@ -104,7 +104,7 @@ public class CoordsCommand extends AbstractCommand implements CommandExecutor
                 {
                     for (UUID recruitUUID: playerFaction.getRecruits())
                     {
-                        Optional<Player> recruit = PlayerManager.getPlayer(recruitUUID);
+                        Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
 
                         if(recruit.isPresent())
                         {

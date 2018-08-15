@@ -77,42 +77,45 @@ public class PVPLogger
     {
         //Update player's time if it already in a list.
 
-        if (_attackedPlayers.containsKey(player.getUniqueId()))
+        synchronized(_attackedPlayers)
         {
-            _attackedPlayers.replace(player.getUniqueId(), getBlockTime());
-        }
-        else
-        {
-            _attackedPlayers.put(player.getUniqueId(), getBlockTime());
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.PVPLOGGER_HAS_TURNED_ON + " " + PluginMessages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + PluginMessages.SECONDS + "!"));
-
-            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-            taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+            if (_attackedPlayers.containsKey(player.getUniqueId()))
             {
-                @Override
-                public void accept(Task task)
-                {
-                    if (_attackedPlayers.containsKey(player.getUniqueId()))
-                    {
-                        int seconds = _attackedPlayers.get(player.getUniqueId());
+                _attackedPlayers.replace(player.getUniqueId(), getBlockTime());
+            }
+            else
+            {
+                _attackedPlayers.put(player.getUniqueId(), getBlockTime());
+                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.PVPLOGGER_HAS_TURNED_ON + " " + PluginMessages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + PluginMessages.SECONDS + "!"));
 
-                        if (seconds <= 0)
+                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+                taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+                {
+                    @Override
+                    public void accept(Task task)
+                    {
+                        if (_attackedPlayers.containsKey(player.getUniqueId()))
                         {
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
-                            _attackedPlayers.remove(player.getUniqueId());
-                            task.cancel();
+                            int seconds = _attackedPlayers.get(player.getUniqueId());
+
+                            if (seconds <= 0)
+                            {
+                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
+                                _attackedPlayers.remove(player.getUniqueId());
+                                task.cancel();
+                            }
+                            else
+                            {
+                                _attackedPlayers.replace(player.getUniqueId(), seconds, seconds - 1);
+                            }
                         }
                         else
                         {
-                            _attackedPlayers.replace(player.getUniqueId(), seconds, seconds - 1);
+                            task.cancel();
                         }
                     }
-                    else
-                    {
-                        task.cancel();
-                    }
-                }
-            }).submit(EagleFactions.getPlugin());
+                }).async().submit(EagleFactions.getPlugin());
+            }
         }
     }
 

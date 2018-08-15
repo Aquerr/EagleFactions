@@ -81,7 +81,7 @@ public class AddAllyCommand extends AbstractCommand implements CommandExecutor
                                 AllyRequest checkInvite = new AllyRequest(invitedFaction.getName(), playerFaction.getName());
 
                                 //TODO: Check if player is online
-                                Player invitedFactionLeader = PlayerManager.getPlayer(playerFaction.getLeader()).get();
+                                Player invitedFactionLeader = getPlugin().getPlayerManager().getPlayer(playerFaction.getLeader()).get();
 
                                 if(EagleFactions.AllayInviteList.contains(checkInvite))
                                 {

@@ -81,7 +81,7 @@ public class RemoveEnemyCommand extends AbstractCommand implements CommandExecut
                                     StopWarRequest stopWarRequest = new StopWarRequest(playerFaction.getName(), enemyFaction.getName());
                                     EagleFactions.stopWarRequestList.add(stopWarRequest);
 
-                                    Player enemyFactionLeader = PlayerManager.getPlayer(enemyFaction.getLeader()).get();
+                                    Player enemyFactionLeader = getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).get();
 
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
                                             " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f enemy remove " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_IT));

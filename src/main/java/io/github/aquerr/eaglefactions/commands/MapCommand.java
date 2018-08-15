@@ -168,7 +168,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                     if (!getPlugin().getConfiguration().getConfigFileds().shouldDelayClaim() &&
                             (EagleFactions.AdminList.contains(player.getUniqueId()) ||
                                     (optionalPlayerFaction.isPresent() &&
-                                            (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId().toString())))))
+                                            (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     } else

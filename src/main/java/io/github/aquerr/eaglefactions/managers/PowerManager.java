@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -9,9 +8,10 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.Text;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -23,19 +23,20 @@ import java.util.function.Consumer;
 
 public class PowerManager
 {
+    private EagleFactions _plugin;
+
     private ConfigFields _configFields;
     private CommentedConfigurationNode _factionsNode;
-    private Path playersPath;
 
-    public PowerManager(IConfiguration configuration, Path configDir)
+    public PowerManager(EagleFactions eagleFactions)
     {
-        _configFields = configuration.getConfigFileds();
+        _plugin = eagleFactions;
+        _configFields = eagleFactions.getConfiguration().getConfigFileds();
+        Path configDir = eagleFactions.getConfigDir();
 
         try
         {
             _factionsNode = HoconConfigurationLoader.builder().setPath(Paths.get(configDir.resolve("data") + "/factions.conf")).build().load();
-            playersPath = configDir.resolve("players");
-            if (!Files.exists(playersPath)) Files.createDirectory(playersPath);
         }
         catch (IOException exception)
         {
@@ -43,70 +44,11 @@ public class PowerManager
         }
     }
 
-    public boolean checkIfPlayerExists(UUID playerUUID)
+    public BigDecimal getPlayerPower(@Nullable UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-        if(Files.exists(playerFile))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public void addPlayer(UUID playerUUID)
-    {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-        try
-        {
-            Files.createFile(playerFile);
-
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            playerNode.getNode("power").setValue(_configFields.getStartingPower());
-            playerNode.getNode("maxpower").setValue(_configFields.getGlobalMaxPower());
-            configLoader.save(playerNode);
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
-    }
-
-    public BigDecimal getPlayerPower(UUID playerUUID)
-    {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-        if(checkIfPlayerExists(playerUUID))
-        {
-            try
-            {
-                ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-                CommentedConfigurationNode playerNode = configLoader.load();
-
-                 if(playerNode.getNode("power").getValue() != null)
-                 {
-                     BigDecimal playerPower =  new BigDecimal(playerNode.getNode("power").getString());
-                     return playerPower;
-                 }
-            }
-            catch (Exception exception)
-            {
-                exception.printStackTrace();
-            }
-        }
-        else
-        {
-            addPlayer(playerUUID);
-            return getPlayerPower(playerUUID);
-        }
-        return BigDecimal.ZERO;
+        if (playerUUID == null)
+            return BigDecimal.ZERO;
+        return _plugin.getPlayerManager().getPlayerPower(playerUUID);
     }
 
     public BigDecimal getFactionPower(Faction faction)
@@ -115,9 +57,7 @@ public class PowerManager
         {
             ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.getName(), "power");
 
-            BigDecimal factionPowerInFile = new BigDecimal(powerNode.getDouble());
-
-            return factionPowerInFile;
+            return new BigDecimal(powerNode.getDouble());
         }
 
         BigDecimal factionPower = BigDecimal.ZERO;
@@ -159,9 +99,7 @@ public class PowerManager
         {
             ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.getName(), "power");
 
-            BigDecimal factionPowerInFile = new BigDecimal(powerNode.getDouble());
-
-            return factionPowerInFile;
+            return new BigDecimal(powerNode.getDouble());
         }
 
         BigDecimal factionMaxPower = BigDecimal.ZERO;
@@ -200,88 +138,33 @@ public class PowerManager
 
     public BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
+        if(playerUUID == null)
+            return BigDecimal.ZERO;
 
-        try
-        {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            Object value = playerNode.getNode("maxpower").getValue();
-
-            if (value != null)
-            {
-                BigDecimal playerMaxPower =  new BigDecimal(value.toString());
-
-                return playerMaxPower;
-            }
-            else
-            {
-                playerNode.getNode("maxpower").setValue(_configFields.getGlobalMaxPower());
-
-                return _configFields.getGlobalMaxPower();
-            }
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
-        return BigDecimal.ZERO;
+        return _plugin.getPlayerManager().getPlayerMaxPower(playerUUID);
     }
 
     public void addPower(UUID playerUUID, boolean isKillAward)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
+        BigDecimal playerPower = _plugin.getPlayerManager().getPlayerPower(playerUUID);
 
-        try
+        if(playerPower.add(_configFields.getPowerIncrement()).doubleValue() < getPlayerMaxPower(playerUUID).doubleValue())
         {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
-
-            if(getPlayerPower(playerUUID).add(_configFields.getPowerIncrement()).doubleValue() < getPlayerMaxPower(playerUUID).doubleValue())
+            if(isKillAward)
             {
-                if(isKillAward)
-                {
-                    BigDecimal killAward = _configFields.getKillAward();
-                    playerNode.getNode("power").setValue(playerPower.add(killAward));
-                }
-                else
-                {
-                    playerNode.getNode("power").setValue(playerPower.add(_configFields.getPowerIncrement()));
-                }
-
-                configLoader.save(playerNode);
+                BigDecimal killAward = _configFields.getKillAward();
+                _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower.add(killAward));
+            }
+            else
+            {
+                _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower.add(_configFields.getPowerIncrement()));
             }
         }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
     }
 
     public void setPower(UUID playerUUID, BigDecimal power)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-        try
-        {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            playerNode.getNode("power").setValue(power);
-            configLoader.save(playerNode);
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
+        _plugin.getPlayerManager().setPlayerPower(playerUUID, power);
     }
 
     public void startIncreasingPower(UUID playerUUID)
@@ -293,7 +176,7 @@ public class PowerManager
             @Override
             public void accept(Task task)
             {
-                if (!PlayerManager.isPlayerOnline(playerUUID)) task.cancel();
+                if (!_plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
 
                 if(getPlayerPower(playerUUID).add(_configFields.getPowerIncrement()).doubleValue() < getPlayerMaxPower(playerUUID).doubleValue())
                 {
@@ -304,30 +187,16 @@ public class PowerManager
                     setPower(playerUUID, getPlayerMaxPower(playerUUID));
                 }
             }
-        }).submit(EagleFactions.getPlugin());
+        }).async().submit(_plugin);
     }
 
     public void decreasePower(UUID playerUUID)
     {
-        if(getPlayerPower(playerUUID).subtract(_configFields.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
+        BigDecimal playerPower = _plugin.getPlayerManager().getPlayerPower(playerUUID);
+
+        if(playerPower.subtract(_configFields.getPowerDecrement()).doubleValue() > BigDecimal.ZERO.doubleValue())
         {
-            Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-            try
-            {
-                ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-                CommentedConfigurationNode playerNode = configLoader.load();
-
-                BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
-
-                playerNode.getNode("power").setValue(playerPower.subtract(_configFields.getPowerDecrement()));
-                configLoader.save(playerNode);
-            }
-            catch (Exception exception)
-            {
-                exception.printStackTrace();
-            }
+                _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower.subtract(_configFields.getPowerDecrement()));
         }
         else
         {
@@ -337,53 +206,21 @@ public class PowerManager
 
     public void penalty(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
+        BigDecimal playerPower = _plugin.getPlayerManager().getPlayerPower(playerUUID);
+        BigDecimal penalty = _configFields.getPenalty();
 
-        try
+        if(playerPower.doubleValue() - penalty.doubleValue() > 0)
         {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            BigDecimal playerPower = new BigDecimal(playerNode.getNode("power").getString());
-
-            BigDecimal penalty = _configFields.getPenalty();
-
-            if(playerPower.doubleValue() - penalty.doubleValue() > 0)
-            {
-                playerNode.getNode("power").setValue(playerPower.subtract(penalty));
-//                updateFactionPower(playerUUID, penalty, false);
-            }
-            else
-            {
-                playerNode.getNode("power").setValue(0.0);
-//                updateFactionPower(playerUUID, penalty, false);
-            }
-
-            configLoader.save(playerNode);
+            _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower.subtract(penalty));
         }
-        catch (Exception exception)
+        else
         {
-            exception.printStackTrace();
+            _plugin.getPlayerManager().setPlayerPower(playerUUID, new BigDecimal(0.0));
         }
     }
 
     public void setMaxPower(UUID playerUUID, BigDecimal power)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-        try
-        {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            playerNode.getNode("maxpower").setValue(power);
-            configLoader.save(playerNode);
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
+        _plugin.getPlayerManager().setPlayerMaxPower(playerUUID, power);
     }
 }

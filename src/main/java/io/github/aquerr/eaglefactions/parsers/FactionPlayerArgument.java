@@ -1,23 +1,22 @@
 package io.github.aquerr.eaglefactions.parsers;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FactionPlayerArgument extends CommandElement
 {
-    List<Player> _serverPlayers = PlayerManager.getServerPlayers();
-
     public FactionPlayerArgument(@Nullable Text key)
     {
         super(key);
@@ -25,18 +24,18 @@ public class FactionPlayerArgument extends CommandElement
 
     @Nullable
     @Override
-    protected Player parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
+    protected String parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
     {
         //Just in case someone new entered the server after start.
-        this._serverPlayers = PlayerManager.getServerPlayers();
+        Set<String> serverPlayers = EagleFactions.getPlugin().getPlayerManager().getServerPlayerNames();
 
         if (args.hasNext())
         {
             String argument = args.next();
 
-            for(Player player : _serverPlayers)
+            for(String player : serverPlayers)
             {
-                if(player.getName().equals(argument))
+                if(player.equals(argument))
                     return player;
             }
 
@@ -51,7 +50,7 @@ public class FactionPlayerArgument extends CommandElement
     @Override
     public List<String> complete(CommandSource src, CommandArgs args, CommandContext context)
     {
-        List<String> list = _serverPlayers.stream().map(User::getName).collect(Collectors.toList());
+        List<String> list = new ArrayList<>(EagleFactions.getPlugin().getPlayerManager().getServerPlayerNames());
 
         if (args.hasNext())
         {

@@ -77,7 +77,7 @@ public class PlayerCommand extends AbstractCommand implements CommandExecutor
             //TODO: Show if player is online or offline.
 
             Text info = Text.builder()
-                    .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, PlayerManager.getPlayerName(player.getUniqueId()).get() + "\n"))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, getPlugin().getPlayerManager().getPlayerName(player.getUniqueId()).get() + "\n"))
                     .append(Text.of(TextColors.AQUA, PluginMessages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
                     .append(Text.of(TextColors.AQUA, PluginMessages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
                     .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())))

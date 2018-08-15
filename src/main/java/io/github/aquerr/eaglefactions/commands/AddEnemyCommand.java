@@ -83,7 +83,7 @@ public class AddEnemyCommand extends AbstractCommand implements CommandExecutor
                                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.getName()));
 
                                     //TODO: Check if player is online
-                                    Player enemyFactionLeader = PlayerManager.getPlayer(enemyFaction.getLeader()).get();
+                                    Player enemyFactionLeader = getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).get();
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
 
                                     return CommandResult.success();

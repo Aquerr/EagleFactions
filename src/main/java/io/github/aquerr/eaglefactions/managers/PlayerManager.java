@@ -1,7 +1,11 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
+import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -11,14 +15,12 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -26,137 +28,96 @@ import java.util.UUID;
  */
 public class PlayerManager
 {
-    private static Path playersPath;
-    private static UserStorageService userStorageService;
+    private ConfigFields _configFields;
+    private UserStorageService userStorageService;
+    private IPlayerStorage _playerStorage;
 
-    public PlayerManager(Path configDir)
+    public PlayerManager(EagleFactions plugin)
     {
-        try
-        {
-            playersPath = configDir.resolve("players");
-            if (!Files.exists(playersPath)) Files.createDirectory(playersPath);
+        _configFields = plugin.getConfiguration().getConfigFileds();
+        _playerStorage = new HOCONPlayerStorage(plugin.getConfigDir());
 
-            Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
-            optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
-
-        }
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
+        Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
+        optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
     }
 
-    public static Optional<String> getPlayerName(UUID playerUUID)
+    public boolean addPlayer(UUID playerUUID, String playerName)
+    {
+        return _playerStorage.addPlayer(playerUUID, playerName, _configFields.getStartingPower(), _configFields.getGlobalMaxPower());
+    }
+
+    public BigDecimal getPlayerPower(UUID playerUUID)
+    {
+        return _playerStorage.getPlayerPower(playerUUID);
+    }
+
+    public boolean setPlayerPower(UUID playerUUID, BigDecimal power)
+    {
+        return _playerStorage.setPlayerPower(playerUUID, power);
+    }
+
+    public BigDecimal getPlayerMaxPower(UUID playerUUID)
+    {
+        return _playerStorage.getPlayerMaxPower(playerUUID);
+    }
+
+    public boolean setPlayerMaxPower(UUID playerUUID, BigDecimal maxpower)
+    {
+        return _playerStorage.setPlayerMaxPower(playerUUID, maxpower);
+    }
+
+    public Optional<String> getPlayerName(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
 
         return Optional.of(oUser.get().getName());
     }
 
-    public static Optional<Player> getPlayer(UUID playerUUID)
+    public Optional<Player> getPlayer(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
 
         return oUser.get().getPlayer();
     }
 
-    private static Optional<User> getUser(UUID playerUUID)
+    private Optional<User> getUser(UUID playerUUID)
     {
         Optional<User> oUser = userStorageService.get(playerUUID);
 
         return oUser;
     }
 
-    public static boolean isPlayerOnline(UUID playerUUID)
+    public boolean isPlayerOnline(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
 
         return oUser.map(User::isOnline).orElse(false);
     }
 
-    public static List<Player> getServerPlayers()
+    public Set<String> getServerPlayerNames()
     {
-        try
-        {
-            List<Player> playerList = new ArrayList<>();
-
-            File playerDirectory = new File(playersPath.toUri());
-            File[] playerFiles = playerDirectory.listFiles();
-
-            for(File playerFile : playerFiles)
-            {
-                String uuid = trimFileExtension(playerFile.getName());
-                if(uuid.split("-").length == 5)
-                {
-                    Optional<Player> optionalPlayer = getPlayer(UUID.fromString(uuid));
-                    optionalPlayer.ifPresent(playerList::add);
-                }
-            }
-
-            return playerList;
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
-        return new ArrayList<>();
+        return _playerStorage.getServerPlayerNames();
     }
 
-    public static void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
+    public void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-        try
-        {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            playerNode.getNode("death-in-warzone").setValue(didDieInWarZone);
-
-            configLoader.save(playerNode);
-        }
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
+        _playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
-    public static boolean lastDeathAtWarZone(UUID playerUUID)
+    public boolean lastDeathAtWarZone(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersPath +  "/" + playerUUID.toString() + ".conf");
-
-        try
-        {
-            ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-
-            CommentedConfigurationNode playerNode = configLoader.load();
-
-            Object value = playerNode.getNode("death-in-warzone").getValue();
-
-            if (value != null)
-            {
-                return (boolean)value;
-            }
-            else
-            {
-                playerNode.getNode("death-in-warzone").setValue(false);
-                configLoader.save(playerNode);
-                return false;
-            }
-        }
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
-
-        return false;
+       return _playerStorage.getLastDeathInWarzone(playerUUID);
     }
 
-    public static @Nullable FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
+    public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
     {
-        if (faction.getLeader().equals(factionPlayer.getUniqueId()))
+        return _playerStorage.checkIfPlayerExists(playerUUID, playerName);
+    }
+
+    @Nullable
+    public FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
+    {
+        if(faction.getLeader() != null && faction.getLeader().equals(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.LEADER;
         }
@@ -164,37 +125,19 @@ public class PlayerManager
         {
             return FactionMemberType.MEMBER;
         }
-        else if (faction.getOfficers().contains(factionPlayer.getUniqueId()))
+        else if(faction.getOfficers().contains(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.OFFICER;
         }
-        else if (faction.getRecruits().contains(factionPlayer.getUniqueId()))
+        else if(faction.getRecruits().contains(factionPlayer.getUniqueId()))
         {
             return FactionMemberType.RECRUIT;
         }
-        else if (faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
+        else if(faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
         {
             return FactionMemberType.ALLY;
         }
 
         return null;
-    }
-
-    private static String trimFileExtension(String str) {
-        // Handle null case specially.
-
-        if (str == null) return null;
-
-        // Get position of last '.'.
-
-        int pos = str.lastIndexOf(".");
-
-        // If there wasn't any '.' just return the string as is.
-
-        if (pos == -1) return str;
-
-        // Otherwise return the string, up to the dot.
-
-        return str.substring(0, pos);
     }
 }

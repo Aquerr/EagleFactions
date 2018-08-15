@@ -21,8 +21,13 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2018-06-24.
  */
-public class PromoteCommand implements CommandExecutor
+public class PromoteCommand extends AbstractCommand implements CommandExecutor
 {
+    public PromoteCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -34,18 +39,18 @@ public class PromoteCommand implements CommandExecutor
             {
                 Player player = (Player)source;
                 Player promotedPlayer = optionalPromotedPlayer.get();
-                Optional<Faction> optionalPlayerFaction = FactionsCache.getInstance().getFactionByPlayer(player.getUniqueId());
-                Optional<Faction> optionalPromotedPlayerFaction = FactionsCache.getInstance().getFactionByPlayer(promotedPlayer.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalPromotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(promotedPlayer.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
 
-                    if(optionalPromotedPlayerFaction.isPresent() && optionalPromotedPlayerFaction.get().Name.equals(playerFaction.Name))
+                    if(optionalPromotedPlayerFaction.isPresent() && optionalPromotedPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
                         if(EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if(!playerFaction.Leader.equals(promotedPlayer.getUniqueId().toString()) && !playerFaction.Officers.contains(promotedPlayer.getUniqueId().toString()))
+                            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType promotedTo = FactionLogic.promotePlayer(playerFaction, FactionMemberType.LEADER, promotedPlayer);
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
@@ -58,9 +63,9 @@ public class PromoteCommand implements CommandExecutor
                             return CommandResult.success();
                         }
 
-                        if(playerFaction.Leader.equals(player.getUniqueId().toString()))
+                        if(playerFaction.getLeader().equals(player.getUniqueId()))
                         {
-                            if(!playerFaction.Leader.equals(promotedPlayer.getUniqueId().toString()) && !playerFaction.Officers.contains(promotedPlayer.getUniqueId().toString()))
+                            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType promotedTo = FactionLogic.promotePlayer(playerFaction, FactionMemberType.LEADER, promotedPlayer);
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
@@ -72,9 +77,9 @@ public class PromoteCommand implements CommandExecutor
 
                             return CommandResult.success();
                         }
-                        else if(playerFaction.Officers.contains(player.getUniqueId().toString()))
+                        else if(playerFaction.getOfficers().contains(player.getUniqueId()))
                         {
-                            if(!playerFaction.Leader.equals(promotedPlayer.getUniqueId().toString()) && !playerFaction.Officers.contains(promotedPlayer.getUniqueId().toString()) && !playerFaction.Members.contains(promotedPlayer.getUniqueId().toString()))
+                            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(promotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType promotedTo = FactionLogic.promotePlayer(playerFaction, FactionMemberType.OFFICER, promotedPlayer);
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));

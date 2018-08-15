@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 
 import java.util.Map;
 
-public interface IStorage
+public interface IFactionStorage
 {
     boolean addOrUpdateFaction(Faction faction);
 

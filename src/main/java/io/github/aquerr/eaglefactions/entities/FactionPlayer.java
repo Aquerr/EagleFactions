@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class FactionPlayer implements IFactionPlayer
 {
-    private UUID playerUniqueId;
+    private UUID uniqueId;
     private String name;
 
     private String factionName;
@@ -15,15 +15,41 @@ public class FactionPlayer implements IFactionPlayer
 
     public FactionPlayer(Player player)
     {
-        this.playerUniqueId = player.getUniqueId();
+        this.uniqueId = player.getUniqueId();
         this.name = player.getName();
+
+        this.factionName = "";
+        this.hasFaction = false;
+        this.factionRole = null;
+    }
+
+    public FactionPlayer(String name, UUID uniqueId)
+    {
+        this.name = name;
+        this.uniqueId = uniqueId;
+
+        this.factionName = "";
+        this.hasFaction = false;
+        this.factionRole = null;
     }
 
     @Override
-    public String getFactionName()
+    public String getName()
+    {
+        return name;
+    }
+
+    @Override
+    public UUID getUniqueId()
+    {
+        return this.uniqueId;
+    }
+
+    @Override
+    public String getFactionName() throws IllegalStateException
     {
         if(!hasFaction)
-            throw new UnsupportedOperationException("Player does not have a faction");
+            throw new IllegalStateException("Player does not have a faction");
         return this.factionName;
     }
 
@@ -34,10 +60,10 @@ public class FactionPlayer implements IFactionPlayer
     }
 
     @Override
-    public FactionMemberType getFactionRole()
+    public FactionMemberType getFactionRole() throws IllegalStateException
     {
         if(!hasFaction)
-            throw new UnsupportedOperationException("Player does not have a faction");
+            throw new IllegalStateException("Player does not have a faction");
         return this.factionRole;
     }
 }

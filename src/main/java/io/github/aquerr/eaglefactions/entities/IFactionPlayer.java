@@ -1,10 +1,16 @@
 package io.github.aquerr.eaglefactions.entities;
 
+import java.util.UUID;
+
 public interface IFactionPlayer
 {
-    String getFactionName();
+    String getName();
+
+    UUID getUniqueId();
+
+    String getFactionName() throws IllegalStateException;
 
     boolean hasFaction();
 
-    FactionMemberType getFactionRole();
+    FactionMemberType getFactionRole() throws IllegalStateException;
 }

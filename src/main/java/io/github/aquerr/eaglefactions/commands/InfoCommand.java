@@ -99,14 +99,17 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
-        if(!faction.getLeader().toString().equals("")) leaderName = PlayerManager.getPlayerName(faction.getLeader()).get();
+        if(faction.getLeader() != null && !faction.getLeader().equals(new UUID(0,0)))
+        {
+            leaderName = getPlugin().getPlayerManager().getPlayerName(faction.getLeader()).get();
+        }
 
         String recruitList = "";
         if(!faction.getRecruits().isEmpty())
         {
             for (UUID recruit : faction.getRecruits())
             {
-                recruitList += PlayerManager.getPlayerName(recruit).get() + ", ";
+                recruitList += getPlugin().getPlayerManager().getPlayerName(recruit).get() + ", ";
             }
             recruitList = recruitList.substring(0, recruitList.length() - 2);
         }
@@ -116,7 +119,7 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         {
             for (UUID member: faction.getMembers())
             {
-                membersList += PlayerManager.getPlayerName(member).get() + ", ";
+                membersList += getPlugin().getPlayerManager().getPlayerName(member).get() + ", ";
             }
             membersList = membersList.substring(0, membersList.length() - 2);
         }
@@ -126,7 +129,7 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         {
             for (UUID officer: faction.getOfficers())
             {
-                officersList += PlayerManager.getPlayerName(officer).get() + ", ";
+                officersList += getPlugin().getPlayerManager().getPlayerName(officer).get() + ", ";
             }
             officersList = officersList.substring(0, officersList.length() - 2);
         }

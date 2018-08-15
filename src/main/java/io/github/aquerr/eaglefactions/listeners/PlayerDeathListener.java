@@ -40,7 +40,7 @@ public class PlayerDeathListener extends AbstractListener
 
             if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
             {
-                PlayerManager.setDeathInWarZone(player.getUniqueId(), true);
+                getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
             }
 
             if (getPlugin().getConfiguration().getConfigFileds().shouldBlockHomeAfterDeathInOwnFaction())

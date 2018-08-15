@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
@@ -10,6 +11,12 @@ import java.util.Map;
 
 public class FlagManager
 {
+    EagleFactions _plugin;
+    public FlagManager(EagleFactions plugin)
+    {
+        _plugin = plugin;
+    }
+
     public boolean canBreakBlock(Player player, Faction playerFaction, Faction chunkFaction)
     {
         return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.DESTROY);
@@ -42,7 +49,7 @@ public class FlagManager
 
     private boolean checkFlag(Player player, Faction playerFaction, FactionFlagTypes flagTypes)
     {
-        FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
+        FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(player, playerFaction);
 
         return playerFaction.getFlags().get(memberType).get(flagTypes);
     }
@@ -51,7 +58,7 @@ public class FlagManager
     {
         if (playerFaction.getName().equals(chunkFaction.getName()))
         {
-            FactionMemberType memberType = PlayerManager.getFactionMemberType(player, playerFaction);
+            FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(player, playerFaction);
 
             return chunkFaction.getFlags().get(memberType).get(flagType);
         }

@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.managers.FlagManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -36,6 +37,7 @@ public class Faction
         this.claims = new HashSet<>();
         this.officers = new HashSet<>();
         this.alliances = new HashSet<>();
+        //TODO: Add truce
         this.enemies = new HashSet<>();
         this.home = null;
         this.flags = FlagManager.getDefaultFactionFlags();
@@ -177,7 +179,6 @@ public class Faction
     {
         this.flags.get(factionMemberType).replace(factionFlagTypes, flagValue);
     }
-
 
     public UUID getLeader()
     {

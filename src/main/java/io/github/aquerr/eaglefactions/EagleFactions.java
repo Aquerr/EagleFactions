@@ -57,14 +57,6 @@ public class EagleFactions
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
 
-//    @Inject
-//    private Logger _logger;
-//
-//    public Logger getLogger()
-//    {
-//        return _logger;
-//    }
-
     private static EagleFactions eagleFactions;
 
     public static EagleFactions getPlugin()
@@ -134,26 +126,22 @@ public class EagleFactions
         }
     }
 
-    private void SetupManagers()
-    {
-        _playerManager = new PlayerManager(_configDir);
-        _powerManager = new PowerManager(_configuration, _configDir);
-        _flagManager = new FlagManager();
-        _factionLogic = new FactionLogic(_configuration, _configDir);
-        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFileds());
-
-    }
-
     private void SetupConfigs()
     {
-        // Create configs
         _configuration = new Configuration(_configDir);
-
         MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
-//        messageLoader.loadPluginMessages();
 
-        //PVPLogger
         _pvpLogger = new PVPLogger(getConfiguration());
+    }
+
+    private void SetupManagers()
+    {
+        _playerManager = new PlayerManager(this);
+        _powerManager = new PowerManager(this);
+        _flagManager = new FlagManager(this);
+        _factionLogic = new FactionLogic(this);
+        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFileds());
+
     }
 
     private void InitializeCommands()
