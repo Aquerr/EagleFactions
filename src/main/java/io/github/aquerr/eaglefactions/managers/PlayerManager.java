@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -139,5 +140,10 @@ public class PlayerManager
         }
 
         return null;
+    }
+
+    public Set<IFactionPlayer> getServerPlayers()
+    {
+        return _playerStorage.getServerPlayers();
     }
 }

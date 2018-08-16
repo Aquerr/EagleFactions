@@ -681,15 +681,41 @@ public class FactionLogic
         factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public static FactionMemberType promotePlayer(Faction playerFaction, FactionMemberType promotedByPlayerType, Player promotedPlayer)
+    public FactionMemberType promotePlayer(Faction faction, Player playerToPromote)
     {
-        if(playerFaction.getRecruits().contains(promotedPlayer.getUniqueId().toString()))
-        {
-            //TODO: Add logic for handling player promoting here.
+        FactionMemberType promotedTo = FactionMemberType.RECRUIT;
 
-            return FactionMemberType.RECRUIT;
+        if(faction.getRecruits().contains(playerToPromote.getUniqueId()))
+        {
+            faction.getMembers().add(playerToPromote.getUniqueId());
+            promotedTo = FactionMemberType.MEMBER;
+        }
+        else if (faction.getMembers().contains(playerToPromote.getUniqueId()))
+        {
+            faction.getOfficers().add(playerToPromote.getUniqueId());
+            promotedTo = FactionMemberType.OFFICER;
         }
 
-        return FactionMemberType.RECRUIT;
+        this.factionsStorage.addOrUpdateFaction(faction);
+        return promotedTo;
+    }
+
+    public FactionMemberType demotePlayer(Faction faction, Player playerToDemote)
+    {
+        FactionMemberType demotedTo = FactionMemberType.RECRUIT;
+
+        if(faction.getMembers().contains(playerToDemote.getUniqueId()))
+        {
+            faction.getRecruits().add(playerToDemote.getUniqueId());
+            demotedTo = FactionMemberType.RECRUIT;
+        }
+        else if (faction.getOfficers().contains(playerToDemote.getUniqueId()))
+        {
+            faction.getMembers().add(playerToDemote.getUniqueId());
+            demotedTo = FactionMemberType.MEMBER;
+        }
+
+        this.factionsStorage.addOrUpdateFaction(faction);
+        return demotedTo;
     }
 }

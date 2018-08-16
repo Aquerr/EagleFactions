@@ -1,5 +1,7 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
+import io.github.aquerr.eaglefactions.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -222,6 +224,34 @@ public class HOCONPlayerStorage implements IPlayerStorage
             {
                 ConfigurationNode configurationNode = configurationLoader.load();
                 playerSet.add(configurationNode.getNode("name").getString(""));
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return playerSet;
+    }
+
+    @Override
+    public Set<IFactionPlayer> getServerPlayers()
+    {
+        Set<IFactionPlayer> playerSet = new HashSet<>();
+
+        File playerDir = new File(playersDirectoryPath.toUri());
+        File[] playerFiles = playerDir.listFiles();
+
+        for(File playerFile : playerFiles)
+        {
+            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile.toPath()).build();
+            try
+            {
+                ConfigurationNode configurationNode = configurationLoader.load();
+                String playerName = configurationNode.getNode("name").getString("");
+                UUID playerUUID = UUID.fromString(playerFile.getName().replace(".conf", ""));
+                FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID);
+                playerSet.add(factionPlayer);
             }
             catch(IOException e)
             {

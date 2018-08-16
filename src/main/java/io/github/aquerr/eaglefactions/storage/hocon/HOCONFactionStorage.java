@@ -137,7 +137,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 configNode.getNode(new Object[]{"factions", faction.getName(), "home"}).setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
 
-            FactionsCache.addOrUpdateFactionCache(faction);
+//            FactionsCache.addOrUpdateFactionCache(faction);
 
             return saveChanges();
         }

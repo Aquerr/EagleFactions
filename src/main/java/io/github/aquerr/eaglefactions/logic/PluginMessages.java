@@ -214,6 +214,7 @@ public class PluginMessages
     public static String YOU_DEMOTED;
     public static String TO;
     public static String YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER;
+    public static String YOU_CANT_DEMOTE_THIS_PLAYER_MORE;
 
     //Player
     public static String PLAYER_INFO;
