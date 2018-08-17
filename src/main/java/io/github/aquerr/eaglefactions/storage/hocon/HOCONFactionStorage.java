@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
@@ -86,7 +87,7 @@ public class HOCONFactionStorage implements IFactionStorage
                     try
                     {
                         Thread.sleep(sleep);
-                        if(sleep < 60000)
+                        if(sleep < 16000)
                             sleep *= 2;
                     }
                     catch(InterruptedException e)
@@ -126,6 +127,7 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode(new Object[]{"factions", faction.getName(), "enemies"}).setValue(faction.getEnemies());
             configNode.getNode(new Object[]{"factions", faction.getName(), "alliances"}).setValue(faction.getAlliances());
             configNode.getNode(new Object[]{"factions", faction.getName(), "claims"}).setValue(faction.getClaims());
+            configNode.getNode(new Object[]{"factions", faction.getName(), "last_online"}).setValue(faction.getLastOnline().toString());
             configNode.getNode(new Object[]{"factions", faction.getName(), "flags"}).setValue(faction.getFlags());
 
             if(faction.getHome() == null)
@@ -228,9 +230,10 @@ public class HOCONFactionStorage implements IFactionStorage
         Set<String> alliances = getFactionAlliances(factionName);
         Set<String> enemies = getFactionEnemies(factionName);
         Set<String> claims = getFactionClaims(factionName);
+        Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
-        Faction faction = new Faction(factionName, tag, leader, recruits, members, claims, officers, alliances, enemies, home, flags);
+        Faction faction = new Faction(factionName, tag, leader, recruits, members, claims, officers, alliances, enemies, home, lastOnline, flags);
 
         if(needToSave)
         {
@@ -352,6 +355,22 @@ public class HOCONFactionStorage implements IFactionStorage
         return flagMap;
     }
 
+    private Instant getLastOnline(String factionName)
+    {
+        Object lastOnline = configNode.getNode("factions", factionName, "last_online").getValue();
+
+        if(lastOnline != null)
+        {
+            return Instant.parse(lastOnline.toString());
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "last_online"}).setValue(Instant.now().toString());
+            needToSave = true;
+            return Instant.now();
+        }
+    }
+
     private Set<String> getFactionClaims(String factionName)
     {
         Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "claims"}).getValue();
@@ -362,7 +381,7 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "claims"}).setValue(new ArrayList<>());
+            configNode.getNode(new Object[]{"factions", factionName, "claims"}).setValue(new HashSet<>());
             needToSave = true;
             return new HashSet<>();
         }
@@ -378,7 +397,7 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "enemies"}).setValue(new ArrayList<>());
+            configNode.getNode(new Object[]{"factions", factionName, "enemies"}).setValue(new HashSet<>());
             needToSave = true;
             return new HashSet<>();
         }
@@ -394,7 +413,7 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "alliances"}).setValue(new ArrayList<>());
+            configNode.getNode(new Object[]{"factions", factionName, "alliances"}).setValue(new HashSet<>());
             needToSave = true;
             return new HashSet<>();
         }
@@ -410,7 +429,7 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new ArrayList<>());
+            configNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new HashSet<>());
             needToSave = true;
             return new HashSet<>();
         }
@@ -426,7 +445,7 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "recruits"}).setValue(new ArrayList<>());
+            configNode.getNode(new Object[]{"factions", factionName, "recruits"}).setValue(new HashSet<>());
             needToSave = true;
             return new HashSet<>();
         }
@@ -466,7 +485,7 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "officers"}).setValue(new ArrayList<>());
+            configNode.getNode(new Object[]{"factions", factionName, "officers"}).setValue(new HashSet<>());
             needToSave = true;
             return new HashSet<>();
         }
@@ -587,8 +606,6 @@ public class HOCONFactionStorage implements IFactionStorage
                 {
                     uuidSet.add(UUID.fromString(stringUUID));
                 }
-
-                uuidSet.add(null);
             }
 
             return uuidSet;

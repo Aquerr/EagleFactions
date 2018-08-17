@@ -71,7 +71,20 @@ public class PlayerManager
     {
         Optional<User> oUser = getUser(playerUUID);
 
-        return Optional.of(oUser.get().getName());
+        if(oUser.isPresent())
+            return Optional.of(oUser.get().getName());
+        else
+        {
+            return getLastKnownPlayerName(playerUUID);
+        }
+    }
+
+    private Optional<String> getLastKnownPlayerName(UUID playerUUID)
+    {
+        String playerName = _playerStorage.getPlayerName(playerUUID);
+        if(playerName.equals(""))
+            return Optional.empty();
+        return Optional.of(playerName);
     }
 
     public Optional<Player> getPlayer(UUID playerUUID)

@@ -51,9 +51,7 @@ public class BlockBreakListener extends AbstractListener
                      }
 
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-
                      Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
                      Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
 
                      if(optionalChunkFaction.isPresent())

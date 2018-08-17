@@ -5,7 +5,6 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
-import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
@@ -26,7 +25,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
-import java.nio.file.Path;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -44,6 +43,7 @@ public class FactionLogic
     {
         factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
         _configFields = plugin.getConfiguration().getConfigFileds();
+        _playerManager = plugin.getPlayerManager();
     }
 
     public void reload()
@@ -717,5 +717,11 @@ public class FactionLogic
 
         this.factionsStorage.addOrUpdateFaction(faction);
         return demotedTo;
+    }
+
+    public void setLastOnline(Faction faction, Instant instantTime)
+    {
+        faction.setLastOnline(instantTime);
+        this.factionsStorage.addOrUpdateFaction(faction);
     }
 }

@@ -4,10 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -20,10 +17,8 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by Aquerr on 2017-08-03.
@@ -101,7 +96,9 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         String leaderName = "";
         if(faction.getLeader() != null && !faction.getLeader().equals(new UUID(0,0)))
         {
-            leaderName = getPlugin().getPlayerManager().getPlayerName(faction.getLeader()).get();
+            Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(faction.getLeader());
+            if(optionalName.isPresent())
+                leaderName = optionalName.get();
         }
 
         String recruitList = "";
@@ -109,9 +106,12 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         {
             for (UUID recruit : faction.getRecruits())
             {
-                recruitList += getPlugin().getPlayerManager().getPlayerName(recruit).get() + ", ";
+                Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(recruit);
+                if(optionalName.isPresent())
+                    recruitList += optionalName.get() + ", ";
             }
-            recruitList = recruitList.substring(0, recruitList.length() - 2);
+            if(recruitList.length() > 2)
+                recruitList = recruitList.substring(0, recruitList.length() - 2);
         }
 
         String membersList = "";
@@ -119,9 +119,12 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         {
             for (UUID member: faction.getMembers())
             {
-                membersList += getPlugin().getPlayerManager().getPlayerName(member).get() + ", ";
+                Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(member);
+                if(optionalName.isPresent())
+                    membersList += optionalName.get() + ", ";
             }
-            membersList = membersList.substring(0, membersList.length() - 2);
+            if(membersList.length() > 2)
+                membersList = membersList.substring(0, membersList.length() - 2);
         }
 
         String officersList = "";
@@ -129,9 +132,12 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         {
             for (UUID officer: faction.getOfficers())
             {
-                officersList += getPlugin().getPlayerManager().getPlayerName(officer).get() + ", ";
+                Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(officer);
+                if(optionalName.isPresent())
+                    officersList += optionalName.get() + ", ";
             }
-            officersList = officersList.substring(0, officersList.length() - 2);
+            if(officersList.length() > 2)
+                officersList = officersList.substring(0, officersList.length() - 2);
         }
 
         String alliancesList = "";
@@ -158,6 +164,7 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         Text info = Text.builder()
                 .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, faction.getName() + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.TAG + ": "), faction.getTag().toBuilder().color(TextColors.GOLD).build(), Text.of("\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.LAST_ONLINE + ": "), lastOnline(faction), Text.of("\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
@@ -173,5 +180,16 @@ public class InfoCommand extends AbstractCommand implements CommandExecutor
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
         PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTION_INFO)).contents(factionInfo);
         paginationBuilder.sendTo(source);
+    }
+
+    private Text lastOnline(Faction faction)
+    {
+        if(getPlugin().getFactionLogic().hasOnlinePlayers(faction))
+            return Text.of(TextColors.GREEN, PluginMessages.NOW);
+
+        Date date = Date.from(faction.getLastOnline());
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String formattedDate = formatter.format(date);
+        return Text.of(TextColors.RED, formattedDate);
     }
 }

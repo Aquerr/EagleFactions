@@ -155,6 +155,8 @@ public class PluginMessages
     public static String POWER;
     public static String CLAIMS;
     public static String FACTION_INFO;
+    public static String LAST_ONLINE;
+    public static String NOW;
 
     //Invite
     public static String PLAYER_IS_ALREADY_IN_A_FACTION;

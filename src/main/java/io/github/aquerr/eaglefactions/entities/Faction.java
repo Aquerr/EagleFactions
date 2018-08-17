@@ -5,6 +5,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -23,6 +24,7 @@ public class Faction
     private Set<UUID> officers;
     private Set<String> claims;
     private FactionHome home;
+    private Instant lastOnline;
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
     //Constructor used while creating a new faction.
@@ -40,11 +42,12 @@ public class Faction
         //TODO: Add truce
         this.enemies = new HashSet<>();
         this.home = null;
+        this.lastOnline = Instant.now();
         this.flags = FlagManager.getDefaultFactionFlags();
     }
 
     //Constructor used while getting a faction from storage.
-    public Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+    public Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
     {
         this.name = factionName;
         this.tag = factionTag;
@@ -57,6 +60,7 @@ public class Faction
         this.alliances = alliances;
         this.enemies = enemies;
         this.home = home;
+        this.lastOnline = lastOnline;
         this.flags = flags;
     }
 
@@ -198,5 +202,15 @@ public class Faction
     public void setTag(Text tag)
     {
         this.tag = tag;
+    }
+
+    public Instant getLastOnline()
+    {
+        return this.lastOnline;
+    }
+
+    public void setLastOnline(Instant lastOnline)
+    {
+        this.lastOnline = lastOnline;
     }
 }

@@ -261,4 +261,23 @@ public class HOCONPlayerStorage implements IPlayerStorage
 
         return playerSet;
     }
+
+    @Override
+    public String getPlayerName(UUID playerUUID)
+    {
+        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+
+        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+        try
+        {
+            ConfigurationNode configurationNode = configurationLoader.load();
+            return configurationNode.getNode("name").getString("");
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
 }

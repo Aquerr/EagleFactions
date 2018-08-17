@@ -28,4 +28,6 @@ public interface IPlayerStorage
     Set<String> getServerPlayerNames();
 
     Set<IFactionPlayer> getServerPlayers();
+
+    String getPlayerName(UUID playerUUID);
 }

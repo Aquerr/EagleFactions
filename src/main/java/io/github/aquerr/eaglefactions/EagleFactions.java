@@ -19,7 +19,6 @@ import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
-import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -277,20 +276,36 @@ public class EagleFactions
                 .child(removeEnemyCommand, "r", "remove")
                 .build());
 
-        //Officer command. Add or remove officers.
-        Subcommands.put(Collections.singletonList("officer"), CommandSpec.builder()
-                .description(Text.of("Add or Remove officer"))
+//        //Officer command. Add or remove officers.
+//        Subcommands.put(Collections.singletonList("officer"), CommandSpec.builder()
+//                .description(Text.of("Add or Remove officer"))
+//                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+//                .permission(PluginPermissions.OfficerCommand)
+//                .executor(new OfficerCommand(this))
+//                .build());
+//
+//        //Member command.
+//        Subcommands.put(Collections.singletonList("member"), CommandSpec.builder()
+//                .description(Text.of("Add or remove member"))
+//                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+//                .permission(PluginPermissions.MemberCommand)
+//                .executor(new MemberCommand(this))
+//                .build());
+
+        //Promote command
+        Subcommands.put(Collections.singletonList("promote"), CommandSpec.builder()
+                .description(Text.of("Promotes the player to a higher rank"))
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .permission(PluginPermissions.OfficerCommand)
-                .executor(new OfficerCommand(this))
+                .permission(PluginPermissions.PromoteCommand)
+                .executor(new PromoteCommand(this))
                 .build());
 
-        //Member command.
-        Subcommands.put(Collections.singletonList("member"), CommandSpec.builder()
-                .description(Text.of("Add or remove member"))
+        //Demote command
+        Subcommands.put(Collections.singletonList("demote"), CommandSpec.builder()
+                .description(Text.of("Demotes the player to a lower rank"))
                 .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-                .permission(PluginPermissions.MemberCommand)
-                .executor(new MemberCommand(this))
+                .permission(PluginPermissions.DemoteCommand)
+                .executor(new DemoteCommand(this))
                 .build());
 
         //Claim command.
