@@ -56,8 +56,12 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                     Vector3i chunk = player.getLocation().getChunkPosition();
 
                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
-
-                    if (getPlugin().getConfiguration().getConfigFileds().getClaimableWorldNames().contains(player.getWorld().getName()))
+                    if(!getPlugin().getConfiguration().getConfigFileds().getClaimableWorldNames().contains(player.getWorld().getName()))
+                    {
+                        player.sendMessage(PluginInfo.ErrorPrefix.concat(Text.of(TextColors.RED, "You can not claim territories in this world!")));
+                        return CommandResult.success();
+                    }
+                    else
                     {
                         if (!optionalChunkFaction.isPresent())
                         {

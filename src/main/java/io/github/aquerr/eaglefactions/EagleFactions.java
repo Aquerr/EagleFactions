@@ -22,6 +22,8 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GameLoadCompleteEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -126,6 +128,12 @@ public class EagleFactions
         }
     }
 
+    @Listener
+    public void onServerGameLoaded(GameStartedServerEvent event)
+    {
+        startFactionsRemover();
+    }
+
     private void SetupConfigs()
     {
         _configuration = new Configuration(_configDir);
@@ -141,7 +149,6 @@ public class EagleFactions
         _flagManager = new FlagManager(this);
         _factionLogic = new FactionLogic(this);
         _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFileds());
-        startFactionsRemover();
     }
 
     private void startFactionsRemover()
@@ -161,16 +168,24 @@ public class EagleFactions
                         if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
                             continue;
 
+                        if(_factionLogic.hasOnlinePlayers(factionEntry.getValue()))
+                            continue;
+
                         Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
 
                         if(maxInactive < inactiveTime.getSeconds())
                         {
                             _factionLogic.disbandFaction(factionEntry.getKey());
                         }
+//                        else if(maxInactive - 172800 < inactiveTime.getSeconds())
+//                        {
+//                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
+//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PluginPrefix.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
+//                        }
                         else if(maxInactive * 0.75 < inactiveTime.getSeconds())
                         {
-                            Duration duration = Duration.ofSeconds(maxInactive - inactiveTime.getSeconds());
-                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PluginPrefix.concat(Text.of(TextColors.RED, factionEntry.getKey(), " will be removed after ", duration.toHours() + "h due to it long inactive time.")));
+                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
+                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PluginPrefix.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "s due to its long inactive time.")));
                         }
                     }
                 }
@@ -263,69 +278,21 @@ public class EagleFactions
                 .executor(new PlayerCommand(this))
                 .build());
 
-        //Build add ally command.
-        CommandSpec addAllyCommand = CommandSpec.builder()
-                .description(Text.of("Invite faction to the alliance"))
-                .permission(PluginPermissions.AddAllyCommand)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new AddAllyCommand(this))
-                .build();
-
-        //Build remove ally command.
-        CommandSpec removeAllyCommand = CommandSpec.builder()
-                .description(Text.of("Remove faction from the alliance"))
-                .permission(PluginPermissions.RemoveAllyCommand)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new RemoveAllyCommand(this))
-                .build();
-
         //Build alliance commands.
         Subcommands.put(Collections.singletonList("ally"), CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
-                .permission(PluginPermissions.AllyCommands)
-                .child(addAllyCommand, "a", "add")
-                .child(removeAllyCommand, "r", "remove")
+                .permission(PluginPermissions.AllyCommand)
+                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .executor(new AllyCommand(this))
                 .build());
-
-        //Build add enemy command.
-        CommandSpec addEnemyCommand = CommandSpec.builder()
-                .description(Text.of("Set faction as enemy"))
-                .permission(PluginPermissions.AddEnemyCommand)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new AddEnemyCommand(this))
-                .build();
-
-        //Build remove enemy command.
-        CommandSpec removeEnemyCommand = CommandSpec.builder()
-                .description(Text.of("Remove faction from the enemies"))
-                .permission(PluginPermissions.RemoveEnemyCommand)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
-                .executor(new RemoveEnemyCommand(this))
-                .build();
 
         //Build enemy commands.
         Subcommands.put(Collections.singletonList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare someone a war"))
-                .permission(PluginPermissions.EnemyCommands)
-                .child(addEnemyCommand, "a", "add")
-                .child(removeEnemyCommand, "r", "remove")
+                .permission(PluginPermissions.EnemyCommand)
+                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .executor(new EnemyCommand(this))
                 .build());
-
-//        //Officer command. Add or remove officers.
-//        Subcommands.put(Collections.singletonList("officer"), CommandSpec.builder()
-//                .description(Text.of("Add or Remove officer"))
-//                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-//                .permission(PluginPermissions.OfficerCommand)
-//                .executor(new OfficerCommand(this))
-//                .build());
-//
-//        //Member command.
-//        Subcommands.put(Collections.singletonList("member"), CommandSpec.builder()
-//                .description(Text.of("Add or remove member"))
-//                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
-//                .permission(PluginPermissions.MemberCommand)
-//                .executor(new MemberCommand(this))
-//                .build());
 
         //Promote command
         Subcommands.put(Collections.singletonList("promote"), CommandSpec.builder()

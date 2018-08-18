@@ -688,11 +688,13 @@ public class FactionLogic
         if(faction.getRecruits().contains(playerToPromote.getUniqueId()))
         {
             faction.getMembers().add(playerToPromote.getUniqueId());
+            faction.getRecruits().remove(playerToPromote.getUniqueId());
             promotedTo = FactionMemberType.MEMBER;
         }
         else if (faction.getMembers().contains(playerToPromote.getUniqueId()))
         {
             faction.getOfficers().add(playerToPromote.getUniqueId());
+            faction.getMembers().remove(playerToPromote.getUniqueId());
             promotedTo = FactionMemberType.OFFICER;
         }
 
@@ -707,11 +709,13 @@ public class FactionLogic
         if(faction.getMembers().contains(playerToDemote.getUniqueId()))
         {
             faction.getRecruits().add(playerToDemote.getUniqueId());
+            faction.getMembers().remove(playerToDemote.getUniqueId());
             demotedTo = FactionMemberType.RECRUIT;
         }
         else if (faction.getOfficers().contains(playerToDemote.getUniqueId()))
         {
             faction.getMembers().add(playerToDemote.getUniqueId());
+            faction.getOfficers().remove(playerToDemote.getUniqueId());
             demotedTo = FactionMemberType.MEMBER;
         }
 

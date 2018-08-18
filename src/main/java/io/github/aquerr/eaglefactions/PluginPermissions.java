@@ -7,13 +7,8 @@ public abstract class PluginPermissions
     //public static final String PlayerCommands = "eaglefactions.player";
     //public static final String AdminCommands = "eaglefactions.admin";
 
-    public static final String AllyCommands = "eaglefactions.player.ally";
-    public static final String AddAllyCommand = "eaglefactions.player.ally.add";
-    public static final String RemoveAllyCommand = "eaglefactions.player.ally.remove";
-
-    public static final String EnemyCommands = "eaglefactions.player.enemy";
-    public static final String AddEnemyCommand = "eaglefactions.player.enemy.add";
-    public static final String RemoveEnemyCommand = "eaglefactions.player.enemy.remove";
+    public static final String AllyCommand = "eaglefactions.player.ally";
+    public static final String EnemyCommand = "eaglefactions.player.enemy";
 
     public static final String CreateCommand = "eaglefactions.player.create";
     public static final String DisbandCommand = "eaglefactions.player.disband";

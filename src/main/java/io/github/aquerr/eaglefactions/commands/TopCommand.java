@@ -14,7 +14,9 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.*;
 
@@ -31,6 +33,8 @@ public class TopCommand extends AbstractCommand implements CommandExecutor
         List<Faction> factionsList = new ArrayList<>(getPlugin().getFactionLogic().getFactions().values());
         List<Text> helpList = new ArrayList<>();
         int index = 0;
+        Text tagPrefix = getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix();
+        Text tagSufix = getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix();
 
         factionsList.sort((o1, o2) -> getPlugin().getPowerManager().getFactionPower(o2).compareTo(getPlugin().getPowerManager().getFactionPower(o1)));
 
@@ -42,12 +46,12 @@ public class TopCommand extends AbstractCommand implements CommandExecutor
             if(index == 11) break;
 
             index++;
-            String tag = "";
-            if(faction.getTag() != null && !faction.getTag().equals("")) tag = "[" + faction.getTag() + "] ";
+
+            Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSufix, Text.of(" ")).build();
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, index + ". " + tag + faction.getName() + " (" + getPlugin().getPowerManager().getFactionPower(faction) + "/" + getPlugin().getPowerManager().getFactionMaxPower(faction) + ")"))
+                            .append(Text.of(TextColors.AQUA, "- ")).append(tag).append(Text.of(faction.getName(), " (", getPlugin().getPowerManager().getFactionPower(faction), "/", getPlugin().getPowerManager().getFactionMaxPower(faction), ")"))
                             .build())
                     .build();
 

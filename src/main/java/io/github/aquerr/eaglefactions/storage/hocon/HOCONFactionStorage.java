@@ -12,6 +12,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.TypeTokens;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -121,9 +122,9 @@ public class HOCONFactionStorage implements IFactionStorage
         {
             configNode.getNode(new Object[]{"factions", faction.getName(), "tag"}).setValue(TypeToken.of(Text.class), faction.getTag());
             configNode.getNode(new Object[]{"factions", faction.getName(), "leader"}).setValue(faction.getLeader().toString());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "officers"}).setValue(faction.getOfficers());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "members"}).setValue(faction.getMembers());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "recruits"}).setValue(faction.getRecruits());
+            configNode.getNode(new Object[]{"factions", faction.getName(), "officers"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
+            configNode.getNode(new Object[]{"factions", faction.getName(), "members"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
+            configNode.getNode(new Object[]{"factions", faction.getName(), "recruits"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
             configNode.getNode(new Object[]{"factions", faction.getName(), "enemies"}).setValue(faction.getEnemies());
             configNode.getNode(new Object[]{"factions", faction.getName(), "alliances"}).setValue(faction.getAlliances());
             configNode.getNode(new Object[]{"factions", faction.getName(), "claims"}).setValue(faction.getClaims());
@@ -612,5 +613,15 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         return null;
     };
+
+    private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
+    {
+        List<String> listOfStrings = new ArrayList<>();
+        for(UUID uuid : listOfUUIDs)
+        {
+            listOfStrings.add(uuid.toString());
+        }
+        return listOfStrings;
+    }
 
 }

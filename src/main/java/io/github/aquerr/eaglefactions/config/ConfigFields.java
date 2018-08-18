@@ -125,6 +125,7 @@ public final class ConfigFields
             this._warzoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
+            this._configuration.save();
         }
         catch(Exception exception)
         {
@@ -422,22 +423,22 @@ public final class ConfigFields
         }
         else if('d' == lastCharacter || 'D' == lastCharacter)
         {
-            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2)) * 24 * 60 * 60;
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 1)) * 24 * 60 * 60;
         }
         else if('h' == lastCharacter || 'H' == lastCharacter)
         {
-            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2)) * 60 * 60;
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 1)) * 60 * 60;
         }
         else if('m' == lastCharacter || 'M' == lastCharacter)
         {
-            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2)) * 60;
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 1)) * 60;
         }
         else if('s' == lastCharacter || 'S' == lastCharacter)
         {
-            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2));
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 1));
         }
 
-        //Default 30 days
-        return 2592000;
+        //Default 10 days
+        return 864000;
     }
 }

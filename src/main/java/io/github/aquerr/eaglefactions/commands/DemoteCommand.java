@@ -65,7 +65,7 @@ public class DemoteCommand extends AbstractCommand implements CommandExecutor
 
                         if(playerFaction.getLeader().equals(player.getUniqueId()))
                         {
-                            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()))
+                            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));

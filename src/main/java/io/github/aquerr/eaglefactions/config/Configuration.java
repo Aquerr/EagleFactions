@@ -110,7 +110,8 @@ public class Configuration implements IConfiguration
         }
     }
 
-    private void save()
+    @Override
+    public void save()
     {
         try
         {

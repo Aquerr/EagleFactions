@@ -6,6 +6,8 @@ public interface IConfiguration
 {
     ConfigFields getConfigFileds();
 
+    void save();
+
     void loadConfiguration();
 
     int getInt(int defaultValue, Object... nodePath);
