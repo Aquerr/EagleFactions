@@ -62,6 +62,7 @@ public final class ConfigFields
     private List<String> _safezoneWorldNames = new ArrayList<>();
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
+    private String _maxInactiveTime = "30d";
 
     public ConfigFields(IConfiguration configuration)
     {
@@ -123,6 +124,7 @@ public final class ConfigFields
             this._safezoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE");
             this._warzoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
+            this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
         }
         catch(Exception exception)
         {
@@ -408,5 +410,34 @@ public final class ConfigFields
     {
         _claimableWorldNames.add(worldName);
         _configuration.setListOfStrings(_claimableWorldNames, "worlds", "CLAIMABLE");
+    }
+
+    public long getMaxInactiveTime()
+    {
+        char lastCharacter = _maxInactiveTime.charAt(_maxInactiveTime.length() - 1);
+
+        if(_maxInactiveTime.charAt(0) == '0')
+        {
+            return 0;
+        }
+        else if('d' == lastCharacter || 'D' == lastCharacter)
+        {
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2)) * 24 * 60 * 60;
+        }
+        else if('h' == lastCharacter || 'H' == lastCharacter)
+        {
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2)) * 60 * 60;
+        }
+        else if('m' == lastCharacter || 'M' == lastCharacter)
+        {
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2)) * 60;
+        }
+        else if('s' == lastCharacter || 'S' == lastCharacter)
+        {
+            return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 2));
+        }
+
+        //Default 30 days
+        return 2592000;
     }
 }
