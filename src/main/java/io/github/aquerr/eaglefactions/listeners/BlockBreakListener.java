@@ -3,11 +3,11 @@ package io.github.aquerr.eaglefactions.listeners;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -19,8 +19,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class BlockBreakListener
+public class BlockBreakListener extends AbstractListener
 {
+    public BlockBreakListener(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
@@ -34,36 +39,34 @@ public class BlockBreakListener
                  {
                      World world = player.getWorld();
 
-                     if (MainLogic.getSafeZoneWorldNames().contains(world.getName()))
+                     if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
                      {
                          event.setCancelled(true);
                          return;
                      }
-                     else if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                     else if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                      {
                          event.setCancelled(true);
                          return;
                      }
 
                      Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-
-                     Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-
-                     Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
+                     Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
 
                      if(optionalChunkFaction.isPresent())
                      {
-                         if(optionalChunkFaction.get().Name.equals("SafeZone") && player.hasPermission("eaglefactions.safezone.build"))
+                         if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                          {
                              return;
                          }
-                         else if(optionalChunkFaction.get().Name.equals("WarZone") && player.hasPermission("eaglefactions.warzone.build"))
+                         else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                          {
                              return;
                          }
                          else if(optionalPlayerFaction.isPresent())
                          {
-                             if (!FlagManager.canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                             if (!getPlugin().getFlagManager().canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                              {
                                  player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                  event.setCancelled(true);
@@ -86,33 +89,33 @@ public class BlockBreakListener
             {
                 World world = transaction.getFinal().getLocation().get().getExtent();
 
-                if (MainLogic.getSafeZoneWorldNames().contains(world.getName()))
+                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if (MainLogic.getWarZoneWorldNames().contains(world.getName()) && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                else if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                 {
                     event.setCancelled(true);
                     return;
                 }
 
                 Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), claim);
+                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
 
                 if (optionalChunkFaction.isPresent())
                 {
-                    if(!optionalChunkFaction.get().Name.equals("SafeZone") && !optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingDisabled())
+                    if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtClaimsDisabled())
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if(optionalChunkFaction.get().Name.equals("SafeZone"))
+                    else if(optionalChunkFaction.get().getName().equals("SafeZone"))
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if (optionalChunkFaction.get().Name.equals("WarZone") && MainLogic.isBlockDestroyingInWarZoneDisabled())
+                    else if (optionalChunkFaction.get().getName().equals("WarZone") && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                     {
                         event.setCancelled(true);
                         return;
@@ -120,7 +123,7 @@ public class BlockBreakListener
                 }
             }
         }
-
+        return;
     }
 
 }

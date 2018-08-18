@@ -18,8 +18,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class SetHomeCommand implements CommandExecutor
+public class SetHomeCommand extends AbstractCommand implements CommandExecutor
 {
+    public SetHomeCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -27,7 +32,7 @@ public class SetHomeCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if(optionalPlayerFaction.isPresent())
             {
@@ -37,21 +42,21 @@ public class SetHomeCommand implements CommandExecutor
                 if(EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
                     Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
-                    FactionLogic.setHome(world.getUniqueId(), playerFaction, home);
+                    getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);
                     source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
 
                     return CommandResult.success();
                 }
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
-                    Optional<Faction> chunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
+                    Optional<Faction> chunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
 
-                    if(chunkFaction.isPresent() && chunkFaction.get().Name.equals(playerFaction.Name))
+                    if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
                     {
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
-                        FactionLogic.setHome(world.getUniqueId(), playerFaction, home);
+                        getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);
                         source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
                     }
                     else

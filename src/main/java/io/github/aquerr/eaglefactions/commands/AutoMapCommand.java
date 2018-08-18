@@ -12,8 +12,13 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class AutoMapCommand implements CommandExecutor
+public class AutoMapCommand extends AbstractCommand implements CommandExecutor
 {
+    public AutoMapCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {

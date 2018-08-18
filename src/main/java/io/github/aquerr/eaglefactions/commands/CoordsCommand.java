@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -22,33 +23,38 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CoordsCommand implements CommandExecutor
+public class CoordsCommand extends AbstractCommand implements CommandExecutor
 {
+    public CoordsCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if(source instanceof Player)
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             List<Text> teamCoords = new ArrayList<>();
 
             if(optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
-                if(playerFaction.Home != null)
+                if(playerFaction.getHome() != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of( PluginMessages.FACTIONS_HOME + ": " + playerFaction.Home.WorldUUID.toString() + '|' + playerFaction.Home.BlockPosition.toString()))
+                            .append(Text.of( PluginMessages.FACTIONS_HOME + ": " + playerFaction.getHome().getWorldUUID().toString() + '|' + playerFaction.getHome().getBlockPosition().toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
                 }
 
-                if (!playerFaction.Leader.equals(""))
+                if (!playerFaction.getLeader().toString().equals(""))
                 {
-                    Optional<Player> leader = PlayerManager.getPlayer(UUID.fromString(playerFaction.Leader));
+                    Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(playerFaction.getLeader());
 
                     if(leader.isPresent())
                     {
@@ -60,11 +66,11 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!playerFaction.Officers.isEmpty())
+                if(!playerFaction.getOfficers().isEmpty())
                 {
-                    for (String officerName: playerFaction.Officers)
+                    for (UUID officerUUID: playerFaction.getOfficers())
                     {
-                        Optional<Player> officer = PlayerManager.getPlayer(UUID.fromString(officerName));
+                        Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
 
                         if(officer.isPresent())
                         {
@@ -77,11 +83,11 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!playerFaction.Members.isEmpty())
+                if(!playerFaction.getMembers().isEmpty())
                 {
-                    for (String memberName: playerFaction.Members)
+                    for (UUID memberUUID: playerFaction.getMembers())
                     {
-                        Optional<Player> member = PlayerManager.getPlayer(UUID.fromString(memberName));
+                        Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
 
                         if(member.isPresent())
                         {
@@ -94,11 +100,11 @@ public class CoordsCommand implements CommandExecutor
                     }
                 }
 
-                if(!playerFaction.Recruits.isEmpty())
+                if(!playerFaction.getRecruits().isEmpty())
                 {
-                    for (String recruitName: playerFaction.Recruits)
+                    for (UUID recruitUUID: playerFaction.getRecruits())
                     {
-                        Optional<Player> recruit = PlayerManager.getPlayer(UUID.fromString(recruitName));
+                        Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
 
                         if(recruit.isPresent())
                         {

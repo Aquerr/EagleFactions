@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class SetLeaderCommand implements CommandExecutor
+public class SetLeaderCommand extends AbstractCommand implements CommandExecutor
 {
+    public SetLeaderCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -29,20 +34,20 @@ public class SetLeaderCommand implements CommandExecutor
             {
                 Player player = (Player) source;
                 Player newLeaderPlayer = optionalNewLeaderPlayer.get();
-                Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalNewLeaderPlayerFaction = FactionLogic.getFactionByPlayerUUID(newLeaderPlayer.getUniqueId());
+                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                Optional<Faction> optionalNewLeaderPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(newLeaderPlayer.getUniqueId());
 
                 if (optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
 
-                    if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().Name.equals(playerFaction.Name))
+                    if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
                         if (EagleFactions.AdminList.contains(player.getUniqueId()))
                         {
-                            if (!playerFaction.Leader.equals(newLeaderPlayer.getUniqueId().toString()))
+                            if (!playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.Name);
+                                getPlugin().getFactionLogic().setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_SET + " ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " " + PluginMessages.AS_YOUR_NEW + " ", TextColors.BLUE, PluginMessages.LEADER, TextColors.WHITE, "!"));
                             }
                             else
@@ -53,11 +58,11 @@ public class SetLeaderCommand implements CommandExecutor
                             return CommandResult.success();
                         }
 
-                        if (playerFaction.Leader.equals(player.getUniqueId().toString()))
+                        if (playerFaction.getLeader().equals(player.getUniqueId()))
                         {
-                            if (!playerFaction.Leader.equals(newLeaderPlayer.getUniqueId().toString()))
+                            if (!playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                             {
-                                FactionLogic.setLeader(newLeaderPlayer.getUniqueId(), playerFaction.Name);
+                                getPlugin().getFactionLogic().setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
                                 source.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_SET + " ", TextColors.GOLD, newLeaderPlayer.getName(), TextColors.WHITE, " as your new ", TextColors.BLUE, "Leader", TextColors.WHITE, "!"));
                             }
                             else

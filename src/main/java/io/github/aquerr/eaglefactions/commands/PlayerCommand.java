@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands;
 
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -27,8 +28,13 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2017-08-04.
  */
-public class PlayerCommand implements CommandExecutor
+public class PlayerCommand extends AbstractCommand implements CommandExecutor
 {
+    public PlayerCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -61,8 +67,8 @@ public class PlayerCommand implements CommandExecutor
             List<Text> playerInfo = new ArrayList<Text>();
 
             String playerFactionName = "";
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
-            if(optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().Name;
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            if(optionalPlayerFaction.isPresent()) playerFactionName = optionalPlayerFaction.get().getName();
 
             Date lastPlayed = Date.from(player.getJoinData().lastPlayed().get());
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -71,10 +77,10 @@ public class PlayerCommand implements CommandExecutor
             //TODO: Show if player is online or offline.
 
             Text info = Text.builder()
-                    .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, PlayerManager.getPlayerName(player.getUniqueId()).get() + "\n"))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, getPlugin().getPlayerManager().getPlayerName(player.getUniqueId()).get() + "\n"))
                     .append(Text.of(TextColors.AQUA, PluginMessages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
                     .append(Text.of(TextColors.AQUA, PluginMessages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
-                    .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, PowerManager.getPlayerPower(player.getUniqueId()) + "/" + PowerManager.getPlayerMaxPower(player.getUniqueId())))
+                    .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())))
                     .build();
 
             playerInfo.add(info);

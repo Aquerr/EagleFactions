@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.command.CommandException;
@@ -23,17 +23,23 @@ import org.spongepowered.api.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
-public class MapCommand implements CommandExecutor
+public class MapCommand extends AbstractCommand implements CommandExecutor
 {
+    public MapCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if (source instanceof Player)
         {
             Player player = (Player) source;
-            if (MainLogic.getClaimableWorldNames().contains(player.getWorld().getName()))
+            if (getPlugin().getConfiguration().getConfigFileds().getClaimableWorldNames().contains(player.getWorld().getName()))
             {
                 generateMap(player);
             }
@@ -52,8 +58,8 @@ public class MapCommand implements CommandExecutor
 
     private void generateMap(Player player)
     {
-        List<String> claimsList = FactionLogic.getAllClaims();
-        Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+        Set<String> claimsList = getPlugin().getFactionLogic().getAllClaims();
+        Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
         World world = player.getWorld();
 
@@ -98,71 +104,71 @@ public class MapCommand implements CommandExecutor
 
                 if (claimsList.contains(world.getUniqueId().toString() + '|' + chunk.toString()))
                 {
-                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), chunk);
+                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
                     if (optionalPlayerFaction.isPresent())
                     {
                         Faction playerFaction = optionalPlayerFaction.get();
 
-                        if (optionalChunkFaction.get().Name.equals(playerFaction.Name))
+                        if (optionalChunkFaction.get().getName().equals(playerFaction.getName()))
                         {
                             textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                            playerFaction = optionalChunkFaction.get();
-                        } else if (playerFaction.Alliances.contains(optionalChunkFaction.get().Name))
+                        } else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
                         {
                             textBuilder.append(allianceMark);
-                            if (!allianceFactions.contains(optionalChunkFaction.get().Name))
+                            if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                allianceFactions += optionalChunkFaction.get().Name + ", ";
+                                allianceFactions += optionalChunkFaction.get().getName() + ", ";
                             }
-                        } else if (playerFaction.Enemies.contains(optionalChunkFaction.get().Name))
+                        } else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
                         {
                             textBuilder.append(enemyMark);
-                            if (!enemyFactions.contains(optionalChunkFaction.get().Name))
+                            if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                enemyFactions += optionalChunkFaction.get().Name + ", ";
+                                enemyFactions += optionalChunkFaction.get().getName() + ", ";
                             }
                         } else
                         {
-                            if (optionalChunkFaction.get().Name.equals("SafeZone"))
+                            if (optionalChunkFaction.get().getName().equals("SafeZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                            } else if (optionalChunkFaction.get().Name.equals("WarZone"))
+                            } else if (optionalChunkFaction.get().getName().equals("WarZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                             } else
                             {
                                 textBuilder.append(normalFactionMark);
                             }
-                            if (!normalFactions.contains(optionalChunkFaction.get().Name))
+                            if (!normalFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                normalFactions += optionalChunkFaction.get().Name + ", ";
+                                normalFactions += optionalChunkFaction.get().getName() + ", ";
                             }
                         }
                     } else
                     {
-                        if (optionalChunkFaction.get().Name.equals("SafeZone"))
+                        if (optionalChunkFaction.get().getName().equals("SafeZone"))
                         {
                             textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                        } else if (optionalChunkFaction.get().Name.equals("WarZone"))
+                        } else if (optionalChunkFaction.get().getName().equals("WarZone"))
                         {
                             textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                         } else
                         {
                             textBuilder.append(normalFactionMark);
                         }
-                        if (!normalFactions.contains(optionalChunkFaction.get().Name))
+                        if (!normalFactions.contains(optionalChunkFaction.get().getName()))
                         {
-                            normalFactions += optionalChunkFaction.get().Name + ", ";
+                            normalFactions += optionalChunkFaction.get().getName() + ", ";
                         }
                     }
                 }
                 else
                 {
-                    if (!MainLogic.isDelayedClaimingToggled() &&
+                    if (!getPlugin().getConfiguration().getConfigFileds().shouldDelayClaim() &&
                             (EagleFactions.AdminList.contains(player.getUniqueId()) ||
                                     (optionalPlayerFaction.isPresent() &&
-                                            (optionalPlayerFaction.get().Leader.equals(player.getUniqueId().toString()) || optionalPlayerFaction.get().Officers.contains(player.getUniqueId().toString())))))
+                                            (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     } else
@@ -176,11 +182,11 @@ public class MapCommand implements CommandExecutor
 
         String playerPositionClaim = "none";
 
-        Optional<Faction> optionalPlayerPositionFaction = FactionLogic.getFactionByChunk(world.getUniqueId(), playerPosition);
+        Optional<Faction> optionalPlayerPositionFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), playerPosition);
 
         if (optionalPlayerPositionFaction.isPresent())
         {
-            playerPositionClaim = optionalPlayerPositionFaction.get().Name;
+            playerPositionClaim = optionalPlayerPositionFaction.get().getName();
         }
 
         //Print map
@@ -194,7 +200,7 @@ public class MapCommand implements CommandExecutor
         //Print factions on map
         if (optionalPlayerFaction.isPresent())
         {
-            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().Name));
+            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().getName()));
         }
         if (!normalFactions.isEmpty())
         {
@@ -219,36 +225,36 @@ public class MapCommand implements CommandExecutor
         {
             //Because faction could have changed we need to get it again here.
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             World world = player.getWorld();
 
             if(optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if (playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if (playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
-                    if (!FactionLogic.isClaimed(world.getUniqueId(), chunk))
+                    if (!getPlugin().getFactionLogic().isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (PowerManager.getFactionPower(playerFaction).doubleValue() > playerFaction.Claims.size())
+                        if (getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
                         {
-                            if (!EagleFactions.AttackedFactions.containsKey(playerFaction.Name))
+                            if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                             {
-                                if (!playerFaction.Claims.isEmpty())
+                                if (!playerFaction.getClaims().isEmpty())
                                 {
-                                    if (playerFaction.Name.equals("SafeZone") || playerFaction.Name.equals("WarZone"))
+                                    if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
                                     {
-                                        FactionLogic.addClaim(playerFaction, world.getUniqueId(), chunk);
+                                        getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
                                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                                     }
                                     else
                                     {
-                                        if (MainLogic.requireConnectedClaims())
+                                        if (getPlugin().getConfiguration().getConfigFileds().requireConnectedClaims())
                                         {
-                                            if (FactionLogic.isClaimConnected(playerFaction, world.getUniqueId(), chunk))
+                                            if (getPlugin().getFactionLogic().isClaimConnected(playerFaction, world.getUniqueId(), chunk))
                                             {
-                                                FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                                getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                             }
                                             else
                                             {
@@ -257,13 +263,13 @@ public class MapCommand implements CommandExecutor
                                         }
                                         else
                                         {
-                                            FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                            getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    FactionLogic.startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+                                    getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                 }
                             }
                             else
@@ -279,20 +285,20 @@ public class MapCommand implements CommandExecutor
                     else
                     {
                         //Check if faction's home was set in this claim. If yes then remove it.
-                        if (playerFaction.Home != null)
+                        if (playerFaction.getHome() != null)
                         {
-                            if (world.getUniqueId().equals(playerFaction.Home.WorldUUID))
+                            if (world.getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                             {
-                                Location homeLocation = world.getLocation(playerFaction.Home.BlockPosition);
+                                Location homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
 
                                 if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                                 {
-                                    FactionLogic.setHome(world.getUniqueId(), playerFaction, null);
+                                    getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, null);
                                 }
                             }
                         }
 
-                        FactionLogic.removeClaim(playerFaction, world.getUniqueId(), chunk);
+                        getPlugin().getFactionLogic().removeClaim(playerFaction, world.getUniqueId(), chunk);
 
                         player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     }
