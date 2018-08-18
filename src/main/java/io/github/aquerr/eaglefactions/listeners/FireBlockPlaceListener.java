@@ -10,8 +10,13 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 import java.util.Optional;
 
-public class FireBlockPlaceListener
+public class FireBlockPlaceListener extends AbstractListener
 {
+    public FireBlockPlaceListener(EagleFactions eagleFactions)
+    {
+        super(eagleFactions);
+    }
+
     @Listener
     public void onIgnite(ChangeBlockEvent.Place event)
     {
@@ -23,11 +28,11 @@ public class FireBlockPlaceListener
             {
                 event.getTransactions().forEach(x->
                 {
-                    Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
+                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
 
                     if (x.getFinal().getState().getType() == BlockTypes.FIRE
-                            && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().Name.equals("SafeZone")
-                            || optionalChunkFaction.get().Name.equals("WarZone")))
+                            && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().getName().equals("SafeZone")
+                            || optionalChunkFaction.get().getName().equals("WarZone")))
                     {
                         event.setCancelled(true);
                     }
@@ -38,11 +43,11 @@ public class FireBlockPlaceListener
         {
             event.getTransactions().forEach(x->
             {
-                Optional<Faction> optionalChunkFaction = FactionLogic.getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
+                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(x.getFinal().getWorldUniqueId(), x.getFinal().getLocation().get().getChunkPosition());
 
                 if (x.getFinal().getState().getType() == BlockTypes.FIRE
-                        && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().Name.equals("SafeZone")
-                        || optionalChunkFaction.get().Name.equals("WarZone")))
+                        && optionalChunkFaction.isPresent() && (optionalChunkFaction.get().getName().equals("SafeZone")
+                        || optionalChunkFaction.get().getName().equals("WarZone")))
                 {
                     event.setCancelled(true);
                 }

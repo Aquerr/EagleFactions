@@ -1,17 +1,12 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.logic.MainLogic;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -20,20 +15,15 @@ import java.util.function.Function;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class Configuration
+public class Configuration implements IConfiguration
 {
-    //TODO: This class should have only one instance. Rework it to singleton.
-
-    public Configuration(Path configDir)
-    {
-        setup(configDir);
-    }
-
     private Path configPath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
-    public void setup(Path configDir)
+    private ConfigFields configFileds;
+
+    public Configuration(Path configDir)
     {
         if (!Files.exists(configDir))
         {
@@ -47,14 +37,14 @@ public class Configuration
             }
         }
 
-        configPath = configDir.resolve("Settings.conf");
+        this.configPath = configDir.resolve("Settings.conf");
 
-        if (!Files.exists(configPath))
+        if (!Files.exists(this.configPath))
         {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("Settings.conf");
             try
             {
-                Files.copy(inputStream, configPath);
+                Files.copy(inputStream, this.configPath);
                 inputStream.close();
             }
             catch (IOException e)
@@ -62,45 +52,57 @@ public class Configuration
                 e.printStackTrace();
             }
 
-            configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
-            load();
+            this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
+            loadConfiguration();
         }
         else
         {
-            configLoader = HoconConfigurationLoader.builder().setPath(configPath).build();
-            load();
-            checkNodes();
+            this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
+            loadConfiguration();
             save();
         }
+
+        this.configFileds = new ConfigFields(this);
+//        setup(configDir);
     }
 
-    private void checkNodes()
+    @Override
+    public ConfigFields getConfigFileds()
     {
-        Method[] methods = MainLogic.class.getDeclaredMethods();
-        for (Method method: methods)
-        {
-            if (!method.getName().equals("setup") && !method.getName().equals("addWorld"))
-            {
-
-                try
-                {
-                    Object o = method.invoke(null);
-                }
-                catch (IllegalAccessException | InvocationTargetException e)
-                {
-                    e.printStackTrace();
-                }
-
-            }
-        }
+        return configFileds;
     }
 
-    public void load()
+    //    public void setup(Path configDir)
+//    {
+//    }
+
+//    private void checkNodes()
+//    {
+//        Method[] methods = ConfigFields.class.getDeclaredMethods();
+//        for (Method method: methods)
+//        {
+//            if (!method.getName().equals("setup") && !method.getName().equals("addWorld"))
+//            {
+//
+//                try
+//                {
+//                    Object o = method.invoke(null);
+//                }
+//                catch (IllegalAccessException | InvocationTargetException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//        }
+//    }
+
+    @Override
+    public void loadConfiguration()
     {
         try
         {
             configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
-            MainLogic.setup(this);
         }
         catch (IOException e)
         {
@@ -108,7 +110,8 @@ public class Configuration
         }
     }
 
-    private void save()
+    @Override
+    public void save()
     {
         try
         {
@@ -120,11 +123,13 @@ public class Configuration
         }
     }
 
+    @Override
     public int getInt(int defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getInt(defaultValue);
     }
 
+    @Override
     public double getDouble(double defaultValue, Object... nodePath)
     {
         Object value = configNode.getNode(nodePath).getValue(defaultValue);
@@ -141,21 +146,25 @@ public class Configuration
         else return 0;
     }
 
+    @Override
     public boolean getBoolean(boolean defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getBoolean(defaultValue);
     }
 
+    @Override
     public String getString(String defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getString(defaultValue);
     }
 
+    @Override
     public List<String> getListOfStrings(List<String> defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getList(objectToStringTransformer, defaultValue);
     }
 
+    @Override
     public boolean setListOfStrings(List<String> listOfStrings, Object... nodePath)
     {
         configNode.getNode(nodePath).setValue(listOfStrings);

@@ -14,4 +14,4 @@
 
 ## More information
 
-<If you want to inform something more then write it here.>
+<If you want to inform about something more then write it here.>

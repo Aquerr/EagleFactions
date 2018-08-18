@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-public class MaxPowerCommand implements CommandExecutor
+public class MaxPowerCommand extends AbstractCommand implements CommandExecutor
 {
+    public MaxPowerCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -57,7 +62,7 @@ public class MaxPowerCommand implements CommandExecutor
     {
         BigDecimal newPower = new BigDecimal(power);
 
-        PowerManager.setMaxPower(player.getUniqueId(), newPower);
+        getPlugin().getPowerManager().setMaxPower(player.getUniqueId(), newPower);
 
         player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PLAYERS_MAXPOWER_HAS_BEEN_CHANGED));
     }

@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class AutoClaimCommand implements CommandExecutor
+public class AutoClaimCommand extends AbstractCommand implements CommandExecutor
 {
+    public AutoClaimCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -25,13 +30,13 @@ public class AutoClaimCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if(optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
                     {

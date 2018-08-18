@@ -1,72 +1,77 @@
 package io.github.aquerr.eaglefactions.caching;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.managers.PowerManager;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class FactionsCache
 {
-    private static List<Faction> _factionsList = new ArrayList<>();
+    //TODO: Add a second thread for saving factions' data.
+
+    private static Map<String, Faction> factionsCacheMap = new HashMap<>();
+    private static Set<String> claimsCacheSet = new HashSet<>();
 
     private FactionsCache()
     {
 
     }
 
-    public static List<Faction> getFactionsList()
+    public static Map<String, Faction> getFactionsMap()
     {
-        return _factionsList;
+        return factionsCacheMap;
     }
 
     public static void addOrUpdateFactionCache(Faction faction)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equals(faction.Name)).findFirst();
+        Faction factionToUpdate = factionsCacheMap.get(faction.getName().toLowerCase());
 
-        if (optionalFaction.isPresent())
+        if (factionToUpdate != null)
         {
-            Faction factionToUpdate = optionalFaction.get();
-            _factionsList.remove(factionToUpdate);
-            _factionsList.add(faction);
+            factionsCacheMap.replace(factionToUpdate.getName().toLowerCase(), faction);
+
+            for(String claim : factionToUpdate.getClaims())
+            {
+                claimsCacheSet.remove(claim);
+            }
         }
         else
         {
-            _factionsList.add(faction);
+            factionsCacheMap.put(faction.getName().toLowerCase(), faction);
+        }
+
+        if(!faction.getClaims().isEmpty())
+        {
+            claimsCacheSet.addAll(faction.getClaims());
         }
     }
 
     public static void removeFactionCache(String factionName)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equals(factionName)).findFirst();
+        Faction faction = factionsCacheMap.get(factionName.toLowerCase());
+        factionsCacheMap.remove(factionName.toLowerCase());
 
-        if (optionalFaction.isPresent())
+        for(String claim : faction.getClaims())
         {
-            Faction factionToRemove = optionalFaction.get();
-            _factionsList.remove(factionToRemove);
+            claimsCacheSet.remove(claim);
         }
     }
 
-    public static @Nullable Faction getFactionCache(String factionName)
+    @Nullable
+    public static Faction getFactionCache(String factionName)
     {
-        Optional<Faction> optionalFaction = _factionsList.stream().filter(x->x.Name.equalsIgnoreCase(factionName)).findFirst();
+        Faction optionalFaction = factionsCacheMap.get(factionName.toLowerCase());
 
-        if (optionalFaction.isPresent())
+        if (optionalFaction != null)
         {
-            Faction faction = optionalFaction.get();
-
-//            //Update power and cache
-//            faction.Power = PowerManager.getFactionPower(faction);
-//            _factionsList.remove(faction);
-//            _factionsList.add(faction);
-
-            //Return faction
-            return faction;
+            return optionalFaction;
         }
 
         return null;
+    }
+
+    public static Set<String> getAllClaims()
+    {
+        return claimsCacheSet;
     }
 }

@@ -7,13 +7,8 @@ public abstract class PluginPermissions
     //public static final String PlayerCommands = "eaglefactions.player";
     //public static final String AdminCommands = "eaglefactions.admin";
 
-    public static final String AllyCommands = "eaglefactions.player.ally";
-    public static final String AddAllyCommand = "eaglefactions.player.ally.add";
-    public static final String RemoveAllyCommand = "eaglefactions.player.ally.remove";
-
-    public static final String EnemyCommands = "eaglefactions.player.enemy";
-    public static final String AddEnemyCommand = "eaglefactions.player.enemy.add";
-    public static final String RemoveEnemyCommand = "eaglefactions.player.enemy.remove";
+    public static final String AllyCommand = "eaglefactions.player.ally";
+    public static final String EnemyCommand = "eaglefactions.player.enemy";
 
     public static final String CreateCommand = "eaglefactions.player.create";
     public static final String DisbandCommand = "eaglefactions.player.disband";
@@ -22,10 +17,8 @@ public abstract class PluginPermissions
     public static final String LeaveCommand = "eaglefactions.player.leave";
     public static final String ListCommand = "eaglefactions.player.list";
     public static final String KickCommand = "eaglefactions.player.kick";
-    //public static final String FriendlyFireCommand = "eaglefactions.player.friendlyfire";
     public static final String ChatCommand = "eaglefactions.player.chat";
     public static final String TopCommand = "eaglefactions.player.top";
-
 
     public static final String HelpCommand = "eaglefactions.player.help";
     public static final String PlayerCommand = "eaglefactions.player.player";
@@ -40,8 +33,10 @@ public abstract class PluginPermissions
     public static final String UnclaimAllCommand = "eaglefactions.player.unclaimall";
 
     public static final String SetLeaderCommand = "eaglefactions.player.setleader";
-    public static final String OfficerCommand = "eaglefactions.player.officer";
-    public static final String MemberCommand = "eaglefactions.player.member";
+//    public static final String OfficerCommand = "eaglefactions.player.officer";
+//    public static final String MemberCommand = "eaglefactions.player.member";
+    public static final String PromoteCommand = "eaglefactions.player.promote";
+    public static final String DemoteCommand = "eaglefactions.player.demote";
     public static final String SetHomeCommand = "eaglefactions.player.sethome";
     public static final String HomeCommand = "eaglefactions.player.home";
 

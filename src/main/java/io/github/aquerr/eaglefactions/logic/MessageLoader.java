@@ -1,5 +1,7 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.config.IConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -9,16 +11,14 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 public class MessageLoader
 {
-    public MessageLoader(Path configDir)
+    public MessageLoader(IConfiguration configuration, Path configDir)
     {
-        String messagesFileName = MainLogic.getLanguageFileName();
+        String messagesFileName = configuration.getConfigFileds().getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
         if (!Files.exists(configDir.resolve("messages")))

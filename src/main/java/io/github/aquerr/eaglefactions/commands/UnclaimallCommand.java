@@ -16,8 +16,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class UnclaimallCommand implements CommandExecutor
+public class UnclaimallCommand extends AbstractCommand implements CommandExecutor
 {
+    public UnclaimallCommand(EagleFactions plugin)
+    {
+        super(plugin);
+    }
+
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
@@ -25,21 +30,21 @@ public class UnclaimallCommand implements CommandExecutor
         {
             Player player = (Player)source;
 
-            Optional<Faction> optionalPlayerFaction = FactionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             //Check if player is in the faction.
             if(optionalPlayerFaction.isPresent())
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.Leader.equals(player.getUniqueId().toString()) || playerFaction.Officers.contains(player.getUniqueId().toString()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
                 {
-                    if(playerFaction.Home != null)
+                    if(playerFaction.getHome() != null)
                     {
-                        FactionLogic.setHome(null, playerFaction, null);
+                        getPlugin().getFactionLogic().setHome(null, playerFaction, null);
                     }
 
-                    FactionLogic.removeClaims(playerFaction);
+                    getPlugin().getFactionLogic().removeClaims(playerFaction);
                     player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.SUCCESSFULLY_REMOVED_ALL_CLAIMS));
 
                     return CommandResult.success();

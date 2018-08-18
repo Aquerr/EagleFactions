@@ -155,6 +155,8 @@ public class PluginMessages
     public static String POWER;
     public static String CLAIMS;
     public static String FACTION_INFO;
+    public static String LAST_ONLINE;
+    public static String NOW;
 
     //Invite
     public static String PLAYER_IS_ALREADY_IN_A_FACTION;
@@ -210,9 +212,11 @@ public class PluginMessages
 
     //Member
     public static String YOU_PROMOTED;
-    //public static String YOU_DEMOTED;
+    public static String YOU_CANT_PROMOTE_THIS_PLAYER_MORE;
+    public static String YOU_DEMOTED;
     public static String TO;
     public static String YOU_CANT_SET_FACTIONS_LEADER_AS_MEMBER;
+    public static String YOU_CANT_DEMOTE_THIS_PLAYER_MORE;
 
     //Player
     public static String PLAYER_INFO;
