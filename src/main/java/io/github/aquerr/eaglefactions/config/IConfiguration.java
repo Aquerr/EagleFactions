@@ -8,7 +8,7 @@ public interface IConfiguration
 
     void save();
 
-    void loadConfiguration();
+    void reloadConfiguration();
 
     int getInt(int defaultValue, Object... nodePath);
 
