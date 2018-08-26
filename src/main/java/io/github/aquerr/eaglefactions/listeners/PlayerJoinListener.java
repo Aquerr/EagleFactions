@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.managers.PowerManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -20,7 +21,7 @@ public class PlayerJoinListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.POST)
     public void onPlayerJoin(ClientConnectionEvent.Join event)
     {
 

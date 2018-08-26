@@ -12,6 +12,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
@@ -27,7 +28,7 @@ public class PlayerBlockPlaceListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
         if(!EagleFactions.AdminList.contains(player.getUniqueId()))

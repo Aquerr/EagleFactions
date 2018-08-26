@@ -22,7 +22,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GameLoadCompleteEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
@@ -475,6 +474,7 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new FireBlockPlaceListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener(this));
         Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
+        Sponge.getEventManager().registerListeners(this, new ExplosionListener(this));
     }
 
     public IConfiguration getConfiguration()

@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
@@ -26,7 +27,7 @@ public class EntityDamageListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onEntityDamage(DamageEntityEvent event)
     {
         if(event.getCause().root() instanceof DamageSource)

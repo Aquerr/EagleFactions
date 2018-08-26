@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class FireBlockPlaceListener extends AbstractListener
         super(eagleFactions);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onIgnite(ChangeBlockEvent.Place event)
     {
         if (event.getCause().root() instanceof Player)

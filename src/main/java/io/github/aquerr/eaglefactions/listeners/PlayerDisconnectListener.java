@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -19,7 +20,7 @@ public class PlayerDisconnectListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.POST)
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player)
     {
         if (super.getPlugin().getPVPLogger().isActive() && EagleFactions.getPlugin().getPVPLogger().isPlayerBlocked(player))

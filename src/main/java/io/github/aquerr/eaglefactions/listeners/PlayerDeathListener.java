@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -24,7 +25,7 @@ public class PlayerDeathListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.POST)
     public void onPlayerDeath(DestructEntityEvent.Death event)
     {
         if(event.getTargetEntity() instanceof Player)

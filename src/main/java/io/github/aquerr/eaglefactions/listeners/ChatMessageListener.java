@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
@@ -25,7 +26,7 @@ public class ChatMessageListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onChatMessage(MessageChannelEvent.Chat event, @Root Player player)
     {
         Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());

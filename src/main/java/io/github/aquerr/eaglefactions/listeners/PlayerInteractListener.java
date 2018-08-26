@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
@@ -25,7 +26,7 @@ public class PlayerInteractListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onPlayerInteract(InteractBlockEvent event, @Root Player player)
     {
 //        if(event.getTargetBlock().getState().getType() == BlockTypes.FURNACE)
