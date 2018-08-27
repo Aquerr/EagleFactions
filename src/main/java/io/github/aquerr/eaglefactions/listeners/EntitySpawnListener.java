@@ -4,8 +4,6 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -73,7 +71,7 @@ public class EntitySpawnListener extends AbstractListener
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET));
                         }
                     }
                 }

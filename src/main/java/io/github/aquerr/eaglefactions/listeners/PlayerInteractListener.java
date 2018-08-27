@@ -75,14 +75,14 @@ public class PlayerInteractListener extends AbstractListener
                     {
                         if (!getPlugin().getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
                             event.setCancelled(true);
                         }
                     }
                     else
                     {
                         event.setCancelled(true);
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+                        player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
                     }
                 }
             }

@@ -254,7 +254,7 @@ public class PluginMessages
     //Unclaim
     public static String SUCCESSFULLY_REMOVED_ALL_CLAIMS;
 
-    //Version
+    //VERSION
     public static String VERSION;
 
     //World
@@ -279,7 +279,7 @@ public class PluginMessages
     public static String YOUR_POWER_HAS_BEEN_INCREASED_BY;
     public static String CURRENT_POWER;
 
-    //Version
+    //VERSION
     public static String A_NEW_VERSION_OF;
     public static String IS_AVAILABLE;
 

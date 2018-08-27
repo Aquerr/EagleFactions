@@ -86,7 +86,7 @@ public class PVPLogger
             else
             {
                 _attackedPlayers.put(player.getUniqueId(), getBlockTime());
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.PVPLOGGER_HAS_TURNED_ON + " " + PluginMessages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + PluginMessages.SECONDS + "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.PVPLOGGER_HAS_TURNED_ON + " " + PluginMessages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + PluginMessages.SECONDS + "!"));
 
                 Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
                 taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
@@ -100,7 +100,7 @@ public class PVPLogger
 
                             if (seconds <= 0)
                             {
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
                                 _attackedPlayers.remove(player.getUniqueId());
                                 task.cancel();
                             }

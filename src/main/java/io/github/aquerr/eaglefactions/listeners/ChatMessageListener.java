@@ -45,8 +45,8 @@ public class ChatMessageListener extends AbstractListener
             //Text.Builder playerText = Text.builder();
             Text.Builder message = Text.builder();
 
-            //Message = Prefixes + Player Name + Text
-            //OriginalMessage = Player Name + Text
+            //Message = Prefixes + Player NAME + Text
+            //OriginalMessage = Player NAME + Text
             //RawMessage = Text
 
             //Get player name

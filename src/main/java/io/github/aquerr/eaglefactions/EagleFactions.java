@@ -35,7 +35,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = PluginInfo.Id, name = PluginInfo.Name, version = PluginInfo.Version, description = PluginInfo.Description, authors = PluginInfo.Author)
+@Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION, authors = PluginInfo.AUTHOR)
 public class EagleFactions
 {
     public static Map<List<String>, CommandSpec> Subcommands;
@@ -116,13 +116,13 @@ public class EagleFactions
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Thank you for choosing this plugin!"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Current version: " + PluginInfo.Version));
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Current version: " + PluginInfo.VERSION));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
 
-        if(!VersionChecker.isLatest(PluginInfo.Version))
+        if(!VersionChecker.isLatest(PluginInfo.VERSION))
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.Name, TextColors.GOLD, " is available online!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         }
     }
@@ -179,12 +179,12 @@ public class EagleFactions
 //                        else if(maxInactive - 172800 < inactiveTime.getSeconds())
 //                        {
 //                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
-//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PluginPrefix.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
+//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
 //                        }
                         else if(maxInactive * 0.75 < inactiveTime.getSeconds())
                         {
                             long timeToRemove = maxInactive - inactiveTime.getSeconds();
-                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PluginPrefix.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "s due to its long inactive time.")));
+                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "s due to its long inactive time.")));
                         }
                     }
                 }
@@ -255,7 +255,7 @@ public class EagleFactions
                 .executor(new LeaveCommand(this))
                 .build());
 
-        //Version command
+        //VERSION command
         Subcommands.put(Arrays.asList("v", "version"), CommandSpec.builder()
                 .description(Text.of("Shows plugin version"))
                 .permission(PluginPermissions.VersionCommand)
