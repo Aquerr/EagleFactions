@@ -42,7 +42,7 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
 
                 if(selectedFaction == null)
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
                     return CommandResult.success();
                 }
 
@@ -54,7 +54,7 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                     {
                         if(playerFaction.getEnemies().contains(selectedFaction.getName()))
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + PluginMessages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + PluginMessages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
                         }
                         else
                         {
@@ -62,13 +62,13 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                             {
                                 //Remove ally
                                 getPlugin().getFactionLogic().removeAlly(playerFaction.getName(), selectedFaction.getName());
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, selectedFaction.getName(), TextColors.GREEN, "!"));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, selectedFaction.getName(), TextColors.GREEN, "!"));
                             }
                             else
                             {
                                 //Add ally
                                 getPlugin().getFactionLogic().addAlly(playerFaction.getName(), selectedFaction.getName());
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
                             }
                         }
                         return CommandResult.success();
@@ -76,13 +76,13 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
 
                     if(!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()))
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
                     else
                     {
                         if(playerFaction.getEnemies().contains(selectedFaction.getName()))
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + PluginMessages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
+                            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + PluginMessages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
                         }
                         else
                         {
@@ -90,7 +90,7 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                             {
                                 //Remove ally
                                 getPlugin().getFactionLogic().removeAlly(playerFaction.getName(), selectedFaction.getName());
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, selectedFaction.getName(), TextColors.GREEN, "!"));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.YOU_DISBANDED_YOUR_ALLIANCE_WITH + " ", TextColors.GOLD, selectedFaction.getName(), TextColors.GREEN, "!"));
                             }
                             else
                             {
@@ -103,8 +103,8 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                                 {
                                     getPlugin().getFactionLogic().addAlly(playerFaction.getName(), selectedFaction.getName());
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, selectedFaction.getName() + "!"));
-                                    optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
+                                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, selectedFaction.getName() + "!"));
+                                    optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
 
                                     EagleFactions.AllayInviteList.remove(checkInvite);
                                 }
@@ -113,17 +113,17 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                                     AllyRequest invite = new AllyRequest(playerFaction.getName(), selectedFaction.getName());
                                     if(EagleFactions.AllayInviteList.contains(invite))
                                     {
-                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "You have already invited this factions to the alliance. Wait for their response!"));
+                                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already invited this factions to the alliance. Wait for their response!"));
                                         return CommandResult.success();
                                     }
                                     EagleFactions.AllayInviteList.add(invite);
 
-                                    optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                    optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
                                             " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION)));
 
                                     //TODO: Send message about invitation to officers.
 
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, selectedFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_THE_ALLIANCE));
+                                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, selectedFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_THE_ALLIANCE));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
                                     taskBuilder.execute(new Runnable()
@@ -133,7 +133,7 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                                         {
                                             EagleFactions.AllayInviteList.remove(invite);
                                         }
-                                    }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+                                    }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(Sponge.getPluginManager().getPlugin(PluginInfo.ID).get().getInstance().get());
                                     return CommandResult.success();
                                 }
                             }
@@ -142,17 +142,17 @@ public class AllyCommand extends AbstractCommand implements CommandExecutor
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f ally <faction name>"));
             return CommandResult.success();
         }

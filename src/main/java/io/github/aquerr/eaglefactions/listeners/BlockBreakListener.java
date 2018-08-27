@@ -52,13 +52,13 @@ public class BlockBreakListener extends AbstractListener
 
                         if(getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                             event.setCancelled(true);
                             return;
                         }
                         else if(getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                             event.setCancelled(true);
                             return;
                         }
@@ -69,13 +69,13 @@ public class BlockBreakListener extends AbstractListener
                         {
                             if(optionalChunkFaction.get().getName().equals("SafeZone") && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                             {
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                 event.setCancelled(true);
                                 return;
                             }
                             else if(optionalChunkFaction.get().getName().equals("WarZone") && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                             {
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                 event.setCancelled(true);
                                 return;
                             }
@@ -83,7 +83,7 @@ public class BlockBreakListener extends AbstractListener
                             {
                                 if(!getPlugin().getFlagManager().canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
                                 {
-                                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
                                     event.setCancelled(true);
                                     return;
                                 }
@@ -91,7 +91,7 @@ public class BlockBreakListener extends AbstractListener
                             else
                             {
                                 event.setCancelled(true);
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
+                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
                                 return;
                             }
                         }

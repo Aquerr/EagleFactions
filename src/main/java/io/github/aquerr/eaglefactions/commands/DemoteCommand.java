@@ -2,10 +2,8 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -53,11 +51,11 @@ public class DemoteCommand extends AbstractCommand implements CommandExecutor
                             if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", demotedTo.toString() + "!"));
+                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", demotedTo.toString() + "!"));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
                             }
 
                             return CommandResult.success();
@@ -68,11 +66,11 @@ public class DemoteCommand extends AbstractCommand implements CommandExecutor
                             if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
+                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
                             }
 
                             return CommandResult.success();
@@ -82,11 +80,11 @@ public class DemoteCommand extends AbstractCommand implements CommandExecutor
                             if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(demotedPlayer.getUniqueId()))
                             {
                                 FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
+                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
                             }
 
                             return CommandResult.success();
@@ -94,22 +92,22 @@ public class DemoteCommand extends AbstractCommand implements CommandExecutor
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
+                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f demote <player>"));
         }
         return CommandResult.success();
