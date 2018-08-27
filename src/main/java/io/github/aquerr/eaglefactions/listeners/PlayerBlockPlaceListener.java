@@ -79,5 +79,4 @@ public class PlayerBlockPlaceListener extends AbstractListener
              }
         }
     }
-
 }

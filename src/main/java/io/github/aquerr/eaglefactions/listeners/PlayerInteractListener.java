@@ -11,6 +11,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -26,63 +30,119 @@ public class PlayerInteractListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener(order = Order.EARLY)
-    public void onPlayerInteract(InteractBlockEvent event, @Root Player player)
+//    @Listener(order = Order.EARLY)
+//    public void onPlayerInteract(InteractBlockEvent event, @Root Player player)
+//    {
+////        if(event.getTargetBlock().getState().getType() == BlockTypes.FURNACE)
+////            return;
+//
+////       if(event.getContext().containsKey(EventContextKeys.BLOCK_HIT))
+////       {
+////           Optional<BlockSnapshot> blockType = event.getContext().get(EventContextKeys.BLOCK_HIT);
+////           if(blockType.isPresent() && blockType.get().getState().getType() == BlockTypes.FURNACE)
+////               return;
+////       }
+//
+//        if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+//        {
+//            if(event.getInteractionPoint().isPresent())
+//            {
+//                World world = player.getWorld();
+//
+//                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+//                {
+//                    return;
+//                }
+//                if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+//                {
+//                    return;
+//                }
+//
+//                Vector3d vector3d = event.getInteractionPoint().get();
+//                Location location = new Location<>(world, vector3d);
+//                Vector3i claim = location.getChunkPosition();
+//
+//                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+//                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
+//
+//                if(optionalChunkFaction.isPresent())
+//                {
+//                    if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+//                    {
+//                        return;
+//                    }
+//                    else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+//                    {
+//                        return;
+//                    }
+//                    else if (optionalPlayerFaction.isPresent())
+//                    {
+//                        if (!getPlugin().getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+//                        {
+//                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+//                            event.setCancelled(true);
+//                        }
+//                    }
+//                    else
+//                    {
+//                        event.setCancelled(true);
+//                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+    @Listener
+    public void onHandInteract(HandInteractEvent event, @Root Player player)
     {
-//        if(event.getTargetBlock().getState().getType() == BlockTypes.FURNACE)
-//            return;
-
-//       if(event.getContext().containsKey(EventContextKeys.BLOCK_HIT))
-//       {
-//           Optional<BlockSnapshot> blockType = event.getContext().get(EventContextKeys.BLOCK_HIT);
-//           if(blockType.isPresent() && blockType.get().getState().getType() == BlockTypes.FURNACE)
-//               return;
-//       }
-
         if(!EagleFactions.AdminList.contains(player.getUniqueId()))
         {
-            if(event.getInteractionPoint().isPresent())
+            World world = player.getWorld();
+
+            if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
             {
-                World world = player.getWorld();
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                event.setCancelled(true);
+                return;
+            }
+            if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+            {
+                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                event.setCancelled(true);
+                return;
+            }
 
-                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+            if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.BLOCK_HIT))
+            {
+                Optional<Location<World>> optionalLocation = event.getContext().get(EventContextKeys.BLOCK_HIT).get().getLocation();
+                if(optionalLocation.isPresent())
                 {
-                    return;
-                }
-                if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
-                {
-                    return;
-                }
-
-                Vector3d vector3d = event.getInteractionPoint().get();
-                Location location = new Location<>(world, vector3d);
-                Vector3i claim = location.getChunkPosition();
-
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
-
-                if(optionalChunkFaction.isPresent())
-                {
-                    if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), optionalLocation.get().getChunkPosition());
+                    Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                    if(optionalChunkFaction.isPresent())
                     {
-                        return;
-                    }
-                    else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
-                    {
-                        return;
-                    }
-                    else if (optionalPlayerFaction.isPresent())
-                    {
-                        if (!getPlugin().getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                        if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
-                            event.setCancelled(true);
+                            return;
                         }
-                    }
-                    else
-                    {
-                        event.setCancelled(true);
-                        player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+                        else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+                        {
+                            return;
+                        }
+                        else if (optionalPlayerFaction.isPresent())
+                        {
+                            if (!getPlugin().getFlagManager().canInteract(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                            {
+                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                                event.setCancelled(true);
+                            }
+                        }
+                        else
+                        {
+                            event.setCancelled(true);
+                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+                        }
                     }
                 }
             }
