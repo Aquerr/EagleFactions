@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.storage.h2.H2FactionStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import org.spongepowered.api.Sponge;
@@ -41,9 +42,21 @@ public class FactionLogic
 
     public FactionLogic(EagleFactions plugin)
     {
-        factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
         _configFields = plugin.getConfiguration().getConfigFileds();
         _playerManager = plugin.getPlayerManager();
+
+        switch(_configFields.getStorageType().toLowerCase())
+        {
+            case "hocon":
+                factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
+                break;
+            case "h2":
+                factionsStorage = new H2FactionStorage(plugin.getConfigDir());
+                break;
+            case "sqllite":
+
+                break;
+        }
     }
 
     public void reload()

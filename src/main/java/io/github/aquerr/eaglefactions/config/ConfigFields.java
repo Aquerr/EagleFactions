@@ -7,7 +7,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import java.math.BigDecimal;
 import java.util.*;
 
-@Singleton
 public final class ConfigFields
 {
     private IConfiguration _configuration;
@@ -63,6 +62,7 @@ public final class ConfigFields
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
     private String _maxInactiveTime = "30d";
+    private String _storageType = "hocon";
 
     public ConfigFields(IConfiguration configuration)
     {
@@ -125,6 +125,7 @@ public final class ConfigFields
             this._warzoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
+            this._storageType = _configuration.getString("hocon", "storage-type");
             this._configuration.save();
         }
         catch(Exception exception)
@@ -440,5 +441,10 @@ public final class ConfigFields
 
         //Default 10 days
         return 864000;
+    }
+
+    public String getStorageType()
+    {
+        return _storageType;
     }
 }

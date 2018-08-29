@@ -26,7 +26,7 @@ public class ChatMessageListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener(order = Order.EARLY)
+    @Listener
     public void onChatMessage(MessageChannelEvent.Chat event, @Root Player player)
     {
         Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
