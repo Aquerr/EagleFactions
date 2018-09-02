@@ -13,7 +13,10 @@ import java.util.Map;
 
 public class H2FactionStorage implements IFactionStorage
 {
-    private EagleFactions plugin;
+    private static final String SELECT_FACTIONS = "SELECT * FROM FACTIONS";
+    private static final String UPDATE_FACTION = "UPDATE Factions SET Name=?, Tag=?, TagColor=?, Leader=?, Home=?, LastOnline=? WHERE Name=?";
+
+    private final EagleFactions plugin;
     private Connection _connection;
 
     public H2FactionStorage(EagleFactions plugin)
@@ -22,7 +25,9 @@ public class H2FactionStorage implements IFactionStorage
 
         try
         {
-            _connection = DriverManager.getConnection("jdbc:h2:" + plugin.getConfigDir().resolve("data/h2").toAbsolutePath().toString() + "/database", "sa", "");
+            this._connection = DriverManager.getConnection("jdbc:h2:" + plugin.getConfigDir().resolve("data/h2").toAbsolutePath().toString() + "/database",
+                    this.plugin.getConfiguration().getConfigFileds().getStorageUserName(),
+                    this.plugin.getConfiguration().getConfigFileds().getStoragePassword());
             int databaseVersionNumber = getDatabaseVersion();
 
             //Get all .sql files

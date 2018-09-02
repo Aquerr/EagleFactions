@@ -90,21 +90,18 @@ public class PlayerManager
     public Optional<Player> getPlayer(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
-
         return oUser.get().getPlayer();
     }
 
     private Optional<User> getUser(UUID playerUUID)
     {
         Optional<User> oUser = userStorageService.get(playerUUID);
-
         return oUser;
     }
 
     public boolean isPlayerOnline(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
-
         return oUser.map(User::isOnline).orElse(false);
     }
 

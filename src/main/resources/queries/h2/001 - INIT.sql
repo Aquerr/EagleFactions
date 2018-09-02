@@ -9,6 +9,7 @@ CREATE TABLE Factions (
    Name        VARCHAR(200)        UNIQUE      NOT NULL,
    Tag         VARCHAR(10)                     NOT NULL,
    TagColor    VARCHAR(40)                     NOT NULL,
+   Leader      VARCHAR(36)                     NOT NULL,
    Home        VARCHAR(200)                    NULL,
    LastOnline  VARCHAR(200)                    NOT NULL,
    PRIMARY KEY (Id)
