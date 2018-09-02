@@ -51,7 +51,7 @@ public class FactionLogic
                 factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
                 break;
             case "h2":
-                factionsStorage = new H2FactionStorage(plugin.getConfigDir());
+                factionsStorage = new H2FactionStorage(plugin);
                 break;
             case "sqllite":
 

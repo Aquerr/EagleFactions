@@ -31,6 +31,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -508,5 +510,15 @@ public class EagleFactions
     public FactionLogic getFactionLogic()
     {
         return _factionLogic;
+    }
+
+    public InputStream getResourceAsStream(String fileName)
+    {
+        return this.getClass().getClassLoader().getResourceAsStream(fileName);
+    }
+
+    public URL getResource(String fileName)
+    {
+        return this.getClass().getClassLoader().getResource(fileName);
     }
 }
