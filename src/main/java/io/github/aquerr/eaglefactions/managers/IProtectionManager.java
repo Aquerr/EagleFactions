@@ -1,13 +1,13 @@
 package io.github.aquerr.eaglefactions.managers;
 
 import org.spongepowered.api.entity.living.player.Player;
-
-import javax.xml.stream.Location;
-import java.util.UUID;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 public interface IProtectionManager
 {
-    boolean canInteract(Player player, Location location, UUID worldUUID);
-    boolean canBreak(Player player, Location location);
-    boolean canPlace(Player player, Location location);
+    boolean canInteract(Location location, World World, Player player);
+    boolean canBreak(Location location, World world, Player player);
+    boolean canBreak(Location location, World world);
+    boolean canPlace(Location location, World world, Player player);
 }
