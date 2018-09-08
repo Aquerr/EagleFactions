@@ -61,7 +61,7 @@ public final class ConfigFields
     private List<String> _safezoneWorldNames = new ArrayList<>();
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
-    private String _maxInactiveTime = "30d";
+    private String _maxInactiveTime = "0";
     private String _storageType = "hocon";
     private String _storageUserName = "sa";
     private String _storagePassword = "";
