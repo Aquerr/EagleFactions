@@ -10,9 +10,7 @@ import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.managers.FlagManager;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.managers.PowerManager;
+import io.github.aquerr.eaglefactions.managers.*;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
@@ -59,6 +57,7 @@ public class EagleFactions
     private PVPLogger _pvpLogger;
     private PlayerManager _playerManager;
     private FlagManager _flagManager;
+    private IProtectionManager _protectionManager;
     private PowerManager _powerManager;
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
@@ -148,6 +147,7 @@ public class EagleFactions
         _flagManager = new FlagManager(this);
         _factionLogic = new FactionLogic(this);
         _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFileds());
+        _protectionManager = new ProtectionManager(this);
     }
 
     private void startFactionsRemover()
@@ -500,6 +500,11 @@ public class EagleFactions
     public PowerManager getPowerManager()
     {
         return _powerManager;
+    }
+
+    public IProtectionManager getProtectionManager()
+    {
+        return _protectionManager;
     }
 
     public AttackLogic getAttackLogic()

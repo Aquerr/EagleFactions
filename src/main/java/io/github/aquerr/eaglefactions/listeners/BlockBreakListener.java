@@ -72,16 +72,12 @@ public class BlockBreakListener extends AbstractListener
                         Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
                         if(optionalChunkFaction.isPresent())
                         {
-                            if(optionalChunkFaction.get().getName().equals("SafeZone") && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                            if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                             {
-                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
-                                event.setCancelled(true);
                                 return;
                             }
-                            else if(optionalChunkFaction.get().getName().equals("WarZone") && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                            else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                             {
-                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
-                                event.setCancelled(true);
                                 return;
                             }
                             else if(optionalPlayerFaction.isPresent())
@@ -207,6 +203,11 @@ public class BlockBreakListener extends AbstractListener
         {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
+                if(transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_WATER)
+                {
+                    return;
+                }
+
                 World world = transaction.getFinal().getLocation().get().getExtent();
 
                 if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
@@ -243,6 +244,5 @@ public class BlockBreakListener extends AbstractListener
                 }
             }
         }
-        return;
     }
 }
