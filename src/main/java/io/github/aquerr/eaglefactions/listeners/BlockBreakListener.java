@@ -65,13 +65,13 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.EARLY)
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
-        if(event.getCause().root() instanceof Player)
+        if(event.getContext().containsKey(EventContextKeys.OWNER) && event.getContext().get(EventContextKeys.OWNER).isPresent())
         {
-            Player player = (Player)event.getCause().root();
+            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
 
             if(!EagleFactions.AdminList.contains(player.getUniqueId()))
             {
-                for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+                for(Transaction<BlockSnapshot> transaction : event.getTransactions())
                 {
                     if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), player.getWorld(), player))
                         event.setCancelled(true);

@@ -28,6 +28,8 @@ public class PowerManager
     private ConfigFields _configFields;
     private CommentedConfigurationNode _factionsNode;
 
+    private UUID dummyUUID = new UUID(0, 0);
+
     public PowerManager(EagleFactions eagleFactions)
     {
         _plugin = eagleFactions;
@@ -46,7 +48,7 @@ public class PowerManager
 
     public BigDecimal getPlayerPower(@Nullable UUID playerUUID)
     {
-        if (playerUUID == null)
+        if (playerUUID == null || playerUUID.equals(dummyUUID))
             return BigDecimal.ZERO;
         return _plugin.getPlayerManager().getPlayerPower(playerUUID);
     }
@@ -138,7 +140,7 @@ public class PowerManager
 
     public BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
-        if(playerUUID == null)
+        if(playerUUID == null || playerUUID.equals(dummyUUID))
             return BigDecimal.ZERO;
 
         return _plugin.getPlayerManager().getPlayerMaxPower(playerUUID);

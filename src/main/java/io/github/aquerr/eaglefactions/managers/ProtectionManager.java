@@ -40,13 +40,15 @@ public class ProtectionManager implements IProtectionManager
         Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         if(optionalChunkFaction.isPresent())
         {
-            if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+            if(optionalChunkFaction.get().getName().equals("SafeZone") && !player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
             {
-                return true;
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                return false;
             }
-            else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+            else if(optionalChunkFaction.get().getName().equals("WarZone") && !player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
             {
-                return true;
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
+                return false;
             }
             else if (optionalPlayerFaction.isPresent())
             {
@@ -83,13 +85,15 @@ public class ProtectionManager implements IProtectionManager
         Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         if(optionalChunkFaction.isPresent())
         {
-            if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+            if(optionalChunkFaction.get().getName().equals("SafeZone") && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
             {
-                return true;
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                return false;
             }
-            else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+            else if(optionalChunkFaction.get().getName().equals("WarZone") && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
             {
-                return true;
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                return false;
             }
             else if(optionalPlayerFaction.isPresent())
             {
@@ -155,13 +159,15 @@ public class ProtectionManager implements IProtectionManager
         Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if(optionalChunkFaction.isPresent())
         {
-            if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+            if(optionalChunkFaction.get().getName().equals("SafeZone") && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
             {
-                return true;
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                return false;
             }
-            else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+            else if(optionalChunkFaction.get().getName().equals("WarZone") && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
             {
-                return true;
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
+                return false;
             }
             else if(optionalPlayerFaction.isPresent())
             {

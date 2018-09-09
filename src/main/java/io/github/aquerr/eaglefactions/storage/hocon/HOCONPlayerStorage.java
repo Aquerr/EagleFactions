@@ -42,7 +42,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
     {
-        Path playerFile = Paths.get(playersDirectoryPath +  "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
         if(Files.exists(playerFile))
         {
             HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
@@ -68,7 +68,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public boolean addPlayer(UUID playerUUID, String playerName, BigDecimal startingPower, BigDecimal maxPower)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -92,7 +92,10 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public boolean setDeathInWarzone(UUID playerUUID, boolean didDieInWarZone)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+
+        if(!Files.exists(playerFile))
+            return false;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -113,7 +116,10 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public boolean getLastDeathInWarzone(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+
+        if(!Files.exists(playerFile))
+            return false;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -132,7 +138,10 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public BigDecimal getPlayerPower(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+
+        if(!Files.exists(playerFile))
+            return BigDecimal.ZERO;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -151,7 +160,10 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public boolean setPlayerPower(UUID playerUUID, BigDecimal power)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+
+        if(!Files.exists(playerFile))
+            return false;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -172,7 +184,10 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+
+        if(!Files.exists(playerFile))
+            return BigDecimal.ZERO;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -191,7 +206,10 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public boolean setPlayerMaxPower(UUID playerUUID, BigDecimal maxpower)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+
+        if(!Files.exists(playerFile))
+            return false;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
@@ -249,7 +267,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
             {
                 ConfigurationNode configurationNode = configurationLoader.load();
                 String playerName = configurationNode.getNode("name").getString("");
-                UUID playerUUID = UUID.fromString(playerFile.getName().replace(".conf", ""));
+                UUID playerUUID = UUID.fromString(playerFile.getName().substring(0, playerFile.getName().indexOf('.')));
                 FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID);
                 playerSet.add(factionPlayer);
             }
@@ -265,7 +283,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public String getPlayerName(UUID playerUUID)
     {
-        Path playerFile = Paths.get(playersDirectoryPath + "/" + playerUUID.toString() + ".conf");
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try

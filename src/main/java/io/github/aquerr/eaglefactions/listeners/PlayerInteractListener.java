@@ -32,7 +32,7 @@ public class PlayerInteractListener extends AbstractListener
                         event.setCancelled(true);
                 }
             }
-            else if((event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT)))
+            else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT))
             {
                 Location<World> entityLocation = event.getContext().get(EventContextKeys.ENTITY_HIT).get().getLocation();
                 if(!this.getPlugin().getProtectionManager().canInteract(entityLocation, player.getWorld(), player))
