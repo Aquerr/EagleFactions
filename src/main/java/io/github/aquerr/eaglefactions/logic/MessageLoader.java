@@ -36,6 +36,11 @@ public class MessageLoader
         if (!Files.exists(messagesFilePath))
         {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
+
+            //If there is not such language...
+            if(inputStream == null)
+                inputStream = getClass().getClassLoader().getResourceAsStream("messages/english.conf");
+            
             try
             {
                 Files.copy(inputStream, messagesFilePath);
