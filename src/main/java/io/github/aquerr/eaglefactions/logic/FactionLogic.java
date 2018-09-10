@@ -741,4 +741,12 @@ public class FactionLogic
         faction.setLastOnline(instantTime);
         this.factionsStorage.addOrUpdateFaction(faction);
     }
+
+    public void renameFaction(Faction faction, String newFactionName)
+    {
+        faction.setName(newFactionName);
+
+        //TODO: Send new faction name forward to faction storage
+        //this.factionsStorage.addOrUpdateFaction(faction);
+    }
 }

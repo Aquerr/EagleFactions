@@ -69,6 +69,11 @@ public class Faction
         return this.name;
     }
 
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
     public FactionHome getHome()
     {
         return this.home;
