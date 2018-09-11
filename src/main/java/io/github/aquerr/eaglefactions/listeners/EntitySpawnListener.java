@@ -36,19 +36,23 @@ public class EntitySpawnListener extends AbstractListener
 
             if(entity instanceof Hostile)
             {
-                if (!getPlugin().getConfiguration().getConfigFileds().getMobSpawning())
+                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                 {
-                    if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
+                    event.setCancelled(true);
+                    return;
+                }
 
-                    if(getPlugin().getFactionLogic().isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
+                Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition());
+                if(optionalFaction.isPresent() && optionalFaction.get().getName().equals("SafeZone"))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+
+                if(!getPlugin().getConfiguration().getConfigFileds().getMobSpawning() && optionalFaction.isPresent() && !optionalFaction.get().getName().equals("WarZone"))
+                {
+                    event.setCancelled(true);
+                    return;
                 }
             }
             else if(entity instanceof Player)
