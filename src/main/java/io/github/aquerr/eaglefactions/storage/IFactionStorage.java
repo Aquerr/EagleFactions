@@ -8,6 +8,8 @@ public interface IFactionStorage
 {
     boolean addOrUpdateFaction(Faction faction);
 
+    boolean renameFaction(Faction faction, String newName);
+
     boolean removeFaction(String factionName);
 
     Faction getFaction(String factionName);

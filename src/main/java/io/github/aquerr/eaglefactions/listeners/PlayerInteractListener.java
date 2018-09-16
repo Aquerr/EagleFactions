@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -32,7 +33,7 @@ public class PlayerInteractListener extends AbstractListener
                         event.setCancelled(true);
                 }
             }
-            else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT))
+            else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT) && !(event.getContext().get(EventContextKeys.ENTITY_HIT).get() instanceof Living))
             {
                 Location<World> entityLocation = event.getContext().get(EventContextKeys.ENTITY_HIT).get().getLocation();
                 if(!this.getPlugin().getProtectionManager().canInteract(entityLocation, player.getWorld(), player))

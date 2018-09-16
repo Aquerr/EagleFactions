@@ -744,7 +744,9 @@ public class FactionLogic
 
     public void renameFaction(Faction faction, String newFactionName)
     {
-        faction.setName(newFactionName);
+//        faction.setName(newFactionName);
+
+        this.factionsStorage.renameFaction(faction, newFactionName);
 
         //TODO: Send new faction name forward to faction storage
         //this.factionsStorage.addOrUpdateFaction(faction);

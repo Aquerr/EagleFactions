@@ -26,7 +26,7 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.EARLY)
     public void onBlockBreak(ChangeBlockEvent.Pre event)
     {
-        if(event.getContext().containsKey(EventContextKeys.PLAYER_BREAK))
+        if(event.getContext().containsKey(EventContextKeys.PLAYER_BREAK) || event.getContext().containsKey(EventContextKeys.FIRE_SPREAD))
         {
             List<Location<World>> locationList = new ArrayList<>(event.getLocations());
             for(Location<World> location : locationList)

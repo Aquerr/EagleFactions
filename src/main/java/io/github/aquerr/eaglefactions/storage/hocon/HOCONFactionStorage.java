@@ -172,6 +172,34 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
+    public boolean renameFaction(Faction faction, String newName)
+    {
+        try
+        {
+            configNode.getNode("factions").removeChild(faction.getName());
+            faction.setName(newName);
+            synchronized(_factionsToSaveList)
+            {
+                if(!_factionsToSaveList.contains(faction))
+                {
+                    _factionsToSaveList.add(faction);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        catch(Exception exception)
+        {
+            exception.printStackTrace();
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean removeFaction(String factionName)
     {
         try
