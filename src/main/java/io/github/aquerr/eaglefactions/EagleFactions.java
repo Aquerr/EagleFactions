@@ -456,6 +456,14 @@ public class EagleFactions
                 .executor(new RenameCommand(this))
                 .build());
 
+        //Tag Command
+        Subcommands.put(Collections.singletonList("tag"), CommandSpec.builder()
+                .description(Text.of("Change faction's tag"))
+                .permission(PluginPermissions.TAG_COMMAND)
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("tag"))))
+                .executor(new TagCommand(this))
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))

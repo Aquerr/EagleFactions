@@ -115,30 +115,6 @@ public class FactionLogic
         return null;
     }
 
-//    public UUID getLeader(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//        if(faction != null)
-//        {
-//            return faction.getLeader();
-//        }
-//
-//        return UUID.randomUUID();
-//    }
-
-//    public Set<UUID> getOfficers(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//        if(faction != null)
-//        {
-//            return faction.getOfficers();
-//        }
-//
-//        return new HashSet<>();
-//    }
-
     public List<Player> getOnlinePlayers(Faction faction)
     {
 
@@ -181,13 +157,6 @@ public class FactionLogic
     {
         return getFactions().keySet();
     }
-
-//    public  @Nullable String getRealFactionName(String rawFactionName)
-//    {
-//        List<String> factionsNames = getFactionsNames();
-//
-//        return factionsNames.stream().filter(x->x.equalsIgnoreCase(rawFactionName)).findFirst().orElse(null);
-//    }
 
     public Map<String, Faction> getFactions()
     {
@@ -744,11 +713,14 @@ public class FactionLogic
 
     public void renameFaction(Faction faction, String newFactionName)
     {
-//        faction.setName(newFactionName);
+        this.factionsStorage.removeFaction(faction.getName());
+        faction.setName(newFactionName);
+        this.factionsStorage.addOrUpdateFaction(faction);
+    }
 
-        this.factionsStorage.renameFaction(faction, newFactionName);
-
-        //TODO: Send new faction name forward to faction storage
-        //this.factionsStorage.addOrUpdateFaction(faction);
+    public void changeTag(Faction faction, String newTag)
+    {
+        faction.setTag(Text.of(faction.getTag().getColor(), newTag));
+        this.factionsStorage.addOrUpdateFaction(faction);
     }
 }

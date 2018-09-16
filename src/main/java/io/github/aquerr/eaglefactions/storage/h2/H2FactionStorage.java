@@ -103,12 +103,6 @@ public class H2FactionStorage implements IFactionStorage
     }
 
     @Override
-    public boolean renameFaction(Faction faction, String newName)
-    {
-        return false;
-    }
-
-    @Override
     public boolean removeFaction(String factionName)
     {
         return false;
@@ -120,11 +114,6 @@ public class H2FactionStorage implements IFactionStorage
         return null;
     }
 
-    @Override
-    public Map<String, Faction> getFactionsMap()
-    {
-        return null;
-    }
 
     @Override
     public void load()

@@ -13,6 +13,7 @@ public abstract class PluginPermissions
     public static final String CREATE_COMMAND = "eaglefactions.player.create";
     public static final String DISBAND_COMMAND = "eaglefactions.player.disband";
     public static final String RENAMECOMMAND = "eaglefactions.player.rename";
+    public static final String TAG_COMMAND = "eaglefactions.player.tag";
     public static final String INVITE_COMMAND = "eaglefactions.player.invite";
     public static final String JOIN_COMMAND = "eaglefactions.player.join";
     public static final String LEAVE_COMMAND = "eaglefactions.player.leave";

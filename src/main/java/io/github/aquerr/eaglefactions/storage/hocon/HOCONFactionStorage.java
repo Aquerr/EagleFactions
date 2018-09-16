@@ -12,7 +12,6 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.TypeTokens;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -172,34 +171,6 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
-    public boolean renameFaction(Faction faction, String newName)
-    {
-        try
-        {
-            configNode.getNode("factions").removeChild(faction.getName());
-            faction.setName(newName);
-            synchronized(_factionsToSaveList)
-            {
-                if(!_factionsToSaveList.contains(faction))
-                {
-                    _factionsToSaveList.add(faction);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-        catch(Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
-        return false;
-    }
-
-    @Override
     public boolean removeFaction(String factionName)
     {
         try
@@ -276,7 +247,7 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
 
-        Object flagnode = configNode.getNode("factions", factionName, "flags");
+    //    Object flagnode = configNode.getNode("factions", factionName, "flags");
 
 //        //TODO: Test this code.
 //        if(flagnode instanceof Map)
@@ -580,12 +551,6 @@ public class HOCONFactionStorage implements IFactionStorage
                 FactionsCache.addOrUpdateFactionCache(faction);
             }
         }
-    }
-
-    @Override
-    public Map<String, Faction> getFactionsMap()
-    {
-        return FactionsCache.getFactionsMap();
     }
 
     @Override
