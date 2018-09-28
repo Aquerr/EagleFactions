@@ -70,9 +70,9 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
         Vector3i playerPosition = player.getLocation().getChunkPosition();
 
         List<Text> map = new ArrayList<>();
-        String normalFactions = "";
-        String allianceFactions = "";
-        String enemyFactions = "";
+        List<String> normalFactions = new ArrayList<>();
+        List<String> allianceFactions = new ArrayList<>();
+        List<String> enemyFactions = new ArrayList<>();
         //String playerFaction = "";
 
         //Map resolution
@@ -99,7 +99,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
 
                 Vector3i chunk = playerPosition.add(column, 0, row);
 
-                if (claimsList.contains(world.getUniqueId().toString() + '|' + chunk.toString()))
+                if (claimsList.contains(world.getUniqueId().toString() + "|" + chunk.toString()))
                 {
                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
@@ -111,52 +111,60 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                         {
                             textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                            playerFaction = optionalChunkFaction.get();
-                        } else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
+                        }
+                        else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
                         {
                             textBuilder.append(allianceMark);
                             if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                allianceFactions += optionalChunkFaction.get().getName() + ", ";
+                                allianceFactions.add(optionalChunkFaction.get().getName());
                             }
-                        } else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
+                        }
+                        else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
                         {
                             textBuilder.append(enemyMark);
                             if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                enemyFactions += optionalChunkFaction.get().getName() + ", ";
+                                enemyFactions.add(optionalChunkFaction.get().getName());
                             }
-                        } else
+                        }
+                        else
                         {
                             if (optionalChunkFaction.get().getName().equals("SafeZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                            } else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                            }
+                            else if (optionalChunkFaction.get().getName().equals("WarZone"))
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
-                            } else
+                            }
+                            else
                             {
                                 textBuilder.append(normalFactionMark);
                             }
                             if (!normalFactions.contains(optionalChunkFaction.get().getName()))
                             {
-                                normalFactions += optionalChunkFaction.get().getName() + ", ";
+                                normalFactions.add(optionalChunkFaction.get().getName());
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         if (optionalChunkFaction.get().getName().equals("SafeZone"))
                         {
                             textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                        } else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                        }
+                        else if (optionalChunkFaction.get().getName().equals("WarZone"))
                         {
                             textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
-                        } else
+                        }
+                        else
                         {
                             textBuilder.append(normalFactionMark);
                         }
                         if (!normalFactions.contains(optionalChunkFaction.get().getName()))
                         {
-                            normalFactions += optionalChunkFaction.get().getName() + ", ";
+                            normalFactions.add(optionalChunkFaction.get().getName());
                         }
                     }
                 }
@@ -168,7 +176,8 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                                             (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
-                    } else
+                    }
+                    else
                     {
                         textBuilder.append(notCapturedMark).build();
                     }
@@ -201,15 +210,15 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
         }
         if (!normalFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.WHITE, PluginMessages.FACTIONS + ": ", TextColors.RESET, normalFactions.substring(0, normalFactions.length() - 2)));
+            player.sendMessage(Text.of(TextColors.WHITE, PluginMessages.FACTIONS + ": ", TextColors.RESET, String.join(",", normalFactions)));
         }
         if (!allianceFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": " + allianceFactions.substring(0, allianceFactions.length() - 2)));
+            player.sendMessage(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": " + String.join("," ,allianceFactions)));
         }
         if (!enemyFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.RED, PluginMessages.ENEMIES + ": " + enemyFactions.substring(0, enemyFactions.length() - 2)));
+            player.sendMessage(Text.of(TextColors.RED, PluginMessages.ENEMIES + ": " + String.join(",", enemyFactions)));
         }
 
         player.sendMessage(Text.of(PluginMessages.CURRENTLY_STANDING_AT + ": ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " " + PluginMessages.WHICH_IS_CLAIMED_BY + " ", TextColors.GOLD, playerPositionClaim));
