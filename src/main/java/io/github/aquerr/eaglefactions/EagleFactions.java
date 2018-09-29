@@ -464,6 +464,13 @@ public class EagleFactions
                 .executor(new TagCommand(this))
                 .build());
 
+        //EagleFeather Command
+        Subcommands.put(Collections.singletonList("feather"), CommandSpec.builder()
+                .description(Text.of("Spawns mystical eagle's feather"))
+                .permission(PluginPermissions.FEATHER_COMMAND)
+                .executor(new EagleFeatherCommand(this))
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))

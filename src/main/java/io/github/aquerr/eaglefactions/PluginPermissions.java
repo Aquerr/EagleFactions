@@ -55,6 +55,8 @@ public abstract class PluginPermissions
     public static final String SET_POWER_COMMAND = "eaglefactions.admin.setpower";
     public static final String MAX_POWER_COMMAND = "eaglefactions.admin.maxpower";
 
+    public static final String FEATHER_COMMAND = "eaglefactions.admin.feather";
+
     public static final String RELOAD_COMMAND = "eaglefactions.admin.reload";
     public static final String VERSION_NOTIFY = "eaglefactions.admin.version.notify";
 
