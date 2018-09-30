@@ -37,8 +37,11 @@ public class BlockBreakListener extends AbstractListener
                     return;
                 }
 
-                if(event.getContext().containsKey(EventContextKeys.OWNER))
+                if(event.getContext().containsKey(EventContextKeys.OWNER)
+                        && event.getContext().get(EventContextKeys.OWNER).isPresent()
+                        && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
                 {
+
                     Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
                     if(!EagleFactions.AdminList.contains(player.getUniqueId()))
                     {

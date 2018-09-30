@@ -3,9 +3,15 @@ package io.github.aquerr.eaglefactions.managers;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
+import io.github.aquerr.eaglefactions.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
@@ -58,6 +64,18 @@ public class ProtectionManager implements IProtectionManager
                     player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
                     return false;
                 }
+            }
+
+            //Check if player has Eagle's Feather
+            if(location.getTileEntity().isPresent()
+                    && player.getItemInHand(HandTypes.MAIN_HAND).isPresent()
+                    && player.getItemInHand(HandTypes.MAIN_HAND).get().getType() == ItemTypes.FEATHER
+                    && player.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName()))
+            {
+                ItemStack feather = player.getItemInHand(HandTypes.MAIN_HAND).get();
+                feather.setQuantity(feather.getQuantity() - 1);
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!"));
+                return true;
             }
 
             if(optionalPlayerFaction.isPresent())
