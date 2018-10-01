@@ -48,8 +48,7 @@ public class FactionsCache
 
     public static void removeFactionCache(String factionName)
     {
-        Faction faction = factionsCacheMap.get(factionName.toLowerCase());
-        factionsCacheMap.remove(factionName.toLowerCase());
+        Faction faction = factionsCacheMap.remove(factionName.toLowerCase());
 
         for(String claim : faction.getClaims())
         {

@@ -75,6 +75,8 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
         List<String> enemyFactions = new ArrayList<>();
         //String playerFaction = "";
 
+        StringBuilder claimBuilder = new StringBuilder();
+
         //Map resolution
         int mapWidth = 20;
         int mapHeight = 8;
@@ -98,8 +100,11 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                 }
 
                 Vector3i chunk = playerPosition.add(column, 0, row);
+                claimBuilder.append(world.getUniqueId().toString());
+                claimBuilder.append("|");
+                claimBuilder.append(chunk.toString());
 
-                if (claimsList.contains(world.getUniqueId().toString() + "|" + chunk.toString()))
+                if (claimsList.contains(claimBuilder.toString()))
                 {
                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
@@ -182,6 +187,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                         textBuilder.append(notCapturedMark).build();
                     }
                 }
+                claimBuilder.setLength(0);
             }
             map.add(textBuilder.build());
         }
