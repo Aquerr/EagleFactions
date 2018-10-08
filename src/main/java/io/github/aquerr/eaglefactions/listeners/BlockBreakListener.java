@@ -9,7 +9,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -43,13 +45,10 @@ public class BlockBreakListener extends AbstractListener
                 {
 
                     Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
-                    if(!EagleFactions.AdminList.contains(player.getUniqueId()))
-                    {
-                        World world = player.getWorld();
+                    World world = player.getWorld();
 
-                        if(!super.getPlugin().getProtectionManager().canBreak(location, world, player))
-                            event.setCancelled(true);
-                    }
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, world, player))
+                        event.setCancelled(true);
                 }
                 else
                 {
@@ -72,17 +71,17 @@ public class BlockBreakListener extends AbstractListener
         {
             Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
 
-            if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+            for(Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                for(Transaction<BlockSnapshot> transaction : event.getTransactions())
-                {
-                    if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), player.getWorld(), player))
-                        event.setCancelled(true);
-                }
+                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), player.getWorld(), player))
+                    event.setCancelled(true);
             }
         }
         else
         {
+            if(event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent())
+                return;
+
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
                 if(transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_WATER)

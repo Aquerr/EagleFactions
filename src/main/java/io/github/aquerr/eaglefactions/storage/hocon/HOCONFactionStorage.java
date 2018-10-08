@@ -27,6 +27,7 @@ public class HOCONFactionStorage implements IFactionStorage
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
     private final List<Faction> _factionsToSaveList = new LinkedList<>();
+    private final List<String> _factionsToRemove = new LinkedList<>();
     private Thread storageThread;
 
     private boolean needToSave = false;
@@ -82,12 +83,21 @@ public class HOCONFactionStorage implements IFactionStorage
                         sleep = 1000;
                     }
                 }
+                else if(_factionsToRemove.size() > 0)
+                {
+                    synchronized(_factionsToRemove)
+                    {
+                        removeFaction(_factionsToRemove.get(0));
+                        _factionsToRemove.remove(0);
+                        sleep = 1000;
+                    }
+                }
                 else
                 {
                     try
                     {
                         Thread.sleep(sleep);
-                        if(sleep < 16000)
+                        if(sleep < 10000)
                             sleep *= 2;
                     }
                     catch(InterruptedException e)
@@ -170,21 +180,38 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
-    @Override
-    public boolean removeFaction(String factionName)
+    private boolean removeFaction(String factionName)
     {
         try
         {
             configNode.getNode("factions").removeChild(factionName);
-            FactionsCache.removeFactionCache(factionName);
-            saveChanges();
-            return true;
+            return saveChanges();
         }
         catch(Exception exception)
         {
             exception.printStackTrace();
         }
-        return false;
+
+        return saveChanges();
+    }
+
+    @Override
+    public boolean queueRemoveFaction(String factionName)
+    {
+        FactionsCache.removeFactionCache(factionName);
+
+        synchronized(_factionsToRemove)
+        {
+            if(!_factionsToRemove.contains(factionName))
+            {
+                _factionsToRemove.add(factionName);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
     @Override

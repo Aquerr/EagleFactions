@@ -35,23 +35,20 @@ public class PlayerInteractListener extends AbstractListener
     {
         if(event instanceof InteractBlockEvent)
         {
-            if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+            if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.BLOCK_HIT) && event.getContext().get(EventContextKeys.BLOCK_HIT).isPresent())
             {
-                if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.BLOCK_HIT))
+                Optional<Location<World>> optionalLocation = event.getContext().get(EventContextKeys.BLOCK_HIT).get().getLocation();
+                if(optionalLocation.isPresent())
                 {
-                    Optional<Location<World>> optionalLocation = event.getContext().get(EventContextKeys.BLOCK_HIT).get().getLocation();
-                    if(optionalLocation.isPresent())
-                    {
-                        if(!this.getPlugin().getProtectionManager().canInteract(optionalLocation.get(), player.getWorld(), player))
-                            event.setCancelled(true);
-                    }
-                }
-                else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT) && !(event.getContext().get(EventContextKeys.ENTITY_HIT).get() instanceof Living))
-                {
-                    Location<World> entityLocation = event.getContext().get(EventContextKeys.ENTITY_HIT).get().getLocation();
-                    if(!this.getPlugin().getProtectionManager().canInteract(entityLocation, player.getWorld(), player))
+                    if(!this.getPlugin().getProtectionManager().canInteract(optionalLocation.get(), player.getWorld(), player))
                         event.setCancelled(true);
                 }
+            }
+            else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT) && event.getContext().get(EventContextKeys.ENTITY_HIT).isPresent() && !(event.getContext().get(EventContextKeys.ENTITY_HIT).get() instanceof Living))
+            {
+                Location<World> entityLocation = event.getContext().get(EventContextKeys.ENTITY_HIT).get().getLocation();
+                if(!this.getPlugin().getProtectionManager().canInteract(entityLocation, player.getWorld(), player))
+                    event.setCancelled(true);
             }
         }
     }

@@ -172,7 +172,7 @@ public class FactionLogic
 
     public boolean disbandFaction(String factionName)
     {
-        return factionsStorage.removeFaction(factionName);
+        return factionsStorage.queueRemoveFaction(factionName);
     }
 
     public void joinFaction(UUID playerUUID, String factionName)
@@ -713,7 +713,7 @@ public class FactionLogic
 
     public void renameFaction(Faction faction, String newFactionName)
     {
-        this.factionsStorage.removeFaction(faction.getName());
+        this.factionsStorage.queueRemoveFaction(faction.getName());
         faction.setName(newFactionName);
         this.factionsStorage.addOrUpdateFaction(faction);
     }

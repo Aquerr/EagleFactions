@@ -103,7 +103,7 @@ public class H2FactionStorage implements IFactionStorage
     }
 
     @Override
-    public boolean removeFaction(String factionName)
+    public boolean queueRemoveFaction(String factionName)
     {
         return false;
     }

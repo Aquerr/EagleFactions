@@ -31,8 +31,8 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canInteract(Location location, World world, Player player)
     {
-//        if(hasAdminMode(player))
-//            return true;
+        if(hasAdminMode(player))
+            return true;
 
         if (this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
         {
@@ -70,6 +70,7 @@ public class ProtectionManager implements IProtectionManager
             if(location.getTileEntity().isPresent()
                     && player.getItemInHand(HandTypes.MAIN_HAND).isPresent()
                     && player.getItemInHand(HandTypes.MAIN_HAND).get().getType() == ItemTypes.FEATHER
+                    && player.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).isPresent()
                     && player.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName()))
             {
                 ItemStack feather = player.getItemInHand(HandTypes.MAIN_HAND).get();
@@ -98,8 +99,8 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canBreak(Location location, World world, Player player)
     {
-//        if(hasAdminMode(player))
-//            return true;
+        if(hasAdminMode(player))
+            return true;
 
         if(this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
         {
@@ -184,8 +185,8 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canPlace(Location location, World world, Player player)
     {
-//        if(hasAdminMode(player))
-//            return true;
+        if(hasAdminMode(player))
+            return true;
 
         if (this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
         {
@@ -234,8 +235,8 @@ public class ProtectionManager implements IProtectionManager
         return true;
     }
 
-//    private boolean hasAdminMode(Player player)
-//    {
-//        return EagleFactions.AdminList.contains(player.getUniqueId());
-//    }
+    private boolean hasAdminMode(Player player)
+    {
+        return EagleFactions.AdminList.contains(player.getUniqueId());
+    }
 }

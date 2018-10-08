@@ -24,13 +24,10 @@ public class PlayerBlockPlaceListener extends AbstractListener
     @Listener(order = Order.EARLY)
     public void onBlockPlace(ChangeBlockEvent.Place event, @Root Player player)
     {
-        if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+        for (Transaction<BlockSnapshot> transaction : event.getTransactions())
         {
-            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-            {
-                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player.getWorld(), player))
-                    event.setCancelled(true);
-            }
+            if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player.getWorld(), player))
+                event.setCancelled(true);
         }
     }
 
@@ -41,7 +38,20 @@ public class PlayerBlockPlaceListener extends AbstractListener
                 && event.getContext().get(EventContextKeys.OWNER).isPresent()
                 && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player
                 && event.getContext().containsKey(EventContextKeys.SPAWN_TYPE)
+                && event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent()
                 && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.PLACEMENT)
+        {
+            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+            {
+                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player.getWorld(), player))
+                    event.setCancelled(true);
+            }
+        }
+
+        if(event.getContext().containsKey(EventContextKeys.OWNER)
+                && event.getContext().get(EventContextKeys.OWNER).isPresent()
+                && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
         {
             Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())

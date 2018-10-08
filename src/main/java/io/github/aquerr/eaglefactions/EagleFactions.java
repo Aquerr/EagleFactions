@@ -100,6 +100,7 @@ public class EagleFactions
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
 
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Loading managers and cache..."));
         SetupManagers();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Managers loaded..."));
@@ -182,8 +183,8 @@ public class EagleFactions
 //                        }
                         else if(maxInactive * 0.75 < inactiveTime.getSeconds())
                         {
-                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
-                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "s due to its long inactive time.")));
+                            long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
+                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
                         }
                     }
                 }
