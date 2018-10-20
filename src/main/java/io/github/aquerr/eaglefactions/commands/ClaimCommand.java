@@ -4,13 +4,19 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.events.ClaimEvent;
+import io.github.aquerr.eaglefactions.events.FactionCreationEvent;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
@@ -59,6 +65,8 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                                     {
                                         if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
                                         {
+                                            ClaimEvent event = new ClaimEvent(player, playerFaction, world, chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                                            Sponge.getEventManager().post(event);
                                             getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
                                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
 
@@ -115,6 +123,9 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                     if (!getPlugin().getFactionLogic().isClaimed(world.getUniqueId(), chunk))
                     {
                         getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
+
+                        ClaimEvent event = new ClaimEvent(player, playerFaction, world, chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                        Sponge.getEventManager().post(event);
 
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         return CommandResult.success();

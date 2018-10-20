@@ -108,8 +108,7 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                                     .build();
 
                             //Testing with events
-                            FactionCreationEvent event = new FactionCreationEvent(player, faction, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
-                            Sponge.getEventManager().post(event);
+                            runCreationEvent(player, faction);
                             //Testing with events
 
                             getPlugin().getFactionLogic().addFaction(faction);
@@ -215,8 +214,15 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
             Faction faction = Faction.builder().setName(factionName).setTag(Text.of(TextColors.GREEN, factionTag)).setLeader(player.getUniqueId()).build();
             getPlugin().getFactionLogic().addFaction(faction);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
+            runCreationEvent(player, faction);
             return CommandResult.success();
         }
         return CommandResult.success();
+    }
+
+    private void runCreationEvent(Player player, Faction faction)
+    {
+        FactionCreationEvent event = new FactionCreationEvent(player, faction, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+        Sponge.getEventManager().post(event);
     }
 }
