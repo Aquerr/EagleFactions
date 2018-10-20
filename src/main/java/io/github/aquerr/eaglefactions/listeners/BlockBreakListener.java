@@ -73,6 +73,9 @@ public class BlockBreakListener extends AbstractListener
 
             for(Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
+                if(super.getPlugin().getProtectionManager().isBlockWhitelistedForPlaceDestroy(transaction.getOriginal().getState().getType()))
+                    return;
+
                 if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), player.getWorld(), player))
                     event.setCancelled(true);
             }

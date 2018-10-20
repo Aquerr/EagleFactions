@@ -48,16 +48,16 @@ public class PlayerBlockPlaceListener extends AbstractListener
                     event.setCancelled(true);
             }
         }
-        else if(event.getContext().containsKey(EventContextKeys.OWNER)
-                && event.getContext().get(EventContextKeys.OWNER).isPresent()
-                && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
-        {
-            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
-            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-            {
-                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player.getWorld(), player))
-                    event.setCancelled(true);
-            }
-        }
+//        else if(event.getContext().containsKey(EventContextKeys.OWNER)
+//                && event.getContext().get(EventContextKeys.OWNER).isPresent()
+//                && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
+//        {
+//            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
+//            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+//            {
+//                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player.getWorld(), player))
+//                    event.setCancelled(true);
+//            }
+//        }
     }
 }

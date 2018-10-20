@@ -37,7 +37,7 @@ public class ProtectionManager implements IProtectionManager
         if(hasAdminMode(player)
                 || isBlockWhitelistedForInteraction(location.getBlockType())
                 || (player.getItemInHand(HandTypes.MAIN_HAND).isPresent()
-                || isItemWhitelisted(player.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
+                && isItemWhitelisted(player.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
         {
             return true;
         }
@@ -251,18 +251,20 @@ public class ProtectionManager implements IProtectionManager
         return EagleFactions.AdminList.contains(player.getUniqueId());
     }
 
-    //TODO: Looks like it is unnecessary
-    private boolean isItemWhitelisted(CatalogType itemType)
+    @Override
+    public boolean isItemWhitelisted(CatalogType itemType)
     {
         return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(itemType.getId());
     }
 
-    private boolean isBlockWhitelistedForInteraction(CatalogType blockType)
+    @Override
+    public boolean isBlockWhitelistedForInteraction(CatalogType blockType)
     {
         return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(blockType.getId());
     }
 
-    private boolean isBlockWhitelistedForPlaceDestroy(CatalogType blockOrItemType)
+    @Override
+    public boolean isBlockWhitelistedForPlaceDestroy(CatalogType blockOrItemType)
     {
         return this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks().contains(blockOrItemType.getId());
     }
