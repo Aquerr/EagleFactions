@@ -29,17 +29,17 @@ public class PlayerDeathListener extends AbstractListener
 
             super.getPlugin().getPowerManager().decreasePower(player.getUniqueId());
 
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(getPlugin().getConfiguration().getConfigFileds().getPowerDecrement()) + "\n",
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(getPlugin().getConfiguration().getConfigFields().getPowerDecrement()) + "\n",
                     TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
 
             Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
 
-            if (super.getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
+            if (super.getPlugin().getConfiguration().getConfigFields().getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
             {
                 super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
             }
 
-            if (super.getPlugin().getConfiguration().getConfigFileds().shouldBlockHomeAfterDeathInOwnFaction())
+            if (super.getPlugin().getConfiguration().getConfigFields().shouldBlockHomeAfterDeathInOwnFaction())
             {
                 Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 

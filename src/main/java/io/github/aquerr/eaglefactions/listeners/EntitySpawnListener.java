@@ -36,7 +36,7 @@ public class EntitySpawnListener extends AbstractListener
 
             if(entity instanceof Hostile)
             {
-                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
+                if (getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                 {
                     event.setCancelled(true);
                     return;
@@ -49,7 +49,7 @@ public class EntitySpawnListener extends AbstractListener
                     return;
                 }
 
-                if(!getPlugin().getConfiguration().getConfigFileds().getMobSpawning() && optionalFaction.isPresent() && !optionalFaction.get().getName().equals("WarZone"))
+                if(!getPlugin().getConfiguration().getConfigFields().getMobSpawning() && optionalFaction.isPresent() && !optionalFaction.get().getName().equals("WarZone"))
                 {
                     event.setCancelled(true);
                     return;
@@ -57,7 +57,7 @@ public class EntitySpawnListener extends AbstractListener
             }
             else if(entity instanceof Player)
             {
-                if(getPlugin().getConfiguration().getConfigFileds().shouldSpawnAtHomeAfterDeath())
+                if(getPlugin().getConfiguration().getConfigFields().shouldSpawnAtHomeAfterDeath())
                 {
                     Player player = (Player)entity;
 

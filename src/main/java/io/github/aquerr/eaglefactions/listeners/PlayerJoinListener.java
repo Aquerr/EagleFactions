@@ -43,9 +43,9 @@ public class PlayerJoinListener extends AbstractListener
             }
 
             //Check if the world that player is connecting to is already in the config file
-            if (!getPlugin().getConfiguration().getConfigFileds().getDetectedWorldNames().contains(player.getWorld().getName()))
+            if (!getPlugin().getConfiguration().getConfigFields().getDetectedWorldNames().contains(player.getWorld().getName()))
             {
-                getPlugin().getConfiguration().getConfigFileds().addWorld(player.getWorld().getName());
+                getPlugin().getConfiguration().getConfigFields().addWorld(player.getWorld().getName());
             }
         }
     }

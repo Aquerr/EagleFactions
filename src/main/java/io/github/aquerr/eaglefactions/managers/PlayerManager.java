@@ -7,19 +7,13 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -35,7 +29,7 @@ public class PlayerManager
 
     public PlayerManager(EagleFactions plugin)
     {
-        _configFields = plugin.getConfiguration().getConfigFileds();
+        _configFields = plugin.getConfiguration().getConfigFields();
         _playerStorage = new HOCONPlayerStorage(plugin.getConfigDir());
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);

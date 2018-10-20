@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.inject.Singleton;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -62,9 +61,16 @@ public final class ConfigFields
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
     private String _maxInactiveTime = "0";
+
+    //Storage
     private String _storageType = "hocon";
     private String _storageUserName = "sa";
     private String _storagePassword = "";
+
+    //Whitelisted items and blocks
+    private List<String> _whitelistedItems = new ArrayList<>();
+    private List<String> _whitelistedPlaceDestroyBlocks = new ArrayList<>();
+    private List<String> _whitelistedIteractBlocks = new ArrayList<>();
 
     public ConfigFields(IConfiguration configuration)
     {
@@ -127,9 +133,17 @@ public final class ConfigFields
             this._warzoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
+
+            //Storage
             this._storageType = _configuration.getString("hocon", "storage", "type");
             this._storageUserName = _configuration.getString("sa", "storage", "username");
             this._storagePassword = _configuration.getString("", "storage", "password");
+
+            //Whitelisted items and blocks
+            this._whitelistedItems = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "items-whitelist");
+            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "place-destroy-whitelist");
+            this._whitelistedIteractBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "interact-whitelist");
+
             this._configuration.save();
         }
         catch(Exception exception)
@@ -460,5 +474,20 @@ public final class ConfigFields
     public String getStoragePassword()
     {
         return _storagePassword;
+    }
+
+    public List<String> getWhiteListedItems()
+    {
+        return this._whitelistedItems;
+    }
+
+    public List<String> getWhiteListedPlaceDestroyBlocks()
+    {
+        return this._whitelistedPlaceDestroyBlocks;
+    }
+
+    public List<String> getWhiteListedInteractBlocks()
+    {
+        return this._whitelistedIteractBlocks;
     }
 }

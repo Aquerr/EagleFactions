@@ -48,8 +48,7 @@ public class PlayerBlockPlaceListener extends AbstractListener
                     event.setCancelled(true);
             }
         }
-
-        if(event.getContext().containsKey(EventContextKeys.OWNER)
+        else if(event.getContext().containsKey(EventContextKeys.OWNER)
                 && event.getContext().get(EventContextKeys.OWNER).isPresent()
                 && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
         {

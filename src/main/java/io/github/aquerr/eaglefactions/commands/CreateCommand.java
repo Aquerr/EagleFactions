@@ -69,14 +69,14 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                     else
                     {
                         //Check tag length
-                        if(factionTag.length() > getPlugin().getConfiguration().getConfigFileds().getMaxTagLength())
+                        if(factionTag.length() > getPlugin().getConfiguration().getConfigFields().getMaxTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFileds().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if(factionTag.length() < getPlugin().getConfiguration().getConfigFileds().getMinTagLength())
+                        if(factionTag.length() < getPlugin().getConfiguration().getConfigFields().getMinTagLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFileds().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
                     }
@@ -84,18 +84,18 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                     if (!getPlugin().getFactionLogic().getFactionsNames().contains(factionName.toLowerCase()))
                     {
                         //Check name length
-                        if(factionName.length() > getPlugin().getConfiguration().getConfigFileds().getMaxNameLength())
+                        if(factionName.length() > getPlugin().getConfiguration().getConfigFields().getMaxNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFileds().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
-                        if(factionName.length() < getPlugin().getConfiguration().getConfigFileds().getMinNameLength())
+                        if(factionName.length() < getPlugin().getConfiguration().getConfigFields().getMinNameLength())
                         {
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFileds().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                             return CommandResult.success();
                         }
 
-                        if (getPlugin().getConfiguration().getConfigFileds().getFactionCreationByItems())
+                        if (getPlugin().getConfiguration().getConfigFields().getFactionCreationByItems())
                         {
                             return createByItems(factionName, factionTag, player);
                         }
@@ -137,7 +137,7 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
 
     private CommandResult createByItems(String factionName, String factionTag, Player player)
     {
-        HashMap<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFileds().getRequiredItemsToCreateFaction();
+        HashMap<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFields().getRequiredItemsToCreateFaction();
         Inventory inventory = player.getInventory();
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;

@@ -66,14 +66,14 @@ public class TagCommand extends AbstractCommand implements CommandExecutor
             }
 
             //Check tag length
-            if(newFactionTag.length() > getPlugin().getConfiguration().getConfigFileds().getMaxTagLength())
+            if(newFactionTag.length() > getPlugin().getConfiguration().getConfigFields().getMaxTagLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFileds().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
-            if(newFactionTag.length() < getPlugin().getConfiguration().getConfigFileds().getMinTagLength())
+            if(newFactionTag.length() < getPlugin().getConfiguration().getConfigFields().getMinTagLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFileds().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
 

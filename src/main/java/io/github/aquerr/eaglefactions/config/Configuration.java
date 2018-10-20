@@ -67,7 +67,7 @@ public class Configuration implements IConfiguration
     }
 
     @Override
-    public ConfigFields getConfigFileds()
+    public ConfigFields getConfigFields()
     {
         return configFileds;
     }

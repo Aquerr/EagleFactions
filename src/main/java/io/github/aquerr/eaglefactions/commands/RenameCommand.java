@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -74,14 +73,14 @@ public class RenameCommand extends AbstractCommand implements CommandExecutor
             }
 
             //Check name length
-            if(newFactionName.length() > getPlugin().getConfiguration().getConfigFileds().getMaxNameLength())
+            if(newFactionName.length() > getPlugin().getConfiguration().getConfigFields().getMaxNameLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFileds().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
-            if(newFactionName.length() < getPlugin().getConfiguration().getConfigFileds().getMinNameLength())
+            if(newFactionName.length() < getPlugin().getConfiguration().getConfigFields().getMinNameLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFileds().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
 

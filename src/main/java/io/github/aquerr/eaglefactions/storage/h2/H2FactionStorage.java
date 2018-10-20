@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
 import java.sql.*;
-import java.util.Map;
 
 public class H2FactionStorage implements IFactionStorage
 {
@@ -26,8 +25,8 @@ public class H2FactionStorage implements IFactionStorage
         try
         {
             this._connection = DriverManager.getConnection("jdbc:h2:" + plugin.getConfigDir().resolve("data/h2").toAbsolutePath().toString() + "/database",
-                    this.plugin.getConfiguration().getConfigFileds().getStorageUserName(),
-                    this.plugin.getConfiguration().getConfigFileds().getStoragePassword());
+                    this.plugin.getConfiguration().getConfigFields().getStorageUserName(),
+                    this.plugin.getConfiguration().getConfigFields().getStoragePassword());
             int databaseVersionNumber = getDatabaseVersion();
 
             //Get all .sql files

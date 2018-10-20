@@ -45,7 +45,7 @@ public class InviteCommand extends AbstractCommand implements CommandExecutor
 
                     if (this.getPlugin().getFlagManager().canInvite(senderPlayer, senderFaction))
                     {
-                        if(getPlugin().getConfiguration().getConfigFileds().isPlayerLimit())
+                        if(getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
                         {
                             int playerCount = 0;
                             playerCount += senderFaction.getLeader().toString().equals("") ? 0 : 1;
@@ -53,7 +53,7 @@ public class InviteCommand extends AbstractCommand implements CommandExecutor
                             playerCount += senderFaction.getMembers().isEmpty() ? 0 : senderFaction.getMembers().size();
                             playerCount += senderFaction.getRecruits().isEmpty() ? 0 : senderFaction.getRecruits().size();
 
-                            if(playerCount >= getPlugin().getConfiguration().getConfigFileds().getPlayerLimit())
+                            if(playerCount >= getPlugin().getConfiguration().getConfigFields().getPlayerLimit())
                             {
                                 senderPlayer.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + PluginMessages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
                                 return CommandResult.success();

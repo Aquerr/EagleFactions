@@ -28,7 +28,7 @@ public class AttackCommand extends AbstractCommand implements CommandExecutor
         if(source instanceof Player)
         {
             Player player = (Player)source;
-            if(getPlugin().getConfiguration().getConfigFileds().canAttackOnlyAtNight())
+            if(getPlugin().getConfiguration().getConfigFields().canAttackOnlyAtNight())
             {
                 if((player.getWorld().getProperties().getWorldTime() % 24000L) >= 12000)
                 {
@@ -78,9 +78,9 @@ public class AttackCommand extends AbstractCommand implements CommandExecutor
                         {
                             if(!playerFaction.getAlliances().contains(attackedFaction.getName()))
                             {
-                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction).doubleValue() * getPlugin().getConfiguration().getConfigFileds().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue() && getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue())
+                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction).doubleValue() * getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue() && getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue())
                                 {
-                                    int attackTime = getPlugin().getConfiguration().getConfigFileds().getAttackTime();
+                                    int attackTime = getPlugin().getConfiguration().getConfigFields().getAttackTime();
                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
                                     getPlugin().getAttackLogic().informAboutAttack(attackedFaction);

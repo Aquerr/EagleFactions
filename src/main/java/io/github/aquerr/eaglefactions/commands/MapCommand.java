@@ -36,7 +36,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
         if (source instanceof Player)
         {
             Player player = (Player) source;
-            if (getPlugin().getConfiguration().getConfigFileds().getClaimableWorldNames().contains(player.getWorld().getName()))
+            if (getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
             {
                 generateMap(player);
             }
@@ -175,7 +175,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                 }
                 else
                 {
-                    if (!getPlugin().getConfiguration().getConfigFileds().shouldDelayClaim() &&
+                    if (!getPlugin().getConfiguration().getConfigFields().shouldDelayClaim() &&
                             (EagleFactions.AdminList.contains(player.getUniqueId()) ||
                                     (optionalPlayerFaction.isPresent() &&
                                             (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
@@ -262,7 +262,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                                     }
                                     else
                                     {
-                                        if (getPlugin().getConfiguration().getConfigFileds().requireConnectedClaims())
+                                        if (getPlugin().getConfiguration().getConfigFields().requireConnectedClaims())
                                         {
                                             if (getPlugin().getFactionLogic().isClaimConnected(playerFaction, world.getUniqueId(), chunk))
                                             {

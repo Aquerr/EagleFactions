@@ -42,7 +42,7 @@ public class FactionLogic
 
     public FactionLogic(EagleFactions plugin)
     {
-        _configFields = plugin.getConfiguration().getConfigFileds();
+        _configFields = plugin.getConfiguration().getConfigFields();
         _playerManager = plugin.getPlayerManager();
 
         switch(_configFields.getStorageType().toLowerCase())

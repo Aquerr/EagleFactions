@@ -24,7 +24,7 @@ public class PVPLogger
 
     public PVPLogger(IConfiguration configuration)
     {
-        _configFields = configuration.getConfigFileds();
+        _configFields = configuration.getConfigFields();
         _isActive = _configFields.isPVPLoggerActive();
 
         if (_isActive)

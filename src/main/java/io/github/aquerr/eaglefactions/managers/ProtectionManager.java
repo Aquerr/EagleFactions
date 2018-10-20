@@ -6,10 +6,13 @@ import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
@@ -31,15 +34,20 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canInteract(Location location, World world, Player player)
     {
-        if(hasAdminMode(player))
+        if(hasAdminMode(player)
+                || isBlockWhitelistedForInteraction(location.getBlockType())
+                || (player.getItemInHand(HandTypes.MAIN_HAND).isPresent()
+                || isItemWhitelisted(player.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
+        {
             return true;
+        }
 
-        if (this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
         {
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
             return false;
         }
-        else if (this.plugin.getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+        else if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
         {
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE));
             return false;
@@ -99,15 +107,15 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canBreak(Location location, World world, Player player)
     {
-        if(hasAdminMode(player))
+        if(hasAdminMode(player) || isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
 
-        if(this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+        if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
         {
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
             return false;
         }
-        else if(this.plugin.getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled() && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled() && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
         {
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
             return false;
@@ -154,11 +162,14 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canBreak(Location location, World world)
     {
-        if(this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
+        if(isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
+            return true;
+
+        if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()))
         {
             return false;
         }
-        else if(this.plugin.getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
+        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
         {
             return false;
         }
@@ -166,7 +177,7 @@ public class ProtectionManager implements IProtectionManager
         Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if (optionalChunkFaction.isPresent())
         {
-            if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && this.plugin.getConfiguration().getConfigFileds().isBlockDestroyAtClaimsDisabled())
+            if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtClaimsDisabled())
             {
                 return false;
             }
@@ -174,7 +185,7 @@ public class ProtectionManager implements IProtectionManager
             {
                 return false;
             }
-            else if (optionalChunkFaction.get().getName().equals("WarZone") && this.plugin.getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
+            else if (optionalChunkFaction.get().getName().equals("WarZone") && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
             {
                 return false;
             }
@@ -185,14 +196,14 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canPlace(Location location, World world, Player player)
     {
-        if(hasAdminMode(player))
+        if(hasAdminMode(player) || (player.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(player.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
             return true;
 
-        if (this.plugin.getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
         {
             return false;
         }
-        else if (this.plugin.getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+        else if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && !player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
         {
             return false;
         }
@@ -238,5 +249,21 @@ public class ProtectionManager implements IProtectionManager
     private boolean hasAdminMode(Player player)
     {
         return EagleFactions.AdminList.contains(player.getUniqueId());
+    }
+
+    //TODO: Looks like it is unnecessary
+    private boolean isItemWhitelisted(CatalogType itemType)
+    {
+        return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(itemType.getId());
+    }
+
+    private boolean isBlockWhitelistedForInteraction(CatalogType blockType)
+    {
+        return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(blockType.getId());
+    }
+
+    private boolean isBlockWhitelistedForPlaceDestroy(CatalogType blockOrItemType)
+    {
+        return this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks().contains(blockOrItemType.getId());
     }
 }

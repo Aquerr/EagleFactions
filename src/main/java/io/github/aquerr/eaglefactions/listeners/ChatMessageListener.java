@@ -3,11 +3,8 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
@@ -103,16 +100,16 @@ public class ChatMessageListener extends AbstractListener
             }
 
             //Get faction prefix from Eagle Factions.
-            if(getPlugin().getConfiguration().getConfigFileds().getChatPrefixType().equals("tag"))
+            if(getPlugin().getConfiguration().getConfigFields().getChatPrefixType().equals("tag"))
             {
                 if(!playerFaction.getTag().toPlainSingle().equals(""))
                 {
-                    if (getPlugin().getConfiguration().getConfigFileds().canColorTags())
+                    if (getPlugin().getConfiguration().getConfigFields().canColorTags())
                     {
                         //Get faction's tag
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), playerFaction.getTag(), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), playerFaction.getTag(), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                                 .build();
 
                         factionPrefixText.append(factionTag);
@@ -122,24 +119,24 @@ public class ChatMessageListener extends AbstractListener
                         //Get faction's tag
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                                 .build();
 
                         factionPrefixText.append(factionTag);
                     }
                 }
             }
-            else if (getPlugin().getConfiguration().getConfigFileds().getChatPrefixType().equals("name"))
+            else if (getPlugin().getConfiguration().getConfigFields().getChatPrefixType().equals("name"))
             {
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
-                        .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                        .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                         .build();
 
                 factionPrefixText.append(factionNamePrefix);
             }
 
-            if(getPlugin().getConfiguration().getConfigFileds().shouldDisplayRank())
+            if(getPlugin().getConfiguration().getConfigFields().shouldDisplayRank())
             {
                 //Get leader prefix.
                 if(playerFaction.getLeader().equals(player.getUniqueId()))
@@ -162,7 +159,7 @@ public class ChatMessageListener extends AbstractListener
                 }
             }
 
-            if (getPlugin().getConfiguration().getConfigFileds().isFactionPrefixFirstInChat())
+            if (getPlugin().getConfiguration().getConfigFields().isFactionPrefixFirstInChat())
             {
                 factionAndRankPrefix.append(factionPrefixText.build());
                 factionAndRankPrefix.append(rankPrefixText.build());
@@ -196,14 +193,14 @@ public class ChatMessageListener extends AbstractListener
     private Text getAlliancePrefix()
     {
         return Text.builder()
-                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.BLUE, "Alliance", TextColors.RESET), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.BLUE, "Alliance", TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                 .build();
     }
 
     private Text getFactionPrefix()
     {
         return Text.builder()
-                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.GREEN, "Faction", TextColors.RESET), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, "Faction", TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                 .build();
     }
 }

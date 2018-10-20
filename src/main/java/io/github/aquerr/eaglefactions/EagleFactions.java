@@ -146,7 +146,7 @@ public class EagleFactions
         _powerManager = new PowerManager(this);
         _flagManager = new FlagManager(this);
         _factionLogic = new FactionLogic(this);
-        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFileds());
+        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFields());
         _protectionManager = new ProtectionManager(this);
     }
 
@@ -158,7 +158,7 @@ public class EagleFactions
             @Override
             public void run()
             {
-                long maxInactive = getConfiguration().getConfigFileds().getMaxInactiveTime();
+                long maxInactive = getConfiguration().getConfigFields().getMaxInactiveTime();
                 if(maxInactive != 0)
                 {
                     Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());

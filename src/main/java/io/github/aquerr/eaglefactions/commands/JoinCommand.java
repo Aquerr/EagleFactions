@@ -60,7 +60,7 @@ public class JoinCommand extends AbstractCommand implements CommandExecutor
                             {
                                 try
                                 {
-                                    if(getPlugin().getConfiguration().getConfigFileds().isPlayerLimit())
+                                    if(getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
                                     {
                                         int playerCount = 0;
                                         playerCount += faction.getLeader().toString().equals("") ? 0 : 1;
@@ -68,7 +68,7 @@ public class JoinCommand extends AbstractCommand implements CommandExecutor
                                         playerCount += faction.getMembers().isEmpty() ? 0 : faction.getMembers().size();
                                         playerCount += faction.getRecruits().isEmpty() ? 0 : faction.getRecruits().size();
 
-                                        if(playerCount >= getPlugin().getConfiguration().getConfigFileds().getPlayerLimit())
+                                        if(playerCount >= getPlugin().getConfiguration().getConfigFields().getPlayerLimit())
                                         {
                                             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT));
                                             return CommandResult.success();
