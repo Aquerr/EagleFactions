@@ -28,26 +28,26 @@ public class Faction
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
     //Constructor used while creating a new faction.
-    public Faction(String factionName, String factionTag, UUID factionLeader)
-    {
-        this.name = factionName;
-        this.tag = Text.of(TextColors.GREEN, factionTag);
-        this.leader = factionLeader;
-        //this.Power = new BigDecimal("0.0");
-        this.recruits = new HashSet<>();
-        this.members = new HashSet<>();
-        this.claims = new HashSet<>();
-        this.officers = new HashSet<>();
-        this.alliances = new HashSet<>();
-        //TODO: Add truce
-        this.enemies = new HashSet<>();
-        this.home = null;
-        this.lastOnline = Instant.now();
-        this.flags = FlagManager.getDefaultFactionFlags();
-    }
+//    private Faction(String factionName, String factionTag, UUID factionLeader)
+//    {
+//        this.name = factionName;
+//        this.tag = Text.of(TextColors.GREEN, factionTag);
+//        this.leader = factionLeader;
+//        //this.Power = new BigDecimal("0.0");
+//        this.recruits = new HashSet<>();
+//        this.members = new HashSet<>();
+//        this.claims = new HashSet<>();
+//        this.officers = new HashSet<>();
+//        this.alliances = new HashSet<>();
+//        //TODO: Add truce
+//        this.enemies = new HashSet<>();
+//        this.home = null;
+//        this.lastOnline = Instant.now();
+//        this.flags = FlagManager.getDefaultFactionFlags();
+//    }
 
     //Constructor used while getting a faction from storage.
-    public Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
     {
         this.name = factionName;
         this.tag = factionTag;
@@ -219,6 +219,24 @@ public class Faction
         this.lastOnline = lastOnline;
     }
 
+    public Builder toBuilder()
+    {
+        Builder factionBuilder = new Builder();
+        factionBuilder.setName(this.name);
+        factionBuilder.setTag(this.tag);
+        factionBuilder.setLastOnline(this.lastOnline);
+        factionBuilder.setHome(this.home);
+        factionBuilder.setEnemies(this.enemies);
+        factionBuilder.setAlliances(this.alliances);
+        factionBuilder.setOfficers(this.officers);
+        factionBuilder.setMembers(this.members);
+        factionBuilder.setRecruits(this.recruits);
+        factionBuilder.setClaims(this.claims);
+        factionBuilder.setFlags(this.flags);
+
+        return factionBuilder;
+    }
+
     public static Builder builder()
     {
         return new Builder();
@@ -249,8 +267,6 @@ public class Faction
             this.officers = new HashSet<>();
             this.claims = new HashSet<>();
             this.home = null;
-            this.lastOnline = Instant.now();
-            this.flags = FlagManager.getDefaultFactionFlags();
         }
 
         public Builder setName(String name)
@@ -303,7 +319,7 @@ public class Faction
 
         public Builder setClaims(Set<String> claims)
         {
-            this.enemies = enemies;
+            this.claims = claims;
             return this;
         }
 
@@ -330,6 +346,15 @@ public class Faction
             if(this.name == null || this.tag == null || this.leader == null)
             {
                 throw new IllegalStateException("Faction must have a name, tag and leader.");
+            }
+
+            if(this.lastOnline == null)
+            {
+                this.lastOnline = Instant.now();
+            }
+            if(this.flags == null)
+            {
+                this.flags = FlagManager.getDefaultFactionFlags();
             }
 
             return new Faction(this.name, this.tag, this.leader, this.recruits, this.members, this.claims, this.officers, this.alliances, this.enemies, this.home, this.lastOnline, this.flags);

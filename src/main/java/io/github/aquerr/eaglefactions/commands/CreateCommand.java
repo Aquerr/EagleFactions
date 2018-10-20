@@ -101,12 +101,18 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                         }
                         else
                         {
+                            Faction faction = Faction.builder()
+                                    .setName(factionName)
+                                    .setTag(Text.of(TextColors.GREEN, factionTag))
+                                    .setLeader(player.getUniqueId())
+                                    .build();
+
                             //Testing with events
-                            FactionCreationEvent event = new FactionCreationEvent(player, new Faction(factionName, factionTag, player.getUniqueId()), Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                            FactionCreationEvent event = new FactionCreationEvent(player, faction, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
                             Sponge.getEventManager().post(event);
                             //Testing with events
 
-                            getPlugin().getFactionLogic().createFaction(factionName, factionTag, player.getUniqueId());
+                            getPlugin().getFactionLogic().addFaction(faction);
                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
                             return CommandResult.success();
                         }
@@ -206,7 +212,8 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
                 }
             }
 
-            getPlugin().getFactionLogic().createFaction(factionName, factionTag, player.getUniqueId());
+            Faction faction = Faction.builder().setName(factionName).setTag(Text.of(TextColors.GREEN, factionTag)).setLeader(player.getUniqueId()).build();
+            getPlugin().getFactionLogic().addFaction(faction);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
             return CommandResult.success();
         }

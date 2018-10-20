@@ -163,10 +163,8 @@ public class FactionLogic
         return FactionsCache.getFactionsMap();
     }
 
-    public void createFaction(String factionName, String factionTag, UUID playerUUID)
+    public void addFaction(Faction faction)
     {
-        Faction faction = new Faction(factionName, factionTag, playerUUID);
-
         factionsStorage.addOrUpdateFaction(faction);
     }
 
@@ -386,11 +384,11 @@ public class FactionLogic
     {
         if(home != null && worldUUID != null)
         {
-            faction.setHome(new FactionHome(worldUUID, home));
+            faction = faction.toBuilder().setHome(new FactionHome(worldUUID, home)).build();
         }
         else
         {
-            faction.setHome(null);
+            faction = faction.toBuilder().setHome(null).build();
         }
 
         factionsStorage.addOrUpdateFaction(faction);
@@ -714,13 +712,13 @@ public class FactionLogic
     public void renameFaction(Faction faction, String newFactionName)
     {
         this.factionsStorage.queueRemoveFaction(faction.getName());
-        faction.setName(newFactionName);
+        faction = faction.toBuilder().setName(newFactionName).build();
         this.factionsStorage.addOrUpdateFaction(faction);
     }
 
     public void changeTag(Faction faction, String newTag)
     {
-        faction.setTag(Text.of(faction.getTag().getColor(), newTag));
+        faction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
         this.factionsStorage.addOrUpdateFaction(faction);
     }
 }

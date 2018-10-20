@@ -260,7 +260,19 @@ public class HOCONFactionStorage implements IFactionStorage
         Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
-        Faction faction = new Faction(factionName, tag, leader, recruits, members, claims, officers, alliances, enemies, home, lastOnline, flags);
+        Faction faction = Faction.builder()
+                .setName(factionName)
+                .setTag(tag)
+                .setLeader(leader)
+                .setRecruits(recruits)
+                .setMembers(members)
+                .setOfficers(officers)
+                .setAlliances(alliances)
+                .setEnemies(enemies)
+                .setHome(home)
+                .setLastOnline(lastOnline)
+                .setFlags(flags)
+                .build();
 
         if(needToSave)
         {
