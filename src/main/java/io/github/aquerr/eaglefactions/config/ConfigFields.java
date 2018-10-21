@@ -127,10 +127,10 @@ public final class ConfigFields
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
             this._factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("]", "faction-prefix-end"));
-            this._claimableWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE");
-            this._notClaimableWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE");
-            this._safezoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE");
-            this._warzoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
+            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE"));
+            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE"));
+            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE"));
+            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
 
