@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.events.FactionCreationEvent;
+import io.github.aquerr.eaglefactions.events.FactionCreateEvent;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -222,7 +222,7 @@ public class CreateCommand extends AbstractCommand implements CommandExecutor
 
     private void runCreationEvent(Player player, Faction faction)
     {
-        FactionCreationEvent event = new FactionCreationEvent(player, faction, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+        FactionCreateEvent event = new FactionCreateEvent(player, faction, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
         Sponge.getEventManager().post(event);
     }
 }

@@ -499,6 +499,7 @@ public class EagleFactions
         Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
         Sponge.getEventManager().registerListeners(this, new ExplosionListener(this));
         Sponge.getEventManager().registerListeners(this, new ModifyBlockListener(this));
+        Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
     }
 
     public IConfiguration getConfiguration()

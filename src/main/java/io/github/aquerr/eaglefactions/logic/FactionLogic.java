@@ -9,7 +9,7 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.events.ClaimEvent;
+import io.github.aquerr.eaglefactions.events.FactionClaimEvent;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.storage.h2.H2FactionStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
@@ -28,7 +28,6 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -537,7 +536,7 @@ public class FactionLogic
             {
                 if(addClaimByItems(player, faction, worldUUID, chunk))
                 {
-                    ClaimEvent event = new ClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                    FactionClaimEvent event = new FactionClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
                     Sponge.getEventManager().post(event);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                 }
@@ -548,7 +547,7 @@ public class FactionLogic
             }
             else
             {
-                ClaimEvent event = new ClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                FactionClaimEvent event = new FactionClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
                 Sponge.getEventManager().post(event);
 
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));

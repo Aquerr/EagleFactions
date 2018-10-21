@@ -4,8 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.events.ClaimEvent;
-import io.github.aquerr.eaglefactions.events.FactionCreationEvent;
+import io.github.aquerr.eaglefactions.events.FactionClaimEvent;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -65,7 +64,7 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                                     {
                                         if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
                                         {
-                                            ClaimEvent event = new ClaimEvent(player, playerFaction, world, chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                                            FactionClaimEvent event = new FactionClaimEvent(player, playerFaction, world, chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
                                             Sponge.getEventManager().post(event);
                                             getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
                                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
@@ -124,7 +123,7 @@ public class ClaimCommand extends AbstractCommand implements CommandExecutor
                     {
                         getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
 
-                        ClaimEvent event = new ClaimEvent(player, playerFaction, world, chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                        FactionClaimEvent event = new FactionClaimEvent(player, playerFaction, world, chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
                         Sponge.getEventManager().post(event);
 
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));

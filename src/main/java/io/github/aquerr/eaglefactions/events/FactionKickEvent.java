@@ -1,19 +1,19 @@
 package io.github.aquerr.eaglefactions.events;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
-import org.spongepowered.api.entity.living.player.Player;
+import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.impl.AbstractEvent;
 
-public class FactionCreationEvent extends AbstractEvent
+public class FactionKickEvent extends AbstractEvent
 {
     private final Cause _cause;
-    private final Player _creator;
+    private final IFactionPlayer _kickedPlayer;
     private final Faction _faction;
 
-    public FactionCreationEvent(Player creator, Faction faction, Cause cause)
+    public FactionKickEvent(IFactionPlayer kickedPlayer, Faction faction, Cause cause)
     {
-        this._creator = creator;
+        this._kickedPlayer = kickedPlayer;
         this._faction = faction;
         this._cause = cause;
     }
@@ -29,8 +29,8 @@ public class FactionCreationEvent extends AbstractEvent
         return _faction;
     }
 
-    public Player getCreator()
+    public IFactionPlayer getKickedPlayer()
     {
-        return _creator;
+        return _kickedPlayer;
     }
 }
