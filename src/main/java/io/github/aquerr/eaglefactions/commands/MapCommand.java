@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -108,29 +109,52 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                 {
                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
-                    if (optionalPlayerFaction.isPresent())
+                    //TODO: This check is unnecessary however code is crashing sometimes without it.
+                    if(optionalChunkFaction.isPresent())
                     {
-                        Faction playerFaction = optionalPlayerFaction.get();
+                        if (optionalPlayerFaction.isPresent())
+                        {
+                            Faction playerFaction = optionalPlayerFaction.get();
 
-                        if (optionalChunkFaction.get().getName().equals(playerFaction.getName()))
-                        {
-                            textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
+                            if (optionalChunkFaction.get().getName().equals(playerFaction.getName()))
+                            {
+                                textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                            playerFaction = optionalChunkFaction.get();
-                        }
-                        else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
-                        {
-                            textBuilder.append(allianceMark);
-                            if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
-                            {
-                                allianceFactions.add(optionalChunkFaction.get().getName());
                             }
-                        }
-                        else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
-                        {
-                            textBuilder.append(enemyMark);
-                            if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
+                            else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
                             {
-                                enemyFactions.add(optionalChunkFaction.get().getName());
+                                textBuilder.append(allianceMark);
+                                if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
+                                {
+                                    allianceFactions.add(optionalChunkFaction.get().getName());
+                                }
+                            }
+                            else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
+                            {
+                                textBuilder.append(enemyMark);
+                                if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
+                                {
+                                    enemyFactions.add(optionalChunkFaction.get().getName());
+                                }
+                            }
+                            else
+                            {
+                                if (optionalChunkFaction.get().getName().equals("SafeZone"))
+                                {
+                                    textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                                }
+                                else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                                {
+                                    textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                                }
+                                else
+                                {
+                                    textBuilder.append(normalFactionMark);
+                                }
+                                if (!normalFactions.contains(optionalChunkFaction.get().getName()))
+                                {
+                                    normalFactions.add(optionalChunkFaction.get().getName());
+                                }
                             }
                         }
                         else
@@ -155,22 +179,12 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
                     }
                     else
                     {
-                        if (optionalChunkFaction.get().getName().equals("SafeZone"))
-                        {
-                            textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                        }
-                        else if (optionalChunkFaction.get().getName().equals("WarZone"))
-                        {
-                            textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
-                        }
-                        else
-                        {
-                            textBuilder.append(normalFactionMark);
-                        }
-                        if (!normalFactions.contains(optionalChunkFaction.get().getName()))
-                        {
-                            normalFactions.add(optionalChunkFaction.get().getName());
-                        }
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something went really wrong..."));
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk exists in claim list but not in the factions' list."));
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk: ", TextColors.GOLD, claimBuilder.toString()));
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Player that used map: ", TextColors.GOLD, player.toString()));
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Check if this claim exists in the ", TextColors.GOLD, "factions.conf."));
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "And report this bug to the plugin owner."));
                     }
                 }
                 else

@@ -71,7 +71,6 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         return () ->
         {
-            int sleep = 1000;
             while(true)
             {
                 if(_factionsToSaveList.size() > 0)
@@ -80,7 +79,6 @@ public class HOCONFactionStorage implements IFactionStorage
                     {
                         saveFaction(_factionsToSaveList.get(0));
                         _factionsToSaveList.remove(0);
-                        sleep = 1000;
                     }
                 }
                 else if(_factionsToRemove.size() > 0)
@@ -89,16 +87,13 @@ public class HOCONFactionStorage implements IFactionStorage
                     {
                         removeFaction(_factionsToRemove.get(0));
                         _factionsToRemove.remove(0);
-                        sleep = 1000;
                     }
                 }
                 else
                 {
                     try
                     {
-                        Thread.sleep(sleep);
-                        if(sleep < 10000)
-                            sleep *= 2;
+                        Thread.sleep(1000);
                     }
                     catch(InterruptedException e)
                     {

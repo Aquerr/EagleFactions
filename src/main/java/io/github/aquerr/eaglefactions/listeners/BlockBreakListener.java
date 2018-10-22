@@ -6,12 +6,15 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.filter.IsCancelled;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -67,16 +70,24 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.EARLY)
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
-        if(event.getContext().containsKey(EventContextKeys.OWNER) && event.getContext().get(EventContextKeys.OWNER).isPresent())
+        User user = null;
+        if(event.getCause().containsType(Player.class))
         {
-            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
+            user = event.getCause().first(Player.class).get();
+        }
+        else if(event.getCause().containsType(User.class))
+        {
+            user = event.getCause().first(User.class).get();
+        }
 
+        if(user instanceof Player)
+        {
             for(Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
                 if(super.getPlugin().getProtectionManager().isBlockWhitelistedForPlaceDestroy(transaction.getOriginal().getState().getType()))
                     return;
 
-                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), player.getWorld(), player))
+                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), transaction.getFinal().getLocation().get().getExtent(), (Player) user))
                     event.setCancelled(true);
             }
         }
