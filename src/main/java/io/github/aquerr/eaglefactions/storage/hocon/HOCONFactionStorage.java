@@ -124,24 +124,24 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         try
         {
-            configNode.getNode(new Object[]{"factions", faction.getName(), "tag"}).setValue(TypeToken.of(Text.class), faction.getTag());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "leader"}).setValue(faction.getLeader().toString());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "officers"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "members"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "recruits"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "enemies"}).setValue(faction.getEnemies());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "alliances"}).setValue(faction.getAlliances());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "claims"}).setValue(faction.getClaims());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "last_online"}).setValue(faction.getLastOnline().toString());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "flags"}).setValue(faction.getFlags());
+            configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
+            configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
+            configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
+            configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
+            configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
+            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
+            configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
+            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims());
+            configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
+            configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
 
             if(faction.getHome() == null)
             {
-                configNode.getNode(new Object[]{"factions", faction.getName(), "home"}).setValue(faction.getHome());
+                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome());
             }
             else
             {
-                configNode.getNode(new Object[]{"factions", faction.getName(), "home"}).setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
+                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
 
 //            FactionsCache.addOrUpdateFactionCache(faction);
@@ -210,8 +210,7 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
-    public @Nullable
-    Faction getFaction(String factionName)
+    public @Nullable Faction getFaction(String factionName)
     {
         try
         {
