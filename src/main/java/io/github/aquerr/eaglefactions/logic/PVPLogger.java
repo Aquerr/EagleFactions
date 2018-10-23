@@ -7,6 +7,12 @@ import io.github.aquerr.eaglefactions.config.IConfiguration;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scoreboard.Score;
+import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.api.scoreboard.critieria.Criteria;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
+import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -20,6 +26,7 @@ public class PVPLogger
     private Map<UUID, Integer> _attackedPlayers;
     private boolean _isActive;
     private int _blockTime;
+    private boolean _shouldDisplayInScoreboard;
     private List<String> _blockedCommandsDuringFight;
 
     public PVPLogger(IConfiguration configuration)
@@ -32,6 +39,7 @@ public class PVPLogger
             _attackedPlayers = new HashMap<>();
             _blockTime = _configFields.getPVPLoggerBlockTime();
             _blockedCommandsDuringFight = _configFields.getBlockedCommandsDuringFight();
+            _shouldDisplayInScoreboard = _configFields.shouldDisplayPvpLoggerInScoreboard();
         }
     }
 
@@ -102,11 +110,31 @@ public class PVPLogger
                             {
                                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
                                 _attackedPlayers.remove(player.getUniqueId());
+
+                                if(_shouldDisplayInScoreboard && player.getScoreboard().getObjective("PVPLogger").isPresent())
+                                {
+                                    player.setScoreboard(Scoreboard.builder().build());
+                                }
+
                                 task.cancel();
                             }
                             else
                             {
-                                _attackedPlayers.replace(player.getUniqueId(), seconds, seconds - 1);
+                                _attackedPlayers.replace(player.getUniqueId(), seconds - 1);
+                                if(_shouldDisplayInScoreboard)
+                                {
+                                    Scoreboard scoreboard = player.getScoreboard();
+                                    Optional<Objective> optionalObjective = scoreboard.getObjective("PVPLogger");
+                                    if(!optionalObjective.isPresent())
+                                    {
+                                        optionalObjective = Optional.of(Objective.builder().name("PVPLogger").displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
+                                        scoreboard.addObjective(optionalObjective.get());
+                                        scoreboard.updateDisplaySlot(optionalObjective.get(), DisplaySlots.SIDEBAR);
+                                    }
+
+                                    Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
+                                    pvpTimer.setScore(seconds - 1);
+                                }
                             }
                         }
                         else
@@ -121,18 +149,22 @@ public class PVPLogger
 
     public boolean isPlayerBlocked(Player player)
     {
-        if (_attackedPlayers.containsKey(player.getUniqueId())) return true;
-
-        return false;
+        return _attackedPlayers.containsKey(player.getUniqueId());
     }
 
     public void removePlayer(Player player)
     {
-        _attackedPlayers.remove(player.getUniqueId());
+        synchronized(_attackedPlayers)
+        {
+            _attackedPlayers.remove(player.getUniqueId());
+        }
     }
 
     public int getPlayerBlockTime(Player player)
     {
-        return _attackedPlayers.getOrDefault(player.getUniqueId(), 0);
+        synchronized(_attackedPlayers)
+        {
+            return _attackedPlayers.getOrDefault(player.getUniqueId(), 0);
+        }
     }
 }

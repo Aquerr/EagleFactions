@@ -49,6 +49,7 @@ public final class ConfigFields
     private double _neededPowerPercentageToAttack = 20;
     private boolean _isPvpLoggerActive = true;
     private int _pvpLoggerBlockTime = 60;
+    private boolean _showPvpLoggerInScoreboard = true;
     private boolean _disableBlockDestroyAtClaims = false;
     private boolean _disableBlockDestroyAtWarzone = false;
     private List<String> _blockedCommandsDuringFight = Arrays.asList("/f home", "spawn", "tpa", "/tp");
@@ -121,6 +122,7 @@ public final class ConfigFields
             this._neededPowerPercentageToAttack = _configuration.getDouble(20, "attack-min-power-percentage") / 100;
             this._isPvpLoggerActive = _configuration.getBoolean(true, "pvp-logger", "active");
             this._pvpLoggerBlockTime = _configuration.getInt(60, "pvp-logger", "time");
+            this._showPvpLoggerInScoreboard = _configuration.getBoolean(true, "pvp-logger", "show-in-scoreboard");
             this._disableBlockDestroyAtClaims = _configuration.getBoolean(false, "disable-block-destroy-claims");
             this._disableBlockDestroyAtWarzone = _configuration.getBoolean(false, "disable-block-destroy-warzone");
             this._blockedCommandsDuringFight = _configuration.getListOfStrings(Arrays.asList("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
@@ -489,5 +491,10 @@ public final class ConfigFields
     public List<String> getWhiteListedInteractBlocks()
     {
         return this._whitelistedIteractBlocks;
+    }
+
+    public boolean shouldDisplayPvpLoggerInScoreboard()
+    {
+        return this._showPvpLoggerInScoreboard;
     }
 }
