@@ -109,13 +109,7 @@ public class PVPLogger
                             if (seconds <= 0)
                             {
                                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PVPLOGGER_HAS_TURNED_OFF + " " + PluginMessages.YOU_CAN_NOW_DISCONNECT_SAFELY));
-                                _attackedPlayers.remove(player.getUniqueId());
-
-                                if(_shouldDisplayInScoreboard && player.getScoreboard().getObjective("PVPLogger").isPresent())
-                                {
-                                    player.setScoreboard(Scoreboard.builder().build());
-                                }
-
+                                removePlayer(player);
                                 task.cancel();
                             }
                             else
@@ -156,6 +150,10 @@ public class PVPLogger
     {
         synchronized(_attackedPlayers)
         {
+            if(_shouldDisplayInScoreboard && player.getScoreboard().getObjective("PVPLogger").isPresent())
+            {
+                player.setScoreboard(Scoreboard.builder().build());
+            }
             _attackedPlayers.remove(player.getUniqueId());
         }
     }
