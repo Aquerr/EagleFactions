@@ -224,14 +224,15 @@ public class Faction
         Builder factionBuilder = new Builder();
         factionBuilder.setName(this.name);
         factionBuilder.setTag(this.tag);
-        factionBuilder.setLastOnline(this.lastOnline);
-        factionBuilder.setHome(this.home);
-        factionBuilder.setEnemies(this.enemies);
-        factionBuilder.setAlliances(this.alliances);
+        factionBuilder.setLeader(this.leader);
         factionBuilder.setOfficers(this.officers);
         factionBuilder.setMembers(this.members);
         factionBuilder.setRecruits(this.recruits);
+        factionBuilder.setAlliances(this.alliances);
+        factionBuilder.setEnemies(this.enemies);
         factionBuilder.setClaims(this.claims);
+        factionBuilder.setLastOnline(this.lastOnline);
+        factionBuilder.setHome(this.home);
         factionBuilder.setFlags(this.flags);
 
         return factionBuilder;
@@ -345,7 +346,7 @@ public class Faction
         {
             if(this.name == null || this.tag == null || this.leader == null)
             {
-                throw new IllegalStateException("Faction must have a name, tag and leader.");
+                throw new IllegalStateException("Couldn't build Faction object! Faction must have a name, tag and leader.");
             }
 
             if(this.lastOnline == null)
