@@ -12,7 +12,6 @@ import java.util.List;
 
 public class EagleFeather
 {
-    //TODO: We should maybe prepare this object when sever initializes and hold the item here in a field?
     private EagleFeather()
     {
 

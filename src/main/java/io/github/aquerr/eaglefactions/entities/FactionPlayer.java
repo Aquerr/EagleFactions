@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.entities;
 
 import org.spongepowered.api.entity.living.player.Player;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
 import java.util.UUID;
 
 public class FactionPlayer implements IFactionPlayer
@@ -10,7 +12,6 @@ public class FactionPlayer implements IFactionPlayer
     private String name;
 
     private String factionName;
-    private boolean hasFaction;
     private FactionMemberType factionRole;
 
     public FactionPlayer(Player player)
@@ -19,7 +20,6 @@ public class FactionPlayer implements IFactionPlayer
         this.name = player.getName();
 
         this.factionName = "";
-        this.hasFaction = false;
         this.factionRole = null;
     }
 
@@ -29,7 +29,6 @@ public class FactionPlayer implements IFactionPlayer
         this.uniqueId = uniqueId;
 
         this.factionName = "";
-        this.hasFaction = false;
         this.factionRole = null;
     }
 
@@ -46,24 +45,28 @@ public class FactionPlayer implements IFactionPlayer
     }
 
     @Override
-    public String getFactionName() throws IllegalStateException
+    public Optional<String> getFactionName() throws IllegalStateException
     {
-        if(!hasFaction)
-            throw new IllegalStateException("Player does not have a faction");
-        return this.factionName;
+        if (this.factionName.equals(""))
+        {
+            return Optional.empty();
+        }
+        else
+        {
+            return Optional.of(this.factionName);
+        }
     }
 
     @Override
-    public boolean hasFaction()
+    public Optional<FactionMemberType> getFactionRole() throws IllegalStateException
     {
-        return this.hasFaction;
-    }
-
-    @Override
-    public FactionMemberType getFactionRole() throws IllegalStateException
-    {
-        if(!hasFaction)
-            throw new IllegalStateException("Player does not have a faction");
-        return this.factionRole;
+        if (this.factionRole == null)
+        {
+            return Optional.empty();
+        }
+        else
+        {
+            return Optional.of(this.factionRole);
+        }
     }
 }
