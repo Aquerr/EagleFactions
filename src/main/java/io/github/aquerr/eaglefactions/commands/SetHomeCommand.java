@@ -17,7 +17,7 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class SetHomeCommand extends AbstractCommand implements CommandExecutor
+public class SetHomeCommand extends AbstractCommand
 {
     public SetHomeCommand(EagleFactions plugin)
     {

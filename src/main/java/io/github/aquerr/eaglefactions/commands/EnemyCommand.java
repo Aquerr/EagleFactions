@@ -19,7 +19,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class EnemyCommand extends AbstractCommand implements CommandExecutor
+public class EnemyCommand extends AbstractCommand
 {
     public EnemyCommand(EagleFactions plugin)
     {

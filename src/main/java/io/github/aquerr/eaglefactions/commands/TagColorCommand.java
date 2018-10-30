@@ -16,7 +16,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class TagColorCommand extends AbstractCommand implements CommandExecutor
+public class TagColorCommand extends AbstractCommand
 {
     public TagColorCommand(EagleFactions plugin)
     {

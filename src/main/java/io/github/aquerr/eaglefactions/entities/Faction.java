@@ -28,7 +28,7 @@ public class Faction
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
     //Constructor used while creating a new faction.
-//    private Faction(String factionName, String factionTag, UUID factionLeader)
+//    private FACTION(String factionName, String factionTag, UUID factionLeader)
 //    {
 //        this.name = factionName;
 //        this.tag = Text.of(TextColors.GREEN, factionTag);
@@ -45,6 +45,8 @@ public class Faction
 //        this.lastOnline = Instant.now();
 //        this.flags = FlagManager.getDefaultFactionFlags();
 //    }
+
+
 
     //Constructor used while getting a faction from storage.
     private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
@@ -219,6 +221,20 @@ public class Faction
         this.lastOnline = lastOnline;
     }
 
+    public FactionMemberType getPlayerMemberType(UUID playerUUID)
+    {
+        if (this.leader.equals(playerUUID))
+            return FactionMemberType.LEADER;
+        else if(this.officers.contains(playerUUID))
+            return FactionMemberType.OFFICER;
+        else if(this.members.contains(playerUUID))
+            return FactionMemberType.MEMBER;
+        else if(this.recruits.contains(playerUUID))
+            return FactionMemberType.RECRUIT;
+        else
+            return null;
+    }
+
     public Builder toBuilder()
     {
         Builder factionBuilder = new Builder();
@@ -346,7 +362,7 @@ public class Faction
         {
             if(this.name == null || this.tag == null || this.leader == null)
             {
-                throw new IllegalStateException("Couldn't build Faction object! Faction must have a name, tag and leader.");
+                throw new IllegalStateException("Couldn't build FACTION object! FACTION must have a name, tag and leader.");
             }
 
             if(this.lastOnline == null)

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class MapCommand extends AbstractCommand implements CommandExecutor
+public class MapCommand extends AbstractCommand
 {
     public MapCommand(EagleFactions plugin)
     {
@@ -95,7 +95,7 @@ public class MapCommand extends AbstractCommand implements CommandExecutor
             {
                 if (row == 0 && column == 0)
                 {
-                    //TODO: Faction that player is standing at is not showed in the list.
+                    //TODO: FACTION that player is standing at is not showed in the list.
                     textBuilder.append(playerLocationMark);
                     continue;
                 }

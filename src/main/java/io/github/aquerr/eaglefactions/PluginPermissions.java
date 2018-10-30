@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions;
 
-public abstract class PluginPermissions
+public final class PluginPermissions
 {
     //public static final String AllPermissions = "eaglefactions";
 
@@ -64,4 +64,9 @@ public abstract class PluginPermissions
     public static final String WAR_ZONE_BUILD = "eaglefactions.warzone.build";
     public static final String SAFE_ZONE_INTERACT = "eaglefactions.safezone.interact";
     public static final String WAR_ZONE_INTERACT = "eaglefactions.warzone.interact";
+
+    private PluginPermissions()
+    {
+
+    }
 }

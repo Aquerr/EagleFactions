@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class SetLeaderCommand extends AbstractCommand implements CommandExecutor
+public class SetLeaderCommand extends AbstractCommand
 {
     public SetLeaderCommand(EagleFactions plugin)
     {

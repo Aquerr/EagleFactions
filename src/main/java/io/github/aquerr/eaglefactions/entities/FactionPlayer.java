@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.entities;
 
-import org.spongepowered.api.entity.living.player.Player;
+import io.github.aquerr.eaglefactions.EagleFactions;
+import org.spongepowered.api.entity.living.player.User;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,22 +14,27 @@ public class FactionPlayer implements IFactionPlayer
     private String factionName;
     private FactionMemberType factionRole;
 
-    public FactionPlayer(Player player)
+    public FactionPlayer(String playerName, UUID uniqueId, String factionName, FactionMemberType factionRole)
     {
-        this.uniqueId = player.getUniqueId();
-        this.name = player.getName();
-
-        this.factionName = "";
-        this.factionRole = null;
-    }
-
-    public FactionPlayer(String name, UUID uniqueId)
-    {
-        this.name = name;
+        this.name = playerName;
         this.uniqueId = uniqueId;
 
-        this.factionName = "";
-        this.factionRole = null;
+        this.factionName = factionName;
+        this.factionRole = factionRole;
+    }
+
+    public static FactionPlayer from(User playerUser)
+    {
+        String factionName = "";
+        FactionMemberType factionMemberType = null;
+        Optional<Faction> optionalFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByPlayerUUID(playerUser.getUniqueId());
+        if (optionalFaction.isPresent())
+        {
+            factionName = optionalFaction.get().getName();
+            factionMemberType = optionalFaction.get().getPlayerMemberType(playerUser.getUniqueId());
+        }
+
+        return new FactionPlayer(playerUser.getName(), playerUser.getUniqueId(), factionName, factionMemberType);
     }
 
     @Override
@@ -45,9 +50,9 @@ public class FactionPlayer implements IFactionPlayer
     }
 
     @Override
-    public Optional<String> getFactionName() throws IllegalStateException
+    public Optional<String> getFactionName()
     {
-        if (this.factionName.equals(""))
+        if (this.factionName == null || this.factionName.equals(""))
         {
             return Optional.empty();
         }
@@ -58,7 +63,7 @@ public class FactionPlayer implements IFactionPlayer
     }
 
     @Override
-    public Optional<FactionMemberType> getFactionRole() throws IllegalStateException
+    public Optional<FactionMemberType> getFactionRole()
     {
         if (this.factionRole == null)
         {

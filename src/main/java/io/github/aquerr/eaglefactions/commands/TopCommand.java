@@ -16,7 +16,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.*;
 
-public class TopCommand extends AbstractCommand implements CommandExecutor
+public class TopCommand extends AbstractCommand
 {
     public TopCommand(EagleFactions plugin)
     {

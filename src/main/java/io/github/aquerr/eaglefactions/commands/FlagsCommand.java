@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FlagsCommand extends AbstractCommand implements CommandExecutor
+public class FlagsCommand extends AbstractCommand
 {
     public FlagsCommand(EagleFactions plugin)
     {

@@ -16,7 +16,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class JoinCommand extends AbstractCommand implements CommandExecutor
+public class JoinCommand extends AbstractCommand
 {
     public JoinCommand(EagleFactions plugin)
     {

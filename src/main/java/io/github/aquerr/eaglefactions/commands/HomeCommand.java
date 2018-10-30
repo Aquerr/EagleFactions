@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class HomeCommand extends AbstractCommand implements CommandExecutor
+public class HomeCommand extends AbstractCommand
 {
     public HomeCommand(EagleFactions plugin)
     {

@@ -12,7 +12,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class AutoMapCommand extends AbstractCommand implements CommandExecutor
+public class AutoMapCommand extends AbstractCommand
 {
     public AutoMapCommand(EagleFactions plugin)
     {

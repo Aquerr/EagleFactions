@@ -7,7 +7,7 @@ import org.spongepowered.api.text.format.TextColors;
  * Created by Aquerr on 2017-07-10.
  */
 
-public abstract class PluginInfo
+public final class PluginInfo
 {
     public static final String ID = "eaglefactions";
     public static final String NAME = "Eagle Factions";
@@ -16,4 +16,9 @@ public abstract class PluginInfo
     public static final Text PLUGIN_PREFIX = Text.of(TextColors.AQUA, "[EF] ");
     public static final Text ERROR_PREFIX = Text.of(TextColors.DARK_RED, "[EF] ");
     public static final String AUTHOR = "Aquerr";
+
+    private PluginInfo()
+    {
+
+    }
 }

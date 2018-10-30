@@ -22,7 +22,7 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class ClaimCommand extends AbstractCommand implements CommandExecutor
+public class ClaimCommand extends AbstractCommand
 {
     public ClaimCommand(EagleFactions plugin)
     {

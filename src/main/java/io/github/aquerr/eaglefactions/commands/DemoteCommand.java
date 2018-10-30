@@ -19,7 +19,7 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2018-06-24.
  */
-public class DemoteCommand extends AbstractCommand implements CommandExecutor
+public class DemoteCommand extends AbstractCommand
 {
     public DemoteCommand(EagleFactions plugin)
     {

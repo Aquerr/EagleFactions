@@ -13,7 +13,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class EagleFeatherCommand extends AbstractCommand implements CommandExecutor
+public class EagleFeatherCommand extends AbstractCommand
 {
     public EagleFeatherCommand(EagleFactions plugin)
     {
@@ -26,6 +26,7 @@ public class EagleFeatherCommand extends AbstractCommand implements CommandExecu
         if(!(source instanceof Player))
         {
             source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            return CommandResult.success();
         }
 
         Player player = (Player)source;

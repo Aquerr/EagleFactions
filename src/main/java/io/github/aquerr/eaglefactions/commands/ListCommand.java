@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ListCommand extends AbstractCommand implements CommandExecutor
+public class ListCommand extends AbstractCommand
 {
     public ListCommand(EagleFactions plugin)
     {

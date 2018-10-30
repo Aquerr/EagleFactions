@@ -7,8 +7,8 @@ import java.util.UUID;
 
 public class FactionHome
 {
-    private Vector3i BlockPosition;
-    private UUID WorldUUID;
+    private final Vector3i BlockPosition;
+    private final UUID WorldUUID;
 
     public FactionHome(@Nullable UUID worldUUID, @Nullable Vector3i blockPosition)
     {

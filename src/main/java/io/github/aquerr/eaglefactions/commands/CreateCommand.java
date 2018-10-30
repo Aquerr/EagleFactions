@@ -29,7 +29,7 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class CreateCommand extends AbstractCommand implements CommandExecutor
+public class CreateCommand extends AbstractCommand
 {
     public CreateCommand(EagleFactions plugin)
     {

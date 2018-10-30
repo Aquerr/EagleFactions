@@ -16,13 +16,14 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class AttackCommand extends AbstractCommand implements CommandExecutor
+public class AttackCommand extends AbstractCommand
 {
     public AttackCommand(EagleFactions plugin)
     {
         super(plugin);
     }
 
+    @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if(source instanceof Player)

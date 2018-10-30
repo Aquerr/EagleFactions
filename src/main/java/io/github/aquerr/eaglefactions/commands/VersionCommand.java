@@ -11,7 +11,7 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class VersionCommand extends AbstractCommand implements CommandExecutor
+public class VersionCommand extends AbstractCommand
 {
     public VersionCommand(EagleFactions plugin)
     {

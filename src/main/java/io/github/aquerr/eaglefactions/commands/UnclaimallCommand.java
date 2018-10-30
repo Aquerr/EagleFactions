@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class UnclaimallCommand extends AbstractCommand implements CommandExecutor
+public class UnclaimallCommand extends AbstractCommand
 {
     public UnclaimallCommand(EagleFactions plugin)
     {

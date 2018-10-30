@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class DisbandCommand extends AbstractCommand implements CommandExecutor
+public class DisbandCommand extends AbstractCommand
 {
     public DisbandCommand(EagleFactions plugin)
     {

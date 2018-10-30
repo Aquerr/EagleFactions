@@ -23,7 +23,7 @@ import java.util.*;
 /**
  * Created by Aquerr on 2017-08-03.
  */
-public class InfoCommand extends AbstractCommand implements CommandExecutor
+public class InfoCommand extends AbstractCommand
 {
     public InfoCommand(EagleFactions plugin)
     {

@@ -21,13 +21,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CoordsCommand extends AbstractCommand implements CommandExecutor
+public class CoordsCommand extends AbstractCommand
 {
     public CoordsCommand(EagleFactions plugin)
     {
         super(plugin);
     }
 
+    @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
         if(source instanceof Player)

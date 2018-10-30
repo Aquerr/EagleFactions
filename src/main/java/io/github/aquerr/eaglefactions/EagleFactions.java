@@ -18,7 +18,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Dependency;
@@ -179,12 +181,12 @@ public class EagleFactions
 //                        else if(maxInactive - 172800 < inactiveTime.getSeconds())
 //                        {
 //                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
-//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
+//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
 //                        }
                         else if(maxInactive * 0.75 < inactiveTime.getSeconds())
                         {
                             long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
-                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
+                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
                         }
                     }
                 }
@@ -203,7 +205,7 @@ public class EagleFactions
 
         //Create faction command.
         Subcommands.put(Arrays.asList("c", "create"), CommandSpec.builder()
-                .description(Text.of("Create Faction Command"))
+                .description(Text.of("Create FACTION Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
                 .arguments(GenericArguments.optional(GenericArguments.string(Text.of("tag"))),
                         GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
@@ -212,7 +214,7 @@ public class EagleFactions
 
         //Disband faction command.
         Subcommands.put(Collections.singletonList("disband"), CommandSpec.builder()
-                .description(Text.of("Disband Faction Command"))
+                .description(Text.of("Disband FACTION Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
                 .executor(new DisbandCommand(this))
                 .build());

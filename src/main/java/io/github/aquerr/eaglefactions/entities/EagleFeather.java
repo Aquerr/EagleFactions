@@ -10,7 +10,7 @@ import org.spongepowered.api.text.format.TextStyles;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EagleFeather
+public final class EagleFeather
 {
     private EagleFeather()
     {
@@ -29,13 +29,11 @@ public class EagleFeather
         eagleFeatherLore.add(Text.of());
         eagleFeatherLore.add(Text.of(TextColors.GRAY, TextStyles.ITALIC, "It looks like a key. Maybe it could be used somewhere?"));
 
-         ItemStack feather = ItemStack.builder()
-                .itemType(ItemTypes.FEATHER)
-                .quantity(1)
-                .add(Keys.DISPLAY_NAME, getDisplayName())
-                .add(Keys.ITEM_LORE, eagleFeatherLore)
-                .build();
-
-         return feather;
+        return ItemStack.builder()
+               .itemType(ItemTypes.FEATHER)
+               .quantity(1)
+               .add(Keys.DISPLAY_NAME, getDisplayName())
+               .add(Keys.ITEM_LORE, eagleFeatherLore)
+               .build();
     }
 }

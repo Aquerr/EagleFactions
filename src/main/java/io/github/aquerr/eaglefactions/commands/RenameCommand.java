@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class RenameCommand extends AbstractCommand implements CommandExecutor
+public class RenameCommand extends AbstractCommand
 {
     public RenameCommand(EagleFactions plugin)
     {

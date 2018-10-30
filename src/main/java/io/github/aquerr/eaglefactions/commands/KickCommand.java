@@ -21,7 +21,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class KickCommand extends AbstractCommand implements CommandExecutor
+public class KickCommand extends AbstractCommand
 {
     public KickCommand(EagleFactions plugin)
     {

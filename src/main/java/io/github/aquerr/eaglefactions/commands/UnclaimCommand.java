@@ -18,7 +18,7 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class UnclaimCommand extends AbstractCommand implements CommandExecutor
+public class UnclaimCommand extends AbstractCommand
 {
     public UnclaimCommand(EagleFactions plugin)
     {

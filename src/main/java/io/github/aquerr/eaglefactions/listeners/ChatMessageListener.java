@@ -59,7 +59,7 @@ public class ChatMessageListener extends AbstractListener
             {
                 Text.Builder chatTypePrefix = Text.builder();
 
-                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
+                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
                 {
                     message.append(Text.of(TextColors.BLUE, event.getRawMessage()));
                     chatTypePrefix.append(getAlliancePrefix());
@@ -74,7 +74,7 @@ public class ChatMessageListener extends AbstractListener
                     receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
                     messageChannel = MessageChannel.fixed(receivers);
                 }
-                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
+                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.FACTION))
                 {
                     message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                     chatTypePrefix.append(getFactionPrefix());

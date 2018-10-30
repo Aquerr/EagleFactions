@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class AutoClaimCommand extends AbstractCommand implements CommandExecutor
+public class AutoClaimCommand extends AbstractCommand
 {
     public AutoClaimCommand(EagleFactions plugin)
     {

@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class LeaveCommand extends AbstractCommand implements CommandExecutor
+public class LeaveCommand extends AbstractCommand
 {
     public LeaveCommand(EagleFactions plugin)
     {

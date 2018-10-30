@@ -25,7 +25,7 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2017-08-04.
  */
-public class PlayerCommand extends AbstractCommand implements CommandExecutor
+public class PlayerCommand extends AbstractCommand
 {
     public PlayerCommand(EagleFactions plugin)
     {

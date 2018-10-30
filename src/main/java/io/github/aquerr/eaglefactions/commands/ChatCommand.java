@@ -8,14 +8,13 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class ChatCommand extends AbstractCommand implements CommandExecutor
+public class ChatCommand extends AbstractCommand
 {
     public ChatCommand(EagleFactions plugin)
     {
@@ -37,7 +36,7 @@ public class ChatCommand extends AbstractCommand implements CommandExecutor
                 {
                     if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
                     {
-                        if (optionalChatType.get().equals(ChatEnum.Global))
+                        if (optionalChatType.get().equals(ChatEnum.GLOBAL))
                         {
                             EagleFactions.ChatList.remove(player.getUniqueId());
                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.GLOBAL_CHAT, TextColors.RESET, "!"));
@@ -59,9 +58,9 @@ public class ChatCommand extends AbstractCommand implements CommandExecutor
                     //If player is in alliance chat or faction chat.
                     if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
                     {
-                        if(EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
+                        if(EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
                         {
-                            EagleFactions.ChatList.replace(player.getUniqueId(), ChatEnum.Alliance, ChatEnum.Faction);
+                            EagleFactions.ChatList.replace(player.getUniqueId(), ChatEnum.ALLIANCE, ChatEnum.FACTION);
                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.FACTION_CHAT, TextColors.RESET, "!"));
                         }
                         else
@@ -72,7 +71,7 @@ public class ChatCommand extends AbstractCommand implements CommandExecutor
                     }
                     else
                     {
-                        EagleFactions.ChatList.put(player.getUniqueId(), ChatEnum.Alliance);
+                        EagleFactions.ChatList.put(player.getUniqueId(), ChatEnum.ALLIANCE);
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.ALLIANCE_CHAT, TextColors.RESET, "!"));
                     }
                 }
