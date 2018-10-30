@@ -138,10 +138,10 @@ public class PlayerManager
         {
             return FactionMemberType.RECRUIT;
         }
-        else if(faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
-        {
-            return FactionMemberType.ALLY;
-        }
+//        else if(faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
+//        {
+//            return FactionMemberType.ALLY;
+//        }
 
         return null;
     }
