@@ -46,7 +46,7 @@ public class FactionNameArgument extends CommandElement
 
         if (args.hasNext())
         {
-            String charSequence = args.nextIfPresent().get();
+            String charSequence = args.nextIfPresent().get().toLowerCase();
             return list.stream().filter(x->x.contains(charSequence)).collect(Collectors.toList());
         }
 

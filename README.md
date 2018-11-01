@@ -2,7 +2,7 @@
 
 # Eagle Factions
 
-Current version: 0.10.0
+Current version: 0.10.1
 
 ## General
 Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using "power". Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
@@ -45,6 +45,7 @@ If there is no translation for your language you can make your own and add it as
 * [Download Links](https://github.com/Aquerr/EagleFactions/releases)
 * [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * [Permissions](https://github.com/Aquerr/EagleFactions/wiki/Permissions)
+* [Translations](https://github.com/Aquerr/EagleFactions/tree/1.12.2/api-7.0.0/src/main/resources/messages)
 * ~~Ore~~ (not yet available)
 
 Recommended downloads will be **available** when version of the plugin hits **1.0.0**

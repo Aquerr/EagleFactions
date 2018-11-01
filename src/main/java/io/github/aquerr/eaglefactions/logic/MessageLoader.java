@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.config.IConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
@@ -18,7 +17,7 @@ public class MessageLoader
 {
     public MessageLoader(IConfiguration configuration, Path configDir)
     {
-        String messagesFileName = configuration.getConfigFileds().getLanguageFileName();
+        String messagesFileName = configuration.getConfigFields().getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
         if (!Files.exists(configDir.resolve("messages")))
@@ -36,6 +35,11 @@ public class MessageLoader
         if (!Files.exists(messagesFilePath))
         {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
+
+            //If there is not such language...
+            if(inputStream == null)
+                inputStream = getClass().getClassLoader().getResourceAsStream("messages/english.conf");
+            
             try
             {
                 Files.copy(inputStream, messagesFilePath);

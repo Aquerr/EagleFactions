@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class DisbandCommand extends AbstractCommand implements CommandExecutor
+public class DisbandCommand extends AbstractCommand
 {
     public DisbandCommand(EagleFactions plugin)
     {
@@ -40,13 +40,13 @@ public class DisbandCommand extends AbstractCommand implements CommandExecutor
 
                     if (didSucceed)
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
                         EagleFactions.AutoClaimList.remove(player.getUniqueId());
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
                     }
 
                     return CommandResult.success();
@@ -60,13 +60,13 @@ public class DisbandCommand extends AbstractCommand implements CommandExecutor
 
                         if (didSucceed)
                         {
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
 
                             EagleFactions.AutoClaimList.remove(player.getUniqueId());
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
+                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
                         }
 
                         return CommandResult.success();
@@ -78,17 +78,17 @@ public class DisbandCommand extends AbstractCommand implements CommandExecutor
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

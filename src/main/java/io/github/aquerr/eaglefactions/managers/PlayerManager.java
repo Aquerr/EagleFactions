@@ -7,19 +7,13 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -35,7 +29,7 @@ public class PlayerManager
 
     public PlayerManager(EagleFactions plugin)
     {
-        _configFields = plugin.getConfiguration().getConfigFileds();
+        _configFields = plugin.getConfiguration().getConfigFields();
         _playerStorage = new HOCONPlayerStorage(plugin.getConfigDir());
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
@@ -90,21 +84,18 @@ public class PlayerManager
     public Optional<Player> getPlayer(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
-
         return oUser.get().getPlayer();
     }
 
     private Optional<User> getUser(UUID playerUUID)
     {
         Optional<User> oUser = userStorageService.get(playerUUID);
-
         return oUser;
     }
 
     public boolean isPlayerOnline(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
-
         return oUser.map(User::isOnline).orElse(false);
     }
 
@@ -147,10 +138,10 @@ public class PlayerManager
         {
             return FactionMemberType.RECRUIT;
         }
-        else if(faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
-        {
-            return FactionMemberType.ALLY;
-        }
+//        else if(faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
+//        {
+//            return FactionMemberType.ALLY;
+//        }
 
         return null;
     }
@@ -158,5 +149,10 @@ public class PlayerManager
     public Set<IFactionPlayer> getServerPlayers()
     {
         return _playerStorage.getServerPlayers();
+    }
+
+    public void updatePlayerName(UUID playerUUID, String playerName)
+    {
+        this._playerStorage.updatePlayerName(playerUUID, playerName);
     }
 }

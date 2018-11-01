@@ -9,7 +9,6 @@ import java.util.UUID;
 public interface IPlayerStorage
 {
     boolean checkIfPlayerExists(UUID playerUUID, String playerName);
-    //boolean checkIfPlayerExists(String lastPlayerName);
 
     boolean addPlayer(UUID playerUUID, String playerName, BigDecimal startingPower, BigDecimal maxPower);
 
@@ -30,4 +29,6 @@ public interface IPlayerStorage
     Set<IFactionPlayer> getServerPlayers();
 
     String getPlayerName(UUID playerUUID);
+
+    void updatePlayerName(UUID playerUUID, String playerName);
 }
