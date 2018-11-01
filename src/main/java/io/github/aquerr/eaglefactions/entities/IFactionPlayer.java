@@ -1,5 +1,8 @@
 package io.github.aquerr.eaglefactions.entities;
 
+import org.spongepowered.api.entity.living.player.User;
+
+import java.util.Optional;
 import java.util.UUID;
 
 public interface IFactionPlayer
@@ -8,9 +11,7 @@ public interface IFactionPlayer
 
     UUID getUniqueId();
 
-    String getFactionName() throws IllegalStateException;
+    Optional<String> getFactionName();
 
-    boolean hasFaction();
-
-    FactionMemberType getFactionRole() throws IllegalStateException;
+    Optional<FactionMemberType> getFactionRole();
 }

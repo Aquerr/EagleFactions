@@ -1,23 +1,22 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BlockBreakListener extends AbstractListener
 {
@@ -26,104 +25,84 @@ public class BlockBreakListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
+    public void onBlockBreak(ChangeBlockEvent.Pre event)
+    {
+        if(event.getContext().containsKey(EventContextKeys.PLAYER_BREAK) || event.getContext().containsKey(EventContextKeys.FIRE_SPREAD))
+        {
+            List<Location<World>> locationList = new ArrayList<>(event.getLocations());
+            for(Location<World> location : locationList)
+            {
+                BlockState blockState = location.getBlock();
+                if(blockState.getType() == BlockTypes.FLOWING_WATER)
+                {
+                    return;
+                }
+
+                if(event.getContext().containsKey(EventContextKeys.OWNER)
+                        && event.getContext().get(EventContextKeys.OWNER).isPresent()
+                        && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
+                {
+
+                    Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
+                    World world = player.getWorld();
+
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, world, player))
+                        event.setCancelled(true);
+                }
+                else
+                {
+                    if(blockState.getType() == BlockTypes.FLOWING_WATER)
+                    {
+                        return;
+                    }
+
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, location.getExtent()))
+                        event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @Listener(order = Order.EARLY)
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
-        if(event.getCause().root() instanceof Player)
+        User user = null;
+        if(event.getCause().containsType(Player.class))
         {
-            Player player = (Player)event.getCause().root();
+            user = event.getCause().first(Player.class).get();
+        }
+        else if(event.getCause().containsType(User.class))
+        {
+            user = event.getCause().first(User.class).get();
+        }
 
-            if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+        if(user instanceof Player)
+        {
+            for(Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                 for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-                 {
-                     World world = player.getWorld();
+                if(super.getPlugin().getProtectionManager().isBlockWhitelistedForPlaceDestroy(transaction.getOriginal().getState().getType()))
+                    return;
 
-                     if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
-                     {
-                         event.setCancelled(true);
-                         return;
-                     }
-                     else if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
-                     {
-                         event.setCancelled(true);
-                         return;
-                     }
-
-                     Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-                     Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
-
-                     if(optionalChunkFaction.isPresent())
-                     {
-                         if(optionalChunkFaction.get().getName().equals("SafeZone") && player.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
-                         {
-                             return;
-                         }
-                         else if(optionalChunkFaction.get().getName().equals("WarZone") && player.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
-                         {
-                             return;
-                         }
-                         else if(optionalPlayerFaction.isPresent())
-                         {
-                             if (!getPlugin().getFlagManager().canBreakBlock(player, optionalPlayerFaction.get(), optionalChunkFaction.get()))
-                             {
-                                 player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE));
-                                 event.setCancelled(true);
-                                 return;
-                             }
-                         }
-                         else
-                         {
-                             event.setCancelled(true);
-                             player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
-                             return;
-                         }
-                     }
-                 }
+                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), transaction.getFinal().getLocation().get().getExtent(), (Player) user))
+                    event.setCancelled(true);
             }
         }
         else
         {
+            if(event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent())
+                return;
+
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                World world = transaction.getFinal().getLocation().get().getExtent();
-
-                if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(world.getName()))
+                if(transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_WATER)
                 {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if (getPlugin().getConfiguration().getConfigFileds().getWarZoneWorldNames().contains(world.getName()) && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
-                {
-                    event.setCancelled(true);
                     return;
                 }
 
-                Vector3i claim = transaction.getFinal().getLocation().get().getChunkPosition();
-                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), claim);
-
-                if (optionalChunkFaction.isPresent())
-                {
-                    if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtClaimsDisabled())
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
-                    else if(optionalChunkFaction.get().getName().equals("SafeZone"))
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
-                    else if (optionalChunkFaction.get().getName().equals("WarZone") && getPlugin().getConfiguration().getConfigFileds().isBlockDestroyAtWarzoneDisabled())
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
+                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), transaction.getFinal().getLocation().get().getExtent()))
+                    event.setCancelled(true);
             }
         }
-        return;
     }
-
 }

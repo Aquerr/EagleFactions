@@ -4,14 +4,13 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -27,7 +26,7 @@ public class EntitySpawnListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onEntitySpawn(SpawnEntityEvent event)
     {
         for (Entity entity: event.getEntities())
@@ -37,24 +36,28 @@ public class EntitySpawnListener extends AbstractListener
 
             if(entity instanceof Hostile)
             {
-                if (!getPlugin().getConfiguration().getConfigFileds().getMobSpawning())
+                if (getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                 {
-                    if (getPlugin().getConfiguration().getConfigFileds().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
+                    event.setCancelled(true);
+                    return;
+                }
 
-                    if(getPlugin().getFactionLogic().isClaimed(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition()))
-                    {
-                        event.setCancelled(true);
-                        return;
-                    }
+                Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition());
+                if(optionalFaction.isPresent() && optionalFaction.get().getName().equals("SafeZone"))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+
+                if(!getPlugin().getConfiguration().getConfigFields().getMobSpawning() && optionalFaction.isPresent() && !optionalFaction.get().getName().equals("WarZone"))
+                {
+                    event.setCancelled(true);
+                    return;
                 }
             }
             else if(entity instanceof Player)
             {
-                if(getPlugin().getConfiguration().getConfigFileds().shouldSpawnAtHomeAfterDeath())
+                if(getPlugin().getConfiguration().getConfigFields().shouldSpawnAtHomeAfterDeath())
                 {
                     Player player = (Player)entity;
 
@@ -72,7 +75,7 @@ public class EntitySpawnListener extends AbstractListener
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET));
                         }
                     }
                 }

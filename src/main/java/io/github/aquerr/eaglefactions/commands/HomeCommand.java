@@ -5,8 +5,6 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -26,7 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class HomeCommand extends AbstractCommand implements CommandExecutor
+public class HomeCommand extends AbstractCommand
 {
     public HomeCommand(EagleFactions plugin)
     {
@@ -49,50 +47,50 @@ public class HomeCommand extends AbstractCommand implements CommandExecutor
                 {
                     if (EagleFactions.HomeCooldownPlayers.containsKey(player.getUniqueId()))
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " " + PluginMessages.SECONDS + " ", TextColors.RED, PluginMessages.TO_BE_ABLE_TO_USE_IT_AGAIN));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactions.HomeCooldownPlayers.get(player.getUniqueId()) + " " + PluginMessages.SECONDS + " ", TextColors.RED, PluginMessages.TO_BE_ABLE_TO_USE_IT_AGAIN));
                         return CommandResult.success();
                     }
-                    else if (getPlugin().getConfiguration().getConfigFileds().shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
+                    else if (getPlugin().getConfiguration().getConfigFields().shouldBlockHomeAfterDeathInOwnFaction() && EagleFactions.BlockedHome.containsKey(player.getUniqueId()))
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RED, PluginMessages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
                         return CommandResult.success();
                     }
                     else
                     {
-                        if(getPlugin().getConfiguration().getConfigFileds().canHomeBetweenWorlds())
+                        if(getPlugin().getConfiguration().getConfigFields().canHomeBetweenWorlds())
                         {
-                            source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFileds().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
+                            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFields().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                             teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                         }
                         else
                         {
                             if(player.getWorld().getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                             {
-                                source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFileds().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
+                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFields().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                                 teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                             }
                             else
                             {
-                                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, PluginMessages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD));
+                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, PluginMessages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD));
                             }
                         }
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.FACTIONS_HOME_IS_NOT_SET));
+                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.FACTIONS_HOME_IS_NOT_SET));
                 }
 
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -111,22 +109,22 @@ public class HomeCommand extends AbstractCommand implements CommandExecutor
             {
                 if (player.getLocation().getBlockPosition().equals(lastBlockPosition))
                 {
-                    if (seconds >= getPlugin().getConfiguration().getConfigFileds().getHomeDelayTime())
+                    if (seconds >= getPlugin().getConfiguration().getConfigFields().getHomeDelayTime())
                     {
                         player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
                         startHomeCooldown(player.getUniqueId());
                         task.cancel();
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
                         seconds++;
                     }
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
                     task.cancel();
                 }
             }
@@ -135,7 +133,7 @@ public class HomeCommand extends AbstractCommand implements CommandExecutor
 
     private void startHomeCooldown(UUID playerUUID)
     {
-        EagleFactions.HomeCooldownPlayers.put(playerUUID, getPlugin().getConfiguration().getConfigFileds().getHomeCooldown());
+        EagleFactions.HomeCooldownPlayers.put(playerUUID, getPlugin().getConfiguration().getConfigFields().getHomeCooldown());
 
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

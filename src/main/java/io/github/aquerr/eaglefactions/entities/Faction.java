@@ -28,26 +28,28 @@ public class Faction
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
     //Constructor used while creating a new faction.
-    public Faction(String factionName, String factionTag, UUID factionLeader)
-    {
-        this.name = factionName;
-        this.tag = Text.of(TextColors.GREEN, factionTag);
-        this.leader = factionLeader;
-        //this.Power = new BigDecimal("0.0");
-        this.recruits = new HashSet<>();
-        this.members = new HashSet<>();
-        this.claims = new HashSet<>();
-        this.officers = new HashSet<>();
-        this.alliances = new HashSet<>();
-        //TODO: Add truce
-        this.enemies = new HashSet<>();
-        this.home = null;
-        this.lastOnline = Instant.now();
-        this.flags = FlagManager.getDefaultFactionFlags();
-    }
+//    private FACTION(String factionName, String factionTag, UUID factionLeader)
+//    {
+//        this.name = factionName;
+//        this.tag = Text.of(TextColors.GREEN, factionTag);
+//        this.leader = factionLeader;
+//        //this.Power = new BigDecimal("0.0");
+//        this.recruits = new HashSet<>();
+//        this.members = new HashSet<>();
+//        this.claims = new HashSet<>();
+//        this.officers = new HashSet<>();
+//        this.alliances = new HashSet<>();
+//        //TODO: Add truce
+//        this.enemies = new HashSet<>();
+//        this.home = null;
+//        this.lastOnline = Instant.now();
+//        this.flags = FlagManager.getDefaultFactionFlags();
+//    }
+
+
 
     //Constructor used while getting a faction from storage.
-    public Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
     {
         this.name = factionName;
         this.tag = factionTag;
@@ -67,6 +69,11 @@ public class Faction
     public String getName()
     {
         return this.name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 
     public FactionHome getHome()
@@ -212,5 +219,162 @@ public class Faction
     public void setLastOnline(Instant lastOnline)
     {
         this.lastOnline = lastOnline;
+    }
+
+    public FactionMemberType getPlayerMemberType(UUID playerUUID)
+    {
+        if (this.leader.equals(playerUUID))
+            return FactionMemberType.LEADER;
+        else if(this.officers.contains(playerUUID))
+            return FactionMemberType.OFFICER;
+        else if(this.members.contains(playerUUID))
+            return FactionMemberType.MEMBER;
+        else if(this.recruits.contains(playerUUID))
+            return FactionMemberType.RECRUIT;
+        else
+            return null;
+    }
+
+    public Builder toBuilder()
+    {
+        Builder factionBuilder = new Builder();
+        factionBuilder.setName(this.name);
+        factionBuilder.setTag(this.tag);
+        factionBuilder.setLeader(this.leader);
+        factionBuilder.setOfficers(this.officers);
+        factionBuilder.setMembers(this.members);
+        factionBuilder.setRecruits(this.recruits);
+        factionBuilder.setAlliances(this.alliances);
+        factionBuilder.setEnemies(this.enemies);
+        factionBuilder.setClaims(this.claims);
+        factionBuilder.setLastOnline(this.lastOnline);
+        factionBuilder.setHome(this.home);
+        factionBuilder.setFlags(this.flags);
+
+        return factionBuilder;
+    }
+
+    public static Builder builder()
+    {
+        return new Builder();
+    }
+
+    //Builder
+    public static final class Builder
+    {
+        private String name;
+        private Text tag;
+        private UUID leader;
+        private Set<UUID> recruits;
+        private Set<UUID> members;
+        private Set<String> alliances;
+        private Set<String> enemies;
+        private Set<UUID> officers;
+        private Set<String> claims;
+        private FactionHome home;
+        private Instant lastOnline;
+        private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+
+        private Builder()
+        {
+            this.recruits = new HashSet<>();
+            this.members = new HashSet<>();
+            this.alliances = new HashSet<>();
+            this.enemies = new HashSet<>();
+            this.officers = new HashSet<>();
+            this.claims = new HashSet<>();
+            this.home = null;
+        }
+
+        public Builder setName(String name)
+        {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setTag(Text tag)
+        {
+            this.tag = tag;
+            return this;
+        }
+
+        public Builder setLeader(UUID leaderUUID)
+        {
+            this.leader = leaderUUID;
+            return this;
+        }
+
+        public Builder setRecruits(Set<UUID> recruits)
+        {
+            this.recruits = recruits;
+            return this;
+        }
+
+        public Builder setMembers(Set<UUID> members)
+        {
+            this.members = members;
+            return this;
+        }
+
+        public Builder setOfficers(Set<UUID> officers)
+        {
+            this.officers = officers;
+            return this;
+        }
+
+        public Builder setAlliances(Set<String> alliances)
+        {
+            this.alliances = alliances;
+            return this;
+        }
+
+        public Builder setEnemies(Set<String> enemies)
+        {
+            this.enemies = enemies;
+            return this;
+        }
+
+        public Builder setClaims(Set<String> claims)
+        {
+            this.claims = claims;
+            return this;
+        }
+
+        public Builder setHome(FactionHome home)
+        {
+            this.home = home;
+            return this;
+        }
+
+        public Builder setLastOnline(Instant lastOnline)
+        {
+            this.lastOnline = lastOnline;
+            return this;
+        }
+
+        public Builder setFlags(Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+        {
+            this.flags = flags;
+            return this;
+        }
+
+        public Faction build()
+        {
+            if(this.name == null || this.tag == null || this.leader == null)
+            {
+                throw new IllegalStateException("Couldn't build FACTION object! FACTION must have a name, tag and leader.");
+            }
+
+            if(this.lastOnline == null)
+            {
+                this.lastOnline = Instant.now();
+            }
+            if(this.flags == null)
+            {
+                this.flags = FlagManager.getDefaultFactionFlags();
+            }
+
+            return new Faction(this.name, this.tag, this.leader, this.recruits, this.members, this.claims, this.officers, this.alliances, this.enemies, this.home, this.lastOnline, this.flags);
+        }
     }
 }

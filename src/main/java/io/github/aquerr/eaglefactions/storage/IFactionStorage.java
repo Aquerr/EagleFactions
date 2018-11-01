@@ -8,11 +8,9 @@ public interface IFactionStorage
 {
     boolean addOrUpdateFaction(Faction faction);
 
-    boolean removeFaction(String factionName);
-
     Faction getFaction(String factionName);
 
-    Map<String, Faction> getFactionsMap();
-
     void load();
+
+    boolean queueRemoveFaction(String factionName);
 }

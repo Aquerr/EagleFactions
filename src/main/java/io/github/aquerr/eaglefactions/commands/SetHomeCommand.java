@@ -4,7 +4,6 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -18,7 +17,7 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class SetHomeCommand extends AbstractCommand implements CommandExecutor
+public class SetHomeCommand extends AbstractCommand
 {
     public SetHomeCommand(EagleFactions plugin)
     {
@@ -43,7 +42,7 @@ public class SetHomeCommand extends AbstractCommand implements CommandExecutor
                 {
                     Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
                     getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);
-                    source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+                    source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
 
                     return CommandResult.success();
                 }
@@ -57,26 +56,26 @@ public class SetHomeCommand extends AbstractCommand implements CommandExecutor
                         Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
 
                         getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);
-                        source.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+                        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
+                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                 }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

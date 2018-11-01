@@ -9,8 +9,9 @@ public class FactionsCache
 {
     //TODO: Add a second thread for saving factions' data.
 
-    private static Map<String, Faction> factionsCacheMap = new HashMap<>();
-    private static Set<String> claimsCacheSet = new HashSet<>();
+    private static final Map<String, Faction> factionsCacheMap = new HashMap<>();
+    private static final Set<String> claimsCacheSet = new HashSet<>();
+//    private static final Map<String, Set<String>> factionsClaimsCache = new Hashtable<>();
 
     private FactionsCache()
     {
@@ -24,36 +25,33 @@ public class FactionsCache
 
     public static void addOrUpdateFactionCache(Faction faction)
     {
-        Faction factionToUpdate = factionsCacheMap.get(faction.getName().toLowerCase());
-
-        if (factionToUpdate != null)
+        synchronized (factionsCacheMap)
         {
-            factionsCacheMap.replace(factionToUpdate.getName().toLowerCase(), faction);
+            Faction factionToUpdate = factionsCacheMap.get(faction.getName().toLowerCase());
 
-            for(String claim : factionToUpdate.getClaims())
+            if (factionToUpdate != null)
             {
-                claimsCacheSet.remove(claim);
+                factionsCacheMap.replace(factionToUpdate.getName().toLowerCase(), faction);
+                claimsCacheSet.removeAll(factionToUpdate.getClaims());
             }
-        }
-        else
-        {
-            factionsCacheMap.put(faction.getName().toLowerCase(), faction);
-        }
+            else
+            {
+                factionsCacheMap.put(faction.getName().toLowerCase(), faction);
+            }
 
-        if(!faction.getClaims().isEmpty())
-        {
-            claimsCacheSet.addAll(faction.getClaims());
+            if(!faction.getClaims().isEmpty())
+            {
+                claimsCacheSet.addAll(faction.getClaims());
+            }
         }
     }
 
     public static void removeFactionCache(String factionName)
     {
-        Faction faction = factionsCacheMap.get(factionName.toLowerCase());
-        factionsCacheMap.remove(factionName.toLowerCase());
-
-        for(String claim : faction.getClaims())
+        synchronized (factionsCacheMap)
         {
-            claimsCacheSet.remove(claim);
+            Faction faction = factionsCacheMap.remove(factionName.toLowerCase());
+            claimsCacheSet.removeAll(faction.getClaims());
         }
     }
 

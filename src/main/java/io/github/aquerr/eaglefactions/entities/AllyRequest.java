@@ -41,6 +41,6 @@ public class AllyRequest
     @Override
     public int hashCode()
     {
-        return factionName.length();
+        return factionName.hashCode();
     }
 }

@@ -9,15 +9,20 @@ import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.events.FactionClaimEvent;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -28,7 +33,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -41,9 +45,21 @@ public class FactionLogic
 
     public FactionLogic(EagleFactions plugin)
     {
-        factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
-        _configFields = plugin.getConfiguration().getConfigFileds();
+        _configFields = plugin.getConfiguration().getConfigFields();
         _playerManager = plugin.getPlayerManager();
+
+        switch(_configFields.getStorageType().toLowerCase())
+        {
+            case "hocon":
+                factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
+                break;
+//            case "h2":
+//                factionsStorage = new H2FactionStorage(plugin);
+//                break;
+//            case "sqllite":
+//
+//                break;
+        }
     }
 
     public void reload()
@@ -102,30 +118,6 @@ public class FactionLogic
         return null;
     }
 
-//    public UUID getLeader(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//        if(faction != null)
-//        {
-//            return faction.getLeader();
-//        }
-//
-//        return UUID.randomUUID();
-//    }
-
-//    public Set<UUID> getOfficers(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//        if(faction != null)
-//        {
-//            return faction.getOfficers();
-//        }
-//
-//        return new HashSet<>();
-//    }
-
     public List<Player> getOnlinePlayers(Faction faction)
     {
 
@@ -169,28 +161,19 @@ public class FactionLogic
         return getFactions().keySet();
     }
 
-//    public  @Nullable String getRealFactionName(String rawFactionName)
-//    {
-//        List<String> factionsNames = getFactionsNames();
-//
-//        return factionsNames.stream().filter(x->x.equalsIgnoreCase(rawFactionName)).findFirst().orElse(null);
-//    }
-
     public Map<String, Faction> getFactions()
     {
         return FactionsCache.getFactionsMap();
     }
 
-    public void createFaction(String factionName, String factionTag, UUID playerUUID)
+    public void addFaction(Faction faction)
     {
-        Faction faction = new Faction(factionName, factionTag, playerUUID);
-
         factionsStorage.addOrUpdateFaction(faction);
     }
 
     public boolean disbandFaction(String factionName)
     {
-        return factionsStorage.removeFaction(factionName);
+        return factionsStorage.queueRemoveFaction(factionName);
     }
 
     public void joinFaction(UUID playerUUID, String factionName)
@@ -404,11 +387,11 @@ public class FactionLogic
     {
         if(home != null && worldUUID != null)
         {
-            faction.setHome(new FactionHome(worldUUID, home));
+            faction = faction.toBuilder().setHome(new FactionHome(worldUUID, home)).build();
         }
         else
         {
-            faction.setHome(null);
+            faction = faction.toBuilder().setHome(null).build();
         }
 
         factionsStorage.addOrUpdateFaction(faction);
@@ -508,28 +491,28 @@ public class FactionLogic
                         {
                             if(addClaimByItems(player, faction, worldUUID, chunk))
                             {
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                             }
                             else
                             {
-                                player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
+                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
                             }
                         }
                         else
                         {
                             addClaim(faction, worldUUID, chunk);
-                            player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                         }
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.RESET, seconds));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
                         seconds++;
                     }
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
                     task.cancel();
                 }
             }
@@ -540,7 +523,7 @@ public class FactionLogic
     {
         if(_configFields.shouldDelayClaim())
         {
-            player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, _configFields.getClaimDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, _configFields.getClaimDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
 
             Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -552,16 +535,21 @@ public class FactionLogic
             {
                 if(addClaimByItems(player, faction, worldUUID, chunk))
                 {
-                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                    FactionClaimEvent event = new FactionClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                    Sponge.getEventManager().post(event);
+                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                FactionClaimEvent event = new FactionClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
+                Sponge.getEventManager().post(event);
+
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                 addClaim(faction, worldUUID, chunk);
             }
         }
@@ -591,9 +579,8 @@ public class FactionLogic
                 {
                     if(itemType.get().getBlock().isPresent())
                     {
-                        List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                         int variant = Integer.parseInt(idAndVariant[2]);
-                        BlockState blockState = (BlockState) blockStateList.toArray()[variant];
+                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
                         itemStack = ItemStack.builder().fromBlockState(blockState).build();
                     }
                 }
@@ -628,14 +615,13 @@ public class FactionLogic
                     {
                         if(itemType.get().getBlock().isPresent())
                         {
-                            List<BlockState> blockStateList = Sponge.getRegistry().getAllOf(BlockState.class).stream().filter(x-> x.getType() == itemType.get().getBlock().get()).collect(Collectors.toList());
                             int variant = Integer.parseInt(idAndVariant[2]);
-                            BlockState blockState = (BlockState) blockStateList.toArray()[variant];
+                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
                             itemStack = ItemStack.builder().fromBlockState(blockState).build();
                         }
                     }
 
-                    inventory.query(itemStack.getItem()).poll(itemStack.getQuantity());
+                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
                 }
             }
 
@@ -728,6 +714,19 @@ public class FactionLogic
     public void setLastOnline(Faction faction, Instant instantTime)
     {
         faction.setLastOnline(instantTime);
+        this.factionsStorage.addOrUpdateFaction(faction);
+    }
+
+    public void renameFaction(Faction faction, String newFactionName)
+    {
+        this.factionsStorage.queueRemoveFaction(faction.getName());
+        faction = faction.toBuilder().setName(newFactionName).build();
+        this.factionsStorage.addOrUpdateFaction(faction);
+    }
+
+    public void changeTag(Faction faction, String newTag)
+    {
+        faction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
         this.factionsStorage.addOrUpdateFaction(faction);
     }
 }

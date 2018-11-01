@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.entities;
 
-import org.spongepowered.api.entity.living.player.Player;
+import io.github.aquerr.eaglefactions.EagleFactions;
+import org.spongepowered.api.entity.living.player.User;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class FactionPlayer implements IFactionPlayer
@@ -10,27 +12,29 @@ public class FactionPlayer implements IFactionPlayer
     private String name;
 
     private String factionName;
-    private boolean hasFaction;
     private FactionMemberType factionRole;
 
-    public FactionPlayer(Player player)
+    public FactionPlayer(String playerName, UUID uniqueId, String factionName, FactionMemberType factionRole)
     {
-        this.uniqueId = player.getUniqueId();
-        this.name = player.getName();
-
-        this.factionName = "";
-        this.hasFaction = false;
-        this.factionRole = null;
-    }
-
-    public FactionPlayer(String name, UUID uniqueId)
-    {
-        this.name = name;
+        this.name = playerName;
         this.uniqueId = uniqueId;
 
-        this.factionName = "";
-        this.hasFaction = false;
-        this.factionRole = null;
+        this.factionName = factionName;
+        this.factionRole = factionRole;
+    }
+
+    public static FactionPlayer from(User playerUser)
+    {
+        String factionName = "";
+        FactionMemberType factionMemberType = null;
+        Optional<Faction> optionalFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByPlayerUUID(playerUser.getUniqueId());
+        if (optionalFaction.isPresent())
+        {
+            factionName = optionalFaction.get().getName();
+            factionMemberType = optionalFaction.get().getPlayerMemberType(playerUser.getUniqueId());
+        }
+
+        return new FactionPlayer(playerUser.getName(), playerUser.getUniqueId(), factionName, factionMemberType);
     }
 
     @Override
@@ -46,24 +50,28 @@ public class FactionPlayer implements IFactionPlayer
     }
 
     @Override
-    public String getFactionName() throws IllegalStateException
+    public Optional<String> getFactionName()
     {
-        if(!hasFaction)
-            throw new IllegalStateException("Player does not have a faction");
-        return this.factionName;
+        if (this.factionName == null || this.factionName.equals(""))
+        {
+            return Optional.empty();
+        }
+        else
+        {
+            return Optional.of(this.factionName);
+        }
     }
 
     @Override
-    public boolean hasFaction()
+    public Optional<FactionMemberType> getFactionRole()
     {
-        return this.hasFaction;
-    }
-
-    @Override
-    public FactionMemberType getFactionRole() throws IllegalStateException
-    {
-        if(!hasFaction)
-            throw new IllegalStateException("Player does not have a faction");
-        return this.factionRole;
+        if (this.factionRole == null)
+        {
+            return Optional.empty();
+        }
+        else
+        {
+            return Optional.of(this.factionRole);
+        }
     }
 }

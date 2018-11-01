@@ -3,8 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -44,8 +43,8 @@ public class ChatMessageListener extends AbstractListener
             //Text.Builder playerText = Text.builder();
             Text.Builder message = Text.builder();
 
-            //Message = Prefixes + Player Name + Text
-            //OriginalMessage = Player Name + Text
+            //Message = Prefixes + Player NAME + Text
+            //OriginalMessage = Player NAME + Text
             //RawMessage = Text
 
             //Get player name
@@ -60,26 +59,22 @@ public class ChatMessageListener extends AbstractListener
             {
                 Text.Builder chatTypePrefix = Text.builder();
 
-                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Alliance))
+                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
                 {
                     message.append(Text.of(TextColors.BLUE, event.getRawMessage()));
                     chatTypePrefix.append(getAlliancePrefix());
                     messageChannel.asMutable().clearMembers();
 
                     Set<MessageReceiver> receivers = new HashSet<>();
-
-                    //TODO: Add option to style prefixes by user form config file.
-
                     for (String allianceName : playerFaction.getAlliances())
                     {
                         receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(getPlugin().getFactionLogic().getFactionByName(allianceName)));
                     }
 
                     receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
-
                     messageChannel = MessageChannel.fixed(receivers);
                 }
-                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.Faction))
+                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.FACTION))
                 {
                     message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                     chatTypePrefix.append(getFactionPrefix());
@@ -102,16 +97,16 @@ public class ChatMessageListener extends AbstractListener
             }
 
             //Get faction prefix from Eagle Factions.
-            if(getPlugin().getConfiguration().getConfigFileds().getChatPrefixType().equals("tag"))
+            if(getPlugin().getConfiguration().getConfigFields().getChatPrefixType().equals("tag"))
             {
                 if(!playerFaction.getTag().toPlainSingle().equals(""))
                 {
-                    if (getPlugin().getConfiguration().getConfigFileds().canColorTags())
+                    if (getPlugin().getConfiguration().getConfigFields().canColorTags())
                     {
                         //Get faction's tag
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), playerFaction.getTag(), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), playerFaction.getTag(), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                                 .build();
 
                         factionPrefixText.append(factionTag);
@@ -121,47 +116,55 @@ public class ChatMessageListener extends AbstractListener
                         //Get faction's tag
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                                 .build();
 
                         factionPrefixText.append(factionTag);
                     }
                 }
             }
-            else if (getPlugin().getConfiguration().getConfigFileds().getChatPrefixType().equals("name"))
+            else if (getPlugin().getConfiguration().getConfigFields().getChatPrefixType().equals("name"))
             {
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
-                        .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                        .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                         .build();
 
                 factionPrefixText.append(factionNamePrefix);
             }
 
-            if(getPlugin().getConfiguration().getConfigFileds().shouldDisplayRank())
+            if(getPlugin().getConfiguration().getConfigFields().shouldDisplayRank())
             {
                 //Get leader prefix.
                 if(playerFaction.getLeader().equals(player.getUniqueId()))
                 {
                     Text leaderPrefix = Text.builder()
-                            .append(Text.of("[", TextColors.GOLD, "Leader", TextColors.RESET, "]"))
+                            .append(Text.of(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), TextColors.GOLD, PluginMessages.LEADER, TextColors.RESET, getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix()))
                             .build();
 
                     rankPrefixText.append(leaderPrefix);
                 }
-
                 //Get officer prefix.
-                if(playerFaction.getOfficers().contains(player.getUniqueId()))
+                else if(playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
                     Text officerPrefix = Text.builder()
-                            .append(Text.of("[", TextColors.GOLD, "Officer", TextColors.RESET, "]"))
+                            .append(Text.of(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), TextColors.GOLD, PluginMessages.OFFICER, TextColors.RESET, getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix()))
                             .build();
 
                     rankPrefixText.append(officerPrefix);
                 }
+                //Get recruit prefix.
+                else if(playerFaction.getRecruits().contains(player.getUniqueId()))
+                {
+                    Text recruitPrefix = Text.builder()
+                            .append(Text.of(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), TextColors.GOLD, PluginMessages.RECRUIT, TextColors.RESET, getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix()))
+                            .build();
+
+                    rankPrefixText.append(recruitPrefix);
+                }
             }
 
-            if (getPlugin().getConfiguration().getConfigFileds().isFactionPrefixFirstInChat())
+            if (getPlugin().getConfiguration().getConfigFields().isFactionPrefixFirstInChat())
             {
                 factionAndRankPrefix.append(factionPrefixText.build());
                 factionAndRankPrefix.append(rankPrefixText.build());
@@ -195,14 +198,14 @@ public class ChatMessageListener extends AbstractListener
     private Text getAlliancePrefix()
     {
         return Text.builder()
-                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.BLUE, "Alliance", TextColors.RESET), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.BLUE, PluginMessages.ALLIANCE_CHAT, TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                 .build();
     }
 
     private Text getFactionPrefix()
     {
         return Text.builder()
-                .append(getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix(), Text.of(TextColors.GREEN, "Faction", TextColors.RESET), getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix())
+                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, PluginMessages.ALLIANCE_CHAT, TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                 .build();
     }
 }
