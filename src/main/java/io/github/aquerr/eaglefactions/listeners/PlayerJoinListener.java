@@ -22,7 +22,6 @@ public class PlayerJoinListener extends AbstractListener
     @Listener(order = Order.POST)
     public void onPlayerJoin(ClientConnectionEvent.Join event)
     {
-
         if(event.getCause().root() instanceof Player)
         {
             Player player = (Player) event.getCause().root();
@@ -32,15 +31,14 @@ public class PlayerJoinListener extends AbstractListener
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + PluginMessages.IS_AVAILABLE));
             }
 
-            if(getPlugin().getPlayerManager().checkIfPlayerExists(player.getUniqueId(), player.getName()))
-            {
-                getPlugin().getPowerManager().startIncreasingPower(player.getUniqueId());
-            }
-            else
+            if(!getPlugin().getPlayerManager().checkIfPlayerExists(player.getUniqueId(), player.getName()))
             {
                 //Create player file and set power.
                 getPlugin().getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
             }
+
+            getPlugin().getPlayerManager().updatePlayerName(player.getUniqueId(), player.getName());
+            getPlugin().getPowerManager().startIncreasingPower(player.getUniqueId());
 
             //Check if the world that player is connecting to is already in the config file
             if (!getPlugin().getConfiguration().getConfigFields().getDetectedWorldNames().contains(player.getWorld().getName()))

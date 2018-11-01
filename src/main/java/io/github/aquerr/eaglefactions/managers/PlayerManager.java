@@ -150,4 +150,9 @@ public class PlayerManager
     {
         return _playerStorage.getServerPlayers();
     }
+
+    public void updatePlayerName(UUID playerUUID, String playerName)
+    {
+        this._playerStorage.updatePlayerName(playerUUID, playerName);
+    }
 }

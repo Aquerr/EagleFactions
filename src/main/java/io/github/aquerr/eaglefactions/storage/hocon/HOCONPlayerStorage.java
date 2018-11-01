@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
+import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
@@ -43,26 +44,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
     public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-        if(Files.exists(playerFile))
-        {
-            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-            try
-            {
-                ConfigurationNode configurationNode = configurationLoader.load();
-                configurationNode.getNode("name").setValue(playerName);
-                configurationLoader.save(configurationNode);
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return Files.exists(playerFile);
     }
 
     @Override
@@ -267,8 +249,26 @@ public class HOCONPlayerStorage implements IPlayerStorage
             {
                 ConfigurationNode configurationNode = configurationLoader.load();
                 String playerName = configurationNode.getNode("name").getString("");
-                UUID playerUUID = UUID.fromString(playerFile.getName().substring(0, playerFile.getName().indexOf('.')));
-                FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID);
+                UUID playerUUID;
+                try
+                {
+                    playerUUID = UUID.fromString(playerFile.getName().substring(0, playerFile.getName().indexOf('.')));
+
+                }
+                catch(Exception exception)
+                {
+                    exception.printStackTrace();
+                    Files.delete(playerFile.toPath());
+                    continue;
+                }
+                String factionName = configurationNode.getNode("faction").getString("");
+                String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
+                FactionMemberType factionMemberType = null;
+
+                if(!factionMemberTypeString.equals(""))
+                    factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
+
+                FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID, factionName, factionMemberType);
                 playerSet.add(factionPlayer);
             }
             catch(IOException e)
@@ -297,5 +297,41 @@ public class HOCONPlayerStorage implements IPlayerStorage
         }
 
         return "";
+    }
+
+    @Override
+    public void updatePlayerName(UUID playerUUID, String playerName)
+    {
+        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+        if(!Files.exists(playerFile))
+            return;
+
+        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+        ConfigurationNode configurationNode = null;
+        try
+        {
+            configurationNode = configurationLoader.load();
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+        Object playerNameInFile = configurationNode.getNode("name").getValue();
+        if(playerNameInFile != null)
+        {
+            String oldPlayerName = (String) playerNameInFile;
+            if(!oldPlayerName.equals(playerName))
+            {
+                configurationNode.getNode("name").setValue(playerName);
+                try
+                {
+                    configurationLoader.save(configurationNode);
+                }
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
