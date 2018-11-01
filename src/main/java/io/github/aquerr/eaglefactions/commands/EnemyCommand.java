@@ -19,7 +19,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class EnemyCommand extends AbstractCommand implements CommandExecutor
+public class EnemyCommand extends AbstractCommand
 {
     public EnemyCommand(EagleFactions plugin)
     {
@@ -42,7 +42,7 @@ public class EnemyCommand extends AbstractCommand implements CommandExecutor
 
                 if(enemyFaction == null)
                 {
-                    player.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName, TextColors.RED, "!"));
                     return CommandResult.success();
                 }
 
@@ -57,17 +57,17 @@ public class EnemyCommand extends AbstractCommand implements CommandExecutor
                             if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
                             {
                                 getPlugin().getFactionLogic().addEnemy(playerFaction.getName(), enemyFaction.getName());
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES));
                             }
                             else
                             {
                                 getPlugin().getFactionLogic().removeEnemy(playerFaction.getName(), enemyFaction.getName());
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_REMOVED_WAR_STATE_WITH + " ", TextColors.GOLD, enemyFaction, TextColors.GREEN, "!"));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_REMOVED_WAR_STATE_WITH + " ", TextColors.GOLD, enemyFaction, TextColors.GREEN, "!"));
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
+                            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
                         }
                         return CommandResult.success();
                     }
@@ -80,11 +80,11 @@ public class EnemyCommand extends AbstractCommand implements CommandExecutor
                             {
                                 getPlugin().getFactionLogic().addEnemy(playerFaction.getName(), enemyFaction.getName());
 
-                                player.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.getName() + "!"));
+                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_FACTION_IS_NOW + " ", TextColors.RED, PluginMessages.ENEMIES + " ", TextColors.WHITE, PluginMessages.WITH + " " + enemyFaction.getName() + "!"));
 
                                 //TODO: Check if player is online
                                 Player enemyFactionLeader = getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).get();
-                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
+                                enemyFactionLeader.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_DECLARED_YOU_A_WAR + "!"));
 
                                 return CommandResult.success();
                             }
@@ -94,7 +94,7 @@ public class EnemyCommand extends AbstractCommand implements CommandExecutor
                                 if(EagleFactions.stopWarRequestList.contains(checkRemove))
                                 {
                                     getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName() + "!"));
+                                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName() + "!"));
                                     EagleFactions.stopWarRequestList.remove(checkRemove);
                                 }
                                 else if(!EagleFactions.stopWarRequestList.contains(checkRemove))
@@ -103,15 +103,15 @@ public class EnemyCommand extends AbstractCommand implements CommandExecutor
                                     StopWarRequest stopWarRequest = new StopWarRequest(playerFaction.getName(), enemyFaction.getName());
                                     if(EagleFactions.stopWarRequestList.contains(stopWarRequest))
                                     {
-                                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, "You have already sent a war-end request to this faction. Wait for their response!"));
+                                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already sent a war-end request to this faction. Wait for their response!"));
                                         return CommandResult.success();
                                     }
                                     EagleFactions.stopWarRequestList.add(stopWarRequest);
 
                                     Player enemyFactionLeader = getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).get();
-                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
+                                    enemyFactionLeader.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
                                             " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f enemy " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_IT));
-                                    player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.WHITE, PluginMessages.YOU_REQUESTED_END_OF_WAR_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.RESET, "!"));
+                                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.YOU_REQUESTED_END_OF_WAR_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.RESET, "!"));
 
                                     Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
                                     taskBuilder.execute(new Runnable()
@@ -121,34 +121,34 @@ public class EnemyCommand extends AbstractCommand implements CommandExecutor
                                         {
                                             EagleFactions.stopWarRequestList.remove(stopWarRequest);
                                         }
-                                    }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(Sponge.getPluginManager().getPlugin(PluginInfo.Id).get().getInstance().get());
+                                    }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(Sponge.getPluginManager().getPlugin(PluginInfo.ID).get().getInstance().get());
                                     return CommandResult.success();
                                 }
                             }
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
+                            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
                         }
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
             source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f enemy <faction name>"));
         }
 

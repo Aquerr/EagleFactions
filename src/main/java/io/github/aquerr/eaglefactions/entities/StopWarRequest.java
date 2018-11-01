@@ -2,23 +2,23 @@ package io.github.aquerr.eaglefactions.entities;
 
 public class StopWarRequest
 {
-    private String FactionName;
-    private String EnemyFactionName;
+    private String factionName;
+    private String enemyFactionName;
 
     public StopWarRequest(String factionName, String enemyFaction)
     {
-        this.FactionName = factionName;
-        this.EnemyFactionName = enemyFaction;
+        this.factionName = factionName;
+        this.enemyFactionName = enemyFaction;
     }
 
     public String getEnemyFactionName()
     {
-        return EnemyFactionName;
+        return enemyFactionName;
     }
 
     public String getFactionName()
     {
-        return FactionName;
+        return factionName;
     }
 
     @Override
@@ -32,12 +32,12 @@ public class StopWarRequest
         {
             return true;
         }
-        return this.FactionName.equals(((StopWarRequest) removeEnemy).FactionName) && this.EnemyFactionName.equals(((StopWarRequest) removeEnemy).EnemyFactionName);
+        return this.factionName.equals(((StopWarRequest) removeEnemy).factionName) && this.enemyFactionName.equals(((StopWarRequest) removeEnemy).enemyFactionName);
     }
 
     @Override
     public int hashCode()
     {
-        return FactionName.length();
+        return factionName.hashCode();
     }
 }

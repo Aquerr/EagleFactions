@@ -12,7 +12,6 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.TypeTokens;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -28,6 +27,7 @@ public class HOCONFactionStorage implements IFactionStorage
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
     private final List<Faction> _factionsToSaveList = new LinkedList<>();
+    private final List<String> _factionsToRemove = new LinkedList<>();
     private Thread storageThread;
 
     private boolean needToSave = false;
@@ -71,7 +71,6 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         return () ->
         {
-            int sleep = 1000;
             while(true)
             {
                 if(_factionsToSaveList.size() > 0)
@@ -80,16 +79,21 @@ public class HOCONFactionStorage implements IFactionStorage
                     {
                         saveFaction(_factionsToSaveList.get(0));
                         _factionsToSaveList.remove(0);
-                        sleep = 1000;
+                    }
+                }
+                else if(_factionsToRemove.size() > 0)
+                {
+                    synchronized(_factionsToRemove)
+                    {
+                        removeFaction(_factionsToRemove.get(0));
+                        _factionsToRemove.remove(0);
                     }
                 }
                 else
                 {
                     try
                     {
-                        Thread.sleep(sleep);
-                        if(sleep < 16000)
-                            sleep *= 2;
+                        Thread.sleep(1000);
                     }
                     catch(InterruptedException e)
                     {
@@ -120,24 +124,24 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         try
         {
-            configNode.getNode(new Object[]{"factions", faction.getName(), "tag"}).setValue(TypeToken.of(Text.class), faction.getTag());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "leader"}).setValue(faction.getLeader().toString());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "officers"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "members"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "recruits"}).setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "enemies"}).setValue(faction.getEnemies());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "alliances"}).setValue(faction.getAlliances());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "claims"}).setValue(faction.getClaims());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "last_online"}).setValue(faction.getLastOnline().toString());
-            configNode.getNode(new Object[]{"factions", faction.getName(), "flags"}).setValue(faction.getFlags());
+            configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
+            configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
+            configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
+            configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
+            configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
+            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
+            configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
+            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims());
+            configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
+            configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
 
             if(faction.getHome() == null)
             {
-                configNode.getNode(new Object[]{"factions", faction.getName(), "home"}).setValue(faction.getHome());
+                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome());
             }
             else
             {
-                configNode.getNode(new Object[]{"factions", faction.getName(), "home"}).setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
+                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
 
 //            FactionsCache.addOrUpdateFactionCache(faction);
@@ -171,26 +175,42 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
-    @Override
-    public boolean removeFaction(String factionName)
+    private boolean removeFaction(String factionName)
     {
         try
         {
             configNode.getNode("factions").removeChild(factionName);
-            FactionsCache.removeFactionCache(factionName);
-            saveChanges();
-            return true;
+            return saveChanges();
         }
         catch(Exception exception)
         {
             exception.printStackTrace();
         }
-        return false;
+
+        return saveChanges();
     }
 
     @Override
-    public @Nullable
-    Faction getFaction(String factionName)
+    public boolean queueRemoveFaction(String factionName)
+    {
+        FactionsCache.removeFactionCache(factionName);
+
+        synchronized(_factionsToRemove)
+        {
+            if(!_factionsToRemove.contains(factionName))
+            {
+                _factionsToRemove.add(factionName);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public @Nullable Faction getFaction(String factionName)
     {
         try
         {
@@ -234,7 +254,20 @@ public class HOCONFactionStorage implements IFactionStorage
         Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
-        Faction faction = new Faction(factionName, tag, leader, recruits, members, claims, officers, alliances, enemies, home, lastOnline, flags);
+        Faction faction = Faction.builder()
+                .setName(factionName)
+                .setTag(tag)
+                .setLeader(leader)
+                .setHome(home)
+                .setOfficers(officers)
+                .setMembers(members)
+                .setRecruits(recruits)
+                .setAlliances(alliances)
+                .setEnemies(enemies)
+                .setClaims(claims)
+                .setLastOnline(lastOnline)
+                .setFlags(flags)
+                .build();
 
         if(needToSave)
         {
@@ -248,7 +281,7 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
 
-        Object flagnode = configNode.getNode("factions", factionName, "flags");
+    //    Object flagnode = configNode.getNode("factions", factionName, "flags");
 
 //        //TODO: Test this code.
 //        if(flagnode instanceof Map)
@@ -552,12 +585,6 @@ public class HOCONFactionStorage implements IFactionStorage
                 FactionsCache.addOrUpdateFactionCache(faction);
             }
         }
-    }
-
-    @Override
-    public Map<String, Faction> getFactionsMap()
-    {
-        return FactionsCache.getFactionsMap();
     }
 
     @Override

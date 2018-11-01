@@ -1,13 +1,11 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.inject.Singleton;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.math.BigDecimal;
 import java.util.*;
 
-@Singleton
 public final class ConfigFields
 {
     private IConfiguration _configuration;
@@ -51,6 +49,7 @@ public final class ConfigFields
     private double _neededPowerPercentageToAttack = 20;
     private boolean _isPvpLoggerActive = true;
     private int _pvpLoggerBlockTime = 60;
+    private boolean _showPvpLoggerInScoreboard = true;
     private boolean _disableBlockDestroyAtClaims = false;
     private boolean _disableBlockDestroyAtWarzone = false;
     private List<String> _blockedCommandsDuringFight = Arrays.asList("/f home", "spawn", "tpa", "/tp");
@@ -62,7 +61,17 @@ public final class ConfigFields
     private List<String> _safezoneWorldNames = new ArrayList<>();
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
-    private String _maxInactiveTime = "30d";
+    private String _maxInactiveTime = "0";
+
+    //Storage
+    private String _storageType = "hocon";
+    private String _storageUserName = "sa";
+    private String _storagePassword = "";
+
+    //Whitelisted items and blocks
+    private List<String> _whitelistedItems = new ArrayList<>();
+    private List<String> _whitelistedPlaceDestroyBlocks = new ArrayList<>();
+    private List<String> _whitelistedIteractBlocks = new ArrayList<>();
 
     public ConfigFields(IConfiguration configuration)
     {
@@ -113,18 +122,30 @@ public final class ConfigFields
             this._neededPowerPercentageToAttack = _configuration.getDouble(20, "attack-min-power-percentage") / 100;
             this._isPvpLoggerActive = _configuration.getBoolean(true, "pvp-logger", "active");
             this._pvpLoggerBlockTime = _configuration.getInt(60, "pvp-logger", "time");
+            this._showPvpLoggerInScoreboard = _configuration.getBoolean(true, "pvp-logger", "show-in-scoreboard");
             this._disableBlockDestroyAtClaims = _configuration.getBoolean(false, "disable-block-destroy-claims");
             this._disableBlockDestroyAtWarzone = _configuration.getBoolean(false, "disable-block-destroy-warzone");
             this._blockedCommandsDuringFight = _configuration.getListOfStrings(Arrays.asList("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
             this._factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("]", "faction-prefix-end"));
-            this._claimableWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE");
-            this._notClaimableWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE");
-            this._safezoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE");
-            this._warzoneWorldNames = _configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE");
+            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE"));
+            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE"));
+            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE"));
+            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
+
+            //Storage
+            this._storageType = _configuration.getString("hocon", "storage", "type");
+            this._storageUserName = _configuration.getString("sa", "storage", "username");
+            this._storagePassword = _configuration.getString("", "storage", "password");
+
+            //Whitelisted items and blocks
+            this._whitelistedItems = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "items-whitelist");
+            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "place-destroy-whitelist");
+            this._whitelistedIteractBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "interact-whitelist");
+
             this._configuration.save();
         }
         catch(Exception exception)
@@ -440,5 +461,40 @@ public final class ConfigFields
 
         //Default 10 days
         return 864000;
+    }
+
+    public String getStorageType()
+    {
+        return _storageType;
+    }
+
+    public String getStorageUserName()
+    {
+        return _storageUserName;
+    }
+
+    public String getStoragePassword()
+    {
+        return _storagePassword;
+    }
+
+    public List<String> getWhiteListedItems()
+    {
+        return this._whitelistedItems;
+    }
+
+    public List<String> getWhiteListedPlaceDestroyBlocks()
+    {
+        return this._whitelistedPlaceDestroyBlocks;
+    }
+
+    public List<String> getWhiteListedInteractBlocks()
+    {
+        return this._whitelistedIteractBlocks;
+    }
+
+    public boolean shouldDisplayPvpLoggerInScoreboard()
+    {
+        return this._showPvpLoggerInScoreboard;
     }
 }

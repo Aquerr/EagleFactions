@@ -3,10 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
-import io.github.aquerr.eaglefactions.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.managers.PowerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -28,7 +25,7 @@ import java.util.Optional;
 /**
  * Created by Aquerr on 2017-08-04.
  */
-public class PlayerCommand extends AbstractCommand implements CommandExecutor
+public class PlayerCommand extends AbstractCommand
 {
     public PlayerCommand(EagleFactions plugin)
     {
@@ -91,7 +88,7 @@ public class PlayerCommand extends AbstractCommand implements CommandExecutor
         }
         else
         {
-            player.sendMessage (Text.of (PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
+            player.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
         }
     }
 }

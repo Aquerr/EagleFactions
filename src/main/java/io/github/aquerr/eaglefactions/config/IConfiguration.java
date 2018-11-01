@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface IConfiguration
 {
-    ConfigFields getConfigFileds();
+    ConfigFields getConfigFields();
 
     void save();
 
-    void loadConfiguration();
+    void reloadConfiguration();
 
     int getInt(int defaultValue, Object... nodePath);
 

@@ -67,7 +67,7 @@ public class Configuration implements IConfiguration
     }
 
     @Override
-    public ConfigFields getConfigFileds()
+    public ConfigFields getConfigFields()
     {
         return configFileds;
     }
@@ -98,7 +98,13 @@ public class Configuration implements IConfiguration
 //    }
 
     @Override
-    public void loadConfiguration()
+    public void reloadConfiguration()
+    {
+        loadConfiguration();
+        this.configFileds = new ConfigFields(this);
+    }
+
+    private void loadConfiguration()
     {
         try
         {

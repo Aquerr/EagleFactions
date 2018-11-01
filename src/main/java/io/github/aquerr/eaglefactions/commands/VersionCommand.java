@@ -11,7 +11,7 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class VersionCommand extends AbstractCommand implements CommandExecutor
+public class VersionCommand extends AbstractCommand
 {
     public VersionCommand(EagleFactions plugin)
     {
@@ -21,7 +21,7 @@ public class VersionCommand extends AbstractCommand implements CommandExecutor
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        source.sendMessage (Text.of (TextColors.AQUA, PluginInfo.Name, TextColors.WHITE, " - " + PluginMessages.VERSION + " ", PluginInfo.Version));
+        source.sendMessage (Text.of (TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - " + PluginMessages.VERSION + " ", PluginInfo.VERSION));
 
         return CommandResult.success();
     }

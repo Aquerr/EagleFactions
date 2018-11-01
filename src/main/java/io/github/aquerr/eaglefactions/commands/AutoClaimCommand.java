@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -16,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class AutoClaimCommand extends AbstractCommand implements CommandExecutor
+public class AutoClaimCommand extends AbstractCommand
 {
     public AutoClaimCommand(EagleFactions plugin)
     {
@@ -41,14 +40,14 @@ public class AutoClaimCommand extends AbstractCommand implements CommandExecutor
                     if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
                     {
                         EagleFactions.AutoClaimList.remove(player.getUniqueId());
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
 
                         return CommandResult.success();
                     }
                     else
                     {
                         EagleFactions.AutoClaimList.add(player.getUniqueId());
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
 
                         return CommandResult.success();
                     }
@@ -58,32 +57,32 @@ public class AutoClaimCommand extends AbstractCommand implements CommandExecutor
                     if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
                     {
                         EagleFactions.AutoClaimList.remove(player.getUniqueId());
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
 
                         return CommandResult.success();
                     }
                     else
                     {
                         EagleFactions.AutoClaimList.add(player.getUniqueId());
-                        player.sendMessage(Text.of(PluginInfo.PluginPrefix, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
 
                         return CommandResult.success();
                     }
                 }
                 else
                 {
-                    source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
                 }
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ErrorPrefix, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
 

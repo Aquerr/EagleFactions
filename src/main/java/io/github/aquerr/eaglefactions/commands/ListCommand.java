@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ListCommand extends AbstractCommand implements CommandExecutor
+public class ListCommand extends AbstractCommand
 {
     public ListCommand(EagleFactions plugin)
     {
@@ -34,8 +34,8 @@ public class ListCommand extends AbstractCommand implements CommandExecutor
         Set<Faction> factionsList = new HashSet<Faction>(getPlugin().getFactionLogic().getFactions().values());
         List<Text> helpList = new ArrayList<>();
 
-        Text tagPrefix = getPlugin().getConfiguration().getConfigFileds().getFactionStartPrefix();
-        Text tagSufix = getPlugin().getConfiguration().getConfigFileds().getFactionEndPrefix();
+        Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
+        Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
 
         for(Faction faction : factionsList)
         {

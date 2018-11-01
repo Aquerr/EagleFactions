@@ -6,15 +6,12 @@ import io.github.aquerr.eaglefactions.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -28,10 +25,12 @@ public class PowerManager
     private ConfigFields _configFields;
     private CommentedConfigurationNode _factionsNode;
 
+    private UUID dummyUUID = new UUID(0, 0);
+
     public PowerManager(EagleFactions eagleFactions)
     {
         _plugin = eagleFactions;
-        _configFields = eagleFactions.getConfiguration().getConfigFileds();
+        _configFields = eagleFactions.getConfiguration().getConfigFields();
         Path configDir = eagleFactions.getConfigDir();
 
         try
@@ -46,7 +45,7 @@ public class PowerManager
 
     public BigDecimal getPlayerPower(@Nullable UUID playerUUID)
     {
-        if (playerUUID == null)
+        if (playerUUID == null || playerUUID.equals(dummyUUID))
             return BigDecimal.ZERO;
         return _plugin.getPlayerManager().getPlayerPower(playerUUID);
     }
@@ -138,7 +137,7 @@ public class PowerManager
 
     public BigDecimal getPlayerMaxPower(UUID playerUUID)
     {
-        if(playerUUID == null)
+        if(playerUUID == null || playerUUID.equals(dummyUUID))
             return BigDecimal.ZERO;
 
         return _plugin.getPlayerManager().getPlayerMaxPower(playerUUID);
