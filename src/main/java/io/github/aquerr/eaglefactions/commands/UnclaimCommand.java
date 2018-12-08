@@ -71,7 +71,7 @@ public class UnclaimCommand extends AbstractCommand
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if (this.getPlugin().getFlagManager().canClaim(player, playerFaction))
+                if (this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
                 {
                     World world = player.getWorld();
                     Vector3i chunk = player.getLocation().getChunkPosition();

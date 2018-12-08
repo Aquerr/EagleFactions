@@ -43,7 +43,7 @@ public class InviteCommand extends AbstractCommand
                 {
                     Faction senderFaction = optionalSenderFaction.get();
 
-                    if (this.getPlugin().getFlagManager().canInvite(senderPlayer, senderFaction))
+                    if (this.getPlugin().getFlagManager().canInvite(senderPlayer.getUniqueId(), senderFaction))
                     {
                         if(getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
                         {

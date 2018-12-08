@@ -235,6 +235,20 @@ public class Faction
             return null;
     }
 
+    public boolean containsPlayer(UUID playerUUID)
+    {
+        if (this.leader.equals(playerUUID))
+            return true;
+        else if(this.officers.contains(playerUUID))
+            return true;
+        else if(this.members.contains(playerUUID))
+            return true;
+        else if(this.recruits.contains(playerUUID))
+            return true;
+        else
+            return false;
+    }
+
     public Builder toBuilder()
     {
         Builder factionBuilder = new Builder();

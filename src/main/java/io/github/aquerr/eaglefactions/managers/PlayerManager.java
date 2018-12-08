@@ -120,21 +120,21 @@ public class PlayerManager
     }
 
     @Nullable
-    public FactionMemberType getFactionMemberType(Player factionPlayer, Faction faction)
+    public FactionMemberType getFactionMemberType(UUID playerUUID, Faction faction)
     {
-        if(faction.getLeader() != null && faction.getLeader().equals(factionPlayer.getUniqueId()))
+        if(faction.getLeader() != null && faction.getLeader().equals(playerUUID))
         {
             return FactionMemberType.LEADER;
         }
-        else if(faction.getMembers().contains(factionPlayer.getUniqueId()))
+        else if(faction.getMembers().contains(playerUUID))
         {
             return FactionMemberType.MEMBER;
         }
-        else if(faction.getOfficers().contains(factionPlayer.getUniqueId()))
+        else if(faction.getOfficers().contains(playerUUID))
         {
             return FactionMemberType.OFFICER;
         }
-        else if(faction.getRecruits().contains(factionPlayer.getUniqueId()))
+        else if(faction.getRecruits().contains(playerUUID))
         {
             return FactionMemberType.RECRUIT;
         }

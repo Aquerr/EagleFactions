@@ -71,7 +71,7 @@ public class AttackCommand extends AbstractCommand
                 }
                 else
                 {
-                    if (this.getPlugin().getFlagManager().canAttack(player, playerFaction))
+                    if (this.getPlugin().getFlagManager().canAttack(player.getUniqueId(), playerFaction))
                     {
                         Faction attackedFaction = optionalChunkFaction.get();
 
