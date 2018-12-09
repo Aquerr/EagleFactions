@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.logic.PluginMessages;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -164,34 +165,32 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canBreak(Location location, World world)
     {
+        //Air can be always destroyed.
+        if(location.getBlockType() == BlockTypes.AIR)
+            return true;
+
         if(isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
 
         if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()))
-        {
             return false;
-        }
-        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
-        {
+
+        if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
             return false;
-        }
 
         Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        if (optionalChunkFaction.isPresent())
-        {
-            if(!optionalChunkFaction.get().getName().equals("SafeZone") && !optionalChunkFaction.get().getName().equals("WarZone") && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtClaimsDisabled())
-            {
-                return false;
-            }
-            else if(optionalChunkFaction.get().getName().equals("SafeZone"))
-            {
-                return false;
-            }
-            else if (optionalChunkFaction.get().getName().equals("WarZone") && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
-            {
-                return false;
-            }
-        }
+        if(!optionalChunkFaction.isPresent())
+            return true;
+
+        if(optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+            return false;
+
+        if(optionalChunkFaction.get().getName().equalsIgnoreCase("WarZone") && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
+            return false;
+
+        if(this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtClaimsDisabled())
+            return false;
+
         return true;
     }
 

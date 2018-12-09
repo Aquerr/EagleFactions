@@ -37,8 +37,11 @@ import org.spongepowered.api.text.format.TextColors;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
+import java.time.*;
+import java.time.chrono.ChronoLocalDate;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -136,66 +139,6 @@ public class EagleFactions
     public void onServerGameLoaded(GameStartedServerEvent event)
     {
         startFactionsRemover();
-    }
-
-    private void SetupConfigs()
-    {
-        _configuration = new Configuration(_configDir);
-        MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
-
-        _pvpLogger = new PVPLogger(getConfiguration());
-    }
-
-    private void SetupManagers()
-    {
-        _playerManager = new PlayerManager(this);
-        _powerManager = new PowerManager(this);
-        _flagManager = new FlagManager(this);
-        _factionLogic = new FactionLogic(this);
-        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFields());
-        _protectionManager = new ProtectionManager(this);
-    }
-
-    private void startFactionsRemover()
-    {
-        Task.Builder factionsRemoveTask = Sponge.getScheduler().createTaskBuilder();
-        factionsRemoveTask.async().execute(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                long maxInactive = getConfiguration().getConfigFields().getMaxInactiveTime();
-                if(maxInactive != 0)
-                {
-                    Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
-                    for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
-                    {
-                        if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
-                            continue;
-
-                        if(_factionLogic.hasOnlinePlayers(factionEntry.getValue()))
-                            continue;
-
-                        Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
-
-                        if(maxInactive < inactiveTime.getSeconds())
-                        {
-                            _factionLogic.disbandFaction(factionEntry.getKey());
-                        }
-//                        else if(maxInactive - 172800 < inactiveTime.getSeconds())
-//                        {
-//                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
-//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
-//                        }
-                        else if(maxInactive * 0.75 < inactiveTime.getSeconds())
-                        {
-                            long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
-                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
-                        }
-                    }
-                }
-            }
-        }).interval(1, TimeUnit.HOURS).submit(this);
     }
 
     private void InitializeCommands()
@@ -478,6 +421,13 @@ public class EagleFactions
                 .executor(new EagleFeatherCommand(this))
                 .build());
 
+        //Chest Command
+        Subcommands.put(Collections.singletonList("chest"), CommandSpec.builder()
+                .description(Text.of("Opens faction's chest"))
+                .permission(PluginPermissions.CHEST_COMMAND)
+                .executor(new ChestCommand(this))
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))
@@ -555,5 +505,59 @@ public class EagleFactions
     public URL getResource(String fileName)
     {
         return this.getClass().getClassLoader().getResource(fileName);
+    }
+
+    private void SetupConfigs()
+    {
+        _configuration = new Configuration(_configDir);
+        MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
+
+        _pvpLogger = new PVPLogger(getConfiguration());
+    }
+
+    private void SetupManagers()
+    {
+        _playerManager = new PlayerManager(this);
+        _powerManager = new PowerManager(this);
+        _flagManager = new FlagManager(this);
+        _factionLogic = new FactionLogic(this);
+        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFields());
+        _protectionManager = new ProtectionManager(this);
+    }
+
+    private void startFactionsRemover()
+    {
+        //Do not turn on faction's remover if max inactive time == 0
+        if(this.getConfiguration().getConfigFields().getMaxInactiveTime() == 0)
+            return;
+
+        Task.Builder factionsRemoveTask = Sponge.getScheduler().createTaskBuilder();
+        factionsRemoveTask.async().execute(this::removeInactiveFaction).interval(1, TimeUnit.HOURS).submit(this);
+    }
+
+    private void removeInactiveFaction()
+    {
+        long maxInactiveTimeInSeconds = getConfiguration().getConfigFields().getMaxInactiveTime();
+        Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
+        for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
+        {
+            if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
+                continue;
+
+            Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
+            if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
+                continue;
+
+            _factionLogic.disbandFaction(factionEntry.getKey());
+
+            if(this.getConfiguration().getConfigFields().shouldNotifyWhenFactionRemoved())
+                Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " has been removed due to its long inactivity time.")));
+
+//            else if(maxInactive * 0.75 < inactiveTime.getSeconds())
+//            {
+//                long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
+//                Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
+//            }
+        }
     }
 }

@@ -10,6 +10,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
+import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -21,6 +22,7 @@ import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
@@ -30,6 +32,7 @@ import org.spongepowered.api.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class BlockBreakListener extends AbstractListener
 {
@@ -493,5 +496,33 @@ public class BlockBreakListener extends AbstractListener
             event.setCancelled(true);
             return;
         }
+    }
+
+    @Listener(order = Order.FIRST, beforeModifications = true)
+    public void onEntityCollideEntity(CollideEntityEvent event)
+    {
+        if(event instanceof CollideEntityEvent.Impact)
+            return;
+
+        Object rootCause = event.getCause().root();
+        if(!(rootCause instanceof ItemFrame))
+            return;
+
+        event.filterEntities(new Predicate<Entity>()
+        {
+            @Override
+            public boolean test(Entity entity)
+            {
+                if(entity instanceof Living)
+                {
+                    Object source = event.getSource();
+                    if(entity instanceof User && !getPlugin().getProtectionManager().canInteract(entity.getLocation(), entity.getWorld(), (User)entity))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        });
     }
 }

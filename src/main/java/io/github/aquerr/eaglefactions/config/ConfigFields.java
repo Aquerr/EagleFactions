@@ -62,6 +62,8 @@ public final class ConfigFields
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
     private String _maxInactiveTime = "0";
+    private boolean _notifyWhenFactionRemoved;
+    private boolean _canUseFactionChest = true;
 
     //Storage
     private String _storageType = "hocon";
@@ -134,7 +136,9 @@ public final class ConfigFields
             this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE"));
             this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
-            this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
+            this._maxInactiveTime = _configuration.getString("30d", "factions-remover", "max-inactive-time");
+            this._notifyWhenFactionRemoved = _configuration.getBoolean(true, "factions-remover", "notify-when-removed");
+            this._canUseFactionChest = _configuration.getBoolean(true, "faction-chest");
 
             //Storage
             this._storageType = _configuration.getString("hocon", "storage", "type");
@@ -459,8 +463,13 @@ public final class ConfigFields
             return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 1));
         }
 
-        //Default 10 days
-        return 864000;
+        //Default 0
+        return 0;
+    }
+
+    public boolean shouldNotifyWhenFactionRemoved()
+    {
+        return this._notifyWhenFactionRemoved;
     }
 
     public String getStorageType()
@@ -496,5 +505,10 @@ public final class ConfigFields
     public boolean shouldDisplayPvpLoggerInScoreboard()
     {
         return this._showPvpLoggerInScoreboard;
+    }
+
+    public boolean canUseFactionChest()
+    {
+        return this._canUseFactionChest;
     }
 }

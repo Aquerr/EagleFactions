@@ -33,8 +33,8 @@ public class PlayerInteractListener extends AbstractListener
     @Listener
     public void onHandInteract(HandInteractEvent event, @Root Player player)
     {
-        if(event instanceof InteractBlockEvent)
-        {
+//        if(event instanceof InteractBlockEvent)
+//        {
             if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.BLOCK_HIT) && event.getContext().get(EventContextKeys.BLOCK_HIT).isPresent())
             {
                 Optional<Location<World>> optionalLocation = event.getContext().get(EventContextKeys.BLOCK_HIT).get().getLocation();
@@ -50,6 +50,6 @@ public class PlayerInteractListener extends AbstractListener
                 if(!this.getPlugin().getProtectionManager().canInteract(entityLocation, player.getWorld(), player))
                     event.setCancelled(true);
             }
-        }
+//        }
     }
 }
