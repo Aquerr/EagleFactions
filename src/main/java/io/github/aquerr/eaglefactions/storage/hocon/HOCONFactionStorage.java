@@ -1,17 +1,30 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
 import com.google.common.reflect.TypeToken;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
-import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -135,6 +148,48 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
 
+//            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<DataView>>(){}, serializeInventory(faction.getChest()));
+
+//            configNode.getNode("factions", faction.getName(), "chest").setValue(faction.getChest().slots());
+
+            List<SlotItem> slots = new ArrayList<>();
+            Inventory gridInventory = faction.getChest();
+            int column = 1;
+            int row = 1;
+
+            Iterator<Inventory> slotsIterator = gridInventory.slots().iterator();
+            while(slotsIterator.hasNext())
+            {
+                Slot slot = (Slot) slotsIterator.next();
+                Optional<ItemStack> optionalItemStack = slot.peek();
+                if(optionalItemStack.isPresent())
+                {
+                    slots.add(new SlotItem(column, row, optionalItemStack.get()));
+                }
+                column++;
+
+                if(column == 10)
+                {
+                    column = 1;
+                    row++;
+                }
+                if(row == 4)
+                    break;
+            }
+
+
+//            for(int i = 0; i < gridInventory.getRows(); i++)
+//            {
+//                for(int j = 0; j < gridInventory.getColumns(); j++)
+//                {
+//                    Optional<ItemStack> optionalItemStack = gridInventory.getSlot(i, j).get().peek();
+//                    if(optionalItemStack.isPresent())
+//                        slots.add(new SlotItem(j, i, optionalItemStack.get()));
+//                }
+//            }
+
+            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<SlotItem>>(){}, slots);
+
             if(faction.getHome() == null)
             {
                 configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome());
@@ -155,6 +210,34 @@ public class HOCONFactionStorage implements IFactionStorage
 
         return false;
     }
+
+//    static final DataQuery SLOT = DataQuery.of("slot");
+//    static final DataQuery STACK = DataQuery.of("stack");
+//
+//    public static List<DataView> serializeInventory(Inventory inventory) {
+//        DataContainer container;
+//        List<DataView> slots = new LinkedList<>();
+//
+//        int i = 0;
+//        Optional<ItemStack> stack;
+//
+//        for (Inventory inv : inventory.slots()) {
+//            stack = inv.peek();
+//
+//            if (stack.isPresent()) {
+//                container = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
+//
+//                container.set(SLOT, i);
+//                container.set(STACK, stack.get().toContainer());
+//
+//                slots.add(container);
+//            }
+//
+//            i++;
+//        }
+//
+//        return slots;
+//    }
 
     @Override
     public boolean addOrUpdateFaction(Faction faction)
@@ -253,6 +336,7 @@ public class HOCONFactionStorage implements IFactionStorage
         Set<String> claims = getFactionClaims(factionName);
         Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
+        Inventory chest = getFactionChest(factionName);
 
         Faction faction = Faction.builder()
                 .setName(factionName)
@@ -275,6 +359,22 @@ public class HOCONFactionStorage implements IFactionStorage
         }
 
         return faction;
+    }
+
+    private Inventory getFactionChest(String factionName)
+    {
+        Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "chest"}).getValue();
+
+        if(claimsObject != null)
+        {
+            return (Inventory) claimsObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "claims"}).setValue(new HashSet<>());
+            needToSave = true;
+            return Inventory.builder().of(InventoryArchetypes.CHEST).property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest"))).build(EagleFactions.getPlugin());
+        }
     }
 
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFactionFlags(String factionName)
@@ -651,4 +751,41 @@ public class HOCONFactionStorage implements IFactionStorage
         return listOfStrings;
     }
 
+    @ConfigSerializable
+    private static class SlotItem
+    {
+        @Setting
+        private int column;
+        @Setting
+        private int row;
+        @Setting
+        private ItemStack item;
+
+        public SlotItem()
+        {
+
+        }
+
+        public SlotItem(int column, int row, ItemStack item)
+        {
+            this.column = column;
+            this.row = row;
+            this.item = item;
+        }
+
+        public int getColumn()
+        {
+            return this.column;
+        }
+
+        public int getRow()
+        {
+            return this.row;
+        }
+
+        public ItemStack getItem()
+        {
+            return this.item;
+        }
+    }
 }

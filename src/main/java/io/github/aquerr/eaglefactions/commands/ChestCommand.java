@@ -36,7 +36,6 @@ public class ChestCommand extends AbstractCommand
         if(!super.getPlugin().getConfiguration().getConfigFields().canUseFactionChest())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction's chest is turned off on this server."));
 
-
         Player player = (Player)source;
         Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
@@ -44,12 +43,13 @@ public class ChestCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         Faction faction = optionalFaction.get();
-        Inventory inventory = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
+        player.openInventory(faction.getChest());
+//        Inventory inventory = Inventory.builder()
+//                .of(InventoryArchetypes.CHEST)
 //                .property(InventoryDimension.PROPERTY_NAME, new InventoryDimension())
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
-                .build(super.getPlugin());
-        player.openInventory(inventory);
+//                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
+//                .build(super.getPlugin());
+//        player.openInventory(inventory);
 //        Inventory chest = faction.getChest();
 
         return CommandResult.success();

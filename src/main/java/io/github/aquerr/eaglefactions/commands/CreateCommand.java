@@ -18,8 +18,11 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -105,7 +108,11 @@ public class CreateCommand extends AbstractCommand
                                     .setName(factionName)
                                     .setTag(Text.of(TextColors.GREEN, factionTag))
                                     .setLeader(player.getUniqueId())
-                                    .build();
+                                    .setChest(Inventory.builder()
+                                            .of(InventoryArchetypes.CHEST)
+                                            .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
+                                            .build(super.getPlugin())
+                                    ).build();
 
                             //Testing with events
                             runCreationEvent(player, faction);
@@ -211,8 +218,17 @@ public class CreateCommand extends AbstractCommand
                 }
             }
 
-            Faction faction = Faction.builder().setName(factionName).setTag(Text.of(TextColors.GREEN, factionTag)).setLeader(player.getUniqueId()).build();
-            getPlugin().getFactionLogic().addFaction(faction);
+            Faction faction = Faction.builder()
+                    .setName(factionName)
+                    .setTag(Text.of(TextColors.GREEN, factionTag))
+                    .setLeader(player.getUniqueId())
+                    .setChest(Inventory.builder()
+                            .of(InventoryArchetypes.CHEST)
+                            .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
+                            .build(super.getPlugin())
+                    ).build();
+
+            super.getPlugin().getFactionLogic().addFaction(faction);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
             runCreationEvent(player, faction);
             return CommandResult.success();

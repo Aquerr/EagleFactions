@@ -21,6 +21,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
@@ -728,6 +729,12 @@ public class FactionLogic
     public void changeTag(Faction faction, String newTag)
     {
         faction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
+        this.factionsStorage.addOrUpdateFaction(faction);
+    }
+
+    public void setChest(Faction faction, Inventory inventory)
+    {
+        faction = faction.toBuilder().setChest(inventory).build();
         this.factionsStorage.addOrUpdateFaction(faction);
     }
 }
