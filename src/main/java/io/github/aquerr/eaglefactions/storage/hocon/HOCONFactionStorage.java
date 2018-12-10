@@ -363,15 +363,32 @@ public class HOCONFactionStorage implements IFactionStorage
 
     private Inventory getFactionChest(String factionName)
     {
-        Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "chest"}).getValue();
+        List<SlotItem> slotItems = null;
+        Inventory inventory = null;
+        try {
+            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<SlotItem>>() {});
+        } catch (ObjectMappingException e) {
+            e.printStackTrace();
+        }
 
-        if(claimsObject != null)
+        if(slotItems != null)
         {
-            return (Inventory) claimsObject;
+            inventory = Inventory.builder()
+                    .of(InventoryArchetypes.CHEST)
+                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
+                    .build(EagleFactions.getPlugin());
+
+            //TODO: To test...
+            for (SlotItem slotItem : slotItems)
+            {
+                inventory.offer(slotItem.getItem());
+            }
+
+            return inventory;
         }
         else
         {
-            configNode.getNode(new Object[]{"factions", factionName, "claims"}).setValue(new HashSet<>());
+            configNode.getNode("factions", factionName, "claims").setValue(new ArrayList<SlotItem>());
             needToSave = true;
             return Inventory.builder().of(InventoryArchetypes.CHEST).property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest"))).build(EagleFactions.getPlugin());
         }
