@@ -30,7 +30,7 @@ public class Faction
     private Instant lastOnline;
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
-    private Inventory chest;
+    private FactionChest chest;
 
     //Constructor used while creating a new faction.
 //    private FACTION(String factionName, String factionTag, UUID factionLeader)
@@ -54,7 +54,7 @@ public class Faction
 
 
     //Constructor used while getting a faction from storage.
-    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags, Inventory chest)
+    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags, FactionChest chest)
     {
         this.name = factionName;
         this.tag = factionTag;
@@ -241,7 +241,7 @@ public class Faction
             return null;
     }
 
-    public Inventory getChest()
+    public FactionChest getChest()
     {
         return this.chest;
     }
@@ -300,7 +300,7 @@ public class Faction
         private FactionHome home;
         private Instant lastOnline;
         private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
-        private Inventory chest;
+        private FactionChest chest;
 
         private Builder()
         {
@@ -386,7 +386,7 @@ public class Faction
             return this;
         }
 
-        public Builder setChest(Inventory chest)
+        public Builder setChest(FactionChest chest)
         {
             this.chest = chest;
             return this;

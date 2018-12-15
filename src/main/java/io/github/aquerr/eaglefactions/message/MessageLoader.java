@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.logic;
+package io.github.aquerr.eaglefactions.message;
 
 import io.github.aquerr.eaglefactions.config.IConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;

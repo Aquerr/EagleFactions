@@ -11,17 +11,19 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataTranslators;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.TargetContainerEvent;
+import org.spongepowered.api.event.item.inventory.TargetInventoryEvent;
+import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -32,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class HOCONFactionStorage implements IFactionStorage
@@ -152,30 +155,32 @@ public class HOCONFactionStorage implements IFactionStorage
 
 //            configNode.getNode("factions", faction.getName(), "chest").setValue(faction.getChest().slots());
 
-            List<SlotItem> slots = new ArrayList<>();
-            Inventory gridInventory = faction.getChest();
-            int column = 1;
-            int row = 1;
 
-            Iterator<Inventory> slotsIterator = gridInventory.slots().iterator();
-            while(slotsIterator.hasNext())
-            {
-                Slot slot = (Slot) slotsIterator.next();
-                Optional<ItemStack> optionalItemStack = slot.peek();
-                if(optionalItemStack.isPresent())
-                {
-                    slots.add(new SlotItem(column, row, optionalItemStack.get()));
-                }
-                column++;
 
-                if(column == 10)
-                {
-                    column = 1;
-                    row++;
-                }
-                if(row == 4)
-                    break;
-            }
+//            List<SlotItem> slots = new ArrayList<>();
+//            Inventory gridInventory = faction.getChest();
+//            int column = 1;
+//            int row = 1;
+//
+//            Iterator<Inventory> slotsIterator = gridInventory.slots().iterator();
+//            while(slotsIterator.hasNext())
+//            {
+//                Slot slot = (Slot) slotsIterator.next();
+//                Optional<ItemStack> optionalItemStack = slot.peek();
+//                if(optionalItemStack.isPresent())
+//                {
+//                    slots.add(new SlotItem(column, row, optionalItemStack.get()));
+//                }
+//                column++;
+//
+//                if(column == 10)
+//                {
+//                    column = 1;
+//                    row++;
+//                }
+//                if(row == 4)
+//                    break;
+//            }
 
 
 //            for(int i = 0; i < gridInventory.getRows(); i++)
@@ -188,7 +193,7 @@ public class HOCONFactionStorage implements IFactionStorage
 //                }
 //            }
 
-            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<SlotItem>>(){}, slots);
+            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
 
             if(faction.getHome() == null)
             {
@@ -336,7 +341,7 @@ public class HOCONFactionStorage implements IFactionStorage
         Set<String> claims = getFactionClaims(factionName);
         Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
-        Inventory chest = getFactionChest(factionName);
+        FactionChest chest = getFactionChest(factionName);
 
         Faction faction = Faction.builder()
                 .setName(factionName)
@@ -351,6 +356,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 .setClaims(claims)
                 .setLastOnline(lastOnline)
                 .setFlags(flags)
+                .setChest(chest)
                 .build();
 
         if(needToSave)
@@ -361,36 +367,54 @@ public class HOCONFactionStorage implements IFactionStorage
         return faction;
     }
 
-    private Inventory getFactionChest(String factionName)
+    private FactionChest getFactionChest(String factionName)
     {
-        List<SlotItem> slotItems = null;
-        Inventory inventory = null;
+        List<FactionChest.SlotItem> slotItems = null;
         try {
-            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<SlotItem>>() {});
+            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
         } catch (ObjectMappingException e) {
             e.printStackTrace();
         }
 
         if(slotItems != null)
         {
-            inventory = Inventory.builder()
-                    .of(InventoryArchetypes.CHEST)
-                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
-                    .build(EagleFactions.getPlugin());
+//            inventory = Inventory.builder()
+//                    .of(InventoryArchetypes.CHEST)
+//                    .listener(org.spongepowered.api.event.item.inventory.InteractInventoryEvent.Open.class, new Consumer<InteractInventoryEvent.Open>()
+//                    {
+//                        @Override
+//                        public void accept(InteractInventoryEvent.Open open)
+//                        {
+//                            Sponge.getServer().getConsole().sendMessage(Text.of("Saving inventory..."));
+//                        }
+//                    })
+//                    .listener(InteractInventoryEvent.Close.class, new Consumer<InteractInventoryEvent.Close>()
+//                    {
+//                        @Override
+//                        public void accept(InteractInventoryEvent.Close event)
+//                        {
+//                            Sponge.getServer().getConsole().sendMessage(Text.of("Saving inventory..."));
+//                        }
+//                    })
+//                    .property(org.spongepowered.api.item.inventory.property.StringProperty.of("FACTIONCHEST"))
+//                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
+//                    .build(EagleFactions.getPlugin());
 
-            //TODO: To test...
-            for (SlotItem slotItem : slotItems)
-            {
-                inventory.offer(slotItem.getItem());
-            }
+//            //TODO: To test...
+//            for (FactionChest.SlotItem slotItem : slotItems)
+//            {
+//                inventory.offer(slotItem.getItem());
+//            }
+//
+//            return inventory;
 
-            return inventory;
+            return new FactionChest(slotItems);
         }
         else
         {
-            configNode.getNode("factions", factionName, "claims").setValue(new ArrayList<SlotItem>());
+            configNode.getNode("factions", factionName, "claims").setValue(new ArrayList<FactionChest.SlotItem>());
             needToSave = true;
-            return Inventory.builder().of(InventoryArchetypes.CHEST).property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest"))).build(EagleFactions.getPlugin());
+            return new FactionChest();
         }
     }
 
@@ -766,43 +790,5 @@ public class HOCONFactionStorage implements IFactionStorage
             listOfStrings.add(uuid.toString());
         }
         return listOfStrings;
-    }
-
-    @ConfigSerializable
-    private static class SlotItem
-    {
-        @Setting
-        private int column;
-        @Setting
-        private int row;
-        @Setting
-        private ItemStack item;
-
-        public SlotItem()
-        {
-
-        }
-
-        public SlotItem(int column, int row, ItemStack item)
-        {
-            this.column = column;
-            this.row = row;
-            this.item = item;
-        }
-
-        public int getColumn()
-        {
-            return this.column;
-        }
-
-        public int getRow()
-        {
-            return this.row;
-        }
-
-        public ItemStack getItem()
-        {
-            return this.item;
-        }
     }
 }

@@ -3,18 +3,13 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -43,15 +38,42 @@ public class ChestCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         Faction faction = optionalFaction.get();
-        player.openInventory(faction.getChest());
-//        Inventory inventory = Inventory.builder()
-//                .of(InventoryArchetypes.CHEST)
-//                .property(InventoryDimension.PROPERTY_NAME, new InventoryDimension())
-//                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
-//                .build(super.getPlugin());
-//        player.openInventory(inventory);
-//        Inventory chest = faction.getChest();
 
+        Optional<Container> optionalContainer = player.openInventory(faction.getChest().toInventory());
+        if(optionalContainer.isPresent())
+        {
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Text.of("You opened faction's chest!")));
+        }
         return CommandResult.success();
     }
+
+//    private Consumer<InteractInventoryEvent.Close> test()
+//    {
+//        return new Consumer<InteractInventoryEvent.Close>()
+//        {
+//            @Override
+//            public void accept(InteractInventoryEvent.Close open)
+//            {
+//                Inventory inventory = open.getTargetInventory();
+//                User user = null;
+//                if(open.getCause().containsType(Player.class))
+//                {
+//                    user = open.getCause().first(Player.class).get();
+//                }
+//                else if(open.getCause().containsType(User.class))
+//                {
+//                    user = open.getCause().first(User.class).get();
+//                }
+//
+//                if(user == null)
+//                    return;
+//
+//                Optional<Faction> optionalFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+//                if(optionalFaction.isPresent())
+//                {
+//                    getPlugin().getFactionLogic().setChest(optionalFaction.get(), inventory);
+//                }
+//            }
+//        };
+//    }
 }

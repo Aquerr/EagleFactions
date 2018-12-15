@@ -8,25 +8,24 @@ import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MessageLoader;
+import io.github.aquerr.eaglefactions.message.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.*;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
+import me.rojo8399.placeholderapi.ExpansionBuilder;
 import me.rojo8399.placeholderapi.Placeholder;
-import me.rojo8399.placeholderapi.impl.PlaceholderAPIPlugin;
-import me.rojo8399.placeholderapi.impl.PlaceholderServiceImpl;
-import me.rojo8399.placeholderapi.impl.configs.Messages;
-import me.rojo8399.placeholderapi.impl.placeholder.gen.ClassPlaceholderFactory;
+import me.rojo8399.placeholderapi.PlaceholderService;
+import me.rojo8399.placeholderapi.Token;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
@@ -34,14 +33,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
+import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.*;
-import java.time.chrono.ChronoLocalDate;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +57,8 @@ public class EagleFactions
     public static Map<UUID, ChatEnum> ChatList;
     public static Map<UUID, Integer> HomeCooldownPlayers;
 
+    private static EagleFactions eagleFactions;
+
     private IConfiguration _configuration;
     private PVPLogger _pvpLogger;
     private PlayerManager _playerManager;
@@ -70,7 +68,7 @@ public class EagleFactions
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
 
-    private static EagleFactions eagleFactions;
+//    private Optional<PlaceholderService> _placeholderService;
 
     public static EagleFactions getPlugin()
     {
@@ -134,6 +132,41 @@ public class EagleFactions
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         }
     }
+
+    @Listener
+    public void onGameStarting(GameStartingServerEvent event)
+    {
+//        _placeholderService = Sponge.getServiceManager().provide(PlaceholderService.class);
+//
+//        if(_placeholderService.isPresent())
+//        {
+//            _placeholderService.get().loadAll(this, this).stream().map(builder -> {
+//                switch(builder.getId())
+//                {
+//                    case "multi":
+//                        return ((ExpansionBuilder) builder).tokens("a", "b", null).description("Parse the token for player!");
+//                    case "msg":
+//                        return ((ExpansionBuilder) builder).description("Send a message!");
+//                }
+//                return builder;
+//            }).map(builder -> builder.author("Nerdi").version("1.0")).forEach(builder -> {
+//                try
+//                {
+//                    builder.buildAndRegister();
+//                }
+//                catch(Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            });
+//        }
+    }
+
+//    @Placeholder(id = "msg")
+//    public String test(@Token @Nullable String text)
+//    {
+//        return text += "ELO";
+//    }
 
     @Listener
     public void onServerGameLoaded(GameStartedServerEvent event)

@@ -5,13 +5,10 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
-import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.events.FactionClaimEvent;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.storage.h2.H2FactionStorage;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import org.spongepowered.api.Sponge;
@@ -21,7 +18,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
@@ -732,7 +728,7 @@ public class FactionLogic
         this.factionsStorage.addOrUpdateFaction(faction);
     }
 
-    public void setChest(Faction faction, Inventory inventory)
+    public void setChest(Faction faction, FactionChest inventory)
     {
         faction = faction.toBuilder().setChest(inventory).build();
         this.factionsStorage.addOrUpdateFaction(faction);

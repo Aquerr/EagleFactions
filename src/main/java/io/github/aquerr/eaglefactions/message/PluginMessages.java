@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.logic;
+package io.github.aquerr.eaglefactions.message;
 
 public class PluginMessages
 {

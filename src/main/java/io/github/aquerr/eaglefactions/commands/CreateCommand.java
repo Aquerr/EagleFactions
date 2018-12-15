@@ -3,26 +3,23 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.FactionChest;
 import io.github.aquerr.eaglefactions.events.FactionCreateEvent;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
-import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -108,11 +105,8 @@ public class CreateCommand extends AbstractCommand
                                     .setName(factionName)
                                     .setTag(Text.of(TextColors.GREEN, factionTag))
                                     .setLeader(player.getUniqueId())
-                                    .setChest(Inventory.builder()
-                                            .of(InventoryArchetypes.CHEST)
-                                            .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
-                                            .build(super.getPlugin())
-                                    ).build();
+                                    .setChest(new FactionChest())
+                                    .build();
 
                             //Testing with events
                             runCreationEvent(player, faction);
@@ -222,11 +216,8 @@ public class CreateCommand extends AbstractCommand
                     .setName(factionName)
                     .setTag(Text.of(TextColors.GREEN, factionTag))
                     .setLeader(player.getUniqueId())
-                    .setChest(Inventory.builder()
-                            .of(InventoryArchetypes.CHEST)
-                            .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.BLUE, "Faction's chest")))
-                            .build(super.getPlugin())
-                    ).build();
+                    .setChest(new FactionChest())
+                    .build();
 
             super.getPlugin().getFactionLogic().addFaction(faction);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
