@@ -262,7 +262,7 @@ public class MapCommand extends AbstractCommand
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
                     if (!getPlugin().getFactionLogic().isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
+                        if (getPlugin().getPowerManager().getFactionPower(playerFaction) > playerFaction.getClaims().size())
                         {
                             if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                             {

@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.config;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public final class ConfigFields
@@ -14,12 +13,12 @@ public final class ConfigFields
 
     private boolean _isFactionFriendlyFire = false;
     private boolean _isAllianceFriendlyFire = false;
-    private BigDecimal _globalMaxPower = BigDecimal.valueOf(10.0);
-    private BigDecimal _startingPower = BigDecimal.valueOf(5.0);
-    private BigDecimal _powerIncrement = BigDecimal.valueOf(0.04);
-    private BigDecimal _powerDecrement = BigDecimal.valueOf(2.00);
-    private BigDecimal _killAward = BigDecimal.valueOf(2.00);
-    private BigDecimal _penalty = BigDecimal.valueOf(1.0);
+    private float _globalMaxPower = 10.0f;
+    private float _startingPower = 5.0f;
+    private float _powerIncrement = 0.04f;
+    private float _powerDecrement = 2.00f;
+    private float _killAward = 2.00f;
+    private float _penalty = 1.0f;
     private int _maxNameLength = 30;
     private int _minNameLength = 3;
     private int _maxTagLength = 5;
@@ -89,12 +88,12 @@ public final class ConfigFields
 
             this._isFactionFriendlyFire = _configuration.getBoolean(false, "friendlyfire-faction");
             this._isAllianceFriendlyFire = _configuration.getBoolean(false, "friendlyfire-alliance");
-            this._globalMaxPower = new BigDecimal(_configuration.getString("10.0", "power", "max-power"));
-            this._startingPower = new BigDecimal(_configuration.getString("5.0", "power", "start-power"));
-            this._powerIncrement = new BigDecimal(_configuration.getString("0.04", "power", "increment"));
-            this._powerDecrement = new BigDecimal(_configuration.getString("2.0", "power", "decrement"));
-            this._killAward = new BigDecimal(_configuration.getString("2.0", "power", "killaward"));
-            this._penalty = new BigDecimal(_configuration.getString("1.0", "power", "penalty"));
+            this._globalMaxPower = _configuration.getFloat(10.0f, "power", "max-power");
+            this._startingPower = _configuration.getFloat(5.0f, "power", "start-power");
+            this._powerIncrement = _configuration.getFloat(0.04f, "power", "increment");
+            this._powerDecrement = _configuration.getFloat(2.0f, "power", "decrement");
+            this._killAward = _configuration.getFloat(2.0f, "power", "killaward");
+            this._penalty = _configuration.getFloat(1.0f, "power", "penalty");
             this._maxNameLength = _configuration.getInt(30,"name", "max-length");
             this._minNameLength = _configuration.getInt(3, "name", "min-length");
             this._maxTagLength = _configuration.getInt(5, "tag", "max-length");
@@ -168,32 +167,32 @@ public final class ConfigFields
         return this._isAllianceFriendlyFire;
     }
 
-    public BigDecimal getGlobalMaxPower()
+    public float getGlobalMaxPower()
     {
         return this._globalMaxPower;
     }
 
-    public BigDecimal getStartingPower()
+    public float getStartingPower()
     {
         return this._startingPower;
     }
 
-    public BigDecimal getPowerIncrement()
+    public float getPowerIncrement()
     {
         return this._powerIncrement;
     }
 
-    public BigDecimal getPowerDecrement()
+    public float getPowerDecrement()
     {
         return this._powerDecrement;
     }
 
-    public BigDecimal getKillAward()
+    public float getKillAward()
     {
         return this._killAward;
     }
 
-    public BigDecimal getPenalty()
+    public float getPenalty()
     {
         return this._penalty;
     }

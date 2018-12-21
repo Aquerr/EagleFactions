@@ -58,7 +58,7 @@ public class SetPowerCommand extends AbstractCommand
 
     private void setPower(Player player, String power)
     {
-        BigDecimal newPower = new BigDecimal(power);
+        float newPower = Float.valueOf(power);
 
         getPlugin().getPowerManager().setPower(player.getUniqueId(), newPower);
 

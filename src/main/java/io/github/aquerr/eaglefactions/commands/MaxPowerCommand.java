@@ -58,7 +58,7 @@ public class MaxPowerCommand extends AbstractCommand
 
     private void setMaxPower(Player player, String power)
     {
-        BigDecimal newPower = new BigDecimal(power);
+        float newPower = Float.valueOf(power);
 
         getPlugin().getPowerManager().setMaxPower(player.getUniqueId(), newPower);
 

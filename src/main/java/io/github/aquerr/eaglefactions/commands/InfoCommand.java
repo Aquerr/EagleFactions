@@ -171,7 +171,7 @@ public class InfoCommand extends AbstractCommand
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getFactionPower(faction) + "/" + getPlugin().getPowerManager().getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.getClaims().size()) + "/" + String.valueOf(getPlugin().getPowerManager().getFactionPower(faction).intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, faction.getClaims().size() + "/" + getPlugin().getPowerManager().getFactionPower(faction)))
                 .build();
 
         factionInfo.add(info);

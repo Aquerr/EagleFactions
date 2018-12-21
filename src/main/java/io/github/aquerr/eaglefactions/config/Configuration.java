@@ -153,6 +153,23 @@ public class Configuration implements IConfiguration
     }
 
     @Override
+    public float getFloat(float defaultValue, Object... nodePath)
+    {
+        Object value = configNode.getNode(nodePath).getValue();
+
+        if (value instanceof Integer)
+        {
+            int number = (Integer) value;
+            return (float) number;
+        }
+        else if (value instanceof Float)
+        {
+            return (float)value;
+        }
+        else return 0;
+    }
+
+    @Override
     public boolean getBoolean(boolean defaultValue, Object... nodePath)
     {
         return configNode.getNode(nodePath).getBoolean(defaultValue);

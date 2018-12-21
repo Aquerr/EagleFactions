@@ -55,7 +55,7 @@ public class ClaimCommand extends AbstractCommand
                     {
                         if (!optionalChunkFaction.isPresent())
                         {
-                            if (getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
+                            if (getPlugin().getPowerManager().getFactionPower(playerFaction) > playerFaction.getClaims().size())
                             {
                                 if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                                 {

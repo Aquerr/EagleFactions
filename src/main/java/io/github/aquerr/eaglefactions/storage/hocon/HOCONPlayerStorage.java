@@ -5,16 +5,12 @@ import io.github.aquerr.eaglefactions.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -48,7 +44,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public boolean addPlayer(UUID playerUUID, String playerName, BigDecimal startingPower, BigDecimal maxPower)
+    public boolean addPlayer(UUID playerUUID, String playerName, float startingPower, float maxPower)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
@@ -118,29 +114,29 @@ public class HOCONPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public BigDecimal getPlayerPower(UUID playerUUID)
+    public float getPlayerPower(UUID playerUUID)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
         if(!Files.exists(playerFile))
-            return BigDecimal.ZERO;
+            return 0.0f;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
         {
             ConfigurationNode configurationNode = configurationLoader.load();
-            return new BigDecimal(configurationNode.getNode("power").getString());
+            return configurationNode.getNode("power").getFloat(0.0f);
         }
         catch(IOException e)
         {
             e.printStackTrace();
         }
 
-        return BigDecimal.ZERO;
+        return 0.0f;
     }
 
     @Override
-    public boolean setPlayerPower(UUID playerUUID, BigDecimal power)
+    public boolean setPlayerPower(UUID playerUUID, float power)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
@@ -151,7 +147,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
         try
         {
             ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("power").setValue(power.toString());
+            configurationNode.getNode("power").setValue(power);
             configurationLoader.save(configurationNode);
             return true;
         }
@@ -164,29 +160,29 @@ public class HOCONPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public BigDecimal getPlayerMaxPower(UUID playerUUID)
+    public float getPlayerMaxPower(UUID playerUUID)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
         if(!Files.exists(playerFile))
-            return BigDecimal.ZERO;
+            return 0.0f;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         try
         {
             ConfigurationNode configurationNode = configurationLoader.load();
-            return new BigDecimal(configurationNode.getNode("maxpower").getString());
+            return configurationNode.getNode("maxpower").getFloat(0.0f);
         }
         catch(IOException e)
         {
             e.printStackTrace();
         }
 
-        return BigDecimal.ZERO;
+        return 0.0f;
     }
 
     @Override
-    public boolean setPlayerMaxPower(UUID playerUUID, BigDecimal maxpower)
+    public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
 
@@ -197,7 +193,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
         try
         {
             ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("maxpower").setValue(maxpower.toString());
+            configurationNode.getNode("maxpower").setValue(maxpower);
             configurationLoader.save(configurationNode);
             return true;
         }

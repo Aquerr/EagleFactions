@@ -31,7 +31,16 @@ public class TopCommand extends AbstractCommand
         Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
         Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
 
-        factionsList.sort((o1, o2) -> getPlugin().getPowerManager().getFactionPower(o2).compareTo(getPlugin().getPowerManager().getFactionPower(o1)));
+        factionsList.sort((o1, o2) -> {
+            if (getPlugin().getPowerManager().getFactionPower(o2) > getPlugin().getPowerManager().getFactionPower(o1))
+            {
+                return 1;
+            }
+            else
+            {
+                return -1;
+            }
+        });
 
         //This should show only top 10 factions on the server.
 

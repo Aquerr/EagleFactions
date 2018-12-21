@@ -78,7 +78,7 @@ public class AttackCommand extends AbstractCommand
                         {
                             if(!playerFaction.getAlliances().contains(attackedFaction.getName()))
                             {
-                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction).doubleValue() * getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue() && getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue())
+                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction) * getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction) && getPlugin().getPowerManager().getFactionPower(playerFaction) > getPlugin().getPowerManager().getFactionPower(attackedFaction))
                                 {
                                     int attackTime = getPlugin().getConfiguration().getConfigFields().getAttackTime();
                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();

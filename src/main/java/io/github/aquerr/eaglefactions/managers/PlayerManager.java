@@ -13,7 +13,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,22 +40,22 @@ public class PlayerManager
         return _playerStorage.addPlayer(playerUUID, playerName, _configFields.getStartingPower(), _configFields.getGlobalMaxPower());
     }
 
-    public BigDecimal getPlayerPower(UUID playerUUID)
+    public float getPlayerPower(UUID playerUUID)
     {
         return _playerStorage.getPlayerPower(playerUUID);
     }
 
-    public boolean setPlayerPower(UUID playerUUID, BigDecimal power)
+    public boolean setPlayerPower(UUID playerUUID, float power)
     {
         return _playerStorage.setPlayerPower(playerUUID, power);
     }
 
-    public BigDecimal getPlayerMaxPower(UUID playerUUID)
+    public float getPlayerMaxPower(UUID playerUUID)
     {
         return _playerStorage.getPlayerMaxPower(playerUUID);
     }
 
-    public boolean setPlayerMaxPower(UUID playerUUID, BigDecimal maxpower)
+    public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
     {
         return _playerStorage.setPlayerMaxPower(playerUUID, maxpower);
     }
