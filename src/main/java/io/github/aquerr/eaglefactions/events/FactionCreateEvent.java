@@ -1,8 +1,11 @@
 package io.github.aquerr.eaglefactions.events;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.impl.AbstractEvent;
 
 public class FactionCreateEvent extends AbstractEvent
@@ -10,6 +13,22 @@ public class FactionCreateEvent extends AbstractEvent
     private final Cause _cause;
     private final Player _creator;
     private final Faction _faction;
+
+    /**
+     * @return True if cancelled, false if not
+     */
+    public static boolean runCreationEvent(Player player, Faction faction)
+    {
+        EventContext eventContext = EventContext.builder()
+                .add(EventContextKeys.OWNER, player)
+                .add(EventContextKeys.PLAYER, player)
+                .add(EventContextKeys.CREATOR, player)
+                .build();
+
+        Cause creationEventCause = Cause.of(eventContext, player);
+        FactionCreateEvent event = new FactionCreateEvent(player, faction, creationEventCause);
+        return Sponge.getEventManager().post(event);
+    }
 
     public FactionCreateEvent(Player creator, Faction faction, Cause cause)
     {
@@ -21,16 +40,16 @@ public class FactionCreateEvent extends AbstractEvent
     @Override
     public Cause getCause()
     {
-        return null;
+        return this._cause;
     }
 
     public Faction getFaction()
     {
-        return _faction;
+        return this._faction;
     }
 
     public Player getCreator()
     {
-        return _creator;
+        return this._creator;
     }
 }

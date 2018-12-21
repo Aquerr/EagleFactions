@@ -21,16 +21,16 @@ public class FactionKickEvent extends AbstractEvent
     @Override
     public Cause getCause()
     {
-        return null;
+        return this._cause;
     }
 
     public Faction getFaction()
     {
-        return _faction;
+        return this._faction;
     }
 
     public IFactionPlayer getKickedPlayer()
     {
-        return _kickedPlayer;
+        return this._kickedPlayer;
     }
 }

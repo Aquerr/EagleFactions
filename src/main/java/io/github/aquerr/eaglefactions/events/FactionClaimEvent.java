@@ -27,26 +27,26 @@ public class FactionClaimEvent extends AbstractEvent
     @Override
     public Cause getCause()
     {
-        return null;
+        return this._cause;
     }
 
     public Faction getFaction()
     {
-        return _faction;
+        return this._faction;
     }
 
     public Player getCreator()
     {
-        return _creator;
+        return this._creator;
     }
 
     public World getWorld()
     {
-        return _world;
+        return this._world;
     }
 
     public Vector3i getChunkPosition()
     {
-        return _chunkPosition;
+        return this._chunkPosition;
     }
 }
