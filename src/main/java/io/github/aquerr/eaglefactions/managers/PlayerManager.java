@@ -22,17 +22,28 @@ import java.util.UUID;
  */
 public class PlayerManager
 {
-    private ConfigFields _configFields;
-    private UserStorageService userStorageService;
-    private IPlayerStorage _playerStorage;
+    private static PlayerManager instance = null;
 
-    public PlayerManager(EagleFactions plugin)
+    private final ConfigFields _configFields;
+    private final IPlayerStorage _playerStorage;
+
+    private UserStorageService userStorageService;
+
+    private PlayerManager(EagleFactions plugin)
     {
+        instance = this;
         _configFields = plugin.getConfiguration().getConfigFields();
         _playerStorage = new HOCONPlayerStorage(plugin.getConfigDir());
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
+    }
+
+    public static PlayerManager getInstance(EagleFactions eagleFactions)
+    {
+        if (instance == null)
+            return new PlayerManager(eagleFactions);
+        else return instance;
     }
 
     public boolean addPlayer(UUID playerUUID, String playerName)

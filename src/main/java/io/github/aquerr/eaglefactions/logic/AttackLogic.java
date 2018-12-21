@@ -19,13 +19,23 @@ import java.util.function.Consumer;
 
 public class AttackLogic
 {
-    private ConfigFields _configFields;
-    private FactionLogic _factionLogic;
+    private static AttackLogic instance = null;
 
-    public AttackLogic(FactionLogic factionLogic, ConfigFields configFields)
+    private final ConfigFields _configFields;
+    private final FactionLogic _factionLogic;
+
+    public AttackLogic(EagleFactions eagleFactions)
     {
-        _configFields = configFields;
-        _factionLogic = factionLogic;
+        instance = this;
+        _configFields = eagleFactions.getConfiguration().getConfigFields();
+        _factionLogic = eagleFactions.getFactionLogic();
+    }
+
+    public static AttackLogic getInstance(EagleFactions eagleFactions)
+    {
+        if (instance == null)
+            return new AttackLogic(eagleFactions);
+        else return instance;
     }
 
     public void attack(Player player, Vector3i attackedChunk)

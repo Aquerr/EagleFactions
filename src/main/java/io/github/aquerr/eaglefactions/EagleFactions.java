@@ -8,16 +8,12 @@ import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.message.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.*;
+import io.github.aquerr.eaglefactions.message.MessageLoader;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
-import me.rojo8399.placeholderapi.ExpansionBuilder;
-import me.rojo8399.placeholderapi.Placeholder;
-import me.rojo8399.placeholderapi.PlaceholderService;
-import me.rojo8399.placeholderapi.Token;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -33,11 +29,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -544,19 +540,19 @@ public class EagleFactions
     private void SetupConfigs()
     {
         _configuration = new Configuration(_configDir);
-        MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
+        MessageLoader messageLoader = MessageLoader.getInstance(this);
 
         _pvpLogger = new PVPLogger(getConfiguration());
     }
 
     private void SetupManagers()
     {
-        _playerManager = new PlayerManager(this);
-        _powerManager = new PowerManager(this);
-        _flagManager = new FlagManager(this);
-        _factionLogic = new FactionLogic(this);
-        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFields());
-        _protectionManager = new ProtectionManager(this);
+        _playerManager = PlayerManager.getInstance(this);
+        _powerManager = PowerManager.getInstance(this);
+        _flagManager = FlagManager.getInstance(this);
+        _factionLogic = FactionLogic.getInstance(this);
+        _attackLogic = AttackLogic.getInstance(this);
+        _protectionManager = ProtectionManager.getInstance(this);
     }
 
     private void startFactionsRemover()

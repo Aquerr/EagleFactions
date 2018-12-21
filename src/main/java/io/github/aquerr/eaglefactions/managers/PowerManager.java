@@ -1,8 +1,9 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -11,24 +12,33 @@ import org.spongepowered.api.scheduler.Task;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+@Singleton
 public class PowerManager
 {
-    private EagleFactions _plugin;
+    private static PowerManager instance = null;
 
-    private ConfigFields _configFields;
+    private final EagleFactions _plugin;
+    private final ConfigFields _configFields;
+
     private CommentedConfigurationNode _factionsNode;
-
     private UUID dummyUUID = new UUID(0, 0);
 
-    public PowerManager(EagleFactions eagleFactions)
+    public static PowerManager getInstance(EagleFactions eagleFactions)
     {
+        if (instance == null)
+            return new PowerManager(eagleFactions);
+        else return instance;
+    }
+
+    private PowerManager(EagleFactions eagleFactions)
+    {
+        instance = this;
         _plugin = eagleFactions;
         _configFields = eagleFactions.getConfiguration().getConfigFields();
         Path configDir = eagleFactions.getConfigDir();

@@ -2,8 +2,11 @@ package io.github.aquerr.eaglefactions.events;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.world.World;
 
@@ -14,6 +17,22 @@ public class FactionClaimEvent extends AbstractEvent
     private final Faction _faction;
     private final World _world;
     private final Vector3i _chunkPosition;
+
+    /**
+     * @return True if cancelled, false if not
+     */
+    public static boolean runEvent(Player player, Faction faction, World world, Vector3i chunkPosition)
+    {
+        final EventContext eventContext = EventContext.builder()
+                .add(EventContextKeys.OWNER, player)
+                .add(EventContextKeys.PLAYER, player)
+                .add(EventContextKeys.CREATOR, player)
+                .build();
+
+        final Cause creationEventCause = Cause.of(eventContext, player);
+        final FactionClaimEvent event = new FactionClaimEvent(player, faction, world, chunkPosition, creationEventCause);
+        return Sponge.getEventManager().post(event);
+    }
 
     public FactionClaimEvent(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
     {

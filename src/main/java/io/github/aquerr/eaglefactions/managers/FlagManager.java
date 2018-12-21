@@ -1,21 +1,32 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Singleton
 public class FlagManager
 {
-    EagleFactions _plugin;
-    public FlagManager(EagleFactions plugin)
+    private static FlagManager instance = null;
+    private final EagleFactions _plugin;
+
+    private FlagManager(EagleFactions plugin)
     {
-        _plugin = plugin;
+        this._plugin = plugin;
+        instance = this;
+    }
+
+    public static FlagManager getInstance(EagleFactions eagleFactions)
+    {
+        if (instance == null)
+            return new FlagManager(eagleFactions);
+        else return instance;
     }
 
     public boolean canBreakBlock(UUID playerUUID, Faction playerFaction, Faction chunkFaction)

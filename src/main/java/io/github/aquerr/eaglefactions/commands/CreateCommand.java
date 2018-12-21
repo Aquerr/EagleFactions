@@ -36,8 +36,8 @@ public class CreateCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<String> optionalFactionName = context.<String>getOne("faction name");
-        Optional<String> optionalFactionTag = context.<String>getOne("tag");
+        final Optional<String> optionalFactionName = context.<String>getOne("faction name");
+        final Optional<String> optionalFactionTag = context.<String>getOne("tag");
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -46,14 +46,14 @@ public class CreateCommand extends AbstractCommand
         if (!optionalFactionName.isPresent() || !optionalFactionTag.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS), true);
 
-        Player player = (Player) source;
-        String factionName = optionalFactionName.get();
-        String factionTag = optionalFactionTag.get();
+        final Player player = (Player) source;
+        final String factionName = optionalFactionName.get();
+        final String factionTag = optionalFactionTag.get();
 
         if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_USE_THIS_FACTION_NAME));
 
-        Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
         if (optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_ARE_ALREADY_IN_A_FACTION));
@@ -83,7 +83,7 @@ public class CreateCommand extends AbstractCommand
         }
         else
         {
-            Faction faction = Faction.builder()
+            final Faction faction = Faction.builder()
                     .setName(factionName)
                     .setTag(Text.of(TextColors.GREEN, factionTag))
                     .setLeader(player.getUniqueId())
@@ -91,7 +91,7 @@ public class CreateCommand extends AbstractCommand
                     .build();
 
             //Testing with events
-            boolean isCancelled = FactionCreateEvent.runCreationEvent(player, faction);
+            final boolean isCancelled = FactionCreateEvent.runEvent(player, faction);
             if (isCancelled)
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
             //Testing with events
@@ -104,88 +104,86 @@ public class CreateCommand extends AbstractCommand
 
     private CommandResult createByItems(String factionName, String factionTag, Player player) throws CommandException
     {
-        HashMap<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFields().getRequiredItemsToCreateFaction();
-        Inventory inventory = player.getInventory();
-        int allRequiredItems = requiredItems.size();
+        final HashMap<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFields().getRequiredItemsToCreateFaction();
+        final Inventory inventory = player.getInventory();
+        final int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
         for (String requiredItem : requiredItems.keySet())
         {
-            String[] idAndVariant = requiredItem.split(":");
+            final String[] idAndVariant = requiredItem.split(":");
+            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
-            String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+            if (!itemType.isPresent())
+                continue;
 
-            if (itemType.isPresent())
+            ItemStack itemStack = ItemStack.builder()
+                    .itemType(itemType.get()).build();
+            itemStack.setQuantity(requiredItems.get(requiredItem));
+
+            if (idAndVariant.length == 3)
             {
-                ItemStack itemStack = ItemStack.builder()
-                        .itemType(itemType.get()).build();
-                itemStack.setQuantity(requiredItems.get(requiredItem));
-
-                if (idAndVariant.length == 3)
+                if (itemType.get().getBlock().isPresent())
                 {
-                    if (itemType.get().getBlock().isPresent())
-                    {
-                        int variant = Integer.parseInt(idAndVariant[2]);
-                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
-                        itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                    }
+                    final int variant = Integer.parseInt(idAndVariant[2]);
+                    final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                    itemStack = ItemStack.builder().fromBlockState(blockState).build();
                 }
+            }
 
-                if (!inventory.contains(itemStack))
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
+            if (!inventory.contains(itemStack))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
 
-                if (inventory.contains(itemStack))
-                {
-                    foundItems += 1;
-                }
+            if (inventory.contains(itemStack))
+            {
+                foundItems += 1;
             }
         }
 
-        if (allRequiredItems == foundItems)
+        if (allRequiredItems != foundItems)
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
+
+        for (final String requiredItem : requiredItems.keySet())
         {
-            for (String requiredItem : requiredItems.keySet())
+            final String[] idAndVariant = requiredItem.split(":");
+            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+
+            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+
+            if (!itemType.isPresent())
+                continue;
+
+            ItemStack itemStack = ItemStack.builder()
+                    .itemType(itemType.get()).build();
+            itemStack.setQuantity(requiredItems.get(requiredItem));
+
+            if (idAndVariant.length == 3)
             {
-                String[] idAndVariant = requiredItem.split(":");
-                String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-
-                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-                if (itemType.isPresent())
+                if (itemType.get().getBlock().isPresent())
                 {
-                    ItemStack itemStack = ItemStack.builder()
-                            .itemType(itemType.get()).build();
-                    itemStack.setQuantity(requiredItems.get(requiredItem));
-
-                    if (idAndVariant.length == 3)
-                    {
-                        if (itemType.get().getBlock().isPresent())
-                        {
-                            int variant = Integer.parseInt(idAndVariant[2]);
-                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
-                            itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                        }
-                    }
-
-                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
+                    final int variant = Integer.parseInt(idAndVariant[2]);
+                    final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                    itemStack = ItemStack.builder().fromBlockState(blockState).build();
                 }
             }
 
-            Faction faction = Faction.builder()
-                    .setName(factionName)
-                    .setTag(Text.of(TextColors.GREEN, factionTag))
-                    .setLeader(player.getUniqueId())
-                    .setChest(new FactionChest())
-                    .build();
-
-            boolean isCancelled = FactionCreateEvent.runCreationEvent(player, faction);
-            if (isCancelled)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
-
-            super.getPlugin().getFactionLogic().addFaction(faction);
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
-            return CommandResult.success();
+            inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
         }
+
+        final Faction faction = Faction.builder()
+                .setName(factionName)
+                .setTag(Text.of(TextColors.GREEN, factionTag))
+                .setLeader(player.getUniqueId())
+                .setChest(new FactionChest())
+                .build();
+
+        final boolean isCancelled = FactionCreateEvent.runEvent(player, faction);
+        if (isCancelled)
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
+
+        super.getPlugin().getFactionLogic().addFaction(faction);
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
         return CommandResult.success();
     }
 }

@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
@@ -21,12 +22,22 @@ import org.spongepowered.api.world.World;
 import java.util.Optional;
 import java.util.UUID;
 
+@Singleton
 public class ProtectionManager implements IProtectionManager
 {
-    private EagleFactions plugin;
+    private static ProtectionManager instance = null;
+    private final EagleFactions plugin;
 
-    public ProtectionManager(EagleFactions plugin)
+    public static ProtectionManager getInstance(EagleFactions eagleFactions)
     {
+        if (instance == null)
+            return new ProtectionManager(eagleFactions);
+        else return instance;
+    }
+
+    private ProtectionManager(EagleFactions plugin)
+    {
+        instance = this;
         this.plugin = plugin;
     }
 

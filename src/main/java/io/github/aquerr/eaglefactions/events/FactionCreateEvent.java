@@ -17,16 +17,16 @@ public class FactionCreateEvent extends AbstractEvent
     /**
      * @return True if cancelled, false if not
      */
-    public static boolean runCreationEvent(Player player, Faction faction)
+    public static boolean runEvent(Player player, Faction faction)
     {
-        EventContext eventContext = EventContext.builder()
+        final EventContext eventContext = EventContext.builder()
                 .add(EventContextKeys.OWNER, player)
                 .add(EventContextKeys.PLAYER, player)
                 .add(EventContextKeys.CREATOR, player)
                 .build();
 
-        Cause creationEventCause = Cause.of(eventContext, player);
-        FactionCreateEvent event = new FactionCreateEvent(player, faction, creationEventCause);
+        final Cause creationEventCause = Cause.of(eventContext, player);
+        final FactionCreateEvent event = new FactionCreateEvent(player, faction, creationEventCause);
         return Sponge.getEventManager().post(event);
     }
 

@@ -6,17 +6,13 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.*;
-import io.github.aquerr.eaglefactions.events.FactionClaimEvent;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
-import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
+import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -37,12 +33,22 @@ import java.util.function.Consumer;
  */
 public class FactionLogic
 {
-    private IFactionStorage factionsStorage;
-    private ConfigFields _configFields;
-    private PlayerManager _playerManager;
+    private static FactionLogic instance = null;
+
+    private final IFactionStorage factionsStorage;
+    private final ConfigFields _configFields;
+    private final PlayerManager _playerManager;
+
+    public static FactionLogic getInstance(EagleFactions eagleFactions)
+    {
+        if (instance == null)
+            return new FactionLogic(eagleFactions);
+        else return instance;
+    }
 
     public FactionLogic(EagleFactions plugin)
     {
+        instance = this;
         _configFields = plugin.getConfiguration().getConfigFields();
         _playerManager = plugin.getPlayerManager();
 
@@ -57,6 +63,9 @@ public class FactionLogic
 //            case "sqllite":
 //
 //                break;
+            default:
+                factionsStorage = new HOCONFactionStorage(plugin.getConfigDir());
+                break;
         }
     }
 
@@ -533,8 +542,6 @@ public class FactionLogic
             {
                 if(addClaimByItems(player, faction, worldUUID, chunk))
                 {
-                    FactionClaimEvent event = new FactionClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
-                    Sponge.getEventManager().post(event);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                 }
                 else
@@ -544,9 +551,6 @@ public class FactionLogic
             }
             else
             {
-                FactionClaimEvent event = new FactionClaimEvent(player, faction, Sponge.getServer().getWorld(worldUUID).get(), chunk, Cause.of(EventContext.builder().add(EventContextKeys.OWNER, player).build(), player));
-                Sponge.getEventManager().post(event);
-
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                 addClaim(faction, worldUUID, chunk);
             }

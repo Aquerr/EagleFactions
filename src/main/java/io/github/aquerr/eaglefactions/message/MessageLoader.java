@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.message;
 
-import io.github.aquerr.eaglefactions.config.IConfiguration;
+import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -13,11 +14,23 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Singleton
 public class MessageLoader
 {
-    public MessageLoader(IConfiguration configuration, Path configDir)
+    private static MessageLoader instance = null;
+
+    public static MessageLoader getInstance(EagleFactions eagleFactions)
     {
-        String messagesFileName = configuration.getConfigFields().getLanguageFileName();
+        if (instance == null)
+            return new MessageLoader(eagleFactions);
+        return instance;
+    }
+
+    private MessageLoader(EagleFactions eagleFactions)
+    {
+        instance = this;
+        Path configDir = eagleFactions.getConfigDir();
+        String messagesFileName = eagleFactions.getConfiguration().getConfigFields().getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
         if (!Files.exists(configDir.resolve("messages")))
