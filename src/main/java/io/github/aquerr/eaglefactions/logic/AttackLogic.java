@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
@@ -59,7 +60,7 @@ public class AttackLogic
                         informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
 
-                        _factionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
+                        _factionLogic.removeClaim(chunkFaction, new Claim(player.getWorld().getUniqueId(), attackedChunk));
                         task.cancel();
                     }
                     else

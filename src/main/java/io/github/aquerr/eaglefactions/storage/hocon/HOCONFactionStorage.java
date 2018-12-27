@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class HOCONFactionStorage implements IFactionStorage
 {
@@ -147,7 +148,7 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
             configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
             configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
-            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims());
+            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(x->x.toString()).collect(Collectors.toList()));
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
 
@@ -338,7 +339,7 @@ public class HOCONFactionStorage implements IFactionStorage
         Set<UUID> recruits = getFactionRecruits(factionName);
         Set<String> alliances = getFactionAlliances(factionName);
         Set<String> enemies = getFactionEnemies(factionName);
-        Set<String> claims = getFactionClaims(factionName);
+        Set<Claim> claims = getFactionClaims(factionName);
         Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
         FactionChest chest = getFactionChest(factionName);
@@ -546,13 +547,19 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
-    private Set<String> getFactionClaims(String factionName)
+    private Set<Claim> getFactionClaims(String factionName)
     {
         Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "claims"}).getValue();
 
         if(claimsObject != null)
         {
-            return new HashSet<>((List<String>) claimsObject);
+            Set<Claim> claims = new HashSet<>();
+            for (String claimAsString : (List<String>)claimsObject)
+            {
+                Claim claim = Claim.valueOf(claimAsString);
+                claims.add(claim);
+            }
+            return claims;
         }
         else
         {

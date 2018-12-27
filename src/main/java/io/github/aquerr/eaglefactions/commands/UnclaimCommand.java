@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -53,7 +54,7 @@ public class UnclaimCommand extends AbstractCommand
                         }
                     }
 
-                    getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+                    getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
 
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     return CommandResult.success();
@@ -93,7 +94,7 @@ public class UnclaimCommand extends AbstractCommand
                                 }
                             }
 
-                            getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), world.getUniqueId() ,chunk);
+                            super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
 
                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                             return CommandResult.success();

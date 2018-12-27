@@ -25,7 +25,7 @@ public class Faction
     private Set<String> enemies;
     private UUID leader;
     private Set<UUID> officers;
-    private Set<String> claims;
+    private Set<Claim> claims;
     private FactionHome home;
     private Instant lastOnline;
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
@@ -54,7 +54,7 @@ public class Faction
 
 
     //Constructor used while getting a faction from storage.
-    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags, FactionChest chest)
+    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<Claim> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags, FactionChest chest)
     {
         this.name = factionName;
         this.tag = factionTag;
@@ -107,17 +107,17 @@ public class Faction
         return this.alliances.remove(factionName);
     }
 
-    public Set<String> getClaims()
+    public Set<Claim> getClaims()
     {
         return this.claims;
     }
 
-    public boolean addClaim(String claim)
+    public boolean addClaim(Claim claim)
     {
         return this.claims.add(claim);
     }
 
-    public boolean removeClaim(String claim)
+    public boolean removeClaim(Claim claim)
     {
         return this.claims.remove(claim);
     }
@@ -296,7 +296,7 @@ public class Faction
         private Set<String> alliances;
         private Set<String> enemies;
         private Set<UUID> officers;
-        private Set<String> claims;
+        private Set<Claim> claims;
         private FactionHome home;
         private Instant lastOnline;
         private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
@@ -362,7 +362,7 @@ public class Faction
             return this;
         }
 
-        public Builder setClaims(Set<String> claims)
+        public Builder setClaims(Set<Claim> claims)
         {
             this.claims = claims;
             return this;

@@ -22,7 +22,7 @@ public class FactionHome
         String worldUUIDString = homeString.split(splitter)[0];
         String vectorsString = homeString.split(splitter)[1];
 
-        String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+        String[] vectors = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
 
         int x = Integer.valueOf(vectors[0]);
         int y = Integer.valueOf(vectors[1]);

@@ -30,6 +30,8 @@ public class PVPLogger
     private boolean _shouldDisplayInScoreboard;
     private List<String> _blockedCommandsDuringFight;
 
+    private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLogger";
+
     public PVPLogger(IConfiguration configuration)
     {
         _configFields = configuration.getConfigFields();
@@ -119,10 +121,10 @@ public class PVPLogger
                                 if(_shouldDisplayInScoreboard)
                                 {
                                     Scoreboard scoreboard = player.getScoreboard();
-                                    Optional<Objective> optionalObjective = scoreboard.getObjective("PVPLogger");
+                                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME);
                                     if(!optionalObjective.isPresent())
                                     {
-                                        optionalObjective = Optional.of(Objective.builder().name("PVPLogger").displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
+                                        optionalObjective = Optional.of(Objective.builder().name(PVPLOGGER_OBJECTIVE_NAME).displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
                                         scoreboard.addObjective(optionalObjective.get());
                                         scoreboard.updateDisplaySlot(optionalObjective.get(), DisplaySlots.SIDEBAR);
                                     }
@@ -151,10 +153,11 @@ public class PVPLogger
     {
         synchronized(_attackedPlayers)
         {
-            if(_shouldDisplayInScoreboard && player.getScoreboard().getObjective("PVPLogger").isPresent())
-            {
-                player.setScoreboard(Scoreboard.builder().build());
-            }
+            //Remove PVPLogger objective
+            Scoreboard scoreboard = player.getScoreboard();
+            Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME);
+            if (pvploggerObjective.isPresent())
+                scoreboard.removeObjective(pvploggerObjective.get());
             _attackedPlayers.remove(player.getUniqueId());
         }
     }
