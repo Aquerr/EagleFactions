@@ -12,6 +12,7 @@ import org.spongepowered.api.scheduler.Task;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -51,6 +52,12 @@ public class PowerManager
         {
             exception.printStackTrace();
         }
+    }
+
+    public int getFactionMaxClaims(Faction faction)
+    {
+        float power = getFactionPower(faction);
+        return (int)power;
     }
 
     public float getPlayerPower(@Nullable UUID playerUUID)
@@ -166,9 +173,16 @@ public class PowerManager
             }
             else
             {
-                _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower + _configFields.getPowerIncrement());
+                float newPower = round(playerPower + _configFields.getPowerIncrement(), 2);
+                _plugin.getPlayerManager().setPlayerPower(playerUUID, newPower);
             }
         }
+    }
+
+    public static float round(float number, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(number);
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd.floatValue();
     }
 
     public void setPower(UUID playerUUID, float power)

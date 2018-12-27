@@ -92,7 +92,7 @@ public final class ConfigFields
             this._startingPower = _configuration.getFloat(5.0f, "power", "start-power");
             this._powerIncrement = _configuration.getFloat(0.04f, "power", "increment");
             this._powerDecrement = _configuration.getFloat(2.0f, "power", "decrement");
-            this._killAward = _configuration.getFloat(2.0f, "power", "killaward");
+            this._killAward = _configuration.getFloat(2.0f, "power", "kill-award");
             this._penalty = _configuration.getFloat(1.0f, "power", "penalty");
             this._maxNameLength = _configuration.getInt(30,"name", "max-length");
             this._minNameLength = _configuration.getInt(3, "name", "min-length");
