@@ -476,7 +476,7 @@ public final class ConfigFields
         return _storageType;
     }
 
-    public String getStorageUserName()
+    public String getStorageUsername()
     {
         return _storageUserName;
     }

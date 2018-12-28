@@ -8,91 +8,142 @@ CREATE TABLE Factions (
    Id          INT AUTO_INCREMENT              NOT NULL,
    Name        VARCHAR(200)        UNIQUE      NOT NULL,
    Tag         VARCHAR(10)                     NOT NULL,
-   TagColor    VARCHAR(40)                     NOT NULL,
-   Leader      VARCHAR(36)                     NOT NULL,
+   TagColor    VARCHAR(40)                     NULL,
+   Leader      UUID                     NOT NULL,
    Home        VARCHAR(200)                    NULL,
    LastOnline  VARCHAR(200)                    NOT NULL,
-   PRIMARY KEY (Id)
+   Alliances    VARCHAR                     NOT NULL,
+   Enemies      VARCHAR                     NOT NULL,
+   PRIMARY KEY (Name)
 );
 CREATE UNIQUE INDEX ON Factions (Name);
 
--- Create FactionAlliances Table
-CREATE TABLE FactionAlliances (
-   FactionId    INT                             NOT NULL,
-   AlliancesIds VARCHAR(200)                    NOT NULL
+-- Create Recruits Table
+CREATE TABLE FactionRecruits (
+    RecruitUUID     UUID    UNIQUE  NOT NULL,
+    FactionName     VARCHAR(200)    NOT NULL,
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON FactionAlliances (FactionId);
+CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 
--- Create FactionEnemies Table
-CREATE TABLE FactionEnemies (
-   FactionId   INT                             NOT NULL,
-   EnemiesIds  VARCHAR(200)                    NOT NULL
+-- Create Members Table
+CREATE TABLE FactionMembers (
+    MemberUUID  UUID    UNIQUE  NOT NULL,
+    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON FactionEnemies (FactionId);
+CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
+
+-- Create Officers Table
+CREATE TABLE FactionOfficers (
+    OfficerUUID UUID    UNIQUE  NOT NULL,
+    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
+
+---- Create FactionAlliances Table
+--CREATE TABLE FactionAlliances (
+--   FactionName  VARCHAR(200)      UNIQUE        NOT NULL,
+--   AlliancesIds VARCHAR(200)                    NOT NULL,
+--   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+--);
+--CREATE UNIQUE INDEX ON FactionAlliances (FactionName);
+--
+---- Create FactionEnemies Table
+--CREATE TABLE FactionEnemies (
+--   FactionName VARCHAR(200)        UNIQUE      NOT NULL,
+--   EnemiesIds  VARCHAR(200)                    NOT NULL,
+--   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+--);
+--CREATE UNIQUE INDEX ON FactionEnemies (FactionName);
 
 ---- Create FactionTruces Table
 --CREATE TABLE `FactionTruces` (
---   `FactionId`   INT                             NOT NULL,
+--   `FactionName`   VARCHAR(200)                             NOT NULL,
 --   `TrucesIds`  VARCHAR(200)        UNIQUE      NOT NULL,
 --);
---CREATE UNIQUE INDEX ON `FactionEnemies` (`FactionId`);
+--CREATE UNIQUE INDEX ON FactionTruces (FactionName);
 
 -- Create LeaderFlags Table
 CREATE TABLE LeaderFlags (
-   FactionId   INT                             NOT NULL,
+   FactionName   VARCHAR(200)     UNIQUE       NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL
+   Invite      BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON LeaderFlags (FactionId);
+CREATE UNIQUE INDEX ON LeaderFlags (FactionName);
 
 -- Create OfficerFlags Table
 CREATE TABLE OfficerFlags (
-   FactionId   INT                             NOT NULL,
+   FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL
+   Invite      BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON OfficerFlags (`FactionId`);
+CREATE UNIQUE INDEX ON OfficerFlags (FactionName);
 
 -- Create MemberFlags Table
 CREATE TABLE MemberFlags (
-   FactionId   INT                             NOT NULL,
+   FactionName   VARCHAR(200)      UNIQUE      NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL
+   Invite      BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON MemberFlags (FactionId);
+CREATE UNIQUE INDEX ON MemberFlags (FactionName);
 
 -- Create RecruitFlags Table
 CREATE TABLE RecruitFlags (
-   FactionId   INT                             NOT NULL,
+   FactionName   VARCHAR(200)   UNIQUE         NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL
+   Invite      BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON `RecruitFlags` (`FactionId`);
+CREATE UNIQUE INDEX ON RecruitFlags (FactionName);
 
 -- Create AllyFlags Table
 CREATE TABLE AllyFlags (
-   FactionId   INT                             NOT NULL,
+   FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
-   Destroy     BOOLEAN                         NOT NULL
+   Destroy     BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON AllyFlags (FactionId);
+CREATE UNIQUE INDEX ON AllyFlags (FactionName);
+
+-- Create Claims Table
+CREATE TABLE Claims (
+   Id            INT AUTO_INCREMENT              NOT NULL,
+   FactionName   VARCHAR(200)                  NOT NULL,
+   WorldUUID   UUID                            NOT NULL,
+   ChunkPosition VARCHAR(200)                  NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX ON Claims (Id);
+
+-- Create FactionsChest Table
+CREATE TABLE FactionChests (
+    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    ChestItems  BINARY            NOT NULL,
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX ON FactionChests (FactionName);
 
 -- Set database version to 1
 INSERT INTO Version VALUES (1);

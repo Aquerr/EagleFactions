@@ -21,8 +21,8 @@ public class ReloadCommand extends AbstractCommand
     {
         try
         {
-            EagleFactions.getPlugin().getConfiguration().reloadConfiguration();
-            getPlugin().getFactionLogic().reload();
+            super.getPlugin().getConfiguration().reloadConfiguration();
+            super.getPlugin().getStorageManager().reloadStorage();
 
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));
         }

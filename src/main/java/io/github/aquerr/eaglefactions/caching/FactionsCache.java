@@ -76,4 +76,10 @@ public class FactionsCache
     {
         claimsCacheSet.remove(claim);
     }
+
+    public static void clearCache()
+    {
+        claimsCacheSet.clear();
+        factionsCacheMap.clear();
+    }
 }

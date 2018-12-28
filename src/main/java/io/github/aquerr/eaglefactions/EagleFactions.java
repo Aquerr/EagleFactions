@@ -13,6 +13,7 @@ import io.github.aquerr.eaglefactions.managers.*;
 import io.github.aquerr.eaglefactions.message.MessageLoader;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
+import io.github.aquerr.eaglefactions.storage.StorageManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -63,6 +64,7 @@ public class EagleFactions
     private PowerManager _powerManager;
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
+    private StorageManager _storageManager;
 
 //    private Optional<PlaceholderService> _placeholderService;
 
@@ -527,6 +529,11 @@ public class EagleFactions
         return _factionLogic;
     }
 
+    public StorageManager getStorageManager()
+    {
+        return this._storageManager;
+    }
+
     public InputStream getResourceAsStream(String fileName)
     {
         return this.getClass().getClassLoader().getResourceAsStream(fileName);
@@ -547,6 +554,8 @@ public class EagleFactions
 
     private void SetupManagers()
     {
+        _storageManager = StorageManager.getInstance(this);
+
         _playerManager = PlayerManager.getInstance(this);
         _powerManager = PowerManager.getInstance(this);
         _flagManager = FlagManager.getInstance(this);

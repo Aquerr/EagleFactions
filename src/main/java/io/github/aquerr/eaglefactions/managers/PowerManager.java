@@ -28,7 +28,7 @@ public class PowerManager
     private final ConfigFields _configFields;
 
     private CommentedConfigurationNode _factionsNode;
-    private UUID dummyUUID = new UUID(0, 0);
+    private final UUID dummyUUID = new UUID(0, 0);
 
     public static PowerManager getInstance(EagleFactions eagleFactions)
     {
