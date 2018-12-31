@@ -145,5 +145,15 @@ CREATE TABLE FactionChests (
 );
 CREATE UNIQUE INDEX ON FactionChests (FactionName);
 
+-- Create Players Table
+CREATE TABLE Players (
+    PlayerUUID UUID PRIMARY KEY NOT NULL,
+    Name    VARCHAR(200)    NOT NULL,
+    Power   REAL NOT NULL,
+    Maxpower    REAL NOT NULL,
+    DeathInWarzone BOOLEAN NOT NULL
+);
+CREATE UNIQUE INDEX ON Players (PlayerUUID);
+
 -- Set database version to 1
 INSERT INTO Version VALUES (1);

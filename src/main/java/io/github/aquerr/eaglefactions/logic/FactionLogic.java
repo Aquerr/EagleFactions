@@ -9,7 +9,6 @@ import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.storage.StorageManager;
-import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
@@ -161,9 +160,9 @@ public class FactionLogic
         storageManager.addOrUpdateFaction(faction);
     }
 
-    public void disbandFaction(String factionName)
+    public boolean disbandFaction(String factionName)
     {
-        this.storageManager.deleteFaction(factionName);
+        return this.storageManager.deleteFaction(factionName);
     }
 
     public void joinFaction(UUID playerUUID, String factionName)

@@ -5,8 +5,7 @@ import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
-import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
-import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
+import io.github.aquerr.eaglefactions.storage.StorageManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -25,7 +24,7 @@ public class PlayerManager
     private static PlayerManager instance = null;
 
     private final ConfigFields _configFields;
-    private final IPlayerStorage _playerStorage;
+    private final StorageManager storageManager;
 
     private UserStorageService userStorageService;
 
@@ -33,7 +32,7 @@ public class PlayerManager
     {
         instance = this;
         _configFields = plugin.getConfiguration().getConfigFields();
-        _playerStorage = new HOCONPlayerStorage(plugin.getConfigDir());
+        storageManager = StorageManager.getInstance(plugin);
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
@@ -48,27 +47,27 @@ public class PlayerManager
 
     public boolean addPlayer(UUID playerUUID, String playerName)
     {
-        return _playerStorage.addPlayer(playerUUID, playerName, _configFields.getStartingPower(), _configFields.getGlobalMaxPower());
+        return storageManager.addPlayer(playerUUID, playerName, _configFields.getStartingPower(), _configFields.getGlobalMaxPower());
     }
 
     public float getPlayerPower(UUID playerUUID)
     {
-        return _playerStorage.getPlayerPower(playerUUID);
+        return storageManager.getPlayerPower(playerUUID);
     }
 
     public boolean setPlayerPower(UUID playerUUID, float power)
     {
-        return _playerStorage.setPlayerPower(playerUUID, power);
+        return storageManager.setPlayerPower(playerUUID, power);
     }
 
     public float getPlayerMaxPower(UUID playerUUID)
     {
-        return _playerStorage.getPlayerMaxPower(playerUUID);
+        return storageManager.getPlayerMaxPower(playerUUID);
     }
 
     public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
     {
-        return _playerStorage.setPlayerMaxPower(playerUUID, maxpower);
+        return storageManager.setPlayerMaxPower(playerUUID, maxpower);
     }
 
     public Optional<String> getPlayerName(UUID playerUUID)
@@ -85,7 +84,7 @@ public class PlayerManager
 
     private Optional<String> getLastKnownPlayerName(UUID playerUUID)
     {
-        String playerName = _playerStorage.getPlayerName(playerUUID);
+        String playerName = storageManager.getPlayerName(playerUUID);
         if(playerName.equals(""))
             return Optional.empty();
         return Optional.of(playerName);
@@ -111,22 +110,22 @@ public class PlayerManager
 
     public Set<String> getServerPlayerNames()
     {
-        return _playerStorage.getServerPlayerNames();
+        return storageManager.getServerPlayerNames();
     }
 
     public void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
     {
-        _playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
+        storageManager.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
     public boolean lastDeathAtWarZone(UUID playerUUID)
     {
-       return _playerStorage.getLastDeathInWarzone(playerUUID);
+       return storageManager.getLastDeathInWarzone(playerUUID);
     }
 
     public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
     {
-        return _playerStorage.checkIfPlayerExists(playerUUID, playerName);
+        return storageManager.checkIfPlayerExists(playerUUID, playerName);
     }
 
     @Nullable
@@ -158,11 +157,11 @@ public class PlayerManager
 
     public Set<IFactionPlayer> getServerPlayers()
     {
-        return _playerStorage.getServerPlayers();
+        return storageManager.getServerPlayers();
     }
 
     public void updatePlayerName(UUID playerUUID, String playerName)
     {
-        this._playerStorage.updatePlayerName(playerUUID, playerName);
+        this.storageManager.updatePlayerName(playerUUID, playerName);
     }
 }

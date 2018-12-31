@@ -5,7 +5,6 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -13,11 +12,12 @@ import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FactionChest
+public class FactionChest implements Serializable
 {
     private List<SlotItem> items;
 
@@ -29,6 +29,32 @@ public class FactionChest
     public FactionChest(List<SlotItem> items)
     {
         this.items = items;
+    }
+
+    public static FactionChest fromInventory(Inventory inventory)
+    {
+        List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
+
+        Iterable<Inventory> slots = inventory.slots();
+        int column = 1;
+        int row = 1;
+        for(Inventory slot : slots)
+        {
+            Optional<ItemStack> optionalItemStack = slot.peek();
+            if(optionalItemStack.isPresent())
+            {
+                slotItemList.add(new FactionChest.SlotItem(column, row, optionalItemStack.get()));
+            }
+
+            column++;
+            if(column > 9)
+            {
+                row++;
+                column = 1;
+            }
+        }
+
+        return new FactionChest(slotItemList);
     }
 
     public List<SlotItem> getItems()
@@ -55,31 +81,11 @@ public class FactionChest
                 .of(InventoryArchetypes.CHEST)
                 .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
                 .listener(InteractInventoryEvent.Close.class, (x) ->{
-                    List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
-
-                    Iterable<Inventory> slots = x.getTargetInventory().slots();
-                    int column = 1;
-                    int row = 1;
-                    for(Inventory slot : slots)
-                    {
-                        Optional<ItemStack> optionalItemStack = slot.peek();
-                        if(optionalItemStack.isPresent())
-                        {
-                            slotItemList.add(new FactionChest.SlotItem(column, row, optionalItemStack.get()));
-                        }
-
-                        column++;
-                        if(column > 9)
-                        {
-                            row++;
-                            column = 1;
-                        }
-                    }
-
+                    FactionChest factionChest = FactionChest.fromInventory(x.getTargetInventory());
                     Optional<Faction> optionalFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByPlayerUUID(x.getCause().first(User.class).get().getUniqueId());
                     if(optionalFaction.isPresent())
                     {
-                        EagleFactions.getPlugin().getFactionLogic().setChest(optionalFaction.get(), new FactionChest(slotItemList));
+                        EagleFactions.getPlugin().getFactionLogic().setChest(optionalFaction.get(), factionChest);
                     }
                 })
                 .build(EagleFactions.getPlugin());
@@ -106,7 +112,7 @@ public class FactionChest
     }
 
     @ConfigSerializable
-    public static class SlotItem
+    public static class SlotItem implements Serializable
     {
         @Setting
         private int column;

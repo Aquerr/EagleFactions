@@ -259,12 +259,14 @@ public class HOCONPlayerStorage implements IPlayerStorage
                 }
                 String factionName = configurationNode.getNode("faction").getString("");
                 String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
+                float power = configurationNode.getNode("power").getFloat(5f);
+                float maxpower = configurationNode.getNode("maxpower").getFloat(10f);
                 FactionMemberType factionMemberType = null;
 
                 if(!factionMemberTypeString.equals(""))
                     factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
-                FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID, factionName, factionMemberType);
+                FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID, factionName, factionMemberType, power, maxpower);
                 playerSet.add(factionPlayer);
             }
             catch(IOException e)
@@ -296,11 +298,11 @@ public class HOCONPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public void updatePlayerName(UUID playerUUID, String playerName)
+    public boolean updatePlayerName(UUID playerUUID, String playerName)
     {
         Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
         if(!Files.exists(playerFile))
-            return;
+            return false;
 
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
         ConfigurationNode configurationNode = null;
@@ -322,6 +324,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
                 try
                 {
                     configurationLoader.save(configurationNode);
+                    return true;
                 }
                 catch(IOException e)
                 {
@@ -329,5 +332,6 @@ public class HOCONPlayerStorage implements IPlayerStorage
                 }
             }
         }
+        return false;
     }
 }

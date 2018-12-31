@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 
-import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,5 +29,5 @@ public interface IPlayerStorage
 
     String getPlayerName(UUID playerUUID);
 
-    void updatePlayerName(UUID playerUUID, String playerName);
+    boolean updatePlayerName(UUID playerUUID, String playerName);
 }

@@ -4,23 +4,26 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.h2.H2FactionStorage;
+import io.github.aquerr.eaglefactions.storage.h2.H2PlayerStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
+import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.UUID;
 
 public class StorageManager
 {
-    //TODO: Consider using FactionsCache in this class only.
-
     private static StorageManager INSTANCE = null;
 
     private final IFactionStorage factionsStorage;
-    private final Queue<IStorageTask> storageTaskQueue = new ConcurrentLinkedQueue<>();
+    private final IPlayerStorage playerStorage;
+    private final Queue<IStorageTask> storageTaskQueue;
 
     private final Thread storageThread;
 
@@ -39,9 +42,11 @@ public class StorageManager
         {
             case "hocon":
                 factionsStorage = new HOCONFactionStorage(configDir);
+                playerStorage = new HOCONPlayerStorage(configDir);
                 break;
             case "h2":
                 factionsStorage = new H2FactionStorage(eagleFactions);
+                playerStorage = new H2PlayerStorage(eagleFactions);
                 break;
                 //TODO: Add SQLLite, JSON, etc...
 //            case "sqllite":
@@ -49,10 +54,13 @@ public class StorageManager
 //                break;
             default:
                 factionsStorage = new HOCONFactionStorage(configDir);
+                playerStorage = new HOCONPlayerStorage(configDir);
                 break;
         }
         prepareFactionsCache();
+//        preparePlayerCache();
 
+        this.storageTaskQueue = new LinkedList<>();
         this.storageThread = new Thread(run());
         this.storageThread.start();
     }
@@ -100,10 +108,11 @@ public class StorageManager
         queueStorageTask(new UpdateFactionTask(faction));
     }
 
-    public void deleteFaction(String factionName)
+    public boolean deleteFaction(String factionName)
     {
         FactionsCache.removeFactionCache(factionName);
         queueStorageTask(new DeleteFactionTask(factionName));
+        return true;
     }
 
     public @Nullable Faction getFaction(String factionName)
@@ -145,5 +154,65 @@ public class StorageManager
         FactionsCache.clearCache();
         this.factionsStorage.load();
         prepareFactionsCache();
+    }
+
+    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
+    {
+        return this.playerStorage.checkIfPlayerExists(playerUUID, playerName);
+    }
+
+    public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float globalMaxPower)
+    {
+        return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
+    }
+
+    public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
+    {
+        return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
+    }
+
+    public boolean getLastDeathInWarzone(final UUID playerUUID)
+    {
+        return this.playerStorage.getLastDeathInWarzone(playerUUID);
+    }
+
+    public float getPlayerPower(final UUID playerUUID)
+    {
+        return this.playerStorage.getPlayerPower(playerUUID);
+    }
+
+    public boolean setPlayerPower(final UUID playerUUID, final float power)
+    {
+        return this.playerStorage.setPlayerPower(playerUUID, power);
+    }
+
+    public float getPlayerMaxPower(final UUID playerUUID)
+    {
+        return this.playerStorage.getPlayerMaxPower(playerUUID);
+    }
+
+    public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
+    {
+        return this.playerStorage.setPlayerMaxPower(playerUUID, maxpower);
+    }
+
+    public Set<String> getServerPlayerNames()
+    {
+        return this.playerStorage.getServerPlayerNames();
+    }
+
+    public Set<IFactionPlayer> getServerPlayers()
+    {
+        return this.playerStorage.getServerPlayers();
+    }
+
+    public String getPlayerName(final UUID playerUUID)
+    {
+        return this.playerStorage.getPlayerName(playerUUID);
+    }
+
+    public boolean updatePlayerName(final UUID playerUUID, final String playerName)
+    {
+        return this.playerStorage.updatePlayerName(playerUUID, playerName);
     }
 }
