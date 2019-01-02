@@ -151,7 +151,7 @@ public class BlockBreakListener extends AbstractListener
                 if(location.getBlockType() == BlockTypes.AIR)
                     continue;
 
-                if(!super.getPlugin().getProtectionManager().canBreak(location, location.getExtent(), user))
+                if(!super.getPlugin().getProtectionManager().canBreak(location, user))
                 {
                     event.setCancelled(true);
                     return;
@@ -174,7 +174,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(user != null && pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteract(location, location.getExtent(), user))
+                    if(!super.getPlugin().getProtectionManager().canInteract(location, user))
                     {
                         event.setCancelled(true);
                         return;
@@ -206,12 +206,12 @@ public class BlockBreakListener extends AbstractListener
                 if(isLeafDecay)
                     continue;
 
-                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, location.getExtent(), user.getPlayer().get()))
+                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location, location.getExtent()))
+                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
                 {
                     event.setCancelled(true);
                     return;
@@ -224,7 +224,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteract(location, location.getExtent(), user))
+                    if(!super.getPlugin().getProtectionManager().canInteract(location, user))
                     {
                         event.setCancelled(true);
                     }
@@ -246,7 +246,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isLeafDecay)
                     continue;
 
-                if(!super.getPlugin().getProtectionManager().canBreak(location, location.getExtent(), user.getPlayer().get()))
+                if(!super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
                 {
                     event.setCancelled(true);
                     return;
@@ -294,12 +294,12 @@ public class BlockBreakListener extends AbstractListener
                 continue;
             }
 
-            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, location.getExtent(), user))
+            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user))
             {
                 event.setCancelled(true);
                 return;
             }
-            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location, location.getExtent()))
+            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
             {
                 event.setCancelled(true);
                 return;
@@ -516,7 +516,7 @@ public class BlockBreakListener extends AbstractListener
                 if(entity instanceof Living)
                 {
                     Object source = event.getSource();
-                    if(entity instanceof User && !getPlugin().getProtectionManager().canInteract(entity.getLocation(), entity.getWorld(), (User)entity))
+                    if(entity instanceof User && !getPlugin().getProtectionManager().canInteract(entity.getLocation(), (User)entity))
                     {
                         return false;
                     }

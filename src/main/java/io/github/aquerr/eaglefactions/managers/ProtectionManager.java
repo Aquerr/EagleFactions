@@ -42,8 +42,10 @@ public class ProtectionManager implements IProtectionManager
     }
 
     @Override
-    public boolean canInteract(Location location, World world, User user)
+    public boolean canInteract(Location<World> location, User user)
     {
+        World world = location.getExtent();
+
         if(hasAdminMode(user.getUniqueId())
                 || isBlockWhitelistedForInteraction(location.getBlockType())
                 || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent()
@@ -115,8 +117,9 @@ public class ProtectionManager implements IProtectionManager
     }
 
     @Override
-    public boolean canBreak(Location location, World world, User user)
+    public boolean canBreak(Location<World> location, User user)
     {
+        World world = location.getExtent();
         if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
 
@@ -125,7 +128,7 @@ public class ProtectionManager implements IProtectionManager
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
             return false;
         }
-        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled() && !user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief() && !user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
         {
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
             return false;
@@ -170,8 +173,10 @@ public class ProtectionManager implements IProtectionManager
     }
 
     @Override
-    public boolean canBreak(Location location, World world)
+    public boolean canBreak(Location<World> location)
     {
+        World world = location.getExtent();
+
         //Air can be always destroyed.
         if(location.getBlockType() == BlockTypes.AIR)
             return true;
@@ -182,7 +187,7 @@ public class ProtectionManager implements IProtectionManager
         if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()))
             return false;
 
-        if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
+        if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief())
             return false;
 
         Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
@@ -192,18 +197,19 @@ public class ProtectionManager implements IProtectionManager
         if(optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
             return false;
 
-        if(optionalChunkFaction.get().getName().equalsIgnoreCase("WarZone") && this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtWarzoneDisabled())
+        if(optionalChunkFaction.get().getName().equalsIgnoreCase("WarZone") && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief())
             return false;
 
-        if(this.plugin.getConfiguration().getConfigFields().isBlockDestroyAtClaimsDisabled())
+        if(this.plugin.getConfiguration().getConfigFields().shouldProtectClaimFromMobGrief())
             return false;
 
         return true;
     }
 
     @Override
-    public boolean canPlace(Location location, World world, User user)
+    public boolean canPlace(Location<World> location, User user)
     {
+        World world = location.getExtent();
         if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
             return true;
 
@@ -254,9 +260,108 @@ public class ProtectionManager implements IProtectionManager
         return true;
     }
 
-    private boolean hasAdminMode(UUID playerUUID)
+    @Override
+    public boolean canExplode(Location<World> location, User user)
     {
-        return EagleFactions.AdminList.contains(playerUUID);
+        boolean shouldProtectWarZoneFromPlayers = this.plugin.getConfiguration().getConfigFields().shouldProtectWarzoneFromPlayers();
+        boolean allowExplosionsByOtherPlayersInClaims = this.plugin.getConfiguration().getConfigFields().shouldAllowExplosionsByOtherPlayersInClaims();
+
+        //Check if admin
+        if(EagleFactions.AdminList.contains(user.getUniqueId()))
+            return true;
+
+        //Check world
+        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(location.getExtent().getName()))
+        {
+            return false;
+        }
+
+        if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(location.getExtent().getName()))
+        {
+            if (shouldProtectWarZoneFromPlayers)
+            {
+                return false;
+            }
+            else return true;
+        }
+
+        //If no faction
+        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        if (!optionalChunkFaction.isPresent())
+            return true;
+
+        //If SafeZone or WarZone
+        Faction chunkFaction = optionalChunkFaction.get();
+        if (chunkFaction.getName().equalsIgnoreCase("SafeZone"))
+        {
+            return false;
+        }
+        if (chunkFaction.getName().equalsIgnoreCase("WarZone") && shouldProtectWarZoneFromPlayers)
+        {
+            return false;
+        }
+
+        //If player is in faction
+        Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        if (optionalPlayerFaction.isPresent())
+        {
+            Faction playerFaction = optionalPlayerFaction.get();
+            //If same faction
+            if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
+            {
+                //Check faction's flags
+                if (!this.plugin.getFlagManager().canBreakBlock(user.getUniqueId(), playerFaction, chunkFaction))
+                {
+                    return false;
+                }
+            }
+            else if (!allowExplosionsByOtherPlayersInClaims)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean canExplode(final Location<World> location)
+    {
+        boolean shouldProtectWarZoneFromMobGrief = this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief();
+        boolean shouldProtectClaimsFromMobGrief = this.plugin.getConfiguration().getConfigFields().shouldProtectClaimFromMobGrief();
+
+        //Check world
+        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(location.getExtent().getName()))
+        {
+            return false;
+        }
+
+        if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(location.getExtent().getName()))
+        {
+            if (shouldProtectWarZoneFromMobGrief)
+            {
+                return false;
+            }
+            else return true;
+        }
+
+        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        if (!optionalChunkFaction.isPresent())
+            return true;
+
+        Faction chunkFaction = optionalChunkFaction.get();
+        if (chunkFaction.getName().equalsIgnoreCase("SafeZone"))
+        {
+            return false;
+        }
+        else if (chunkFaction.getName().equalsIgnoreCase("WarZone") && shouldProtectWarZoneFromMobGrief)
+        {
+            return false;
+        }
+        else if (shouldProtectClaimsFromMobGrief)
+        {
+            return false;
+        }
+        else return true;
     }
 
     @Override
@@ -275,5 +380,10 @@ public class ProtectionManager implements IProtectionManager
     public boolean isBlockWhitelistedForPlaceDestroy(CatalogType blockOrItemType)
     {
         return this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks().contains(blockOrItemType.getId());
+    }
+
+    private boolean hasAdminMode(UUID playerUUID)
+    {
+        return EagleFactions.AdminList.contains(playerUUID);
     }
 }

@@ -49,8 +49,10 @@ public final class ConfigFields
     private boolean _isPvpLoggerActive = true;
     private int _pvpLoggerBlockTime = 60;
     private boolean _showPvpLoggerInScoreboard = true;
-    private boolean _disableBlockDestroyAtClaims = false;
-    private boolean _disableBlockDestroyAtWarzone = false;
+    private boolean _protectFromMobGrief = false;
+    private boolean _protectFromMobGriefWarZone = false;
+    private boolean _allowExplosionsByOtherPlayersInClaims = false;
+    private boolean _protectWarZoneFromPlayers = false;
     private List<String> _blockedCommandsDuringFight = Arrays.asList("/f home", "spawn", "tpa", "/tp");
     private boolean _canColorTags = true;
     private Text _factionStartPrefix = Text.of("[");
@@ -124,8 +126,10 @@ public final class ConfigFields
             this._isPvpLoggerActive = _configuration.getBoolean(true, "pvp-logger", "active");
             this._pvpLoggerBlockTime = _configuration.getInt(60, "pvp-logger", "time");
             this._showPvpLoggerInScoreboard = _configuration.getBoolean(true, "pvp-logger", "show-in-scoreboard");
-            this._disableBlockDestroyAtClaims = _configuration.getBoolean(false, "disable-block-destroy-claims");
-            this._disableBlockDestroyAtWarzone = _configuration.getBoolean(false, "disable-block-destroy-warzone");
+            this._protectFromMobGrief = _configuration.getBoolean(false, "protect-from-mob-grief");
+            this._protectFromMobGriefWarZone = _configuration.getBoolean(false, "protect-from-mob-grief-warzone");
+            this._allowExplosionsByOtherPlayersInClaims = _configuration.getBoolean(false, "allow-explosions-by-other-players-in-claims");
+            this._protectWarZoneFromPlayers = _configuration.getBoolean(false, "protect-warzone-from-players");
             this._blockedCommandsDuringFight = _configuration.getListOfStrings(Arrays.asList("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
@@ -359,14 +363,14 @@ public final class ConfigFields
         return _pvpLoggerBlockTime;
     }
 
-    public boolean isBlockDestroyAtClaimsDisabled()
+    public boolean shouldProtectClaimFromMobGrief()
     {
-        return _disableBlockDestroyAtClaims;
+        return _protectFromMobGrief;
     }
 
-    public boolean isBlockDestroyAtWarzoneDisabled()
+    public boolean shouldProtectWarZoneFromMobGrief()
     {
-        return _disableBlockDestroyAtWarzone;
+        return _protectFromMobGriefWarZone;
     }
 
     public List<String> getBlockedCommandsDuringFight()
@@ -509,5 +513,15 @@ public final class ConfigFields
     public boolean canUseFactionChest()
     {
         return this._canUseFactionChest;
+    }
+
+    public boolean shouldAllowExplosionsByOtherPlayersInClaims()
+    {
+        return this._allowExplosionsByOtherPlayersInClaims;
+    }
+
+    public boolean shouldProtectWarzoneFromPlayers()
+    {
+        return this._protectWarZoneFromPlayers;
     }
 }

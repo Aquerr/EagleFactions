@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
@@ -17,11 +16,9 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.explosion.Explosion;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ExplosionListener extends AbstractListener
 {
@@ -33,14 +30,48 @@ public class ExplosionListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onExplosionPre(ExplosionEvent.Pre event)
     {
-        World world = event.getTargetWorld();
-        EventContext eventContext = event.getContext();
+        EventContext context = event.getContext();
         Cause cause = event.getCause();
 
-        //TODO: Improve this code... as it should not happen every time.
-        Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(event.getTargetWorld().getUniqueId(), event.getExplosion().getLocation().getChunkPosition());
-        if(optionalChunkFaction.isPresent())
-            event.setCancelled(true);
+        User user = null;
+        if (cause.root() instanceof TileEntity) {
+            user = context.get(EventContextKeys.OWNER)
+                    .orElse(context.get(EventContextKeys.NOTIFIER)
+                            .orElse(context.get(EventContextKeys.CREATOR)
+                                    .orElse(null)));
+        } else {
+            user = context.get(EventContextKeys.NOTIFIER)
+                    .orElse(context.get(EventContextKeys.OWNER)
+                            .orElse(context.get(EventContextKeys.CREATOR)
+                                    .orElse(null)));
+        }
+
+        if(event.getCause().containsType(Player.class))
+        {
+            user = event.getCause().first(Player.class).get();
+        }
+        else if(event.getCause().containsType(User.class))
+        {
+            user = event.getCause().first(User.class).get();
+        }
+
+        Location<World> location = event.getExplosion().getLocation();
+        if (user == null)
+        {
+            if(!super.getPlugin().getProtectionManager().canExplode(location))
+            {
+                event.setCancelled(true);
+                return;
+            }
+        }
+        else
+        {
+            if (!super.getPlugin().getProtectionManager().canExplode(location, user))
+            {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
@@ -75,54 +106,29 @@ public class ExplosionListener extends AbstractListener
         for(Entity entity : entityList)
         {
             Location<World> entityLocation = entity.getLocation();
-//            Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(entityLocation.getExtent().getUniqueId(), entityLocation.getChunkPosition());
             if(user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canBreak(entityLocation, entityLocation.getExtent(), user))
+                if(!super.getPlugin().getProtectionManager().canExplode(entityLocation, user))
                 {
                     event.getEntities().remove(entity);
                 }
             }
-            else if(!super.getPlugin().getProtectionManager().canBreak(entityLocation, entityLocation.getExtent()))
+            else if(!super.getPlugin().getProtectionManager().canExplode(entityLocation))
             {
                 event.getEntities().remove(entity);
             }
         }
 
-//        for(int i = 0; i < entityList.size(); i++)
-//        {
-//            Location<World> entityLocation = entityList.get(i).getLocation();
-//            if(user != null)
-//            {
-//                if(!super.getPlugin().getProtectionManager().canBreak(entityLocation, entityLocation.getExtent(), user))
-//                {
-//                    event.getEntities().remove(i);
-//                    i--;
-//                }
-//            }
-//            else if(!super.getPlugin().getProtectionManager().canBreak(entityLocation, entityLocation.getExtent()))
-//            {
-//                event.getEntities().remove(i);
-//                i--;
-//            }
-//        }
-//
         for(Location<World> location : locationList)
         {
-//            Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
-
             if(user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canBreak(location, location.getExtent(), user))
+                if(!super.getPlugin().getProtectionManager().canExplode(location, user))
                 {
                     event.getAffectedLocations().remove(location);
                 }
             }
-//            else if(optionalFaction.isPresent() && optionalFaction.get().getName().equalsIgnoreCase("SafeZone"))
-//            {
-//                event.getAffectedLocations().remove(location);
-//            }
-            else if(!super.getPlugin().getProtectionManager().canBreak(location, location.getExtent()))
+            else if(!super.getPlugin().getProtectionManager().canExplode(location))
             {
                 event.getAffectedLocations().remove(location);
             }
@@ -165,20 +171,38 @@ public class ExplosionListener extends AbstractListener
             if(location == null)
                 continue;
 
-            Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-            if(!optionalChunkFaction.isPresent())
-                continue;
+            if (user != null)
+            {
+                if (!super.getPlugin().getProtectionManager().canExplode(location, user))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            else
+            {
+                if (!super.getPlugin().getProtectionManager().canExplode(location))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
 
-            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, world, user))
-            {
-                event.setCancelled(true);
-                return;
-            }
-            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location, world))
-            {
-                event.setCancelled(true);
-                return;
-            }
+//            Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+//
+//            if(!optionalChunkFaction.isPresent())
+//                continue;
+//
+//            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user))
+//            {
+//                event.setCancelled(true);
+//                return;
+//            }
+//            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
+//            {
+//                event.setCancelled(true);
+//                return;
+//            }
         }
     }
 }

@@ -1,15 +1,12 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -45,7 +42,7 @@ public class ModifyBlockListener extends AbstractListener
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
                 final Optional<Location<World>> optionalLocation = transaction.getFinal().getLocation();
-                if(optionalLocation.isPresent() && !super.getPlugin().getProtectionManager().canInteract(optionalLocation.get(), optionalLocation.get().getExtent(), user))
+                if(optionalLocation.isPresent() && !super.getPlugin().getProtectionManager().canInteract(optionalLocation.get(), user))
                     event.setCancelled(true);
             }
         }

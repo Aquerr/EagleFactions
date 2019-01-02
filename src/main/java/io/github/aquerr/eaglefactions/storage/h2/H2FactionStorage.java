@@ -86,39 +86,47 @@ public class H2FactionStorage implements IFactionStorage
             URL resourcesFolderURL = this.plugin.getResource("queries/h2");
             File resourcesFolder = new File(resourcesFolderURL.getPath());
             File[] resources = resourcesFolder.listFiles();
-            for(File resource : resources)
+            if (resources != null)
             {
-                int scriptNumber = Integer.parseInt(resource.getName().substring(0, 3));
-                if(scriptNumber <= databaseVersionNumber)
-                    continue;
-
-                try(BufferedReader bufferedReader = new BufferedReader(new FileReader(resource)))
+                for(File resource : resources)
                 {
-                    try(Statement statement = _connection.getConnection().createStatement())
+                    int scriptNumber = Integer.parseInt(resource.getName().substring(0, 3));
+                    if(scriptNumber <= databaseVersionNumber)
+                        continue;
+
+                    try(BufferedReader bufferedReader = new BufferedReader(new FileReader(resource)))
                     {
-                        StringBuilder stringBuilder = new StringBuilder();
-                        String line;
-
-                        while((line = bufferedReader.readLine()) != null)
+                        try(Statement statement = _connection.getConnection().createStatement())
                         {
-                            if(line.startsWith("--"))
-                                continue;
+                            StringBuilder stringBuilder = new StringBuilder();
+                            String line;
 
-                            stringBuilder.append(line);
-
-                            if(line.endsWith(";"))
+                            while((line = bufferedReader.readLine()) != null)
                             {
-                                statement.addBatch(stringBuilder.toString().trim());
-                                stringBuilder = new StringBuilder();
+                                if(line.startsWith("--"))
+                                    continue;
+
+                                stringBuilder.append(line);
+
+                                if(line.endsWith(";"))
+                                {
+                                    statement.addBatch(stringBuilder.toString().trim());
+                                    stringBuilder = new StringBuilder();
+                                }
                             }
+                            statement.executeBatch();
                         }
-                        statement.executeBatch();
+                    }
+                    catch(Exception exception)
+                    {
+                        exception.printStackTrace();
                     }
                 }
-                catch(Exception exception)
-                {
-                    exception.printStackTrace();
-                }
+            }
+            else
+            {
+                System.out.println("There may be a problem with database script files...");
+                System.out.println("Searched for them in: " + resourcesFolder.getName());
             }
             if (databaseVersionNumber == 0)
                 precreate();

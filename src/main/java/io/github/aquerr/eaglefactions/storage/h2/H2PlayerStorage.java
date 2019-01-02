@@ -107,12 +107,13 @@ public class H2PlayerStorage implements IPlayerStorage
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_DEATH_IN_WARZONE_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
+            boolean lastDeathInWarzone = false;
             if (resultSet.next())
             {
-                boolean lastDeathInWarzone = resultSet.getBoolean("DeathInWarzone");
-                connection.close();
-                return lastDeathInWarzone;
+                lastDeathInWarzone = resultSet.getBoolean("DeathInWarzone");
             }
+            connection.close();
+            return lastDeathInWarzone;
         }
         catch (SQLException e)
         {
@@ -130,12 +131,13 @@ public class H2PlayerStorage implements IPlayerStorage
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_POWER_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
+            float power = 0;
             if (resultSet.next())
             {
-                float power = resultSet.getFloat("Power");
-                return power;
+                power = resultSet.getFloat("Power");
             }
             connection.close();
+            return power;
         }
         catch (SQLException e)
         {
@@ -173,12 +175,13 @@ public class H2PlayerStorage implements IPlayerStorage
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MAXPOWER_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
+            float power = 0;
             if (resultSet.next())
             {
-                float power = resultSet.getFloat("MaxPower");
-                return power;
+                power = resultSet.getFloat("MaxPower");
             }
             connection.close();
+            return power;
         }
         catch (SQLException e)
         {
@@ -266,18 +269,19 @@ public class H2PlayerStorage implements IPlayerStorage
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PLAYER_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
+            String playerName = "";
             while (resultSet.next())
             {
-                String playerName = resultSet.getString("Name");
-                connection.close();
-                return playerName;
+                playerName = resultSet.getString("Name");
             }
+            connection.close();
+            return playerName;
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-        return null;
+        return "";
     }
 
     @Override
