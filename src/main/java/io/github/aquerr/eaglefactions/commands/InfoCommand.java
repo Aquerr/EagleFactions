@@ -19,6 +19,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-08-03.
@@ -104,60 +105,39 @@ public class InfoCommand extends AbstractCommand
         String recruitList = "";
         if(!faction.getRecruits().isEmpty())
         {
-            for (UUID recruit : faction.getRecruits())
-            {
-                Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(recruit);
-                if(optionalName.isPresent())
-                    recruitList += optionalName.get() + ", ";
-            }
-            if(recruitList.length() > 2)
-                recruitList = recruitList.substring(0, recruitList.length() - 2);
+        	recruitList = faction.getRecruits().stream()
+        			.map(recruit -> getPlugin().getPlayerManager().getPlayerName(recruit))
+        			.filter(optionalName -> optionalName.isPresent()).map(optionalName -> optionalName.get())
+        			.collect(Collectors.joining(", "));
         }
 
         String membersList = "";
         if(!faction.getMembers().isEmpty())
         {
-            for (UUID member: faction.getMembers())
-            {
-                Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(member);
-                if(optionalName.isPresent())
-                    membersList += optionalName.get() + ", ";
-            }
-            if(membersList.length() > 2)
-                membersList = membersList.substring(0, membersList.length() - 2);
+        	membersList = faction.getMembers().stream()
+        			.map(member -> getPlugin().getPlayerManager().getPlayerName(member))
+        			.filter(optionalName -> optionalName.isPresent()).map(optionalName -> optionalName.get())
+        			.collect(Collectors.joining(", "));
         }
 
         String officersList = "";
-        if(!faction.getOfficers().isEmpty())
-        {
-            for (UUID officer: faction.getOfficers())
-            {
-                Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(officer);
-                if(optionalName.isPresent())
-                    officersList += optionalName.get() + ", ";
-            }
-            if(officersList.length() > 2)
-                officersList = officersList.substring(0, officersList.length() - 2);
-        }
+        if(!faction.getOfficers().isEmpty()) {
+        	officersList = faction.getOfficers().stream()
+        			.map(officer -> getPlugin().getPlayerManager().getPlayerName(officer))
+        			.filter(optionalName -> optionalName.isPresent()).map(optionalName -> optionalName.get())
+        			.collect(Collectors.joining(", "));		
+        }		 
 
         String alliancesList = "";
         if(!faction.getAlliances().isEmpty())
         {
-            for (String alliance: faction.getAlliances())
-            {
-                alliancesList += alliance + ", ";
-            }
-            alliancesList = alliancesList.substring(0, alliancesList.length() - 2);
+        	alliancesList = faction.getAlliances().stream().collect(Collectors.joining(", "));
         }
 
         String enemiesList = "";
         if(!faction.getEnemies().isEmpty())
         {
-            for (String enemy: faction.getEnemies())
-            {
-                enemiesList += enemy + ", ";
-            }
-            enemiesList = enemiesList.substring(0, enemiesList.length() - 2);
+        	enemiesList = faction.getEnemies().stream().collect(Collectors.joining(", "));
         }
 
 
