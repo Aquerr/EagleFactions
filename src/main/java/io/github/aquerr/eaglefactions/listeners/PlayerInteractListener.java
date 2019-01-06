@@ -54,9 +54,6 @@ public class PlayerInteractListener extends AbstractListener
             return;
 
         Location<World> blockLocation = optionalLocation.get();
-//        Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(blockLocation.getExtent().getUniqueId(), blockLocation.getChunkPosition());
-//        if (!optionalChunkFaction.isPresent())
-//            return;
 
         boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player);
         if (!canInteractWithBlock)
@@ -65,27 +62,4 @@ public class PlayerInteractListener extends AbstractListener
             return;
         }
     }
-
-//    @Listener
-//    public void onHandInteract(HandInteractEvent event, @Root Player player)
-//    {
-////        if(event instanceof InteractBlockEvent)
-////        {
-//            if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.BLOCK_HIT) && event.getContext().get(EventContextKeys.BLOCK_HIT).isPresent())
-//            {
-//                Optional<Location<World>> optionalLocation = event.getContext().get(EventContextKeys.BLOCK_HIT).get().getLocation();
-//                if(optionalLocation.isPresent())
-//                {
-//                    if(!this.getPlugin().getProtectionManager().canInteractWithBlock(optionalLocation.get(), player))
-//                        event.setCancelled(true);
-//                }
-//            }
-//            else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT) && event.getContext().get(EventContextKeys.ENTITY_HIT).isPresent() && !(event.getContext().get(EventContextKeys.ENTITY_HIT).get() instanceof Living))
-//            {
-//                Location<World> entityLocation = event.getContext().get(EventContextKeys.ENTITY_HIT).get().getLocation();
-//                if(!this.getPlugin().getProtectionManager().canInteractWithBlock(entityLocation, player))
-//                    event.setCancelled(true);
-//            }
-////        }
-//    }
 }

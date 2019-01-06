@@ -114,7 +114,6 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canUseItem(final Location<World> location, final User user, final ItemStackSnapshot usedItem)
     {
-        //TODO: Add code for handling items...
         World world = location.getExtent();
 
         if (hasAdminMode(user.getUniqueId()))
