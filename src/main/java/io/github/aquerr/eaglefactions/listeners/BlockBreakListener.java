@@ -174,7 +174,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(user != null && pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteract(location, user))
+                    if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user))
                     {
                         event.setCancelled(true);
                         return;
@@ -224,7 +224,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteract(location, user))
+                    if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user))
                     {
                         event.setCancelled(true);
                     }
@@ -515,8 +515,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(entity instanceof Living)
                 {
-                    Object source = event.getSource();
-                    if(entity instanceof User && !getPlugin().getProtectionManager().canInteract(entity.getLocation(), (User)entity))
+                    if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity))
                     {
                         return false;
                     }
