@@ -23,7 +23,7 @@ import java.util.*;
 
 public class H2FactionStorage implements IFactionStorage
 {
-    private static final String SELECT_FACTIONS = "SELECT * FROM FACTIONS";
+//    private static final String SELECT_FACTIONS = "SELECT * FROM FACTIONS";
     private static final String SELECT_FACTIONNAMES = "SELECT Name FROM Factions";
 //    private static final String SELECT_ALLIANCES = "SELECT  FROM ? WHERE";
     private static final String SELECT_RECRUITS_WHERE_FACTIONNAME = "SELECT RecruitUUID FROM FactionRecruits WHERE FactionName=?";
@@ -39,18 +39,18 @@ public class H2FactionStorage implements IFactionStorage
     private static final String SELECT_ALLY_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM AllyFlags WHERE FactionName=?";
     private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM Factions WHERE Name=?";
 
-    private static final String UPDATE_FACTION = "UPDATE Factions SET Name=?, Tag=?, TagColor=?, Leader=?, Home=?, LastOnline=? WHERE Name=?";
+//    private static final String UPDATE_FACTION = "UPDATE Factions SET Name=?, Tag=?, TagColor=?, Leader=?, Home=?, LastOnline=? WHERE Name=?";
     private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM Factions WHERE Name=?";
     private static final String DELETE_OFFICERS_WHERE_FACIONNAME = "DELETE FROM FactionOfficers WHERE FactionName=?";
     private static final String DELETE_MEMBERS_WHERE_FACIONNAME = "DELETE FROM FactionMembers WHERE FactionName=?";
     private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
-    private static final String DELETE_CLAIMS_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
+//    private static final String DELETE_CLAIMS_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
 
     //    private static final String DELEE_FROM_WHERE_FACTIONNAME = "DELETE FROM ? WHERE FactionName=?";
-    private static final String INSERT_FIVE_VALUES = "INSERT INTO ? VALUES (?, ?, ?, ?, ?)";
-    private static final String INSERT_FOUR_VALUES = "INSERT INTO ? VALUES (?, ?, ?, ?)";
-    private static final String INSERT_THREE_VALUES = "INSERT INTO ? VALUES (?, ?, ?)";
-    private static final String INSERT_TWO_VALUES = "INSERT INTO ? VALUES (?, ?)";
+//    private static final String INSERT_FIVE_VALUES = "INSERT INTO ? VALUES (?, ?, ?, ?, ?)";
+//    private static final String INSERT_FOUR_VALUES = "INSERT INTO ? VALUES (?, ?, ?, ?)";
+//    private static final String INSERT_THREE_VALUES = "INSERT INTO ? VALUES (?, ?, ?)";
+//    private static final String INSERT_TWO_VALUES = "INSERT INTO ? VALUES (?, ?)";
     private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";

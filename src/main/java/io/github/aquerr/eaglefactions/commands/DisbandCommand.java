@@ -24,70 +24,48 @@ public class DisbandCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if(!(source instanceof Player))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+
+        Player player = (Player) source;
+        Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if(!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+
+        Faction playerFaction = optionalPlayerFaction.get();
+
+        if(playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
+
+        //If player has adminmode
+        if(EagleFactions.AdminList.contains(player.getUniqueId()))
         {
-            Player player = (Player)source;
-
-            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-            if(optionalPlayerFaction.isPresent())
+            boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
+            if(didSucceed)
             {
-                Faction playerFaction = optionalPlayerFaction.get();
-                if(EagleFactions.AdminList.contains(player.getUniqueId()))
-                {
-                    boolean didSucceed = getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
-
-                    if (didSucceed)
-                    {
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
-
-                        EagleFactions.AutoClaimList.remove(player.getUniqueId());
-                    }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
-                    }
-
-                    return CommandResult.success();
-                }
-
-                if(playerFaction.getLeader().equals(player.getUniqueId()))
-                {
-                    try
-                    {
-                        boolean didSucceed = getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
-
-                        if (didSucceed)
-                        {
-                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
-
-                            EagleFactions.AutoClaimList.remove(player.getUniqueId());
-                        }
-                        else
-                        {
-                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
-                        }
-
-                        return CommandResult.success();
-                    }
-                    catch (Exception exception)
-                    {
-                        exception.printStackTrace();
-                    }
-                }
-                else
-                {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
-                }
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+                EagleFactions.AutoClaimList.remove(player.getUniqueId());
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
             }
+            return CommandResult.success();
+        }
+
+        //If player is leader
+        if(!playerFaction.getLeader().equals(player.getUniqueId()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
+
+        boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
+        if(didSucceed)
+        {
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+            EagleFactions.AutoClaimList.remove(player.getUniqueId());
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
         }
 
         return CommandResult.success();
