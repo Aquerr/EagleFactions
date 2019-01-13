@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
@@ -11,6 +12,9 @@ import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.storage.StorageManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -20,6 +24,8 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -321,6 +327,12 @@ public class FactionLogic
     {
         faction.addClaim(claim);
         this.storageManager.addOrUpdateFaction(faction);
+
+        World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
+        Vector3i chunkPosition = claim.getChunkPosition();
+        int test = chunkPosition.getX() << 4;
+        Vector3d position = new Vector3d((chunkPosition.getX() << 4) + 8, world.getHighestYAt(chunkPosition.getX() << 4, chunkPosition.getZ() << 4), (chunkPosition.getZ() << 4) + 8);
+        world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.EXPLOSION).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
     }
 
     public void removeClaim(Faction faction, Claim claim)
