@@ -9,6 +9,8 @@ import io.github.aquerr.eaglefactions.storage.h2.H2FactionStorage;
 import io.github.aquerr.eaglefactions.storage.h2.H2PlayerStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.hocon.HOCONPlayerStorage;
+import io.github.aquerr.eaglefactions.storage.mysql.MySQLFactionStorage;
+import io.github.aquerr.eaglefactions.storage.mysql.MySQLPlayerStorage;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -24,6 +26,7 @@ public class StorageManager
     private final IFactionStorage factionsStorage;
     private final IPlayerStorage playerStorage;
     private final Queue<IStorageTask> storageTaskQueue;
+    private final EagleFactions plugin;
 
     private final Thread storageThread;
 
@@ -36,6 +39,7 @@ public class StorageManager
 
     private StorageManager(EagleFactions eagleFactions)
     {
+        this.plugin = eagleFactions;
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         Path configDir = eagleFactions.getConfigDir();
         switch(configFields.getStorageType().toLowerCase())
@@ -43,18 +47,27 @@ public class StorageManager
             case "hocon":
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
+                this.plugin.printInfo("HOCON storage has been initialized!");
                 break;
             case "h2":
                 factionsStorage = new H2FactionStorage(eagleFactions);
                 playerStorage = new H2PlayerStorage(eagleFactions);
+                this.plugin.printInfo("H2 storage has been initialized!");
                 break;
                 //TODO: Add SQLLite, JSON, etc...
 //            case "sqllite":
 //
 //                break;
-            default:
+            case "mysql":
+                factionsStorage = new MySQLFactionStorage(eagleFactions);
+                playerStorage = new MySQLPlayerStorage(eagleFactions);
+                this.plugin.printInfo("MySQL storage has been initialized!");
+                break;
+            default: //HOCON
+                this.plugin.printInfo("Couldn't find provided storage type.");
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
+                this.plugin.printInfo("Initialized default HOCON storage.");
                 break;
         }
         prepareFactionsCache();

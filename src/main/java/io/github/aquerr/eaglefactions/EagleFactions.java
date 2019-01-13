@@ -543,6 +543,11 @@ public class EagleFactions
         return this.getClass().getClassLoader().getResource(fileName);
     }
 
+    public void printInfo(String message)
+    {
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.YELLOW, message));
+    }
+
     private void SetupConfigs()
     {
         _configuration = new Configuration(_configDir);

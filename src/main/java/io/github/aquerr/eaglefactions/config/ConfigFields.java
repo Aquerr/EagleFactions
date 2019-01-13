@@ -70,6 +70,8 @@ public final class ConfigFields
     private String _storageType = "hocon";
     private String _storageUserName = "sa";
     private String _storagePassword = "";
+    private String _databaseUrl = "localhost:3306/";
+    private String _databaseFileName = "database";
 
     //Whitelisted items and blocks
     private List<String> _whitelistedItems = new ArrayList<>();
@@ -147,6 +149,8 @@ public final class ConfigFields
             this._storageType = _configuration.getString("hocon", "storage", "type");
             this._storageUserName = _configuration.getString("sa", "storage", "username");
             this._storagePassword = _configuration.getString("", "storage", "password");
+            this._databaseUrl = _configuration.getString("localhost:3306/", "storage", "database-url");
+            this._databaseFileName = _configuration.getString("database", "storage", "database-file-name");
 
             //Whitelisted items and blocks
             this._whitelistedItems = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "items-whitelist");
@@ -523,5 +527,15 @@ public final class ConfigFields
     public boolean shouldProtectWarzoneFromPlayers()
     {
         return this._protectWarZoneFromPlayers;
+    }
+
+    public String getDatabaseUrl()
+    {
+        return this._databaseUrl;
+    }
+
+    public String getDatabaseName()
+    {
+        return this._databaseFileName;
     }
 }

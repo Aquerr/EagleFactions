@@ -29,7 +29,7 @@ public class ChestCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         if (!super.getPlugin().getConfiguration().getConfigFields().canUseFactionChest())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction's chest is turned off on this server."));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Factions' chests are turned off on this server."));
 
         final Player player = (Player) source;
         Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
@@ -41,9 +41,8 @@ public class ChestCommand extends AbstractCommand
 
         final Optional<Container> optionalContainer = player.openInventory(faction.getChest().toInventory());
         if (optionalContainer.isPresent())
-        {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Text.of("You opened faction's chest!")));
-        }
+
         return CommandResult.success();
     }
 }
