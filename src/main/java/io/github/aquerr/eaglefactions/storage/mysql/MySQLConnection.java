@@ -53,6 +53,8 @@ public class MySQLConnection
 
     public Connection openConnection() throws SQLException
     {
+        //Create database if it does not exist first.
+        String url = "jdbc:mysql://localhost:3306/?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
         return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName, this.username, this.password);
     }
 }
