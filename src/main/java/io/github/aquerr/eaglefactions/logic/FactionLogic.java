@@ -330,8 +330,10 @@ public class FactionLogic
 
         World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
         Vector3i chunkPosition = claim.getChunkPosition();
-        int test = chunkPosition.getX() << 4;
-        Vector3d position = new Vector3d((chunkPosition.getX() << 4) + 8, world.getHighestYAt(chunkPosition.getX() << 4, chunkPosition.getZ() << 4), (chunkPosition.getZ() << 4) + 8);
+        double x = (chunkPosition.getX() << 4) + 8;
+        double z = (chunkPosition.getZ() << 4) + 8;
+        double y = world.getHighestYAt((int)x, (int)z);
+        Vector3d position = new Vector3d(x, y, z);
         world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.EXPLOSION).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
     }
 
