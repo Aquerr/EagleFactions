@@ -3,13 +3,17 @@ package io.github.aquerr.eaglefactions.storage.mysql;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 
+import javax.management.relation.RelationSupport;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MySQLConnection
 {
     private static final MySQLConnection INSTANCE = null;
+
+    private static final String TIME_ZONE_PROPERTY = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
     private final String databaseUrl;
     private final String databaseName;
@@ -28,7 +32,7 @@ public class MySQLConnection
         try
         {
             //Load MySQL driver
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
         }
         catch(InstantiationException | IllegalAccessException | ClassNotFoundException e)
         {
@@ -42,8 +46,8 @@ public class MySQLConnection
         this.password = configFields.getStoragePassword();
         try
         {
-            Connection connection = openConnection();
-            connection.close();
+            if(!databaseExists())
+                createDatabase();
         }
         catch (SQLException e)
         {
@@ -51,10 +55,29 @@ public class MySQLConnection
         }
     }
 
+    private boolean databaseExists() throws SQLException
+    {
+//        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + TIME_ZONE_PROPERTY, this.username, this.password);
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user=sa&password=admin&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        ResultSet resultSet = connection.getMetaData().getCatalogs();
+
+        while(resultSet.next())
+        {
+            if(resultSet.getString(1).equalsIgnoreCase(this.databaseName))
+                return true;
+        }
+        resultSet.close();
+        connection.close();
+        return false;
+    }
+
+    private void createDatabase()
+    {
+
+    }
+
     public Connection openConnection() throws SQLException
     {
-        //Create database if it does not exist first.
-        String url = "jdbc:mysql://localhost:3306/?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
-        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName, this.username, this.password);
+        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + TIME_ZONE_PROPERTY, this.username, this.password);
     }
 }

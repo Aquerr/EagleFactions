@@ -72,11 +72,11 @@ public class InventorySerializer {
         return fail;
     }
 
-    static DataView serializeItemStack(ItemStack item) {
+    public static DataView serializeItemStack(ItemStack item) {
         return item.toContainer();
     }
 
-    static ItemStack deserializeItemStack(DataView data) {
+    public static ItemStack deserializeItemStack(DataView data) {
         return ItemStack.builder().fromContainer(data).build();
     }
 }

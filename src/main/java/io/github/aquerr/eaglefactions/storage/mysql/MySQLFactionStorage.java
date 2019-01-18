@@ -72,7 +72,7 @@ public class MySQLFactionStorage implements IFactionStorage
             int databaseVersionNumber = getDatabaseVersion();
 
             //Get all .sql files
-            URL resourcesFolderURL = this.plugin.getResource("queries/h2");
+            URL resourcesFolderURL = this.plugin.getResource("queries/mysql");
             File resourcesFolder = new File(resourcesFolderURL.getPath());
             File[] resources = resourcesFolder.listFiles();
             Connection connection = this.mySQLConnection.openConnection();

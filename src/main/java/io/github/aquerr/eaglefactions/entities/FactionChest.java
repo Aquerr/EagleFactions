@@ -5,15 +5,16 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +53,9 @@ public class FactionChest implements Serializable
                 row++;
                 column = 1;
             }
+
+            if(row > 3)
+                break;
         }
 
         return new FactionChest(slotItemList);
@@ -80,8 +84,23 @@ public class FactionChest implements Serializable
         Inventory inventory = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
-                .listener(InteractInventoryEvent.Close.class, (x) ->{
-                    FactionChest factionChest = FactionChest.fromInventory(x.getTargetInventory());
+                .listener(InteractInventoryEvent.Close.class, (x) ->
+                {
+                    // x is actually an Inventory that contains both player and chest inventory
+                    FactionChest factionChest = null;
+                    Iterator<Inventory> inventoryIterator = x.getTargetInventory().iterator();
+                    while(inventoryIterator.hasNext())
+                    {
+                        Inventory inv = inventoryIterator.next();
+                        //Ensure that it is a chest.
+                        if(inv.capacity() == 27)
+                        {
+                            factionChest = FactionChest.fromInventory(inv);
+                        }
+                    }
+
+                    if(factionChest == null)
+                        factionChest = new FactionChest();
                     Optional<Faction> optionalFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByPlayerUUID(x.getCause().first(User.class).get().getUniqueId());
                     if(optionalFaction.isPresent())
                     {

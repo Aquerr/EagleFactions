@@ -3,10 +3,20 @@ package io.github.aquerr.eaglefactions.storage.hocon;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
+import io.github.aquerr.eaglefactions.storage.InventorySerializer;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
@@ -65,11 +75,9 @@ public class HOCONFactionStorage implements IFactionStorage
 
         getStorage().getNode("factions", "WarZone", "claims").setValue(new ArrayList<>());
         getStorage().getNode("factions", "WarZone", "members").setValue(new ArrayList<>());
-        getStorage().getNode("factions", "WarZone", "power").setValue(9999);
 
         getStorage().getNode("factions", "SafeZone", "claims").setValue(new ArrayList<>());
         getStorage().getNode("factions", "SafeZone", "members").setValue(new ArrayList<>());
-        getStorage().getNode("factions", "SafeZone", "power").setValue(9999);
 
         saveChanges();
     }
@@ -184,7 +192,18 @@ public class HOCONFactionStorage implements IFactionStorage
     private FactionChest getFactionChest(String factionName)
     {
         List<FactionChest.SlotItem> slotItems = null;
-        try {
+        try
+        {
+//            DataContainer dataContainer = DataFormats.HOCON.read((String) configNode.getNode("factions", factionName, "chest").getValue(""));
+//            DataContainer dataContainer = DataTranslators.CONFIGURATION_NODE.translate(configNode.getNode("factions", factionName, "chest"));
+//
+//            if(dataContainer.getViewList(DataQuery.of("")).isPresent())
+//            {
+//                List<DataView> list = dataContainer.getViewList(DataQuery.of("")).get();
+//            }
+
+
+//            slotItems = configNode.getNode("factions", factionName, "chest").getValue(objectToSlotItemListTransformer);
             slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
         } catch (ObjectMappingException e) {
             e.printStackTrace();
@@ -572,6 +591,88 @@ public class HOCONFactionStorage implements IFactionStorage
             }
 
             return uuidSet;
+        }
+        return null;
+    };
+
+    private Function<Object, List<FactionChest.SlotItem>> objectToSlotItemListTransformer = (Function<Object, List<FactionChest.SlotItem>>) object ->
+    {
+        if(object instanceof List)
+        {
+            List<FactionChest.SlotItem> itemSlots = new ArrayList<>();
+            try
+            {
+                DataContainer dataContainer = DataFormats.HOCON.read(object.toString());
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            List<Object> slotItemsObjectsList = (List<Object>)object;
+
+            for(Object slotItemObject : slotItemsObjectsList)
+            {
+                Map<String, Object> objectList = (Map<String, Object>)slotItemObject;
+
+                int column = 0;
+                int row = 0;
+                ItemStack item = null;
+
+                for(Map.Entry<String, Object> mapEntry : objectList.entrySet())
+                {
+                    if(mapEntry.getKey().equalsIgnoreCase("column"))
+                    {
+                        column = (int)mapEntry.getValue();
+                    }
+                    else if(mapEntry.getKey().equalsIgnoreCase("row"))
+                    {
+                        row = (int)mapEntry.getValue();
+                    }
+                    else if(mapEntry.getKey().equalsIgnoreCase("item"))
+                    {
+                        //Check itemtype
+                        String itemType = (String)((Map<String, Object>)mapEntry.getValue()).get("ItemType");
+                        if(Sponge.getRegistry().getType(ItemType.class, itemType).isPresent())
+                        {
+                            try
+                            {
+//                                ItemStack itemStack = TypeToken.of(ItemStack.class).;
+
+                                String test = mapEntry.getValue().toString();
+
+                                //Not working
+                                item = InventorySerializer.deserializeItemStack(DataFormats.HOCON.read(mapEntry.getValue().toString()));
+                            }
+                            catch(IOException e)
+                            {
+                                e.printStackTrace();
+                            }
+
+                            //Not working
+//                            item = InventorySerializer.deserializeItemStack(DataTranslators.CONFIGURATION_NODE.translate((ConfigurationNode) object));
+                        }
+                    }
+                }
+
+                if(item == null)
+                    continue;
+
+                FactionChest.SlotItem slotItem = new FactionChest.SlotItem(column, row, item);
+            }
+
+//            List<String> list = (List<String>)object;
+
+//            for(String stringUUID : list)
+//            {
+//                String[] components = stringUUID.split("-");
+//                if(components.length == 5)
+//                {
+//                    itemSlots.add(UUID.fromString(stringUUID));
+//                }
+//            }
+
+            return itemSlots;
         }
         return null;
     };
