@@ -4,10 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 
 import javax.management.relation.RelationSupport;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MySQLConnection
 {
@@ -57,8 +54,8 @@ public class MySQLConnection
 
     private boolean databaseExists() throws SQLException
     {
-//        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + TIME_ZONE_PROPERTY, this.username, this.password);
-        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user=sa&password=admin&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + TIME_ZONE_PROPERTY, this.username, this.password);
+//        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user=sa&password=admin&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
         ResultSet resultSet = connection.getMetaData().getCatalogs();
 
         while(resultSet.next())
@@ -71,9 +68,14 @@ public class MySQLConnection
         return false;
     }
 
-    private void createDatabase()
+    private void createDatabase() throws SQLException
     {
-
+        Connection connection = openConnection();
+        Statement statement = connection.createStatement();
+        statement.execute("create database " + this.databaseName + ";");
+        statement.close();
+        connection.commit();
+        connection.close();
     }
 
     public Connection openConnection() throws SQLException
