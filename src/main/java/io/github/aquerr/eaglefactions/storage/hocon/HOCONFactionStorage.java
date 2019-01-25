@@ -43,7 +43,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 Files.createDirectory(dataPath);
             }
 
-            filePath = dataPath.resolve("factions.properties");
+            filePath = dataPath.resolve("factions.conf");
 
             if(!Files.exists(filePath))
             {
