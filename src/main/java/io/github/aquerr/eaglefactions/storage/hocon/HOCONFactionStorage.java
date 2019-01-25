@@ -1,22 +1,18 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
 import com.google.common.reflect.TypeToken;
+import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import io.github.aquerr.eaglefactions.storage.InventorySerializer;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.DataTranslators;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
@@ -47,7 +43,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 Files.createDirectory(dataPath);
             }
 
-            filePath = dataPath.resolve("factions.conf");
+            filePath = dataPath.resolve("factions.properties");
 
             if(!Files.exists(filePath))
             {
@@ -86,6 +82,12 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         try
         {
+            List<DataView> serializedInventorySlots = InventorySerializer.serializeInventory(faction.getChest().toInventory());
+            List<String> serializedHoconChest = new ArrayList<>();
+            for(DataView dataView : serializedInventorySlots)
+            {
+                serializedHoconChest.add(DataFormats.HOCON.write(dataView));
+            }
             configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
             configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
             configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
@@ -96,7 +98,8 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(x->x.toString()).collect(Collectors.toList()));
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
-            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+//            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+            configNode.getNode("factions", faction.getName(), "chest").setValue(serializedHoconChest);
 
             if(faction.getHome() == null)
             {
@@ -106,9 +109,6 @@ public class HOCONFactionStorage implements IFactionStorage
             {
                 configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
-
-//            FactionsCache.addOrUpdateFactionCache(faction);
-
             return saveChanges();
         }
         catch(Exception exception)
@@ -191,31 +191,28 @@ public class HOCONFactionStorage implements IFactionStorage
 
     private FactionChest getFactionChest(String factionName)
     {
+        FactionChest factionChest = null;
         List<FactionChest.SlotItem> slotItems = null;
-        try
+//        try
+//        {
+
+            factionChest = configNode.getNode("factions", factionName, "chest").getValue(objectToFactionChestTransformer);
+//            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
+//        } catch (ObjectMappingException e) {
+//            e.printStackTrace();
+//        }
+
+        if(factionChest != null)
         {
-//            DataContainer dataContainer = DataFormats.HOCON.read((String) configNode.getNode("factions", factionName, "chest").getValue(""));
-//            DataContainer dataContainer = DataTranslators.CONFIGURATION_NODE.translate(configNode.getNode("factions", factionName, "chest"));
-//
-//            if(dataContainer.getViewList(DataQuery.of("")).isPresent())
-//            {
-//                List<DataView> list = dataContainer.getViewList(DataQuery.of("")).get();
-//            }
-
-
-//            slotItems = configNode.getNode("factions", factionName, "chest").getValue(objectToSlotItemListTransformer);
-            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
-        } catch (ObjectMappingException e) {
-            e.printStackTrace();
+            return factionChest;
         }
-
-        if(slotItems != null)
-        {
-            return new FactionChest(slotItems);
-        }
+//        if(slotItems != null)
+//        {
+//            return new FactionChest(slotItems);
+//        }
         else
         {
-            configNode.getNode("factions", factionName, "claims").setValue(new ArrayList<FactionChest.SlotItem>());
+            configNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
             needToSave = true;
             return new FactionChest();
         }
@@ -595,87 +592,35 @@ public class HOCONFactionStorage implements IFactionStorage
         return null;
     };
 
-    private Function<Object, List<FactionChest.SlotItem>> objectToSlotItemListTransformer = (Function<Object, List<FactionChest.SlotItem>>) object ->
+    private Function<Object, FactionChest> objectToFactionChestTransformer = object ->
     {
         if(object instanceof List)
         {
-            List<FactionChest.SlotItem> itemSlots = new ArrayList<>();
-            try
+            List<DataView> dataViewList = new ArrayList<>();
+            List<Object> objectList = (List<Object>)object;
+
+            for(Object dataViewObject : objectList)
             {
-                DataContainer dataContainer = DataFormats.HOCON.read(object.toString());
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            List<Object> slotItemsObjectsList = (List<Object>)object;
-
-            for(Object slotItemObject : slotItemsObjectsList)
-            {
-                Map<String, Object> objectList = (Map<String, Object>)slotItemObject;
-
-                int column = 0;
-                int row = 0;
-                ItemStack item = null;
-
-                for(Map.Entry<String, Object> mapEntry : objectList.entrySet())
+                try
                 {
-                    if(mapEntry.getKey().equalsIgnoreCase("column"))
-                    {
-                        column = (int)mapEntry.getValue();
-                    }
-                    else if(mapEntry.getKey().equalsIgnoreCase("row"))
-                    {
-                        row = (int)mapEntry.getValue();
-                    }
-                    else if(mapEntry.getKey().equalsIgnoreCase("item"))
-                    {
-                        //Check itemtype
-                        String itemType = (String)((Map<String, Object>)mapEntry.getValue()).get("ItemType");
-                        if(Sponge.getRegistry().getType(ItemType.class, itemType).isPresent())
-                        {
-                            try
-                            {
-//                                ItemStack itemStack = TypeToken.of(ItemStack.class).;
-
-                                String test = mapEntry.getValue().toString();
-
-                                //Not working
-                                item = InventorySerializer.deserializeItemStack(DataFormats.HOCON.read(mapEntry.getValue().toString()));
-                            }
-                            catch(IOException e)
-                            {
-                                e.printStackTrace();
-                            }
-
-                            //Not working
-//                            item = InventorySerializer.deserializeItemStack(DataTranslators.CONFIGURATION_NODE.translate((ConfigurationNode) object));
-                        }
-                    }
+                    DataView dataView = DataFormats.HOCON.read(dataViewObject.toString());
+                    dataViewList.add(dataView);
                 }
-
-                if(item == null)
-                    continue;
-
-                FactionChest.SlotItem slotItem = new FactionChest.SlotItem(column, row, item);
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
             }
 
-//            List<String> list = (List<String>)object;
+            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(EagleFactions.getPlugin());
+            InventorySerializer.deserializeInventory(dataViewList, inventory);
+            return FactionChest.fromInventory(inventory);
 
-//            for(String stringUUID : list)
-//            {
-//                String[] components = stringUUID.split("-");
-//                if(components.length == 5)
-//                {
-//                    itemSlots.add(UUID.fromString(stringUUID));
-//                }
-//            }
-
-            return itemSlots;
+//            return dataViewList;
         }
         return null;
     };
+
 
     private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
     {

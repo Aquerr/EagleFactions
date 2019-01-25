@@ -23,7 +23,14 @@ public final class ConfigFields
     private int _minNameLength = 3;
     private int _maxTagLength = 5;
     private int _minTagLength = 2;
-    private boolean _mobSpawning = false;
+
+    private boolean _spawnMobsInSafeZone = true;
+    private boolean _spawnMobsInWarZone = true;
+    private boolean _spawnHostileMobsInWarZone = true;
+    private boolean _spawnMobsInFactionsTerritory = true;
+    private boolean _spawnHostileMobsInFactionsTerritory = true;
+//    private boolean _mobSpawning = false;
+
     private boolean _blockEnteringOfflineFactions = false;
     private boolean _requireConnectedClaims = true;
     private boolean _blockEnteringSafezoneFromWarzone = false;
@@ -102,7 +109,14 @@ public final class ConfigFields
             this._minNameLength = _configuration.getInt(3, "name", "min-length");
             this._maxTagLength = _configuration.getInt(5, "tag", "max-length");
             this._minTagLength = _configuration.getInt(2, "tag", "min-length");
-            this._mobSpawning = _configuration.getBoolean(false,"spawn", "mobs");
+
+            //Mob spawning nodes
+            this._spawnMobsInSafeZone = _configuration.getBoolean(true, "spawn-mobs-in-safezone");
+            this._spawnMobsInWarZone = _configuration.getBoolean(true, "spawn-mobs-in-warzone");
+            this._spawnHostileMobsInWarZone = _configuration.getBoolean(true, "spawn-hostile-mobs-in-warzone");
+            this._spawnMobsInFactionsTerritory = _configuration.getBoolean(true, "spawn-mobs-in-factions-territory");
+            this._spawnHostileMobsInFactionsTerritory = _configuration.getBoolean(true, "spawn-hostile-mobs-in-factions-territory");
+
             this._blockEnteringOfflineFactions = _configuration.getBoolean(true, "block-entering-faction-while-offline");
             this._requireConnectedClaims = _configuration.getBoolean(true, "connected-claims");
             this._blockEnteringSafezoneFromWarzone = _configuration.getBoolean(false, "block-safezone-from-warzone");
@@ -113,7 +127,7 @@ public final class ConfigFields
             this._shouldDisplayRank = _configuration.getBoolean(true, "faction-rank");
             this._factionCreationByItems = _configuration.getBoolean(false, "creating-by-items", "toggled");
             this._requiredItemsToCreateFaction = prepareItems(_configuration.getListOfStrings(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20"), "creating-by-items", "items"));
-            this._spawnAtHomeAfterDeath = _configuration.getBoolean(false, "spawn", "spawn-at-home-after-death");
+            this._spawnAtHomeAfterDeath = _configuration.getBoolean(false, "spawn-at-home-after-death");
             this._canAttackOnlyAtNight = _configuration.getBoolean(false, "attack-only-at-night");
             this._canHomeBetweenWorlds = _configuration.getBoolean(false, "home-from-other-worlds");
             this._homeDelay = _configuration.getInt(5, "home-delay");
@@ -225,9 +239,30 @@ public final class ConfigFields
         return this._minTagLength;
     }
 
-    public boolean getMobSpawning()
+    //Mob spawning methods
+    public boolean canSpawnMobsInSafeZone()
     {
-        return this._mobSpawning;
+        return this._spawnMobsInSafeZone;
+    }
+
+    public boolean canSpawnMobsInWarZone()
+    {
+        return this._spawnMobsInWarZone;
+    }
+
+    public boolean canSpawnHostileMobsInWarZone()
+    {
+        return this._spawnHostileMobsInWarZone;
+    }
+
+    public boolean canSpawnMobsInFactionsTerritory()
+    {
+        return this._spawnMobsInFactionsTerritory;
+    }
+
+    public boolean canSpawnHostileMobsInFactionsTerritory()
+    {
+        return this._spawnHostileMobsInFactionsTerritory;
     }
 
     public boolean getBlockEnteringFactions()

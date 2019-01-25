@@ -183,8 +183,9 @@ public class H2FactionStorage implements IFactionStorage
             if (enemies.endsWith(","))
                 enemies = enemies.substring(0, enemies.length() - 1);
 
-            _connection.getConnection().setAutoCommit(false);
-            PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(MERGE_FACTION);
+            Connection connection = _connection.getConnection();
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(MERGE_FACTION);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setString(2, faction.getTag().toPlain());
             preparedStatement.setString(3, faction.getTag().getColor().getId());
@@ -704,11 +705,9 @@ public class H2FactionStorage implements IFactionStorage
 
     private void precreate()
     {
-        try
+        try(Connection connection = _connection.getConnection())
         {
-            Connection connection = _connection.getConnection();
             connection.setAutoCommit(false);
-
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_FACTION);
             preparedStatement.setString(1, "WarZone");
             preparedStatement.setString(2, "SZ");

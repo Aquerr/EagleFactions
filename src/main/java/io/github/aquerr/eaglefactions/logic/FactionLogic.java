@@ -44,7 +44,7 @@ public class FactionLogic
     private final ConfigFields _configFields;
     private final PlayerManager _playerManager;
 
-//    private final UUID dummyUUID = new UUID(0, 0);
+    private final UUID DUMMY_UUID = new UUID(0, 0);
 
     public static FactionLogic getInstance(EagleFactions eagleFactions)
     {
@@ -119,7 +119,7 @@ public class FactionLogic
         List<Player> factionPlayers = new ArrayList<>();
 
         UUID factionLeader = faction.getLeader();
-        if(!faction.getLeader().equals("") && _playerManager.isPlayerOnline(factionLeader))
+        if(!faction.getLeader().equals(DUMMY_UUID) && _playerManager.isPlayerOnline(factionLeader))
         {
             factionPlayers.add(_playerManager.getPlayer(factionLeader).get());
         }

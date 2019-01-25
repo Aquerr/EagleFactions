@@ -68,7 +68,9 @@ public class ChatMessageListener extends AbstractListener
                     Set<MessageReceiver> receivers = new HashSet<>();
                     for (String allianceName : playerFaction.getAlliances())
                     {
-                        receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(getPlugin().getFactionLogic().getFactionByName(allianceName)));
+                        Faction allyFaction = super.getPlugin().getFactionLogic().getFactionByName(allianceName);
+                        if(allyFaction != null)
+                            receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(allyFaction));
                     }
 
                     receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
@@ -80,9 +82,7 @@ public class ChatMessageListener extends AbstractListener
                     chatTypePrefix.append(getFactionPrefix());
                     messageChannel.asMutable().clearMembers();
 
-                    Set<MessageReceiver> receivers = new HashSet<>();
-
-                    receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
+                    Set<MessageReceiver> receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
                 }
