@@ -114,7 +114,6 @@ public class H2FactionStorage implements IFactionStorage
                                 }
                             }
                             statement.executeBatch();
-                            statement.close();
                         }
                     }
                     catch(Exception exception)
@@ -130,7 +129,6 @@ public class H2FactionStorage implements IFactionStorage
             }
             if (databaseVersionNumber == 0)
                 precreate();
-            h2provider.getConnection().close();
         }
         catch(SQLException e)
         {

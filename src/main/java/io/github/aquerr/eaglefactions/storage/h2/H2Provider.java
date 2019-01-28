@@ -15,7 +15,6 @@ public class H2Provider
     private final Path databasePath;
     private final String username;
     private final String password;
-    private Connection connection;
 
     public static H2Provider getInstance(EagleFactions eagleFactions)
     {
@@ -32,7 +31,8 @@ public class H2Provider
         this.password = configFields.getStoragePassword();
         try
         {
-            connection = getConnection();
+            //Create database file
+            Connection connection = getConnection();
             connection.close();
         }
         catch (SQLException e)
@@ -43,8 +43,6 @@ public class H2Provider
 
     public Connection getConnection() throws SQLException
     {
-        if (this.connection == null || this.connection.isClosed())
-            return DriverManager.getConnection("jdbc:h2:" + this.databasePath, this.username, this.password);
-        else return connection;
+        return DriverManager.getConnection("jdbc:h2:" + this.databasePath, this.username, this.password);
     }
 }
