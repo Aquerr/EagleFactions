@@ -27,25 +27,25 @@ public class H2PlayerStorage implements IPlayerStorage
     private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
     private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
 
-    private final H2Connection connection;
+    private final H2Provider h2provider;
 
     public H2PlayerStorage(final EagleFactions eagleFactions)
     {
-        this.connection = H2Connection.getInstance(eagleFactions);
+        this.h2provider = H2Provider.getInstance(eagleFactions);
     }
 
     @Override
     public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_WHERE_PLAYERUUID_AND_PLAYERNAME);
             statement.setObject(1, playerUUID);
             statement.setString(2, playerName);
             ResultSet resultSet = statement.executeQuery();
             boolean exists = resultSet.next();
-            connection.close();
+            resultSet.close();
+            statement.close();
             return exists;
         }
         catch (SQLException e)
@@ -58,9 +58,8 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float maxPower)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement statement = connection.prepareStatement(MERGE_PLAYER);
             statement.setObject(1, playerUUID);
             statement.setString(2, playerName);
@@ -68,7 +67,7 @@ public class H2PlayerStorage implements IPlayerStorage
             statement.setFloat(4, maxPower);
             statement.setBoolean(5, false);
             boolean didSucceed = statement.execute();
-            connection.close();
+            statement.close();
             return didSucceed;
         }
         catch (SQLException e)
@@ -81,14 +80,13 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID);
             preparedStatement.setBoolean(1, didDieInWarZone);
             preparedStatement.setObject(2, playerUUID);
             boolean didSucceed = preparedStatement.execute();
-            connection.close();
+            preparedStatement.close();
             return didSucceed;
         }
         catch (SQLException e)
@@ -101,9 +99,8 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public boolean getLastDeathInWarzone(final UUID playerUUID)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_DEATH_IN_WARZONE_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -112,7 +109,8 @@ public class H2PlayerStorage implements IPlayerStorage
             {
                 lastDeathInWarzone = resultSet.getBoolean("DeathInWarzone");
             }
-            connection.close();
+            resultSet.close();
+            preparedStatement.close();
             return lastDeathInWarzone;
         }
         catch (SQLException e)
@@ -125,9 +123,8 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public float getPlayerPower(final UUID playerUUID)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_POWER_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -136,7 +133,8 @@ public class H2PlayerStorage implements IPlayerStorage
             {
                 power = resultSet.getFloat("Power");
             }
-            connection.close();
+            resultSet.close();
+            preparedStatement.close();
             return power;
         }
         catch (SQLException e)
@@ -149,14 +147,13 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public boolean setPlayerPower(final UUID playerUUID, final float power)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_POWER_WHERE_PLAYERUUID);
             preparedStatement.setFloat(1, power);
             preparedStatement.setObject(2, playerUUID);
             boolean didSucceed = preparedStatement.execute();
-            connection.close();
+            preparedStatement.close();
             return didSucceed;
         }
         catch (SQLException e)
@@ -169,9 +166,8 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public float getPlayerMaxPower(final UUID playerUUID)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MAXPOWER_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -180,7 +176,8 @@ public class H2PlayerStorage implements IPlayerStorage
             {
                 power = resultSet.getFloat("MaxPower");
             }
-            connection.close();
+            resultSet.close();
+            preparedStatement.close();
             return power;
         }
         catch (SQLException e)
@@ -193,14 +190,13 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_MAXPOWER_WHERE_PLAYERUUID);
             preparedStatement.setFloat(1, maxpower);
             preparedStatement.setObject(2, playerUUID);
             boolean didSucceed = preparedStatement.execute();
-            connection.close();
+            preparedStatement.close();
             return didSucceed;
         }
         catch (SQLException e)
@@ -214,9 +210,8 @@ public class H2PlayerStorage implements IPlayerStorage
     public Set<String> getServerPlayerNames()
     {
         Set<String> playerNames = new HashSet<>();
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(SELECT_PLAYERNAMES);
             while (resultSet.next())
@@ -224,7 +219,8 @@ public class H2PlayerStorage implements IPlayerStorage
                 String playerName = resultSet.getString("Name");
                 playerNames.add(playerName);
             }
-            connection.close();
+            resultSet.close();
+            statement.close();
         }
         catch (SQLException e)
         {
@@ -237,9 +233,8 @@ public class H2PlayerStorage implements IPlayerStorage
     public Set<IFactionPlayer> getServerPlayers()
     {
         Set<IFactionPlayer> factionPlayers = new HashSet<>();
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(SELECT_PLAYERS);
             while (resultSet.next())
@@ -251,7 +246,8 @@ public class H2PlayerStorage implements IPlayerStorage
                 IFactionPlayer factionPlayer = new FactionPlayer(name, playerUUID, null, null, power, maxpower);
                 factionPlayers.add(factionPlayer);
             }
-            connection.close();
+            resultSet.close();
+            statement.close();
         }
         catch (SQLException e)
         {
@@ -263,9 +259,8 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public String getPlayerName(final UUID playerUUID)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PLAYER_WHERE_PLAYERUUID);
             preparedStatement.setObject(1, playerUUID);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -274,7 +269,8 @@ public class H2PlayerStorage implements IPlayerStorage
             {
                 playerName = resultSet.getString("Name");
             }
-            connection.close();
+            resultSet.close();
+            preparedStatement.close();
             return playerName;
         }
         catch (SQLException e)
@@ -287,14 +283,13 @@ public class H2PlayerStorage implements IPlayerStorage
     @Override
     public boolean updatePlayerName(final UUID playerUUID, final String playerName)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            Connection connection = this.connection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PLAYERNAME_WHERE_PLAYERUUID);
             preparedStatement.setString(1, playerName);
             preparedStatement.setObject(2, playerUUID);
             boolean didSucceed = preparedStatement.execute();
-            connection.close();
+            preparedStatement.close();
             return didSucceed;
         }
         catch (SQLException e)

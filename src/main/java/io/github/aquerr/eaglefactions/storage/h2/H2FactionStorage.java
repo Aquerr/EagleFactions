@@ -71,12 +71,12 @@ public class H2FactionStorage implements IFactionStorage
 
 
     private final EagleFactions plugin;
-    private final H2Connection _connection;
+    private final H2Provider h2provider;
 
     public H2FactionStorage(EagleFactions plugin)
     {
         this.plugin = plugin;
-        this._connection = H2Connection.getInstance(plugin);
+        this.h2provider = H2Provider.getInstance(plugin);
         try
         {
             int databaseVersionNumber = getDatabaseVersion();
@@ -95,7 +95,7 @@ public class H2FactionStorage implements IFactionStorage
 
                     try(BufferedReader bufferedReader = new BufferedReader(new FileReader(resource)))
                     {
-                        try(Statement statement = _connection.getConnection().createStatement())
+                        try(Statement statement = this.h2provider.getConnection().createStatement())
                         {
                             StringBuilder stringBuilder = new StringBuilder();
                             String line;
@@ -114,6 +114,7 @@ public class H2FactionStorage implements IFactionStorage
                                 }
                             }
                             statement.executeBatch();
+                            statement.close();
                         }
                     }
                     catch(Exception exception)
@@ -129,7 +130,7 @@ public class H2FactionStorage implements IFactionStorage
             }
             if (databaseVersionNumber == 0)
                 precreate();
-            _connection.getConnection().close();
+            h2provider.getConnection().close();
         }
         catch(SQLException e)
         {
@@ -140,27 +141,31 @@ public class H2FactionStorage implements IFactionStorage
 
     private int getDatabaseVersion() throws SQLException
     {
-        ResultSet resultSet = _connection.getConnection().getMetaData().getTables(null, null, "VERSION", null);
-        while(resultSet.next())
+        try(Connection connection = this.h2provider.getConnection())
         {
-            if(resultSet.getString(3).equalsIgnoreCase("Version"))
+            ResultSet resultSet = connection.getMetaData().getTables(null, null, "VERSION", null);
+            while(resultSet.next())
             {
-                try(Statement statement = _connection.getConnection().createStatement())
+                if(resultSet.getString(3).equalsIgnoreCase("Version"))
                 {
-                    ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
-                    if(resultSet1.last())
+                    try(Statement statement = h2provider.getConnection().createStatement())
                     {
-                        return resultSet1.getInt("Version");
+                        ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
+                        if(resultSet1.last())
+                        {
+                            return resultSet1.getInt("Version");
+                        }
                     }
                 }
             }
+            return 0;
         }
-        return 0;
     }
 
     @Override
     public boolean addOrUpdateFaction(Faction faction)
     {
+        Connection connection = null;
         try
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -183,7 +188,7 @@ public class H2FactionStorage implements IFactionStorage
             if (enemies.endsWith(","))
                 enemies = enemies.substring(0, enemies.length() - 1);
 
-            Connection connection = _connection.getConnection();
+            connection = this.h2provider.getConnection();
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(MERGE_FACTION);
             preparedStatement.setString(1, faction.getName());
@@ -197,43 +202,53 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setString(7, alliances);
             preparedStatement.setString(8, enemies);
             preparedStatement.execute();
+            preparedStatement.close();
+            connection.close();
 
+            //These create connection explicitly
             deleteFactionOfficers(faction.getName());
             deleteFactionMembers(faction.getName());
             deleteFactionRecruits(faction.getName());
             deleteFactionClaims(faction.getName());
+            //End
+
+            connection = this.h2provider.getConnection();
 
             for (UUID officer : faction.getOfficers())
             {
-                preparedStatement = _connection.getConnection().prepareStatement(MERGE_OFFICERS);
+                preparedStatement = connection.prepareStatement(MERGE_OFFICERS);
                 preparedStatement.setObject(1, officer);
                 preparedStatement.setString(2, faction.getName());
                 preparedStatement.execute();
+                preparedStatement.close();
             }
 
             for (UUID member : faction.getMembers())
             {
-                preparedStatement = _connection.getConnection().prepareStatement(MERGE_MEMBERS);
+                preparedStatement = connection.prepareStatement(MERGE_MEMBERS);
                 preparedStatement.setObject(1, member);
                 preparedStatement.setString(2, faction.getName());
                 preparedStatement.execute();
+                preparedStatement.close();
             }
 
             for (UUID recruit : faction.getRecruits())
             {
-                preparedStatement = _connection.getConnection().prepareStatement(MERGE_RECRUITS);
+                preparedStatement = connection.prepareStatement(MERGE_RECRUITS);
                 preparedStatement.setObject(1, recruit);
                 preparedStatement.setString(2, faction.getName());
                 preparedStatement.execute();
+                preparedStatement.close();
             }
 
             for (Claim claim : faction.getClaims())
             {
-                preparedStatement = _connection.getConnection().prepareStatement(MERGE_CLAIM);
+                preparedStatement = connection.prepareStatement(MERGE_CLAIM);
                 preparedStatement.setString(1, faction.getName());
                 preparedStatement.setObject(2, claim.getWorldUUID());
                 preparedStatement.setString(3, claim.getChunkPosition().toString());
                 preparedStatement.execute();
+                preparedStatement.close();
             }
 
             List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().toInventory());
@@ -246,12 +261,13 @@ public class H2FactionStorage implements IFactionStorage
             byte[] chestBytes = byteArrayStream.toByteArray();
             byteArrayStream.close();
 
-            preparedStatement = _connection.getConnection().prepareStatement(MERGE_CHEST);
+            preparedStatement = connection.prepareStatement(MERGE_CHEST);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBytes(2, chestBytes);
             preparedStatement.execute();
+            preparedStatement.close();
 
-            preparedStatement = _connection.getConnection().prepareStatement(MERGE_LEADER_FLAGS);
+            preparedStatement = connection.prepareStatement(MERGE_LEADER_FLAGS);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.USE));
             preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.PLACE));
@@ -260,8 +276,9 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.ATTACK));
             preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.INVITE));
             preparedStatement.execute();
+            preparedStatement.close();
 
-            preparedStatement = _connection.getConnection().prepareStatement(MERGE_OFFICER_FLAGS);
+            preparedStatement = connection.prepareStatement(MERGE_OFFICER_FLAGS);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.USE));
             preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.PLACE));
@@ -270,8 +287,9 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.ATTACK));
             preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.INVITE));
             preparedStatement.execute();
+            preparedStatement.close();
 
-            preparedStatement = _connection.getConnection().prepareStatement(MERGE_MEMBER_FLAGS);
+            preparedStatement = connection.prepareStatement(MERGE_MEMBER_FLAGS);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.USE));
             preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.PLACE));
@@ -280,8 +298,9 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.ATTACK));
             preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.INVITE));
             preparedStatement.execute();
+            preparedStatement.close();
 
-            preparedStatement = _connection.getConnection().prepareStatement(MERGE_RECRUIT_FLAGS);
+            preparedStatement = connection.prepareStatement(MERGE_RECRUIT_FLAGS);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.USE));
             preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.PLACE));
@@ -290,23 +309,25 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.ATTACK));
             preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.INVITE));
             preparedStatement.execute();
+            preparedStatement.close();
 
-            preparedStatement = _connection.getConnection().prepareStatement(MERGE_ALLY_FLAGS);
+            preparedStatement = connection.prepareStatement(MERGE_ALLY_FLAGS);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.ALLY).get(FactionFlagTypes.USE));
             preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.ALLY).get(FactionFlagTypes.PLACE));
             preparedStatement.setBoolean(4, faction.getFlags().get(FactionMemberType.ALLY).get(FactionFlagTypes.DESTROY));
             preparedStatement.execute();
+            preparedStatement.close();
 
-            _connection.getConnection().commit();
-            _connection.getConnection().close();
+            connection.commit();
+            connection.close();
             return true;
         }
         catch (SQLException | IOException e)
         {
             try
             {
-                _connection.getConnection().rollback();
+                connection.rollback();
             }
             catch (SQLException e1)
             {
@@ -319,42 +340,46 @@ public class H2FactionStorage implements IFactionStorage
 
     private boolean deleteFactionOfficers(final String name) throws SQLException
     {
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(DELETE_OFFICERS_WHERE_FACIONNAME);
+        PreparedStatement preparedStatement = this.h2provider.getConnection().prepareStatement(DELETE_OFFICERS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
         return didSucceed;
     }
 
     private boolean deleteFactionMembers(final String name) throws SQLException
     {
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(DELETE_MEMBERS_WHERE_FACIONNAME);
+        PreparedStatement preparedStatement = this.h2provider.getConnection().prepareStatement(DELETE_MEMBERS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
         return didSucceed;
     }
 
     private boolean deleteFactionRecruits(final String name) throws SQLException
     {
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(DELETE_RECRUITS_WHERE_FACIONNAME);
+        PreparedStatement preparedStatement = this.h2provider.getConnection().prepareStatement(DELETE_RECRUITS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
         return didSucceed;
     }
 
     private boolean deleteFactionClaims(final String name) throws SQLException
     {
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
+        PreparedStatement preparedStatement = this.h2provider.getConnection().prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
         return didSucceed;
     }
 
     @Override
     public Faction getFaction(String factionName)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            PreparedStatement statement = _connection.getConnection().prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
+            PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
             statement.setString(1, factionName);
             ResultSet factionsResultSet = statement.executeQuery();
             if (factionsResultSet.first())
@@ -397,7 +422,6 @@ public class H2FactionStorage implements IFactionStorage
                         .build();
                 return faction;
             }
-            _connection.getConnection().close();
         }
         catch (IOException | SQLException | ClassNotFoundException exception)
         {
@@ -412,13 +436,15 @@ public class H2FactionStorage implements IFactionStorage
         Set<Faction> factions = new HashSet<>();
         try
         {
-            ResultSet resultSet = _connection.getConnection().createStatement().executeQuery(SELECT_FACTIONNAMES);
+            Connection connection = this.h2provider.getConnection();
+            ResultSet resultSet = connection.createStatement().executeQuery(SELECT_FACTIONNAMES);
             List<String> factionsNames = new ArrayList<>();
             while (resultSet.next())
             {
                 factionsNames.add(resultSet.getString("Name"));
             }
-            _connection.getConnection().close();
+            h2provider.getConnection().close();
+            connection.close();
 
             for (String factionName : factionsNames)
             {
@@ -442,12 +468,13 @@ public class H2FactionStorage implements IFactionStorage
     @Override
     public boolean deleteFaction(final String factionName)
     {
-        try
+        try(Connection connection = this.h2provider.getConnection())
         {
-            PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
             preparedStatement.setString(1, factionName);
             boolean didSucceed = preparedStatement.execute();
-            _connection.getConnection().close();
+            preparedStatement.close();
+            connection.close();
             return didSucceed;
         }
         catch (SQLException e)
@@ -460,7 +487,8 @@ public class H2FactionStorage implements IFactionStorage
     private Set<UUID> getFactionRecruits(String factionName) throws SQLException
     {
         Set<UUID> recruits = new HashSet<>();
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(SELECT_RECRUITS_WHERE_FACTIONNAME);
+        Connection connection = this.h2provider.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_RECRUITS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet recruitsResultSet = preparedStatement.executeQuery();
         while (recruitsResultSet.next())
@@ -468,13 +496,17 @@ public class H2FactionStorage implements IFactionStorage
             UUID recruitUUID = UUID.fromString(recruitsResultSet.getString("RecruitUUID"));
             recruits.add(recruitUUID);
         }
+        recruitsResultSet.close();
+        preparedStatement.close();
+        connection.close();
         return recruits;
     }
 
     private Set<UUID> getFactionMembers(final String factionName) throws SQLException
     {
         Set<UUID> members = new HashSet<>();
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(SELECT_MEMBERS_WHERE_FACTIONNAME);
+        Connection connection = this.h2provider.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MEMBERS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next())
@@ -482,13 +514,17 @@ public class H2FactionStorage implements IFactionStorage
             UUID memberUUID = UUID.fromString(resultSet.getString("MemberUUID"));
             members.add(memberUUID);
         }
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
         return members;
     }
 
     private Set<UUID> getFactionOfficers(final String factionName) throws SQLException
     {
         Set<UUID> officers = new HashSet<>();
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(SELECT_OFFICERS_WHERE_FACTIONNAME);
+        Connection connection = this.h2provider.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_OFFICERS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next())
@@ -496,13 +532,17 @@ public class H2FactionStorage implements IFactionStorage
             UUID officerUUID = UUID.fromString(resultSet.getString("OfficerUUID"));
             officers.add(officerUUID);
         }
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
         return officers;
     }
 
     private Set<Claim> getFactionClaims(final String factionName) throws SQLException
     {
         Set<Claim> claims = new HashSet<>();
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(SELECT_CLAIMS_WHERE_FACTIONNAME);
+        Connection connection = this.h2provider.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CLAIMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next())
@@ -512,13 +552,17 @@ public class H2FactionStorage implements IFactionStorage
             Claim claim = Claim.valueOf(worldUUID + "|" + chunkPosition);
             claims.add(claim);
         }
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
         return claims;
     }
 
     private FactionChest getFactionChest(final String factionName) throws SQLException, IOException, ClassNotFoundException
     {
         FactionChest factionChest = new FactionChest();
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
+        Connection connection = this.h2provider.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.first())
@@ -531,6 +575,9 @@ public class H2FactionStorage implements IFactionStorage
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
             factionChest = FactionChest.fromInventory(inventory);
         }
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
         return factionChest;
     }
 
@@ -569,7 +616,8 @@ public class H2FactionStorage implements IFactionStorage
         Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
 
         //Get leader flags
-        PreparedStatement preparedStatement = _connection.getConnection().prepareStatement(SELECT_LEADER_FLAGS_WHERE_FACTIONNAME);
+        Connection connection = this.h2provider.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LEADER_FLAGS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet leaderResult = preparedStatement.executeQuery();
         boolean leaderUSE = true;
@@ -587,9 +635,11 @@ public class H2FactionStorage implements IFactionStorage
             leaderATTACK = leaderResult.getBoolean("Attack");
             leaderINVITE = leaderResult.getBoolean("Invite");
         }
+        leaderResult.close();
+        preparedStatement.close();
 
         //Get officer flags
-        preparedStatement = _connection.getConnection().prepareStatement(SELECT_OFFICER_FLAGS_WHERE_FACTIONNAME);
+        preparedStatement = connection.prepareStatement(SELECT_OFFICER_FLAGS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet officerResult = preparedStatement.executeQuery();
         boolean officerUSE = true;
@@ -607,9 +657,11 @@ public class H2FactionStorage implements IFactionStorage
             officerATTACK = officerResult.getBoolean("Attack");
             officerINVITE = officerResult.getBoolean("Invite");
         }
+        officerResult.close();
+        preparedStatement.close();
 
         //Get member flags
-        preparedStatement = _connection.getConnection().prepareStatement(SELECT_MEMBER_FLAGS_WHERE_FACTIONNAME);
+        preparedStatement = connection.prepareStatement(SELECT_MEMBER_FLAGS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet memberResult = preparedStatement.executeQuery();
         boolean memberUSE = true;
@@ -627,9 +679,11 @@ public class H2FactionStorage implements IFactionStorage
             memberATTACK = memberResult.getBoolean("Attack");
             memberINVITE = memberResult.getBoolean("Invite");
         }
+        memberResult.close();
+        preparedStatement.close();
 
         //Get recruit flags
-        preparedStatement = _connection.getConnection().prepareStatement(SELECT_RECRUIT_FLAGS_WHERE_FACTIONNAME);
+        preparedStatement = connection.prepareStatement(SELECT_RECRUIT_FLAGS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet recruitResult = preparedStatement.executeQuery();
         boolean recruitUSE = true;
@@ -647,9 +701,11 @@ public class H2FactionStorage implements IFactionStorage
             recruitATTACK = recruitResult.getBoolean("Attack");
             recruitINVITE = recruitResult.getBoolean("Invite");
         }
+        recruitResult.close();
+        preparedStatement.close();
 
         //Get ally flags
-        preparedStatement = _connection.getConnection().prepareStatement(SELECT_ALLY_FLAGS_WHERE_FACTIONNAME);
+        preparedStatement = connection.prepareStatement(SELECT_ALLY_FLAGS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet allyResult = preparedStatement.executeQuery();
         boolean allyUSE = true;
@@ -661,6 +717,9 @@ public class H2FactionStorage implements IFactionStorage
             allyPLACE = allyResult.getBoolean("Place");
             allyDESTROY = allyResult.getBoolean("Destroy");
         }
+        allyResult.close();
+        preparedStatement.close();
+        connection.close();
 
         leaderMap.put(FactionFlagTypes.USE, leaderUSE);
         leaderMap.put(FactionFlagTypes.PLACE, leaderPLACE);
@@ -705,7 +764,7 @@ public class H2FactionStorage implements IFactionStorage
 
     private void precreate()
     {
-        try(Connection connection = _connection.getConnection())
+        try(Connection connection = h2provider.getConnection())
         {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_FACTION);
@@ -730,18 +789,12 @@ public class H2FactionStorage implements IFactionStorage
 
             preparedStatement.execute();
             preparedStatement1.execute();
+            preparedStatement1.close();
+            preparedStatement.close();
             connection.commit();
         }
-        catch (SQLException e)
+        catch(SQLException e)
         {
-            try
-            {
-                _connection.getConnection().rollback();
-            }
-            catch (SQLException e1)
-            {
-                e1.printStackTrace();
-            }
             e.printStackTrace();
         }
     }
