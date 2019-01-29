@@ -4,13 +4,12 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.Invite;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -43,7 +42,7 @@ public class InviteCommand extends AbstractCommand
                 {
                     Faction senderFaction = optionalSenderFaction.get();
 
-                    if (this.getPlugin().getFlagManager().canInvite(senderPlayer, senderFaction))
+                    if (this.getPlugin().getFlagManager().canInvite(senderPlayer.getUniqueId(), senderFaction))
                     {
                         if(getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
                         {

@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.config;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public final class ConfigFields
@@ -14,17 +13,24 @@ public final class ConfigFields
 
     private boolean _isFactionFriendlyFire = false;
     private boolean _isAllianceFriendlyFire = false;
-    private BigDecimal _globalMaxPower = BigDecimal.valueOf(10.0);
-    private BigDecimal _startingPower = BigDecimal.valueOf(5.0);
-    private BigDecimal _powerIncrement = BigDecimal.valueOf(0.04);
-    private BigDecimal _powerDecrement = BigDecimal.valueOf(2.00);
-    private BigDecimal _killAward = BigDecimal.valueOf(2.00);
-    private BigDecimal _penalty = BigDecimal.valueOf(1.0);
+    private float _globalMaxPower = 10.0f;
+    private float _startingPower = 5.0f;
+    private float _powerIncrement = 0.04f;
+    private float _powerDecrement = 2.00f;
+    private float _killAward = 2.00f;
+    private float _penalty = 1.0f;
     private int _maxNameLength = 30;
     private int _minNameLength = 3;
     private int _maxTagLength = 5;
     private int _minTagLength = 2;
-    private boolean _mobSpawning = false;
+
+    private boolean _spawnMobsInSafeZone = true;
+    private boolean _spawnMobsInWarZone = true;
+    private boolean _spawnHostileMobsInWarZone = true;
+    private boolean _spawnMobsInFactionsTerritory = true;
+    private boolean _spawnHostileMobsInFactionsTerritory = true;
+//    private boolean _mobSpawning = false;
+
     private boolean _blockEnteringOfflineFactions = false;
     private boolean _requireConnectedClaims = true;
     private boolean _blockEnteringSafezoneFromWarzone = false;
@@ -50,8 +56,10 @@ public final class ConfigFields
     private boolean _isPvpLoggerActive = true;
     private int _pvpLoggerBlockTime = 60;
     private boolean _showPvpLoggerInScoreboard = true;
-    private boolean _disableBlockDestroyAtClaims = false;
-    private boolean _disableBlockDestroyAtWarzone = false;
+    private boolean _protectFromMobGrief = false;
+    private boolean _protectFromMobGriefWarZone = false;
+    private boolean _allowExplosionsByOtherPlayersInClaims = false;
+    private boolean _protectWarZoneFromPlayers = false;
     private List<String> _blockedCommandsDuringFight = Arrays.asList("/f home", "spawn", "tpa", "/tp");
     private boolean _canColorTags = true;
     private Text _factionStartPrefix = Text.of("[");
@@ -62,11 +70,15 @@ public final class ConfigFields
     private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
     private String _maxInactiveTime = "0";
+    private boolean _notifyWhenFactionRemoved;
+    private boolean _canUseFactionChest = true;
 
     //Storage
     private String _storageType = "hocon";
     private String _storageUserName = "sa";
     private String _storagePassword = "";
+    private String _databaseUrl = "localhost:3306/";
+    private String _databaseFileName = "database";
 
     //Whitelisted items and blocks
     private List<String> _whitelistedItems = new ArrayList<>();
@@ -87,17 +99,24 @@ public final class ConfigFields
 
             this._isFactionFriendlyFire = _configuration.getBoolean(false, "friendlyfire-faction");
             this._isAllianceFriendlyFire = _configuration.getBoolean(false, "friendlyfire-alliance");
-            this._globalMaxPower = new BigDecimal(_configuration.getString("10.0", "power", "max-power"));
-            this._startingPower = new BigDecimal(_configuration.getString("5.0", "power", "start-power"));
-            this._powerIncrement = new BigDecimal(_configuration.getString("0.04", "power", "increment"));
-            this._powerDecrement = new BigDecimal(_configuration.getString("2.0", "power", "decrement"));
-            this._killAward = new BigDecimal(_configuration.getString("2.0", "power", "killaward"));
-            this._penalty = new BigDecimal(_configuration.getString("1.0", "power", "penalty"));
+            this._globalMaxPower = _configuration.getFloat(10.0f, "power", "max-power");
+            this._startingPower = _configuration.getFloat(5.0f, "power", "start-power");
+            this._powerIncrement = _configuration.getFloat(0.04f, "power", "increment");
+            this._powerDecrement = _configuration.getFloat(2.0f, "power", "decrement");
+            this._killAward = _configuration.getFloat(2.0f, "power", "kill-award");
+            this._penalty = _configuration.getFloat(1.0f, "power", "penalty");
             this._maxNameLength = _configuration.getInt(30,"name", "max-length");
             this._minNameLength = _configuration.getInt(3, "name", "min-length");
             this._maxTagLength = _configuration.getInt(5, "tag", "max-length");
             this._minTagLength = _configuration.getInt(2, "tag", "min-length");
-            this._mobSpawning = _configuration.getBoolean(false,"spawn", "mobs");
+
+            //Mob spawning nodes
+            this._spawnMobsInSafeZone = _configuration.getBoolean(true, "spawn-mobs-in-safezone");
+            this._spawnMobsInWarZone = _configuration.getBoolean(true, "spawn-mobs-in-warzone");
+            this._spawnHostileMobsInWarZone = _configuration.getBoolean(true, "spawn-hostile-mobs-in-warzone");
+            this._spawnMobsInFactionsTerritory = _configuration.getBoolean(true, "spawn-mobs-in-factions-territory");
+            this._spawnHostileMobsInFactionsTerritory = _configuration.getBoolean(true, "spawn-hostile-mobs-in-factions-territory");
+
             this._blockEnteringOfflineFactions = _configuration.getBoolean(true, "block-entering-faction-while-offline");
             this._requireConnectedClaims = _configuration.getBoolean(true, "connected-claims");
             this._blockEnteringSafezoneFromWarzone = _configuration.getBoolean(false, "block-safezone-from-warzone");
@@ -108,7 +127,7 @@ public final class ConfigFields
             this._shouldDisplayRank = _configuration.getBoolean(true, "faction-rank");
             this._factionCreationByItems = _configuration.getBoolean(false, "creating-by-items", "toggled");
             this._requiredItemsToCreateFaction = prepareItems(_configuration.getListOfStrings(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20"), "creating-by-items", "items"));
-            this._spawnAtHomeAfterDeath = _configuration.getBoolean(false, "spawn", "spawn-at-home-after-death");
+            this._spawnAtHomeAfterDeath = _configuration.getBoolean(false, "spawn-at-home-after-death");
             this._canAttackOnlyAtNight = _configuration.getBoolean(false, "attack-only-at-night");
             this._canHomeBetweenWorlds = _configuration.getBoolean(false, "home-from-other-worlds");
             this._homeDelay = _configuration.getInt(5, "home-delay");
@@ -123,8 +142,10 @@ public final class ConfigFields
             this._isPvpLoggerActive = _configuration.getBoolean(true, "pvp-logger", "active");
             this._pvpLoggerBlockTime = _configuration.getInt(60, "pvp-logger", "time");
             this._showPvpLoggerInScoreboard = _configuration.getBoolean(true, "pvp-logger", "show-in-scoreboard");
-            this._disableBlockDestroyAtClaims = _configuration.getBoolean(false, "disable-block-destroy-claims");
-            this._disableBlockDestroyAtWarzone = _configuration.getBoolean(false, "disable-block-destroy-warzone");
+            this._protectFromMobGrief = _configuration.getBoolean(false, "protect-from-mob-grief");
+            this._protectFromMobGriefWarZone = _configuration.getBoolean(false, "protect-from-mob-grief-warzone");
+            this._allowExplosionsByOtherPlayersInClaims = _configuration.getBoolean(false, "allow-explosions-by-other-players-in-claims");
+            this._protectWarZoneFromPlayers = _configuration.getBoolean(false, "protect-warzone-from-players");
             this._blockedCommandsDuringFight = _configuration.getListOfStrings(Arrays.asList("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
@@ -134,12 +155,16 @@ public final class ConfigFields
             this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE"));
             this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
-            this._maxInactiveTime = _configuration.getString("30d", "max-inactive-time");
+            this._maxInactiveTime = _configuration.getString("30d", "factions-remover", "max-inactive-time");
+            this._notifyWhenFactionRemoved = _configuration.getBoolean(true, "factions-remover", "notify-when-removed");
+            this._canUseFactionChest = _configuration.getBoolean(true, "faction-chest");
 
             //Storage
             this._storageType = _configuration.getString("hocon", "storage", "type");
             this._storageUserName = _configuration.getString("sa", "storage", "username");
             this._storagePassword = _configuration.getString("", "storage", "password");
+            this._databaseUrl = _configuration.getString("localhost:3306/", "storage", "database-url");
+            this._databaseFileName = _configuration.getString("database", "storage", "database-file-name");
 
             //Whitelisted items and blocks
             this._whitelistedItems = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "items-whitelist");
@@ -164,32 +189,32 @@ public final class ConfigFields
         return this._isAllianceFriendlyFire;
     }
 
-    public BigDecimal getGlobalMaxPower()
+    public float getGlobalMaxPower()
     {
         return this._globalMaxPower;
     }
 
-    public BigDecimal getStartingPower()
+    public float getStartingPower()
     {
         return this._startingPower;
     }
 
-    public BigDecimal getPowerIncrement()
+    public float getPowerIncrement()
     {
         return this._powerIncrement;
     }
 
-    public BigDecimal getPowerDecrement()
+    public float getPowerDecrement()
     {
         return this._powerDecrement;
     }
 
-    public BigDecimal getKillAward()
+    public float getKillAward()
     {
         return this._killAward;
     }
 
-    public BigDecimal getPenalty()
+    public float getPenalty()
     {
         return this._penalty;
     }
@@ -214,9 +239,30 @@ public final class ConfigFields
         return this._minTagLength;
     }
 
-    public boolean getMobSpawning()
+    //Mob spawning methods
+    public boolean canSpawnMobsInSafeZone()
     {
-        return this._mobSpawning;
+        return this._spawnMobsInSafeZone;
+    }
+
+    public boolean canSpawnMobsInWarZone()
+    {
+        return this._spawnMobsInWarZone;
+    }
+
+    public boolean canSpawnHostileMobsInWarZone()
+    {
+        return this._spawnHostileMobsInWarZone;
+    }
+
+    public boolean canSpawnMobsInFactionsTerritory()
+    {
+        return this._spawnMobsInFactionsTerritory;
+    }
+
+    public boolean canSpawnHostileMobsInFactionsTerritory()
+    {
+        return this._spawnHostileMobsInFactionsTerritory;
     }
 
     public boolean getBlockEnteringFactions()
@@ -356,14 +402,14 @@ public final class ConfigFields
         return _pvpLoggerBlockTime;
     }
 
-    public boolean isBlockDestroyAtClaimsDisabled()
+    public boolean shouldProtectClaimFromMobGrief()
     {
-        return _disableBlockDestroyAtClaims;
+        return _protectFromMobGrief;
     }
 
-    public boolean isBlockDestroyAtWarzoneDisabled()
+    public boolean shouldProtectWarZoneFromMobGrief()
     {
-        return _disableBlockDestroyAtWarzone;
+        return _protectFromMobGriefWarZone;
     }
 
     public List<String> getBlockedCommandsDuringFight()
@@ -459,8 +505,13 @@ public final class ConfigFields
             return Long.parseLong(_maxInactiveTime.substring(0, _maxInactiveTime.length() - 1));
         }
 
-        //Default 10 days
-        return 864000;
+        //Default 0
+        return 0;
+    }
+
+    public boolean shouldNotifyWhenFactionRemoved()
+    {
+        return this._notifyWhenFactionRemoved;
     }
 
     public String getStorageType()
@@ -468,7 +519,7 @@ public final class ConfigFields
         return _storageType;
     }
 
-    public String getStorageUserName()
+    public String getStorageUsername()
     {
         return _storageUserName;
     }
@@ -496,5 +547,30 @@ public final class ConfigFields
     public boolean shouldDisplayPvpLoggerInScoreboard()
     {
         return this._showPvpLoggerInScoreboard;
+    }
+
+    public boolean canUseFactionChest()
+    {
+        return this._canUseFactionChest;
+    }
+
+    public boolean shouldAllowExplosionsByOtherPlayersInClaims()
+    {
+        return this._allowExplosionsByOtherPlayersInClaims;
+    }
+
+    public boolean shouldProtectWarzoneFromPlayers()
+    {
+        return this._protectWarZoneFromPlayers;
+    }
+
+    public String getDatabaseUrl()
+    {
+        return this._databaseUrl;
+    }
+
+    public String getDatabaseName()
+    {
+        return this._databaseFileName;
     }
 }

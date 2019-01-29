@@ -4,13 +4,12 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
@@ -171,8 +170,8 @@ public class InfoCommand extends AbstractCommand
                 .append(Text.of(TextColors.AQUA, PluginMessages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.RECRUITS + ": ", TextColors.GREEN, recruitList + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getFactionPower(faction) + "/" + getPlugin().getPowerManager().getFactionMaxPower(faction) + "\n"))
-                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, String.valueOf(faction.getClaims().size()) + "/" + String.valueOf(getPlugin().getPowerManager().getFactionPower(faction).intValue())))
+                .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction) + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.CLAIMS + ": ", TextColors.GOLD, faction.getClaims().size() + "/" + super.getPlugin().getPowerManager().getFactionMaxClaims(faction)))
                 .build();
 
         factionInfo.add(info);

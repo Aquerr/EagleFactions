@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 
-import java.util.Map;
+import java.util.Set;
 
 public interface IFactionStorage
 {
@@ -10,7 +10,9 @@ public interface IFactionStorage
 
     Faction getFaction(String factionName);
 
+    Set<Faction> getFactions();
+
     void load();
 
-    boolean queueRemoveFaction(String factionName);
+    boolean deleteFaction(String factionName);
 }

@@ -21,7 +21,7 @@ public class Configuration implements IConfiguration
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
-    private ConfigFields configFileds;
+    private ConfigFields configFields;
 
     public Configuration(Path configDir)
     {
@@ -62,14 +62,14 @@ public class Configuration implements IConfiguration
             save();
         }
 
-        this.configFileds = new ConfigFields(this);
+        this.configFields = new ConfigFields(this);
 //        setup(configDir);
     }
 
     @Override
     public ConfigFields getConfigFields()
     {
-        return configFileds;
+        return configFields;
     }
 
     //    public void setup(Path configDir)
@@ -101,7 +101,7 @@ public class Configuration implements IConfiguration
     public void reloadConfiguration()
     {
         loadConfiguration();
-        this.configFileds = new ConfigFields(this);
+        this.configFields = new ConfigFields(this);
     }
 
     private void loadConfiguration()
@@ -147,9 +147,32 @@ public class Configuration implements IConfiguration
         }
         else if(value instanceof Double)
         {
-            return (Double) value;
+            return (double) value;
         }
         else return 0;
+    }
+
+    @Override
+    public float getFloat(float defaultValue, Object... nodePath)
+    {
+       return configNode.getNode(nodePath).getFloat(defaultValue);
+
+//        Object value = configNode.getNode(nodePath).getValue();
+//
+//        if (value instanceof Integer)
+//        {
+//            int number = (Integer) value;
+//            return (float) number;
+//        }
+//        else if (value instanceof Float)
+//        {
+//            return (float)value;
+//        }
+//        else if (value instanceof Double)
+//        {
+//            return  ((Double) value).floatValue();
+//        }
+//        else return 0;
     }
 
     @Override

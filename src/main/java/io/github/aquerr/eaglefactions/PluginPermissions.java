@@ -49,6 +49,7 @@ public final class PluginPermissions
     public static final String ATTACK_COMMAND = "eaglefactions.player.attack";
     public static final String FLAGS_COMMAND = "eaglefactions.player.flags";
     public static final String TAG_COLOR_COMMAND = "eaglefactions.player.tagcolor";
+    public static final String CHEST_COMMAND = "eaglefactions.player.chest";
 
     public static final String ADMIN_COMMAND = "eaglefactions.admin.adminmode";
 

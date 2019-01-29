@@ -1,23 +1,15 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.EagleFeather;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -30,26 +22,44 @@ public class PlayerInteractListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
-    public void onHandInteract(HandInteractEvent event, @Root Player player)
+    @Listener(order = Order.FIRST, beforeModifications = true)
+    public void onItemUse(final InteractItemEvent event, @Root final Player player)
     {
-        if(event instanceof InteractBlockEvent)
+        if (event.getItemStack() == ItemStackSnapshot.NONE)
+            return;
+
+        Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
+        if (!optionalInteractionPoint.isPresent())
+            return;
+
+        Location<World> location = new Location<>(player.getWorld(), optionalInteractionPoint.get());
+
+        boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack());
+        if (!canUseItem)
         {
-            if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.BLOCK_HIT) && event.getContext().get(EventContextKeys.BLOCK_HIT).isPresent())
-            {
-                Optional<Location<World>> optionalLocation = event.getContext().get(EventContextKeys.BLOCK_HIT).get().getLocation();
-                if(optionalLocation.isPresent())
-                {
-                    if(!this.getPlugin().getProtectionManager().canInteract(optionalLocation.get(), player.getWorld(), player))
-                        event.setCancelled(true);
-                }
-            }
-            else if(event.getInteractionPoint().isPresent() && event.getContext().containsKey(EventContextKeys.ENTITY_HIT) && event.getContext().get(EventContextKeys.ENTITY_HIT).isPresent() && !(event.getContext().get(EventContextKeys.ENTITY_HIT).get() instanceof Living))
-            {
-                Location<World> entityLocation = event.getContext().get(EventContextKeys.ENTITY_HIT).get().getLocation();
-                if(!this.getPlugin().getProtectionManager().canInteract(entityLocation, player.getWorld(), player))
-                    event.setCancelled(true);
-            }
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    @Listener(order = Order.FIRST, beforeModifications = true)
+    public void onBlockInteract(final InteractBlockEvent event, @Root final Player player)
+    {
+        //If AIR or NONE then return
+        if (event.getTargetBlock() == BlockSnapshot.NONE)
+            return;
+
+        Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
+        if (!optionalLocation.isPresent())
+            return;
+
+        Location<World> blockLocation = optionalLocation.get();
+
+        boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player);
+        if (!canInteractWithBlock)
+        {
+            event.setCancelled(true);
+            return;
         }
     }
 }

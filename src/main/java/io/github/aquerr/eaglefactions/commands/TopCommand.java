@@ -2,13 +2,12 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
@@ -32,7 +31,16 @@ public class TopCommand extends AbstractCommand
         Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
         Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
 
-        factionsList.sort((o1, o2) -> getPlugin().getPowerManager().getFactionPower(o2).compareTo(getPlugin().getPowerManager().getFactionPower(o1)));
+        factionsList.sort((o1, o2) -> {
+            if (getPlugin().getPowerManager().getFactionPower(o2) > getPlugin().getPowerManager().getFactionPower(o1))
+            {
+                return 1;
+            }
+            else
+            {
+                return -1;
+            }
+        });
 
         //This should show only top 10 factions on the server.
 

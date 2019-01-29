@@ -4,7 +4,9 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -18,13 +20,23 @@ import java.util.function.Consumer;
 
 public class AttackLogic
 {
-    private ConfigFields _configFields;
-    private FactionLogic _factionLogic;
+    private static AttackLogic instance = null;
 
-    public AttackLogic(FactionLogic factionLogic, ConfigFields configFields)
+    private final ConfigFields _configFields;
+    private final FactionLogic _factionLogic;
+
+    public AttackLogic(EagleFactions eagleFactions)
     {
-        _configFields = configFields;
-        _factionLogic = factionLogic;
+        instance = this;
+        _configFields = eagleFactions.getConfiguration().getConfigFields();
+        _factionLogic = eagleFactions.getFactionLogic();
+    }
+
+    public static AttackLogic getInstance(EagleFactions eagleFactions)
+    {
+        if (instance == null)
+            return new AttackLogic(eagleFactions);
+        else return instance;
     }
 
     public void attack(Player player, Vector3i attackedChunk)
@@ -48,7 +60,7 @@ public class AttackLogic
                         informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
 
-                        _factionLogic.removeClaim(chunkFaction, player.getWorld().getUniqueId(), attackedChunk);
+                        _factionLogic.removeClaim(chunkFaction, new Claim(player.getWorld().getUniqueId(), attackedChunk));
                         task.cancel();
                     }
                     else

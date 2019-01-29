@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -68,7 +68,9 @@ public class ChatMessageListener extends AbstractListener
                     Set<MessageReceiver> receivers = new HashSet<>();
                     for (String allianceName : playerFaction.getAlliances())
                     {
-                        receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(getPlugin().getFactionLogic().getFactionByName(allianceName)));
+                        Faction allyFaction = super.getPlugin().getFactionLogic().getFactionByName(allianceName);
+                        if(allyFaction != null)
+                            receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(allyFaction));
                     }
 
                     receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
@@ -80,9 +82,7 @@ public class ChatMessageListener extends AbstractListener
                     chatTypePrefix.append(getFactionPrefix());
                     messageChannel.asMutable().clearMembers();
 
-                    Set<MessageReceiver> receivers = new HashSet<>();
-
-                    receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
+                    Set<MessageReceiver> receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
                 }

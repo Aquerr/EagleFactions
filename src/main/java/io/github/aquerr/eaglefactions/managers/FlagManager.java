@@ -1,64 +1,76 @@
 package io.github.aquerr.eaglefactions.managers;
 
+import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Singleton
 public class FlagManager
 {
-    EagleFactions _plugin;
-    public FlagManager(EagleFactions plugin)
+    private static FlagManager instance = null;
+    private final EagleFactions _plugin;
+
+    private FlagManager(EagleFactions plugin)
     {
-        _plugin = plugin;
+        this._plugin = plugin;
+        instance = this;
     }
 
-    public boolean canBreakBlock(Player player, Faction playerFaction, Faction chunkFaction)
+    public static FlagManager getInstance(EagleFactions eagleFactions)
     {
-        return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.DESTROY);
+        if (instance == null)
+            return new FlagManager(eagleFactions);
+        else return instance;
     }
 
-    public boolean canPlaceBlock(Player player, Faction playerFaction, Faction chunkFaction)
+    public boolean canBreakBlock(UUID playerUUID, Faction playerFaction, Faction chunkFaction)
     {
-        return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.PLACE);
+        return checkFlag(playerUUID, playerFaction, chunkFaction, FactionFlagTypes.DESTROY);
     }
 
-    public boolean canInteract(Player player, Faction playerFaction, Faction chunkFaction)
+    public boolean canPlaceBlock(UUID playerUUID, Faction playerFaction, Faction chunkFaction)
     {
-        return checkFlag(player, playerFaction, chunkFaction, FactionFlagTypes.USE);
+        return checkFlag(playerUUID, playerFaction, chunkFaction, FactionFlagTypes.PLACE);
     }
 
-    public boolean canClaim(Player player, Faction playerFaction)
+    public boolean canInteract(UUID playerUUID, Faction playerFaction, Faction chunkFaction)
     {
-        return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
+        return checkFlag(playerUUID, playerFaction, chunkFaction, FactionFlagTypes.USE);
     }
 
-    public boolean canAttack(Player player, Faction playerFaction)
+    public boolean canClaim(UUID playerUUID, Faction playerFaction)
     {
-        return checkFlag(player, playerFaction, FactionFlagTypes.CLAIM);
+        return checkFlag(playerUUID, playerFaction, FactionFlagTypes.CLAIM);
     }
 
-    public boolean canInvite(Player player, Faction playerFaction)
+    public boolean canAttack(UUID playerUUID, Faction playerFaction)
     {
-        return checkFlag(player, playerFaction, FactionFlagTypes.INVITE);
+        return checkFlag(playerUUID, playerFaction, FactionFlagTypes.CLAIM);
     }
 
-    private boolean checkFlag(Player player, Faction playerFaction, FactionFlagTypes flagTypes)
+    public boolean canInvite(UUID playerUUID, Faction playerFaction)
     {
-        FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(player, playerFaction);
+        return checkFlag(playerUUID, playerFaction, FactionFlagTypes.INVITE);
+    }
+
+    private boolean checkFlag(UUID playerUUID, Faction playerFaction, FactionFlagTypes flagTypes)
+    {
+        FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(playerUUID, playerFaction);
 
         return playerFaction.getFlags().get(memberType).get(flagTypes);
     }
 
-    private boolean checkFlag(Player player, Faction playerFaction, Faction chunkFaction, FactionFlagTypes flagType)
+    private boolean checkFlag(UUID playerUUID, Faction playerFaction, Faction chunkFaction, FactionFlagTypes flagType)
     {
         if (playerFaction.getName().equals(chunkFaction.getName()))
         {
-            FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(player, playerFaction);
+            FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(playerUUID, playerFaction);
 
             return chunkFaction.getFlags().get(memberType).get(flagType);
         }
