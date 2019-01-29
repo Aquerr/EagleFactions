@@ -1,6 +1,9 @@
 package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.managers.FlagManager;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.inventory.type.Inventory2D;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -22,10 +25,12 @@ public class Faction
     private Set<String> enemies;
     private UUID leader;
     private Set<UUID> officers;
-    private Set<String> claims;
+    private Set<Claim> claims;
     private FactionHome home;
     private Instant lastOnline;
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+
+    private FactionChest chest;
 
     //Constructor used while creating a new faction.
 //    private FACTION(String factionName, String factionTag, UUID factionLeader)
@@ -49,7 +54,7 @@ public class Faction
 
 
     //Constructor used while getting a faction from storage.
-    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<String> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<Claim> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags, FactionChest chest)
     {
         this.name = factionName;
         this.tag = factionTag;
@@ -64,6 +69,7 @@ public class Faction
         this.home = home;
         this.lastOnline = lastOnline;
         this.flags = flags;
+        this.chest = chest;
     }
 
     public String getName()
@@ -101,17 +107,17 @@ public class Faction
         return this.alliances.remove(factionName);
     }
 
-    public Set<String> getClaims()
+    public Set<Claim> getClaims()
     {
         return this.claims;
     }
 
-    public boolean addClaim(String claim)
+    public boolean addClaim(Claim claim)
     {
         return this.claims.add(claim);
     }
 
-    public boolean removeClaim(String claim)
+    public boolean removeClaim(Claim claim)
     {
         return this.claims.remove(claim);
     }
@@ -235,6 +241,25 @@ public class Faction
             return null;
     }
 
+    public FactionChest getChest()
+    {
+        return this.chest;
+    }
+
+    public boolean containsPlayer(UUID playerUUID)
+    {
+        if (this.leader.equals(playerUUID))
+            return true;
+        else if(this.officers.contains(playerUUID))
+            return true;
+        else if(this.members.contains(playerUUID))
+            return true;
+        else if(this.recruits.contains(playerUUID))
+            return true;
+        else
+            return false;
+    }
+
     public Builder toBuilder()
     {
         Builder factionBuilder = new Builder();
@@ -250,6 +275,7 @@ public class Faction
         factionBuilder.setLastOnline(this.lastOnline);
         factionBuilder.setHome(this.home);
         factionBuilder.setFlags(this.flags);
+        factionBuilder.setChest(this.chest);
 
         return factionBuilder;
     }
@@ -270,10 +296,11 @@ public class Faction
         private Set<String> alliances;
         private Set<String> enemies;
         private Set<UUID> officers;
-        private Set<String> claims;
+        private Set<Claim> claims;
         private FactionHome home;
         private Instant lastOnline;
         private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+        private FactionChest chest;
 
         private Builder()
         {
@@ -284,6 +311,7 @@ public class Faction
             this.officers = new HashSet<>();
             this.claims = new HashSet<>();
             this.home = null;
+            this.chest = null;
         }
 
         public Builder setName(String name)
@@ -334,7 +362,7 @@ public class Faction
             return this;
         }
 
-        public Builder setClaims(Set<String> claims)
+        public Builder setClaims(Set<Claim> claims)
         {
             this.claims = claims;
             return this;
@@ -358,6 +386,12 @@ public class Faction
             return this;
         }
 
+        public Builder setChest(FactionChest chest)
+        {
+            this.chest = chest;
+            return this;
+        }
+
         public Faction build()
         {
             if(this.name == null || this.tag == null || this.leader == null)
@@ -374,7 +408,7 @@ public class Faction
                 this.flags = FlagManager.getDefaultFactionFlags();
             }
 
-            return new Faction(this.name, this.tag, this.leader, this.recruits, this.members, this.claims, this.officers, this.alliances, this.enemies, this.home, this.lastOnline, this.flags);
+            return new Faction(this.name, this.tag, this.leader, this.recruits, this.members, this.claims, this.officers, this.alliances, this.enemies, this.home, this.lastOnline, this.flags, this.chest);
         }
     }
 }

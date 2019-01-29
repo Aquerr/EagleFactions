@@ -4,12 +4,11 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -71,7 +70,7 @@ public class AttackCommand extends AbstractCommand
                 }
                 else
                 {
-                    if (this.getPlugin().getFlagManager().canAttack(player, playerFaction))
+                    if (this.getPlugin().getFlagManager().canAttack(player.getUniqueId(), playerFaction))
                     {
                         Faction attackedFaction = optionalChunkFaction.get();
 
@@ -79,7 +78,7 @@ public class AttackCommand extends AbstractCommand
                         {
                             if(!playerFaction.getAlliances().contains(attackedFaction.getName()))
                             {
-                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction).doubleValue() * getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue() && getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > getPlugin().getPowerManager().getFactionPower(attackedFaction).doubleValue())
+                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction) * getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction) && getPlugin().getPowerManager().getFactionPower(playerFaction) > getPlugin().getPowerManager().getFactionPower(attackedFaction))
                                 {
                                     int attackTime = getPlugin().getConfiguration().getConfigFields().getAttackTime();
                                     Vector3i attackedClaim = player.getLocation().getChunkPosition();

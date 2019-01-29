@@ -2,12 +2,11 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -59,7 +58,7 @@ public class SetPowerCommand extends AbstractCommand
 
     private void setPower(Player player, String power)
     {
-        BigDecimal newPower = new BigDecimal(power);
+        float newPower = Float.valueOf(power);
 
         getPlugin().getPowerManager().setPower(player.getUniqueId(), newPower);
 

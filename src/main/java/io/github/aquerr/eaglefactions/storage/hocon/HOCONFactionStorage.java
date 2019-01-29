@@ -1,11 +1,7 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
 import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
-import io.github.aquerr.eaglefactions.entities.FactionHome;
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -20,15 +16,13 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class HOCONFactionStorage implements IFactionStorage
 {
     private Path filePath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
-    private final List<Faction> _factionsToSaveList = new LinkedList<>();
-    private final List<String> _factionsToRemove = new LinkedList<>();
-    private Thread storageThread;
 
     private boolean needToSave = false;
 
@@ -57,51 +51,11 @@ public class HOCONFactionStorage implements IFactionStorage
                 configLoader = HoconConfigurationLoader.builder().setPath(filePath).build();
                 load();
             }
-            prepareFactionsCache();
-            storageThread = new Thread(handleFactionsSaving());
-            storageThread.start();
         }
         catch(IOException exception)
         {
             exception.printStackTrace();
         }
-    }
-
-    private Runnable handleFactionsSaving()
-    {
-        return () ->
-        {
-            while(true)
-            {
-                if(_factionsToSaveList.size() > 0)
-                {
-                    synchronized(_factionsToSaveList)
-                    {
-                        saveFaction(_factionsToSaveList.get(0));
-                        _factionsToSaveList.remove(0);
-                    }
-                }
-                else if(_factionsToRemove.size() > 0)
-                {
-                    synchronized(_factionsToRemove)
-                    {
-                        removeFaction(_factionsToRemove.get(0));
-                        _factionsToRemove.remove(0);
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        Thread.sleep(1000);
-                    }
-                    catch(InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
     }
 
     private void precreate()
@@ -111,11 +65,9 @@ public class HOCONFactionStorage implements IFactionStorage
 
         getStorage().getNode("factions", "WarZone", "claims").setValue(new ArrayList<>());
         getStorage().getNode("factions", "WarZone", "members").setValue(new ArrayList<>());
-        getStorage().getNode("factions", "WarZone", "power").setValue(9999);
 
         getStorage().getNode("factions", "SafeZone", "claims").setValue(new ArrayList<>());
         getStorage().getNode("factions", "SafeZone", "members").setValue(new ArrayList<>());
-        getStorage().getNode("factions", "SafeZone", "power").setValue(9999);
 
         saveChanges();
     }
@@ -124,16 +76,24 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         try
         {
+//            List<DataView> serializedInventorySlots = InventorySerializer.serializeInventory(faction.getChest().toInventory());
+//            List<String> serializedHoconChest = new ArrayList<>();
+//            for(DataView dataView : serializedInventorySlots)
+//            {
+//                serializedHoconChest.add(DataFormats.HOCON.write(dataView));
+//            }
             configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
             configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
-            configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
-            configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
-            configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
+            configNode.getNode("factions", faction.getName(), "officers").setValue(toListOfStrings(faction.getOfficers()));
+            configNode.getNode("factions", faction.getName(), "members").setValue(toListOfStrings(faction.getMembers()));
+            configNode.getNode("factions", faction.getName(), "recruits").setValue(toListOfStrings(faction.getRecruits()));
             configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
             configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
-            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims());
+            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(x->x.toString()).collect(Collectors.toList()));
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
+            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+//            configNode.getNode("factions", faction.getName(), "chest").setValue(serializedHoconChest);
 
             if(faction.getHome() == null)
             {
@@ -143,9 +103,6 @@ public class HOCONFactionStorage implements IFactionStorage
             {
                 configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
-
-//            FactionsCache.addOrUpdateFactionCache(faction);
-
             return saveChanges();
         }
         catch(Exception exception)
@@ -157,25 +114,13 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
-    public boolean addOrUpdateFaction(Faction faction)
+    public boolean addOrUpdateFaction(final Faction faction)
     {
-        FactionsCache.addOrUpdateFactionCache(faction);
-
-        synchronized(_factionsToSaveList)
-        {
-            if(!_factionsToSaveList.contains(faction))
-            {
-                _factionsToSaveList.add(faction);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        return saveFaction(faction);
     }
 
-    private boolean removeFaction(String factionName)
+    @Override
+    public boolean deleteFaction(String factionName)
     {
         try
         {
@@ -191,53 +136,12 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
-    public boolean queueRemoveFaction(String factionName)
-    {
-        FactionsCache.removeFactionCache(factionName);
-
-        synchronized(_factionsToRemove)
-        {
-            if(!_factionsToRemove.contains(factionName))
-            {
-                _factionsToRemove.add(factionName);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
-
-    @Override
     public @Nullable Faction getFaction(String factionName)
     {
-        try
-        {
-            Faction factionCache = FactionsCache.getFactionCache(factionName);
-            if(factionCache != null)
-            {
-                return factionCache;
-            }
-
             if(configNode.getNode("factions", factionName).getValue() == null)
-            {
                 return null;
-            }
 
-            Faction faction = createFactionObject(factionName);
-
-            FactionsCache.addOrUpdateFactionCache(faction);
-
-            return faction;
-        }
-        catch(Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
-        //If it was not possible to get a faction then return null.
-        return null;
+            return createFactionObject(factionName);
     }
 
     private Faction createFactionObject(String factionName)
@@ -250,9 +154,10 @@ public class HOCONFactionStorage implements IFactionStorage
         Set<UUID> recruits = getFactionRecruits(factionName);
         Set<String> alliances = getFactionAlliances(factionName);
         Set<String> enemies = getFactionEnemies(factionName);
-        Set<String> claims = getFactionClaims(factionName);
+        Set<Claim> claims = getFactionClaims(factionName);
         Instant lastOnline = getLastOnline(factionName);
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
+        FactionChest chest = getFactionChest(factionName);
 
         Faction faction = Faction.builder()
                 .setName(factionName)
@@ -267,6 +172,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 .setClaims(claims)
                 .setLastOnline(lastOnline)
                 .setFlags(flags)
+                .setChest(chest)
                 .build();
 
         if(needToSave)
@@ -275,6 +181,35 @@ public class HOCONFactionStorage implements IFactionStorage
         }
 
         return faction;
+    }
+
+    private FactionChest getFactionChest(String factionName)
+    {
+//        FactionChest factionChest = null;
+        List<FactionChest.SlotItem> slotItems = null;
+        try
+        {
+
+//            factionChest = configNode.getNode("factions", factionName, "chest").getValue(objectToFactionChestTransformer);
+            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
+        } catch (ObjectMappingException e) {
+            e.printStackTrace();
+        }
+
+//        if(factionChest != null)
+//        {
+//            return factionChest;
+//        }
+        if(slotItems != null)
+        {
+            return new FactionChest(slotItems);
+        }
+        else
+        {
+            configNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
+            needToSave = true;
+            return new FactionChest();
+        }
     }
 
     private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFactionFlags(String factionName)
@@ -405,13 +340,19 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
-    private Set<String> getFactionClaims(String factionName)
+    private Set<Claim> getFactionClaims(String factionName)
     {
         Object claimsObject = configNode.getNode(new Object[]{"factions", factionName, "claims"}).getValue();
 
         if(claimsObject != null)
         {
-            return new HashSet<>((List<String>) claimsObject);
+            Set<Claim> claims = new HashSet<>();
+            for (String claimAsString : (List<String>)claimsObject)
+            {
+                Claim claim = Claim.valueOf(claimAsString);
+                claims.add(claim);
+            }
+            return claims;
         }
         else
         {
@@ -497,7 +438,7 @@ public class HOCONFactionStorage implements IFactionStorage
             }
             else
             {
-                return new FactionHome(String.valueOf(homeObject));
+                return FactionHome.from(String.valueOf(homeObject));
             }
 
         }
@@ -573,8 +514,10 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
-    private void prepareFactionsCache()
+    @Override
+    public Set<Faction> getFactions()
     {
+        final Set<Faction> factions = new HashSet<>();
         final Set<Object> keySet = getStorage().getNode("factions").getChildrenMap().keySet();
 
         for(Object object : keySet)
@@ -582,9 +525,11 @@ public class HOCONFactionStorage implements IFactionStorage
             if(object instanceof String)
             {
                 Faction faction = createFactionObject(String.valueOf(object));
-                FactionsCache.addOrUpdateFactionCache(faction);
+                factions.add(faction);
             }
         }
+
+        return factions;
     }
 
     @Override
@@ -641,6 +586,36 @@ public class HOCONFactionStorage implements IFactionStorage
         return null;
     };
 
+//    private Function<Object, FactionChest> objectToFactionChestTransformer = object ->
+//    {
+//        if(object instanceof List)
+//        {
+//            List<DataView> dataViewList = new ArrayList<>();
+//            List<Object> objectList = (List<Object>)object;
+//
+//            for(Object dataViewObject : objectList)
+//            {
+//                try
+//                {
+//                    DataView dataView = DataFormats.HOCON.r(dataViewObject.toString());
+//                    dataViewList.add(dataView);
+//                }
+//                catch(IOException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(EagleFactions.getPlugin());
+//            InventorySerializer.deserializeInventory(dataViewList, inventory);
+//            return FactionChest.fromInventory(inventory);
+//
+////            return dataViewList;
+//        }
+//        return null;
+//    };
+
+
     private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
     {
         List<String> listOfStrings = new ArrayList<>();
@@ -650,5 +625,4 @@ public class HOCONFactionStorage implements IFactionStorage
         }
         return listOfStrings;
     }
-
 }
