@@ -187,7 +187,6 @@ public class H2FactionStorage implements IFactionStorage
                 enemies = enemies.substring(0, enemies.length() - 1);
 
             connection = this.h2provider.getConnection();
-            connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(MERGE_FACTION);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setString(2, faction.getTag().toPlain());
@@ -317,7 +316,7 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.execute();
             preparedStatement.close();
 
-            connection.commit();
+//            connection.commit();
             connection.close();
             return true;
         }

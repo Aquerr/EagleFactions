@@ -30,23 +30,23 @@ public class ProtectionManager implements IProtectionManager
     private static ProtectionManager INSTANCE = null;
     private final EagleFactions plugin;
 
-    public static ProtectionManager getInstance(EagleFactions eagleFactions)
+    public static ProtectionManager getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new ProtectionManager(eagleFactions);
         else return INSTANCE;
     }
 
-    private ProtectionManager(EagleFactions plugin)
+    private ProtectionManager(final EagleFactions plugin)
     {
         INSTANCE = this;
         this.plugin = plugin;
     }
 
     @Override
-    public boolean canInteractWithBlock(Location<World> location, User user)
+    public boolean canInteractWithBlock(final Location<World> location, final User user)
     {
-        World world = location.getExtent();
+        final World world = location.getExtent();
 
         if (hasAdminMode(user.getUniqueId()))
             return true;
@@ -63,39 +63,27 @@ public class ProtectionManager implements IProtectionManager
                 && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).isPresent()
                 && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName()))
         {
-            ItemStack feather = user.getItemInHand(HandTypes.MAIN_HAND).get();
+            final ItemStack feather = user.getItemInHand(HandTypes.MAIN_HAND).get();
             feather.setQuantity(feather.getQuantity() - 1);
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!")));
             return true;
         }
 
-        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && !user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
-        else if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && !user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
+        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+            return true;
+        if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+            return true;
 
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
             return true;
 
-        Faction chunkFaction = optionalChunkFaction.get();
-        if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && !user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
-        else if (chunkFaction.getName().equalsIgnoreCase("WarZone") && !user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
+        final Faction chunkFaction = optionalChunkFaction.get();
+        if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+            return true;
+        if (chunkFaction.getName().equalsIgnoreCase("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+            return true;
 
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
@@ -104,7 +92,7 @@ public class ProtectionManager implements IProtectionManager
             return false;
         }
 
-        Faction playerFaction = optionalPlayerFaction.get();
+        final Faction playerFaction = optionalPlayerFaction.get();
         if (plugin.getFlagManager().canInteract(user.getUniqueId(), playerFaction, chunkFaction))
             return true;
         else
@@ -125,33 +113,21 @@ public class ProtectionManager implements IProtectionManager
         if (isItemWhitelisted(usedItem.getType()))
             return true;
 
-        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && !user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
-        else if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && !user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
+        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+            return true;
+        if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+            return true;
 
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
             return true;
 
-        Faction chunkFaction = optionalChunkFaction.get();
-        if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && !user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
-        else if (chunkFaction.getName().equalsIgnoreCase("WarZone") && !user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
-            return false;
-        }
+        final Faction chunkFaction = optionalChunkFaction.get();
+        if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+            return true;
+        if (chunkFaction.getName().equalsIgnoreCase("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+            return true;
 
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
@@ -177,16 +153,10 @@ public class ProtectionManager implements IProtectionManager
         if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
 
-        if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && !user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
-            return false;
-        }
-        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief() && !user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
-        {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
-            return false;
-        }
+        if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()) && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+            return true;
+        else if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && (user.hasPermission(PluginPermissions.WAR_ZONE_BUILD) || !this.plugin.getConfiguration().getConfigFields().shouldProtectWarzoneFromPlayers()))
+            return true;
 
         Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
