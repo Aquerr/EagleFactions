@@ -8,11 +8,12 @@ import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.logic.MessageLoader;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.*;
+import io.github.aquerr.eaglefactions.message.MessageLoader;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
+import io.github.aquerr.eaglefactions.storage.StorageManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -21,6 +22,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
@@ -52,6 +54,8 @@ public class EagleFactions
     public static Map<UUID, ChatEnum> ChatList;
     public static Map<UUID, Integer> HomeCooldownPlayers;
 
+    private static EagleFactions eagleFactions;
+
     private IConfiguration _configuration;
     private PVPLogger _pvpLogger;
     private PlayerManager _playerManager;
@@ -60,8 +64,9 @@ public class EagleFactions
     private PowerManager _powerManager;
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
+    private StorageManager _storageManager;
 
-    private static EagleFactions eagleFactions;
+//    private Optional<PlaceholderService> _placeholderService;
 
     public static EagleFactions getPlugin()
     {
@@ -127,69 +132,44 @@ public class EagleFactions
     }
 
     @Listener
+    public void onGameStarting(GameStartingServerEvent event)
+    {
+//        _placeholderService = Sponge.getServiceManager().provide(PlaceholderService.class);
+//
+//        if(_placeholderService.isPresent())
+//        {
+//            _placeholderService.get().loadAll(this, this).stream().map(builder -> {
+//                switch(builder.getId())
+//                {
+//                    case "multi":
+//                        return ((ExpansionBuilder) builder).tokens("a", "b", null).description("Parse the token for player!");
+//                    case "msg":
+//                        return ((ExpansionBuilder) builder).description("Send a message!");
+//                }
+//                return builder;
+//            }).map(builder -> builder.author("Nerdi").version("1.0")).forEach(builder -> {
+//                try
+//                {
+//                    builder.buildAndRegister();
+//                }
+//                catch(Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            });
+//        }
+    }
+
+//    @Placeholder(id = "msg")
+//    public String test(@Token @Nullable String text)
+//    {
+//        return text += "ELO";
+//    }
+
+    @Listener
     public void onServerGameLoaded(GameStartedServerEvent event)
     {
         startFactionsRemover();
-    }
-
-    private void SetupConfigs()
-    {
-        _configuration = new Configuration(_configDir);
-        MessageLoader messageLoader = new MessageLoader(getConfiguration(), _configDir);
-
-        _pvpLogger = new PVPLogger(getConfiguration());
-    }
-
-    private void SetupManagers()
-    {
-        _playerManager = new PlayerManager(this);
-        _powerManager = new PowerManager(this);
-        _flagManager = new FlagManager(this);
-        _factionLogic = new FactionLogic(this);
-        _attackLogic = new AttackLogic(_factionLogic, _configuration.getConfigFields());
-        _protectionManager = new ProtectionManager(this);
-    }
-
-    private void startFactionsRemover()
-    {
-        Task.Builder factionsRemoveTask = Sponge.getScheduler().createTaskBuilder();
-        factionsRemoveTask.async().execute(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                long maxInactive = getConfiguration().getConfigFields().getMaxInactiveTime();
-                if(maxInactive != 0)
-                {
-                    Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
-                    for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
-                    {
-                        if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
-                            continue;
-
-                        if(_factionLogic.hasOnlinePlayers(factionEntry.getValue()))
-                            continue;
-
-                        Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
-
-                        if(maxInactive < inactiveTime.getSeconds())
-                        {
-                            _factionLogic.disbandFaction(factionEntry.getKey());
-                        }
-//                        else if(maxInactive - 172800 < inactiveTime.getSeconds())
-//                        {
-//                            long timeToRemove = maxInactive - inactiveTime.getSeconds();
-//                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + "days due to its long inactive time.")));
-//                        }
-                        else if(maxInactive * 0.75 < inactiveTime.getSeconds())
-                        {
-                            long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
-                            Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
-                        }
-                    }
-                }
-            }
-        }).interval(1, TimeUnit.HOURS).submit(this);
     }
 
     private void InitializeCommands()
@@ -472,6 +452,13 @@ public class EagleFactions
                 .executor(new EagleFeatherCommand(this))
                 .build());
 
+        //Chest Command
+        Subcommands.put(Collections.singletonList("chest"), CommandSpec.builder()
+                .description(Text.of("Opens faction's chest"))
+                .permission(PluginPermissions.CHEST_COMMAND)
+                .executor(new ChestCommand(this))
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))
@@ -541,6 +528,11 @@ public class EagleFactions
         return _factionLogic;
     }
 
+    public StorageManager getStorageManager()
+    {
+        return this._storageManager;
+    }
+
     public InputStream getResourceAsStream(String fileName)
     {
         return this.getClass().getClassLoader().getResourceAsStream(fileName);
@@ -549,5 +541,66 @@ public class EagleFactions
     public URL getResource(String fileName)
     {
         return this.getClass().getClassLoader().getResource(fileName);
+    }
+
+    public void printInfo(String message)
+    {
+        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.YELLOW, message));
+    }
+
+    private void SetupConfigs()
+    {
+        _configuration = new Configuration(_configDir);
+        MessageLoader messageLoader = MessageLoader.getInstance(this);
+
+        _pvpLogger = new PVPLogger(getConfiguration());
+    }
+
+    private void SetupManagers()
+    {
+        _storageManager = StorageManager.getInstance(this);
+
+        _playerManager = PlayerManager.getInstance(this);
+        _powerManager = PowerManager.getInstance(this);
+        _flagManager = FlagManager.getInstance(this);
+        _factionLogic = FactionLogic.getInstance(this);
+        _attackLogic = AttackLogic.getInstance(this);
+        _protectionManager = ProtectionManager.getInstance(this);
+    }
+
+    private void startFactionsRemover()
+    {
+        //Do not turn on faction's remover if max inactive time == 0
+        if(this.getConfiguration().getConfigFields().getMaxInactiveTime() == 0)
+            return;
+
+        Task.Builder factionsRemoveTask = Sponge.getScheduler().createTaskBuilder();
+        factionsRemoveTask.async().execute(this::removeInactiveFaction).interval(1, TimeUnit.HOURS).submit(this);
+    }
+
+    private void removeInactiveFaction()
+    {
+        long maxInactiveTimeInSeconds = getConfiguration().getConfigFields().getMaxInactiveTime();
+        Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
+        for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
+        {
+            if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
+                continue;
+
+            Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
+            if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
+                continue;
+
+            _factionLogic.disbandFaction(factionEntry.getKey());
+
+            if(this.getConfiguration().getConfigFields().shouldNotifyWhenFactionRemoved())
+                Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " has been removed due to its long inactivity time.")));
+
+//            else if(maxInactive * 0.75 < inactiveTime.getSeconds())
+//            {
+//                long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
+//                Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
+//            }
+        }
     }
 }

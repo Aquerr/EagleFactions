@@ -16,24 +16,30 @@ public class FactionHome
         this.WorldUUID = worldUUID;
     }
 
-    public FactionHome(String homeString)
+    public static FactionHome from(String worldUUIDAndBlockPositionString)
     {
-        String splitter = "\\|";
-        String worldUUIDString = homeString.split(splitter)[0];
-        String vectorsString = homeString.split(splitter)[1];
+        try
+        {
+            String splitter = "\\|";
+            String worldUUIDString = worldUUIDAndBlockPositionString.split(splitter)[0];
+            String vectorsString = worldUUIDAndBlockPositionString.split(splitter)[1];
 
-        String vectors[] = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+            String[] vectors = vectorsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
 
-        int x = Integer.valueOf(vectors[0]);
-        int y = Integer.valueOf(vectors[1]);
-        int z = Integer.valueOf(vectors[2]);
+            int x = Integer.valueOf(vectors[0]);
+            int y = Integer.valueOf(vectors[1]);
+            int z = Integer.valueOf(vectors[2]);
 
-        Vector3i blockPosition = Vector3i.from(x, y, z);
+            Vector3i blockPosition = Vector3i.from(x, y, z);
 
-        UUID worldUUID = UUID.fromString(worldUUIDString);
-        this.BlockPosition = blockPosition;
-        this.WorldUUID = worldUUID;
-
+            UUID worldUUID = UUID.fromString(worldUUIDString);
+            return new FactionHome(worldUUID, blockPosition);
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+            return null;
+        }
     }
 
     public UUID getWorldUUID()
@@ -44,5 +50,11 @@ public class FactionHome
     public Vector3i getBlockPosition()
     {
         return BlockPosition;
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.WorldUUID.toString() + "|" + this.BlockPosition.toString();
     }
 }

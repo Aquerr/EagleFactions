@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.caching;
 
+import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
 
 import javax.annotation.Nullable;
@@ -7,10 +8,8 @@ import java.util.*;
 
 public class FactionsCache
 {
-    //TODO: Add a second thread for saving factions' data.
-
     private static final Map<String, Faction> factionsCacheMap = new HashMap<>();
-    private static final Set<String> claimsCacheSet = new HashSet<>();
+    private static final Set<Claim> claimsCacheSet = new HashSet<>();
 //    private static final Map<String, Set<String>> factionsClaimsCache = new Hashtable<>();
 
     private FactionsCache()
@@ -68,8 +67,19 @@ public class FactionsCache
         return null;
     }
 
-    public static Set<String> getAllClaims()
+    public static Set<Claim> getAllClaims()
     {
         return claimsCacheSet;
+    }
+
+    public static void removeClaimCache(Claim claim)
+    {
+        claimsCacheSet.remove(claim);
+    }
+
+    public static void clearCache()
+    {
+        claimsCacheSet.clear();
+        factionsCacheMap.clear();
     }
 }

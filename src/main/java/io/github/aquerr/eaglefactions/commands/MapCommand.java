@@ -3,14 +3,14 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.logic.PluginMessages;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -56,7 +56,7 @@ public class MapCommand extends AbstractCommand
 
     private void generateMap(Player player)
     {
-        Set<String> claimsList = getPlugin().getFactionLogic().getAllClaims();
+        Set<Claim> claimsList = getPlugin().getFactionLogic().getAllClaims();
         Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
         World world = player.getWorld();
@@ -75,8 +75,6 @@ public class MapCommand extends AbstractCommand
         List<String> allianceFactions = new ArrayList<>();
         List<String> enemyFactions = new ArrayList<>();
         //String playerFaction = "";
-
-        StringBuilder claimBuilder = new StringBuilder();
 
         //Map resolution
         int mapWidth = 20;
@@ -101,11 +99,9 @@ public class MapCommand extends AbstractCommand
                 }
 
                 Vector3i chunk = playerPosition.add(column, 0, row);
-                claimBuilder.append(world.getUniqueId().toString());
-                claimBuilder.append("|");
-                claimBuilder.append(chunk.toString());
+                Claim claim = new Claim(world.getUniqueId(), chunk);
 
-                if (claimsList.contains(claimBuilder.toString()))
+                if (claimsList.contains(claim))
                 {
                     Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
@@ -181,7 +177,7 @@ public class MapCommand extends AbstractCommand
                     {
                         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something went really wrong..."));
                         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk exists in claim list but not in the factions' list."));
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk: ", TextColors.GOLD, claimBuilder.toString()));
+                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk: ", TextColors.GOLD, claim.toString()));
                         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Player that used map: ", TextColors.GOLD, player.toString()));
                         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Check if this claim exists in the ", TextColors.GOLD, "factions.conf."));
                         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "And report this bug to the plugin owner."));
@@ -201,7 +197,6 @@ public class MapCommand extends AbstractCommand
                         textBuilder.append(notCapturedMark).build();
                     }
                 }
-                claimBuilder.setLength(0);
             }
             map.add(textBuilder.build());
         }
@@ -253,6 +248,7 @@ public class MapCommand extends AbstractCommand
 
             Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             World world = player.getWorld();
+            Claim claim = new Claim(player.getWorld().getUniqueId(), chunk);
 
             if(optionalPlayerFaction.isPresent())
             {
@@ -263,22 +259,22 @@ public class MapCommand extends AbstractCommand
                     //We need to check if because player can click on the claim that is already claimed (in the previous map in the chat)
                     if (!getPlugin().getFactionLogic().isClaimed(world.getUniqueId(), chunk))
                     {
-                        if (getPlugin().getPowerManager().getFactionPower(playerFaction).doubleValue() > playerFaction.getClaims().size())
+                        if (super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) > playerFaction.getClaims().size())
                         {
                             if (!EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
                             {
                                 if (!playerFaction.getClaims().isEmpty())
                                 {
-                                    if (playerFaction.getName().equals("SafeZone") || playerFaction.getName().equals("WarZone"))
+                                    if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
                                     {
-                                        getPlugin().getFactionLogic().addClaim(playerFaction, world.getUniqueId(), chunk);
+                                        getPlugin().getFactionLogic().addClaim(playerFaction, claim);
                                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                                     }
                                     else
                                     {
                                         if (getPlugin().getConfiguration().getConfigFields().requireConnectedClaims())
                                         {
-                                            if (getPlugin().getFactionLogic().isClaimConnected(playerFaction, world.getUniqueId(), chunk))
+                                            if (getPlugin().getFactionLogic().isClaimConnected(playerFaction, claim))
                                             {
                                                 getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                                             }
@@ -324,7 +320,7 @@ public class MapCommand extends AbstractCommand
                             }
                         }
 
-                        getPlugin().getFactionLogic().removeClaim(playerFaction, world.getUniqueId(), chunk);
+                        getPlugin().getFactionLogic().removeClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
 
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                     }

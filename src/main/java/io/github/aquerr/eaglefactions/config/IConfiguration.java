@@ -14,6 +14,8 @@ public interface IConfiguration
 
     double getDouble(double defaultValue, Object... nodePath);
 
+    float getFloat(float defaultValue, Object... nodePath);
+
     boolean getBoolean(boolean defaultValue, Object... nodePath);
 
     String getString(String defaultValue, Object... nodePath);
