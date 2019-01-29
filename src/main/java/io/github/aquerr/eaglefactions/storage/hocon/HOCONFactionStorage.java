@@ -82,12 +82,12 @@ public class HOCONFactionStorage implements IFactionStorage
     {
         try
         {
-            List<DataView> serializedInventorySlots = InventorySerializer.serializeInventory(faction.getChest().toInventory());
-            List<String> serializedHoconChest = new ArrayList<>();
-            for(DataView dataView : serializedInventorySlots)
-            {
-                serializedHoconChest.add(DataFormats.HOCON.write(dataView));
-            }
+//            List<DataView> serializedInventorySlots = InventorySerializer.serializeInventory(faction.getChest().toInventory());
+//            List<String> serializedHoconChest = new ArrayList<>();
+//            for(DataView dataView : serializedInventorySlots)
+//            {
+//                serializedHoconChest.add(DataFormats.HOCON.write(dataView));
+//            }
             configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
             configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
             configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
@@ -98,8 +98,8 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(x->x.toString()).collect(Collectors.toList()));
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
-//            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
-            configNode.getNode("factions", faction.getName(), "chest").setValue(serializedHoconChest);
+            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+//            configNode.getNode("factions", faction.getName(), "chest").setValue(serializedHoconChest);
 
             if(faction.getHome() == null)
             {
@@ -191,25 +191,25 @@ public class HOCONFactionStorage implements IFactionStorage
 
     private FactionChest getFactionChest(String factionName)
     {
-        FactionChest factionChest = null;
+//        FactionChest factionChest = null;
         List<FactionChest.SlotItem> slotItems = null;
-//        try
-//        {
-
-            factionChest = configNode.getNode("factions", factionName, "chest").getValue(objectToFactionChestTransformer);
-//            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
-//        } catch (ObjectMappingException e) {
-//            e.printStackTrace();
-//        }
-
-        if(factionChest != null)
+        try
         {
-            return factionChest;
+
+//            factionChest = configNode.getNode("factions", factionName, "chest").getValue(objectToFactionChestTransformer);
+            slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
+        } catch (ObjectMappingException e) {
+            e.printStackTrace();
         }
-//        if(slotItems != null)
+
+//        if(factionChest != null)
 //        {
-//            return new FactionChest(slotItems);
+//            return factionChest;
 //        }
+        if(slotItems != null)
+        {
+            return new FactionChest(slotItems);
+        }
         else
         {
             configNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
