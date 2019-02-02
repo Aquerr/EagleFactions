@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 public class PlayerManager
 {
-    private static PlayerManager instance = null;
+    private static PlayerManager INSTANCE = null;
 
     private final ConfigFields _configFields;
     private final StorageManager storageManager;
@@ -30,7 +30,7 @@ public class PlayerManager
 
     private PlayerManager(EagleFactions plugin)
     {
-        instance = this;
+        INSTANCE = this;
         _configFields = plugin.getConfiguration().getConfigFields();
         storageManager = StorageManager.getInstance(plugin);
 
@@ -40,9 +40,9 @@ public class PlayerManager
 
     public static PlayerManager getInstance(EagleFactions eagleFactions)
     {
-        if (instance == null)
+        if (INSTANCE == null)
             return new PlayerManager(eagleFactions);
-        else return instance;
+        else return INSTANCE;
     }
 
     public boolean addPlayer(UUID playerUUID, String playerName)

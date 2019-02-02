@@ -200,6 +200,7 @@ public class HOCONFactionStorage implements IFactionStorage
             slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
         } catch (ObjectMappingException e) {
             e.printStackTrace();
+            return new FactionChest();
         }
 
 //        if(factionChest != null)

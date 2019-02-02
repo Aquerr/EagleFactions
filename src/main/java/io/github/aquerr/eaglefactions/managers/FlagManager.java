@@ -13,20 +13,20 @@ import java.util.UUID;
 @Singleton
 public class FlagManager
 {
-    private static FlagManager instance = null;
+    private static FlagManager INSTANCE = null;
     private final EagleFactions _plugin;
 
     private FlagManager(EagleFactions plugin)
     {
         this._plugin = plugin;
-        instance = this;
+        INSTANCE = this;
     }
 
     public static FlagManager getInstance(EagleFactions eagleFactions)
     {
-        if (instance == null)
+        if (INSTANCE == null)
             return new FlagManager(eagleFactions);
-        else return instance;
+        else return INSTANCE;
     }
 
     public boolean canBreakBlock(UUID playerUUID, Faction playerFaction, Faction chunkFaction)

@@ -39,6 +39,7 @@ public class StorageManager
 
     private StorageManager(EagleFactions eagleFactions)
     {
+        INSTANCE = this;
         this.plugin = eagleFactions;
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         Path configDir = eagleFactions.getConfigDir();
