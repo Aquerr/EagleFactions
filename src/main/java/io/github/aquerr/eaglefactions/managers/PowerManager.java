@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 @Singleton
 public class PowerManager
 {
-    private static PowerManager instance = null;
+    private static PowerManager INSTANCE = null;
 
     private final EagleFactions _plugin;
     private final ConfigFields _configFields;
@@ -32,14 +32,14 @@ public class PowerManager
 
     public static PowerManager getInstance(EagleFactions eagleFactions)
     {
-        if (instance == null)
+        if (INSTANCE == null)
             return new PowerManager(eagleFactions);
-        else return instance;
+        else return INSTANCE;
     }
 
     private PowerManager(EagleFactions eagleFactions)
     {
-        instance = this;
+        INSTANCE = this;
         _plugin = eagleFactions;
         _configFields = eagleFactions.getConfiguration().getConfigFields();
         Path configDir = eagleFactions.getConfigDir();
