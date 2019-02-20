@@ -19,7 +19,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 
-public class StorageManager
+public class StorageManager implements Runnable
 {
     private static StorageManager INSTANCE = null;
 
@@ -75,37 +75,39 @@ public class StorageManager
 //        preparePlayerCache();
 
         this.storageTaskQueue = new LinkedList<>();
-        this.storageThread = new Thread(run());
+        this.storageThread = new Thread(this::run);
         this.storageThread.start();
     }
 
     private void queueStorageTask(IStorageTask task)
     {
-        this.storageTaskQueue.add(task);
+        synchronized(this.storageTaskQueue)
+        {
+            this.storageTaskQueue.add(task);
+            this.storageTaskQueue.notify();
+        }
     }
 
-    public Runnable run()
+    @Override
+    public void run()
     {
-        return () ->
+        while(true)
         {
-            while(true)
+            synchronized(this.storageTaskQueue)
             {
                 if(storageTaskQueue.size() > 0)
                 {
-                    synchronized(storageTaskQueue)
-                    {
-                        IStorageTask storageTask = storageTaskQueue.poll();
-                        if (storageTask instanceof DeleteFactionTask)
-                            factionsStorage.deleteFaction(((DeleteFactionTask) storageTask).getFactionName());
-                        else if (storageTask instanceof UpdateFactionTask)
-                            factionsStorage.addOrUpdateFaction(((UpdateFactionTask) storageTask).getFaction());
-                    }
+                    IStorageTask storageTask = storageTaskQueue.poll();
+                    if (storageTask instanceof DeleteFactionTask)
+                        factionsStorage.deleteFaction(((DeleteFactionTask) storageTask).getFactionName());
+                    else if (storageTask instanceof UpdateFactionTask)
+                        factionsStorage.addOrUpdateFaction(((UpdateFactionTask) storageTask).getFaction());
                 }
                 else
                 {
                     try
                     {
-                        Thread.sleep(1000);
+                        this.storageTaskQueue.wait();
                     }
                     catch(InterruptedException e)
                     {
@@ -113,7 +115,7 @@ public class StorageManager
                     }
                 }
             }
-        };
+        }
     }
 
     public void addOrUpdateFaction(Faction faction)

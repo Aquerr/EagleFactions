@@ -15,6 +15,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -334,7 +336,11 @@ public class FactionLogic
         double z = (chunkPosition.getZ() << 4) + 8;
         double y = world.getHighestYAt((int)x, (int)z);
         Vector3d position = new Vector3d(x, y, z);
-        world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.EXPLOSION).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
+        world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
+//        world.playSound(SoundTypes.ENTITY_LIGHTNING_IMPACT, position, 10, 10);
+//        world.playSound(SoundTypes.ITEM_SHIELD_BREAK, position, 10, 10);
+//        world.playSound(SoundTypes.BLOCK_IRON_DOOR_OPEN, position, 10, 10);
+        world.playSound(SoundTypes.ITEM_ARMOR_EQUIP_IRON, position, 5, -10);
     }
 
     public void removeClaim(Faction faction, Claim claim)
