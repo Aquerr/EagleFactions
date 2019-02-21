@@ -3,12 +3,14 @@ package io.github.aquerr.eaglefactions.listeners;
 import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -46,7 +48,7 @@ public class PlayerInteractListener extends AbstractListener
     public void onBlockInteract(final InteractBlockEvent event, @Root final Player player)
     {
         //If AIR or NONE then return
-        if (event.getTargetBlock() == BlockSnapshot.NONE)
+        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR)
             return;
 
         Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();

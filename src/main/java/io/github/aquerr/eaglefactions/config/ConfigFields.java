@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.config;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public final class ConfigFields
@@ -150,10 +151,10 @@ public final class ConfigFields
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
             this._factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("]", "faction-prefix-end"));
-            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE"));
-            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE"));
-            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE"));
-            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE"));
+            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "CLAIMABLE"));
+            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "NOT_CLAIMABLE"));
+            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "SAFE_ZONE"));
+            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "factions-remover", "max-inactive-time");
             this._notifyWhenFactionRemoved = _configuration.getBoolean(true, "factions-remover", "notify-when-removed");
@@ -167,9 +168,9 @@ public final class ConfigFields
             this._databaseFileName = _configuration.getString("database", "storage", "database-file-name");
 
             //Whitelisted items and blocks
-            this._whitelistedItems = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "items-whitelist");
-            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "place-destroy-whitelist");
-            this._whitelistedIteractBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "interact-whitelist");
+            this._whitelistedItems = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "items-whitelist");
+            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
+            this._whitelistedIteractBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "interact-whitelist");
 
             this._configuration.save();
         }
