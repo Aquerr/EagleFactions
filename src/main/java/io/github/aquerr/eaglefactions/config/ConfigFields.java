@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.config;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public final class ConfigFields
@@ -84,7 +83,7 @@ public final class ConfigFields
     //Whitelisted items and blocks
     private List<String> _whitelistedItems = new ArrayList<>();
     private List<String> _whitelistedPlaceDestroyBlocks = new ArrayList<>();
-    private List<String> _whitelistedIteractBlocks = new ArrayList<>();
+    private List<String> _whitelistedInteractBlocks = new ArrayList<>();
 
     public ConfigFields(IConfiguration configuration)
     {
@@ -170,7 +169,7 @@ public final class ConfigFields
             //Whitelisted items and blocks
             this._whitelistedItems = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "items-whitelist");
             this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
-            this._whitelistedIteractBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "interact-whitelist");
+            this._whitelistedInteractBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "interact-whitelist");
 
             this._configuration.save();
         }
@@ -542,7 +541,7 @@ public final class ConfigFields
 
     public List<String> getWhiteListedInteractBlocks()
     {
-        return this._whitelistedIteractBlocks;
+        return this._whitelistedInteractBlocks;
     }
 
     public boolean shouldDisplayPvpLoggerInScoreboard()

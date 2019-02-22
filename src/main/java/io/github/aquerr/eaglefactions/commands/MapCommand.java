@@ -187,7 +187,9 @@ public class MapCommand extends AbstractCommand
                 {
                     if(!super.getPlugin().getConfiguration().getConfigFields().shouldDelayClaim()
                             && (EagleFactions.AdminList.contains(player.getUniqueId())
-                                || (optionalPlayerFaction.isPresent() && (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId())) || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId()))))
+                                || (optionalPlayerFaction.isPresent()
+                                    && (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId())
+                                        || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
                     }
