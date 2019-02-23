@@ -580,8 +580,9 @@ public class EagleFactions
 
     private void removeInactiveFaction()
     {
-        long maxInactiveTimeInSeconds = getConfiguration().getConfigFields().getMaxInactiveTime();
-        Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
+        final long maxInactiveTimeInSeconds = getConfiguration().getConfigFields().getMaxInactiveTime();
+        final Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
+        final boolean shouldNotifyWhenRemoved = this.getConfiguration().getConfigFields().shouldNotifyWhenFactionRemoved();
         for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
         {
             if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
@@ -591,9 +592,9 @@ public class EagleFactions
             if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
                 continue;
 
-            _factionLogic.disbandFaction(factionEntry.getKey());
+            boolean didSucceed = _factionLogic.disbandFaction(factionEntry.getValue().getName());
 
-            if(this.getConfiguration().getConfigFields().shouldNotifyWhenFactionRemoved())
+            if(didSucceed && shouldNotifyWhenRemoved)
                 Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "Faction ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " has been removed due to its long inactivity time.")));
 
 //            else if(maxInactive * 0.75 < inactiveTime.getSeconds())

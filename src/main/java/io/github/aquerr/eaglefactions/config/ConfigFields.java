@@ -72,6 +72,7 @@ public final class ConfigFields
     private String _maxInactiveTime = "0";
     private boolean _notifyWhenFactionRemoved;
     private boolean _canUseFactionChest = true;
+    private boolean _showOnlyPlayersFactionsClaimsInMap = false;
 
     //Storage
     private String _storageType = "hocon";
@@ -158,6 +159,7 @@ public final class ConfigFields
             this._maxInactiveTime = _configuration.getString("30d", "factions-remover", "max-inactive-time");
             this._notifyWhenFactionRemoved = _configuration.getBoolean(true, "factions-remover", "notify-when-removed");
             this._canUseFactionChest = _configuration.getBoolean(true, "faction-chest");
+            this._showOnlyPlayersFactionsClaimsInMap = _configuration.getBoolean(false, "show-only-player-faction-claims-in-map");
 
             //Storage
             this._storageType = _configuration.getString("hocon", "storage", "type");
@@ -562,6 +564,11 @@ public final class ConfigFields
     public boolean shouldProtectWarzoneFromPlayers()
     {
         return this._protectWarZoneFromPlayers;
+    }
+
+    public boolean shouldShowOnlyPlayerFactionsClaimsInMap()
+    {
+        return this._showOnlyPlayersFactionsClaimsInMap;
     }
 
     public String getDatabaseUrl()

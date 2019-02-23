@@ -56,8 +56,9 @@ public class MapCommand extends AbstractCommand
 
     private void generateMap(Player player)
     {
-        Set<Claim> claimsList = getPlugin().getFactionLogic().getAllClaims();
-        Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        Set<Claim> claimsList = super.getPlugin().getFactionLogic().getAllClaims();
+        Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        boolean showPlayerFactionClaimsOnly = super.getPlugin().getConfiguration().getConfigFields().shouldShowOnlyPlayerFactionsClaimsInMap();
 
         World world = player.getWorld();
 
@@ -77,8 +78,8 @@ public class MapCommand extends AbstractCommand
         //String playerFaction = "";
 
         //Map resolution
-        int mapWidth = 20;
-        int mapHeight = 8;
+        int mapWidth = 18;
+        int mapHeight = 7;
 
         //Half map resolution + 1 (for player column/row in the center)
         //Needs to be an odd number so the map will have equal distance to the left and right.
@@ -117,7 +118,7 @@ public class MapCommand extends AbstractCommand
                                 textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                            playerFaction = optionalChunkFaction.get();
                             }
-                            else if (playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
+                            else if (!showPlayerFactionClaimsOnly && playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
                             {
                                 textBuilder.append(allianceMark);
                                 if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
@@ -125,7 +126,7 @@ public class MapCommand extends AbstractCommand
                                     allianceFactions.add(optionalChunkFaction.get().getName());
                                 }
                             }
-                            else if (playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
+                            else if (!showPlayerFactionClaimsOnly && playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
                             {
                                 textBuilder.append(enemyMark);
                                 if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
@@ -145,9 +146,16 @@ public class MapCommand extends AbstractCommand
                                 }
                                 else
                                 {
-                                    textBuilder.append(normalFactionMark);
+                                    if(!showPlayerFactionClaimsOnly)
+                                    {
+                                        textBuilder.append(normalFactionMark);
+                                    }
+                                    else
+                                    {
+                                        textBuilder.append(notCapturedMark);
+                                    }
                                 }
-                                if (!normalFactions.contains(optionalChunkFaction.get().getName()))
+                                if (!showPlayerFactionClaimsOnly && !normalFactions.contains(optionalChunkFaction.get().getName()))
                                 {
                                     normalFactions.add(optionalChunkFaction.get().getName());
                                 }
@@ -165,9 +173,16 @@ public class MapCommand extends AbstractCommand
                             }
                             else
                             {
-                                textBuilder.append(normalFactionMark);
+                                if(!showPlayerFactionClaimsOnly)
+                                {
+                                    textBuilder.append(normalFactionMark);
+                                }
+                                else
+                                {
+                                    textBuilder.append(notCapturedMark);
+                                }
                             }
-                            if (!normalFactions.contains(optionalChunkFaction.get().getName()))
+                            if (!showPlayerFactionClaimsOnly && !normalFactions.contains(optionalChunkFaction.get().getName()))
                             {
                                 normalFactions.add(optionalChunkFaction.get().getName());
                             }
@@ -195,7 +210,7 @@ public class MapCommand extends AbstractCommand
                     }
                     else
                     {
-                        textBuilder.append(notCapturedMark).build();
+                        textBuilder.append(notCapturedMark);
                     }
                 }
             }
