@@ -9,9 +9,11 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -107,6 +109,8 @@ public class ChatMessageListener extends AbstractListener
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
                                 .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), playerFaction.getTag(), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
+                                .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
+                                .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                                 .build();
 
                         factionPrefixText.append(factionTag);
@@ -117,6 +121,8 @@ public class ChatMessageListener extends AbstractListener
                         Text factionTag = Text.builder()
                                 //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
                                 .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
+                                .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
+                                .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                                 .build();
 
                         factionPrefixText.append(factionTag);
@@ -128,6 +134,8 @@ public class ChatMessageListener extends AbstractListener
                 //Add faction name
                 Text factionNamePrefix = Text.builder()
                         .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
+                        .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
+                        .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                         .build();
 
                 factionPrefixText.append(factionNamePrefix);
