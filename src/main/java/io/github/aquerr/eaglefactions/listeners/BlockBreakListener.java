@@ -18,12 +18,14 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -246,6 +248,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isLeafDecay)
                     continue;
 
+                //TODO: This is runned even when player right clicks the block.
                 if(!super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
                 {
                     event.setCancelled(true);
