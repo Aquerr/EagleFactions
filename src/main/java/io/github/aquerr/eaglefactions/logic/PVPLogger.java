@@ -124,7 +124,6 @@ public class PVPLogger
                                 if(_shouldDisplayInScoreboard)
                                 {
                                     Scoreboard scoreboard = player.getScoreboard();
-                                    player.sendMessage(Text.of(player.getName()));
                                     Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + _playersIdTaskMap.get(player.getUniqueId()));
                                     if(!optionalObjective.isPresent())
                                     {
