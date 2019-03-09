@@ -38,10 +38,10 @@ tasks.create("publishBuildOnDiscord") {
     description = "Task for publishing the jar file to discord's jenkins channel"
     doLast {
 
-        def jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
+        String[] jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
         println("Found jar files: " + jarFiles)
 
-        def lastCommitDescription = "git log -1 --pretty=%B".execute().text
+        String lastCommitDescription = "git log -1 --pretty=%B".execute().text
 
         exec {
             commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", "EagleFactions", jarFiles[0], lastCommitDescription)
