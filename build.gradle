@@ -21,10 +21,9 @@ dependencies {
 }
 
 jar {
-    println(baseName)
     if(System.getenv("JENKINS_HOME")) {
         version = version + "_" + System.getenv("BUILD_NUMBER")
-        println(baseName)
+        println("File name =>" + baseName)
     }
 }
 
@@ -40,7 +39,7 @@ tasks.create("publishBuildOnDiscord") {
     doLast {
 
         def jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
-        println(jarFiles)
+        println("Found jar files: " + jarFiles)
 
         exec {
             commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", jarFiles[0])
