@@ -21,10 +21,16 @@ dependencies {
 }
 
 jar {
-    println(baseName + "-" + version)
+    println(baseName)
     if(System.getenv("JENKINS_HOME")) {
-        baseName = baseName + "-" + System.getenv("BUILD_NUMBER")
+        version = version + "_" + System.getenv("BUILD_NUMBER")
         println(baseName)
+    }
+}
+
+tasks.create("setPluginVersion") {
+    doLast {
+
     }
 }
 
