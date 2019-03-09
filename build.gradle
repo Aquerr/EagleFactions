@@ -23,6 +23,7 @@ dependencies {
 jar {
     if(!System.getenv("JENKINS_HOME")) {
         baseName = baseName "." + System.getenv("BUILD_NUMBER")
+        println(baseName);
     }
 }
 
