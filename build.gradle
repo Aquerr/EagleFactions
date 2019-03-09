@@ -19,3 +19,26 @@ dependencies {
     //compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13'
 }
+
+jar {
+    if(!System.getenv("JENKINS_HOME")) {
+        baseName = baseName "." + System.getenv("BUILD_NUMBER")
+    }
+}
+
+tasks.create("publishBuildOnDiscord") {
+    group = "Publishing"
+    description = "Task for publishing the jar file to discord's jenkins channel"
+    doLast {
+
+        def jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
+        println(jarFiles)
+//        println(project.getBuildDir().find {
+//            file -> file.endsWith(".jar")
+//        })
+
+        exec {
+            commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", jarFiles[0])
+        }
+    }
+}
