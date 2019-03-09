@@ -33,9 +33,6 @@ tasks.create("publishBuildOnDiscord") {
 
         def jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
         println(jarFiles)
-//        println(project.getBuildDir().find {
-//            file -> file.endsWith(".jar")
-//        })
 
         exec {
             commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", jarFiles[0])
