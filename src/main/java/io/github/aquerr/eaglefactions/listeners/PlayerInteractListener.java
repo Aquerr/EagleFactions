@@ -10,6 +10,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -34,7 +35,7 @@ public class PlayerInteractListener extends AbstractListener
         if (event.getItemStack() == ItemStackSnapshot.NONE)
             return;
 
-        Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
+        final Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
         if (!optionalInteractionPoint.isPresent())
             return;
 
@@ -63,11 +64,11 @@ public class PlayerInteractListener extends AbstractListener
         if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR)
             return;
 
-        Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
+        final Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
         if (!optionalLocation.isPresent())
             return;
 
-        Location<World> blockLocation = optionalLocation.get();
+        final Location<World> blockLocation = optionalLocation.get();
 
         boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player);
         if (!canInteractWithBlock)

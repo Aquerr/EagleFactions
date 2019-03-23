@@ -2,18 +2,25 @@ package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
@@ -208,6 +215,76 @@ public class EntityDamageListener extends AbstractListener
             return false;
         }
         return false;
+    }
+
+    @Listener
+    public void onIgniteEntity(final IgniteEntityEvent event)
+    {
+        final ConfigFields configFields = super.getPlugin().getConfiguration().getConfigFields();
+        final EventContext eventContext = event.getContext();
+        final Entity entity = event.getTargetEntity();
+        final World world = event.getTargetEntity().getWorld();
+
+        //Only if ignited entity is player
+        if(!(entity instanceof Player))
+            return;
+
+        //Check safezone world
+        if(configFields.getSafeZoneWorldNames().contains(world.getName()))
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+        final Player ignitedPlayer = (Player) entity;
+
+        //Check if location is safezone
+        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), ignitedPlayer.getLocation().getChunkPosition());
+        if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+        if(!eventContext.containsKey(EventContextKeys.OWNER) || !(eventContext.get(EventContextKeys.OWNER).get() instanceof Player))
+            return;
+
+//        if(!cause.containsType(Player.class))
+//            return;
+
+        final Player igniterPlayer = (Player) eventContext.get(EventContextKeys.OWNER).get();
+        final boolean isFactionFriendlyFireOn = configFields.isFactionFriendlyFire();
+        final boolean isAllianceFriendlyFireOn = configFields.isAllianceFriendlyFire();
+
+        if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
+            return;
+
+        final Optional<Faction> optionalIgnitedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(ignitedPlayer.getUniqueId());
+        final Optional<Faction> optionalIgniterPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(igniterPlayer.getUniqueId());
+
+        if(optionalIgnitedPlayerFaction.isPresent() && optionalIgniterPlayerFaction.isPresent())
+        {
+            final Faction ignitedPlayerFaction = optionalIgnitedPlayerFaction.get();
+            final Faction igniterPlayerFaction = optionalIgniterPlayerFaction.get();
+
+            if(!isFactionFriendlyFireOn)
+            {
+                if(ignitedPlayerFaction.getName().equals(igniterPlayerFaction.getName()))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
+            if(!isAllianceFriendlyFireOn)
+            {
+                if(ignitedPlayerFaction.getAlliances().contains(igniterPlayerFaction.getName()))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
     }
 
     private void sendPenaltyMessageAndDecreasePower(Player player)
