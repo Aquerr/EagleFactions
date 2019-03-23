@@ -144,7 +144,7 @@ public class BlockBreakListener extends AbstractListener
         final boolean isFireSource = !isLiquidSource && event.getContext().containsKey(EventContextKeys.FIRE_SPREAD);
         final boolean isLeafDecay = event.getContext().containsKey(EventContextKeys.LEAVES_DECAY);
         final boolean isForgePlayerBreak = event.getContext().containsKey(EventContextKeys.PLAYER_BREAK);
-        Location<World> sourceLocation = locatableBlock != null ? locatableBlock.getLocation() : tileEntity != null ? tileEntity.getLocation() : null;
+        final Location<World> sourceLocation = locatableBlock != null ? locatableBlock.getLocation() : tileEntity != null ? tileEntity.getLocation() : null;
 
         if(isForgePlayerBreak && user instanceof Player)
         {
@@ -167,7 +167,7 @@ public class BlockBreakListener extends AbstractListener
             if(pistonExtend)
             {
                 sourceLocations = new ArrayList<>(event.getLocations());
-                Location<World> location = sourceLocations.get(sourceLocations.size() - 1);
+                final Location<World> location = sourceLocations.get(sourceLocations.size() - 1);
                 final Direction direction = locatableBlock.getLocation().getBlock().get(Keys.DIRECTION).get();
                 final Location<World> directionLocation = location.getBlockRelative(direction);
                 sourceLocations.add(directionLocation);
@@ -194,7 +194,7 @@ public class BlockBreakListener extends AbstractListener
 
                 if(isFireSource)
                 {
-                    Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+                    final Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
                     if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
                     {
                         event.setCancelled(true);
@@ -206,6 +206,9 @@ public class BlockBreakListener extends AbstractListener
                     continue;
 
                 if(isLeafDecay)
+                    continue;
+
+                if(location.getBlock().getType() == BlockTypes.AIR)
                     continue;
 
                 if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
@@ -291,7 +294,8 @@ public class BlockBreakListener extends AbstractListener
 
         for(Transaction<BlockSnapshot> transaction : event.getTransactions())
         {
-            Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+            final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+
             if(location == null || transaction.getOriginal().getState().getType() == BlockTypes.AIR)
             {
                 continue;

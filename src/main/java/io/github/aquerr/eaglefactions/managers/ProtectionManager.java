@@ -199,11 +199,7 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canBreak(Location<World> location)
     {
-        World world = location.getExtent();
-
-        //Air can be always destroyed.
-        if(location.getBlockType() == BlockTypes.AIR)
-            return true;
+        final World world = location.getExtent();
 
         if(isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
@@ -214,7 +210,7 @@ public class ProtectionManager implements IProtectionManager
         if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief())
             return false;
 
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if(!optionalChunkFaction.isPresent())
             return true;
 
