@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
@@ -9,6 +10,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.living.Living;
@@ -18,19 +20,20 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
-import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.event.entity.TargetEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,9 +41,12 @@ import java.util.function.Predicate;
 
 public class BlockBreakListener extends AbstractListener
 {
+    private final ConfigFields configFields;
+
     public BlockBreakListener(EagleFactions plugin)
     {
         super(plugin);
+        this.configFields = plugin.getConfiguration().getConfigFields();
     }
 
     @Listener(order = Order.EARLY)
@@ -238,7 +244,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
-                    if(super.getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(location.getExtent().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone")))
+                    if(configFields.getSafeZoneWorldNames().contains(location.getExtent().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone")))
                     {
                         event.setCancelled(true);
                         return;
@@ -505,12 +511,103 @@ public class BlockBreakListener extends AbstractListener
         }
     }
 
+    @Listener
+    public void onTarget(TargetEntityEvent event)
+    {
+
+    }
+
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onEntityCollideEntity(CollideEntityEvent event)
     {
+        final List<Entity> entityList = event.getEntities();
+        for(final Entity entity : entityList)
+        {
+            if(entity instanceof Player && event.getSource() instanceof Entity)
+            {
+                final Entity sourceEntity = (Entity) event.getSource();
+                if(sourceEntity.getType().getName().contains("projectile"))
+                {
+                    final Player player = (Player) entity;
+                    if(configFields.getSafeZoneWorldNames().contains(player.getWorld().getName()))
+                        sourceEntity.remove();
+
+
+                    final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
+                        sourceEntity.remove();
+
+                    //TechGuns - Should be better to find more generic way of doing this...
+                    if(sourceEntity.getType().getId().contains("techguns"))
+                    {
+                        final Class clazz = sourceEntity.getClass();
+                        try
+                        {
+                            Player playerObject = null;
+                            final Field[] fields = clazz.getDeclaredFields();
+                            for(Field field : fields)
+                            {
+                                if(field.getName().equals("shooter"))
+                                {
+                                    field.setAccessible(true);
+                                    playerObject = (Player) field.get(sourceEntity);
+                                    field.setAccessible(false);
+                                }
+                            }
+
+                            if(playerObject != null)
+                            {
+                                //We got shooter player
+                                //Check friendly fire
+                                final Player shooterPlayer = playerObject;
+                                final boolean isFactionFriendlyFireOn = configFields.isFactionFriendlyFire();
+                                final boolean isAllianceFriendlyFireOn = configFields.isAllianceFriendlyFire();
+                                if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
+                                    continue;
+
+                                final Optional<Faction> optionalAffectedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                                final Optional<Faction> optionalShooterPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(shooterPlayer.getUniqueId());
+
+                                if(optionalAffectedPlayerFaction.isPresent() && optionalShooterPlayerFaction.isPresent())
+                                {
+                                    final Faction affectedPlayerFaction = optionalAffectedPlayerFaction.get();
+                                    final Faction shooterPlayerFaction = optionalShooterPlayerFaction.get();
+
+                                    if(!isFactionFriendlyFireOn)
+                                    {
+                                        if(affectedPlayerFaction.getName().equals(shooterPlayerFaction.getName()))
+                                        {
+                                            sourceEntity.remove();
+                                            event.setCancelled(true);
+                                            return;
+                                        }
+                                    }
+
+                                    if(!isAllianceFriendlyFireOn)
+                                    {
+                                        if(affectedPlayerFaction.getAlliances().contains(shooterPlayerFaction.getName()))
+                                        {
+                                            sourceEntity.remove();
+                                            event.setCancelled(true);
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch(IllegalAccessException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
         if(event instanceof CollideEntityEvent.Impact)
             return;
 
+        //Handle Item Frames
         Object rootCause = event.getCause().root();
         if(!(rootCause instanceof ItemFrame))
             return;

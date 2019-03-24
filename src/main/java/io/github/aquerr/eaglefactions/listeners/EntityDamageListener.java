@@ -1,19 +1,19 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -83,6 +83,7 @@ public class EntityDamageListener extends AbstractListener
                     event.setBaseDamage(0);
                     event.setCancelled(true);
                     indirectEntityDamageSource.getSource().remove();
+                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
                     return;
                 }
             }
@@ -90,15 +91,37 @@ public class EntityDamageListener extends AbstractListener
         else if (rootCause instanceof EntityDamageSource)
         {
             //Handle damage from other entities
-            EntityDamageSource entityDamageSource = (EntityDamageSource) rootCause;
-            if(entityDamageSource.getSource() instanceof Player)
+            final EntityDamageSource entityDamageSource = (EntityDamageSource) rootCause;
+            Entity entitySource = entityDamageSource.getSource();
+
+            //Try closure for TechGuns
+            if(entityDamageSource.getType().getId().contains("techguns"))
             {
-                final Player player = (Player) entityDamageSource.getSource();
+                try
+                {
+                    //Reflection
+                    final Object attacker = entityDamageSource.getClass().getField("attacker").get(entityDamageSource);
+                    if(attacker instanceof Player)
+                    {
+                        //We got attacker
+                        entitySource = (Player)attacker;
+                    }
+                }
+                catch(NoSuchFieldException | IllegalAccessException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+            if(entitySource instanceof Player)
+            {
+                final Player player = (Player) entitySource;
                 final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
                 if(shouldBlockDamage)
                 {
                     event.setBaseDamage(0);
                     event.setCancelled(true);
+                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
                     return;
                 }
             }
@@ -106,9 +129,14 @@ public class EntityDamageListener extends AbstractListener
     }
 
 //    @Listener
-//    public void onAttack(AttackEntityEvent event)
+//    public void onAttack(final AttackEntityEvent event)
 //    {
-//        Entity entity = event.getTargetEntity();
+//        final Entity entity = event.getTargetEntity();
+//        if(entity instanceof Player)
+//        {
+//            final Player player = (Player)entity;
+//            final String test = "";
+//        }
 //        Cause cause = event.getCause();
 //        Object source = event.getSource();
 //        EventContext eventContext = event.getContext();
