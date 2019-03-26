@@ -543,23 +543,26 @@ public class BlockBreakListener extends AbstractListener
                         final Class clazz = sourceEntity.getClass();
                         try
                         {
-                            Player playerObject = null;
+                            Player shooterPlayer = null;
                             final Field[] fields = clazz.getDeclaredFields();
                             for(Field field : fields)
                             {
                                 if(field.getName().equals("shooter"))
                                 {
                                     field.setAccessible(true);
-                                    playerObject = (Player) field.get(sourceEntity);
+                                    final Object playerObject = field.get(sourceEntity);
+                                    if(playerObject instanceof Player)
+                                    {
+                                        shooterPlayer = (Player) playerObject;
+                                    }
                                     field.setAccessible(false);
                                 }
                             }
 
-                            if(playerObject != null)
+                            if(shooterPlayer != null)
                             {
                                 //We got shooter player
                                 //Check friendly fire
-                                final Player shooterPlayer = playerObject;
                                 final boolean isFactionFriendlyFireOn = configFields.isFactionFriendlyFire();
                                 final boolean isAllianceFriendlyFireOn = configFields.isAllianceFriendlyFire();
                                 if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
