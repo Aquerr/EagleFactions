@@ -72,7 +72,7 @@ public class FactionChest implements Serializable
         for(SlotItem slotItem : this.items)
         {
             if(slotItem.getRow() == row && slotItem.getColumn() == column)
-                itemStack = ItemStack.of(slotItem.getItem().getType(), slotItem.getItem().getQuantity());
+                itemStack = ItemStack.builder().fromContainer(slotItem.getItem().toContainer()).build();
         }
 
         return itemStack;
