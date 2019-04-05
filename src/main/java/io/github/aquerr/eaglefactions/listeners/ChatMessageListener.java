@@ -61,6 +61,7 @@ public class ChatMessageListener extends AbstractListener
             //and add it to the formattedMessage
             if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
             {
+                Set<MessageReceiver> receivers = new HashSet<>();
                 Text.Builder chatTypePrefix = Text.builder();
 
                 if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
@@ -69,37 +70,33 @@ public class ChatMessageListener extends AbstractListener
                     chatTypePrefix.append(getAlliancePrefix());
                     messageChannel.asMutable().clearMembers();
 
-                    final Set<MessageReceiver> receivers = new HashSet<>();
                     for (String allianceName : playerFaction.getAlliances())
                     {
                         Faction allyFaction = super.getPlugin().getFactionLogic().getFactionByName(allianceName);
                         if(allyFaction != null)
                             receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(allyFaction));
                     }
-
                     receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
-                    messageChannel = MessageChannel.fixed(receivers);
                 }
                 else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.FACTION))
                 {
                     message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                     chatTypePrefix.append(getFactionPrefix());
                     messageChannel.asMutable().clearMembers();
-
-                    final Set<MessageReceiver> receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
-
-                    messageChannel = MessageChannel.fixed(receivers);
+                    receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
                 }
 
                 //Add users with factions-admin mode to the collection. Admins should see all chats.
                 for(final UUID adminUUID : EagleFactions.AdminList)
                 {
-                    final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(adminUUID);
-                    if(optionalPlayer.isPresent() && !messageChannel.getMembers().contains(optionalPlayer.get()))
+                    final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
+                    if(optionalAdminPlayer.isPresent())
                     {
-                        messageChannel.getMembers().add(optionalPlayer.get());
+                        receivers.add(optionalAdminPlayer.get());
                     }
                 }
+
+                messageChannel = MessageChannel.fixed(receivers);
 
                 //Add chatType to formattedMessage
                 formattedMessage.append(chatTypePrefix.build());
@@ -225,7 +222,7 @@ public class ChatMessageListener extends AbstractListener
     private Text getFactionPrefix()
     {
         return Text.builder()
-                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, PluginMessages.ALLIANCE_CHAT, TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
+                .append(getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix(), Text.of(TextColors.GREEN, PluginMessages.FACTION_CHAT, TextColors.RESET), getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix())
                 .build();
     }
 }
