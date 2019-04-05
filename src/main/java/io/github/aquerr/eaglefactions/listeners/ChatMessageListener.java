@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -18,6 +19,7 @@ import org.spongepowered.api.text.format.TextStyles;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public class ChatMessageListener extends AbstractListener
 {
@@ -67,7 +69,7 @@ public class ChatMessageListener extends AbstractListener
                     chatTypePrefix.append(getAlliancePrefix());
                     messageChannel.asMutable().clearMembers();
 
-                    Set<MessageReceiver> receivers = new HashSet<>();
+                    final Set<MessageReceiver> receivers = new HashSet<>();
                     for (String allianceName : playerFaction.getAlliances())
                     {
                         Faction allyFaction = super.getPlugin().getFactionLogic().getFactionByName(allianceName);
@@ -84,9 +86,19 @@ public class ChatMessageListener extends AbstractListener
                     chatTypePrefix.append(getFactionPrefix());
                     messageChannel.asMutable().clearMembers();
 
-                    Set<MessageReceiver> receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
+                    final Set<MessageReceiver> receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
 
                     messageChannel = MessageChannel.fixed(receivers);
+                }
+
+                //Add users with factions-admin mode to the collection. Admins should see all chats.
+                for(final UUID adminUUID : EagleFactions.AdminList)
+                {
+                    final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(adminUUID);
+                    if(optionalPlayer.isPresent() && !messageChannel.getMembers().contains(optionalPlayer.get()))
+                    {
+                        messageChannel.getMembers().add(optionalPlayer.get());
+                    }
                 }
 
                 //Add chatType to formattedMessage
