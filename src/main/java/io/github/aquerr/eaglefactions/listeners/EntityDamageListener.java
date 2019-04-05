@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
@@ -14,11 +15,13 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.text.Text;
@@ -82,7 +85,10 @@ public class EntityDamageListener extends AbstractListener
                 {
                     event.setBaseDamage(0);
                     event.setCancelled(true);
-                    indirectEntityDamageSource.getSource().remove();
+                    if(!(indirectEntityDamageSource.getSource() instanceof Player))
+                    {
+                        indirectEntityDamageSource.getSource().remove();
+                    }
                     world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
                     return;
                 }
@@ -95,7 +101,7 @@ public class EntityDamageListener extends AbstractListener
             Entity entitySource = entityDamageSource.getSource();
 
             //Try closure for TechGuns
-            if(entityDamageSource.getType().getId().contains("techguns"))
+            if(entityDamageSource.getClass().getName().contains("techguns"))
             {
                 try
                 {
@@ -127,20 +133,6 @@ public class EntityDamageListener extends AbstractListener
             }
         }
     }
-
-//    @Listener
-//    public void onAttack(final AttackEntityEvent event)
-//    {
-//        final Entity entity = event.getTargetEntity();
-//        if(entity instanceof Player)
-//        {
-//            final Player player = (Player)entity;
-//            final String test = "";
-//        }
-//        Cause cause = event.getCause();
-//        Object source = event.getSource();
-//        EventContext eventContext = event.getContext();
-//    }
 
     private boolean shouldBlockDamageFromPlayer(final Player attackedPlayer, final Player sourcePlayer, boolean willCauseDeath)
     {

@@ -10,17 +10,17 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -33,7 +33,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,87 +47,6 @@ public class BlockBreakListener extends AbstractListener
         super(plugin);
         this.configFields = plugin.getConfiguration().getConfigFields();
     }
-
-    @Listener(order = Order.EARLY)
-    public void onBlockBreak(ChangeBlockEvent.Pre event)
-    {
-//        if(event.getContext().containsKey(EventContextKeys.PLAYER_BREAK) || event.getContext().containsKey(EventContextKeys.FIRE_SPREAD))
-//        {
-//            List<Location<World>> locationList = new ArrayList<>(event.getLocations());
-//            for(Location<World> location : locationList)
-//            {
-//                BlockState blockState = location.getBlock();
-//                if(blockState.getType() == BlockTypes.FLOWING_WATER)
-//                {
-//                    return;
-//                }
-//
-//                if(event.getContext().containsKey(EventContextKeys.OWNER)
-//                        && event.getContext().get(EventContextKeys.OWNER).isPresent()
-//                        && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
-//                {
-//
-//                    Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
-//                    World world = player.getWorld();
-//
-//                    if(!super.getPlugin().getProtectionManager().canBreak(location, world, player))
-//                        event.setCancelled(true);
-//                }
-//                else
-//                {
-//                    if(blockState.getType() == BlockTypes.FLOWING_WATER)
-//                    {
-//                        return;
-//                    }
-//
-//                    if(!super.getPlugin().getProtectionManager().canBreak(location, location.getExtent()))
-//                        event.setCancelled(true);
-//                }
-//            }
-//        }
-    }
-
-//    @Listener(order = Order.EARLY)
-//    public void onBlockBreak(ChangeBlockEvent.Break event)
-//    {
-//        User user = null;
-//        if(event.getCause().containsType(Player.class))
-//        {
-//            user = event.getCause().first(Player.class).get();
-//        }
-//        else if(event.getCause().containsType(User.class))
-//        {
-//            user = event.getCause().first(User.class).get();
-//        }
-//
-//        if(user instanceof Player)
-//        {
-//            for(Transaction<BlockSnapshot> transaction : event.getTransactions())
-//            {
-//                if(super.getPlugin().getProtectionManager().isBlockWhitelistedForPlaceDestroy(transaction.getOriginal().getState().getType()))
-//                    return;
-//
-//                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), transaction.getFinal().getLocation().get().getExtent(), (Player) user))
-//                    event.setCancelled(true);
-//            }
-//        }
-//        else
-//        {
-//            if(event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent())
-//                return;
-//
-//            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-//            {
-//                if(transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_WATER)
-//                {
-//                    return;
-//                }
-//
-//                if(!super.getPlugin().getProtectionManager().canBreak(transaction.getFinal().getLocation().get(), transaction.getFinal().getLocation().get().getExtent()))
-//                    event.setCancelled(true);
-//            }
-//        }
-//    }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockPre(ChangeBlockEvent.Pre event)
@@ -257,7 +175,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isLeafDecay)
                     continue;
 
-                //TODO: This is runned even when player right clicks the block.
+                //TODO: This is ran even when player right clicks the block.
                 if(!super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
                 {
                     event.setCancelled(true);
@@ -318,85 +236,6 @@ public class BlockBreakListener extends AbstractListener
                 return;
             }
         }
-    }
-
-    @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onBlockNotify(NotifyNeighborBlockEvent event)
-    {
-//        LocatableBlock locatableBlock = event.getCause().first(LocatableBlock.class).orElse(null);
-//        TileEntity tileEntity = event.getCause().first(TileEntity.class).orElse(null);
-//        Location<World> sourceLocation = locatableBlock != null ? locatableBlock.getLocation() : tileEntity != null ? tileEntity.getLocation() : null;
-//        Optional<Faction> optionalChunkFaction = null;
-//
-//        User user = null;
-//        final Cause cause = event.getCause();
-//        final EventContext context = event.getContext();
-//        if (user == null) {
-//            // Always use owner for ticking TE's
-//            // See issue MinecraftPortCentral/GriefPrevention#610 for more information
-//            if (cause.root() instanceof TileEntity) {
-//                user = context.get(EventContextKeys.OWNER)
-//                        .orElse(context.get(EventContextKeys.NOTIFIER)
-//                                .orElse(context.get(EventContextKeys.CREATOR)
-//                                        .orElse(null)));
-//            } else {
-//                user = context.get(EventContextKeys.NOTIFIER)
-//                        .orElse(context.get(EventContextKeys.OWNER)
-//                                .orElse(context.get(EventContextKeys.CREATOR)
-//                                        .orElse(null)));
-//            }
-//        }
-//
-//        if (user == null) {
-//            if (event instanceof ExplosionEvent) {
-//                // Check igniter
-//                final Living living = context.get(EventContextKeys.IGNITER).orElse(null);
-//                if (living != null && living instanceof User) {
-//                    user = (User) living;
-//                }
-//            }
-//        }
-//
-//        if(user == null)
-//            return;
-//
-//        Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-//
-//        if(sourceLocation == null)
-//        {
-//            Player player = event.getCause().first(Player.class).orElse(null);
-//            if(player == null)
-//                return;
-//
-//            sourceLocation = player.getLocation();
-//            optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(sourceLocation.getExtent().getUniqueId(), sourceLocation.getChunkPosition());
-//        }
-//        else
-//        {
-//            optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(sourceLocation.getExtent().getUniqueId(), sourceLocation.getChunkPosition());
-//        }
-
-//        Iterator<Direction> directionIterator = event.getNeighbors().keySet().iterator();
-//        while(directionIterator.hasNext())
-//        {
-//            Direction direction = directionIterator.next();
-//            Location<World> location = sourceLocation.getBlockRelative(direction);
-//            Vector3i chunkPosition = location.getChunkPosition();
-//            optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), chunkPosition);
-//            if(optionalChunkFaction.isPresent())
-//            {
-//                if(optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equalsIgnoreCase(optionalChunkFaction.get().getName()))
-//                {
-//                    continue;
-//                }
-//            }
-//            else
-//            {
-//                continue;
-//            }
-//
-//            directionIterator.remove();
-//        }
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
@@ -537,14 +376,26 @@ public class BlockBreakListener extends AbstractListener
                     if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
                         sourceEntity.remove();
 
+                    if(sourceEntity instanceof Projectile)
+                    {
+                        Projectile projectile = (Projectile)sourceEntity;
+                        String test = "";
+                    }
+                    if(sourceEntity instanceof ProjectileSource)
+                    {
+                        ProjectileSource projectileSource = (ProjectileSource) sourceEntity;
+                        String test = "";
+                    }
+
                     //TechGuns - Should be better to find more generic way of doing this...
                     if(sourceEntity.getType().getId().contains("techguns"))
                     {
-                        final Class clazz = sourceEntity.getClass();
+                        //If sourceEntity = projectile that comes from techguns
+                        final Class sourceEntityClass = sourceEntity.getClass();
                         try
                         {
                             Player shooterPlayer = null;
-                            final Field[] fields = clazz.getDeclaredFields();
+                            final Field[] fields = sourceEntityClass.getDeclaredFields();
                             for(Field field : fields)
                             {
                                 if(field.getName().equals("shooter"))
