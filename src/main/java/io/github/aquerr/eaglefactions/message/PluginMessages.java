@@ -134,7 +134,7 @@ public class PluginMessages
     public static String HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN;
     public static String TO_BE_ABLE_TO_USE_IT_AGAIN;
     public static String YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND;
-    public static String STAY_STILL_FOR;
+    public static String STAND_STILL_FOR;
     public static String FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD;
     public static String FACTIONS_HOME_IS_NOT_SET;
     public static String YOU_WERE_TELEPORTED_TO_FACTIONS_HOME;

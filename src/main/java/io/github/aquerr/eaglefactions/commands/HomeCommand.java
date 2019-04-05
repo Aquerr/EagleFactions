@@ -14,7 +14,9 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -58,14 +60,14 @@ public class HomeCommand extends AbstractCommand
                     {
                         if(getPlugin().getConfiguration().getConfigFields().canHomeBetweenWorlds())
                         {
-                            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFields().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
+                            player.sendMessage(ChatTypes.ACTION_BAR, Text.of(PluginMessages.STAND_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFields().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                             teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                         }
                         else
                         {
                             if(player.getWorld().getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                             {
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.STAY_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFields().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
+                                player.sendMessage(ChatTypes.ACTION_BAR, Text.of(PluginMessages.STAND_STILL_FOR + " ", TextColors.GOLD, getPlugin().getConfiguration().getConfigFields().getHomeDelayTime() + " " + PluginMessages.SECONDS, TextColors.RESET, "!"));
                                 teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                             }
                             else
@@ -99,31 +101,31 @@ public class HomeCommand extends AbstractCommand
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.interval(1, TimeUnit.SECONDS).delay(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        taskBuilder.interval(1, TimeUnit.SECONDS).delay(2, TimeUnit.SECONDS).execute(new Consumer<Task>()
         {
-            int seconds = 1;
+            int seconds = getPlugin().getConfiguration().getConfigFields().getHomeDelayTime();
 
             @Override
             public void accept(Task task)
             {
                 if (player.getLocation().getBlockPosition().equals(lastBlockPosition))
                 {
-                    if (seconds >= getPlugin().getConfiguration().getConfigFields().getHomeDelayTime())
+                    if (seconds <= 0)
                     {
                         player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
+                        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.GREEN, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
                         startHomeCooldown(player.getUniqueId());
                         task.cancel();
                     }
                     else
                     {
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
-                        seconds++;
+                        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Teleporting to faction's home in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds."));
+                        seconds--;
                     }
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
+                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
                     task.cancel();
                 }
             }
