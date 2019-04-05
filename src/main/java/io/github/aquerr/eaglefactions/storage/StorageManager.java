@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class StorageManager implements Runnable
 {
@@ -179,12 +180,14 @@ public class StorageManager implements Runnable
 
     public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float globalMaxPower)
     {
-        return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
+        return CompletableFuture.supplyAsync(() -> playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower)).isDone();
+        //return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
     }
 
     public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
     {
-        return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
+        return CompletableFuture.supplyAsync(() -> this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone)).isDone();
+        //return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
     public boolean getLastDeathInWarzone(final UUID playerUUID)
@@ -199,7 +202,7 @@ public class StorageManager implements Runnable
 
     public boolean setPlayerPower(final UUID playerUUID, final float power)
     {
-        return this.playerStorage.setPlayerPower(playerUUID, power);
+        return CompletableFuture.supplyAsync(() -> this.playerStorage.setPlayerPower(playerUUID, power)).isDone();
     }
 
     public float getPlayerMaxPower(final UUID playerUUID)
@@ -209,7 +212,7 @@ public class StorageManager implements Runnable
 
     public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
     {
-        return this.playerStorage.setPlayerMaxPower(playerUUID, maxpower);
+        return CompletableFuture.supplyAsync(()-> this.playerStorage.setPlayerMaxPower(playerUUID, maxpower)).isDone();
     }
 
     public Set<String> getServerPlayerNames()
@@ -229,6 +232,6 @@ public class StorageManager implements Runnable
 
     public boolean updatePlayerName(final UUID playerUUID, final String playerName)
     {
-        return this.playerStorage.updatePlayerName(playerUUID, playerName);
+        return CompletableFuture.supplyAsync(()->this.playerStorage.updatePlayerName(playerUUID, playerName)).isDone();
     }
 }
