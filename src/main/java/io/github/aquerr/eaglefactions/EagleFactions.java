@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.managers.*;
 import io.github.aquerr.eaglefactions.message.MessageLoader;
+import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.storage.StorageManager;
@@ -19,7 +20,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -168,6 +171,19 @@ public class EagleFactions
     public void onServerPostInitialization(GamePostInitializationEvent event)
     {
         startFactionsRemover();
+    }
+
+    @Listener
+    public void onReload(GameReloadEvent event)
+    {
+        this._configuration.reloadConfiguration();
+        this._storageManager.reloadStorage();
+
+        if(event.getSource() instanceof Player)
+        {
+            Player player = (Player)event.getSource();
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));
+        }
     }
 
     private void InitializeCommands()
