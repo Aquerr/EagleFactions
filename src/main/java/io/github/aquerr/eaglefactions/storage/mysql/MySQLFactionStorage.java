@@ -67,6 +67,10 @@ public class MySQLFactionStorage implements IFactionStorage
     {
         this.plugin = eagleFactions;
         this.mySQLConnection = MySQLConnection.getInstance(plugin);
+        if(this.mySQLConnection == null) {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not connect to MySQL database. Aborting..."));
+            System.exit(1);
+        }
         try
         {
             int databaseVersionNumber = getDatabaseVersion();

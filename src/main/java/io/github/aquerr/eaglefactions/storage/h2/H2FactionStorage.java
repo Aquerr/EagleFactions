@@ -77,6 +77,10 @@ public class H2FactionStorage implements IFactionStorage
     {
         this.plugin = plugin;
         this.h2provider = H2Provider.getInstance(plugin);
+        if(this.h2provider == null) {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not connect to H2 database. Aborting..."));
+            System.exit(1);
+        }
         try
         {
             int databaseVersionNumber = getDatabaseVersion();

@@ -1,4 +1,5 @@
 plugins {
+    id 'java'
     id 'org.spongepowered.plugin' version '0.8.1'
 }
 
@@ -6,18 +7,22 @@ group = pluginGroup
 version = pluginVersion
 description = 'A factions plugin that will make managing your battle-server easier. :)'
 
+sourceCompatibility = 1.8
+
 allprojects {
     repositories {
         maven { url 'https://jitpack.io' }
+        jcenter()
+        mavenCentral()
     }
 }
 
 dependencies {
     compile 'org.spongepowered:spongeapi:7.1.0'
-    //compile 'com.github.rojo8399:PlaceholderAPI:master-SNAPSHOT'
+    compile 'com.github.rojo8399:PlaceholderAPI:master-SNAPSHOT'
     compile group: 'com.h2database', name: 'h2', version: '1.3.148'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
     //compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13'
 }
 
 jar {
@@ -25,6 +30,13 @@ jar {
         version = version + "_" + System.getenv("BUILD_NUMBER")
         println("File name =>" + baseName)
     }
+}
+
+task fatJar(type: Jar) {
+    from {
+        configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
+    }
+    with jar
 }
 
 tasks.create("setPluginVersion") {
@@ -37,14 +49,19 @@ tasks.create("publishBuildOnDiscord") {
     group = "Publishing"
     description = "Task for publishing the jar file to discord's jenkins channel"
     doLast {
-
         String[] jarFiles = new FileNameFinder().getFileNames(project.buildDir.getPath(), "**/*.jar")
-        println("Found jar files: " + jarFiles)
 
-        String lastCommitDescription = "git log -1 --pretty=%B".execute().text
+        if(jarFiles.length > 0) {
+            println("Found jar files: " + jarFiles)
 
-        exec {
-            commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", "EagleFactions", jarFiles[0], lastCommitDescription)
+            String lastCommitDescription = "git log -1 --pretty=%B".execute().getText()
+            if(lastCommitDescription == null || lastCommitDescription == "") {
+                lastCommitDescription = "No changelog provided"
+            }
+
+            exec {
+                commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", "EagleFactions", jarFiles[0], lastCommitDescription)
+            }
         }
     }
 }

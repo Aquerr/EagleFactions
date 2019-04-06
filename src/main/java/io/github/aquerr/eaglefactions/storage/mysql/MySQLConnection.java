@@ -3,12 +3,11 @@ package io.github.aquerr.eaglefactions.storage.mysql;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
 
-import javax.management.relation.RelationSupport;
 import java.sql.*;
 
 public class MySQLConnection
 {
-    private static final MySQLConnection INSTANCE = null;
+    private static MySQLConnection INSTANCE = null;
 
     private static final String TIME_ZONE_PROPERTY = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
@@ -20,36 +19,33 @@ public class MySQLConnection
     public static MySQLConnection getInstance(EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
-            return new MySQLConnection(eagleFactions);
+        {
+            try
+            {
+                INSTANCE = new MySQLConnection(eagleFactions);
+                return INSTANCE;
+            }
+            catch(IllegalAccessException | InstantiationException | ClassNotFoundException | SQLException e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
         else return INSTANCE;
     }
 
-    private MySQLConnection(EagleFactions eagleFactions)
+    private MySQLConnection(EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
-        try
-        {
-            //Load MySQL driver
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-        }
-        catch(InstantiationException | IllegalAccessException | ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
+        //Load MySQL driver
+        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         this.databaseUrl = configFields.getDatabaseUrl();
         this.databaseName = configFields.getDatabaseName();
         this.username = configFields.getStorageUsername();
         this.password = configFields.getStoragePassword();
-        try
-        {
-            if(!databaseExists())
-                createDatabase();
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        if(!databaseExists())
+            createDatabase();
     }
 
     private boolean databaseExists() throws SQLException
