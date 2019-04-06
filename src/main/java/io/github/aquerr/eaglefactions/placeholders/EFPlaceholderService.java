@@ -7,13 +7,18 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
-import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class EFPlaceholderService
 {
+    private static EFPlaceholderService INSTANCE = null;
+
     private EagleFactions plugin;
-    private static EFPlaceholderService INSTANCE;
     private PlaceholderService placeholderService;
 
     public static EFPlaceholderService getInstance(final EagleFactions plugin, PlaceholderService placeholderService)
@@ -40,7 +45,8 @@ public class EFPlaceholderService
                     try
                     {
                         return ((ExpansionBuilder) builder)
-                                .tokens("name", "tag", "power")
+                                .tokens("name", "tag", "power", "maxpower", "last_online", "claims_count", "alliances",
+                                        "enemies", "truce", "officers_count", "members_count", "recruits_count")
                                 .description("Player's faction's placeholders.")
                                 .url("https://github.com/Aquerr/EagleFactions")
                                 .author("Aquerr (Nerdi)")
@@ -57,7 +63,7 @@ public class EFPlaceholderService
                     try
                     {
                         return ((ExpansionBuilder) builder)
-                                .tokens("power")
+                                .tokens("power", "maxpower", "last_online")
                                 .description("Player's placeholders.")
                                 .url("https://github.com/Aquerr/EagleFactions")
                                 .author("Aquerr (Nerdi)")
@@ -69,14 +75,6 @@ public class EFPlaceholderService
                         e.printStackTrace();
                     }
                 }
-//                case "faction_name":
-//                    return builder.description("Parse player's faction's name.");
-//                case "faction_tag":
-//                    return builder.tokens("a", "b", null).description("Parse player's faction's tag.");
-//                    case "multi":
-//                        return ((ExpansionBuilder) builder).tokens("a", "b", null).description("Parse the token for player!");
-//                    case "msg":
-//                        return ((ExpansionBuilder) builder).description("Send a message!");
             }
             return builder;
         }).map(builder -> builder.author("Aquerr (Nerdi)").version("1.0")).forEach(builder -> {
@@ -97,21 +95,33 @@ public class EFPlaceholderService
         if(token == null)
             return "";
 
-//        if(token.contains("_"))
-//        {
-            String[] a = token.split("_");
-            token = a[0];
-
-            switch(token)
-            {
-                case "name":
-                    return getFactionName(player);
-                case "tag":
-                    return getFactionTag(player);
-                case "power":
-                    return getFactionPower(player);
-            }
-//        }
+        switch(token)
+        {
+            case "name":
+                return getFactionName(player);
+            case "tag":
+                return getFactionTag(player);
+            case "power":
+                return getFactionPower(player);
+            case "maxpower":
+                return getFactionMaxPower(player);
+            case "last_online":
+                return getFactionLastOnline(player);
+            case "claims_count":
+                return getFactionClaimCount(player);
+            case "officers_count":
+                return getFactionOfficerCount(player);
+            case "members_count":
+                return getFactionMemberCount(player);
+            case "recruits_count":
+                return getFactionRecruitCount(player);
+            case "alliances":
+                return getFactionAlliances(player);
+            case "enemies":
+                return getFactionEnemies(player);
+            case "truce":
+                return getFactionTruce(player);
+        }
         return "";
     }
 
@@ -121,21 +131,19 @@ public class EFPlaceholderService
         if(token == null)
             return "";
 
-//        if(token.contains("_"))
-//        {
-            String[] a = token.split("_");
-            token = a[0];
-
-            switch(token)
-            {
-                case "power":
-                    return getPlayerPower(player);
-            }
-//        }
+        switch(token)
+        {
+            case "power":
+                return getPlayerPower(player);
+            case "maxpower":
+                return getPlayerMaxPower(player);
+            case "last_online":
+                return getPlayerLastOnline(player);
+        }
         return "";
     }
 
-    public String getFactionName(final User user)
+    private String getFactionName(final User user)
     {
         Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(optionalFaction.isPresent())
@@ -145,7 +153,7 @@ public class EFPlaceholderService
         else return "";
     }
 
-    public Text getFactionTag(final User user)
+    private Text getFactionTag(final User user)
     {
         Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(optionalFaction.isPresent())
@@ -155,14 +163,93 @@ public class EFPlaceholderService
         else return Text.of("");
     }
 
+    private float getFactionPower(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(faction -> this.plugin.getPowerManager().getFactionPower(faction)).orElse(0F);
+    }
+
+    private float getFactionMaxPower(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(faction -> this.plugin.getPowerManager().getFactionMaxPower(faction)).orElse(0F);
+    }
+
+    private Instant getFactionLastOnline(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if(optionalFaction.isPresent())
+        {
+//            final Date date = Date.from(optionalFaction.get().getLastOnline());
+//            final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+//            return formatter.format(date);
+            return optionalFaction.get().getLastOnline();
+        }
+        return Instant.now();
+    }
+
+    private int getFactionClaimCount(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(x->x.getClaims().size()).orElse(0);
+    }
+
+    private int getFactionOfficerCount(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(x->x.getOfficers().size()).orElse(0);
+    }
+
+    private int getFactionMemberCount(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(x->x.getMembers().size()).orElse(0);
+    }
+
+    private int getFactionRecruitCount(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(x->x.getRecruits().size()).orElse(0);
+    }
+
+    private Set<String> getFactionAlliances(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(Faction::getAlliances).orElse(new HashSet<>());
+    }
+
+    private Set<String> getFactionEnemies(final User player)
+    {
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(Faction::getEnemies).orElse(new HashSet<>());
+    }
+
+    private Set<String> getFactionTruce(final User player)
+    {
+        //TODO
+//        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+//        return optionalFaction.map(Faction::getTruce).orElse(new HashSet<>());
+        return new HashSet<>();
+    }
+
+    //
+    //FactionPlayer placeholder methods starts here.
+    //
+
     private float getPlayerPower(final User player)
     {
         return this.plugin.getPlayerManager().getPlayerPower(player.getUniqueId());
     }
 
-    private float getFactionPower(final User player)
+    private float getPlayerMaxPower(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(faction -> this.plugin.getPowerManager().getFactionPower(faction)).orElse(0F);
+        return this.plugin.getPlayerManager().getPlayerMaxPower(player.getUniqueId());
+    }
+
+    private String getPlayerLastOnline(final User player)
+    {
+        //TODO
+//        this.plugin.getPlayerManager().get
+        return "";
     }
 }
