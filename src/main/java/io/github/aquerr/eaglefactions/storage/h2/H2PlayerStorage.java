@@ -37,7 +37,7 @@ public class H2PlayerStorage implements IPlayerStorage
         this.h2provider = H2Provider.getInstance(eagleFactions);
         if(this.h2provider == null) {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not connect to MySQL database. Aborting..."));
-            System.exit(1);
+            Sponge.getServer().shutdown();
         }
     }
 

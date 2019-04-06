@@ -14,8 +14,11 @@ import io.github.aquerr.eaglefactions.message.MessageLoader;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
+import io.github.aquerr.eaglefactions.placeholders.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.storage.StorageManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
+import me.rojo8399.placeholderapi.ExpansionBuilder;
+import me.rojo8399.placeholderapi.PlaceholderService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -66,8 +69,9 @@ public class EagleFactions
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
     private StorageManager _storageManager;
+    private EFPlaceholderService _efPlaceholderService;
 
-//    private Optional<PlaceholderService> _placeholderService;
+    private Optional<PlaceholderService> _placeholderService;
 
     public static EagleFactions getPlugin()
     {
@@ -135,37 +139,9 @@ public class EagleFactions
     @Listener
     public void onGameStarting(GameStartingServerEvent event)
     {
-//        _placeholderService = Sponge.getServiceManager().provide(PlaceholderService.class);
-//
-//        if(_placeholderService.isPresent())
-//        {
-//            _placeholderService.get().loadAll(this, this).stream().map(builder -> {
-//                switch(builder.getId())
-//                {
-//                    case "multi":
-//                        return ((ExpansionBuilder) builder).tokens("a", "b", null).description("Parse the token for player!");
-//                    case "msg":
-//                        return ((ExpansionBuilder) builder).description("Send a message!");
-//                }
-//                return builder;
-//            }).map(builder -> builder.author("Nerdi").version("1.0")).forEach(builder -> {
-//                try
-//                {
-//                    builder.buildAndRegister();
-//                }
-//                catch(Exception e)
-//                {
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
+        _placeholderService = Sponge.getServiceManager().provide(PlaceholderService.class);
+        _placeholderService.ifPresent(placeholderService -> _efPlaceholderService = EFPlaceholderService.getInstance(this, placeholderService));
     }
-
-//    @Placeholder(id = "msg")
-//    public String test(@Token @Nullable String text)
-//    {
-//        return text += "ELO";
-//    }
 
     @Listener
     public void onServerPostInitialization(GamePostInitializationEvent event)
