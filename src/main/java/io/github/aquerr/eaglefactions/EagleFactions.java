@@ -185,8 +185,8 @@ public class EagleFactions
         SUBCOMMANDS.put(Arrays.asList("c", "create"), CommandSpec.builder()
                 .description(Text.of("Create FACTION Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("tag"))),
-                        GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.string(Text.of("tag")),
+                        GenericArguments.string(Text.of("faction name")))
                 .executor(new CreateCommand(this))
                 .build());
 
@@ -208,7 +208,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("invite"), CommandSpec.builder()
                 .description(Text.of("Invites a player to the faction"))
                 .permission(PluginPermissions.INVITE_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.player(Text.of("player")))
                 .executor(new InviteCommand(this))
                 .build());
 
@@ -253,7 +253,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Arrays.asList("p", "player"), CommandSpec.builder()
                 .description(Text.of("Show info about a player"))
                 .permission(PluginPermissions.PLAYER_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.player(Text.of("player")))
                 .executor(new PlayerCommand(this))
                 .build());
 
@@ -276,7 +276,7 @@ public class EagleFactions
         //Promote command
         SUBCOMMANDS.put(Collections.singletonList("promote"), CommandSpec.builder()
                 .description(Text.of("Promotes the player to a higher rank"))
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.player(Text.of("player")))
                 .permission(PluginPermissions.PROMOTE_COMMAND)
                 .executor(new PromoteCommand(this))
                 .build());
@@ -284,7 +284,7 @@ public class EagleFactions
         //Demote command
         SUBCOMMANDS.put(Collections.singletonList("demote"), CommandSpec.builder()
                 .description(Text.of("Demotes the player to a lower rank"))
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.player(Text.of("player")))
                 .permission(PluginPermissions.DEMOTE_COMMAND)
                 .executor(new DemoteCommand(this))
                 .build());
@@ -370,8 +370,8 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission(PluginPermissions.SET_POWER_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
-                        GenericArguments.optional(GenericArguments.string(Text.of("power"))))
+                .arguments(GenericArguments.player(Text.of("player")),
+                        GenericArguments.string(Text.of("power")))
                 .executor(new SetPowerCommand(this))
                 .build());
 
@@ -379,8 +379,8 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("maxpower"), CommandSpec.builder()
                 .description(Text.of("Set player's maxpower"))
                 .permission(PluginPermissions.MAX_POWER_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))),
-                        GenericArguments.optional(GenericArguments.string(Text.of("power"))))
+                .arguments(GenericArguments.player(Text.of("player")),
+                        GenericArguments.string(Text.of("power")))
                 .executor(new MaxPowerCommand(this))
                 .build());
 
@@ -417,7 +417,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setleader"), CommandSpec.builder()
                 .description(Text.of("Set someone as leader (removes you as a leader if you are one)"))
                 .permission(PluginPermissions.SET_LEADER_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.player(Text.of("player")))
                 .executor(new SetLeaderCommand(this))
                 .build());
 
@@ -432,7 +432,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("tagcolor"), CommandSpec.builder()
                 .description(Text.of("Change faction's tag color"))
                 .permission(PluginPermissions.TAG_COLOR_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.catalogedElement(Text.of("color"), TextColor.class)))
+                .arguments(GenericArguments.catalogedElement(Text.of("color"), TextColor.class))
                 .executor(new TagColorCommand(this))
                 .build());
 
@@ -440,7 +440,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("rename"), CommandSpec.builder()
                 .description(Text.of("Rename faction"))
                 .permission(PluginPermissions.RENAMECOMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.string(Text.of("faction name")))
                 .executor(new RenameCommand(this))
                 .build());
 
@@ -448,7 +448,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("tag"), CommandSpec.builder()
                 .description(Text.of("Change faction's tag"))
                 .permission(PluginPermissions.TAG_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("tag"))))
+                .arguments(GenericArguments.string(Text.of("tag")))
                 .executor(new TagCommand(this))
                 .build());
 
@@ -463,6 +463,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("chest"), CommandSpec.builder()
                 .description(Text.of("Opens faction's chest"))
                 .permission(PluginPermissions.CHEST_COMMAND)
+                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
                 .executor(new ChestCommand(this))
                 .build());
 
