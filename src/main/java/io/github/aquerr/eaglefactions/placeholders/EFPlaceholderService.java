@@ -7,9 +7,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -18,13 +16,13 @@ public class EFPlaceholderService
 {
     private static EFPlaceholderService INSTANCE = null;
 
-    private EagleFactions plugin;
-    private PlaceholderService placeholderService;
+    private final EagleFactions plugin;
+    private final PlaceholderService placeholderService;
 
-    public static EFPlaceholderService getInstance(final EagleFactions plugin, PlaceholderService placeholderService)
+    public static EFPlaceholderService getInstance(final EagleFactions plugin, Object placeholderService)
     {
         if(INSTANCE == null) {
-            INSTANCE = new EFPlaceholderService(plugin, placeholderService);
+            INSTANCE = new EFPlaceholderService(plugin, PlaceholderService.class.cast(placeholderService));
         }
         return INSTANCE;
     }
@@ -34,6 +32,11 @@ public class EFPlaceholderService
         this.plugin = plugin;
         this.placeholderService = placeholderService;
         registerPlaceholders();
+    }
+
+    public PlaceholderService getPlaceholderService()
+    {
+        return placeholderService;
     }
 
     private void registerPlaceholders()

@@ -28,7 +28,7 @@ public class HelpCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Map<List<String>, CommandSpec> commands = EagleFactions.Subcommands;
+        Map<List<String>, CommandSpec> commands = EagleFactions.SUBCOMMANDS;
         List<Text> helpList = Lists.newArrayList();
 
         for (List<String> aliases: commands.keySet())
