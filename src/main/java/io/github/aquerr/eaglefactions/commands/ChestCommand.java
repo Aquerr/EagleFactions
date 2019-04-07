@@ -69,7 +69,7 @@ public class ChestCommand extends AbstractCommand
         final Optional<Container> optionalContainer = player.openInventory(faction.getChest().toInventory());
         if(optionalContainer.isPresent())
         {
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Text.of("You opened faction's chest!")));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Text.of("You opened " + faction.getName() + " faction's chest!")));
         }
     }
 }

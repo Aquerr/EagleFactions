@@ -117,9 +117,7 @@ public class FactionLogic
 
     public List<Player> getOnlinePlayers(Faction faction)
     {
-
         List<Player> factionPlayers = new ArrayList<>();
-
         UUID factionLeader = faction.getLeader();
         if(!faction.getLeader().equals(DUMMY_UUID) && _playerManager.isPlayerOnline(factionLeader))
         {
@@ -181,28 +179,34 @@ public class FactionLogic
         }
 
         Faction faction = getFactionByName(factionName);
-        faction.addRecruit(playerUUID);
-        storageManager.addOrUpdateFaction(faction);
+        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
+        recruits.add(playerUUID);
+        Faction updatedFaction = faction.toBuilder().setRecruits(recruits).build();
+        storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public void leaveFaction(UUID playerUUID, String factionName)
     {
-        Faction faction = getFactionByName(factionName);
+        final Faction faction = getFactionByName(factionName);
+        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
+        final Set<UUID> members = new HashSet<>(faction.getMembers());
+        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
 
         if(faction.getRecruits().contains(playerUUID))
         {
-            faction.removeRecruit(playerUUID);
+            recruits.remove(playerUUID);
         }
         else if(faction.getMembers().contains(playerUUID))
         {
-            faction.removeMember(playerUUID);
+            members.remove(playerUUID);
         }
         else
         {
-            faction.removeOfficer(playerUUID);
+            officers.remove(playerUUID);
         }
 
-        storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setRecruits(recruits).setMembers(members).setOfficers(officers).build();
+        storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public void addAlly(String playerFactionName, String invitedFactionName)
@@ -212,141 +216,162 @@ public class FactionLogic
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
         }
 
-        Faction playerFaction = getFactionByName(playerFactionName);
-        Faction invitedFaction = getFactionByName(invitedFactionName);
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction invitedFaction = getFactionByName(invitedFactionName);
 
-        playerFaction.addAlliance(invitedFactionName);
-        invitedFaction.addAlliance(playerFactionName);
+        final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
+        final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getAlliances());
 
-        storageManager.addOrUpdateFaction(playerFaction);
-        storageManager.addOrUpdateFaction(invitedFaction);
-    }
+        playerFactionAlliances.add(invitedFactionName);
+        invitedFactionAlliances.add(playerFactionName);
 
-    public Set<String> getAlliances(String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionAlliances).build();
+        final Faction updatedInvitedFaction = invitedFaction.toBuilder().setAlliances(invitedFactionAlliances).build();
 
-        return faction.getAlliances();
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedInvitedFaction);
     }
 
     public void removeAlly(String playerFactionName, String removedFactionName)
     {
-        Faction playerFaction = getFactionByName(playerFactionName);
-        Faction removedFaction = getFactionByName(removedFactionName);
+        if(playerFactionName == null || removedFactionName == null || playerFactionName.equals("") || removedFactionName.equals(""))
+        {
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        }
 
-        playerFaction.removeAlliance(removedFactionName);
-        removedFaction.removeAlliance(playerFactionName);
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction removedFaction = getFactionByName(removedFactionName);
 
-        storageManager.addOrUpdateFaction(playerFaction);
-        storageManager.addOrUpdateFaction(removedFaction);
+        final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
+        final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getAlliances());
+
+        playerFactionAlliances.remove(removedFactionName);
+        removedFactionAlliances.remove(playerFactionName);
+
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionAlliances).build();
+        final Faction updatedRemovedFaction = removedFaction.toBuilder().setAlliances(removedFactionAlliances).build();
+
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedRemovedFaction);
     }
 
     public void addEnemy(String playerFactionName, String enemyFactionName)
     {
-        Faction playerFaction = getFactionByName(playerFactionName);
-        Faction enemyFaction = getFactionByName(enemyFactionName);
+        if(playerFactionName == null || enemyFactionName == null || playerFactionName.equals("") || enemyFactionName.equals(""))
+        {
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        }
 
-        playerFaction.addEnemy(enemyFactionName);
-        enemyFaction.addEnemy(playerFactionName);
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction enemyFaction = getFactionByName(enemyFactionName);
 
-        storageManager.addOrUpdateFaction(playerFaction);
-        storageManager.addOrUpdateFaction(enemyFaction);
+        final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
+        final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
+
+        playerFactionEnemies.add(enemyFactionName);
+        enemyFactionEnemies.add(playerFactionName);
+
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionEnemies).build();
+        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setAlliances(enemyFactionEnemies).build();
+
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedEnemyFaction);
     }
 
     public void removeEnemy(String playerFactionName, String enemyFactionName)
     {
-        Faction playerFaction = getFactionByName(playerFactionName);
-        Faction enemyFaction = getFactionByName(enemyFactionName);
+        if(playerFactionName == null || enemyFactionName == null || playerFactionName.equals("") || enemyFactionName.equals(""))
+        {
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        }
 
-        playerFaction.removeEnemy(enemyFactionName);
-        enemyFaction.removeEnemy(playerFactionName);
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction enemyFaction = getFactionByName(enemyFactionName);
 
-        storageManager.addOrUpdateFaction(playerFaction);
-        storageManager.addOrUpdateFaction(enemyFaction);
-    }
+        final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
+        final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
 
-    public void addOfficerAndRemoveMember(UUID newOfficerUUID, String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
+        playerFactionEnemies.remove(enemyFactionName);
+        enemyFactionEnemies.remove(playerFactionName);
 
-        faction.addOfficer(newOfficerUUID);
-        faction.removeMember(newOfficerUUID);
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionEnemies).build();
+        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setAlliances(enemyFactionEnemies).build();
 
-        storageManager.addOrUpdateFaction(faction);
-    }
-
-    public void removeOfficerAndSetAsMember(UUID officerUUID, String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        faction.removeOfficer(officerUUID);
-        faction.addMember(officerUUID);
-
-        storageManager.addOrUpdateFaction(faction);
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedEnemyFaction);
     }
 
     public void setLeader(UUID newLeaderUUID, String playerFactionName)
     {
-        Faction faction = getFactionByName(playerFactionName);
+        final Faction faction = getFactionByName(playerFactionName);
+        UUID leader = faction.getLeader();
+        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
+        final Set<UUID> members = new HashSet<>(faction.getMembers());
+        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
 
-        if(!faction.getLeader().equals(""))
+        if(!faction.getLeader().equals(DUMMY_UUID))
         {
-            faction.addOfficer(faction.getLeader());
+            officers.add(faction.getLeader());
         }
 
         if(faction.getOfficers().contains(newLeaderUUID))
         {
-            faction.removeOfficer(newLeaderUUID);
-            faction.setLeader(newLeaderUUID);
+            officers.remove(newLeaderUUID);
+            leader = newLeaderUUID;
         }
         else if(faction.getMembers().contains(newLeaderUUID))
         {
-            faction.removeMember(newLeaderUUID);
-            faction.setLeader(newLeaderUUID);
+            members.remove(newLeaderUUID);
+            leader = newLeaderUUID;
         }
         else if(faction.getRecruits().contains(newLeaderUUID))
         {
-            faction.removeRecruit(newLeaderUUID);
-            faction.setLeader(newLeaderUUID);
+            recruits.remove(newLeaderUUID);
+            leader = newLeaderUUID;
         }
 
-        storageManager.addOrUpdateFaction(faction);
-    }
+        final Faction updatedFaction = faction.toBuilder()
+                .setLeader(leader)
+                .setOfficers(officers)
+                .setMembers(members)
+                .setRecruits(recruits)
+                .build();
 
-//    public  List<String> getAllClaims(String factionName)
-//    {
-//        Faction faction = getFactionByName(factionName);
-//
-//        return faction.Claims;
-//    }
+        storageManager.addOrUpdateFaction(updatedFaction);
+    }
 
     public Set<Claim> getAllClaims()
     {
         return FactionsCache.getAllClaims();
     }
 
-    public void addClaims(Faction faction, List<Claim> claims)
+    public void addClaims(final Faction faction, final List<Claim> claims)
     {
+        final Set<Claim> factionClaims = new HashSet<>(faction.getClaims());
+
         for(final Claim claim : claims)
         {
-            faction.addClaim(claim);
-            World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
-            Vector3i chunkPosition = claim.getChunkPosition();
-            double x = (chunkPosition.getX() << 4) + 8;
-            double z = (chunkPosition.getZ() << 4) + 8;
-            double y = world.getHighestYAt((int)x, (int)z);
-            Vector3d position = new Vector3d(x, y, z);
+            factionClaims.add(claim);
+            final World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
+            final Vector3i chunkPosition = claim.getChunkPosition();
+            final double x = (chunkPosition.getX() << 4) + 8;
+            final double z = (chunkPosition.getZ() << 4) + 8;
+            final double y = world.getHighestYAt((int)x, (int)z);
+            final Vector3d position = new Vector3d(x, y, z);
             world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
             world.playSound(SoundTypes.ITEM_ARMOR_EQUIP_IRON, position, 5, -10);
         }
 
-        this.storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setClaims(factionClaims).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public void addClaim(Faction faction, Claim claim)
     {
-        faction.addClaim(claim);
-        this.storageManager.addOrUpdateFaction(faction);
+        final Set<Claim> claims = new HashSet<>(faction.getClaims());
+        claims.add(claim);
+        final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
 
         World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
         Vector3i chunkPosition = claim.getChunkPosition();
@@ -360,24 +385,12 @@ public class FactionLogic
 
     public void removeClaim(Faction faction, Claim claim)
     {
-        faction.removeClaim(claim);
+        final Set<Claim> claims = new HashSet<>(faction.getClaims());
+        claims.remove(claim);
+        final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         FactionsCache.removeClaimCache(claim);
-        this.storageManager.addOrUpdateFaction(faction);
+        this.storageManager.addOrUpdateFaction(updatedFaction);
     }
-
-//    public void addClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
-//    {
-//        faction.addClaim(worldUUID.toString() + "|" + claimedChunk.toString());
-//
-//        storageManager.addOrUpdateFaction(faction);
-//    }
-//
-//    public void removeClaim(Faction faction, UUID worldUUID, Vector3i claimedChunk)
-//    {
-//        faction.removeClaim(worldUUID.toString() + "|" + claimedChunk.toString());
-//
-//        storageManager.addOrUpdateFaction(faction);
-//    }
 
     public boolean isClaimed(UUID worldUUID, Vector3i chunk)
     {
@@ -413,35 +426,6 @@ public class FactionLogic
         }
         return false;
     }
-
-//    public boolean isClaimConnected(Faction faction, UUID worldUUID, Vector3i chunk)
-//    {
-//        Set<String> claimsList = faction.getClaims();
-//
-//        for(String object : claimsList)
-//        {
-//            if(object.contains(worldUUID.toString()))
-//            {
-//                String vectors[] = object.replace(worldUUID.toString() + "|", "").replace("(", "").replace(")", "").replace(" ", "").split(",");
-//
-//                int x = Integer.valueOf(vectors[0]);
-//                int y = Integer.valueOf(vectors[1]);
-//                int z = Integer.valueOf(vectors[2]);
-//
-//                Vector3i claim = Vector3i.from(x, y, z);
-//
-//                if((claim.getX() == chunk.getX()) && ((claim.getZ() + 1 == chunk.getZ()) || (claim.getZ() - 1 == chunk.getZ())))
-//                {
-//                    return true;
-//                }
-//                else if((claim.getZ() == chunk.getZ()) && ((claim.getX() + 1 == chunk.getX()) || (claim.getX() - 1 == chunk.getX())))
-//                {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
 
     public void setHome(@Nullable UUID worldUUID, Faction faction, @Nullable Vector3i home)
     {
@@ -507,34 +491,41 @@ public class FactionLogic
         return false;
     }
 
-    public void removeClaims(Faction faction)
+    public void removeAllClaims(Faction faction)
     {
         for (Claim claim: faction.getClaims())
         {
             FactionsCache.removeClaimCache(claim);
         }
-        faction.removeAllClaims();
-        storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setClaims(new HashSet<>()).build();
+        storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public void kickPlayer(UUID playerUUID, String factionName)
     {
-        Faction faction = getFactionByName(factionName);
+        final Faction faction = getFactionByName(factionName);
+        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
+        final Set<UUID> members = new HashSet<>(faction.getMembers());
+        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
 
         if(faction.getRecruits().contains(playerUUID))
         {
-            faction.removeRecruit(playerUUID);
+            recruits.remove(playerUUID);
         }
         else if(faction.getMembers().contains(playerUUID))
         {
-            faction.removeMember(playerUUID);
+            members.remove(playerUUID);
         }
         else
         {
-            faction.removeOfficer(playerUUID);
+            officers.remove(playerUUID);
         }
-
-        storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder()
+                .setOfficers(officers)
+                .setMembers(members)
+                .setRecruits(recruits)
+                .build();
+        storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     private Consumer<Task> addClaimWithDelay(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
@@ -694,85 +685,75 @@ public class FactionLogic
 
     public void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean flagValue)
     {
-        faction.setFlag(factionMemberType, factionFlagTypes, flagValue);
+        final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = new HashMap<>(faction.getFlags());
+        flags.get(factionMemberType).replace(factionFlagTypes, flagValue);
 
-        storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setFlags(flags).build();
+        storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public void changeTagColor(Faction faction, TextColor textColor)
     {
         Text text = Text.of(textColor, faction.getTag().toPlainSingle());
-        faction.setTag(text);
-
-        storageManager.addOrUpdateFaction(faction);
-    }
-
-    public void addMemberAndRemoveRecruit(UUID newMemberUUID, String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        faction.addMember(newMemberUUID);
-        faction.removeRecruit(newMemberUUID);
-
-        storageManager.addOrUpdateFaction(faction);
-    }
-
-    public void addRecruitAndRemoveMember(UUID newRecruitUUID, String factionName)
-    {
-        Faction faction = getFactionByName(factionName);
-
-        faction.addRecruit(newRecruitUUID);
-        faction.removeMember(newRecruitUUID);
-
-        storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setTag(text).build();
+        storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public FactionMemberType promotePlayer(Faction faction, Player playerToPromote)
     {
         FactionMemberType promotedTo = FactionMemberType.RECRUIT;
 
-        if(faction.getRecruits().contains(playerToPromote.getUniqueId()))
+        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
+        final Set<UUID> members = new HashSet<>(faction.getMembers());
+        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
+
+        if(recruits.contains(playerToPromote.getUniqueId()))
         {
-            faction.getMembers().add(playerToPromote.getUniqueId());
-            faction.getRecruits().remove(playerToPromote.getUniqueId());
+            members.add(playerToPromote.getUniqueId());
+            recruits.remove(playerToPromote.getUniqueId());
             promotedTo = FactionMemberType.MEMBER;
         }
-        else if (faction.getMembers().contains(playerToPromote.getUniqueId()))
+        else if (members.contains(playerToPromote.getUniqueId()))
         {
-            faction.getOfficers().add(playerToPromote.getUniqueId());
-            faction.getMembers().remove(playerToPromote.getUniqueId());
+            officers.add(playerToPromote.getUniqueId());
+            members.remove(playerToPromote.getUniqueId());
             promotedTo = FactionMemberType.OFFICER;
         }
 
-        this.storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setRecruits(recruits).setOfficers(officers).setMembers(members).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
         return promotedTo;
     }
 
     public FactionMemberType demotePlayer(Faction faction, Player playerToDemote)
     {
         FactionMemberType demotedTo = FactionMemberType.RECRUIT;
+        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
+        final Set<UUID> members = new HashSet<>(faction.getMembers());
+        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
 
-        if(faction.getMembers().contains(playerToDemote.getUniqueId()))
+        if(members.contains(playerToDemote.getUniqueId()))
         {
-            faction.getRecruits().add(playerToDemote.getUniqueId());
-            faction.getMembers().remove(playerToDemote.getUniqueId());
+            recruits.add(playerToDemote.getUniqueId());
+            members.remove(playerToDemote.getUniqueId());
             demotedTo = FactionMemberType.RECRUIT;
         }
-        else if (faction.getOfficers().contains(playerToDemote.getUniqueId()))
+        else if (officers.contains(playerToDemote.getUniqueId()))
         {
-            faction.getMembers().add(playerToDemote.getUniqueId());
-            faction.getOfficers().remove(playerToDemote.getUniqueId());
+            members.add(playerToDemote.getUniqueId());
+            officers.remove(playerToDemote.getUniqueId());
             demotedTo = FactionMemberType.MEMBER;
         }
 
-        this.storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setRecruits(recruits).setOfficers(officers).setMembers(members).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
         return demotedTo;
     }
 
     public void setLastOnline(Faction faction, Instant instantTime)
     {
-        faction.setLastOnline(instantTime);
-        this.storageManager.addOrUpdateFaction(faction);
+        final Faction updatedFaction = faction.toBuilder().setLastOnline(instantTime).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     public void renameFaction(Faction faction, String newFactionName)

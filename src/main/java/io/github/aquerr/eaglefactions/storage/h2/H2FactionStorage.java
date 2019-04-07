@@ -406,11 +406,8 @@ public class H2FactionStorage implements IFactionStorage
                 FactionChest factionChest = getFactionChest(factionName);
                 Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
-                Faction faction = Faction.builder()
-                        .setName(factionName)
-                        .setTag(Text.of(textColor, tag))
+                Faction faction = Faction.builder(factionName, Text.of(textColor, tag), leaderUUID)
                         .setHome(factionHome)
-                        .setLeader(leaderUUID)
                         .setAlliances(alliances)
                         .setEnemies(enemies)
                         .setClaims(claims)
@@ -561,7 +558,7 @@ public class H2FactionStorage implements IFactionStorage
 
     private FactionChest getFactionChest(final String factionName) throws SQLException, IOException, ClassNotFoundException
     {
-        FactionChest factionChest = new FactionChest();
+        FactionChest factionChest = new FactionChest(factionName);
         Connection connection = this.h2provider.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
@@ -574,7 +571,7 @@ public class H2FactionStorage implements IFactionStorage
             byteArrayInputStream.close();
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(this.plugin);
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
-            factionChest = FactionChest.fromInventory(inventory);
+            factionChest = FactionChest.fromInventory(factionName, inventory);
         }
         resultSet.close();
         preparedStatement.close();

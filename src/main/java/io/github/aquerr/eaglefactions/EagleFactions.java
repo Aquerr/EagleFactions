@@ -245,7 +245,7 @@ public class EagleFactions
         //Info command. Shows info about a faction.
         SUBCOMMANDS.put(Arrays.asList("i", "info"), CommandSpec.builder()
                 .description(Text.of("Show info about a faction"))
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
                 .executor(new InfoCommand(this))
                 .build());
 
@@ -253,7 +253,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Arrays.asList("p", "player"), CommandSpec.builder()
                 .description(Text.of("Show info about a player"))
                 .permission(PluginPermissions.PLAYER_COMMAND)
-                .arguments(GenericArguments.player(Text.of("player")))
+                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .executor(new PlayerCommand(this))
                 .build());
 

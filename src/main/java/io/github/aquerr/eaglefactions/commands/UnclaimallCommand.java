@@ -42,7 +42,7 @@ public class UnclaimallCommand extends AbstractCommand
                         getPlugin().getFactionLogic().setHome(null, playerFaction, null);
                     }
 
-                    getPlugin().getFactionLogic().removeClaims(playerFaction);
+                    getPlugin().getFactionLogic().removeAllClaims(playerFaction);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_REMOVED_ALL_CLAIMS));
 
                     return CommandResult.success();

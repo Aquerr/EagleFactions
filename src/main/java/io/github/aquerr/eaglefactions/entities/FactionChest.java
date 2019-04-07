@@ -20,19 +20,22 @@ import java.util.Optional;
 
 public class FactionChest implements Serializable
 {
+    private String factionName; //Reference to faction holding this chest
     private List<SlotItem> items;
 
-    public FactionChest()
+    public FactionChest(String factionName)
     {
+        this.factionName = factionName;
         items = new ArrayList<>();
     }
 
-    public FactionChest(List<SlotItem> items)
+    public FactionChest(String factionName, List<SlotItem> items)
     {
+        this.factionName = factionName;
         this.items = items;
     }
 
-    public static FactionChest fromInventory(Inventory inventory)
+    public static FactionChest fromInventory(String factionName, Inventory inventory)
     {
         List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
 
@@ -58,7 +61,12 @@ public class FactionChest implements Serializable
                 break;
         }
 
-        return new FactionChest(slotItemList);
+        return new FactionChest(factionName, slotItemList);
+    }
+
+    public String getFactionName()
+    {
+        return this.factionName;
     }
 
     public List<SlotItem> getItems()
@@ -95,17 +103,22 @@ public class FactionChest implements Serializable
                         //Ensure that it is a chest.
                         if(inv.capacity() == 27)
                         {
-                            factionChest = FactionChest.fromInventory(inv);
+                            factionChest = FactionChest.fromInventory(this.factionName, inv);
                         }
                     }
 
                     if(factionChest == null)
-                        factionChest = new FactionChest();
-                    Optional<Faction> optionalFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByPlayerUUID(x.getCause().first(User.class).get().getUniqueId());
-                    if(optionalFaction.isPresent())
+                        factionChest = new FactionChest(factionName);
+                    final Faction faction = EagleFactions.getPlugin().getFactionLogic().getFactionByName(factionName);
+                    if(faction != null)
                     {
-                        EagleFactions.getPlugin().getFactionLogic().setChest(optionalFaction.get(), factionChest);
+                        EagleFactions.getPlugin().getFactionLogic().setChest(faction, factionChest);
                     }
+//                    Optional<Faction> optionalFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByPlayerUUID(x.getCause().first(User.class).get().getUniqueId());
+//                    if(optionalFaction.isPresent())
+//                    {
+//                        EagleFactions.getPlugin().getFactionLogic().setChest(optionalFaction.get(), factionChest);
+//                    }
                 })
                 .build(EagleFactions.getPlugin());
 

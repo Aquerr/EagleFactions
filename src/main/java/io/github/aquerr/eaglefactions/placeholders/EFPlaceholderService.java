@@ -22,7 +22,7 @@ public class EFPlaceholderService
     public static EFPlaceholderService getInstance(final EagleFactions plugin, Object placeholderService)
     {
         if(INSTANCE == null) {
-            INSTANCE = new EFPlaceholderService(plugin, PlaceholderService.class.cast(placeholderService));
+            INSTANCE = new EFPlaceholderService(plugin, (PlaceholderService) placeholderService);
         }
         return INSTANCE;
     }

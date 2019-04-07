@@ -25,7 +25,7 @@ public class JoinCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<String> optionalFactionName = context.<String>getOne("faction name");
+        final Optional<String> optionalFactionName = context.<String>getOne("faction name");
 
         if (optionalFactionName.isPresent())
         {

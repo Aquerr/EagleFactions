@@ -165,10 +165,7 @@ public class HOCONFactionStorage implements IFactionStorage
         Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
         FactionChest chest = getFactionChest(factionName);
 
-        Faction faction = Faction.builder()
-                .setName(factionName)
-                .setTag(tag)
-                .setLeader(leader)
+        Faction faction = Faction.builder(factionName, tag, leader)
                 .setHome(home)
                 .setOfficers(officers)
                 .setMembers(members)
@@ -200,7 +197,7 @@ public class HOCONFactionStorage implements IFactionStorage
             slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
         } catch (ObjectMappingException e) {
             e.printStackTrace();
-            return new FactionChest();
+            return new FactionChest(factionName);
         }
 
 //        if(factionChest != null)
@@ -209,13 +206,13 @@ public class HOCONFactionStorage implements IFactionStorage
 //        }
         if(slotItems != null)
         {
-            return new FactionChest(slotItems);
+            return new FactionChest(factionName, slotItems);
         }
         else
         {
             configNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
             needToSave = true;
-            return new FactionChest();
+            return new FactionChest(factionName);
         }
     }
 
@@ -593,34 +590,34 @@ public class HOCONFactionStorage implements IFactionStorage
         return null;
     };
 
-    private Function<Object, FactionChest> objectToFactionChestTransformer = object ->
-    {
-        if(object instanceof List)
-        {
-            List<DataView> dataViewList = new ArrayList<>();
-            List<Object> objectList = (List<Object>)object;
-
-            for(Object dataViewObject : objectList)
-            {
-                try
-                {
-                    DataView dataView = DataFormats.HOCON.read(dataViewObject.toString());
-                    dataViewList.add(dataView);
-                }
-                catch(IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-
-            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(EagleFactions.getPlugin());
-            InventorySerializer.deserializeInventory(dataViewList, inventory);
-            return FactionChest.fromInventory(inventory);
-
-//            return dataViewList;
-        }
-        return null;
-    };
+//    private Function<Object, FactionChest> objectToFactionChestTransformer = object ->
+//    {
+//        if(object instanceof List)
+//        {
+//            List<DataView> dataViewList = new ArrayList<>();
+//            List<Object> objectList = (List<Object>)object;
+//
+//            for(Object dataViewObject : objectList)
+//            {
+//                try
+//                {
+//                    DataView dataView = DataFormats.HOCON.read(dataViewObject.toString());
+//                    dataViewList.add(dataView);
+//                }
+//                catch(IOException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(EagleFactions.getPlugin());
+//            InventorySerializer.deserializeInventory(dataViewList, inventory);
+//            return FactionChest.fromInventory(,inventory);
+//
+////            return dataViewList;
+//        }
+//        return null;
+//    };
 
 
     private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
