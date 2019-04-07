@@ -296,6 +296,13 @@ public class EagleFactions
                 .executor(new ClaimCommand(this))
                 .build());
 
+        SUBCOMMANDS.put(Collections.singletonList("rectangleclaim"), CommandSpec.builder()
+                .description(Text.of("Claim lands in form of rectangle"))
+                .permission(PluginPermissions.RECTANGLE_CLAIM_COMMAND)
+                .arguments(GenericArguments.integer(Text.of("number")))
+                .executor(new RectangleClaimCommand(this))
+                .build());
+
         //Unclaim command.
         SUBCOMMANDS.put(Collections.singletonList("unclaim"), CommandSpec.builder()
                 .description(Text.of("Unclaim a land captured by your faction."))

@@ -325,6 +325,24 @@ public class FactionLogic
         return FactionsCache.getAllClaims();
     }
 
+    public void addClaims(Faction faction, List<Claim> claims)
+    {
+        for(final Claim claim : claims)
+        {
+            faction.addClaim(claim);
+            World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
+            Vector3i chunkPosition = claim.getChunkPosition();
+            double x = (chunkPosition.getX() << 4) + 8;
+            double z = (chunkPosition.getZ() << 4) + 8;
+            double y = world.getHighestYAt((int)x, (int)z);
+            Vector3d position = new Vector3d(x, y, z);
+            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
+            world.playSound(SoundTypes.ITEM_ARMOR_EQUIP_IRON, position, 5, -10);
+        }
+
+        this.storageManager.addOrUpdateFaction(faction);
+    }
+
     public void addClaim(Faction faction, Claim claim)
     {
         faction.addClaim(claim);
@@ -337,9 +355,6 @@ public class FactionLogic
         double y = world.getHighestYAt((int)x, (int)z);
         Vector3d position = new Vector3d(x, y, z);
         world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
-//        world.playSound(SoundTypes.ENTITY_LIGHTNING_IMPACT, position, 10, 10);
-//        world.playSound(SoundTypes.ITEM_SHIELD_BREAK, position, 10, 10);
-//        world.playSound(SoundTypes.BLOCK_IRON_DOOR_OPEN, position, 10, 10);
         world.playSound(SoundTypes.ITEM_ARMOR_EQUIP_IRON, position, 5, -10);
     }
 
