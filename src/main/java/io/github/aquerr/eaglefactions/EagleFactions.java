@@ -296,11 +296,11 @@ public class EagleFactions
                 .executor(new ClaimCommand(this))
                 .build());
 
-        SUBCOMMANDS.put(Collections.singletonList("rectangleclaim"), CommandSpec.builder()
-                .description(Text.of("Claim lands in form of rectangle"))
-                .permission(PluginPermissions.RECTANGLE_CLAIM_COMMAND)
-                .arguments(GenericArguments.integer(Text.of("number")))
-                .executor(new RectangleClaimCommand(this))
+        SUBCOMMANDS.put(Collections.singletonList("squareclaim"), CommandSpec.builder()
+                .description(Text.of("Claim land in form of square with a given radius"))
+                .permission(PluginPermissions.RADIUS_CLAIM_COMMAND)
+                .arguments(GenericArguments.integer(Text.of("radius")))
+                .executor(new SquareClaimCommand(this))
                 .build());
 
         //Unclaim command.

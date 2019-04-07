@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.events.FactionClaimEvent;
@@ -21,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class RectangleClaimCommand extends AbstractCommand
+public class SquareClaimCommand extends AbstractCommand
 {
-    public RectangleClaimCommand(final EagleFactions plugin)
+    public SquareClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
@@ -31,7 +30,7 @@ public class RectangleClaimCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final Optional<Integer> optionalNumber = context.getOne(Text.of("number"));
+        final Optional<Integer> optionalNumber = context.getOne(Text.of("radius"));
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
