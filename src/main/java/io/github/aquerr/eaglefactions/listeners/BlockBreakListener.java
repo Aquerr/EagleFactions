@@ -70,17 +70,27 @@ public class BlockBreakListener extends AbstractListener
         final boolean isForgePlayerBreak = event.getContext().containsKey(EventContextKeys.PLAYER_BREAK);
         final Location<World> sourceLocation = locatableBlock != null ? locatableBlock.getLocation() : tileEntity != null ? tileEntity.getLocation() : null;
 
-        if(isForgePlayerBreak && user instanceof Player)
+        if(isForgePlayerBreak)
         {
-            for(Location<World> location : event.getLocations())
+            //Helps blocking mining laser from IC2
+            if(user == null)
             {
-                if(location.getBlockType() == BlockTypes.AIR)
-                    continue;
+                user = event.getContext().get(EventContextKeys.OWNER)
+                        .orElse(event.getContext().get(EventContextKeys.NOTIFIER).orElse(null));
+            }
 
-                if(!super.getPlugin().getProtectionManager().canBreak(location, user))
+            if(user instanceof Player)
+            {
+                for(Location<World> location : event.getLocations())
                 {
-                    event.setCancelled(true);
-                    return;
+                    if(location.getBlockType() == BlockTypes.AIR)
+                        continue;
+
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
             }
         }
@@ -199,6 +209,12 @@ public class BlockBreakListener extends AbstractListener
         else if(event.getCause().containsType(User.class))
         {
             user = event.getCause().first(User.class).get();
+        }
+
+        //Helps blocking dynamite from IC2
+        if(user == null)
+        {
+            user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
         }
 
         LocatableBlock locatableBlock = null;
@@ -369,22 +385,18 @@ public class BlockBreakListener extends AbstractListener
                 {
                     final Player player = (Player) entity;
                     if(configFields.getSafeZoneWorldNames().contains(player.getWorld().getName()))
+                    {
                         sourceEntity.remove();
-
+                        event.setCancelled(true);
+                        return;
+                    }
 
                     final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
                     if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
+                    {
                         sourceEntity.remove();
-
-                    if(sourceEntity instanceof Projectile)
-                    {
-                        Projectile projectile = (Projectile)sourceEntity;
-                        String test = "";
-                    }
-                    if(sourceEntity instanceof ProjectileSource)
-                    {
-                        ProjectileSource projectileSource = (ProjectileSource) sourceEntity;
-                        String test = "";
+                        event.setCancelled(true);
+                        return;
                     }
 
                     //TechGuns - Should be better to find more generic way of doing this...
@@ -412,6 +424,10 @@ public class BlockBreakListener extends AbstractListener
 
                             if(shooterPlayer != null)
                             {
+                                //Crazy situation...
+                                if(shooterPlayer == player)
+                                    continue;
+
                                 //We got shooter player
                                 //Check friendly fire
                                 final boolean isFactionFriendlyFireOn = configFields.isFactionFriendlyFire();
