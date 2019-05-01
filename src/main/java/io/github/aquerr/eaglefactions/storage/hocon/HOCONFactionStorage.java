@@ -90,6 +90,8 @@ public class HOCONFactionStorage implements IFactionStorage
 //            }
             configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
             configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
+            configNode.getNode("factions", faction.getName(), "description").setValue(faction.getDescription());
+            configNode.getNode("factions", faction.getName(), "motd").setValue(faction.getMessageOfTheDay());
             configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
             configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
             configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
@@ -153,6 +155,8 @@ public class HOCONFactionStorage implements IFactionStorage
     private Faction createFactionObject(String factionName)
     {
         Text tag = getFactionTag(factionName);
+        String description = getFactionDescription(factionName);
+        String messageOfTheDay = getFactionMessageOfTheDay(factionName);
         UUID leader = getFactionLeader(factionName);
         FactionHome home = getFactionHome(factionName);
         Set<UUID> officers = getFactionOfficers(factionName);
@@ -166,6 +170,8 @@ public class HOCONFactionStorage implements IFactionStorage
         FactionChest chest = getFactionChest(factionName);
 
         Faction faction = Faction.builder(factionName, tag, leader)
+                .setDescription(description)
+                .setMessageOfTheDay(messageOfTheDay)
                 .setHome(home)
                 .setOfficers(officers)
                 .setMembers(members)
@@ -518,6 +524,38 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
+    private String getFactionDescription(final String factionName)
+    {
+        final Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "description"}).getValue();
+
+        if(leaderObject != null)
+        {
+            return (String)leaderObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "description"}).setValue("");
+            needToSave = true;
+            return "";
+        }
+    }
+
+    private String getFactionMessageOfTheDay(final String factionName)
+    {
+        final Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "motd"}).getValue();
+
+        if(leaderObject != null)
+        {
+            return (String)leaderObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "motd"}).setValue("");
+            needToSave = true;
+            return "";
+        }
+    }
+
     @Override
     public Set<Faction> getFactions()
     {
@@ -620,13 +658,13 @@ public class HOCONFactionStorage implements IFactionStorage
 //    };
 
 
-    private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
-    {
-        List<String> listOfStrings = new ArrayList<>();
-        for(UUID uuid : listOfUUIDs)
-        {
-            listOfStrings.add(uuid.toString());
-        }
-        return listOfStrings;
-    }
+//    private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
+//    {
+//        List<String> listOfStrings = new ArrayList<>();
+//        for(UUID uuid : listOfUUIDs)
+//        {
+//            listOfStrings.add(uuid.toString());
+//        }
+//        return listOfStrings;
+//    }
 }

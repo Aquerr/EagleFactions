@@ -148,6 +148,8 @@ public class PluginMessages
     public static String YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND;
     public static String NAME;
     public static String TAG;
+    public static String DESCRIPTION;
+    public static String MOTD;
     public static String OFFICERS;
     public static String ALLIANCES;
     public static String MEMBERS;

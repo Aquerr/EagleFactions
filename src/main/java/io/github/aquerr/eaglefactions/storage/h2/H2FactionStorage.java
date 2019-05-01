@@ -51,9 +51,9 @@ public class H2FactionStorage implements IFactionStorage
 //    private static final String INSERT_FOUR_VALUES = "INSERT INTO ? VALUES (?, ?, ?, ?)";
 //    private static final String INSERT_THREE_VALUES = "INSERT INTO ? VALUES (?, ?, ?)";
 //    private static final String INSERT_TWO_VALUES = "INSERT INTO ? VALUES (?, ?)";
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName) VALUES (?, ?, ?)";
     private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
 
@@ -202,6 +202,8 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setString(6, faction.getLastOnline().toString());
             preparedStatement.setString(7, alliances);
             preparedStatement.setString(8, enemies);
+            preparedStatement.setString(9, faction.getDescription());
+            preparedStatement.setString(10, faction.getMessageOfTheDay());
             preparedStatement.execute();
             preparedStatement.close();
             connection.close();
@@ -390,6 +392,8 @@ public class H2FactionStorage implements IFactionStorage
                 TextColor textColor = Sponge.getRegistry().getType(TextColor.class, tagColor).orElse(TextColors.RESET);
                 UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
                 String factionHomeAsString = factionsResultSet.getString("Home");
+                String description = factionsResultSet.getString("Description");
+                String messageOfTheDay = factionsResultSet.getString("Motd");
                 FactionHome factionHome = null;
                 if (factionHomeAsString != null)
                     factionHome = FactionHome.from(factionHomeAsString);
@@ -417,6 +421,8 @@ public class H2FactionStorage implements IFactionStorage
                         .setOfficers(officers)
                         .setChest(factionChest)
                         .setFlags(flags)
+                        .setDescription(description)
+                        .setMessageOfTheDay(messageOfTheDay)
                         .build();
                 return faction;
             }
@@ -447,7 +453,8 @@ public class H2FactionStorage implements IFactionStorage
             for (String factionName : factionsNames)
             {
                 Faction faction = getFaction(factionName);
-                factions.add(faction);
+                if(faction != null)
+                    factions.add(faction);
             }
         }
         catch (SQLException e)
@@ -774,6 +781,8 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setString(6, Instant.now().toString());
             preparedStatement.setString(7, "");
             preparedStatement.setString(8, "");
+            preparedStatement.setString(9, "");
+            preparedStatement.setString(10, "");
 
             PreparedStatement preparedStatement1 = connection.prepareStatement(INSERT_FACTION);
             preparedStatement1.setString(1, "SafeZone");
@@ -784,6 +793,8 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement1.setString(6, Instant.now().toString());
             preparedStatement1.setString(7, "");
             preparedStatement1.setString(8, "");
+            preparedStatement1.setString(9, "");
+            preparedStatement1.setString(10, "");
 
             preparedStatement.execute();
             preparedStatement1.execute();

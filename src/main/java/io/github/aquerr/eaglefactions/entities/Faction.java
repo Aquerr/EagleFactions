@@ -58,6 +58,21 @@ public class Faction
         return this.name;
     }
 
+    public Text getTag()
+    {
+        return this.tag;
+    }
+
+    public String getDescription()
+    {
+        return this.description;
+    }
+
+    public String getMessageOfTheDay()
+    {
+        return this.messageOfTheDay;
+    }
+
     public FactionHome getHome()
     {
         return this.home;
@@ -101,11 +116,6 @@ public class Faction
     public UUID getLeader()
     {
         return this.leader;
-    }
-
-    public Text getTag()
-    {
-        return this.tag;
     }
 
     public Instant getLastOnline()

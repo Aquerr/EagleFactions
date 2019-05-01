@@ -774,4 +774,16 @@ public class FactionLogic
         faction = faction.toBuilder().setChest(inventory).build();
         this.storageManager.addOrUpdateFaction(faction);
     }
+
+    public void setDescription(final Faction faction, final String description)
+    {
+        final Faction updatedFaction = faction.toBuilder().setDescription(description).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
+    }
+
+    public void setMessageOfTheDay(final Faction faction, final String motd)
+    {
+        final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
+    }
 }

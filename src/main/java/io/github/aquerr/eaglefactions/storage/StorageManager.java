@@ -122,7 +122,8 @@ public class StorageManager implements Runnable
     public void addOrUpdateFaction(Faction faction)
     {
         FactionsCache.addOrUpdateFactionCache(faction);
-        queueStorageTask(new UpdateFactionTask(faction.toBuilder().build())); //Build new object to avoid concurrent modification.
+        queueStorageTask(new UpdateFactionTask(faction));
+//        queueStorageTask(new UpdateFactionTask(faction.toBuilder().build())); //Build new object to avoid concurrent modification.
     }
 
     public boolean deleteFaction(String factionName)

@@ -452,6 +452,21 @@ public class EagleFactions
                 .executor(new TagCommand(this))
                 .build());
 
+        //Description Command
+        SUBCOMMANDS.put(Arrays.asList("desc", "description"), CommandSpec.builder()
+                .description(Text.of("Set faction's description."))
+                .permission(PluginPermissions.DESCRIPTION_COMMAND)
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("description")))
+                .executor(new DescriptionCommand(this))
+                .build());
+        //Motd Command
+        SUBCOMMANDS.put(Collections.singletonList("motd"), CommandSpec.builder()
+                .description(Text.of("Set faction's message of the day."))
+                .permission(PluginPermissions.MOTD_COMMAND)
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("motd")))
+                .executor(new MotdCommand(this))
+                .build());
+
         //EagleFeather Command
         SUBCOMMANDS.put(Collections.singletonList("feather"), CommandSpec.builder()
                 .description(Text.of("Spawns mystical eagle's feather"))
