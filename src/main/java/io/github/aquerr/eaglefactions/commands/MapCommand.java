@@ -201,7 +201,7 @@ public class MapCommand extends AbstractCommand
                 else
                 {
                     if(!super.getPlugin().getConfiguration().getConfigFields().shouldDelayClaim()
-                            && (EagleFactions.AdminList.contains(player.getUniqueId())
+                            && (EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId())
                                 || (optionalPlayerFaction.isPresent()
                                     && (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId())
                                         || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
@@ -265,7 +265,7 @@ public class MapCommand extends AbstractCommand
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             final World world = player.getWorld();
             final Claim claim = new Claim(player.getWorld().getUniqueId(), chunk);
-            final boolean hasFactionsAdminMode = EagleFactions.AdminList.contains(player.getUniqueId());
+            final boolean hasFactionsAdminMode = EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
 
             if(!optionalPlayerFaction.isPresent())
             {
@@ -275,7 +275,7 @@ public class MapCommand extends AbstractCommand
 
             final Faction playerFaction = optionalPlayerFaction.get();
             final boolean hasClaimPermission = super.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction);
-            final boolean isFactionAttacked = EagleFactions.AttackedFactions.containsKey(playerFaction.getName());
+            final boolean isFactionAttacked = EagleFactions.ATTACKED_FACTIONS.containsKey(playerFaction.getName());
 
             if(!hasFactionsAdminMode && !hasClaimPermission)
             {

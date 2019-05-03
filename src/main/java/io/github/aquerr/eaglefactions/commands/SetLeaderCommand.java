@@ -41,7 +41,7 @@ public class SetLeaderCommand extends AbstractCommand
 
                     if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
-                        if (EagleFactions.AdminList.contains(player.getUniqueId()))
+                        if (EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                         {
                             if (!playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                             {

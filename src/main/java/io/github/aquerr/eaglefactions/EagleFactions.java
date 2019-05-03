@@ -44,17 +44,18 @@ import java.util.concurrent.TimeUnit;
         dependencies = {@Dependency(id = "placeholderapi", optional = true)})
 public class EagleFactions
 {
-    public static Map<List<String>, CommandSpec> SUBCOMMANDS;
-    public static List<Invite> InviteList;
-    public static List<AllyRequest> AllayInviteList;
-    public static List<StopWarRequest> stopWarRequestList;
-    public static List<UUID> AutoClaimList;
-    public static List<UUID> AutoMapList;
-    public static List<UUID> AdminList;
-    public static Map<String, Integer> AttackedFactions;
-    public static Map<UUID, Integer> BlockedHome;
-    public static Map<UUID, ChatEnum> ChatList;
-    public static Map<UUID, Integer> HomeCooldownPlayers;
+    public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
+    public static final List<Invite> INVITE_LIST = new ArrayList<>();
+    public static final List<AllyRequest> ALLY_INVITE_LIST = new ArrayList<>();
+    public static final List<StopWarRequest> WAR_STOP_REQUEST_LIST = new ArrayList<>();
+    public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
+    public static final List<UUID> AUTO_MAP_LIST = new ArrayList<>();
+    public static final List<UUID> ADMIN_MODE_PLAYERS = new ArrayList<>();
+    public static final Map<String, Integer> ATTACKED_FACTIONS = new HashMap<>();
+    public static final Map<UUID, Integer> BLOCKED_HOME = new HashMap<>();
+    public static final Map<UUID, ChatEnum> CHAT_LIST = new HashMap<>();
+    public static final Map<UUID, Integer> HOME_COOLDOWN_PLAYERS = new HashMap<>();
+    public static final List<UUID> DEBUG_MODE_PLAYERS = new ArrayList<>();
 
     private static EagleFactions eagleFactions;
 
@@ -86,18 +87,6 @@ public class EagleFactions
     @Listener
     public void onServerInitialization(GameInitializationEvent event)
     {
-        SUBCOMMANDS = new HashMap<>();
-        InviteList = new ArrayList<>();
-        AllayInviteList = new ArrayList<>();
-        stopWarRequestList = new ArrayList<>();
-        AutoClaimList = new ArrayList<>();
-        AutoMapList = new ArrayList<>();
-        AdminList = new ArrayList<>();
-        AttackedFactions = new HashMap<>();
-        BlockedHome = new HashMap<>();
-        ChatList = new HashMap<>();
-        HomeCooldownPlayers = new HashMap<>();
-
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
@@ -480,6 +469,13 @@ public class EagleFactions
                 .permission(PluginPermissions.CHEST_COMMAND)
                 .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
                 .executor(new ChestCommand(this))
+                .build());
+
+        //Debug Command
+        SUBCOMMANDS.put(Collections.singletonList("debug"), CommandSpec.builder()
+                .description(Text.of("Toggles debug mode"))
+                .permission(PluginPermissions.DEBUG_COMMAND)
+                .executor(new DebugCommand(this))
                 .build());
 
         //Build all commands

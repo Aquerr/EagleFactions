@@ -59,12 +59,12 @@ public class ChatMessageListener extends AbstractListener
 
             //Get ChatType from Eagle Factions
             //and add it to the formattedMessage
-            if (EagleFactions.ChatList.containsKey(player.getUniqueId()))
+            if (EagleFactions.CHAT_LIST.containsKey(player.getUniqueId()))
             {
                 Set<MessageReceiver> receivers = new HashSet<>();
                 Text.Builder chatTypePrefix = Text.builder();
 
-                if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
+                if (EagleFactions.CHAT_LIST.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
                 {
                     message.append(Text.of(TextColors.BLUE, event.getRawMessage()));
                     chatTypePrefix.append(getAlliancePrefix());
@@ -78,7 +78,7 @@ public class ChatMessageListener extends AbstractListener
                     }
                     receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
                 }
-                else if (EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.FACTION))
+                else if (EagleFactions.CHAT_LIST.get(player.getUniqueId()).equals(ChatEnum.FACTION))
                 {
                     message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                     chatTypePrefix.append(getFactionPrefix());
@@ -87,7 +87,7 @@ public class ChatMessageListener extends AbstractListener
                 }
 
                 //Add users with factions-admin mode to the collection. Admins should see all chats.
-                for(final UUID adminUUID : EagleFactions.AdminList)
+                for(final UUID adminUUID : EagleFactions.ADMIN_MODE_PLAYERS)
                 {
                     final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
                     if(optionalAdminPlayer.isPresent())

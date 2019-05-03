@@ -49,7 +49,7 @@ public class AllyCommand extends AbstractCommand
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
 
-                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                    if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                     {
                         if(playerFaction.getEnemies().contains(selectedFaction.getName()))
                         {
@@ -98,24 +98,24 @@ public class AllyCommand extends AbstractCommand
                                 //TODO: Check if player is online
                                 Optional<Player> optionalInvitedFactionLeader = getPlugin().getPlayerManager().getPlayer(selectedFaction.getLeader());
 
-                                if(EagleFactions.AllayInviteList.contains(checkInvite))
+                                if(EagleFactions.ALLY_INVITE_LIST.contains(checkInvite))
                                 {
                                     getPlugin().getFactionLogic().addAlly(playerFaction.getName(), selectedFaction.getName());
 
                                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, selectedFaction.getName() + "!"));
                                     optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
 
-                                    EagleFactions.AllayInviteList.remove(checkInvite);
+                                    EagleFactions.ALLY_INVITE_LIST.remove(checkInvite);
                                 }
-                                else if(!EagleFactions.AllayInviteList.contains(checkInvite))
+                                else if(!EagleFactions.ALLY_INVITE_LIST.contains(checkInvite))
                                 {
                                     AllyRequest invite = new AllyRequest(playerFaction.getName(), selectedFaction.getName());
-                                    if(EagleFactions.AllayInviteList.contains(invite))
+                                    if(EagleFactions.ALLY_INVITE_LIST.contains(invite))
                                     {
                                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already invited this factions to the alliance. Wait for their response!"));
                                         return CommandResult.success();
                                     }
-                                    EagleFactions.AllayInviteList.add(invite);
+                                    EagleFactions.ALLY_INVITE_LIST.add(invite);
 
                                     optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
                                             " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION)));
@@ -130,7 +130,7 @@ public class AllyCommand extends AbstractCommand
                                         @Override
                                         public void run()
                                         {
-                                            EagleFactions.AllayInviteList.remove(invite);
+                                            EagleFactions.ALLY_INVITE_LIST.remove(invite);
                                         }
                                     }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(Sponge.getPluginManager().getPlugin(PluginInfo.ID).get().getInstance().get());
                                     return CommandResult.success();

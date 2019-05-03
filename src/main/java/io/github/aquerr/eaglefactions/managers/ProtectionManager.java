@@ -12,6 +12,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -47,6 +48,18 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canInteractWithBlock(final Location<World> location, final User user)
     {
+        if(EagleFactions.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
+        {
+            if(user instanceof Player)
+            {
+                Player player = (Player)user;
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Interact With Block:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+            }
+        }
+
         final World world = location.getExtent();
 
         if (hasAdminMode(user.getUniqueId()))
@@ -116,6 +129,19 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canUseItem(final Location<World> location, final User user, final ItemStackSnapshot usedItem)
     {
+        if(EagleFactions.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
+        {
+            if(user instanceof Player)
+            {
+                Player player = (Player)user;
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Usage of item:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Used item: " + usedItem.getType().getName())));
+            }
+        }
+
         World world = location.getExtent();
 
         if (hasAdminMode(user.getUniqueId()))
@@ -170,6 +196,18 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canBreak(Location<World> location, User user)
     {
+        if(EagleFactions.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
+        {
+            if(user instanceof Player)
+            {
+                Player player = (Player)user;
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block break:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+            }
+        }
+
         World world = location.getExtent();
         if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
@@ -260,6 +298,19 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canPlace(Location<World> location, User user)
     {
+        if(EagleFactions.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
+        {
+            if(user instanceof Player)
+            {
+                Player player = (Player)user;
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block place:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Item in hand: " + (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() ? user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getName() : ""))));
+            }
+        }
+
         World world = location.getExtent();
         if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
             return true;
@@ -320,11 +371,23 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canExplode(Location<World> location, User user)
     {
+        if(EagleFactions.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
+        {
+            if(user instanceof Player)
+            {
+                Player player = (Player)user;
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Explosion:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+            }
+        }
+
         boolean shouldProtectWarZoneFromPlayers = this.plugin.getConfiguration().getConfigFields().shouldProtectWarzoneFromPlayers();
         boolean allowExplosionsByOtherPlayersInClaims = this.plugin.getConfiguration().getConfigFields().shouldAllowExplosionsByOtherPlayersInClaims();
 
         //Check if admin
-        if(EagleFactions.AdminList.contains(user.getUniqueId()))
+        if(EagleFactions.ADMIN_MODE_PLAYERS.contains(user.getUniqueId()))
             return true;
 
         //Check world
@@ -415,14 +478,14 @@ public class ProtectionManager implements IProtectionManager
 //
 //    }
 
-    private boolean canUseBlock(Location<World> location)
-    {
-        BlockType blockType = location.getBlockType();
-        return blockType != BlockTypes.AIR && isBlockWhitelistedForInteraction(blockType);
-    }
+//    private boolean canUseBlock(Location<World> location)
+//    {
+//        BlockType blockType = location.getBlockType();
+//        return blockType != BlockTypes.AIR && isBlockWhitelistedForInteraction(blockType);
+//    }
 
     private boolean hasAdminMode(UUID playerUUID)
     {
-        return EagleFactions.AdminList.contains(playerUUID);
+        return EagleFactions.ADMIN_MODE_PLAYERS.contains(playerUUID);
     }
 }

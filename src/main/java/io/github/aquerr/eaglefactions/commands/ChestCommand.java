@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.commands;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -45,7 +44,7 @@ public class ChestCommand extends AbstractCommand
                 return CommandResult.success();
             }
 
-            if(!EagleFactions.AdminList.contains(player.getUniqueId()))
+            if(!EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You need to toggle faction's admin-mode first to view other faction's chest."));
 
             final Faction nullableFaction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());

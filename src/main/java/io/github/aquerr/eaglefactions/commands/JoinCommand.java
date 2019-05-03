@@ -45,7 +45,7 @@ public class JoinCommand extends AbstractCommand
                     else
                     {
                         //If player has admin mode then force join.
-                        if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                        if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                         {
                             getPlugin().getFactionLogic().joinFaction(player.getUniqueId(), faction.getName());
                             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
@@ -53,7 +53,7 @@ public class JoinCommand extends AbstractCommand
                             return CommandResult.success();
                         }
 
-                        for (Invite invite: EagleFactions.InviteList)
+                        for (Invite invite: EagleFactions.INVITE_LIST)
                         {
                             if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(faction.getName()))
                             {
@@ -77,7 +77,7 @@ public class JoinCommand extends AbstractCommand
                                     //TODO: Create a listener which will notify all players in faction that someone has joined.
                                     getPlugin().getFactionLogic().joinFaction(player.getUniqueId(), faction.getName());
 
-                                    EagleFactions.InviteList.remove(new Invite(faction.getName(), player.getUniqueId()));
+                                    EagleFactions.INVITE_LIST.remove(new Invite(faction.getName(), player.getUniqueId()));
 
                                     source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
                                     return CommandResult.success();

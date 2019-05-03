@@ -288,4 +288,7 @@ public class PluginMessages
     //Tagcolor
     public static String TAG_COLOR_HAS_BEEN_CHANGED;
     public static String TAG_COLORING_IS_TURNED_OFF_ON_THIS_SERVER;
+
+    //Debug
+    public static String DEBUG_MODE;
 }

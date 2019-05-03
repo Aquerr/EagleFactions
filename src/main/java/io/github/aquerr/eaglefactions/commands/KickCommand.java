@@ -82,7 +82,7 @@ public class KickCommand extends AbstractCommand
                 getPlugin().getPlayerManager().getPlayer(selectedPlayer.getUniqueId()).get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
             }
 
-            EagleFactions.AutoClaimList.remove(selectedPlayer.getUniqueId());
+            EagleFactions.AUTO_CLAIM_LIST.remove(selectedPlayer.getUniqueId());
         }
         return CommandResult.success();
     }

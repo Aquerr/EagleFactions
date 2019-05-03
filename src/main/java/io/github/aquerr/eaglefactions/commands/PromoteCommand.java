@@ -45,7 +45,7 @@ public class PromoteCommand extends AbstractCommand
 
                     if(optionalPromotedPlayerFaction.isPresent() && optionalPromotedPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
-                        if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                        if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                         {
                             if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
                             {

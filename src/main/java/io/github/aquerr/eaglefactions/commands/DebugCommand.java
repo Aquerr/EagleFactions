@@ -11,9 +11,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class AdminCommand extends AbstractCommand
+public class DebugCommand extends AbstractCommand
 {
-    public AdminCommand(EagleFactions plugin)
+    public DebugCommand(EagleFactions plugin)
     {
         super(plugin);
     }
@@ -25,16 +25,16 @@ public class AdminCommand extends AbstractCommand
         {
             Player player = (Player)source;
 
-            if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if(EagleFactions.DEBUG_MODE_PLAYERS.contains(player.getUniqueId()))
             {
-                EagleFactions.ADMIN_MODE_PLAYERS.remove(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
+                EagleFactions.DEBUG_MODE_PLAYERS.remove(player.getUniqueId());
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, PluginMessages.DEBUG_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
                 return CommandResult.success();
             }
             else
             {
-                EagleFactions.ADMIN_MODE_PLAYERS.add(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
+                EagleFactions.DEBUG_MODE_PLAYERS.add(player.getUniqueId());
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, PluginMessages.DEBUG_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
                 return CommandResult.success();
             }
         }

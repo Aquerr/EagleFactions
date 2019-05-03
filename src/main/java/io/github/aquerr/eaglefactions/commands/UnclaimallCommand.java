@@ -35,7 +35,7 @@ public class UnclaimallCommand extends AbstractCommand
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
                     if(playerFaction.getHome() != null)
                     {

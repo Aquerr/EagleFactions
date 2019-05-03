@@ -36,44 +36,44 @@ public class ChatCommand extends AbstractCommand
 
         if(optionalChatType.isPresent())
         {
-            if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
+            if(EagleFactions.CHAT_LIST.containsKey(player.getUniqueId()))
             {
                 if(optionalChatType.get().equals(ChatEnum.GLOBAL))
                 {
-                    EagleFactions.ChatList.remove(player.getUniqueId());
+                    EagleFactions.CHAT_LIST.remove(player.getUniqueId());
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.GLOBAL_CHAT, TextColors.RESET, "!"));
                 }
                 else
                 {
-                    EagleFactions.ChatList.replace(player.getUniqueId(), EagleFactions.ChatList.get(player.getUniqueId()), optionalChatType.get());
+                    EagleFactions.CHAT_LIST.replace(player.getUniqueId(), EagleFactions.CHAT_LIST.get(player.getUniqueId()), optionalChatType.get());
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
                 }
             }
             else
             {
-                EagleFactions.ChatList.put(player.getUniqueId(), optionalChatType.get());
+                EagleFactions.CHAT_LIST.put(player.getUniqueId(), optionalChatType.get());
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, optionalChatType.get(), TextColors.RESET, "!"));
             }
         }
         else
         {
             //If player is in alliance chat or faction chat.
-            if(EagleFactions.ChatList.containsKey(player.getUniqueId()))
+            if(EagleFactions.CHAT_LIST.containsKey(player.getUniqueId()))
             {
-                if(EagleFactions.ChatList.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
+                if(EagleFactions.CHAT_LIST.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
                 {
-                    EagleFactions.ChatList.replace(player.getUniqueId(), ChatEnum.ALLIANCE, ChatEnum.FACTION);
+                    EagleFactions.CHAT_LIST.replace(player.getUniqueId(), ChatEnum.ALLIANCE, ChatEnum.FACTION);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.FACTION_CHAT, TextColors.RESET, "!"));
                 }
                 else
                 {
-                    EagleFactions.ChatList.remove(player.getUniqueId());
+                    EagleFactions.CHAT_LIST.remove(player.getUniqueId());
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.GLOBAL_CHAT, TextColors.RESET, "!"));
                 }
             }
             else
             {
-                EagleFactions.ChatList.put(player.getUniqueId(), ChatEnum.ALLIANCE);
+                EagleFactions.CHAT_LIST.put(player.getUniqueId(), ChatEnum.ALLIANCE);
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.ALLIANCE_CHAT, TextColors.RESET, "!"));
             }
         }
