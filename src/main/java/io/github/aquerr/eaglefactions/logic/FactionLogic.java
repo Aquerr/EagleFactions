@@ -372,6 +372,7 @@ public class FactionLogic
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         this.storageManager.addOrUpdateFaction(updatedFaction);
+        Sponge.getServer().getBroadcastChannel().send(Text.of(updatedFaction));
 
         World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
         Vector3i chunkPosition = claim.getChunkPosition();
@@ -533,40 +534,36 @@ public class FactionLogic
         return new Consumer<Task>()
         {
             int seconds = 1;
+            int claimDelay = _configFields.getClaimDelay();
 
             @Override
             public void accept(Task task)
             {
-                if(chunk.toString().equals(player.getLocation().getChunkPosition().toString()))
+                if(!chunk.equals(player.getLocation().getChunkPosition()))
                 {
-                    if(seconds >= _configFields.getClaimDelay())
-                    {
-                        if(_configFields.shouldClaimByItems())
-                        {
-                            if(addClaimByItems(player, faction, worldUUID, chunk))
-                            {
-                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                            }
-                            else
-                            {
-                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
-                            }
-                        }
-                        else
-                        {
-                            addClaim(faction, new Claim(worldUUID, chunk));
-                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                        }
-                    }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
-                        seconds++;
-                    }
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
+                    task.cancel();
+                }
+
+                if(seconds < claimDelay)
+                {
+                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
+                    seconds++;
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
+                    if(_configFields.shouldClaimByItems())
+                    {
+                        if(addClaimByItems(player, faction, worldUUID, chunk))
+                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                        else
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
+                    }
+                    else
+                    {
+                        addClaim(faction, new Claim(worldUUID, chunk));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                    }
                     task.cancel();
                 }
             }
