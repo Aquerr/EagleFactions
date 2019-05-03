@@ -145,7 +145,7 @@ public class BlockBreakListener extends AbstractListener
                 if(location.getBlock().getType() == BlockTypes.AIR)
                     continue;
 
-                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
+                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user))
                 {
                     event.setCancelled(true);
                     return;
@@ -186,7 +186,7 @@ public class BlockBreakListener extends AbstractListener
                     continue;
 
                 //TODO: This is ran even when player right clicks the block.
-                if(!super.getPlugin().getProtectionManager().canBreak(location, user.getPlayer().get()))
+                if(!super.getPlugin().getProtectionManager().canBreak(location, user))
                 {
                     event.setCancelled(true);
                     return;
@@ -364,12 +364,6 @@ public class BlockBreakListener extends AbstractListener
             event.setCancelled(true);
             return;
         }
-    }
-
-    @Listener
-    public void onTarget(TargetEntityEvent event)
-    {
-
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
