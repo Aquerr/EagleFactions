@@ -45,7 +45,7 @@ public class MySQLFactionStorage implements IFactionStorage
     private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName) VALUES (?, ?, ?)";
+    private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName, WorldUUID, ChunkPosition) VALUES (?, ?, ?)";
     private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
 
     private static final String MERGE_CHEST = "MERGE INTO FactionChests (FactionName, ChestItems) KEY (FactionName) VALUES (?, ?)";
@@ -122,9 +122,9 @@ public class MySQLFactionStorage implements IFactionStorage
                 System.out.println("There may be a problem with database script files...");
                 System.out.println("Searched for them in: " + resourcesFolder.getName());
             }
+            connection.close();
             if (databaseVersionNumber == 0)
                 precreate();
-            connection.close();
         }
         catch(SQLException e)
         {
@@ -175,10 +175,10 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement.setString(8, enemies);
             preparedStatement.execute();
 
-            deleteFactionOfficers(faction.getName());
-            deleteFactionMembers(faction.getName());
-            deleteFactionRecruits(faction.getName());
-            deleteFactionClaims(faction.getName());
+            deleteFactionOfficers(connection, faction.getName());
+            deleteFactionMembers(connection, faction.getName());
+            deleteFactionRecruits(connection, faction.getName());
+            deleteFactionClaims(connection, faction.getName());
 
             for (UUID officer : faction.getOfficers())
             {
@@ -472,6 +472,7 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement.execute();
             preparedStatement1.execute();
             connection.commit();
+            connection.close();
         }
         catch (SQLException e)
         {
@@ -487,36 +488,32 @@ public class MySQLFactionStorage implements IFactionStorage
         }
     }
 
-    private boolean deleteFactionOfficers(final String name) throws SQLException
+    private boolean deleteFactionOfficers(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_OFFICERS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
         return didSucceed;
     }
 
-    private boolean deleteFactionMembers(final String name) throws SQLException
+    private boolean deleteFactionMembers(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MEMBERS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
         return didSucceed;
     }
 
-    private boolean deleteFactionRecruits(final String name) throws SQLException
+    private boolean deleteFactionRecruits(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RECRUITS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
         return didSucceed;
     }
 
-    private boolean deleteFactionClaims(final String name) throws SQLException
+    private boolean deleteFactionClaims(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
