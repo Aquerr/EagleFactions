@@ -372,7 +372,6 @@ public class FactionLogic
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         this.storageManager.addOrUpdateFaction(updatedFaction);
-        Sponge.getServer().getBroadcastChannel().send(Text.of(updatedFaction));
 
         World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
         Vector3i chunkPosition = claim.getChunkPosition();
