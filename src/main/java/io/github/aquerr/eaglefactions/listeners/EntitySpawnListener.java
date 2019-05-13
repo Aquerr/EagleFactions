@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -107,6 +108,9 @@ public class EntitySpawnListener extends AbstractListener
 
             if(isLiving)
             {
+                if(entity instanceof ArmorStand)
+                    return;
+
                 //Check worlds
                 if(super.getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(entity.getWorld().getName())
                     && !super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInSafeZone())
