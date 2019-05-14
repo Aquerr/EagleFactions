@@ -89,20 +89,20 @@ public class EagleFactions
     {
         eagleFactions = this;
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Preparing wings..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
 
         SetupConfigs();
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Configs loaded..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded..."));
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Loading managers and cache..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
         SetupManagers();
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Managers loaded..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded..."));
 
         InitializeCommands();
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Commands loaded..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded..."));
 
         RegisterListeners();
 
@@ -172,7 +172,7 @@ public class EagleFactions
 
         //Create faction command.
         SUBCOMMANDS.put(Arrays.asList("c", "create"), CommandSpec.builder()
-                .description(Text.of("Create FACTION Command"))
+                .description(Text.of("Create Faction Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
                 .arguments(GenericArguments.string(Text.of("tag")),
                         GenericArguments.string(Text.of("faction name")))
@@ -181,7 +181,7 @@ public class EagleFactions
 
         //Disband faction command.
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
-                .description(Text.of("Disband FACTION Command"))
+                .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
                 .executor(new DisbandCommand(this))
                 .build());
@@ -564,7 +564,7 @@ public class EagleFactions
 
     public void printInfo(String message)
     {
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.YELLOW, message));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
     }
 
     private void SetupConfigs()

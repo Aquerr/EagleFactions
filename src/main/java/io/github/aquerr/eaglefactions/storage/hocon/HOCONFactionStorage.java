@@ -1,18 +1,12 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
 import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
-import io.github.aquerr.eaglefactions.storage.InventorySerializer;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
@@ -154,22 +148,22 @@ public class HOCONFactionStorage implements IFactionStorage
 
     private Faction createFactionObject(String factionName)
     {
-        Text tag = getFactionTag(factionName);
-        String description = getFactionDescription(factionName);
-        String messageOfTheDay = getFactionMessageOfTheDay(factionName);
-        UUID leader = getFactionLeader(factionName);
-        FactionHome home = getFactionHome(factionName);
-        Set<UUID> officers = getFactionOfficers(factionName);
-        Set<UUID> members = getFactionMembers(factionName);
-        Set<UUID> recruits = getFactionRecruits(factionName);
-        Set<String> alliances = getFactionAlliances(factionName);
-        Set<String> enemies = getFactionEnemies(factionName);
-        Set<Claim> claims = getFactionClaims(factionName);
-        Instant lastOnline = getLastOnline(factionName);
-        Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
-        FactionChest chest = getFactionChest(factionName);
+        final Text tag = getFactionTag(factionName);
+        final String description = getFactionDescription(factionName);
+        final String messageOfTheDay = getFactionMessageOfTheDay(factionName);
+        final UUID leader = getFactionLeader(factionName);
+        final FactionHome home = getFactionHome(factionName);
+        final Set<UUID> officers = getFactionOfficers(factionName);
+        final Set<UUID> members = getFactionMembers(factionName);
+        final Set<UUID> recruits = getFactionRecruits(factionName);
+        final Set<String> alliances = getFactionAlliances(factionName);
+        final Set<String> enemies = getFactionEnemies(factionName);
+        final Set<Claim> claims = getFactionClaims(factionName);
+        final Instant lastOnline = getLastOnline(factionName);
+        final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
+        final FactionChest chest = getFactionChest(factionName);
 
-        Faction faction = Faction.builder(factionName, tag, leader)
+        final Faction faction = Faction.builder(factionName, tag, leader)
                 .setDescription(description)
                 .setMessageOfTheDay(messageOfTheDay)
                 .setHome(home)
