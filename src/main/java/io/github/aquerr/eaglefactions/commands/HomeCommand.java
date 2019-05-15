@@ -111,7 +111,7 @@ public class HomeCommand extends AbstractCommand
                 {
                     if (seconds <= 0)
                     {
-                        player.setLocation(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
+                        player.setLocationSafely(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
                         player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.GREEN, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
                         startHomeCooldown(player.getUniqueId());
                         task.cancel();
