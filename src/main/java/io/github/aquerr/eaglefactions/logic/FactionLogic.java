@@ -600,7 +600,7 @@ public class FactionLogic
         }
     }
 
-    private boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
+    public boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
         HashMap<String, Integer> requiredItems = _configFields.getRequiredItemsToClaim();
         PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
