@@ -34,7 +34,7 @@ public class ClaimDelayTask implements EagleFactionsRunnableTask
     @Override
     public void run()
     {
-        if(!chunkPosition.toString().equals(player.getLocation().getChunkPosition().toString()))
+        if(!chunkPosition.equals(player.getLocation().getChunkPosition()))
         {
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
             return;
