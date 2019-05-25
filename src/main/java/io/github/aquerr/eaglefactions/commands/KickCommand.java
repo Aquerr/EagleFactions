@@ -83,6 +83,7 @@ public class KickCommand extends AbstractCommand
             }
 
             EagleFactions.AUTO_CLAIM_LIST.remove(selectedPlayer.getUniqueId());
+            EagleFactions.CHAT_LIST.remove(selectedPlayer.getUniqueId());
         }
         return CommandResult.success();
     }

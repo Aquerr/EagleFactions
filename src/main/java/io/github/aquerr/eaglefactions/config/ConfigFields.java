@@ -86,6 +86,9 @@ public final class ConfigFields
     private List<String> _whitelistedPlaceDestroyBlocks = new ArrayList<>();
     private List<String> _whitelistedInteractBlocks = new ArrayList<>();
 
+    //Chat
+    private boolean _supressOtherFactionsMessagesWhileInTeamChat = false;
+
     public ConfigFields(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -173,12 +176,20 @@ public final class ConfigFields
             this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
             this._whitelistedInteractBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "interact-whitelist");
 
+            //Chat
+            this._supressOtherFactionsMessagesWhileInTeamChat = _configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
+
             this._configuration.save();
         }
         catch(Exception exception)
         {
             System.out.println("Your faction's config file may be corrupted.");
         }
+    }
+
+    public void reload()
+    {
+        setupConfigFields();
     }
 
     public boolean isFactionFriendlyFire()
@@ -579,5 +590,10 @@ public final class ConfigFields
     public String getDatabaseName()
     {
         return this._databaseFileName;
+    }
+
+    public boolean shouldSupressOtherFactionsMessagesWhileInTeamChat()
+    {
+        return this._supressOtherFactionsMessagesWhileInTeamChat;
     }
 }

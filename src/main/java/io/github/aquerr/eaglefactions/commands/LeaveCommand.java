@@ -40,6 +40,7 @@ public class LeaveCommand extends AbstractCommand
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.YOU_LEFT_FACTION + " ", TextColors.GOLD, optionalPlayerFaction.get().getName()));
 
                     EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
+                    EagleFactions.CHAT_LIST.remove(player.getUniqueId());
 
                     return CommandResult.success();
                 }

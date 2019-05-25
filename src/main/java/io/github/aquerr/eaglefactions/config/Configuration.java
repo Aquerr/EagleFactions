@@ -105,7 +105,8 @@ public class Configuration implements IConfiguration
     public void reloadConfiguration()
     {
         loadConfiguration();
-        this.configFields = new ConfigFields(this);
+//        this.configFields = new ConfigFields(this);
+        this.configFields.reload();
     }
 
     private void loadConfiguration()

@@ -45,6 +45,7 @@ public class DisbandCommand extends AbstractCommand
             {
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
                 EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
+                EagleFactions.CHAT_LIST.remove(player.getUniqueId());
             }
             else
             {
@@ -62,6 +63,7 @@ public class DisbandCommand extends AbstractCommand
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
             EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
+            EagleFactions.CHAT_LIST.remove(player.getUniqueId());
         }
         else
         {
