@@ -24,13 +24,18 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.*;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.Tristate;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -139,6 +144,12 @@ public class EagleFactions
         catch(ClassNotFoundException e)
         {
             printInfo("No PlaceholderAPI found. Skipping adding placeholders.");
+        }
+
+        final Optional<PermissionService> permissionService = Sponge.getServiceManager().provide(PermissionService.class);
+        if(permissionService.isPresent())
+        {
+            permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
         }
     }
 
