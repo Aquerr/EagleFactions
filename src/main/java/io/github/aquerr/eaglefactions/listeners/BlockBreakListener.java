@@ -34,6 +34,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.explosion.Explosion;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -241,7 +242,7 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
-        if(event instanceof ExplosionEvent)
+        if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
             return;
 
         User user = null;
