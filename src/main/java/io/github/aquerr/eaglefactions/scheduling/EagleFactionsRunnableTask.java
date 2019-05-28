@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
-interface EagleFactionsRunnableTask extends Runnable
+public interface EagleFactionsRunnableTask extends Runnable
 {
     void run();
 }

@@ -15,6 +15,8 @@ import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.parsers.FactionNameArgument;
 import io.github.aquerr.eaglefactions.parsers.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.placeholders.EFPlaceholderService;
+import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.storage.StorageManager;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.Sponge;
@@ -32,6 +34,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
@@ -604,35 +607,7 @@ public class EagleFactions
         if(this.getConfiguration().getConfigFields().getMaxInactiveTime() == 0)
             return;
 
-        Task.Builder factionsRemoveTask = Sponge.getScheduler().createTaskBuilder();
-        factionsRemoveTask.async().execute(this::removeInactiveFaction).interval(1, TimeUnit.HOURS).submit(this);
-    }
-
-    private void removeInactiveFaction()
-    {
-        final long maxInactiveTimeInSeconds = getConfiguration().getConfigFields().getMaxInactiveTime();
-        final Map<String, Faction> factionsList = new HashMap<>(_factionLogic.getFactions());
-        final boolean shouldNotifyWhenRemoved = this.getConfiguration().getConfigFields().shouldNotifyWhenFactionRemoved();
-        for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
-        {
-            if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
-                continue;
-
-            Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
-            if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
-                continue;
-
-            boolean didSucceed = _factionLogic.disbandFaction(factionEntry.getValue().getName());
-
-            if(didSucceed && shouldNotifyWhenRemoved)
-                Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, PluginMessages.FACTION + " ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " has been removed due to its long inactivity time.")));
-
-//            else if(maxInactive * 0.75 < inactiveTime.getSeconds())
-//            {
-//                long timeToRemove = (maxInactive - inactiveTime.getSeconds()) / 60;
-//                Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, "FACTION ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " will be removed after ", timeToRemove + " min due to its long inactive time.")));
-//            }
-        }
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
     }
 
     public EFPlaceholderService getEfPlaceholderService()

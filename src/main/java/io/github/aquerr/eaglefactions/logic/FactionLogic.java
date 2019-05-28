@@ -9,6 +9,8 @@ import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
+import io.github.aquerr.eaglefactions.scheduling.ClaimDelayTask;
+import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.storage.StorageManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -528,69 +530,64 @@ public class FactionLogic
         storageManager.addOrUpdateFaction(updatedFaction);
     }
 
-    private Consumer<Task> addClaimWithDelay(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
-    {
-        return new Consumer<Task>()
-        {
-            int seconds = 1;
-            int claimDelay = _configFields.getClaimDelay();
-
-            @Override
-            public void accept(Task task)
-            {
-                if(!chunk.equals(player.getLocation().getChunkPosition()))
-                {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
-                    task.cancel();
-                }
-
-                if(seconds < claimDelay)
-                {
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
-                    seconds++;
-                }
-                else
-                {
-                    if(_configFields.shouldClaimByItems())
-                    {
-                        if(addClaimByItems(player, faction, worldUUID, chunk))
-                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                        else
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
-                    }
-                    else
-                    {
-                        addClaim(faction, new Claim(worldUUID, chunk));
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                    }
-                    task.cancel();
-                }
-            }
-        };
-    }
+//    private Consumer<Task> addClaimWithDelay(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
+//    {
+//        return new Consumer<Task>()
+//        {
+//            int seconds = 1;
+//            int claimDelay = _configFields.getClaimDelay();
+//
+//            @Override
+//            public void accept(Task task)
+//            {
+//                if(!chunk.equals(player.getLocation().getChunkPosition()))
+//                {
+//                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
+//                    task.cancel();
+//                }
+//
+//                if(seconds < claimDelay)
+//                {
+//                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
+//                    seconds++;
+//                }
+//                else
+//                {
+//                    if(_configFields.shouldClaimByItems())
+//                    {
+//                        if(addClaimByItems(player, faction, worldUUID, chunk))
+//                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+//                        else
+//                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
+//                    }
+//                    else
+//                    {
+//                        addClaim(faction, new Claim(worldUUID, chunk));
+//                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+//                    }
+//                    task.cancel();
+//                }
+//            }
+//        };
+//    }
 
     public void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
         if(_configFields.shouldDelayClaim())
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, _configFields.getClaimDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
-
-            Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-
-            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactions.getPlugin());
+            EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunk), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
+//            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactions.getPlugin());
         }
         else
         {
             if(_configFields.shouldClaimByItems())
             {
-                if(addClaimByItems(player, faction, worldUUID, chunk))
-                {
+                boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunk);
+                if(didSucceed)
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                }
                 else
-                {
                     player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
-                }
             }
             else
             {

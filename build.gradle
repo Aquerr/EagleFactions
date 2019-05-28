@@ -20,9 +20,10 @@ allprojects {
 dependencies {
     compile 'org.spongepowered:spongeapi:7.1.0'
     compile 'com.github.rojo8399:PlaceholderAPI:4.5.1'
-    compile group: 'com.h2database', name: 'h2', version: '1.3.148'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
+    compile group: 'com.h2database', name: 'h2', version: '1.4.196'
+//    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
     //compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
+//    compile 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
 }
 
 jar {
