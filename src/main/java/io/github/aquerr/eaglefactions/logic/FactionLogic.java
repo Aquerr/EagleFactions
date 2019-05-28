@@ -271,8 +271,8 @@ public class FactionLogic
         playerFactionEnemies.add(enemyFactionName);
         enemyFactionEnemies.add(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionEnemies).build();
-        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setAlliances(enemyFactionEnemies).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setEnemies(playerFactionEnemies).build();
+        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setEnemies(enemyFactionEnemies).build();
 
         storageManager.addOrUpdateFaction(updatedPlayerFaction);
         storageManager.addOrUpdateFaction(updatedEnemyFaction);
@@ -294,8 +294,8 @@ public class FactionLogic
         playerFactionEnemies.remove(enemyFactionName);
         enemyFactionEnemies.remove(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionEnemies).build();
-        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setAlliances(enemyFactionEnemies).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setEnemies(playerFactionEnemies).build();
+        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setEnemies(enemyFactionEnemies).build();
 
         storageManager.addOrUpdateFaction(updatedPlayerFaction);
         storageManager.addOrUpdateFaction(updatedEnemyFaction);
