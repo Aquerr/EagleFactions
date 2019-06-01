@@ -35,6 +35,9 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
         final boolean shouldNotifyWhenRemoved = this.configuration.getConfigFields().shouldNotifyWhenFactionRemoved();
         for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
         {
+            if(factionLogic.hasOnlinePlayers(factionEntry.getValue()))
+                continue;
+
             if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
                 continue;
 
