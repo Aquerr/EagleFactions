@@ -1,69 +1,69 @@
 CREATE TABLE Version (
     Version INT NOT NULL
 );
-CREATE UNIQUE INDEX ON Version (Version);
+CREATE UNIQUE INDEX Version_Version ON Version (Version);
 
 -- Create Factions Table
 CREATE TABLE Factions (
-   Id          UNSIGNED AUTO_INCREMENT              NOT NULL,
+   Id          INT UNSIGNED AUTO_INCREMENT              NOT NULL,
    Name        VARCHAR(200)        UNIQUE      NOT NULL,
    Tag         VARCHAR(10)                     NOT NULL,
    TagColor    VARCHAR(40)                     NULL,
-   Leader      UUID                     NOT NULL,
+   Leader      VARCHAR(36)                     NOT NULL,
    Home        VARCHAR(200)                    NULL,
    LastOnline  VARCHAR(200)                    NOT NULL,
-   Alliances    VARCHAR                     NOT NULL,
-   Enemies      VARCHAR                     NOT NULL,
+   Alliances    VARCHAR(255)                     NOT NULL,
+   Enemies      VARCHAR(255)                     NOT NULL,
    PRIMARY KEY (Name)
 );
-CREATE UNIQUE INDEX ON Factions (Name);
+CREATE UNIQUE INDEX Factions_Name ON Factions (Name);
 
 -- Create Recruits Table
 CREATE TABLE FactionRecruits (
-    RecruitUUID     UUID    UNIQUE  NOT NULL,
+    RecruitUUID     VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName     VARCHAR(200)    NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
+CREATE UNIQUE INDEX FactionRecruits_RecruitUUID ON FactionRecruits (RecruitUUID);
 
 -- Create Members Table
 CREATE TABLE FactionMembers (
-    MemberUUID  UUID    UNIQUE  NOT NULL,
+    MemberUUID  VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName VARCHAR(200)    UNIQUE  NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
+CREATE UNIQUE INDEX FactionMembers_MemberUUID ON FactionMembers (MemberUUID);
 
 -- Create Officers Table
 CREATE TABLE FactionOfficers (
-    OfficerUUID UUID    UNIQUE  NOT NULL,
+    OfficerUUID VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName VARCHAR(200)    UNIQUE  NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
+CREATE UNIQUE INDEX FactionOfficers_OfficerUUID ON FactionOfficers (OfficerUUID);
 
----- Create FactionAlliances Table
---CREATE TABLE FactionAlliances (
+-- Create FactionAlliances Table
+-- CREATE TABLE FactionAlliances (
 --   FactionName  VARCHAR(200)      UNIQUE        NOT NULL,
 --   AlliancesIds VARCHAR(200)                    NOT NULL,
 --   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
---);
---CREATE UNIQUE INDEX ON FactionAlliances (FactionName);
+-- );
+-- CREATE UNIQUE INDEX FactionAlliances_FactionName ON FactionAlliances (FactionName);
 --
----- Create FactionEnemies Table
---CREATE TABLE FactionEnemies (
+-- Create FactionEnemies Table
+-- CREATE TABLE FactionEnemies (
 --   FactionName VARCHAR(200)        UNIQUE      NOT NULL,
 --   EnemiesIds  VARCHAR(200)                    NOT NULL,
 --   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
---);
---CREATE UNIQUE INDEX ON FactionEnemies (FactionName);
+-- );
+-- CREATE UNIQUE INDEX FactionEnemies_FactionName ON FactionEnemies (FactionName);
 
----- Create FactionTruces Table
---CREATE TABLE `FactionTruces` (
+-- Create FactionTruces Table
+-- CREATE TABLE `FactionTruces` (
 --   `FactionName`   VARCHAR(200)                             NOT NULL,
 --   `TrucesIds`  VARCHAR(200)        UNIQUE      NOT NULL,
---);
---CREATE UNIQUE INDEX ON FactionTruces (FactionName);
+-- );
+-- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
 
 -- Create LeaderFlags Table
 CREATE TABLE LeaderFlags (
@@ -76,7 +76,7 @@ CREATE TABLE LeaderFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON LeaderFlags (FactionName);
+CREATE UNIQUE INDEX LeaderFlags_FactionName ON LeaderFlags (FactionName);
 
 -- Create OfficerFlags Table
 CREATE TABLE OfficerFlags (
@@ -89,7 +89,7 @@ CREATE TABLE OfficerFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON OfficerFlags (FactionName);
+CREATE UNIQUE INDEX OfficerFlags_FactionName ON OfficerFlags (FactionName);
 
 -- Create MemberFlags Table
 CREATE TABLE MemberFlags (
@@ -102,7 +102,7 @@ CREATE TABLE MemberFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON MemberFlags (FactionName);
+CREATE UNIQUE INDEX MemberFlags_FactionName ON MemberFlags (FactionName);
 
 -- Create RecruitFlags Table
 CREATE TABLE RecruitFlags (
@@ -115,7 +115,7 @@ CREATE TABLE RecruitFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON RecruitFlags (FactionName);
+CREATE UNIQUE INDEX RecruitFlags_FactionName ON RecruitFlags (FactionName);
 
 -- Create AllyFlags Table
 CREATE TABLE AllyFlags (
@@ -125,17 +125,17 @@ CREATE TABLE AllyFlags (
    Destroy     BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON AllyFlags (FactionName);
+CREATE UNIQUE INDEX AllyFlags_FactionName ON AllyFlags (FactionName);
 
 -- Create Claims Table
 CREATE TABLE Claims (
    Id            INT AUTO_INCREMENT              NOT NULL,
    FactionName   VARCHAR(200)                  NOT NULL,
-   WorldUUID   UUID                            NOT NULL,
+   WorldUUID   VARCHAR(36)                           NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON Claims (Id);
+CREATE UNIQUE INDEX Claims_Id ON Claims (Id);
 
 -- Create FactionsChest Table
 CREATE TABLE FactionChests (
@@ -143,17 +143,17 @@ CREATE TABLE FactionChests (
     ChestItems  BINARY            NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON FactionChests (FactionName);
+CREATE UNIQUE INDEX FactionChests_FactionName ON FactionChests (FactionName);
 
 -- Create Players Table
 CREATE TABLE Players (
-    PlayerUUID UUID PRIMARY KEY NOT NULL,
+    PlayerUUID VARCHAR(36) PRIMARY KEY NOT NULL,
     Name    VARCHAR(200)    NOT NULL,
     Power   REAL NOT NULL,
     Maxpower    REAL NOT NULL,
     DeathInWarzone BOOLEAN NOT NULL
 );
-CREATE UNIQUE INDEX ON Players (PlayerUUID);
+CREATE UNIQUE INDEX Players_PlayerUUID ON Players (PlayerUUID);
 
 -- Set database version to 1
 INSERT INTO Version VALUES (1);

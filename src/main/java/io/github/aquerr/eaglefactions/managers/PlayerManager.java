@@ -28,14 +28,14 @@ public class PlayerManager
 
     private UserStorageService userStorageService;
 
-    private PlayerManager(EagleFactions plugin)
+    private PlayerManager(final EagleFactions plugin)
     {
         INSTANCE = this;
         _configFields = plugin.getConfiguration().getConfigFields();
         storageManager = StorageManager.getInstance(plugin);
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
-        optionalUserStorageService.ifPresent(userStorageService1 -> userStorageService = userStorageService1);
+        optionalUserStorageService.ifPresent(x -> userStorageService = x);
     }
 
     public static PlayerManager getInstance(EagleFactions eagleFactions)

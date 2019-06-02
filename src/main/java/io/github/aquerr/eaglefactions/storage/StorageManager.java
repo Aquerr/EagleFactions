@@ -18,8 +18,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-public class StorageManager
+public class StorageManager implements Runnable
 {
     private static StorageManager INSTANCE = null;
 
@@ -75,37 +76,39 @@ public class StorageManager
 //        preparePlayerCache();
 
         this.storageTaskQueue = new LinkedList<>();
-        this.storageThread = new Thread(run());
+        this.storageThread = new Thread(this::run);
         this.storageThread.start();
     }
 
     private void queueStorageTask(IStorageTask task)
     {
-        this.storageTaskQueue.add(task);
+        synchronized(this.storageTaskQueue)
+        {
+            this.storageTaskQueue.add(task);
+            this.storageTaskQueue.notify();
+        }
     }
 
-    public Runnable run()
+    @Override
+    public void run()
     {
-        return () ->
+        while(true)
         {
-            while(true)
+            synchronized(this.storageTaskQueue)
             {
                 if(storageTaskQueue.size() > 0)
                 {
-                    synchronized(storageTaskQueue)
-                    {
-                        IStorageTask storageTask = storageTaskQueue.poll();
-                        if (storageTask instanceof DeleteFactionTask)
-                            factionsStorage.deleteFaction(((DeleteFactionTask) storageTask).getFactionName());
-                        else if (storageTask instanceof UpdateFactionTask)
-                            factionsStorage.addOrUpdateFaction(((UpdateFactionTask) storageTask).getFaction());
-                    }
+                    IStorageTask storageTask = storageTaskQueue.poll();
+                    if (storageTask instanceof DeleteFactionTask)
+                        factionsStorage.deleteFaction(((DeleteFactionTask) storageTask).getFactionName());
+                    else if (storageTask instanceof UpdateFactionTask)
+                        factionsStorage.addOrUpdateFaction(((UpdateFactionTask) storageTask).getFaction());
                 }
                 else
                 {
                     try
                     {
-                        Thread.sleep(1000);
+                        this.storageTaskQueue.wait();
                     }
                     catch(InterruptedException e)
                     {
@@ -113,13 +116,14 @@ public class StorageManager
                     }
                 }
             }
-        };
+        }
     }
 
     public void addOrUpdateFaction(Faction faction)
     {
         FactionsCache.addOrUpdateFactionCache(faction);
         queueStorageTask(new UpdateFactionTask(faction));
+//        queueStorageTask(new UpdateFactionTask(faction.toBuilder().build())); //Build new object to avoid concurrent modification.
     }
 
     public boolean deleteFaction(String factionName)
@@ -177,12 +181,14 @@ public class StorageManager
 
     public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float globalMaxPower)
     {
-        return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
+        return CompletableFuture.supplyAsync(() -> playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower)).isDone();
+        //return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
     }
 
     public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
     {
-        return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
+        return CompletableFuture.supplyAsync(() -> this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone)).isDone();
+        //return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
     public boolean getLastDeathInWarzone(final UUID playerUUID)
@@ -197,7 +203,7 @@ public class StorageManager
 
     public boolean setPlayerPower(final UUID playerUUID, final float power)
     {
-        return this.playerStorage.setPlayerPower(playerUUID, power);
+        return CompletableFuture.supplyAsync(() -> this.playerStorage.setPlayerPower(playerUUID, power)).isDone();
     }
 
     public float getPlayerMaxPower(final UUID playerUUID)
@@ -207,7 +213,7 @@ public class StorageManager
 
     public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
     {
-        return this.playerStorage.setPlayerMaxPower(playerUUID, maxpower);
+        return CompletableFuture.supplyAsync(()-> this.playerStorage.setPlayerMaxPower(playerUUID, maxpower)).isDone();
     }
 
     public Set<String> getServerPlayerNames()
@@ -227,6 +233,6 @@ public class StorageManager
 
     public boolean updatePlayerName(final UUID playerUUID, final String playerName)
     {
-        return this.playerStorage.updatePlayerName(playerUUID, playerName);
+        return CompletableFuture.supplyAsync(()->this.playerStorage.updatePlayerName(playerUUID, playerName)).isDone();
     }
 }

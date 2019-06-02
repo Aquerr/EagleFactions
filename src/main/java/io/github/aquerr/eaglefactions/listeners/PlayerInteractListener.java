@@ -3,6 +3,8 @@ package io.github.aquerr.eaglefactions.listeners;
 import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -25,14 +27,26 @@ public class PlayerInteractListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onItemUse(final InteractItemEvent event, @Root final Player player)
     {
+        if(event instanceof InteractBlockEvent)
+            return;
+
         if (event.getItemStack() == ItemStackSnapshot.NONE)
             return;
 
-        Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
+        final Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
         if (!optionalInteractionPoint.isPresent())
             return;
 
         Location<World> location = new Location<>(player.getWorld(), optionalInteractionPoint.get());
+
+        //Handle hitting entities
+        Location<World> finalLocation = location;
+        Optional<Entity> hitEntity = player.getWorld().getEntities().stream().filter(x->x.getLocation().equals(finalLocation)).findFirst();
+        if(hitEntity.isPresent())
+        {
+            //Excuse me what? Why?
+            location = hitEntity.get().getLocation();
+        }
 
         boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack());
         if (!canUseItem)
@@ -46,14 +60,14 @@ public class PlayerInteractListener extends AbstractListener
     public void onBlockInteract(final InteractBlockEvent event, @Root final Player player)
     {
         //If AIR or NONE then return
-        if (event.getTargetBlock() == BlockSnapshot.NONE)
+        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR)
             return;
 
-        Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
+        final Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
         if (!optionalLocation.isPresent())
             return;
 
-        Location<World> blockLocation = optionalLocation.get();
+        final Location<World> blockLocation = optionalLocation.get();
 
         boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player);
         if (!canInteractWithBlock)

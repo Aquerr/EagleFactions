@@ -39,7 +39,8 @@ public class LeaveCommand extends AbstractCommand
                     //TODO: Add listener that will inform players in a faction that someone has left their faction.
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, PluginMessages.YOU_LEFT_FACTION + " ", TextColors.GOLD, optionalPlayerFaction.get().getName()));
 
-                    EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                    EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
+                    EagleFactions.CHAT_LIST.remove(player.getUniqueId());
 
                     return CommandResult.success();
                 }

@@ -80,13 +80,13 @@ public class AttackLogic
 
     public void blockClaiming(String factionName)
     {
-        if(EagleFactions.AttackedFactions.containsKey(factionName))
+        if(EagleFactions.ATTACKED_FACTIONS.containsKey(factionName))
         {
-            EagleFactions.AttackedFactions.replace(factionName, 120);
+            EagleFactions.ATTACKED_FACTIONS.replace(factionName, 120);
         }
         else
         {
-            EagleFactions.AttackedFactions.put(factionName, 120);
+            EagleFactions.ATTACKED_FACTIONS.put(factionName, 120);
             runClaimingRestorer(factionName);
         }
     }
@@ -102,18 +102,18 @@ public class AttackLogic
             public void accept(Task task)
             {
 
-                if(EagleFactions.AttackedFactions.containsKey(factionName))
+                if(EagleFactions.ATTACKED_FACTIONS.containsKey(factionName))
                 {
-                    int seconds = EagleFactions.AttackedFactions.get(factionName);
+                    int seconds = EagleFactions.ATTACKED_FACTIONS.get(factionName);
 
                     if (seconds <= 0)
                     {
-                        EagleFactions.AttackedFactions.remove(factionName);
+                        EagleFactions.ATTACKED_FACTIONS.remove(factionName);
                         task.cancel();
                     }
                     else
                     {
-                        EagleFactions.AttackedFactions.replace(factionName, seconds, seconds - 1);
+                        EagleFactions.ATTACKED_FACTIONS.replace(factionName, seconds, seconds - 1);
                     }
                 }
             }
@@ -136,13 +136,13 @@ public class AttackLogic
 
     public void blockHome(UUID playerUUID)
     {
-        if(EagleFactions.BlockedHome.containsKey(playerUUID))
+        if(EagleFactions.BLOCKED_HOME.containsKey(playerUUID))
         {
-            EagleFactions.BlockedHome.replace(playerUUID, _configFields.getHomeBlockTimeAfterDeathInOwnFaction());
+            EagleFactions.BLOCKED_HOME.replace(playerUUID, _configFields.getHomeBlockTimeAfterDeathInOwnFaction());
         }
         else
         {
-            EagleFactions.BlockedHome.put(playerUUID, _configFields.getHomeBlockTimeAfterDeathInOwnFaction());
+            EagleFactions.BLOCKED_HOME.put(playerUUID, _configFields.getHomeBlockTimeAfterDeathInOwnFaction());
             runHomeUsageRestorer(playerUUID);
         }
     }
@@ -156,18 +156,18 @@ public class AttackLogic
             @Override
             public void accept(Task task)
             {
-                if (EagleFactions.BlockedHome.containsKey(playerUUID))
+                if (EagleFactions.BLOCKED_HOME.containsKey(playerUUID))
                 {
-                    int seconds = EagleFactions.BlockedHome.get(playerUUID);
+                    int seconds = EagleFactions.BLOCKED_HOME.get(playerUUID);
 
                     if (seconds <= 0)
                     {
-                        EagleFactions.BlockedHome.remove(playerUUID);
+                        EagleFactions.BLOCKED_HOME.remove(playerUUID);
                         task.cancel();
                     }
                     else
                     {
-                        EagleFactions.BlockedHome.replace(playerUUID, seconds, seconds - 1);
+                        EagleFactions.BLOCKED_HOME.replace(playerUUID, seconds, seconds - 1);
                     }
                 }
             }

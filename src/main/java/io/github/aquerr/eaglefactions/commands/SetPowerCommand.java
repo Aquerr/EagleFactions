@@ -11,7 +11,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 public class SetPowerCommand extends AbstractCommand
@@ -33,7 +32,7 @@ public class SetPowerCommand extends AbstractCommand
             {
                 Player player = (Player) source;
 
-                if (EagleFactions.AdminList.contains(player.getUniqueId()))
+                if (EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
                     setPower(optionalSelectedPlayer.get(), optionalPower.get());
                 }

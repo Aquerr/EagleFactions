@@ -20,8 +20,7 @@ public class VersionCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        source.sendMessage (Text.of (TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - " + PluginMessages.VERSION + " ", PluginInfo.VERSION));
-
+        source.sendMessage(Text.of(TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - " + PluginMessages.VERSION + " ", PluginInfo.VERSION));
         return CommandResult.success();
     }
 }
