@@ -36,33 +36,33 @@ public class AutoClaimCommand extends AbstractCommand
 
                 if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
                 {
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
+                    if(EagleFactions.AUTO_CLAIM_LIST.contains(player.getUniqueId()))
                     {
-                        EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                        EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
 
                         return CommandResult.success();
                     }
                     else
                     {
-                        EagleFactions.AutoClaimList.add(player.getUniqueId());
+                        EagleFactions.AUTO_CLAIM_LIST.add(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
 
                         return CommandResult.success();
                     }
                 }
-                else if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                else if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
-                    if(EagleFactions.AutoClaimList.contains(player.getUniqueId()))
+                    if(EagleFactions.AUTO_CLAIM_LIST.contains(player.getUniqueId()))
                     {
-                        EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                        EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
 
                         return CommandResult.success();
                     }
                     else
                     {
-                        EagleFactions.AutoClaimList.add(player.getUniqueId());
+                        EagleFactions.AUTO_CLAIM_LIST.add(player.getUniqueId());
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoClaim", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
 
                         return CommandResult.success();

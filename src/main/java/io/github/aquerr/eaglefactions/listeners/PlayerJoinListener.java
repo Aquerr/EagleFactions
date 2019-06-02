@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
+import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -12,6 +13,8 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.Optional;
 
 public class PlayerJoinListener extends AbstractListener
 {
@@ -37,5 +40,12 @@ public class PlayerJoinListener extends AbstractListener
         //Check if the world that player is connecting to is already in the config file
         if (!super.getPlugin().getConfiguration().getConfigFields().getDetectedWorldNames().contains(player.getWorld().getName()))
             super.getPlugin().getConfiguration().getConfigFields().addWorld(player.getWorld().getName());
+
+        //Send motd
+        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if(optionalPlayerFaction.isPresent() && !optionalPlayerFaction.get().getMessageOfTheDay().equals(""))
+        {
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, optionalPlayerFaction.get().getName() + "'s message of the day: ", TextColors.RESET, optionalPlayerFaction.get().getMessageOfTheDay()));
+        }
     }
 }

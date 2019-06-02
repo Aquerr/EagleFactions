@@ -37,7 +37,7 @@ public class SetHomeCommand extends AbstractCommand
                 Faction playerFaction = optionalPlayerFaction.get();
                 World world = player.getWorld();
 
-                if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
                     Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
                     getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);

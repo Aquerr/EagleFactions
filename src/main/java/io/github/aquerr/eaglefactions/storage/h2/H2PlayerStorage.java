@@ -4,6 +4,9 @@ import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.storage.IPlayerStorage;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -32,6 +35,10 @@ public class H2PlayerStorage implements IPlayerStorage
     public H2PlayerStorage(final EagleFactions eagleFactions)
     {
         this.h2provider = H2Provider.getInstance(eagleFactions);
+        if(this.h2provider == null) {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not connect to MySQL database. Aborting..."));
+            Sponge.getServer().shutdown();
+        }
     }
 
     @Override

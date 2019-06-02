@@ -35,14 +35,14 @@ public class UnclaimallCommand extends AbstractCommand
             {
                 Faction playerFaction = optionalPlayerFaction.get();
 
-                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
                     if(playerFaction.getHome() != null)
                     {
                         getPlugin().getFactionLogic().setHome(null, playerFaction, null);
                     }
 
-                    getPlugin().getFactionLogic().removeClaims(playerFaction);
+                    getPlugin().getFactionLogic().removeAllClaims(playerFaction);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_REMOVED_ALL_CLAIMS));
 
                     return CommandResult.success();

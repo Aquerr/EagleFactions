@@ -49,7 +49,7 @@ public class EnemyCommand extends AbstractCommand
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
 
-                    if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                    if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                     {
                         if(!playerFaction.getAlliances().contains(enemyFaction.getName()))
                         {
@@ -90,22 +90,22 @@ public class EnemyCommand extends AbstractCommand
                             else
                             {
                                 StopWarRequest checkRemove = new StopWarRequest(enemyFaction.getName(), playerFaction.getName());
-                                if(EagleFactions.stopWarRequestList.contains(checkRemove))
+                                if(EagleFactions.WAR_STOP_REQUEST_LIST.contains(checkRemove))
                                 {
                                     getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
                                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName() + "!"));
-                                    EagleFactions.stopWarRequestList.remove(checkRemove);
+                                    EagleFactions.WAR_STOP_REQUEST_LIST.remove(checkRemove);
                                 }
-                                else if(!EagleFactions.stopWarRequestList.contains(checkRemove))
+                                else if(!EagleFactions.WAR_STOP_REQUEST_LIST.contains(checkRemove))
                                 {
 
                                     StopWarRequest stopWarRequest = new StopWarRequest(playerFaction.getName(), enemyFaction.getName());
-                                    if(EagleFactions.stopWarRequestList.contains(stopWarRequest))
+                                    if(EagleFactions.WAR_STOP_REQUEST_LIST.contains(stopWarRequest))
                                     {
                                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already sent a war-end request to this faction. Wait for their response!"));
                                         return CommandResult.success();
                                     }
-                                    EagleFactions.stopWarRequestList.add(stopWarRequest);
+                                    EagleFactions.WAR_STOP_REQUEST_LIST.add(stopWarRequest);
 
                                     Player enemyFactionLeader = getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).get();
                                     enemyFactionLeader.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.WANTS_TO_END_THE + " ", TextColors.RED, PluginMessages.WAR + " ", TextColors.WHITE, PluginMessages.WITH_YOUR_FACTION, TextColors.GREEN, " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
@@ -118,7 +118,7 @@ public class EnemyCommand extends AbstractCommand
                                         @Override
                                         public void run()
                                         {
-                                            EagleFactions.stopWarRequestList.remove(stopWarRequest);
+                                            EagleFactions.WAR_STOP_REQUEST_LIST.remove(stopWarRequest);
                                         }
                                     }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(Sponge.getPluginManager().getPlugin(PluginInfo.ID).get().getInstance().get());
                                     return CommandResult.success();

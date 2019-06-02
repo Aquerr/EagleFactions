@@ -1,18 +1,12 @@
 package io.github.aquerr.eaglefactions.storage.hocon;
 
 import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.entities.*;
 import io.github.aquerr.eaglefactions.storage.IFactionStorage;
-import io.github.aquerr.eaglefactions.storage.InventorySerializer;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
@@ -90,6 +84,8 @@ public class HOCONFactionStorage implements IFactionStorage
 //            }
             configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
             configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
+            configNode.getNode("factions", faction.getName(), "description").setValue(faction.getDescription());
+            configNode.getNode("factions", faction.getName(), "motd").setValue(faction.getMessageOfTheDay());
             configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<Set<UUID>>(){}, faction.getOfficers());
             configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<Set<UUID>>(){}, faction.getMembers());
             configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<Set<UUID>>(){}, faction.getRecruits());
@@ -152,23 +148,24 @@ public class HOCONFactionStorage implements IFactionStorage
 
     private Faction createFactionObject(String factionName)
     {
-        Text tag = getFactionTag(factionName);
-        UUID leader = getFactionLeader(factionName);
-        FactionHome home = getFactionHome(factionName);
-        Set<UUID> officers = getFactionOfficers(factionName);
-        Set<UUID> members = getFactionMembers(factionName);
-        Set<UUID> recruits = getFactionRecruits(factionName);
-        Set<String> alliances = getFactionAlliances(factionName);
-        Set<String> enemies = getFactionEnemies(factionName);
-        Set<Claim> claims = getFactionClaims(factionName);
-        Instant lastOnline = getLastOnline(factionName);
-        Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
-        FactionChest chest = getFactionChest(factionName);
+        final Text tag = getFactionTag(factionName);
+        final String description = getFactionDescription(factionName);
+        final String messageOfTheDay = getFactionMessageOfTheDay(factionName);
+        final UUID leader = getFactionLeader(factionName);
+        final FactionHome home = getFactionHome(factionName);
+        final Set<UUID> officers = getFactionOfficers(factionName);
+        final Set<UUID> members = getFactionMembers(factionName);
+        final Set<UUID> recruits = getFactionRecruits(factionName);
+        final Set<String> alliances = getFactionAlliances(factionName);
+        final Set<String> enemies = getFactionEnemies(factionName);
+        final Set<Claim> claims = getFactionClaims(factionName);
+        final Instant lastOnline = getLastOnline(factionName);
+        final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
+        final FactionChest chest = getFactionChest(factionName);
 
-        Faction faction = Faction.builder()
-                .setName(factionName)
-                .setTag(tag)
-                .setLeader(leader)
+        final Faction faction = Faction.builder(factionName, tag, leader)
+                .setDescription(description)
+                .setMessageOfTheDay(messageOfTheDay)
                 .setHome(home)
                 .setOfficers(officers)
                 .setMembers(members)
@@ -200,7 +197,7 @@ public class HOCONFactionStorage implements IFactionStorage
             slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
         } catch (ObjectMappingException e) {
             e.printStackTrace();
-            return new FactionChest();
+            return new FactionChest(factionName);
         }
 
 //        if(factionChest != null)
@@ -209,13 +206,13 @@ public class HOCONFactionStorage implements IFactionStorage
 //        }
         if(slotItems != null)
         {
-            return new FactionChest(slotItems);
+            return new FactionChest(factionName, slotItems);
         }
         else
         {
             configNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
             needToSave = true;
-            return new FactionChest();
+            return new FactionChest(factionName);
         }
     }
 
@@ -521,6 +518,38 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
+    private String getFactionDescription(final String factionName)
+    {
+        final Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "description"}).getValue();
+
+        if(leaderObject != null)
+        {
+            return (String)leaderObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "description"}).setValue("");
+            needToSave = true;
+            return "";
+        }
+    }
+
+    private String getFactionMessageOfTheDay(final String factionName)
+    {
+        final Object leaderObject = configNode.getNode(new Object[]{"factions", factionName, "motd"}).getValue();
+
+        if(leaderObject != null)
+        {
+            return (String)leaderObject;
+        }
+        else
+        {
+            configNode.getNode(new Object[]{"factions", factionName, "motd"}).setValue("");
+            needToSave = true;
+            return "";
+        }
+    }
+
     @Override
     public Set<Faction> getFactions()
     {
@@ -593,43 +622,43 @@ public class HOCONFactionStorage implements IFactionStorage
         return null;
     };
 
-    private Function<Object, FactionChest> objectToFactionChestTransformer = object ->
-    {
-        if(object instanceof List)
-        {
-            List<DataView> dataViewList = new ArrayList<>();
-            List<Object> objectList = (List<Object>)object;
+//    private Function<Object, FactionChest> objectToFactionChestTransformer = object ->
+//    {
+//        if(object instanceof List)
+//        {
+//            List<DataView> dataViewList = new ArrayList<>();
+//            List<Object> objectList = (List<Object>)object;
+//
+//            for(Object dataViewObject : objectList)
+//            {
+//                try
+//                {
+//                    DataView dataView = DataFormats.HOCON.read(dataViewObject.toString());
+//                    dataViewList.add(dataView);
+//                }
+//                catch(IOException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(EagleFactions.getPlugin());
+//            InventorySerializer.deserializeInventory(dataViewList, inventory);
+//            return FactionChest.fromInventory(,inventory);
+//
+////            return dataViewList;
+//        }
+//        return null;
+//    };
 
-            for(Object dataViewObject : objectList)
-            {
-                try
-                {
-                    DataView dataView = DataFormats.HOCON.read(dataViewObject.toString());
-                    dataViewList.add(dataView);
-                }
-                catch(IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
 
-            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(EagleFactions.getPlugin());
-            InventorySerializer.deserializeInventory(dataViewList, inventory);
-            return FactionChest.fromInventory(inventory);
-
-//            return dataViewList;
-        }
-        return null;
-    };
-
-
-    private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
-    {
-        List<String> listOfStrings = new ArrayList<>();
-        for(UUID uuid : listOfUUIDs)
-        {
-            listOfStrings.add(uuid.toString());
-        }
-        return listOfStrings;
-    }
+//    private List<String> toListOfStrings(Collection<UUID> listOfUUIDs)
+//    {
+//        List<String> listOfStrings = new ArrayList<>();
+//        for(UUID uuid : listOfUUIDs)
+//        {
+//            listOfStrings.add(uuid.toString());
+//        }
+//        return listOfStrings;
+//    }
 }

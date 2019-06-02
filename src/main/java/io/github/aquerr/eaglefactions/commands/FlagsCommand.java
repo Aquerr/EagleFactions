@@ -39,7 +39,7 @@ public class FlagsCommand extends AbstractCommand
             {
                 Faction faction = optionalPlayerFaction.get();
 
-                if (faction.getLeader().equals(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                if (faction.getLeader().equals(player.getUniqueId()) || EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
                     showFlags(player, faction);
                 }

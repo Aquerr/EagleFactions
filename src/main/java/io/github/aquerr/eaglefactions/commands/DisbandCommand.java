@@ -38,13 +38,14 @@ public class DisbandCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
 
         //If player has adminmode
-        if(EagleFactions.AdminList.contains(player.getUniqueId()))
+        if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
             if(didSucceed)
             {
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
-                EagleFactions.AutoClaimList.remove(player.getUniqueId());
+                EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
+                EagleFactions.CHAT_LIST.remove(player.getUniqueId());
             }
             else
             {
@@ -61,7 +62,8 @@ public class DisbandCommand extends AbstractCommand
         if(didSucceed)
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
-            EagleFactions.AutoClaimList.remove(player.getUniqueId());
+            EagleFactions.AUTO_CLAIM_LIST.remove(player.getUniqueId());
+            EagleFactions.CHAT_LIST.remove(player.getUniqueId());
         }
         else
         {

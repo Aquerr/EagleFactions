@@ -43,7 +43,7 @@ public class TagColorCommand extends AbstractCommand
                 if (optionalPlayerFaction.isPresent())
                 {
                     Faction playerFaction = optionalPlayerFaction.get();
-                    if (playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.AdminList.contains(player.getUniqueId()))
+                    if (playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                     {
                         getPlugin().getFactionLogic().changeTagColor(playerFaction, optionalColor.get());
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.TAG_COLOR_HAS_BEEN_CHANGED));

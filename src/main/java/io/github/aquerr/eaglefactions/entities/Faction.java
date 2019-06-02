@@ -16,60 +16,41 @@ import java.util.*;
  */
 public class Faction
 {
-    private String name;
-    private Text tag;
+    private final String name;
+    private final Text tag;
+    private final String description;
+    private final String messageOfTheDay;
     //public BigDecimal Power;
-    private Set<UUID> recruits;
-    private Set<UUID> members;
-    private Set<String> alliances;
-    private Set<String> enemies;
-    private UUID leader;
-    private Set<UUID> officers;
-    private Set<Claim> claims;
-    private FactionHome home;
-    private Instant lastOnline;
-    private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+    private final Set<UUID> recruits;
+    private final Set<UUID> members;
+    private final Set<String> alliances;
+    private final Set<String> enemies;
+    private final UUID leader;
+    private final Set<UUID> officers;
+    private final Set<Claim> claims;
+    private final FactionHome home;
+    private final Instant lastOnline;
+    private final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
     private FactionChest chest;
 
-    //Constructor used while creating a new faction.
-//    private FACTION(String factionName, String factionTag, UUID factionLeader)
-//    {
-//        this.name = factionName;
-//        this.tag = Text.of(TextColors.GREEN, factionTag);
-//        this.leader = factionLeader;
-//        //this.Power = new BigDecimal("0.0");
-//        this.recruits = new HashSet<>();
-//        this.members = new HashSet<>();
-//        this.claims = new HashSet<>();
-//        this.officers = new HashSet<>();
-//        this.alliances = new HashSet<>();
-//        //TODO: Add truce
-//        this.enemies = new HashSet<>();
-//        this.home = null;
-//        this.lastOnline = Instant.now();
-//        this.flags = FlagManager.getDefaultFactionFlags();
-//    }
-
-
-
-    //Constructor used while getting a faction from storage.
-    private Faction(String factionName, Text factionTag, UUID factionLeader, Set<UUID> recruits, Set<UUID> members, Set<Claim> claims, Set<UUID> officers, Set<String> alliances, Set<String> enemies, FactionHome home, Instant lastOnline, Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags, FactionChest chest)
+    public Faction(final Builder builder)
     {
-        this.name = factionName;
-        this.tag = factionTag;
-        this.leader = factionLeader;
-        //this.Power = new BigDecimal("0.0");
-        this.recruits = recruits;
-        this.members = members;
-        this.claims = claims;
-        this.officers = officers;
-        this.alliances = alliances;
-        this.enemies = enemies;
-        this.home = home;
-        this.lastOnline = lastOnline;
-        this.flags = flags;
-        this.chest = chest;
+        this.name = builder.name;
+        this.tag = builder.tag;
+        this.description = builder.description;
+        this.messageOfTheDay = builder.messageOfTheDay;
+        this.leader = builder.leader;
+        this.recruits = builder.recruits;
+        this.members = builder.members;
+        this.claims = builder.claims;
+        this.officers = builder.officers;
+        this.alliances = builder.alliances;
+        this.enemies = builder.enemies;
+        this.home = builder.home;
+        this.lastOnline = builder.lastOnline;
+        this.flags = builder.flags;
+        this.chest = builder.chest;
     }
 
     public String getName()
@@ -77,9 +58,19 @@ public class Faction
         return this.name;
     }
 
-    public void setName(String name)
+    public Text getTag()
     {
-        this.name = name;
+        return this.tag;
+    }
+
+    public String getDescription()
+    {
+        return this.description;
+    }
+
+    public String getMessageOfTheDay()
+    {
+        return this.messageOfTheDay;
     }
 
     public FactionHome getHome()
@@ -87,114 +78,39 @@ public class Faction
         return this.home;
     }
 
-    public void setHome(FactionHome home)
-    {
-        this.home = home;
-    }
-
     public Set<String> getAlliances()
     {
-        return this.alliances;
-    }
-
-    public boolean addAlliance(String factionName)
-    {
-        return this.alliances.add(factionName);
-    }
-
-    public boolean removeAlliance(String factionName)
-    {
-        return this.alliances.remove(factionName);
+        return Collections.unmodifiableSet(this.alliances);
     }
 
     public Set<Claim> getClaims()
     {
-        return this.claims;
-    }
-
-    public boolean addClaim(Claim claim)
-    {
-        return this.claims.add(claim);
-    }
-
-    public boolean removeClaim(Claim claim)
-    {
-        return this.claims.remove(claim);
-    }
-
-    public void removeAllClaims()
-    {
-        this.claims.clear();
+        return Collections.unmodifiableSet(this.claims);
     }
 
     public Set<String> getEnemies()
     {
-        return enemies;
-    }
-
-    public boolean addEnemy(String factionName)
-    {
-        return this.enemies.add(factionName);
-    }
-
-    public boolean removeEnemy(String factionName)
-    {
-        return this.enemies.remove(factionName);
+        return Collections.unmodifiableSet(enemies);
     }
 
     public Set<UUID> getMembers()
     {
-        return this.members;
-    }
-
-    public boolean addMember(UUID playerUUID)
-    {
-        return this.members.add(playerUUID);
-    }
-
-    public boolean removeMember(UUID playerUUID)
-    {
-        return this.members.remove(playerUUID);
+        return Collections.unmodifiableSet(this.members);
     }
 
     public Set<UUID> getOfficers()
     {
-        return officers;
-    }
-
-    public boolean addOfficer(UUID playerUUID)
-    {
-        return this.officers.add(playerUUID);
-    }
-
-    public boolean removeOfficer(UUID playerUUID)
-    {
-        return this.officers.remove(playerUUID);
+        return Collections.unmodifiableSet(officers);
     }
 
     public Set<UUID> getRecruits()
     {
-        return this.recruits;
-    }
-
-    public boolean addRecruit(UUID playerUUID)
-    {
-        return this.recruits.add(playerUUID);
-    }
-
-    public boolean removeRecruit(UUID playerUUID)
-    {
-        return this.recruits.remove(playerUUID);
+        return Collections.unmodifiableSet(this.recruits);
     }
 
     public Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFlags()
     {
-        return flags;
-    }
-
-    public void setFlag(FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean flagValue)
-    {
-        this.flags.get(factionMemberType).replace(factionFlagTypes, flagValue);
+        return Collections.unmodifiableMap(flags);
     }
 
     public UUID getLeader()
@@ -202,29 +118,9 @@ public class Faction
         return this.leader;
     }
 
-    public void setLeader(UUID playerUUID)
-    {
-        this.leader = playerUUID;
-    }
-
-    public Text getTag()
-    {
-        return this.tag;
-    }
-
-    public void setTag(Text tag)
-    {
-        this.tag = tag;
-    }
-
     public Instant getLastOnline()
     {
         return this.lastOnline;
-    }
-
-    public void setLastOnline(Instant lastOnline)
-    {
-        this.lastOnline = lastOnline;
     }
 
     public FactionMemberType getPlayerMemberType(UUID playerUUID)
@@ -265,6 +161,8 @@ public class Faction
         Builder factionBuilder = new Builder();
         factionBuilder.setName(this.name);
         factionBuilder.setTag(this.tag);
+        factionBuilder.setDescription(this.description);
+        factionBuilder.setMessageOfTheDay(this.messageOfTheDay);
         factionBuilder.setLeader(this.leader);
         factionBuilder.setOfficers(this.officers);
         factionBuilder.setMembers(this.members);
@@ -280,9 +178,9 @@ public class Faction
         return factionBuilder;
     }
 
-    public static Builder builder()
+    public static Builder builder(final String name, final Text tag, final UUID leader)
     {
-        return new Builder();
+        return new Builder(name, tag, leader);
     }
 
     //Builder
@@ -290,6 +188,8 @@ public class Faction
     {
         private String name;
         private Text tag;
+        private String description;
+        private String messageOfTheDay;
         private UUID leader;
         private Set<UUID> recruits;
         private Set<UUID> members;
@@ -304,6 +204,8 @@ public class Faction
 
         private Builder()
         {
+            this.description = "";
+            this.messageOfTheDay = "";
             this.recruits = new HashSet<>();
             this.members = new HashSet<>();
             this.alliances = new HashSet<>();
@@ -311,82 +213,102 @@ public class Faction
             this.officers = new HashSet<>();
             this.claims = new HashSet<>();
             this.home = null;
-            this.chest = null;
         }
 
-        public Builder setName(String name)
+        public Builder(final String name, final Text tag, final UUID leader)
+        {
+            this();
+            this.name = name;
+            this.tag = tag;
+            this.leader = leader;
+            this.chest = new FactionChest(this.name);
+        }
+
+        public Builder setName(final String name)
         {
             this.name = name;
             return this;
         }
 
-        public Builder setTag(Text tag)
+        public Builder setTag(final Text tag)
         {
             this.tag = tag;
             return this;
         }
 
-        public Builder setLeader(UUID leaderUUID)
+        public Builder setDescription(final String description)
+        {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setMessageOfTheDay(final String messageOfTheDay)
+        {
+            this.messageOfTheDay = messageOfTheDay;
+            return this;
+        }
+
+        public Builder setLeader(final UUID leaderUUID)
         {
             this.leader = leaderUUID;
             return this;
         }
 
-        public Builder setRecruits(Set<UUID> recruits)
+        public Builder setRecruits(final Set<UUID> recruits)
         {
             this.recruits = recruits;
             return this;
         }
 
-        public Builder setMembers(Set<UUID> members)
+        public Builder setMembers(final Set<UUID> members)
         {
             this.members = members;
             return this;
         }
 
-        public Builder setOfficers(Set<UUID> officers)
+        public Builder setOfficers(final Set<UUID> officers)
         {
             this.officers = officers;
             return this;
         }
 
-        public Builder setAlliances(Set<String> alliances)
+        public Builder setAlliances(final Set<String> alliances)
         {
             this.alliances = alliances;
             return this;
         }
 
-        public Builder setEnemies(Set<String> enemies)
+        public Builder setEnemies(final Set<String> enemies)
         {
             this.enemies = enemies;
             return this;
         }
 
-        public Builder setClaims(Set<Claim> claims)
+        public Builder setClaims(final Set<Claim> claims)
         {
             this.claims = claims;
             return this;
         }
 
-        public Builder setHome(FactionHome home)
+        public Builder setHome(final FactionHome home)
         {
             this.home = home;
             return this;
         }
 
-        public Builder setLastOnline(Instant lastOnline)
+        public Builder setLastOnline(final Instant lastOnline)
         {
             this.lastOnline = lastOnline;
             return this;
         }
 
-        public Builder setFlags(Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+        public Builder setFlags(final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
         {
             this.flags = flags;
             return this;
         }
 
-        public Builder setChest(FactionChest chest)
+        public Builder setChest(final FactionChest chest)
         {
             this.chest = chest;
             return this;
@@ -396,7 +318,7 @@ public class Faction
         {
             if(this.name == null || this.tag == null || this.leader == null)
             {
-                throw new IllegalStateException("Couldn't build FACTION object! FACTION must have a name, tag and leader.");
+                throw new IllegalStateException("Couldn't build FACTION object! FACTION must have a name, a tag and a leader.");
             }
 
             if(this.lastOnline == null)
@@ -407,8 +329,12 @@ public class Faction
             {
                 this.flags = FlagManager.getDefaultFactionFlags();
             }
+            if(this.chest == null)
+            {
+                this.chest = new FactionChest(this.name);
+            }
 
-            return new Faction(this.name, this.tag, this.leader, this.recruits, this.members, this.claims, this.officers, this.alliances, this.enemies, this.home, this.lastOnline, this.flags, this.chest);
+            return new Faction(this);
         }
     }
 }

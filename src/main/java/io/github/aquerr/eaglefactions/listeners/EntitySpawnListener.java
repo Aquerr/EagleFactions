@@ -7,17 +7,24 @@ import io.github.aquerr.eaglefactions.entities.FactionHome;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 public class EntitySpawnListener extends AbstractListener
@@ -27,11 +34,36 @@ public class EntitySpawnListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener(order = Order.EARLY)
+    @Listener(order = Order.EARLY, beforeModifications = true)
     public void onEntitySpawn(SpawnEntityEvent event)
     {
-        for(Entity entity : event.getEntities())
+        Cause cause = event.getCause();
+        Object rootCause = cause.root();
+        EventContext eventContext = event.getContext();
+
+        Iterator<Entity> entitiesIterator = event.getEntities().iterator();
+        while(entitiesIterator.hasNext())
         {
+            Entity entity = entitiesIterator.next();
+
+            //Special case for IC2's Mining Laser's explosive mode
+            if(rootCause instanceof Entity)
+            {
+                Entity causeEntity = (Entity)rootCause;
+                String entityId = causeEntity.getType().getId();
+                if(entityId.contains("mininglaser")
+                        && eventContext.containsKey(EventContextKeys.OWNER))
+                {
+                    User user = eventContext.get(EventContextKeys.OWNER).get();
+                    Entity miningLaser = (Entity)rootCause;
+                    if(!super.getPlugin().getProtectionManager().canExplode(miningLaser.getLocation(), user))
+                    {
+                        event.setCancelled(true);
+                        continue;
+                    }
+                }
+            }
+
             if(entity.toString().contains("EntityCustomNpc")) return;
 
             boolean isHostile = entity instanceof Hostile;
@@ -107,6 +139,9 @@ public class EntitySpawnListener extends AbstractListener
 
             if(isLiving)
             {
+                if(entity instanceof ArmorStand)
+                    return;
+
                 //Check worlds
                 if(super.getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(entity.getWorld().getName())
                     && !super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInSafeZone())

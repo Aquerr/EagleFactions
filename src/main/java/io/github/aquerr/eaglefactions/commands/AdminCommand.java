@@ -25,15 +25,15 @@ public class AdminCommand extends AbstractCommand
         {
             Player player = (Player)source;
 
-            if(EagleFactions.AdminList.contains(player.getUniqueId()))
+            if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
-                EagleFactions.AdminList.remove(player.getUniqueId());
+                EagleFactions.ADMIN_MODE_PLAYERS.remove(player.getUniqueId());
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
                 return CommandResult.success();
             }
             else
             {
-                EagleFactions.AdminList.add(player.getUniqueId());
+                EagleFactions.ADMIN_MODE_PLAYERS.add(player.getUniqueId());
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, PluginMessages.ADMIN_MODE, TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
                 return CommandResult.success();
             }

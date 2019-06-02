@@ -64,7 +64,7 @@ public class InviteCommand extends AbstractCommand
                             try
                             {
                                 Invite invite = new Invite(senderFaction.getName(), invitedPlayer.getUniqueId());
-                                EagleFactions.InviteList.add(invite);
+                                EagleFactions.INVITE_LIST.add(invite);
 
                                 invitedPlayer.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, senderFaction.getName(), TextColors.GREEN, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE + " " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
                                         " " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f join " + senderFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_JOIN));
@@ -80,9 +80,9 @@ public class InviteCommand extends AbstractCommand
                                     @Override
                                     public void run()
                                     {
-                                        if(EagleFactions.InviteList.contains(invite) && EagleFactions.InviteList != null)
+                                        if(EagleFactions.INVITE_LIST.contains(invite) && EagleFactions.INVITE_LIST != null)
                                         {
-                                            EagleFactions.InviteList.remove(invite);
+                                            EagleFactions.INVITE_LIST.remove(invite);
                                         }
                                     }
                                 }).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(EagleFactions.getPlugin());

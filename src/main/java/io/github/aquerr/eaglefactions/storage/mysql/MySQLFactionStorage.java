@@ -42,10 +42,10 @@ public class MySQLFactionStorage implements IFactionStorage
     private static final String DELETE_MEMBERS_WHERE_FACIONNAME = "DELETE FROM FactionMembers WHERE FactionName=?";
     private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName) VALUES (?, ?, ?)";
+    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName, WorldUUID, ChunkPosition) VALUES (?, ?, ?)";
     private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
 
     private static final String MERGE_CHEST = "MERGE INTO FactionChests (FactionName, ChestItems) KEY (FactionName) VALUES (?, ?)";
@@ -67,6 +67,10 @@ public class MySQLFactionStorage implements IFactionStorage
     {
         this.plugin = eagleFactions;
         this.mySQLConnection = MySQLConnection.getInstance(plugin);
+        if(this.mySQLConnection == null) {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not connect to MySQL database. Aborting..."));
+            Sponge.getServer().shutdown();
+        }
         try
         {
             int databaseVersionNumber = getDatabaseVersion();
@@ -118,9 +122,9 @@ public class MySQLFactionStorage implements IFactionStorage
                 System.out.println("There may be a problem with database script files...");
                 System.out.println("Searched for them in: " + resourcesFolder.getName());
             }
+            connection.close();
             if (databaseVersionNumber == 0)
                 precreate();
-            connection.close();
         }
         catch(SQLException e)
         {
@@ -171,10 +175,10 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement.setString(8, enemies);
             preparedStatement.execute();
 
-            deleteFactionOfficers(faction.getName());
-            deleteFactionMembers(faction.getName());
-            deleteFactionRecruits(faction.getName());
-            deleteFactionClaims(faction.getName());
+            deleteFactionOfficers(connection, faction.getName());
+            deleteFactionMembers(connection, faction.getName());
+            deleteFactionRecruits(connection, faction.getName());
+            deleteFactionClaims(connection, faction.getName());
 
             for (UUID officer : faction.getOfficers())
             {
@@ -307,6 +311,8 @@ public class MySQLFactionStorage implements IFactionStorage
                 TextColor textColor = Sponge.getRegistry().getType(TextColor.class, tagColor).orElse(TextColors.RESET);
                 UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
                 String factionHomeAsString = factionsResultSet.getString("Home");
+                String description = factionsResultSet.getString("Description");
+                String messageOfTheDay = factionsResultSet.getString("Motd");
                 FactionHome factionHome = null;
                 if (factionHomeAsString != null)
                     factionHome = FactionHome.from(factionHomeAsString);
@@ -323,11 +329,8 @@ public class MySQLFactionStorage implements IFactionStorage
                 FactionChest factionChest = getFactionChest(factionName);
                 Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
 
-                Faction faction = Faction.builder()
-                        .setName(factionName)
-                        .setTag(Text.of(textColor, tag))
+                Faction faction = Faction.builder(factionName, Text.of(textColor, tag), leaderUUID)
                         .setHome(factionHome)
-                        .setLeader(leaderUUID)
                         .setAlliances(alliances)
                         .setEnemies(enemies)
                         .setClaims(claims)
@@ -337,6 +340,8 @@ public class MySQLFactionStorage implements IFactionStorage
                         .setOfficers(officers)
                         .setChest(factionChest)
                         .setFlags(flags)
+                        .setDescription(description)
+                        .setMessageOfTheDay(messageOfTheDay)
                         .build();
                 return faction;
             }
@@ -367,7 +372,8 @@ public class MySQLFactionStorage implements IFactionStorage
             for (String factionName : factionsNames)
             {
                 Faction faction = getFaction(factionName);
-                factions.add(faction);
+                if(faction != null)
+                    factions.add(faction);
             }
         }
         catch (SQLException e)
@@ -448,6 +454,8 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement.setString(6, Instant.now().toString());
             preparedStatement.setString(7, "");
             preparedStatement.setString(8, "");
+            preparedStatement.setString(9, "");
+            preparedStatement.setString(10, "");
 
             PreparedStatement preparedStatement1 = connection.prepareStatement(INSERT_FACTION);
             preparedStatement1.setString(1, "SafeZone");
@@ -458,10 +466,13 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement1.setString(6, Instant.now().toString());
             preparedStatement1.setString(7, "");
             preparedStatement1.setString(8, "");
+            preparedStatement1.setString(9, "");
+            preparedStatement1.setString(10, "");
 
             preparedStatement.execute();
             preparedStatement1.execute();
             connection.commit();
+            connection.close();
         }
         catch (SQLException e)
         {
@@ -477,36 +488,32 @@ public class MySQLFactionStorage implements IFactionStorage
         }
     }
 
-    private boolean deleteFactionOfficers(final String name) throws SQLException
+    private boolean deleteFactionOfficers(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_OFFICERS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
         return didSucceed;
     }
 
-    private boolean deleteFactionMembers(final String name) throws SQLException
+    private boolean deleteFactionMembers(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MEMBERS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
         return didSucceed;
     }
 
-    private boolean deleteFactionRecruits(final String name) throws SQLException
+    private boolean deleteFactionRecruits(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RECRUITS_WHERE_FACIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
         return didSucceed;
     }
 
-    private boolean deleteFactionClaims(final String name) throws SQLException
+    private boolean deleteFactionClaims(final Connection connection, final String name) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
         preparedStatement.setString(1, name);
         boolean didSucceed = preparedStatement.execute();
@@ -578,7 +585,7 @@ public class MySQLFactionStorage implements IFactionStorage
     private FactionChest getFactionChest(final String factionName) throws SQLException, IOException, ClassNotFoundException
     {
         Connection connection = this.mySQLConnection.openConnection();
-        FactionChest factionChest = new FactionChest();
+        FactionChest factionChest = new FactionChest(factionName);
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -590,7 +597,7 @@ public class MySQLFactionStorage implements IFactionStorage
             byteArrayInputStream.close();
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(this.plugin);
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
-            factionChest = FactionChest.fromInventory(inventory);
+            factionChest = FactionChest.fromInventory(factionName, inventory);
         }
         return factionChest;
     }

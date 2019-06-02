@@ -25,16 +25,16 @@ public class AutoMapCommand extends AbstractCommand
         {
             Player player = (Player)source;
 
-            if(EagleFactions.AutoMapList.contains(player.getUniqueId()))
+            if(EagleFactions.AUTO_MAP_LIST.contains(player.getUniqueId()))
             {
-                EagleFactions.AutoMapList.remove(player.getUniqueId());
+                EagleFactions.AUTO_MAP_LIST.remove(player.getUniqueId());
 
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoMap", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.OFF));
                 return CommandResult.success();
             }
             else
             {
-                EagleFactions.AutoMapList.add(player.getUniqueId());
+                EagleFactions.AUTO_MAP_LIST.add(player.getUniqueId());
 
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, "AutoMap", TextColors.WHITE, " " + PluginMessages.HAS_BEEN_TURNED + " ", TextColors.GOLD, PluginMessages.ON));
                 return CommandResult.success();

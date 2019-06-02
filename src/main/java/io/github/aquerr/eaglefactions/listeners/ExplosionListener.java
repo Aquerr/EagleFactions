@@ -138,7 +138,6 @@ public class ExplosionListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onExplosionPost(ExplosionEvent.Post event)
     {
-        final World world = event.getExplosion().getWorld();
         User user = null;
         final Cause cause = event.getCause();
         final EventContext context = event.getContext();

@@ -14,6 +14,8 @@ public final class PluginPermissions
     public static final String DISBAND_COMMAND = "eaglefactions.player.disband";
     public static final String RENAMECOMMAND = "eaglefactions.player.rename";
     public static final String TAG_COMMAND = "eaglefactions.player.tag";
+    public static final String DESCRIPTION_COMMAND = "eaglefactions.player.description";
+    public static final String MOTD_COMMAND = "eaglefactions.player.motd";
     public static final String INVITE_COMMAND = "eaglefactions.player.invite";
     public static final String JOIN_COMMAND = "eaglefactions.player.join";
     public static final String LEAVE_COMMAND = "eaglefactions.player.leave";
@@ -30,6 +32,7 @@ public final class PluginPermissions
     public static final String VERSION_COMMAND = "eaglefactions.player.version";
 
     public static final String CLAIM_COMMAND = "eaglefactions.player.claim";
+    public static final String RADIUS_CLAIM_COMMAND = "eaglefactions.player.radiusclaim";
     public static final String AUTO_CLAIM_COMMAND = "eaglefactions.player.autoclaim";
     public static final String UNCLAIM_COMMAND = "eaglefactions.player.unclaim";
     public static final String UNCLAIM_ALL_COMMAND = "eaglefactions.player.unclaimall";
@@ -60,6 +63,8 @@ public final class PluginPermissions
 
     public static final String RELOAD_COMMAND = "eaglefactions.admin.reload";
     public static final String VERSION_NOTIFY = "eaglefactions.admin.version.notify";
+
+    public static final String DEBUG_COMMAND = "eaglefactions.admin.debug";
 
     public static final String SAFE_ZONE_BUILD = "eaglefactions.safezone.build";
     public static final String WAR_ZONE_BUILD = "eaglefactions.warzone.build";
