@@ -72,6 +72,7 @@ public final class ConfigFields
     private String _maxInactiveTime = "0";
     private boolean _notifyWhenFactionRemoved;
     private boolean _canUseFactionChest = true;
+    private boolean _showOnlyPlayersFactionsClaimsInMap = false;
 
     //Storage
     private String _storageType = "hocon";
@@ -83,7 +84,10 @@ public final class ConfigFields
     //Whitelisted items and blocks
     private List<String> _whitelistedItems = new ArrayList<>();
     private List<String> _whitelistedPlaceDestroyBlocks = new ArrayList<>();
-    private List<String> _whitelistedIteractBlocks = new ArrayList<>();
+    private List<String> _whitelistedInteractBlocks = new ArrayList<>();
+
+    //Chat
+    private boolean _supressOtherFactionsMessagesWhileInTeamChat = false;
 
     public ConfigFields(IConfiguration configuration)
     {
@@ -150,14 +154,15 @@ public final class ConfigFields
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
             this._factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("]", "faction-prefix-end"));
-            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "CLAIMABLE"));
-            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "NOT_CLAIMABLE"));
-            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "SAFE_ZONE"));
-            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(Collections.singletonList(""), "worlds", "WAR_ZONE"));
+            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "CLAIMABLE"));
+            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "NOT_CLAIMABLE"));
+            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "SAFE_ZONE"));
+            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "factions-remover", "max-inactive-time");
             this._notifyWhenFactionRemoved = _configuration.getBoolean(true, "factions-remover", "notify-when-removed");
             this._canUseFactionChest = _configuration.getBoolean(true, "faction-chest");
+            this._showOnlyPlayersFactionsClaimsInMap = _configuration.getBoolean(false, "show-only-player-faction-claims-in-map");
 
             //Storage
             this._storageType = _configuration.getString("hocon", "storage", "type");
@@ -167,9 +172,12 @@ public final class ConfigFields
             this._databaseFileName = _configuration.getString("database", "storage", "database-file-name");
 
             //Whitelisted items and blocks
-            this._whitelistedItems = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "items-whitelist");
-            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "place-destroy-whitelist");
-            this._whitelistedIteractBlocks = _configuration.getListOfStrings(Collections.singletonList(""), "allowed-items-and-blocks", "interact-whitelist");
+            this._whitelistedItems = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "items-whitelist");
+            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
+            this._whitelistedInteractBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "interact-whitelist");
+
+            //Chat
+            this._supressOtherFactionsMessagesWhileInTeamChat = _configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
 
             this._configuration.save();
         }
@@ -177,6 +185,11 @@ public final class ConfigFields
         {
             System.out.println("Your faction's config file may be corrupted.");
         }
+    }
+
+    public void reload()
+    {
+        setupConfigFields();
     }
 
     public boolean isFactionFriendlyFire()
@@ -541,7 +554,7 @@ public final class ConfigFields
 
     public List<String> getWhiteListedInteractBlocks()
     {
-        return this._whitelistedIteractBlocks;
+        return this._whitelistedInteractBlocks;
     }
 
     public boolean shouldDisplayPvpLoggerInScoreboard()
@@ -564,6 +577,11 @@ public final class ConfigFields
         return this._protectWarZoneFromPlayers;
     }
 
+    public boolean shouldShowOnlyPlayerFactionsClaimsInMap()
+    {
+        return this._showOnlyPlayersFactionsClaimsInMap;
+    }
+
     public String getDatabaseUrl()
     {
         return this._databaseUrl;
@@ -572,5 +590,10 @@ public final class ConfigFields
     public String getDatabaseName()
     {
         return this._databaseFileName;
+    }
+
+    public boolean shouldSupressOtherFactionsMessagesWhileInTeamChat()
+    {
+        return this._supressOtherFactionsMessagesWhileInTeamChat;
     }
 }

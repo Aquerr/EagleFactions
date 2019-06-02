@@ -25,6 +25,7 @@ public class PVPLogger
 {
     private ConfigFields _configFields;
     private Map<UUID, Integer> _attackedPlayers;
+    private Map<UUID, Integer> _playersIdTaskMap;
     private boolean _isActive;
     private int _blockTime;
     private boolean _shouldDisplayInScoreboard;
@@ -40,6 +41,7 @@ public class PVPLogger
         if (_isActive)
         {
             _attackedPlayers = new HashMap<>();
+            _playersIdTaskMap = new HashMap<>();
             _blockTime = _configFields.getPVPLoggerBlockTime();
             _blockedCommandsDuringFight = _configFields.getBlockedCommandsDuringFight();
             _shouldDisplayInScoreboard = _configFields.shouldDisplayPvpLoggerInScoreboard();
@@ -97,6 +99,7 @@ public class PVPLogger
             else
             {
                 _attackedPlayers.put(player.getUniqueId(), getBlockTime());
+                _playersIdTaskMap.put(player.getUniqueId(), getNewTaskId(1));
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.PVPLOGGER_HAS_TURNED_ON + " " + PluginMessages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + PluginMessages.SECONDS + "!"));
 
                 Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
@@ -121,10 +124,10 @@ public class PVPLogger
                                 if(_shouldDisplayInScoreboard)
                                 {
                                     Scoreboard scoreboard = player.getScoreboard();
-                                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME);
+                                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + _playersIdTaskMap.get(player.getUniqueId()));
                                     if(!optionalObjective.isPresent())
                                     {
-                                        optionalObjective = Optional.of(Objective.builder().name(PVPLOGGER_OBJECTIVE_NAME).displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
+                                        optionalObjective = Optional.of(Objective.builder().name(PVPLOGGER_OBJECTIVE_NAME + "-" + _playersIdTaskMap.get(player.getUniqueId())).displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
                                         scoreboard.addObjective(optionalObjective.get());
                                         scoreboard.updateDisplaySlot(optionalObjective.get(), DisplaySlots.SIDEBAR);
                                     }
@@ -144,6 +147,16 @@ public class PVPLogger
         }
     }
 
+    private Integer getNewTaskId(int preferredId)
+    {
+        if(this._playersIdTaskMap.values().contains(preferredId))
+        {
+            return getNewTaskId(preferredId + 1);
+        }
+
+        return preferredId;
+    }
+
     public boolean isPlayerBlocked(Player player)
     {
         return _attackedPlayers.containsKey(player.getUniqueId());
@@ -155,10 +168,15 @@ public class PVPLogger
         {
             //Remove PVPLogger objective
             Scoreboard scoreboard = player.getScoreboard();
-            Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME);
+            Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + this._playersIdTaskMap.get(player.getUniqueId()));
             if (pvploggerObjective.isPresent())
                 scoreboard.removeObjective(pvploggerObjective.get());
             _attackedPlayers.remove(player.getUniqueId());
+        }
+
+        synchronized(_playersIdTaskMap)
+        {
+            _playersIdTaskMap.remove(player.getUniqueId());
         }
     }
 

@@ -1,14 +1,18 @@
 package io.github.aquerr.eaglefactions.config;
 
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -101,7 +105,8 @@ public class Configuration implements IConfiguration
     public void reloadConfiguration()
     {
         loadConfiguration();
-        this.configFields = new ConfigFields(this);
+//        this.configFields = new ConfigFields(this);
+        this.configFields.reload();
     }
 
     private void loadConfiguration()
@@ -190,7 +195,15 @@ public class Configuration implements IConfiguration
     @Override
     public List<String> getListOfStrings(List<String> defaultValue, Object... nodePath)
     {
-        return configNode.getNode(nodePath).getList(objectToStringTransformer, defaultValue);
+        try
+        {
+            return configNode.getNode(nodePath).getList(TypeToken.of(String.class), defaultValue);
+        }
+        catch(ObjectMappingException e)
+        {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
     @Override

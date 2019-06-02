@@ -86,12 +86,7 @@ public class CreateCommand extends AbstractCommand
         }
         else
         {
-            final Faction faction = Faction.builder()
-                    .setName(factionName)
-                    .setTag(Text.of(TextColors.GREEN, factionTag))
-                    .setLeader(player.getUniqueId())
-                    .setChest(new FactionChest())
-                    .build();
+            final Faction faction = Faction.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
             //Testing with events
             final boolean isCancelled = FactionCreateEvent.runEvent(player, faction);
@@ -174,12 +169,7 @@ public class CreateCommand extends AbstractCommand
             inventory.query(itemType.get()).poll(itemStack.getQuantity());
         }
 
-        final Faction faction = Faction.builder()
-                .setName(factionName)
-                .setTag(Text.of(TextColors.GREEN, factionTag))
-                .setLeader(player.getUniqueId())
-                .setChest(new FactionChest())
-                .build();
+        final Faction faction = Faction.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
         final boolean isCancelled = FactionCreateEvent.runEvent(player, faction);
         if (isCancelled)

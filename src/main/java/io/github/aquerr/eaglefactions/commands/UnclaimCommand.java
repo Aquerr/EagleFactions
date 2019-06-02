@@ -35,7 +35,7 @@ public class UnclaimCommand extends AbstractCommand
             Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             //Check if player has admin mode.
-            if(EagleFactions.AdminList.contains(player.getUniqueId()))
+            if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
                 World world = player.getWorld();
                 Vector3i chunk = player.getLocation().getChunkPosition();

@@ -50,7 +50,7 @@ public class ClaimCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
 
         //Check if admin mode
-        if (EagleFactions.AdminList.contains(player.getUniqueId()))
+        if (EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             boolean isCancelled = FactionClaimEvent.runEvent(player, playerFaction, world, chunk);
             if (isCancelled)
@@ -70,7 +70,7 @@ public class ClaimCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
 
         //If attacked then It should not be able to claim territories
-        if (EagleFactions.AttackedFactions.containsKey(playerFaction.getName()))
+        if (EagleFactions.ATTACKED_FACTIONS.containsKey(playerFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOUR_FACTION_IS_UNDER_ATTACK + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.GOLD, PluginMessages.TWO_MINUTES, TextColors.RED, " " + PluginMessages.TO_BE_ABLE_TO_CLAIM_AGAIN));
 
         if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))

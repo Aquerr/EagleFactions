@@ -45,7 +45,7 @@ public class DemoteCommand extends AbstractCommand
 
                     if(optionalDemotedPlayerFaction.isPresent() && optionalDemotedPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
-                        if(EagleFactions.AdminList.contains(player.getUniqueId()))
+                        if(EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                         {
                             if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()))
                             {

@@ -134,7 +134,7 @@ public class PluginMessages
     public static String HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN;
     public static String TO_BE_ABLE_TO_USE_IT_AGAIN;
     public static String YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND;
-    public static String STAY_STILL_FOR;
+    public static String STAND_STILL_FOR;
     public static String FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD;
     public static String FACTIONS_HOME_IS_NOT_SET;
     public static String YOU_WERE_TELEPORTED_TO_FACTIONS_HOME;
@@ -148,6 +148,8 @@ public class PluginMessages
     public static String YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND;
     public static String NAME;
     public static String TAG;
+    public static String DESCRIPTION;
+    public static String MOTD;
     public static String OFFICERS;
     public static String ALLIANCES;
     public static String MEMBERS;
@@ -286,4 +288,7 @@ public class PluginMessages
     //Tagcolor
     public static String TAG_COLOR_HAS_BEEN_CHANGED;
     public static String TAG_COLORING_IS_TURNED_OFF_ON_THIS_SERVER;
+
+    //Debug
+    public static String DEBUG_MODE;
 }
