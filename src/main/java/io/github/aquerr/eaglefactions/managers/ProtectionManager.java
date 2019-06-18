@@ -48,6 +48,8 @@ public class ProtectionManager implements IProtectionManager
     @Override
     public boolean canInteractWithBlock(final Location<World> location, final User user)
     {
+        final boolean isTileEntityAtLocation = location.getTileEntity().isPresent();
+
         if(EagleFactions.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
@@ -70,19 +72,6 @@ public class ProtectionManager implements IProtectionManager
             return true;
         }
 
-        //Check if player is holding Eagle's Feather
-        if(location.getTileEntity().isPresent()
-                && user.getItemInHand(HandTypes.MAIN_HAND).isPresent()
-                && user.getItemInHand(HandTypes.MAIN_HAND).get().getType() == ItemTypes.FEATHER
-                && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).isPresent()
-                && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName()))
-        {
-            final ItemStack feather = user.getItemInHand(HandTypes.MAIN_HAND).get();
-            feather.setQuantity(feather.getQuantity() - 1);
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!")));
-            return true;
-        }
-
         final List<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
         final List<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
 
@@ -93,6 +82,13 @@ public class ProtectionManager implements IProtectionManager
 
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                 return true;
+
+            //Warzone, chest and eaglefeather
+            if(warZoneWorlds.contains(world.getName()) && isTileEntityAtLocation && isHoldingEagleFeather(user))
+            {
+                removeEagleFeather(user);
+                return true;
+            }
 
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
             return false;
@@ -109,9 +105,22 @@ public class ProtectionManager implements IProtectionManager
         if (chunkFaction.getName().equalsIgnoreCase("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
             return true;
 
+        if(chunkFaction.getName().equalsIgnoreCase("WarZone") && isTileEntityAtLocation && isHoldingEagleFeather(user))
+        {
+            removeEagleFeather(user);
+            return true;
+        }
+
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
         {
+            //Holding Eagle Feather?
+            if(isTileEntityAtLocation && isHoldingEagleFeather(user))
+            {
+                removeEagleFeather(user);
+                return true;
+            }
+
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
             return false;
         }
@@ -121,6 +130,13 @@ public class ProtectionManager implements IProtectionManager
             return true;
         else
         {
+            //Holding Eagle Feather?
+            if(isTileEntityAtLocation && isHoldingEagleFeather(user))
+            {
+                removeEagleFeather(user);
+                return true;
+            }
+
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
             return false;
         }
@@ -487,5 +503,20 @@ public class ProtectionManager implements IProtectionManager
     private boolean hasAdminMode(UUID playerUUID)
     {
         return EagleFactions.ADMIN_MODE_PLAYERS.contains(playerUUID);
+    }
+
+    private boolean isHoldingEagleFeather(final User user)
+    {
+        return user.getItemInHand(HandTypes.MAIN_HAND).isPresent()
+                && user.getItemInHand(HandTypes.MAIN_HAND).get().getType() == ItemTypes.FEATHER
+                && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).isPresent()
+                && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName());
+    }
+
+    private void removeEagleFeather(final User user)
+    {
+        final ItemStack feather = user.getItemInHand(HandTypes.MAIN_HAND).get();
+        feather.setQuantity(feather.getQuantity() - 1);
+        user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!")));
     }
 }
