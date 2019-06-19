@@ -34,7 +34,7 @@ public class MaxPowerCommand extends AbstractCommand
 
                 if (EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
-                    setMaxPower(optionalSelectedPlayer.get(), optionalPower.get());
+                    setMaxPower(source, optionalSelectedPlayer.get(), optionalPower.get());
                 }
                 else
                 {
@@ -43,7 +43,7 @@ public class MaxPowerCommand extends AbstractCommand
             }
             else
             {
-                setMaxPower(optionalSelectedPlayer.get(), optionalPower.get());
+                setMaxPower(source, optionalSelectedPlayer.get(), optionalPower.get());
             }
         }
         else
@@ -55,12 +55,10 @@ public class MaxPowerCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void setMaxPower(Player player, String power)
+    private void setMaxPower(CommandSource source, Player player, String power)
     {
         float newPower = Float.valueOf(power);
-
-        getPlugin().getPowerManager().setMaxPower(player.getUniqueId(), newPower);
-
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PLAYERS_MAXPOWER_HAS_BEEN_CHANGED));
+        super.getPlugin().getPowerManager().setMaxPower(player.getUniqueId(), newPower);
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PLAYERS_MAXPOWER_HAS_BEEN_CHANGED));
     }
 }

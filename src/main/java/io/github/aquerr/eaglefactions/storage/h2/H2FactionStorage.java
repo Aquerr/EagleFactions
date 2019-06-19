@@ -170,7 +170,6 @@ public class H2FactionStorage implements IFactionStorage
         Connection connection = null;
         try
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of("Updating faction... => " + faction));
             StringBuilder stringBuilder = new StringBuilder();
             for (String alliance : faction.getAlliances())
             {
@@ -326,7 +325,6 @@ public class H2FactionStorage implements IFactionStorage
 
             connection.commit();
             connection.close();
-            Sponge.getServer().getConsole().sendMessage(Text.of("Successfully updated faction => " + faction));
             return true;
         }
         catch (SQLException | IOException e)

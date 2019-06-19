@@ -34,7 +34,7 @@ public class SetPowerCommand extends AbstractCommand
 
                 if (EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
-                    setPower(optionalSelectedPlayer.get(), optionalPower.get());
+                    setPower(source, optionalSelectedPlayer.get(), optionalPower.get());
                 }
                 else
                 {
@@ -43,7 +43,7 @@ public class SetPowerCommand extends AbstractCommand
             }
             else
             {
-                setPower(optionalSelectedPlayer.get(), optionalPower.get());
+                setPower(source, optionalSelectedPlayer.get(), optionalPower.get());
             }
         }
         else
@@ -55,12 +55,10 @@ public class SetPowerCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void setPower(Player player, String power)
+    private void setPower(CommandSource source, Player player, String power)
     {
         float newPower = Float.valueOf(power);
-
-        getPlugin().getPowerManager().setPower(player.getUniqueId(), newPower);
-
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PLAYERS_POWER_HAS_BEEN_CHANGED));
+        super.getPlugin().getPowerManager().setPower(player.getUniqueId(), newPower);
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PLAYERS_POWER_HAS_BEEN_CHANGED));
     }
 }
