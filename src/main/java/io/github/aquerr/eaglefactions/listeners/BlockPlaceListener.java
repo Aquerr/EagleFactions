@@ -57,23 +57,4 @@ public class BlockPlaceListener extends AbstractListener
             }
         }
     }
-
-    @Listener
-    public void onBlockPlace(ChangeBlockEvent event)
-    {
-//        if(event.getContext().containsKey(EventContextKeys.OWNER)
-//                && event.getContext().get(EventContextKeys.OWNER).isPresent()
-//                && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player
-//                && event.getContext().containsKey(EventContextKeys.SPAWN_TYPE)
-//                && event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent()
-//                && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.PLACEMENT)
-//        {
-//            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
-//            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-//            {
-//                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player.getWorld(), player))
-//                    event.setCancelled(true);
-//            }
-//        }
-    }
 }

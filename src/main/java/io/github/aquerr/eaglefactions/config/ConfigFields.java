@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.config;
 
+import com.google.common.collect.Sets;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -40,7 +41,7 @@ public final class ConfigFields
     private String _chatPrefixType = "tag";
     private boolean _shouldDisplayRank = true;
     private boolean _factionCreationByItems = false;
-    private HashMap<String,Integer> _requiredItemsToCreateFaction = new HashMap<>();
+    private Map<String, Integer> _requiredItemsToCreateFaction = new HashMap<>();
     private boolean _spawnAtHomeAfterDeath = false;
     private boolean _canAttackOnlyAtNight = false;
     private boolean _canHomeBetweenWorlds = false;
@@ -51,7 +52,7 @@ public final class ConfigFields
     private boolean _blockHomeAfterDeathInOwnFaction = false;
     private int _homeBlockTimeAfterDeathInOwnFaction = 60;
     private boolean _claimByItems = false;
-    private HashMap<String,Integer> _requiredItemsToClaim = new HashMap<>();
+    private Map<String, Integer> _requiredItemsToClaim = new HashMap<>();
     private double _neededPowerPercentageToAttack = 20;
     private boolean _isPvpLoggerActive = true;
     private int _pvpLoggerBlockTime = 60;
@@ -60,19 +61,21 @@ public final class ConfigFields
     private boolean _protectFromMobGriefWarZone = false;
     private boolean _allowExplosionsByOtherPlayersInClaims = false;
     private boolean _protectWarZoneFromPlayers = false;
-    private List<String> _blockedCommandsDuringFight = Arrays.asList("/f home", "spawn", "tpa", "/tp");
+    private Set<String> _blockedCommandsDuringFight = Sets.newHashSet("/f home", "spawn", "tpa", "/tp");
     private boolean _canColorTags = true;
     private Text _factionStartPrefix = Text.of("[");
     private Text _factionEndPrefix = Text.of("]");
-    private List<String> _claimableWorldNames = new ArrayList<>();
-    private List<String> _notClaimableWorldNames = new ArrayList<>();
-    private List<String> _safezoneWorldNames = new ArrayList<>();
-    private List<String> _warzoneWorldNames = new ArrayList<>();
     private boolean _isFactionPrefixFirstInChat = true;
     private String _maxInactiveTime = "0";
     private boolean _notifyWhenFactionRemoved;
     private boolean _canUseFactionChest = true;
     private boolean _showOnlyPlayersFactionsClaimsInMap = false;
+
+    //Worlds
+    private Set<String> _claimableWorldNames = new HashSet<>();
+    private Set<String> _notClaimableWorldNames = new HashSet<>();
+    private Set<String> _safezoneWorldNames = new HashSet<>();
+    private Set<String> _warzoneWorldNames = new HashSet<>();
 
     //Storage
     private String _storageType = "hocon";
@@ -82,9 +85,9 @@ public final class ConfigFields
     private String _databaseFileName = "database";
 
     //Whitelisted items and blocks
-    private List<String> _whitelistedItems = new ArrayList<>();
-    private List<String> _whitelistedPlaceDestroyBlocks = new ArrayList<>();
-    private List<String> _whitelistedInteractBlocks = new ArrayList<>();
+    private Set<String> _whitelistedItems = new HashSet<>();
+    private Set<String> _whitelistedPlaceDestroyBlocks = new HashSet<>();
+    private Set<String> _whitelistedInteractBlocks = new HashSet<>();
 
     //Chat
     private boolean _supressOtherFactionsMessagesWhileInTeamChat = false;
@@ -150,19 +153,21 @@ public final class ConfigFields
             this._protectFromMobGriefWarZone = _configuration.getBoolean(false, "protect-from-mob-grief-warzone");
             this._allowExplosionsByOtherPlayersInClaims = _configuration.getBoolean(false, "allow-explosions-by-other-players-in-claims");
             this._protectWarZoneFromPlayers = _configuration.getBoolean(false, "protect-warzone-from-players");
-            this._blockedCommandsDuringFight = _configuration.getListOfStrings(Arrays.asList("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
+            this._blockedCommandsDuringFight = _configuration.getSetOfStrings(Sets.newHashSet("/f home", "spawn", "tpa", "/tp"), "pvp-logger", "blocked-commands-during-fight");
             this._canColorTags = _configuration.getBoolean(true, "colored-tags-allowed");
             this._factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("[", "faction-prefix-start"));
             this._factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(_configuration.getString("]", "faction-prefix-end"));
-            this._claimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "CLAIMABLE"));
-            this._notClaimableWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "NOT_CLAIMABLE"));
-            this._safezoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "SAFE_ZONE"));
-            this._warzoneWorldNames = new ArrayList<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "WAR_ZONE"));
             this._isFactionPrefixFirstInChat = _configuration.getBoolean(true, "faction-prefix-first-in-chat");
             this._maxInactiveTime = _configuration.getString("30d", "factions-remover", "max-inactive-time");
             this._notifyWhenFactionRemoved = _configuration.getBoolean(true, "factions-remover", "notify-when-removed");
             this._canUseFactionChest = _configuration.getBoolean(true, "faction-chest");
             this._showOnlyPlayersFactionsClaimsInMap = _configuration.getBoolean(false, "show-only-player-faction-claims-in-map");
+
+            //Worlds
+            this._claimableWorldNames = new HashSet<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "CLAIMABLE"));
+            this._notClaimableWorldNames = new HashSet<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "NOT_CLAIMABLE"));
+            this._safezoneWorldNames = new HashSet<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "SAFE_ZONE"));
+            this._warzoneWorldNames = new HashSet<>(_configuration.getListOfStrings(new ArrayList<>(), "worlds", "WAR_ZONE"));
 
             //Storage
             this._storageType = _configuration.getString("hocon", "storage", "type");
@@ -172,9 +177,9 @@ public final class ConfigFields
             this._databaseFileName = _configuration.getString("database", "storage", "database-file-name");
 
             //Whitelisted items and blocks
-            this._whitelistedItems = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "items-whitelist");
-            this._whitelistedPlaceDestroyBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
-            this._whitelistedInteractBlocks = _configuration.getListOfStrings(new ArrayList<>(), "allowed-items-and-blocks", "interact-whitelist");
+            this._whitelistedItems = _configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "items-whitelist");
+            this._whitelistedPlaceDestroyBlocks = _configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
+            this._whitelistedInteractBlocks = _configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "interact-whitelist");
 
             //Chat
             this._supressOtherFactionsMessagesWhileInTeamChat = _configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
@@ -340,7 +345,7 @@ public final class ConfigFields
         return items;
     }
 
-    public HashMap<String, Integer> getRequiredItemsToCreateFaction()
+    public Map<String, Integer> getRequiredItemsToCreateFaction()
     {
         return _requiredItemsToCreateFaction;
     }
@@ -395,7 +400,7 @@ public final class ConfigFields
         return _claimByItems;
     }
 
-    public HashMap<String, Integer> getRequiredItemsToClaim()
+    public Map<String, Integer> getRequiredItemsToClaim()
     {
         return _requiredItemsToClaim;
     }
@@ -425,7 +430,7 @@ public final class ConfigFields
         return _protectFromMobGriefWarZone;
     }
 
-    public List<String> getBlockedCommandsDuringFight()
+    public Set<String> getBlockedCommandsDuringFight()
     {
         return _blockedCommandsDuringFight;
     }
@@ -450,29 +455,29 @@ public final class ConfigFields
         return _factionEndPrefix;
     }
 
-    public List<String> getClaimableWorldNames()
+    public Set<String> getClaimableWorldNames()
     {
         return _claimableWorldNames;
     }
 
-    public List<String> getNotClaimableWorldNames()
+    public Set<String> getNotClaimableWorldNames()
     {
         return _notClaimableWorldNames;
     }
 
-    public List<String> getSafeZoneWorldNames()
+    public Set<String> getSafeZoneWorldNames()
     {
         return _safezoneWorldNames;
     }
 
-    public List<String> getWarZoneWorldNames()
+    public Set<String> getWarZoneWorldNames()
     {
         return _warzoneWorldNames;
     }
 
-    public List<String> getDetectedWorldNames()
+    public Set<String> getDetectedWorldNames()
     {
-        List<String> detectedWorldNames = new ArrayList<>();
+        Set<String> detectedWorldNames = new HashSet<>();
 
         detectedWorldNames.addAll(getClaimableWorldNames());
         detectedWorldNames.addAll(getNotClaimableWorldNames());
@@ -490,7 +495,7 @@ public final class ConfigFields
     public void addWorld(String worldName)
     {
         _claimableWorldNames.add(worldName);
-        _configuration.setListOfStrings(_claimableWorldNames, "worlds", "CLAIMABLE");
+        _configuration.setSetOfStrings(_claimableWorldNames, "worlds", "CLAIMABLE");
     }
 
     public long getMaxInactiveTime()
@@ -542,17 +547,17 @@ public final class ConfigFields
         return _storagePassword;
     }
 
-    public List<String> getWhiteListedItems()
+    public Set<String> getWhiteListedItems()
     {
         return this._whitelistedItems;
     }
 
-    public List<String> getWhiteListedPlaceDestroyBlocks()
+    public Set<String> getWhiteListedPlaceDestroyBlocks()
     {
         return this._whitelistedPlaceDestroyBlocks;
     }
 
-    public List<String> getWhiteListedInteractBlocks()
+    public Set<String> getWhiteListedInteractBlocks()
     {
         return this._whitelistedInteractBlocks;
     }

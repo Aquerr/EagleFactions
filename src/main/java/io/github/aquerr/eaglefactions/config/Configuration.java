@@ -11,10 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
+import java.util.*;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -75,31 +72,6 @@ public class Configuration implements IConfiguration
     {
         return configFields;
     }
-
-    //    public void setup(Path configDir)
-//    {
-//    }
-
-//    private void checkNodes()
-//    {
-//        Method[] methods = ConfigFields.class.getDeclaredMethods();
-//        for (Method method: methods)
-//        {
-//            if (!method.getName().equals("setup") && !method.getName().equals("addWorld"))
-//            {
-//
-//                try
-//                {
-//                    Object o = method.invoke(null);
-//                }
-//                catch (IllegalAccessException | InvocationTargetException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//        }
-//    }
 
     @Override
     public void reloadConfiguration()
@@ -193,11 +165,11 @@ public class Configuration implements IConfiguration
     }
 
     @Override
-    public List<String> getListOfStrings(List<String> defaultValue, Object... nodePath)
+    public List<String> getListOfStrings(Collection<String> defaultValue, Object... nodePath)
     {
         try
         {
-            return configNode.getNode(nodePath).getList(TypeToken.of(String.class), defaultValue);
+            return configNode.getNode(nodePath).getList(TypeToken.of(String.class), new ArrayList<>(defaultValue));
         }
         catch(ObjectMappingException e)
         {
@@ -207,22 +179,30 @@ public class Configuration implements IConfiguration
     }
 
     @Override
-    public boolean setListOfStrings(List<String> listOfStrings, Object... nodePath)
+    public Set<String> getSetOfStrings(Collection<String> defaultValue, Object... nodePath)
+    {
+        try
+        {
+            return new HashSet<>(configNode.getNode(nodePath).getList(TypeToken.of(String.class), new ArrayList<>(defaultValue)));
+        }
+        catch(ObjectMappingException e)
+        {
+            e.printStackTrace();
+        }
+        return new HashSet<>();
+    }
+
+    @Override
+    public boolean setListOfStrings(Collection<String> listOfStrings, Object... nodePath)
     {
         configNode.getNode(nodePath).setValue(listOfStrings);
         save();
         return true;
     }
 
-    private static Function<Object,String> objectToStringTransformer = input ->
+    @Override
+    public boolean setSetOfStrings(Collection<String> setOfStrings, Object... nodePath)
     {
-        if (input instanceof String)
-        {
-            return (String) input;
-        }
-        else
-        {
-            return null;
-        }
-    };
+        return false;
+    }
 }

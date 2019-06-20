@@ -8,8 +8,6 @@ import io.github.aquerr.eaglefactions.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -22,8 +20,8 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Singleton
@@ -72,8 +70,8 @@ public class ProtectionManager implements IProtectionManager
             return true;
         }
 
-        final List<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final List<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -166,8 +164,8 @@ public class ProtectionManager implements IProtectionManager
         if (isItemWhitelisted(usedItem.getType()))
             return true;
 
-        final List<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final List<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -228,8 +226,8 @@ public class ProtectionManager implements IProtectionManager
         if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
             return true;
 
-        final List<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final List<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -331,8 +329,8 @@ public class ProtectionManager implements IProtectionManager
         if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
             return true;
 
-        final List<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final List<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {

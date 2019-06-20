@@ -29,7 +29,7 @@ public class PVPLogger
     private boolean _isActive;
     private int _blockTime;
     private boolean _shouldDisplayInScoreboard;
-    private List<String> _blockedCommandsDuringFight;
+    private Set<String> _blockedCommandsDuringFight;
 
     private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLogger";
 

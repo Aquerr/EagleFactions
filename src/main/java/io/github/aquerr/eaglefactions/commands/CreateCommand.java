@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.commands;
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionChest;
 import io.github.aquerr.eaglefactions.events.FactionCreateEvent;
 import io.github.aquerr.eaglefactions.message.PluginMessages;
 import org.spongepowered.api.Sponge;
@@ -20,7 +19,7 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -103,7 +102,7 @@ public class CreateCommand extends AbstractCommand
 
     private CommandResult createByItems(String factionName, String factionTag, Player player) throws CommandException
     {
-        final HashMap<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFields().getRequiredItemsToCreateFaction();
+        final Map<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFields().getRequiredItemsToCreateFaction();
         final Inventory inventory = player.getInventory();
         final int allRequiredItems = requiredItems.size();
         int foundItems = 0;

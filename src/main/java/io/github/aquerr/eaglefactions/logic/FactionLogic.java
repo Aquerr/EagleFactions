@@ -15,27 +15,22 @@ import io.github.aquerr.eaglefactions.storage.StorageManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -599,7 +594,7 @@ public class FactionLogic
 
     public boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        HashMap<String, Integer> requiredItems = _configFields.getRequiredItemsToClaim();
+        Map<String, Integer> requiredItems = _configFields.getRequiredItemsToClaim();
         PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;
