@@ -2,21 +2,22 @@
 
 # Eagle Factions
 
-![Build](https://img.shields.io/jenkins/build/https/jenkins.bartlomiejstepien.pl/EagleFactions-dev-build.svg?label=Build)
-![Version](https://img.shields.io/github/release/aquerr/eaglefactions.svg?label=Version)
-![Downloads](https://img.shields.io/github/downloads/aquerr/eaglefactions/total.svg?label=Total%20Downloads)
 ![License](https://img.shields.io/github/license/aquerr/eaglefactions.svg?label=License)
+![Version](https://img.shields.io/github/release/aquerr/eaglefactions.svg?label=Version)
+[![Downloads](https://img.shields.io/github/downloads/aquerr/eaglefactions/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
+[![Discord](https://img.shields.io/discord/447076657698963466.svg?color=blue&label=Discord&logo=Discord&logoColor=white)](https://discord.gg/bjZqmwP)
+
 
 ## General
 Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using **power**. Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
 
-Eagle Factions offers you some additional features which will allow you to adjust gamestyle on your Minecraft Server to your own preferences. Land protection while faction is offline, ability to attack someone's claim, Eagle's Feather are few of them.
+Eagle Factions offers you some additional features which will allow you to adjust gamestyle on your Minecraft Server for your own preferences. Land protection while faction is offline, ability to attack someone's claim, Eagle's Feather are few of them.
 
 Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know how everything works.
 
 **Feel free to send me your feedback!** :grin: 
 
-**If you find any issues while using **Eagle Factions** or you want to share your thoughts on what could be added, post them below or at [Github](https://github.com/Aquerr/EagleFactions/issues)**
+**If you find any issues while using **Eagle Factions** or you want to share your thoughts on what could be added, post them at [Github](https://github.com/Aquerr/EagleFactions/issues)**
 
 ## Features
 
