@@ -2,12 +2,15 @@
 
 # Eagle Factions
 
-Current version: 0.12.0
+![Build](https://img.shields.io/jenkins/build/https/jenkins.bartlomiejstepien.pl/EagleFactions-dev-build.svg?label=Build)
+![Version](https://img.shields.io/github/release/aquerr/eaglefactions.svg?label=Version)
+![Downloads](https://img.shields.io/github/downloads/aquerr/eaglefactions/total.svg?label=Total%20Downloads)
+![License](https://img.shields.io/github/license/aquerr/eaglefactions.svg?label=License)
 
 ## General
-Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using "power". Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
+Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using **power**. Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
 
-Eagle Factions will change your minecraft experience forever. We offer you a new gameplay with some extra cool features that will change your gameplay. Land protection while faction is offline, possiblity to destroy enemy factions, custom ranks, and many more.
+Eagle Factions offers you some additional features which will allow you to adjust gamestyle on your Minecraft Server to your own preferences. Land protection while faction is offline, ability to attack someone's claim, Eagle's Feather are few of them.
 
 Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know how everything works.
 
@@ -17,25 +20,31 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 
 ## Features
 
-* Creating factions
+* Create factions
 * Invite others to faction
 * Form alliances with other factions
+* Declare wars 
 * Power system
-* Claiming territories/lands
+* Claim territories/lands
+* Faction Map with ability to claim territories from it
+* Set faction's home that will allow faction's members to teleport to it
 * Friendly Fire in faction can be disabled by its leaders.
-* Option for disabling friendly fire between aliances.
+* Option for disabling friendly fire between alliances.
 * Unclaim other factions lands if their power is low.
-* Prefixes Factions Tags
-* Internal Faction Chat
-* Custom ranks in factions **(not implemented yet)**
+* Factions' chests
+* Eagle's Feather - Command only item that will allow you to bypass chest protection
+* Factions' Tags
+* Faction Chat and Alliance Chat
 * PVP-Logger
 * Plugin Messages' Translations
 * Database support
 * Fully configurable
 
+* Custom ranks in factions **(not implemented yet)**
+
 ## Translations
 
-Eagle Factions provides option for changing its language.
+Eagle Factions provides support for translations. In other words, it is possible to change plugin messages to your own language.
 
 You can see all available translations [here](https://github.com/Aquerr/EagleFactions/tree/1.12.2/api-7.0.0/src/main/resources/messages).
 
