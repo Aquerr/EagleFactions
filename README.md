@@ -40,8 +40,6 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * Database support
 * Fully configurable
 
-* Custom ranks in factions **(not implemented yet)**
-
 ## Translations
 
 Eagle Factions provides support for translations. In other words, it is possible to change plugin messages to your own language.
