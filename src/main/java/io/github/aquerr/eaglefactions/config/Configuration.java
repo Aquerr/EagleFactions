@@ -64,7 +64,6 @@ public class Configuration implements IConfiguration
         }
 
         this.configFields = new ConfigFields(this);
-//        setup(configDir);
     }
 
     @Override
@@ -77,7 +76,6 @@ public class Configuration implements IConfiguration
     public void reloadConfiguration()
     {
         loadConfiguration();
-//        this.configFields = new ConfigFields(this);
         this.configFields.reload();
     }
 
@@ -133,23 +131,6 @@ public class Configuration implements IConfiguration
     public float getFloat(float defaultValue, Object... nodePath)
     {
        return configNode.getNode(nodePath).getFloat(defaultValue);
-
-//        Object value = configNode.getNode(nodePath).getValue();
-//
-//        if (value instanceof Integer)
-//        {
-//            int number = (Integer) value;
-//            return (float) number;
-//        }
-//        else if (value instanceof Float)
-//        {
-//            return (float)value;
-//        }
-//        else if (value instanceof Double)
-//        {
-//            return  ((Double) value).floatValue();
-//        }
-//        else return 0;
     }
 
     @Override
