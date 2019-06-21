@@ -92,7 +92,9 @@ public class PlayerManager
 
     public Optional<Player> getPlayer(UUID playerUUID)
     {
-        Optional<User> oUser = getUser(playerUUID);
+        final Optional<User> oUser = getUser(playerUUID);
+        if(!oUser.isPresent())
+            return Optional.empty();
         return oUser.get().getPlayer();
     }
 
