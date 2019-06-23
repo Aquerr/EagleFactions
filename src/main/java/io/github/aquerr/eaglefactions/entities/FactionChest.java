@@ -22,6 +22,7 @@ public class FactionChest implements Serializable
 {
     private String factionName; //Reference to faction holding this chest
     private List<SlotItem> items;
+    private Inventory inventory;
 
     public FactionChest(String factionName)
     {
@@ -89,7 +90,10 @@ public class FactionChest implements Serializable
     public Inventory toInventory()
     {
         //Create inventory
-        Inventory inventory = Inventory.builder()
+        if(this.inventory != null)
+            return this.inventory;
+
+        this.inventory = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
                 .listener(InteractInventoryEvent.Close.class, (x) ->
