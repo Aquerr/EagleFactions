@@ -108,6 +108,7 @@ public class FactionChest implements Serializable
                         if(inv.capacity() == 27)
                         {
                             factionChest = FactionChest.fromInventory(this.factionName, inv);
+                            break;
                         }
                     }
 

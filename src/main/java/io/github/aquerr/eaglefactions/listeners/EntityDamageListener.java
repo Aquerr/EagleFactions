@@ -143,6 +143,10 @@ public class EntityDamageListener extends AbstractListener
         if(playerChunkFaction.isPresent() && playerChunkFaction.get().getName().equals("SafeZone"))
             return true;
 
+        //If player attacked herself/himself
+        if(attackedPlayer.equals(sourcePlayer))
+            return false;
+
         //Check if player is not in a faction.
         final Optional<Faction> optionalSourcePlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
         if(!optionalSourcePlayerFaction.isPresent())
