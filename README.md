@@ -29,9 +29,8 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * Claim territories/lands
 * Faction Map with ability to claim territories from it
 * Set faction's home that will allow faction's members to teleport to it
-* Friendly Fire in faction can be disabled by its leaders.
-* Option for disabling friendly fire between alliances.
-* Unclaim other factions lands if their power is low.
+* Toggleable friendly fire in faction and between alliances
+* Unclaim other factions lands if their power is low
 * Factions' chests
 * Eagle's Feather - Command only item that will allow you to bypass chest protection
 * Factions' Tags
