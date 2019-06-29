@@ -79,7 +79,7 @@ public class MySQLFactionStorage implements IFactionStorage
             URL resourcesFolderURL = this.plugin.getResource("queries/mysql");
             File resourcesFolder = new File(resourcesFolderURL.getPath());
             File[] resources = resourcesFolder.listFiles();
-            Connection connection = this.mySQLConnection.openConnection();
+            Connection connection = this.mySQLConnection.getConnection();
             if (resources != null)
             {
                 for(File resource : resources)
@@ -160,7 +160,7 @@ public class MySQLFactionStorage implements IFactionStorage
             if (enemies.endsWith(","))
                 enemies = enemies.substring(0, enemies.length() - 1);
 
-            connection = this.mySQLConnection.openConnection();
+            connection = this.mySQLConnection.getConnection();
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(MERGE_FACTION);
             preparedStatement.setString(1, faction.getName());
@@ -173,6 +173,8 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement.setString(6, faction.getLastOnline().toString());
             preparedStatement.setString(7, alliances);
             preparedStatement.setString(8, enemies);
+            preparedStatement.setString(9, faction.getDescription());
+            preparedStatement.setString(10, faction.getMessageOfTheDay());
             preparedStatement.execute();
 
             deleteFactionOfficers(connection, faction.getName());
@@ -300,7 +302,7 @@ public class MySQLFactionStorage implements IFactionStorage
         Connection connection = null;
         try
         {
-            connection = this.mySQLConnection.openConnection();
+            connection = this.mySQLConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
             statement.setString(1, factionName);
             ResultSet factionsResultSet = statement.executeQuery();
@@ -360,7 +362,7 @@ public class MySQLFactionStorage implements IFactionStorage
         Set<Faction> factions = new HashSet<>();
         try
         {
-            Connection connection = this.mySQLConnection.openConnection();
+            Connection connection = this.mySQLConnection.getConnection();
             ResultSet resultSet = connection.createStatement().executeQuery(SELECT_FACTIONNAMES);
             List<String> factionsNames = new ArrayList<>();
             while (resultSet.next())
@@ -395,7 +397,7 @@ public class MySQLFactionStorage implements IFactionStorage
         Connection connection = null;
         try
         {
-            connection = this.mySQLConnection.openConnection();
+            connection = this.mySQLConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
             preparedStatement.setString(1, factionName);
             boolean didSucceed = preparedStatement.execute();
@@ -419,20 +421,28 @@ public class MySQLFactionStorage implements IFactionStorage
 
     private int getDatabaseVersion() throws SQLException
     {
-        ResultSet resultSet = this.mySQLConnection.openConnection().getMetaData().getTables(null, null, "VERSION", null);
-        while(resultSet.next())
+        try(final Connection connection = this.mySQLConnection.getConnection())
         {
-            if(resultSet.getString(3).equalsIgnoreCase("Version"))
+            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
+            preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            boolean versionTableExists = false;
+            while(resultSet.next())
             {
-                try(Statement statement = this.mySQLConnection.openConnection().createStatement())
-                {
-                    ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
-                    if(resultSet1.last())
-                    {
-                        return resultSet1.getInt("Version");
-                    }
-                }
+                versionTableExists = true;
             }
+
+            if(versionTableExists)
+            {
+                final Statement statement = connection.createStatement();
+                final ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
+                if(resultSet1.last())
+                {
+                    return resultSet1.getInt("Version");
+                }
+                statement.close();
+            }
+            preparedStatement.close();
         }
         return 0;
     }
@@ -442,14 +452,14 @@ public class MySQLFactionStorage implements IFactionStorage
         Connection connection = null;
         try
         {
-            connection = this.mySQLConnection.openConnection();
+            connection = this.mySQLConnection.getConnection();
             connection.setAutoCommit(false);
 
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_FACTION);
             preparedStatement.setString(1, "WarZone");
             preparedStatement.setString(2, "SZ");
             preparedStatement.setString(3, "");
-            preparedStatement.setString(4, "0");
+            preparedStatement.setString(4, new UUID(0, 0).toString());
             preparedStatement.setString(5, null);
             preparedStatement.setString(6, Instant.now().toString());
             preparedStatement.setString(7, "");
@@ -461,7 +471,7 @@ public class MySQLFactionStorage implements IFactionStorage
             preparedStatement1.setString(1, "SafeZone");
             preparedStatement1.setString(2, "WZ");
             preparedStatement1.setString(3, "");
-            preparedStatement1.setString(4, "0");
+            preparedStatement1.setString(4, new UUID(0, 0).toString());
             preparedStatement1.setString(5, null);
             preparedStatement1.setString(6, Instant.now().toString());
             preparedStatement1.setString(7, "");
@@ -522,7 +532,7 @@ public class MySQLFactionStorage implements IFactionStorage
 
     private Set<UUID> getFactionRecruits(String factionName) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
+        Connection connection = this.mySQLConnection.getConnection();
         Set<UUID> recruits = new HashSet<>();
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_RECRUITS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
@@ -537,7 +547,7 @@ public class MySQLFactionStorage implements IFactionStorage
 
     private Set<UUID> getFactionMembers(final String factionName) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
+        Connection connection = this.mySQLConnection.getConnection();
         Set<UUID> members = new HashSet<>();
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MEMBERS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
@@ -552,7 +562,7 @@ public class MySQLFactionStorage implements IFactionStorage
 
     private Set<UUID> getFactionOfficers(final String factionName) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
+        Connection connection = this.mySQLConnection.getConnection();
         Set<UUID> officers = new HashSet<>();
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_OFFICERS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
@@ -567,7 +577,7 @@ public class MySQLFactionStorage implements IFactionStorage
 
     private Set<Claim> getFactionClaims(final String factionName) throws SQLException
     {
-        Connection connection = this.mySQLConnection.openConnection();
+        Connection connection = this.mySQLConnection.getConnection();
         Set<Claim> claims = new HashSet<>();
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CLAIMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
@@ -584,7 +594,7 @@ public class MySQLFactionStorage implements IFactionStorage
 
     private FactionChest getFactionChest(final String factionName) throws SQLException, IOException, ClassNotFoundException
     {
-        Connection connection = this.mySQLConnection.openConnection();
+        Connection connection = this.mySQLConnection.getConnection();
         FactionChest factionChest = new FactionChest(factionName);
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
@@ -636,7 +646,7 @@ public class MySQLFactionStorage implements IFactionStorage
         Map<FactionFlagTypes, Boolean> recruitMap = new LinkedHashMap<>();
         Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
 
-        Connection connection = this.mySQLConnection.openConnection();
+        Connection connection = this.mySQLConnection.getConnection();
 
         //Get leader flags
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LEADER_FLAGS_WHERE_FACTIONNAME);

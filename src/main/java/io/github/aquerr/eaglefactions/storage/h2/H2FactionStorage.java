@@ -143,25 +143,30 @@ public class H2FactionStorage implements IFactionStorage
 
     private int getDatabaseVersion() throws SQLException
     {
-        try(Connection connection = this.h2provider.getConnection())
+        try(final Connection connection = this.h2provider.getConnection())
         {
-            ResultSet resultSet = connection.getMetaData().getTables(null, null, "VERSION", null);
+            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
+            preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            boolean versionTableExists = false;
             while(resultSet.next())
             {
-                if(resultSet.getString(3).equalsIgnoreCase("Version"))
-                {
-                    try(Statement statement = h2provider.getConnection().createStatement())
-                    {
-                        ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
-                        if(resultSet1.last())
-                        {
-                            return resultSet1.getInt("Version");
-                        }
-                    }
-                }
+                versionTableExists = true;
             }
-            return 0;
+
+            if(versionTableExists)
+            {
+                final Statement statement = connection.createStatement();
+                final ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
+                if(resultSet1.last())
+                {
+                    return resultSet1.getInt("Version");
+                }
+                statement.close();
+            }
+            preparedStatement.close();
         }
+        return 0;
     }
 
     @Override
@@ -777,7 +782,7 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement.setString(1, "WarZone");
             preparedStatement.setString(2, "SZ");
             preparedStatement.setString(3, "");
-            preparedStatement.setString(4, "0");
+            preparedStatement.setString(4, new UUID(0, 0).toString());
             preparedStatement.setString(5, null);
             preparedStatement.setString(6, Instant.now().toString());
             preparedStatement.setString(7, "");
@@ -789,7 +794,7 @@ public class H2FactionStorage implements IFactionStorage
             preparedStatement1.setString(1, "SafeZone");
             preparedStatement1.setString(2, "WZ");
             preparedStatement1.setString(3, "");
-            preparedStatement1.setString(4, "0");
+            preparedStatement1.setString(4, new UUID(0, 0).toString());
             preparedStatement1.setString(5, null);
             preparedStatement1.setString(6, Instant.now().toString());
             preparedStatement1.setString(7, "");

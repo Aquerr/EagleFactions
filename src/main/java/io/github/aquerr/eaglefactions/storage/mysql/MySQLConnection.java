@@ -2,6 +2,10 @@ package io.github.aquerr.eaglefactions.storage.mysql;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.sql.SqlService;
+
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class MySQLConnection
@@ -36,7 +40,7 @@ public class MySQLConnection
     private MySQLConnection(EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
         //Load MySQL driver
-//        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         this.databaseUrl = configFields.getDatabaseUrl();
@@ -49,33 +53,34 @@ public class MySQLConnection
 
     private boolean databaseExists() throws SQLException
     {
-//        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-//        DataSource dataSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-//        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user=sa&password=admin&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
-        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", this.username, this.password);
-        ResultSet resultSet = connection.getMetaData().getCatalogs();
+        //Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
+        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + "&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        final ResultSet resultSet = connection.getMetaData().getCatalogs();
 
         while(resultSet.next())
         {
             if(resultSet.getString(1).equalsIgnoreCase(this.databaseName))
+            {
+                resultSet.close();
+                connection.close();
                 return true;
+            }
         }
         resultSet.close();
-//        connection.close();
+        connection.close();
         return false;
     }
 
     private void createDatabase() throws SQLException
     {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", this.username, this.password);
+        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + "&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
         Statement statement = connection.createStatement();
         statement.execute("CREATE SCHEMA " + this.databaseName + ";");
         statement.close();
-        connection.commit();
         connection.close();
     }
 
-    public Connection openConnection() throws SQLException
+    public Connection getConnection() throws SQLException
     {
         return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + TIME_ZONE_PROPERTY, this.username, this.password);
     }
