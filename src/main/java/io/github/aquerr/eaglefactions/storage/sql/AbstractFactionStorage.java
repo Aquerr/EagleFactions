@@ -84,9 +84,9 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String UPDATE_ALLY_FLAGS = "UPDATE AllyFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
 
     private final EagleFactions plugin;
-    private final SqlProvider sqlProvider;
+    private final SQLProvider sqlProvider;
 
-    protected AbstractFactionStorage(final EagleFactions plugin, final SqlProvider sqlProvider)
+    protected AbstractFactionStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
     {
         this.plugin = plugin;
         this.sqlProvider = sqlProvider;

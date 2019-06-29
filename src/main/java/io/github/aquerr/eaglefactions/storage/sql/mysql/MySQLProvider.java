@@ -2,11 +2,11 @@ package io.github.aquerr.eaglefactions.storage.sql.mysql;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
-import io.github.aquerr.eaglefactions.storage.sql.SqlProvider;
+import io.github.aquerr.eaglefactions.storage.sql.SQLProvider;
 
 import java.sql.*;
 
-public class MySQLProvider implements SqlProvider
+public class MySQLProvider implements SQLProvider
 {
     private static MySQLProvider INSTANCE = null;
 

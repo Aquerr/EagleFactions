@@ -2,14 +2,14 @@ package io.github.aquerr.eaglefactions.storage.sql.h2;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
-import io.github.aquerr.eaglefactions.storage.sql.SqlProvider;
+import io.github.aquerr.eaglefactions.storage.sql.SQLProvider;
 
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class H2Provider implements SqlProvider
+public class H2Provider implements SQLProvider
 {
     private static H2Provider INSTANCE = null;
 

@@ -33,9 +33,9 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
 
     private final EagleFactions plugin;
-    private final SqlProvider sqlProvider;
+    private final SQLProvider sqlProvider;
 
-    protected AbstractPlayerStorage(final EagleFactions plugin, final SqlProvider sqlProvider)
+    protected AbstractPlayerStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
     {
         if(sqlProvider == null) {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));
