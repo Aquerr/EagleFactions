@@ -2,13 +2,14 @@ package io.github.aquerr.eaglefactions.storage.h2;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.storage.SqlProvider;
 
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class H2Provider
+public class H2Provider implements SqlProvider
 {
     private static H2Provider INSTANCE = null;
 
@@ -16,7 +17,7 @@ public class H2Provider
     private final String username;
     private final String password;
 
-    public static H2Provider getInstance(EagleFactions eagleFactions)
+    public static H2Provider getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
         {
@@ -34,7 +35,7 @@ public class H2Provider
         else return INSTANCE;
     }
 
-    private H2Provider(EagleFactions eagleFactions) throws SQLException
+    private H2Provider(final EagleFactions eagleFactions) throws SQLException
     {
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         this.databasePath = eagleFactions.getConfigDir().resolve("data/h2/database");

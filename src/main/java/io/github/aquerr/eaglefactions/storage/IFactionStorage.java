@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 
+import java.sql.Connection;
 import java.util.Set;
 
 public interface IFactionStorage

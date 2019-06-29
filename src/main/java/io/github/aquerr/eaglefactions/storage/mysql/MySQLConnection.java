@@ -2,13 +2,14 @@ package io.github.aquerr.eaglefactions.storage.mysql;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.storage.SqlProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.sql.SqlService;
 
 import javax.sql.DataSource;
 import java.sql.*;
 
-public class MySQLConnection
+public class MySQLConnection implements SqlProvider
 {
     private static MySQLConnection INSTANCE = null;
 
@@ -19,7 +20,7 @@ public class MySQLConnection
     private final String username;
     private final String password;
 
-    public static MySQLConnection getInstance(EagleFactions eagleFactions)
+    public static MySQLConnection getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
         {
@@ -37,7 +38,12 @@ public class MySQLConnection
         else return INSTANCE;
     }
 
-    private MySQLConnection(EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
+    public Connection getConnection() throws SQLException
+    {
+        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + TIME_ZONE_PROPERTY, this.username, this.password);
+    }
+
+    private MySQLConnection(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
         //Load MySQL driver
         Class.forName("com.mysql.cj.jdbc.Driver");
@@ -78,10 +84,5 @@ public class MySQLConnection
         statement.execute("CREATE SCHEMA " + this.databaseName + ";");
         statement.close();
         connection.close();
-    }
-
-    public Connection getConnection() throws SQLException
-    {
-        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + TIME_ZONE_PROPERTY, this.username, this.password);
     }
 }
