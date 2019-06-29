@@ -1,8 +1,8 @@
-package io.github.aquerr.eaglefactions.storage.h2;
+package io.github.aquerr.eaglefactions.storage.sql.h2;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
-import io.github.aquerr.eaglefactions.storage.SqlProvider;
+import io.github.aquerr.eaglefactions.storage.sql.SqlProvider;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -49,5 +49,11 @@ public class H2Provider implements SqlProvider
     public Connection getConnection() throws SQLException
     {
         return DriverManager.getConnection("jdbc:h2:" + this.databasePath, this.username, this.password);
+    }
+
+    @Override
+    public String getProviderName()
+    {
+        return "h2";
     }
 }

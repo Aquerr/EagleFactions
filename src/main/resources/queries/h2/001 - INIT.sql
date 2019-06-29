@@ -9,7 +9,7 @@ CREATE TABLE Factions (
    Name        VARCHAR(200)        UNIQUE      NOT NULL,
    Tag         VARCHAR(10)                     NOT NULL,
    TagColor    VARCHAR(40)                     NULL,
-   Leader      UUID                     NOT NULL,
+   Leader      VARCHAR(36)                     NOT NULL,
    Home        VARCHAR(200)                    NULL,
    LastOnline  VARCHAR(200)                    NOT NULL,
    Alliances    VARCHAR                     NOT NULL,
@@ -20,7 +20,7 @@ CREATE UNIQUE INDEX ON Factions (Name);
 
 -- Create Recruits Table
 CREATE TABLE FactionRecruits (
-    RecruitUUID     UUID    UNIQUE  NOT NULL,
+    RecruitUUID     VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName     VARCHAR(200)    NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
@@ -28,7 +28,7 @@ CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 
 -- Create Members Table
 CREATE TABLE FactionMembers (
-    MemberUUID  UUID    UNIQUE  NOT NULL,
+    MemberUUID  VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName VARCHAR(200)    UNIQUE  NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
@@ -36,7 +36,7 @@ CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
 
 -- Create Officers Table
 CREATE TABLE FactionOfficers (
-    OfficerUUID UUID    UNIQUE  NOT NULL,
+    OfficerUUID VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName VARCHAR(200)    UNIQUE  NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
@@ -131,7 +131,7 @@ CREATE UNIQUE INDEX ON AllyFlags (FactionName);
 CREATE TABLE Claims (
    Id            INT AUTO_INCREMENT              NOT NULL,
    FactionName   VARCHAR(200)                  NOT NULL,
-   WorldUUID   UUID                            NOT NULL,
+   WorldUUID     VARCHAR(36)                            NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
@@ -147,10 +147,10 @@ CREATE UNIQUE INDEX ON FactionChests (FactionName);
 
 -- Create Players Table
 CREATE TABLE Players (
-    PlayerUUID UUID PRIMARY KEY NOT NULL,
+    PlayerUUID VARCHAR(36) PRIMARY KEY NOT NULL,
     Name    VARCHAR(200)    NOT NULL,
     Power   REAL NOT NULL,
-    Maxpower    REAL NOT NULL,
+    MaxPower    REAL NOT NULL,
     DeathInWarzone BOOLEAN NOT NULL
 );
 CREATE UNIQUE INDEX ON Players (PlayerUUID);

@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.storage.hocon;
+package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.entities.*;

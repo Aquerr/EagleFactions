@@ -1,17 +1,14 @@
-package io.github.aquerr.eaglefactions.storage.mysql;
+package io.github.aquerr.eaglefactions.storage.sql.mysql;
 
 import io.github.aquerr.eaglefactions.EagleFactions;
 import io.github.aquerr.eaglefactions.config.ConfigFields;
-import io.github.aquerr.eaglefactions.storage.SqlProvider;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.sql.SqlService;
+import io.github.aquerr.eaglefactions.storage.sql.SqlProvider;
 
-import javax.sql.DataSource;
 import java.sql.*;
 
-public class MySQLConnection implements SqlProvider
+public class MySQLProvider implements SqlProvider
 {
-    private static MySQLConnection INSTANCE = null;
+    private static MySQLProvider INSTANCE = null;
 
     private static final String TIME_ZONE_PROPERTY = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
@@ -20,13 +17,13 @@ public class MySQLConnection implements SqlProvider
     private final String username;
     private final String password;
 
-    public static MySQLConnection getInstance(final EagleFactions eagleFactions)
+    public static MySQLProvider getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
         {
             try
             {
-                INSTANCE = new MySQLConnection(eagleFactions);
+                INSTANCE = new MySQLProvider(eagleFactions);
                 return INSTANCE;
             }
             catch(IllegalAccessException | InstantiationException | ClassNotFoundException | SQLException e)
@@ -43,7 +40,13 @@ public class MySQLConnection implements SqlProvider
         return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + TIME_ZONE_PROPERTY, this.username, this.password);
     }
 
-    private MySQLConnection(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
+    @Override
+    public String getProviderName()
+    {
+        return "mysql";
+    }
+
+    private MySQLProvider(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
         //Load MySQL driver
         Class.forName("com.mysql.cj.jdbc.Driver");

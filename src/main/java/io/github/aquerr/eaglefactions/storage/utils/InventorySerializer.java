@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.storage;
+package io.github.aquerr.eaglefactions.storage.utils;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;

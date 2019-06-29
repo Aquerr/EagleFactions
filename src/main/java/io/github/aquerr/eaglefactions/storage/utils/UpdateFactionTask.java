@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.storage;
+package io.github.aquerr.eaglefactions.storage.utils;
 
 import io.github.aquerr.eaglefactions.entities.Faction;
 

@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.storage.hocon;
+package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import io.github.aquerr.eaglefactions.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.entities.FactionPlayer;

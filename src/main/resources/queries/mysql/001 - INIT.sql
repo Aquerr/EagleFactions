@@ -1,6 +1,6 @@
 
 -- Create Version Table
-CREATE TABLE IF NOT EXISTS `Version` (
+CREATE TABLE `Version` (
   `Version` INT NOT NULL,
   PRIMARY KEY (`Version`),
   UNIQUE INDEX `Version_UNIQUE` (`Version` ASC) VISIBLE
@@ -182,7 +182,7 @@ CREATE TABLE `Claims` (
 -- Create FactionsChest Table
 CREATE TABLE `FactionChests` (
   `FactionName` VARCHAR(200) NOT NULL,
-  `ChestItems` BINARY NOT NULL,
+  `ChestItems` BLOB NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
   CONSTRAINT `Faction_FactionChest`
     FOREIGN KEY (`FactionName`)
@@ -196,7 +196,7 @@ CREATE TABLE `Players` (
   `PlayerUUID` VARCHAR(36) NOT NULL,
   `Name` VARCHAR(200) NOT NULL,
   `Power` FLOAT NOT NULL,
-  `Maxpower` FLOAT NOT NULL,
+  `MaxPower` FLOAT NOT NULL,
   `DeathInWarzone` TINYINT(1) NOT NULL,
   PRIMARY KEY (`PlayerUUID`),
   UNIQUE INDEX `PlayerUUID_UNIQUE` (`PlayerUUID` ASC) VISIBLE

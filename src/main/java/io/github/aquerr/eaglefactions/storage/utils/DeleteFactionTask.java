@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.storage;
+package io.github.aquerr.eaglefactions.storage.utils;
 
 public class DeleteFactionTask implements IStorageTask
 {
