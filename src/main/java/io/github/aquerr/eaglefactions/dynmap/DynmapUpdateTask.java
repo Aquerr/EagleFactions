@@ -14,13 +14,15 @@ public class DynmapUpdateTask implements Runnable {
 
         String worldName = Sponge.getServer().getDefaultWorld().get().getWorldName();
 
-        MarkerSet markerSwt = DynmapMain.markerapi.createMarkerSet("islandearth.markerset", "EagleFactions", DynmapMain.markerapi.getMarkerIcons(), false);
+        MarkerSet markerSwt = DynmapMain.markerapi.createMarkerSet("purpleflag", "EagleFactions", DynmapMain.markerapi.getMarkerIcons(), false);
         String markerId = worldName + "_" + "FactionTest";
 
-        AreaMarker areaMarker = markerSwt.createAreaMarker(markerId, "FactionTest", false, worldName, new double[3000], new double[1000], false);
+        AreaMarker areaMarker = markerSwt.createAreaMarker(markerId, "FactionTest", false, worldName, new double[1000], new double[1000], false);
 
-        areaMarker.setCornerLocation(0, 0, 0);
-        areaMarker.setCornerLocation(1, -100, -100);
+        double[] d1 = {-50, -9};
+        double[] d2 = {-720, -679};
+
+        areaMarker.setCornerLocations(d1, d2);
 
         areaMarker.setLabel("Test");
         areaMarker.setDescription("Test?");
