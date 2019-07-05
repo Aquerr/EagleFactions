@@ -14,7 +14,7 @@ public class DynmapUpdateTask implements Runnable {
 
         String worldName = Sponge.getServer().getDefaultWorld().get().getWorldName();
 
-        MarkerSet markerSwt = DynmapMain.markerapi.createMarkerSet("test_markerset", "EagleFactions", DynmapMain.markerapi.getMarkerIcons(), false);
+        MarkerSet markerSwt = DynmapMain.markerapi.createMarkerSet("islandearth.markerset", "EagleFactions", DynmapMain.markerapi.getMarkerIcons(), false);
         String markerId = worldName + "_" + "FactionTest";
 
         AreaMarker areaMarker = markerSwt.createAreaMarker(markerId, "FactionTest", false, worldName, new double[3000], new double[1000], false);
