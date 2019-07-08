@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class PlayerDeathListener extends AbstractListener
 {
-    public PlayerDeathListener(EagleFactionsPlugin plugin)
+    public PlayerDeathListener(EagleFactions plugin)
     {
         super(plugin);
     }

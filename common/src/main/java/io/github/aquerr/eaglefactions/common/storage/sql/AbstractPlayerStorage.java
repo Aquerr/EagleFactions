@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
@@ -32,10 +32,10 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
     private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
 
-    private final EagleFactionsPlugin plugin;
+    private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
 
-    protected AbstractPlayerStorage(final EagleFactionsPlugin plugin, final SQLProvider sqlProvider)
+    protected AbstractPlayerStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
     {
         if(sqlProvider == null) {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));

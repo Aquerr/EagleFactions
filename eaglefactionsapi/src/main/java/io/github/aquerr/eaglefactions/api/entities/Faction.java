@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.api.entities;
 
+import io.github.aquerr.eaglefactions.api.managers.FlagManager;
 import org.spongepowered.api.text.Text;
 
 import java.time.Instant;

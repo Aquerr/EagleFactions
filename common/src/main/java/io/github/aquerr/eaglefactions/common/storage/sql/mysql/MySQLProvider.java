@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.mysql;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 
 import java.sql.*;
@@ -17,7 +17,7 @@ public class MySQLProvider implements SQLProvider
     private final String username;
     private final String password;
 
-    public static MySQLProvider getInstance(final EagleFactionsPlugin eagleFactions)
+    public static MySQLProvider getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
         {
@@ -46,7 +46,7 @@ public class MySQLProvider implements SQLProvider
         return "mysql";
     }
 
-    private MySQLProvider(final EagleFactionsPlugin eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
+    private MySQLProvider(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
         //Load MySQL driver
         Class.forName("com.mysql.cj.jdbc.Driver");

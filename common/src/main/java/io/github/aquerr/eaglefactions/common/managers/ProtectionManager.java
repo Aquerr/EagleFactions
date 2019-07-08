@@ -1,6 +1,14 @@
-package io.github.aquerr.eaglefactions.api.managers;
+package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.managers.IProtectionManager;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.PluginPermissions;
+import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
@@ -14,6 +22,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,16 +30,16 @@ import java.util.UUID;
 public class ProtectionManager implements IProtectionManager
 {
     private static ProtectionManager INSTANCE = null;
-    private final EagleFactionsPlugin plugin;
+    private final EagleFactions plugin;
 
-    public static ProtectionManager getInstance(final EagleFactionsPlugin eagleFactions)
+    public static ProtectionManager getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new ProtectionManager(eagleFactions);
         else return INSTANCE;
     }
 
-    private ProtectionManager(final EagleFactionsPlugin plugin)
+    private ProtectionManager(final EagleFactions plugin)
     {
         INSTANCE = this;
         this.plugin = plugin;

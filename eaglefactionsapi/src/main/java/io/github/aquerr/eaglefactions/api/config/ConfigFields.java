@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.config;
+package io.github.aquerr.eaglefactions.api.config;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.api.text.Text;

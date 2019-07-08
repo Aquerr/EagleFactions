@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.h2;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 
 import java.nio.file.Path;
@@ -17,7 +17,7 @@ public class H2Provider implements SQLProvider
     private final String username;
     private final String password;
 
-    public static H2Provider getInstance(final EagleFactionsPlugin eagleFactions)
+    public static H2Provider getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
         {
@@ -35,7 +35,7 @@ public class H2Provider implements SQLProvider
         else return INSTANCE;
     }
 
-    private H2Provider(final EagleFactionsPlugin eagleFactions) throws SQLException
+    private H2Provider(final EagleFactions eagleFactions) throws SQLException
     {
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         this.databasePath = eagleFactions.getConfigDir().resolve("data/h2/database");

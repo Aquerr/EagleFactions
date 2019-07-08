@@ -1,10 +1,10 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.common.config.IConfiguration;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.common.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.IConfiguration;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
@@ -20,7 +20,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
     private final IConfiguration configuration;
     private final FactionLogic factionLogic;
 
-    public FactionRemoverTask(final EagleFactionsPlugin eagleFactions)
+    public FactionRemoverTask(final EagleFactions eagleFactions)
     {
         this.configuration = eagleFactions.getConfiguration();
         this.factionLogic = eagleFactions.getFactionLogic();

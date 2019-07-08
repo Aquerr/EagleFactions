@@ -1,9 +1,10 @@
-package io.github.aquerr.eaglefactions.api.managers;
+package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.managers.IPowerManager;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -20,27 +21,27 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Singleton
-public class PowerManager
+public class PowerManager implements IPowerManager
 {
     private static PowerManager INSTANCE = null;
 
-    private final EagleFactionsPlugin _plugin;
+    private final EagleFactions plugin;
     private final ConfigFields _configFields;
 
     private CommentedConfigurationNode _factionsNode;
     private final UUID dummyUUID = new UUID(0, 0);
 
-    public static PowerManager getInstance(EagleFactionsPlugin eagleFactions)
+    public static PowerManager getInstance(EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new PowerManager(eagleFactions);
         else return INSTANCE;
     }
 
-    private PowerManager(EagleFactionsPlugin eagleFactions)
+    private PowerManager(EagleFactions eagleFactions)
     {
         INSTANCE = this;
-        _plugin = eagleFactions;
+        plugin = eagleFactions;
         _configFields = eagleFactions.getConfiguration().getConfigFields();
         Path configDir = eagleFactions.getConfigDir();
 
@@ -64,7 +65,7 @@ public class PowerManager
     {
         if (playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
-        return _plugin.getPlayerManager().getPlayerPower(playerUUID);
+        return plugin.getPlayerManager().getPlayerPower(playerUUID);
     }
 
     public float getFactionPower(Faction faction)
@@ -157,24 +158,24 @@ public class PowerManager
         if(playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
 
-        return _plugin.getPlayerManager().getPlayerMaxPower(playerUUID);
+        return plugin.getPlayerManager().getPlayerMaxPower(playerUUID);
     }
 
     public void addPower(UUID playerUUID, boolean isKillAward)
     {
-        float playerPower = _plugin.getPlayerManager().getPlayerPower(playerUUID);
+        float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
 
         if(playerPower + _configFields.getPowerIncrement() < getPlayerMaxPower(playerUUID))
         {
             if(isKillAward)
             {
                 float killAward = _configFields.getKillAward();
-                _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower + killAward);
+                plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower + killAward);
             }
             else
             {
                 float newPower = round(playerPower + _configFields.getPowerIncrement(), 2);
-                _plugin.getPlayerManager().setPlayerPower(playerUUID, newPower);
+                plugin.getPlayerManager().setPlayerPower(playerUUID, newPower);
             }
         }
     }
@@ -187,7 +188,7 @@ public class PowerManager
 
     public void setPower(UUID playerUUID, float power)
     {
-        _plugin.getPlayerManager().setPlayerPower(playerUUID, power);
+        plugin.getPlayerManager().setPlayerPower(playerUUID, power);
     }
 
     public void startIncreasingPower(UUID playerUUID)
@@ -199,7 +200,7 @@ public class PowerManager
             @Override
             public void accept(Task task)
             {
-                if (!_plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
+                if (!plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
 
                 if(getPlayerPower(playerUUID) + _configFields.getPowerIncrement() < getPlayerMaxPower(playerUUID))
                 {
@@ -210,16 +211,16 @@ public class PowerManager
                     setPower(playerUUID, getPlayerMaxPower(playerUUID));
                 }
             }
-        }).async().submit(_plugin);
+        }).async().submit(plugin);
     }
 
     public void decreasePower(UUID playerUUID)
     {
-        float playerPower = _plugin.getPlayerManager().getPlayerPower(playerUUID);
+        float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
 
         if(playerPower - _configFields.getPowerDecrement() > 0)
         {
-                _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - _configFields.getPowerDecrement());
+                plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - _configFields.getPowerDecrement());
         }
         else
         {
@@ -229,21 +230,21 @@ public class PowerManager
 
     public void penalty(UUID playerUUID)
     {
-        float playerPower = _plugin.getPlayerManager().getPlayerPower(playerUUID);
+        float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
         float penalty = _configFields.getPenalty();
 
         if(playerPower - penalty > 0)
         {
-            _plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - penalty);
+            plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - penalty);
         }
         else
         {
-            _plugin.getPlayerManager().setPlayerPower(playerUUID, 0);
+            plugin.getPlayerManager().setPlayerPower(playerUUID, 0);
         }
     }
 
     public void setMaxPower(UUID playerUUID, float power)
     {
-        _plugin.getPlayerManager().setPlayerMaxPower(playerUUID, power);
+        plugin.getPlayerManager().setPlayerMaxPower(playerUUID, power);
     }
 }

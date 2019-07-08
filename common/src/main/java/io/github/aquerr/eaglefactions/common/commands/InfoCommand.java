@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 public class InfoCommand extends AbstractCommand
 {
-    public InfoCommand(EagleFactionsPlugin plugin)
+    public InfoCommand(EagleFactions plugin)
     {
         super(plugin);
     }

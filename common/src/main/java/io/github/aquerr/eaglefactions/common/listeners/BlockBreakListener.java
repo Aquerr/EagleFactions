@@ -1,9 +1,10 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -43,7 +44,7 @@ public class BlockBreakListener extends AbstractListener
 {
     private final ConfigFields configFields;
 
-    public BlockBreakListener(EagleFactionsPlugin plugin)
+    public BlockBreakListener(EagleFactions plugin)
     {
         super(plugin);
         this.configFields = plugin.getConfiguration().getConfigFields();

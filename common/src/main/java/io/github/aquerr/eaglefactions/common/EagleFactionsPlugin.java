@@ -6,10 +6,31 @@ import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.api.entities.StopWarRequest;
+import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.api.managers.*;
+import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
+import io.github.aquerr.eaglefactions.api.config.IConfiguration;
+import io.github.aquerr.eaglefactions.common.config.Configuration;
 import io.github.aquerr.eaglefactions.common.listeners.*;
+import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
+import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
+import io.github.aquerr.eaglefactions.common.logic.PVPLoggerImpl;
+import io.github.aquerr.eaglefactions.api.managers.FlagManager;
+import io.github.aquerr.eaglefactions.common.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.common.managers.PowerManager;
+import io.github.aquerr.eaglefactions.common.managers.ProtectionManager;
+import io.github.aquerr.eaglefactions.common.message.MessageLoader;
+import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.parsers.FactionNameArgument;
+import io.github.aquerr.eaglefactions.common.parsers.FactionPlayerArgument;
+import io.github.aquerr.eaglefactions.common.placeholders.EFPlaceholderService;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.common.scheduling.FactionRemoverTask;
+import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
+import io.github.aquerr.eaglefactions.common.version.VersionChecker;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -545,7 +566,7 @@ public class EagleFactionsPlugin implements EagleFactions
         return _attackLogic;
     }
 
-    public FactionLogicImpl getFactionLogic()
+    public FactionLogic getFactionLogic()
     {
         return _factionLogic;
     }
@@ -575,17 +596,17 @@ public class EagleFactionsPlugin implements EagleFactions
         _configuration = new Configuration(_configDir);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
 
-        _pvpLogger = new PVPLogger(getConfiguration());
+        _pvpLogger = new PVPLoggerImpl(getConfiguration());
     }
 
     private void SetupManagers()
     {
-        _storageManager = StorageManager.getInstance(this);
+        _storageManager = StorageManagerImpl.getInstance(this);
         _playerManager = PlayerManager.getInstance(this);
         _powerManager = PowerManager.getInstance(this);
         _flagManager = FlagManager.getInstance(this);
         _factionLogic = FactionLogicImpl.getInstance(this);
-        _attackLogic = AttackLogic.getInstance(this);
+        _attackLogic = AttackLogicImpl.getInstance(this);
         _protectionManager = ProtectionManager.getInstance(this);
     }
 

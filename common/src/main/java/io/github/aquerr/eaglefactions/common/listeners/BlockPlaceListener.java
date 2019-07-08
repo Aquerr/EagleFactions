@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Piston;
@@ -13,7 +13,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 public class BlockPlaceListener extends AbstractListener
 {
-    public BlockPlaceListener(EagleFactionsPlugin plugin)
+    public BlockPlaceListener(EagleFactions plugin)
     {
         super(plugin);
     }

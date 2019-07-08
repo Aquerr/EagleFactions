@@ -1,11 +1,11 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import com.flowpowered.math.vector.Vector3d;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.common.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
@@ -31,7 +31,7 @@ public class EntityDamageListener extends AbstractListener
 {
     private final PVPLogger pvpLogger;
 
-    public EntityDamageListener(final EagleFactionsPlugin plugin)
+    public EntityDamageListener(final EagleFactions plugin)
     {
         super(plugin);
         this.pvpLogger = plugin.getPVPLogger();

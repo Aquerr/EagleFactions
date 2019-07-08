@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.FactionCreateEvent;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
@@ -27,7 +27,7 @@ import java.util.Optional;
  */
 public class CreateCommand extends AbstractCommand
 {
-    public CreateCommand(EagleFactionsPlugin plugin)
+    public CreateCommand(EagleFactions plugin)
     {
         super(plugin);
     }

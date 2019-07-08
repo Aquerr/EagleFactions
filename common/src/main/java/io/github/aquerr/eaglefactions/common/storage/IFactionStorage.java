@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.common.storage;
 
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 
 import java.util.Set;
 

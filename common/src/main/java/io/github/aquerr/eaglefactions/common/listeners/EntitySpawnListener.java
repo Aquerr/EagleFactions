@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 public class EntitySpawnListener extends AbstractListener
 {
-    public EntitySpawnListener(EagleFactionsPlugin plugin)
+    public EntitySpawnListener(EagleFactions plugin)
     {
         super(plugin);
     }

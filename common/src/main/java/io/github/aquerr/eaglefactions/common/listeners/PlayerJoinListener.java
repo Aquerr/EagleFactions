@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import io.github.aquerr.eaglefactions.common.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class PlayerJoinListener extends AbstractListener
 {
-    public PlayerJoinListener(EagleFactionsPlugin plugin)
+    public PlayerJoinListener(EagleFactions plugin)
     {
         super(plugin);
     }

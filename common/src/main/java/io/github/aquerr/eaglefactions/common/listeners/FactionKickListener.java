@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.FactionKickEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FactionKickListener extends AbstractListener
 {
-    public FactionKickListener(EagleFactionsPlugin plugin)
+    public FactionKickListener(EagleFactions plugin)
     {
         super(plugin);
     }

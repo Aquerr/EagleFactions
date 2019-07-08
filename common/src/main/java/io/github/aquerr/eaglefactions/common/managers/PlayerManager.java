@@ -1,10 +1,11 @@
-package io.github.aquerr.eaglefactions.api.managers;
+package io.github.aquerr.eaglefactions.common.managers;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.managers.IPlayerManager;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.storage.StorageManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -19,7 +20,7 @@ import java.util.UUID;
 /**
  * Created by Aquerr on 2017-08-04.
  */
-public class PlayerManager
+public class PlayerManager implements IPlayerManager
 {
     private static PlayerManager INSTANCE = null;
 
@@ -28,7 +29,7 @@ public class PlayerManager
 
     private UserStorageService userStorageService;
 
-    private PlayerManager(final EagleFactionsPlugin plugin)
+    private PlayerManager(final EagleFactions plugin)
     {
         INSTANCE = this;
         _configFields = plugin.getConfiguration().getConfigFields();
@@ -38,7 +39,7 @@ public class PlayerManager
         optionalUserStorageService.ifPresent(x -> userStorageService = x);
     }
 
-    public static PlayerManager getInstance(EagleFactionsPlugin eagleFactions)
+    public static PlayerManager getInstance(EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new PlayerManager(eagleFactions);

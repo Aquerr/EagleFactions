@@ -1,8 +1,9 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 public class TagColorCommand extends AbstractCommand
 {
-    public TagColorCommand(EagleFactionsPlugin plugin)
+    public TagColorCommand(EagleFactions plugin)
     {
         super(plugin);
     }

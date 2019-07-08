@@ -1,16 +1,16 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 
 public abstract class AbstractListener
 {
-    private EagleFactionsPlugin plugin;
+    private EagleFactions plugin;
 
-    public AbstractListener(EagleFactionsPlugin plugin){
+    public AbstractListener(EagleFactions plugin){
         this.plugin = plugin;
     }
 
-    public EagleFactionsPlugin getPlugin()
+    public EagleFactions getPlugin()
     {
         return plugin;
     }

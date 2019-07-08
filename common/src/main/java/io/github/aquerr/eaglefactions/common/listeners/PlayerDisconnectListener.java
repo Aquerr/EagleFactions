@@ -1,7 +1,8 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 public class PlayerDisconnectListener extends AbstractListener
 {
-    public PlayerDisconnectListener(EagleFactionsPlugin plugin)
+    public PlayerDisconnectListener(EagleFactions plugin)
     {
         super(plugin);
     }

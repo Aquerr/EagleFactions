@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ExplosionListener extends AbstractListener
 {
-    public ExplosionListener(EagleFactionsPlugin plugin)
+    public ExplosionListener(EagleFactions plugin)
     {
         super(plugin);
     }

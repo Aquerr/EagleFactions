@@ -1,7 +1,8 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import com.google.common.collect.Lists;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 public class HelpCommand extends AbstractCommand
 {
-    public HelpCommand(EagleFactionsPlugin plugin)
+    public HelpCommand(EagleFactions plugin)
     {
         super(plugin);
     }

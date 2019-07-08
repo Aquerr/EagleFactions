@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -9,14 +9,14 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 
 public abstract class AbstractCommand implements CommandExecutor
 {
-    private EagleFactionsPlugin _eagleFactions;
+    private EagleFactions _eagleFactions;
 
-    public AbstractCommand(EagleFactionsPlugin plugin)
+    public AbstractCommand(EagleFactions plugin)
     {
         this._eagleFactions = plugin;
     }
 
-    public EagleFactionsPlugin getPlugin()
+    public EagleFactions getPlugin()
     {
         return _eagleFactions;
     }

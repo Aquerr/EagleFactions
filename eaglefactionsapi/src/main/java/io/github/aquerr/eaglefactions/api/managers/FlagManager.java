@@ -1,28 +1,28 @@
 package io.github.aquerr.eaglefactions.api.managers;
 
 import com.google.inject.Singleton;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionFlagTypes;
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionFlagTypes;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @Singleton
-public class FlagManager
+public class FlagManager implements IFlagManager
 {
     private static FlagManager INSTANCE = null;
-    private final EagleFactionsPlugin _plugin;
+    private final EagleFactions plugin;
 
-    private FlagManager(EagleFactionsPlugin plugin)
+    private FlagManager(EagleFactions plugin)
     {
-        this._plugin = plugin;
+        this.plugin = plugin;
         INSTANCE = this;
     }
 
-    public static FlagManager getInstance(EagleFactionsPlugin eagleFactions)
+    public static FlagManager getInstance(EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new FlagManager(eagleFactions);
@@ -61,7 +61,7 @@ public class FlagManager
 
     private boolean checkFlag(UUID playerUUID, Faction playerFaction, FactionFlagTypes flagTypes)
     {
-        FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(playerUUID, playerFaction);
+        FactionMemberType memberType = plugin.getPlayerManager().getFactionMemberType(playerUUID, playerFaction);
 
         return playerFaction.getFlags().get(memberType).get(flagTypes);
     }
@@ -70,7 +70,7 @@ public class FlagManager
     {
         if (playerFaction.getName().equals(chunkFaction.getName()))
         {
-            FactionMemberType memberType = _plugin.getPlayerManager().getFactionMemberType(playerUUID, playerFaction);
+            FactionMemberType memberType = plugin.getPlayerManager().getFactionMemberType(playerUUID, playerFaction);
 
             return chunkFaction.getFlags().get(memberType).get(flagType);
         }

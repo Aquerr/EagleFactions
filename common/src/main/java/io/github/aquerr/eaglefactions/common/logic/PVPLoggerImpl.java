@@ -1,9 +1,10 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.common.config.IConfiguration;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.IConfiguration;
+import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -21,7 +22,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class PVPLogger
+public class PVPLoggerImpl implements PVPLogger
 {
     private ConfigFields _configFields;
     private Map<UUID, Integer> _attackedPlayers;
@@ -31,9 +32,9 @@ public class PVPLogger
     private boolean _shouldDisplayInScoreboard;
     private Set<String> _blockedCommandsDuringFight;
 
-    private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLogger";
+    private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLoggerImpl";
 
-    public PVPLogger(IConfiguration configuration)
+    public PVPLoggerImpl(IConfiguration configuration)
     {
         _configFields = configuration.getConfigFields();
         _isActive = _configFields.isPVPLoggerActive();
@@ -48,16 +49,19 @@ public class PVPLogger
         }
     }
 
+    @Override
     public boolean isActive()
     {
         return _isActive;
     }
 
+    @Override
     public int getBlockTime()
     {
         return _blockTime;
     }
 
+    @Override
     public boolean shouldBlockCommand(Player player, String usedCommand)
     {
         if (isPlayerBlocked(player))
@@ -86,6 +90,7 @@ public class PVPLogger
         return false;
     }
 
+    @Override
     public void addOrUpdatePlayer(Player player)
     {
         //Update player's time if it already in a list.
@@ -147,26 +152,19 @@ public class PVPLogger
         }
     }
 
-    private Integer getNewTaskId(int preferredId)
-    {
-        if(this._playersIdTaskMap.values().contains(preferredId))
-        {
-            return getNewTaskId(preferredId + 1);
-        }
-
-        return preferredId;
-    }
-
+    @Override
     public boolean isPlayerBlocked(Player player)
     {
         return _attackedPlayers.containsKey(player.getUniqueId());
     }
 
+
+    @Override
     public void removePlayer(Player player)
     {
         synchronized(_attackedPlayers)
         {
-            //Remove PVPLogger objective
+            //Remove PVPLoggerImpl objective
             Scoreboard scoreboard = player.getScoreboard();
             Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + this._playersIdTaskMap.get(player.getUniqueId()));
             if (pvploggerObjective.isPresent())
@@ -180,11 +178,22 @@ public class PVPLogger
         }
     }
 
+    @Override
     public int getPlayerBlockTime(Player player)
     {
         synchronized(_attackedPlayers)
         {
             return _attackedPlayers.getOrDefault(player.getUniqueId(), 0);
         }
+    }
+
+    private Integer getNewTaskId(int preferredId)
+    {
+        if(this._playersIdTaskMap.values().contains(preferredId))
+        {
+            return getNewTaskId(preferredId + 1);
+        }
+
+        return preferredId;
     }
 }

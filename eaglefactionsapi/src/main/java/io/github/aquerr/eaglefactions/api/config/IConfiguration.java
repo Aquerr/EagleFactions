@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.config;
+package io.github.aquerr.eaglefactions.api.config;
 
 import java.util.Collection;
 import java.util.List;

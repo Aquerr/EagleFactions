@@ -1,9 +1,10 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.ChatEnum;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -23,7 +24,7 @@ public class ChatMessageListener extends AbstractListener
 {
     private final ConfigFields configFields;
 
-    public ChatMessageListener(EagleFactionsPlugin plugin)
+    public ChatMessageListener(EagleFactions plugin)
     {
         super(plugin);
         this.configFields = plugin.getConfiguration().getConfigFields();

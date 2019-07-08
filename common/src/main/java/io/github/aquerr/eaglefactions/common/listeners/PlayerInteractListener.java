@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import com.flowpowered.math.vector.Vector3d;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.Entity;
@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public class PlayerInteractListener extends AbstractListener
 {
-    public PlayerInteractListener(EagleFactionsPlugin plugin)
+    public PlayerInteractListener(EagleFactions plugin)
     {
         super(plugin);
     }

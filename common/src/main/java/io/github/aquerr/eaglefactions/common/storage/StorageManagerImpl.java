@@ -1,10 +1,11 @@
 package io.github.aquerr.eaglefactions.common.storage;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
-import io.github.aquerr.eaglefactions.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.storage.StorageManager;
+import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2FactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2PlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.file.hocon.HOCONFactionStorage;
@@ -23,25 +24,25 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class StorageManager implements Runnable
+public class StorageManagerImpl implements StorageManager, Runnable
 {
     private static StorageManager INSTANCE = null;
 
     private final IFactionStorage factionsStorage;
     private final IPlayerStorage playerStorage;
     private final Queue<IStorageTask> storageTaskQueue;
-    private final EagleFactionsPlugin plugin;
+    private final EagleFactions plugin;
 
     private final Thread storageThread;
 
-    public static StorageManager getInstance(EagleFactionsPlugin eagleFactions)
+    public static StorageManager getInstance(EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
-            return new StorageManager(eagleFactions);
+            return new StorageManagerImpl(eagleFactions);
         else return INSTANCE;
     }
 
-    private StorageManager(EagleFactionsPlugin eagleFactions)
+    private StorageManagerImpl(EagleFactions eagleFactions)
     {
         INSTANCE = this;
         this.plugin = eagleFactions;

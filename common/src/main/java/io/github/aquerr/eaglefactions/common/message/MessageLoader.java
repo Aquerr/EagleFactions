@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.message;
 
 import com.google.inject.Singleton;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -19,14 +19,14 @@ public class MessageLoader
 {
     private static MessageLoader instance = null;
 
-    public static MessageLoader getInstance(EagleFactionsPlugin eagleFactions)
+    public static MessageLoader getInstance(EagleFactions eagleFactions)
     {
         if (instance == null)
             return new MessageLoader(eagleFactions);
         return instance;
     }
 
-    private MessageLoader(EagleFactionsPlugin eagleFactions)
+    private MessageLoader(EagleFactions eagleFactions)
     {
         instance = this;
         Path configDir = eagleFactions.getConfigDir();

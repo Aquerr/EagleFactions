@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.entities.*;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
@@ -83,10 +83,10 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String UPDATE_RECRUIT_FLAGS = "UPDATE RecruitFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
     private static final String UPDATE_ALLY_FLAGS = "UPDATE AllyFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
 
-    private final EagleFactionsPlugin plugin;
+    private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
 
-    protected AbstractFactionStorage(final EagleFactionsPlugin plugin, final SQLProvider sqlProvider)
+    protected AbstractFactionStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
     {
         this.plugin = plugin;
         this.sqlProvider = sqlProvider;

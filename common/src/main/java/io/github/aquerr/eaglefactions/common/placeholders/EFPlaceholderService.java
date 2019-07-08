@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.placeholders;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import me.rojo8399.placeholderapi.*;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
@@ -16,10 +16,10 @@ public class EFPlaceholderService
 {
     private static EFPlaceholderService INSTANCE = null;
 
-    private final EagleFactionsPlugin plugin;
+    private final EagleFactions plugin;
     private final PlaceholderService placeholderService;
 
-    public static EFPlaceholderService getInstance(final EagleFactionsPlugin plugin, Object placeholderService)
+    public static EFPlaceholderService getInstance(final EagleFactions plugin, Object placeholderService)
     {
         if(INSTANCE == null) {
             INSTANCE = new EFPlaceholderService(plugin, (PlaceholderService) placeholderService);
@@ -27,7 +27,7 @@ public class EFPlaceholderService
         return INSTANCE;
     }
 
-    private EFPlaceholderService(final EagleFactionsPlugin plugin, PlaceholderService placeholderService)
+    private EFPlaceholderService(final EagleFactions plugin, PlaceholderService placeholderService)
     {
         this.plugin = plugin;
         this.placeholderService = placeholderService;
