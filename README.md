@@ -2,9 +2,9 @@
 
 # Eagle Factions
 
-![License](https://img.shields.io/github/license/aquerr/eaglefactions.svg?label=License)
-![Version](https://img.shields.io/github/release/aquerr/eaglefactions.svg?label=Version)
-[![Downloads](https://img.shields.io/github/downloads/aquerr/eaglefactions/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
+![License](https://img.shields.io/github/license/aquerr/io.github.aquerr.eaglefactions.svg?label=License)
+![Version](https://img.shields.io/github/release/aquerr/io.github.aquerr.eaglefactions.svg?label=Version)
+[![Downloads](https://img.shields.io/github/downloads/aquerr/io.github.aquerr.eaglefactions/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
 [![Discord](https://img.shields.io/discord/447076657698963466.svg?color=blue&label=Discord&logo=Discord&logoColor=white)](https://discord.gg/bjZqmwP)
 
 

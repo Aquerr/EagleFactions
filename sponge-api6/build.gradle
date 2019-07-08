@@ -1,0 +1,44 @@
+import groovy.util.FileNameFinder
+import org.gradle.api.tasks.bundling.Jar
+
+plugins {
+    id 'java'
+    id 'org.spongepowered.plugin' version '0.9.0'
+}
+
+group 'io.github.aquerr'
+version '1.11.2-v0.12.0'
+
+sourceCompatibility = 1.8
+
+dependencies {
+    compile project(':eaglefactionsapi')
+    compile 'org.spongepowered:spongeapi:6.0.0'
+    compile 'com.github.rojo8399:PlaceholderAPI:4.4'
+    compile group: 'com.h2database', name: 'h2', version: '1.4.196'
+//    compile group: 'io.github.webbukkit', name: 'DynmapCoreAPI', version: '2.1'
+//    compile 'com.github.webbukkit:DynmapCoreAPI:v2.5'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
+    //compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
+//    compile 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
+}
+
+jar {
+    if(System.getenv("JENKINS_HOME")) {
+        version = version + "_" + System.getenv("BUILD_NUMBER")
+        println("File name =>" + baseName)
+    }
+}
+
+task fatJar(type: Jar) {
+    from {
+        configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
+    }
+    with jar
+}
+
+tasks.create("setPluginVersion") {
+    doLast {
+
+    }
+}

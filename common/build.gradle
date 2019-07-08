@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+    id 'org.spongepowered.plugin' version '0.9.0'
+}
+
+group 'io.github.aquerr'
+version 'unspecified'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile project(':eaglefactionsapi')
+    compile 'org.spongepowered:spongeapi:7.1.0'
+}
