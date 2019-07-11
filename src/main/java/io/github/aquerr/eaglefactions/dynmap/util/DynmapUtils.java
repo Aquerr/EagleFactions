@@ -30,7 +30,7 @@ public class DynmapUtils {
                 "<span style=\"font-weight: bold; font-size: 150%;\">%name%</span></br>\n".replace("%name%", factionName) +
                 "<span style=\"font-style: italic; font-size: 110%;\">%description%</span></br>\n".replace("%description%", factionDesc.length() > 0 ? factionDesc : "No description"));
 
-        if (faction.getTag() != null) {
+        if (faction.getTag().toPlain().length() > 0) {
             description.append("<span style=\"font-weight: bold;\">Tag:</span> %tag%</br>\n".replace("%tag%", faction.getTag().toPlain()) +
                     "</br>\n");
         }
