@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.entities.Claim;
 import io.github.aquerr.eaglefactions.entities.Faction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.user.UserStorageService;
+
 import java.util.*;
 
 /**
@@ -83,9 +84,8 @@ public class DynmapUtils {
      *
      */
 
-    static void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
+    private static void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
     {
-        int cnt = 0;
         ArrayDeque<int[]> stack = new ArrayDeque<int[]>();
         stack.push(new int[] { x, y });
 
@@ -98,7 +98,6 @@ public class DynmapUtils {
             { // Set in src
                 source.setFlag(x, y, false); // Clear source
                 destination.setFlag(x, y, true); // Set in destination
-                cnt++;
                 if (source.getFlag(x + 1, y)) stack.push(new int[] { x + 1, y });
                 if (source.getFlag(x - 1, y)) stack.push(new int[] { x - 1, y });
                 if (source.getFlag(x, y + 1)) stack.push(new int[] { x, y + 1 });
