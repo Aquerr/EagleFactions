@@ -1,0 +1,285 @@
+package io.github.aquerr.eaglefactions.dynmap.util;
+
+import io.github.aquerr.eaglefactions.EagleFactions;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
+import io.github.aquerr.eaglefactions.entities.Claim;
+import io.github.aquerr.eaglefactions.entities.Faction;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.user.UserStorageService;
+import java.util.*;
+
+/**
+ * Util class for the Dynmap Integration. Contains some various functions just
+ * to make code cleaner.
+ *
+ * @author Iterator
+ */
+
+public class DynmapUtils {
+    public static String getFactionInfoWindow(Faction faction) {
+        // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
+        ConfigFields config = EagleFactions.getPlugin().getConfiguration().getConfigFields();
+        Optional<UserStorageService> userStorage = Sponge.getServiceManager().provide(UserStorageService.class);
+
+        StringBuilder description = new StringBuilder();
+
+        String factionName = faction.getName();
+        String factionDesc = faction.getDescription();
+
+        description.append("<div class=\"infowindow\">\n" +
+                "<span style=\"font-weight: bold; font-size: 150%;\">%name%</span></br>\n".replace("%name%", factionName) +
+                "<span style=\"font-style: italic; font-size: 110%;\">%description%</span></br>\n".replace("%description%", factionDesc.length() > 0 ? factionDesc : "No description") +
+                "</br>\n");
+
+        if (faction.getTag() != null) {
+            description.append("\"<span style=\\\"font-weight: bold;\\\">Tag:</span> %tag%</br>\\n\"" +
+                    "</br>\n"
+                            .replace("%tag%", faction.getTag().toPlain()));
+        }
+
+        if (config.showDynmapFactionLeader() && userStorage.isPresent()) {
+            if (userStorage.get().get(faction.getLeader()).isPresent()) {
+                description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
+                        .replace("%leader%",
+                                userStorage.get().get(faction.getLeader()).get().getName()));
+            }
+        }
+
+        if (config.showDynmapMemberInfo()) {
+            int memberCount = 0;
+
+            // Why isn't there a method to get all the faction people at one time?
+            memberCount += faction.getRecruits().size();
+            memberCount += faction.getMembers().size();
+            memberCount += faction.getOfficers().size();
+
+            if (memberCount > 0) {
+                description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
+                        .replace("%players%",
+                                String.valueOf(memberCount)));
+            }
+        }
+
+        description.append("</br>\n</div>");
+
+        return description.toString();
+    }
+
+    public static int getAreaColor(Faction faction) {
+        ConfigFields config = EagleFactions.getPlugin().getConfiguration().getConfigFields();
+
+        int areaColor = config.getDynmapFactionColor();
+
+        if (faction.getName().equals("SafeZone")) {
+            areaColor = config.getDynmapSafezoneColor();
+        } else if (faction.getName().equals("WarZone")) {
+            areaColor = config.getDynmapWarzoneColor();
+        }
+
+        return areaColor;
+    }
+
+    /**
+     * WARNING: all code below is taken from Dynmap-Factions
+     * https://github.com/webbukkit/Dynmap-Factions/
+     *
+     */
+
+    static void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
+    {
+        int cnt = 0;
+        ArrayDeque<int[]> stack = new ArrayDeque<int[]>();
+        stack.push(new int[] { x, y });
+
+        while (!stack.isEmpty())
+        {
+            int[] nxt = stack.pop();
+            x = nxt[0];
+            y = nxt[1];
+            if (source.getFlag(x, y))
+            { // Set in src
+                source.setFlag(x, y, false); // Clear source
+                destination.setFlag(x, y, true); // Set in destination
+                cnt++;
+                if (source.getFlag(x + 1, y)) stack.push(new int[] { x + 1, y });
+                if (source.getFlag(x - 1, y)) stack.push(new int[] { x - 1, y });
+                if (source.getFlag(x, y + 1)) stack.push(new int[] { x, y + 1 });
+                if (source.getFlag(x, y - 1)) stack.push(new int[] { x, y - 1 });
+            }
+        }
+    }
+
+    public static ArrayList<TempAreaMarker> createAreas(Set<Claim> chunks)
+    {
+        ArrayList<TempAreaMarker> ret = new ArrayList<>();
+
+        // Loop through chunks: set flags on chunk map
+        TileFlags allChunkFlags = new TileFlags();
+        LinkedList<Claim> allChunks = new LinkedList<Claim>();
+        for (Claim chunk : chunks)
+        {
+            allChunkFlags.setFlag(chunk.getChunkPosition().getX(), chunk.getChunkPosition().getZ(), true); // Set flag for chunk
+            allChunks.addLast(chunk);
+        }
+
+        // Loop through until we don't find more areas
+        while (allChunks != null)
+        {
+            TileFlags ourChunkFlags = null;
+            LinkedList<Claim> ourChunks = null;
+            LinkedList<Claim> newChunks = null;
+
+            int minimumX = Integer.MAX_VALUE;
+            int minimumZ = Integer.MAX_VALUE;
+            for (Claim chunk : allChunks)
+            {
+                int chunkX = chunk.getChunkPosition().getX();
+                int chunkZ = chunk.getChunkPosition().getZ();
+
+                // If we need to start shape, and this block is not part of one yet
+                if (ourChunkFlags == null && allChunkFlags.getFlag(chunkX, chunkZ))
+                {
+                    ourChunkFlags = new TileFlags(); // Create map for shape
+                    ourChunks = new LinkedList<Claim>();
+                    floodFillTarget(allChunkFlags, ourChunkFlags, chunkX, chunkZ); // Copy shape
+                    ourChunks.add(chunk); // Add it to our chunk list
+                    minimumX = chunkX;
+                    minimumZ = chunkZ;
+                }
+                // If shape found, and we're in it, add to our node list
+                else if (ourChunkFlags != null && ourChunkFlags.getFlag(chunkX, chunkZ))
+                {
+                    ourChunks.add(chunk);
+                    if (chunkX < minimumX)
+                    {
+                        minimumX = chunkX;
+                        minimumZ = chunkZ;
+                    }
+                    else if (chunkX == minimumX && chunkZ < minimumZ)
+                    {
+                        minimumZ = chunkZ;
+                    }
+                }
+                // Else, keep it in the list for the next polygon
+                else
+                {
+                    if (newChunks == null) newChunks = new LinkedList<Claim>();
+                    newChunks.add(chunk);
+                }
+            }
+
+            // Replace list (null if no more to process)
+            allChunks = newChunks;
+
+            if (ourChunkFlags == null) continue;
+
+            // Trace outline of blocks - start from minx, minz going to x+
+            int initialX = minimumX;
+            int initialZ = minimumZ;
+            int currentX = minimumX;
+            int currentZ = minimumZ;
+            Direction direction = Direction.XPLUS;
+            ArrayList<int[]> linelist = new ArrayList<int[]>();
+            linelist.add(new int[]{ initialX, initialZ }); // Add start point
+            while ((currentX != initialX) || (currentZ != initialZ) || (direction != Direction.ZMINUS))
+            {
+                switch (direction)
+                {
+                    case XPLUS: // Segment in X+ direction
+                        if (!ourChunkFlags.getFlag(currentX + 1, currentZ))
+                        { // Right turn?
+                            linelist.add(new int[]{ currentX + 1, currentZ }); // Finish line
+                            direction = Direction.ZPLUS; // Change direction
+                        }
+                        else if (!ourChunkFlags.getFlag(currentX + 1, currentZ - 1))
+                        { // Straight?
+                            currentX++;
+                        }
+                        else
+                        { // Left turn
+                            linelist.add(new int[]{ currentX + 1, currentZ }); // Finish line
+                            direction = Direction.ZMINUS;
+                            currentX++;
+                            currentZ--;
+                        }
+                        break;
+                    case ZPLUS: // Segment in Z+ direction
+                        if (!ourChunkFlags.getFlag(currentX, currentZ + 1))
+                        { // Right turn?
+                            linelist.add(new int[]{ currentX + 1, currentZ + 1 }); // Finish line
+                            direction = Direction.XMINUS; // Change direction
+                        }
+                        else if (!ourChunkFlags.getFlag(currentX + 1, currentZ + 1))
+                        { // Straight?
+                            currentZ++;
+                        }
+                        else
+                        { // Left turn
+                            linelist.add(new int[]{ currentX + 1, currentZ + 1 }); // Finish line
+                            direction = Direction.XPLUS;
+                            currentX++;
+                            currentZ++;
+                        }
+                        break;
+                    case XMINUS: // Segment in X- direction
+                        if (!ourChunkFlags.getFlag(currentX - 1, currentZ))
+                        { // Right turn?
+                            linelist.add(new int[]{ currentX, currentZ + 1 }); // Finish line
+                            direction = Direction.ZMINUS; // Change direction
+                        }
+                        else if (!ourChunkFlags.getFlag(currentX - 1, currentZ + 1))
+                        { // Straight?
+                            currentX--;
+                        }
+                        else
+                        { // Left turn
+                            linelist.add(new int[] { currentX, currentZ + 1 }); // Finish line
+                            direction = Direction.ZPLUS;
+                            currentX--;
+                            currentZ++;
+                        }
+                        break;
+                    case ZMINUS: // Segment in Z- direction
+                        if (!ourChunkFlags.getFlag(currentX, currentZ - 1))
+                        { // Right turn?
+                            linelist.add(new int[]{ currentX, currentZ }); // Finish line
+                            direction = Direction.XPLUS; // Change direction
+                        }
+                        else if (!ourChunkFlags.getFlag(currentX - 1, currentZ - 1))
+                        { // Straight?
+                            currentZ--;
+                        }
+                        else
+                        { // Left turn
+                            linelist.add(new int[] { currentX, currentZ }); // Finish line
+                            direction = Direction.XMINUS;
+                            currentX--;
+                            currentZ--;
+                        }
+                        break;
+                }
+            }
+
+            int sz = linelist.size();
+            double[] x = new double[sz];
+            double[] z = new double[sz];
+            for (int i = 0; i < sz; i++)
+            {
+                int[] line = linelist.get(i);
+                x[i] = (double) line[0] * (double) 16;
+                z[i] = (double) line[1] * (double) 16;
+            }
+
+            TempAreaMarker temp = new TempAreaMarker(x, z);
+
+            ret.add(temp);
+        }
+
+        return ret;
+    }
+
+    enum Direction
+    {
+        XPLUS, ZPLUS, XMINUS, ZMINUS
+    }
+}

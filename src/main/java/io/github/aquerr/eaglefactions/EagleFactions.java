@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.commands.*;
+import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.dynmap.DynmapMain;
@@ -154,13 +155,15 @@ public class EagleFactions
             permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
         }
 
-        try {
-            Class.forName("org.dynmap.DynmapCommonAPI");
-            DynmapMain.activate();
+        if (_configuration.getConfigFields().isDynmapIntegrationEnabled()) {
+            try {
+                Class.forName("org.dynmap.DynmapCommonAPI");
+                DynmapMain.activate();
 
-            printInfo("Dynmap integration is active!");
-        } catch (ClassNotFoundException error) {
-            printInfo("Dynmap is not installed, but integration is enabled in the config.");
+                printInfo("Dynmap Integration is active!");
+            } catch (ClassNotFoundException error) {
+                printInfo("Failed to enable Dynmap Integration; Dynmap is not available");
+            }
         }
     }
 
