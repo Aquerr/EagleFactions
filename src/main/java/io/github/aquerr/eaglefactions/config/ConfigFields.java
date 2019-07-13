@@ -92,6 +92,17 @@ public final class ConfigFields
     //Chat
     private boolean _supressOtherFactionsMessagesWhileInTeamChat = false;
 
+    //Dynmap Integration
+    private boolean _dynmapIntegrationEnabled = false;
+
+    private int _dynmapFactionColor = 0x00FF00;
+    private int _dynmapSafezoneColor = 0x800080;
+    private int _dynmapWarzoneColor = 0xFF0000;
+    private String _dynmapFactionHomeIcon = "greenflag";
+
+    private boolean _dynmapShowFactionLeader = true;
+    private boolean _dynmapMemberInfo = true;
+
     public ConfigFields(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -183,6 +194,17 @@ public final class ConfigFields
 
             //Chat
             this._supressOtherFactionsMessagesWhileInTeamChat = _configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
+
+            //Dynmap Integration
+            this._dynmapIntegrationEnabled = _configuration.getBoolean(false, "dynmap-integration-enable");
+
+            this._dynmapFactionColor = _configuration.getInt(0x00FF00, "dynmap-faction-color");
+            this._dynmapSafezoneColor = _configuration.getInt(0x800080, "dynmap-safezone-color");
+            this._dynmapWarzoneColor = _configuration.getInt(0xFF0000, "dynmap-warzone-color");
+            this._dynmapFactionHomeIcon = _configuration.getString("greenflag", "dynmap-faction-home-marker");
+
+            this._dynmapShowFactionLeader = _configuration.getBoolean(true, "dynmap-show-faction-leader");
+            this._dynmapMemberInfo = _configuration.getBoolean(true, "dynmap-members-info");
 
             this._configuration.save();
         }
@@ -600,5 +622,34 @@ public final class ConfigFields
     public boolean shouldSupressOtherFactionsMessagesWhileInTeamChat()
     {
         return this._supressOtherFactionsMessagesWhileInTeamChat;
+    }
+
+    // Dynmap Integration
+    public boolean isDynmapIntegrationEnabled() {
+        return this._dynmapIntegrationEnabled;
+    }
+
+    public int getDynmapFactionColor() {
+        return this._dynmapFactionColor;
+    }
+
+    public int getDynmapSafezoneColor() {
+        return this._dynmapSafezoneColor;
+    }
+
+    public int getDynmapWarzoneColor() {
+        return this._dynmapWarzoneColor;
+    }
+
+    public String getDynmapFactionHomeIcon() {
+        return this._dynmapFactionHomeIcon;
+    }
+
+    public boolean showDynmapFactionLeader() {
+        return this._dynmapShowFactionLeader;
+    }
+
+    public boolean showDynmapMemberInfo() {
+        return this._dynmapMemberInfo;
     }
 }

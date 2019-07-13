@@ -38,6 +38,7 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * PVP-Logger
 * Plugin Messages' Translations
 * Database support
+^ Dynmap support
 * Fully configurable
 
 ## Translations
