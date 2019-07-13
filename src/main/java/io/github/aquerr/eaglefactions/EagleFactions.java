@@ -2,11 +2,13 @@ package io.github.aquerr.eaglefactions;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.commands.*;
-import io.github.aquerr.eaglefactions.config.ConfigFields;
 import io.github.aquerr.eaglefactions.config.Configuration;
 import io.github.aquerr.eaglefactions.config.IConfiguration;
 import io.github.aquerr.eaglefactions.dynmap.DynmapMain;
-import io.github.aquerr.eaglefactions.entities.*;
+import io.github.aquerr.eaglefactions.entities.AllyRequest;
+import io.github.aquerr.eaglefactions.entities.ChatEnum;
+import io.github.aquerr.eaglefactions.entities.Invite;
+import io.github.aquerr.eaglefactions.entities.StopWarRequest;
 import io.github.aquerr.eaglefactions.listeners.*;
 import io.github.aquerr.eaglefactions.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.logic.FactionLogic;
@@ -33,10 +35,8 @@ import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
@@ -208,6 +208,7 @@ public class EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
+                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
                 .executor(new DisbandCommand(this))
                 .build());
 
