@@ -33,9 +33,6 @@ public class DisbandCommand extends AbstractCommand
         // There's a bit of code duplicating, but...
         Optional<String> optionalFactionName = context.<String>getOne("faction name");
         if (optionalFactionName.isPresent()) {
-            if (!player.hasPermission(PluginPermissions.ADMIN_DISBAND_COMMAND))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND));
-
             if (!EagleFactions.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
 
