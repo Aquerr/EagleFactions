@@ -1,7 +1,5 @@
 package io.github.aquerr.eaglefactions.api.entities;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.config.ConfigFields;
 import org.spongepowered.api.entity.living.player.User;
 
 import java.util.Optional;
@@ -28,21 +26,6 @@ public class FactionPlayer implements IFactionPlayer
 
         this.power = power;
         this.maxpower = maxpower;
-    }
-
-    public static FactionPlayer from(User playerUser)
-    {
-        String factionName = "";
-        FactionMemberType factionMemberType = null;
-        ConfigFields configFields = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
-        Optional<Faction> optionalFaction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByPlayerUUID(playerUser.getUniqueId());
-        if (optionalFaction.isPresent())
-        {
-            factionName = optionalFaction.get().getName();
-            factionMemberType = optionalFaction.get().getPlayerMemberType(playerUser.getUniqueId());
-        }
-
-        return new FactionPlayer(playerUser.getName(), playerUser.getUniqueId(), factionName, factionMemberType, configFields.getStartingPower(),  configFields.getGlobalMaxPower());
     }
 
     @Override

@@ -229,7 +229,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("kick"), CommandSpec.builder()
                 .description(Text.of("Kicks a player from the faction"))
                 .permission(PluginPermissions.KICK_COMMAND)
-                .arguments(new FactionPlayerArgument(Text.of("player")))
+                .arguments(new FactionPlayerArgument(this, Text.of("player")))
                 .executor(new KickCommand(this))
                 .build());
 
@@ -237,7 +237,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("j", "join"), CommandSpec.builder()
                 .description(Text.of("Join a specific faction"))
                 .permission(PluginPermissions.JOIN_COMMAND)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(new FactionNameArgument(this, Text.of("faction name")))
                 .executor(new JoinCommand(this))
                 .build());
 
@@ -258,7 +258,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Info command. Shows info about a faction.
         SUBCOMMANDS.put(Arrays.asList("i", "info"), CommandSpec.builder()
                 .description(Text.of("Show info about a faction"))
-                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new InfoCommand(this))
                 .build());
 
@@ -274,7 +274,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
                 .permission(PluginPermissions.ALLY_COMMAND)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(new FactionNameArgument(this, Text.of("faction name")))
                 .executor(new AllyCommand(this))
                 .build());
 
@@ -282,7 +282,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare someone a war"))
                 .permission(PluginPermissions.ENEMY_COMMAND)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(new FactionNameArgument(this, Text.of("faction name")))
                 .executor(new EnemyCommand(this))
                 .build());
 
@@ -491,7 +491,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("chest"), CommandSpec.builder()
                 .description(Text.of("Opens faction's chest"))
                 .permission(PluginPermissions.CHEST_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new ChestCommand(this))
                 .build());
 

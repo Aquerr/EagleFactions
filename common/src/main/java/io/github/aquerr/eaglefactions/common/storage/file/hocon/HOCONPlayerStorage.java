@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
-import io.github.aquerr.eaglefactions.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -233,10 +233,9 @@ public class HOCONPlayerStorage implements IPlayerStorage
     @Override
     public Set<IFactionPlayer> getServerPlayers()
     {
-        Set<IFactionPlayer> playerSet = new HashSet<>();
-
-        File playerDir = new File(playersDirectoryPath.toUri());
-        File[] playerFiles = playerDir.listFiles();
+        final Set<IFactionPlayer> playerSet = new HashSet<>();
+        final File playerDir = new File(playersDirectoryPath.toUri());
+        final File[] playerFiles = playerDir.listFiles();
 
         for(File playerFile : playerFiles)
         {

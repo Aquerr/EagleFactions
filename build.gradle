@@ -1,5 +1,7 @@
-apply plugin: 'java'
-
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "2.0.4"
+}
 
 allprojects {
     description = 'A factions plugin that will make managing your battle-server easier. :)'
@@ -21,6 +23,24 @@ dependencies {
     compile project(":common")
     compile project(":sponge-api6")
     compile project(":sponge-api7")
+}
+
+shadowJar {
+    archiveName = "EagleFactions-Sponge-1.0.0.jar";
+}
+
+artifacts {
+    archives shadowJar
+}
+
+task copyJarsFromSubprojects(type: Copy) {
+    def jars=[];
+    subprojects.each {
+        jars+=it.buildDir.toPath().resolve("libs").toFile()
+        println(it.buildDir.toPath().resolve("libs"))
+    }
+    from jars
+    into 'build/libs'
 }
 
 tasks.create("publishBuildOnDiscord") {

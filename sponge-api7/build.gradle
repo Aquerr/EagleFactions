@@ -13,6 +13,7 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile project(':eaglefactionsapi')
+    compile project(':common')
     compile 'org.spongepowered:spongeapi:7.1.0'
     compile 'com.github.rojo8399:PlaceholderAPI:4.5.1'
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'

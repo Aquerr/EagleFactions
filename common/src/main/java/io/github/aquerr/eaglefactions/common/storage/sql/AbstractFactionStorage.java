@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.storage.sql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
@@ -9,8 +10,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
@@ -281,7 +285,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 preparedStatement.close();
             }
 
-            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().toInventory());
+            List<DataView> dataViews = InventorySerializer.serializeInventory(this.plugin.getFactionLogic().convertFactionChestToInventory(faction.getChest()));
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();

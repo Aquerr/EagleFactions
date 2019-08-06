@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.caching;
 
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.Faction;
 
 import javax.annotation.Nullable;
 import java.util.*;

@@ -13,8 +13,9 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile project(':eaglefactionsapi')
-    compile 'org.spongepowered:spongeapi:6.0.0'
-    compile 'com.github.rojo8399:PlaceholderAPI:4.4'
+    compile project(':common')
+//    compile 'org.spongepowered:spongeapi:6.0.0'
+//    compile 'com.github.rojo8399:PlaceholderAPI:4.4'
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'
 //    compile group: 'io.github.webbukkit', name: 'DynmapCoreAPI', version: '2.1'
 //    compile 'com.github.webbukkit:DynmapCoreAPI:v2.5'

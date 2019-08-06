@@ -6,11 +6,13 @@ plugins {
 group 'io.github.aquerr'
 version '0.12.0'
 
+compileJava.options.encoding = 'UTF-8'
+
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
     jcenter()
+    mavenCentral()
 }
 
 dependencies {

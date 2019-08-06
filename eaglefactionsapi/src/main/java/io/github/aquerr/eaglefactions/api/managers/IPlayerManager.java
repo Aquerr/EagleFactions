@@ -2,9 +2,12 @@ package io.github.aquerr.eaglefactions.api.managers;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface IPlayerManager
@@ -21,10 +24,19 @@ public interface IPlayerManager
     boolean isPlayerOnline(UUID playerUUID);
 
     boolean lastDeathAtWarZone(UUID playerUUID);
+
+    Set<String> getServerPlayerNames();
+
     void setDeathInWarZone(UUID playerUUID, boolean didDie);
 
     boolean checkIfPlayerExists(UUID playerUUID, String playerName);
+
+    Set<IFactionPlayer> getServerPlayers();
+
     void updatePlayerName(UUID playerUUID, String playerName);
 
     Optional<String> getPlayerName(UUID playerUUID);
+
+
+    IFactionPlayer convertToFactionPlayer(User user);
 }
