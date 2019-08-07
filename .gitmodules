@@ -1,4 +1,4 @@
-[submodule "eaglefactionsapi"]
-path = eaglefactionsapi
-url = https://github.com/Aquerr/EagleFactionsAPI.git
-branch = master
+[submodule "EagleFactionsAPI"]
+	path = EagleFactionsAPI
+	url = https://github.com/Aquerr/EagleFactionsAPI.git
+	branch = master

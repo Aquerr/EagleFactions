@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':eaglefactionsapi')
+    compile project(':EagleFactionsAPI')
     compile 'org.spongepowered:spongeapi:7.1.0'
     compile 'com.github.rojo8399:PlaceholderAPI:4.5.1'
 }
