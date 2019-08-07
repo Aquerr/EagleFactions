@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+    }
+}
+
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "2.0.4"
@@ -19,19 +25,23 @@ allprojects {
     }
 }
 
+artifacts {
+    archives shadowJar
+}
+
 dependencies {
     compile project(":common")
     compile project(":sponge-api6")
     compile project(":sponge-api7")
 }
 
-shadowJar {
-    archiveName = "EagleFactions-Sponge-1.0.0.jar";
-}
-
-artifacts {
-    archives shadowJar
-}
+//shadowJar {
+//    archiveName = "EagleFactions-Sponge-1.0.0.jar";
+//}
+//
+//artifacts {
+//    archives shadowJar
+//}
 
 task copyJarsFromSubprojects(type: Copy) {
     def jars=[];
@@ -42,6 +52,23 @@ task copyJarsFromSubprojects(type: Copy) {
     from jars
     into 'build/libs'
 }
+
+task explodedDist(type: Copy) {
+    into "$buildDir/explodedDist"
+    subprojects {
+        from tasks.withType(Jar)
+    }
+}
+
+//
+//task allJar(type: Jar, dependsOn: subprojects.collect{it+"compileJava"}) {
+//    baseName = "allJar"
+//    from files(subprojects.collect{project(it).sourceSets.main.output})
+//}
+//
+//artifacts {
+//    archives allJar
+//}
 
 tasks.create("publishBuildOnDiscord") {
     group = "Publishing"
