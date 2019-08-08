@@ -23,7 +23,7 @@ allprojects {
         jcenter()
         maven { url 'https://jitpack.io' }
     }
-}
+} 
 
 artifacts {
     archives shadowJar

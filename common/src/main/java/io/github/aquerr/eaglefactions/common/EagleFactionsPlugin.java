@@ -107,20 +107,21 @@ public class EagleFactionsPlugin implements EagleFactions
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
 
-        SetupConfigs();
+        setupConfigs();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded..."));
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
-        SetupManagers();
+        setupManagers();
+        registerAPI();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded..."));
 
-        InitializeCommands();
+        initializeCommands();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded..."));
 
-        RegisterListeners();
+        registerListeners();
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
@@ -137,6 +138,11 @@ public class EagleFactionsPlugin implements EagleFactions
         }
 
         Sponge.getServiceManager().setProvider(this, io.github.aquerr.eaglefactions.api.logic.FactionLogic.class, _factionLogic);
+    }
+
+    private void registerAPI() {
+        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this._factionLogic);
+        Sponge.getServiceManager().setProvider(this, IPowerManager.class, this._powerManager);
     }
 
     @Listener
@@ -185,7 +191,7 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
-    private void InitializeCommands()
+    private void initializeCommands()
     {
         //Help command should display all possible commands in plugin.
         SUBCOMMANDS.put(Collections.singletonList("help"), CommandSpec.builder()
@@ -513,7 +519,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getCommandManager().register(this, commandEagleFactions, "factions", "faction", "f");
     }
 
-    private void RegisterListeners()
+    private void registerListeners()
     {
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener(this));
@@ -591,7 +597,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
     }
 
-    private void SetupConfigs()
+    private void setupConfigs()
     {
         _configuration = new Configuration(_configDir);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
@@ -599,7 +605,7 @@ public class EagleFactionsPlugin implements EagleFactions
         _pvpLogger = new PVPLoggerImpl(getConfiguration());
     }
 
-    private void SetupManagers()
+    private void setupManagers()
     {
         _storageManager = StorageManagerImpl.getInstance(this);
         _playerManager = PlayerManager.getInstance(this);

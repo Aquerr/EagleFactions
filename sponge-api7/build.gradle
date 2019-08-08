@@ -15,10 +15,10 @@ dependencies {
     implementation project(':EagleFactionsAPI')
     implementation project(':common')
 //    compile 'com.github.rojo8399:PlaceholderAPI:4.5.1'
-    compile group: 'com.h2database', name: 'h2', version: '1.4.196'
+    compileOnly group: 'com.h2database', name: 'h2', version: '1.4.196'
 //    compile group: 'io.github.webbukkit', name: 'DynmapCoreAPI', version: '2.1'
 //    compile 'com.github.webbukkit:DynmapCoreAPI:v2.5'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
+    compileOnly group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
     //compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
 //    compile 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
 }
