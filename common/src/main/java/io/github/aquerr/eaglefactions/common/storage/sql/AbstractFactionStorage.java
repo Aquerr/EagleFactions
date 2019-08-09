@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
+import com.sun.nio.zipfs.ZipPath;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -20,10 +21,16 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 public abstract class AbstractFactionStorage implements IFactionStorage
 {
@@ -104,18 +111,51 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             final int databaseVersionNumber = getDatabaseVersion();
 
             //Get all .sql files
-            final URL resourcesFolderURL = this.plugin.getResource("queries/" + this.sqlProvider.getProviderName());
-            final File resourcesFolder = new File(resourcesFolderURL.getPath());
-            final File[] resources = resourcesFolder.listFiles();
-            if (resources != null)
+            final List<Path> filePaths = new ArrayList<>();
+
+            final URL url = this.plugin.getClass().getResource("/queries/" + this.sqlProvider.getProviderName());
+            if (url != null)
             {
-                for(File resource : resources)
+                final URI uri = url.toURI();
+                Path myPath;
+                if (uri.getScheme().equals("jar"))
                 {
-                    final int scriptNumber = Integer.parseInt(resource.getName().substring(0, 3));
+                    this.plugin.printInfo("URI Scheme: " + uri.getScheme());
+                    final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                    myPath = fileSystem.getPath("/queries/" + this.sqlProvider.getProviderName());
+                }
+                else
+                {
+                    myPath = Paths.get(uri);
+                }
+
+                final Stream<Path> walk = Files.walk(myPath, 1);
+                boolean skipFirst = true;
+                for (final Iterator<Path> it = walk.iterator(); it.hasNext();) {
+                    if (skipFirst)
+                    {
+                        it.next();
+                        skipFirst = false;
+                    }
+
+                    final Path zipPath = it.next();
+                    filePaths.add(zipPath);
+                }
+            }
+
+            filePaths.sort(Comparator.comparing(x -> x.getFileName().toString()));
+
+            if (!filePaths.isEmpty())
+            {
+                for(final Path resourceFilePath : filePaths)
+                {
+                    this.plugin.printInfo("File: " + resourceFilePath);
+                    final int scriptNumber = Integer.parseInt(resourceFilePath.getFileName().toString().substring(0, 3));
                     if(scriptNumber <= databaseVersionNumber)
                         continue;
 
-                    try(final BufferedReader bufferedReader = new BufferedReader(new FileReader(resource)))
+                    try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
+                        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream)))
                     {
                         try(final Statement statement = this.sqlProvider.getConnection().createStatement())
                         {
@@ -128,10 +168,12 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                                     continue;
 
                                 stringBuilder.append(line);
+                                this.plugin.printInfo(line);
 
                                 if(line.endsWith(";"))
                                 {
                                     statement.addBatch(stringBuilder.toString().trim());
+                                    this.plugin.printInfo(";");
                                     stringBuilder.setLength(0);
                                 }
                             }
@@ -147,12 +189,12 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             else
             {
                 System.out.println("There may be a problem with database script files...");
-                System.out.println("Searched for them in: " + resourcesFolder.getName());
+                System.out.println("Searched for them in: " + this.sqlProvider.getProviderName());
             }
             if (databaseVersionNumber == 0)
                 precreate();
         }
-        catch(SQLException e)
+        catch(SQLException | IOException | URISyntaxException e)
         {
             e.printStackTrace();
             Sponge.getServer().shutdown();

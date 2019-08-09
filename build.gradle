@@ -43,22 +43,22 @@ dependencies {
 //    archives shadowJar
 //}
 
-task copyJarsFromSubprojects(type: Copy) {
-    def jars=[];
-    subprojects.each {
-        jars+=it.buildDir.toPath().resolve("libs").toFile()
-        println(it.buildDir.toPath().resolve("libs"))
-    }
-    from jars
-    into 'build/libs'
-}
+//task copyJarsFromSubprojects(type: Copy) {
+//    def jars=[];
+//    subprojects.each {
+//        jars+=it.buildDir.toPath().resolve("libs").toFile()
+//        println(it.buildDir.toPath().resolve("libs"))
+//    }
+//    from jars
+//    into 'build/libs'
+//}
 
-task explodedDist(type: Copy) {
-    into "$buildDir/explodedDist"
-    subprojects {
-        from tasks.withType(Jar)
-    }
-}
+//task explodedDist(type: Copy) {
+//    into "$buildDir/explodedDist"
+//    subprojects {
+//        from tasks.withType(Jar)
+//    }
+//}
 
 //
 //task allJar(type: Jar, dependsOn: subprojects.collect{it+"compileJava"}) {

@@ -101,7 +101,7 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onServerInitialization(GameInitializationEvent event)
+    public void onServerInitialization(final GameInitializationEvent event)
     {
         eagleFactions = this;
 
@@ -136,8 +136,6 @@ public class EagleFactionsPlugin implements EagleFactions
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         }
-
-        Sponge.getServiceManager().setProvider(this, io.github.aquerr.eaglefactions.api.logic.FactionLogic.class, _factionLogic);
     }
 
     private void registerAPI() {
@@ -146,7 +144,7 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onGameStarting(GameStartingServerEvent event)
+    public void onGameStarting(final GameStartingServerEvent event)
     {
         try
         {
@@ -173,13 +171,13 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onServerPostInitialization(GamePostInitializationEvent event)
+    public void onServerPostInitialization(final GamePostInitializationEvent event)
     {
         startFactionsRemover();
     }
 
     @Listener
-    public void onReload(GameReloadEvent event)
+    public void onReload(final GameReloadEvent event)
     {
         this._configuration.reloadConfiguration();
         this._storageManager.reloadStorage();
@@ -587,12 +585,12 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.getClass().getClassLoader().getResourceAsStream(fileName);
     }
 
-    public URL getResource(String fileName)
+    public URL getResource(final String fileName)
     {
         return this.getClass().getClassLoader().getResource(fileName);
     }
 
-    public void printInfo(String message)
+    public void printInfo(final String message)
     {
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
     }

@@ -14,7 +14,9 @@ repositories {
 }
 
 dependencies {
-    implementation project(':EagleFactionsAPI')
-    compileOnly('org.spongepowered:spongeapi:7.1.0')
+    implementation (project(':EagleFactionsAPI'))
+    compileOnly ('org.spongepowered:spongeapi:7.1.0')
     compileOnly('com.github.rojo8399:PlaceholderAPI:4.5.1')
+    compileOnly group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
+    compileOnly group: 'com.h2database', name: 'h2', version: '1.4.196'
 }
