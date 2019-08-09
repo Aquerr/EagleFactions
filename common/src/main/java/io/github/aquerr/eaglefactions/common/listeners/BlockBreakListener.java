@@ -24,6 +24,7 @@ import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.text.Text;
@@ -66,6 +67,7 @@ public class BlockBreakListener extends AbstractListener
         final LocatableBlock locatableBlock = event.getCause().first(LocatableBlock.class).orElse(null);
         final TileEntity tileEntity = event.getCause().first(TileEntity.class).orElse(null);
         final boolean pistonExtend = event.getContext().containsKey(EventContextKeys.PISTON_EXTEND);
+        final boolean pistonRetract = event.getContext().containsKey(EventContextKeys.PISTON_RETRACT);
         final boolean isLiquidSource = event.getContext().containsKey(EventContextKeys.LIQUID_FLOW);
         final boolean isFireSource = !isLiquidSource && event.getContext().containsKey(EventContextKeys.FIRE_SPREAD);
         final boolean isLeafDecay = event.getContext().containsKey(EventContextKeys.LEAVES_DECAY);
@@ -140,17 +142,22 @@ public class BlockBreakListener extends AbstractListener
         if(sourceLocation != null)
         {
             List<Location<World>> sourceLocations = event.getLocations();
-            if(pistonExtend)
+            if(pistonExtend || pistonRetract)
             {
                 sourceLocations = new ArrayList<>(event.getLocations());
                 final Location<World> location = sourceLocations.get(sourceLocations.size() - 1);
                 final Direction direction = locatableBlock.getLocation().getBlock().get(Keys.DIRECTION).get();
                 final Location<World> directionLocation = location.getBlockRelative(direction);
                 sourceLocations.add(directionLocation);
+
+                if (user == null)
+                {
+                    user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
+                }
             }
             for(Location<World> location : sourceLocations)
             {
-                if(user != null && pistonExtend)
+                if(user != null && (pistonExtend || pistonRetract))
                 {
                     if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user))
                     {
@@ -227,7 +234,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isLeafDecay)
                     continue;
 
-                //TODO: This is ran even when player right clicks the block.
+                //TODO: This runs even when player right clicks the block.
                 if(!super.getPlugin().getProtectionManager().canBreak(location, user))
                 {
                     event.setCancelled(true);
@@ -240,6 +247,10 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockBreak(ChangeBlockEvent.Break event)
     {
+        //SpawnType in break event? Should be located in Pre or global event in my opinion.
+        //Custom Spawn Type = Can be a piston moving block or possibly any other "magically" spawned block.
+        final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
+
         if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
             return;
 
@@ -273,6 +284,9 @@ public class BlockBreakListener extends AbstractListener
             if(!optionalSourceChunkFaction.isPresent())
                 return;
         }
+
+        if(isCustomSpawnType)
+            return;
 
         for(Transaction<BlockSnapshot> transaction : event.getTransactions())
         {

@@ -14,6 +14,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.api.config.IConfiguration;
 import io.github.aquerr.eaglefactions.common.config.Configuration;
+import io.github.aquerr.eaglefactions.common.dynmap.DynmapMain;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
@@ -85,6 +86,8 @@ public class EagleFactionsPlugin implements EagleFactions
     private FactionLogic _factionLogic;
     private StorageManager _storageManager;
     private EFPlaceholderService _efPlaceholderService;
+
+    private DynmapMain _dynmapMain;
 
     public static EagleFactionsPlugin getPlugin()
     {
@@ -168,6 +171,18 @@ public class EagleFactionsPlugin implements EagleFactions
         {
             permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "io.github.aquerr.eaglefactions.player", Tristate.TRUE);
         }
+
+        if (_configuration.getConfigFields().isDynmapIntegrationEnabled()) {
+            try {
+                Class.forName("org.dynmap.DynmapCommonAPI");
+                this._dynmapMain = new DynmapMain(this);
+                this._dynmapMain.activate();
+
+                printInfo("Dynmap Integration is active!");
+            } catch (ClassNotFoundException error) {
+                printInfo("Failed to enable Dynmap Integration; Dynmap is not available");
+            }
+        }
     }
 
     @Listener
@@ -211,6 +226,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new DisbandCommand(this))
                 .build());
 
