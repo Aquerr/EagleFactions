@@ -5,6 +5,8 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
+import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
@@ -205,8 +207,17 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     {
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
-            preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+            PreparedStatement preparedStatement = null;
+            if(this.sqlProvider instanceof H2Provider)
+            {
+                preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VERSION'");
+            }
+            else if(this.sqlProvider instanceof MySQLProvider)
+            {
+                preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
+                preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+            }
+
             final ResultSet resultSet = preparedStatement.executeQuery();
             boolean versionTableExists = false;
             while(resultSet.next())
