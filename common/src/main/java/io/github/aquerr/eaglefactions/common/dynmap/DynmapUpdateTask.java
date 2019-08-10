@@ -1,11 +1,11 @@
 package io.github.aquerr.eaglefactions.common.dynmap;
 
 import com.flowpowered.math.vector.Vector3i;
-import io.github.aquerr.eaglefactions.EagleFactions;
-import io.github.aquerr.eaglefactions.dynmap.util.DynmapUtils;
-import io.github.aquerr.eaglefactions.dynmap.util.TempAreaMarker;
-import io.github.aquerr.eaglefactions.entities.Claim;
-import io.github.aquerr.eaglefactions.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.dynmap.util.DynmapUtils;
+import io.github.aquerr.eaglefactions.common.dynmap.util.TempAreaMarker;
 import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.Marker;
 import org.spongepowered.api.Sponge;
@@ -31,7 +31,7 @@ public class DynmapUpdateTask implements Runnable {
         for (Iterator<Faction> iterator = drawnFactions.iterator(); iterator.hasNext();) {
             Faction drawmFaction = iterator.next();
 
-            Faction currentFaction = EagleFactions.getPlugin().getFactionLogic().getFactionByName(drawmFaction.getName());
+            Faction currentFaction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(drawmFaction.getName());
 
             if (currentFaction == null || !currentFaction.equals(drawmFaction)) {
                 /* Remove everything created */
@@ -53,7 +53,7 @@ public class DynmapUpdateTask implements Runnable {
             }
         }
 
-        for (Faction faction : new HashSet<>(EagleFactions.getPlugin().getFactionLogic().getFactions().values())) {
+        for (Faction faction : new HashSet<>(EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values())) {
             if (faction.getClaims().size() < 1 || drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
 
             if (faction.getHome() != null) { /* Let's draw faction home first */
@@ -70,7 +70,7 @@ public class DynmapUpdateTask implements Runnable {
                             blockPos.getX(),
                             blockPos.getY(),
                             blockPos.getZ(),
-                            DynmapMain.markerapi.getMarkerIcon(EagleFactions.getPlugin().getConfiguration().getConfigFields().getDynmapFactionHomeIcon()),
+                            DynmapMain.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields().getDynmapFactionHomeIcon()),
                             false);
 
                     drawnMarkers.put(faction.getName(), marker);

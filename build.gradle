@@ -11,8 +11,8 @@ plugins {
 
 allprojects {
     description = 'A factions plugin that will make managing your battle-server easier. :)'
-
-    group = "io.github.aquerr"
+    group = "io.github.aquerr.eaglefactions"
+    version = "v0.13.0"
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -33,6 +33,17 @@ dependencies {
     compile project(":common")
     compile project(":sponge-api6")
     compile project(":sponge-api7")
+}
+
+shadowJar {
+//    archiveName = "EagleFactions-Sponge-1.0.0-SNAPSHOT.jar"
+
+    if(System.getenv("JENKINS_HOME")) {
+        version = version + "_" + System.getenv("BUILD_NUMBER")
+        println("File name => " + baseName)
+    } else {
+        version = version + "-SNAPSHOT"
+    }
 }
 
 //shadowJar {
