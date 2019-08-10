@@ -114,7 +114,6 @@ public abstract class AbstractFactionStorage implements IFactionStorage
 
             //Get all .sql files
             final List<Path> filePaths = new ArrayList<>();
-
             final URL url = this.plugin.getClass().getResource("/queries/" + this.sqlProvider.getProviderName());
             if (url != null)
             {
@@ -122,7 +121,6 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 Path myPath;
                 if (uri.getScheme().equals("jar"))
                 {
-                    this.plugin.printInfo("URI Scheme: " + uri.getScheme());
                     final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
                     myPath = fileSystem.getPath("/queries/" + this.sqlProvider.getProviderName());
                 }
@@ -145,13 +143,13 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 }
             }
 
+            //Sort .sql files
             filePaths.sort(Comparator.comparing(x -> x.getFileName().toString()));
 
             if (!filePaths.isEmpty())
             {
                 for(final Path resourceFilePath : filePaths)
                 {
-                    this.plugin.printInfo("File: " + resourceFilePath);
                     final int scriptNumber = Integer.parseInt(resourceFilePath.getFileName().toString().substring(0, 3));
                     if(scriptNumber <= databaseVersionNumber)
                         continue;
@@ -170,12 +168,10 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                                     continue;
 
                                 stringBuilder.append(line);
-                                this.plugin.printInfo(line);
 
                                 if(line.endsWith(";"))
                                 {
                                     statement.addBatch(stringBuilder.toString().trim());
-                                    this.plugin.printInfo(";");
                                     stringBuilder.setLength(0);
                                 }
                             }

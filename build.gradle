@@ -31,13 +31,12 @@ artifacts {
 
 dependencies {
     compile project(":common")
+    compile project(":sponge-api5")
     compile project(":sponge-api6")
     compile project(":sponge-api7")
 }
 
 shadowJar {
-//    archiveName = "EagleFactions-Sponge-1.0.0-SNAPSHOT.jar"
-
     if(System.getenv("JENKINS_HOME")) {
         version = version + "_" + System.getenv("BUILD_NUMBER")
         println("File name => " + baseName)
@@ -46,40 +45,11 @@ shadowJar {
     }
 }
 
-//shadowJar {
-//    archiveName = "EagleFactions-Sponge-1.0.0.jar";
-//}
-//
-//artifacts {
-//    archives shadowJar
-//}
-
-//task copyJarsFromSubprojects(type: Copy) {
-//    def jars=[];
-//    subprojects.each {
-//        jars+=it.buildDir.toPath().resolve("libs").toFile()
-//        println(it.buildDir.toPath().resolve("libs"))
-//    }
-//    from jars
-//    into 'build/libs'
-//}
-
-//task explodedDist(type: Copy) {
-//    into "$buildDir/explodedDist"
-//    subprojects {
-//        from tasks.withType(Jar)
-//    }
-//}
-
-//
-//task allJar(type: Jar, dependsOn: subprojects.collect{it+"compileJava"}) {
-//    baseName = "allJar"
-//    from files(subprojects.collect{project(it).sourceSets.main.output})
-//}
-//
-//artifacts {
-//    archives allJar
-//}
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 tasks.create("publishBuildOnDiscord") {
     group = "Publishing"
