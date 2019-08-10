@@ -11,7 +11,7 @@ plugins {
 
 allprojects {
     description = 'A factions plugin that will make managing your battle-server easier. :)'
-    group = "io.github.aquerr.eaglefactions"
+    group = "io.github.aquerr"
     version = "v0.13.0"
 
     tasks.withType(JavaCompile) {
