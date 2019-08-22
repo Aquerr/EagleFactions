@@ -27,23 +27,21 @@ public class UnclaimallCommand extends AbstractCommand
     {
         if(source instanceof Player)
         {
-            Player player = (Player)source;
-
-            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final Player player = (Player)source;
+            final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             //Check if player is in the faction.
             if(optionalPlayerFaction.isPresent())
             {
-                Faction playerFaction = optionalPlayerFaction.get();
-
+                final Faction playerFaction = optionalPlayerFaction.get();
                 if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
-                    if(playerFaction.getHome() != null)
+                    if(!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
                     {
-                        getPlugin().getFactionLogic().setHome(null, playerFaction, null);
+                        super.getPlugin().getFactionLogic().setHome(null, playerFaction, null);
                     }
 
-                    getPlugin().getFactionLogic().removeAllClaims(playerFaction);
+                    super.getPlugin().getFactionLogic().removeAllClaims(playerFaction);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_REMOVED_ALL_CLAIMS));
 
                     return CommandResult.success();
