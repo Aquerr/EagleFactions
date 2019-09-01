@@ -134,21 +134,30 @@ public class ChatMessageListener extends AbstractListener
             if(this.configFields.shouldSupressOtherFactionsMessagesWhileInTeamChat())
             {
                 final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
-                Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
-                for(MessageReceiver messageReceiver : chatMembers)
+                final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
+                for(final MessageReceiver messageReceiver : chatMembers)
                 {
-                    if(messageReceiver instanceof Player)
+                    if (!(messageReceiver instanceof Player))
+                        continue;
+
+                    final Player receiver = (Player) messageReceiver;
+                    if (!EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()))
+                        continue;
+
+                    if (EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) == ChatEnum.GLOBAL)
+                        continue;
+
+                    final Optional<Faction> receiverFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(receiver.getUniqueId());
+                    if (!receiverFaction.isPresent())
+                        continue;
+
+                    if(playerFaction.getAlliances().contains(receiverFaction.get().getName()))
                     {
-                        final Player receiver = (Player) messageReceiver;
-                        if(EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()) && EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) != ChatEnum.GLOBAL)
-                        {
-                            //TODO: Filter alliances also.
-                            final Optional<Faction> receiverFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(receiver.getUniqueId());
-                            if(receiverFaction.isPresent() && !receiverFaction.get().getName().equals(playerFaction.getName()))
-                            {
-                                newReceivers.remove(receiver);
-                            }
-                        }
+                        continue;
+                    }
+                    else if(!receiverFaction.get().getName().equals(playerFaction.getName()))
+                    {
+                        newReceivers.remove(receiver);
                     }
                 }
                 messageChannel = MessageChannel.fixed(newReceivers);
