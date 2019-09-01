@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.parsers;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -17,9 +17,12 @@ import java.util.stream.Collectors;
 
 public class FactionPlayerArgument extends CommandElement
 {
-    public FactionPlayerArgument(@Nullable Text key)
+    private final EagleFactions plugin;
+
+    public FactionPlayerArgument(final EagleFactions plugin, final @Nullable Text key)
     {
         super(key);
+        this.plugin = plugin;
     }
 
     @Nullable
@@ -27,7 +30,7 @@ public class FactionPlayerArgument extends CommandElement
     protected IFactionPlayer parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
     {
         //Just in case someone new entered the server after start.
-        Set<IFactionPlayer> serverPlayers = EagleFactionsPlugin.getPlugin().getPlayerManager().getServerPlayers();
+        Set<IFactionPlayer> serverPlayers = plugin.getPlayerManager().getServerPlayers();
 
         if (args.hasNext())
         {
@@ -50,7 +53,7 @@ public class FactionPlayerArgument extends CommandElement
     @Override
     public List<String> complete(CommandSource src, CommandArgs args, CommandContext context)
     {
-        List<String> list = new ArrayList<>(EagleFactionsPlugin.getPlugin().getPlayerManager().getServerPlayerNames());
+        List<String> list = new ArrayList<>(this.plugin.getPlayerManager().getServerPlayerNames());
 
         if (args.hasNext())
         {

@@ -8,7 +8,10 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.asset.AssetId;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -26,6 +29,11 @@ public class Configuration implements IConfiguration
 
     private ConfigFields configFields;
 
+
+    @Inject
+    @AssetId("Settings.conf")
+    private Asset asset;
+
     public Configuration(Path configDir)
     {
         if (!Files.exists(configDir))
@@ -42,28 +50,18 @@ public class Configuration implements IConfiguration
 
         this.configPath = configDir.resolve("Settings.conf");
 
-        if (!Files.exists(this.configPath))
+        try
         {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("Settings.conf");
-            try
-            {
-                Files.copy(inputStream, this.configPath);
-                inputStream.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            asset.copyToDirectory(this.configPath, false, true);
+        }
+        catch (final IOException e)
+        {
+            e.printStackTrace();
+        }
 
-            this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
-            loadConfiguration();
-        }
-        else
-        {
-            this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
-            loadConfiguration();
-            save();
-        }
+        this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
+        loadConfiguration();
+        save();
 
         this.configFields = new ConfigFields(this);
     }

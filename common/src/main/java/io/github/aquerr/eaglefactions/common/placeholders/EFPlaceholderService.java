@@ -148,7 +148,7 @@ public class EFPlaceholderService
 
     private String getFactionName(final User user)
     {
-        Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(optionalFaction.isPresent())
         {
             return optionalFaction.get().getName();
@@ -158,7 +158,7 @@ public class EFPlaceholderService
 
     private Text getFactionTag(final User user)
     {
-        Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(optionalFaction.isPresent())
         {
             return optionalFaction.get().getTag();

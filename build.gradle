@@ -1,10 +1,18 @@
-apply plugin: 'java'
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+    }
+}
 
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "2.0.4"
+}
 
 allprojects {
     description = 'A factions plugin that will make managing your battle-server easier. :)'
-
     group = "io.github.aquerr"
+    version = "v0.13.0"
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -15,12 +23,32 @@ allprojects {
         jcenter()
         maven { url 'https://jitpack.io' }
     }
+} 
+
+artifacts {
+    archives shadowJar
 }
 
 dependencies {
     compile project(":common")
+    compile project(":sponge-api5")
     compile project(":sponge-api6")
     compile project(":sponge-api7")
+}
+
+shadowJar {
+    if(System.getenv("JENKINS_HOME")) {
+        version = version + "_" + System.getenv("BUILD_NUMBER")
+        println("File name => " + baseName)
+    } else {
+        version = version + "-SNAPSHOT"
+    }
+}
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 tasks.create("publishBuildOnDiscord") {

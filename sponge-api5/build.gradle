@@ -8,5 +8,5 @@ sourceCompatibility = 1.8
 dependencies {
     implementation project(':EagleFactionsAPI')
     implementation project(':common')
-    compileOnly('org.spongepowered:spongeapi:7.1.0')
+    compileOnly('org.spongepowered:spongeapi:5.1.0')
 }

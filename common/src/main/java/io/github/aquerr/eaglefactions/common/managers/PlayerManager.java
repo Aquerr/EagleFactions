@@ -3,10 +3,11 @@ package io.github.aquerr.eaglefactions.common.managers;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.IPlayerManager;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
-import io.github.aquerr.eaglefactions.common.storage.StorageManager;
+import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -24,16 +25,19 @@ public class PlayerManager implements IPlayerManager
 {
     private static PlayerManager INSTANCE = null;
 
-    private final ConfigFields _configFields;
-    private final StorageManager storageManager;
+    private final EagleFactions plugin;
+
+    private final ConfigFields configFields;
+    private final StorageManagerImpl storageManager;
 
     private UserStorageService userStorageService;
 
     private PlayerManager(final EagleFactions plugin)
     {
         INSTANCE = this;
-        _configFields = plugin.getConfiguration().getConfigFields();
-        storageManager = StorageManager.getInstance(plugin);
+        this.plugin = plugin;
+        this.configFields = plugin.getConfiguration().getConfigFields();
+        this.storageManager = StorageManagerImpl.getInstance(plugin);
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         optionalUserStorageService.ifPresent(x -> userStorageService = x);
@@ -46,31 +50,37 @@ public class PlayerManager implements IPlayerManager
         else return INSTANCE;
     }
 
+    @Override
     public boolean addPlayer(UUID playerUUID, String playerName)
     {
-        return storageManager.addPlayer(playerUUID, playerName, _configFields.getStartingPower(), _configFields.getGlobalMaxPower());
+        return storageManager.addPlayer(playerUUID, playerName, configFields.getStartingPower(), configFields.getGlobalMaxPower());
     }
 
+    @Override
     public float getPlayerPower(UUID playerUUID)
     {
         return storageManager.getPlayerPower(playerUUID);
     }
 
+    @Override
     public boolean setPlayerPower(UUID playerUUID, float power)
     {
         return storageManager.setPlayerPower(playerUUID, power);
     }
 
+    @Override
     public float getPlayerMaxPower(UUID playerUUID)
     {
         return storageManager.getPlayerMaxPower(playerUUID);
     }
 
+    @Override
     public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
     {
         return storageManager.setPlayerMaxPower(playerUUID, maxpower);
     }
 
+    @Override
     public Optional<String> getPlayerName(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
@@ -83,6 +93,20 @@ public class PlayerManager implements IPlayerManager
         }
     }
 
+    @Override
+    public IFactionPlayer convertToFactionPlayer(User user) {
+        String factionName = "";
+        FactionMemberType factionMemberType = null;
+        Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        if (optionalFaction.isPresent())
+        {
+            factionName = optionalFaction.get().getName();
+            factionMemberType = optionalFaction.get().getPlayerMemberType(user.getUniqueId());
+        }
+
+        return new FactionPlayer(user.getName(), user.getUniqueId(), factionName, factionMemberType, this.configFields.getStartingPower(),  this.configFields.getGlobalMaxPower());
+    }
+
     private Optional<String> getLastKnownPlayerName(UUID playerUUID)
     {
         String playerName = storageManager.getPlayerName(playerUUID);
@@ -91,6 +115,7 @@ public class PlayerManager implements IPlayerManager
         return Optional.of(playerName);
     }
 
+    @Override
     public Optional<Player> getPlayer(UUID playerUUID)
     {
         final Optional<User> oUser = getUser(playerUUID);
@@ -99,38 +124,38 @@ public class PlayerManager implements IPlayerManager
         return oUser.get().getPlayer();
     }
 
-    private Optional<User> getUser(UUID playerUUID)
-    {
-        Optional<User> oUser = userStorageService.get(playerUUID);
-        return oUser;
-    }
-
+    @Override
     public boolean isPlayerOnline(UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
         return oUser.map(User::isOnline).orElse(false);
     }
 
+    @Override
     public Set<String> getServerPlayerNames()
     {
         return storageManager.getServerPlayerNames();
     }
 
+    @Override
     public void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
     {
         storageManager.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
+    @Override
     public boolean lastDeathAtWarZone(UUID playerUUID)
     {
        return storageManager.getLastDeathInWarzone(playerUUID);
     }
 
+    @Override
     public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
     {
         return storageManager.checkIfPlayerExists(playerUUID, playerName);
     }
 
+    @Override
     @Nullable
     public FactionMemberType getFactionMemberType(UUID playerUUID, Faction faction)
     {
@@ -158,13 +183,21 @@ public class PlayerManager implements IPlayerManager
         return null;
     }
 
+    @Override
     public Set<IFactionPlayer> getServerPlayers()
     {
         return storageManager.getServerPlayers();
     }
 
+    @Override
     public void updatePlayerName(UUID playerUUID, String playerName)
     {
         this.storageManager.updatePlayerName(playerUUID, playerName);
+    }
+
+    private Optional<User> getUser(UUID playerUUID)
+    {
+        Optional<User> oUser = userStorageService.get(playerUUID);
+        return oUser;
     }
 }

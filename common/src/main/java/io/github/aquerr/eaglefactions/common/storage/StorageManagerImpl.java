@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class StorageManagerImpl implements StorageManager, Runnable
 {
-    private static StorageManager INSTANCE = null;
+    private static StorageManagerImpl INSTANCE = null;
 
     private final IFactionStorage factionsStorage;
     private final IPlayerStorage playerStorage;
@@ -35,7 +35,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
 
     private final Thread storageThread;
 
-    public static StorageManager getInstance(EagleFactions eagleFactions)
+    public static StorageManagerImpl getInstance(EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new StorageManagerImpl(eagleFactions);
@@ -123,6 +123,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
         }
     }
 
+    @Override
     public void addOrUpdateFaction(Faction faction)
     {
         FactionsCache.addOrUpdateFactionCache(faction);
@@ -130,6 +131,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
 //        queueStorageTask(new UpdateFactionTask(faction.toBuilder().build())); //Build new object to avoid concurrent modification.
     }
 
+    @Override
     public boolean deleteFaction(String factionName)
     {
         FactionsCache.removeFactionCache(factionName);
@@ -137,6 +139,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
         return true;
     }
 
+    @Override
     public @Nullable Faction getFaction(String factionName)
     {
         try
@@ -171,6 +174,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
         }
     }
 
+    @Override
     public void reloadStorage()
     {
         FactionsCache.clearCache();
@@ -178,63 +182,75 @@ public class StorageManagerImpl implements StorageManager, Runnable
         prepareFactionsCache();
     }
 
+    @Override
     public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
     {
         return this.playerStorage.checkIfPlayerExists(playerUUID, playerName);
     }
 
+    @Override
     public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float globalMaxPower)
     {
         return CompletableFuture.supplyAsync(() -> playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower)).isDone();
         //return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
     }
 
+    @Override
     public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
     {
         return CompletableFuture.supplyAsync(() -> this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone)).isDone();
         //return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
+    @Override
     public boolean getLastDeathInWarzone(final UUID playerUUID)
     {
         return this.playerStorage.getLastDeathInWarzone(playerUUID);
     }
 
+    @Override
     public float getPlayerPower(final UUID playerUUID)
     {
         return this.playerStorage.getPlayerPower(playerUUID);
     }
 
+    @Override
     public boolean setPlayerPower(final UUID playerUUID, final float power)
     {
         return CompletableFuture.supplyAsync(() -> this.playerStorage.setPlayerPower(playerUUID, power)).isDone();
     }
 
+    @Override
     public float getPlayerMaxPower(final UUID playerUUID)
     {
         return this.playerStorage.getPlayerMaxPower(playerUUID);
     }
 
+    @Override
     public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
     {
         return CompletableFuture.supplyAsync(()-> this.playerStorage.setPlayerMaxPower(playerUUID, maxpower)).isDone();
     }
 
+    @Override
     public Set<String> getServerPlayerNames()
     {
         return this.playerStorage.getServerPlayerNames();
     }
 
+    @Override
     public Set<IFactionPlayer> getServerPlayers()
     {
         return this.playerStorage.getServerPlayers();
     }
 
+    @Override
     public String getPlayerName(final UUID playerUUID)
     {
         return this.playerStorage.getPlayerName(playerUUID);
     }
 
+    @Override
     public boolean updatePlayerName(final UUID playerUUID, final String playerName)
     {
         return CompletableFuture.supplyAsync(()->this.playerStorage.updatePlayerName(playerUUID, playerName)).isDone();

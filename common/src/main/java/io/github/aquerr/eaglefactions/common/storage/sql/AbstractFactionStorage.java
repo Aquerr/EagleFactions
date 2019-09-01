@@ -1,25 +1,38 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
+import com.sun.nio.zipfs.ZipPath;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
+import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 public abstract class AbstractFactionStorage implements IFactionStorage
 {
@@ -100,18 +113,49 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             final int databaseVersionNumber = getDatabaseVersion();
 
             //Get all .sql files
-            final URL resourcesFolderURL = this.plugin.getResource("queries/" + this.sqlProvider.getProviderName());
-            final File resourcesFolder = new File(resourcesFolderURL.getPath());
-            final File[] resources = resourcesFolder.listFiles();
-            if (resources != null)
+            final List<Path> filePaths = new ArrayList<>();
+            final URL url = this.plugin.getClass().getResource("/queries/" + this.sqlProvider.getProviderName());
+            if (url != null)
             {
-                for(File resource : resources)
+                final URI uri = url.toURI();
+                Path myPath;
+                if (uri.getScheme().equals("jar"))
                 {
-                    final int scriptNumber = Integer.parseInt(resource.getName().substring(0, 3));
+                    final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                    myPath = fileSystem.getPath("/queries/" + this.sqlProvider.getProviderName());
+                }
+                else
+                {
+                    myPath = Paths.get(uri);
+                }
+
+                final Stream<Path> walk = Files.walk(myPath, 1);
+                boolean skipFirst = true;
+                for (final Iterator<Path> it = walk.iterator(); it.hasNext();) {
+                    if (skipFirst)
+                    {
+                        it.next();
+                        skipFirst = false;
+                    }
+
+                    final Path zipPath = it.next();
+                    filePaths.add(zipPath);
+                }
+            }
+
+            //Sort .sql files
+            filePaths.sort(Comparator.comparing(x -> x.getFileName().toString()));
+
+            if (!filePaths.isEmpty())
+            {
+                for(final Path resourceFilePath : filePaths)
+                {
+                    final int scriptNumber = Integer.parseInt(resourceFilePath.getFileName().toString().substring(0, 3));
                     if(scriptNumber <= databaseVersionNumber)
                         continue;
 
-                    try(final BufferedReader bufferedReader = new BufferedReader(new FileReader(resource)))
+                    try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
+                        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream)))
                     {
                         try(final Statement statement = this.sqlProvider.getConnection().createStatement())
                         {
@@ -143,12 +187,12 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             else
             {
                 System.out.println("There may be a problem with database script files...");
-                System.out.println("Searched for them in: " + resourcesFolder.getName());
+                System.out.println("Searched for them in: " + this.sqlProvider.getProviderName());
             }
             if (databaseVersionNumber == 0)
                 precreate();
         }
-        catch(SQLException e)
+        catch(SQLException | IOException | URISyntaxException e)
         {
             e.printStackTrace();
             Sponge.getServer().shutdown();
@@ -159,8 +203,17 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     {
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
-            preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+            PreparedStatement preparedStatement = null;
+            if(this.sqlProvider instanceof H2Provider)
+            {
+                preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VERSION'");
+            }
+            else if(this.sqlProvider instanceof MySQLProvider)
+            {
+                preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
+                preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+            }
+
             final ResultSet resultSet = preparedStatement.executeQuery();
             boolean versionTableExists = false;
             while(resultSet.next())
@@ -281,7 +334,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 preparedStatement.close();
             }
 
-            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().toInventory());
+            List<DataView> dataViews = InventorySerializer.serializeInventory(this.plugin.getFactionLogic().convertFactionChestToInventory(faction.getChest()));
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();

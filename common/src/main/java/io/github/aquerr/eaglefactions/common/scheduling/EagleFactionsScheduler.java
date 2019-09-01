@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;

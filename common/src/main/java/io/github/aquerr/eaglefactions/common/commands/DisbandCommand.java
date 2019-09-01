@@ -28,7 +28,28 @@ public class DisbandCommand extends AbstractCommand
         if(!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
-        Player player = (Player) source;
+        final Player player = (Player) source;
+
+        // There's a bit of code duplicating, but...
+        Optional<String> optionalFactionName = context.<String>getOne("faction name");
+        if (optionalFactionName.isPresent()) {
+            if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
+
+            Faction faction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());
+            if (faction == null)
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, optionalFactionName.get() + "!"));
+
+            boolean didSecceed = super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
+            if (didSecceed) {
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HAS_BEEN_DISBANDED));
+            } else {
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, PluginMessages.SOMETHING_WENT_WRONG));
+            }
+
+            return CommandResult.success();
+        }
+
         Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         if(!optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));

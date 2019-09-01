@@ -14,6 +14,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.api.config.IConfiguration;
 import io.github.aquerr.eaglefactions.common.config.Configuration;
+import io.github.aquerr.eaglefactions.common.dynmap.DynmapMain;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
@@ -86,6 +87,8 @@ public class EagleFactionsPlugin implements EagleFactions
     private StorageManager _storageManager;
     private EFPlaceholderService _efPlaceholderService;
 
+    private DynmapMain _dynmapMain;
+
     public static EagleFactionsPlugin getPlugin()
     {
         return eagleFactions;
@@ -101,26 +104,27 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onServerInitialization(GameInitializationEvent event)
+    public void onServerInitialization(final GameInitializationEvent event)
     {
         eagleFactions = this;
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
 
-        SetupConfigs();
+        setupConfigs();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded..."));
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
-        SetupManagers();
+        setupManagers();
+        registerAPI();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded..."));
 
-        InitializeCommands();
+        initializeCommands();
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded..."));
 
-        RegisterListeners();
+        registerListeners();
 
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
@@ -135,12 +139,15 @@ public class EagleFactionsPlugin implements EagleFactions
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         }
+    }
 
-        Sponge.getServiceManager().setProvider(this, io.github.aquerr.eaglefactions.api.logic.FactionLogic.class, _factionLogic);
+    private void registerAPI() {
+        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this._factionLogic);
+        Sponge.getServiceManager().setProvider(this, IPowerManager.class, this._powerManager);
     }
 
     @Listener
-    public void onGameStarting(GameStartingServerEvent event)
+    public void onGameStarting(final GameStartingServerEvent event)
     {
         try
         {
@@ -164,16 +171,28 @@ public class EagleFactionsPlugin implements EagleFactions
         {
             permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "io.github.aquerr.eaglefactions.player", Tristate.TRUE);
         }
+
+        if (_configuration.getConfigFields().isDynmapIntegrationEnabled()) {
+            try {
+                Class.forName("org.dynmap.DynmapCommonAPI");
+                this._dynmapMain = new DynmapMain(this);
+                this._dynmapMain.activate();
+
+                printInfo("Dynmap Integration is active!");
+            } catch (ClassNotFoundException error) {
+                printInfo("Failed to enable Dynmap Integration; Dynmap is not available");
+            }
+        }
     }
 
     @Listener
-    public void onServerPostInitialization(GamePostInitializationEvent event)
+    public void onServerPostInitialization(final GamePostInitializationEvent event)
     {
         startFactionsRemover();
     }
 
     @Listener
-    public void onReload(GameReloadEvent event)
+    public void onReload(final GameReloadEvent event)
     {
         this._configuration.reloadConfiguration();
         this._storageManager.reloadStorage();
@@ -185,7 +204,7 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
-    private void InitializeCommands()
+    private void initializeCommands()
     {
         //Help command should display all possible commands in plugin.
         SUBCOMMANDS.put(Collections.singletonList("help"), CommandSpec.builder()
@@ -207,6 +226,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new DisbandCommand(this))
                 .build());
 
@@ -229,7 +249,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("kick"), CommandSpec.builder()
                 .description(Text.of("Kicks a player from the faction"))
                 .permission(PluginPermissions.KICK_COMMAND)
-                .arguments(new FactionPlayerArgument(Text.of("player")))
+                .arguments(new FactionPlayerArgument(this, Text.of("player")))
                 .executor(new KickCommand(this))
                 .build());
 
@@ -237,7 +257,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("j", "join"), CommandSpec.builder()
                 .description(Text.of("Join a specific faction"))
                 .permission(PluginPermissions.JOIN_COMMAND)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(new FactionNameArgument(this, Text.of("faction name")))
                 .executor(new JoinCommand(this))
                 .build());
 
@@ -258,7 +278,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Info command. Shows info about a faction.
         SUBCOMMANDS.put(Arrays.asList("i", "info"), CommandSpec.builder()
                 .description(Text.of("Show info about a faction"))
-                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new InfoCommand(this))
                 .build());
 
@@ -274,7 +294,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
                 .description(Text.of("Invite faction to the alliance"))
                 .permission(PluginPermissions.ALLY_COMMAND)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(new FactionNameArgument(this, Text.of("faction name")))
                 .executor(new AllyCommand(this))
                 .build());
 
@@ -282,7 +302,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare someone a war"))
                 .permission(PluginPermissions.ENEMY_COMMAND)
-                .arguments(new FactionNameArgument(Text.of("faction name")))
+                .arguments(new FactionNameArgument(this, Text.of("faction name")))
                 .executor(new EnemyCommand(this))
                 .build());
 
@@ -491,7 +511,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("chest"), CommandSpec.builder()
                 .description(Text.of("Opens faction's chest"))
                 .permission(PluginPermissions.CHEST_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new ChestCommand(this))
                 .build());
 
@@ -513,7 +533,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getCommandManager().register(this, commandEagleFactions, "factions", "faction", "f");
     }
 
-    private void RegisterListeners()
+    private void registerListeners()
     {
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener(this));
@@ -581,17 +601,17 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.getClass().getClassLoader().getResourceAsStream(fileName);
     }
 
-    public URL getResource(String fileName)
+    public URL getResource(final String fileName)
     {
         return this.getClass().getClassLoader().getResource(fileName);
     }
 
-    public void printInfo(String message)
+    public void printInfo(final String message)
     {
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
     }
 
-    private void SetupConfigs()
+    private void setupConfigs()
     {
         _configuration = new Configuration(_configDir);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
@@ -599,7 +619,7 @@ public class EagleFactionsPlugin implements EagleFactions
         _pvpLogger = new PVPLoggerImpl(getConfiguration());
     }
 
-    private void SetupManagers()
+    private void setupManagers()
     {
         _storageManager = StorageManagerImpl.getInstance(this);
         _playerManager = PlayerManager.getInstance(this);

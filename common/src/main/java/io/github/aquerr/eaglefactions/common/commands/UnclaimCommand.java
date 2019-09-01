@@ -31,30 +31,29 @@ public class UnclaimCommand extends AbstractCommand
     {
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player)source;
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final Player player = (Player)source;
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
         //Check if player has admin mode.
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            final World world = player.getWorld();
-            final Vector3i chunk = player.getLocation().getChunkPosition();
-            final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
+                final World world = player.getWorld();
+                final Vector3i chunk = player.getLocation().getChunkPosition();
+                final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
             if (optionalChunkFaction.isPresent())
             {
-                if (optionalChunkFaction.get().getHome() != null)
+                    if (!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
                 {
                     if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                     {
-                        Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
-
-                        if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                            final Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
+                            if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
+                                super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
                     }
                 }
 
-                getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
+                    super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
 
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
                 return CommandResult.success();
@@ -69,28 +68,26 @@ public class UnclaimCommand extends AbstractCommand
         //Check if player is in the faction.
         if(optionalPlayerFaction.isPresent())
         {
-            Faction playerFaction = optionalPlayerFaction.get();
-
+                final Faction playerFaction = optionalPlayerFaction.get();
             if (this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
             {
-                World world = player.getWorld();
-                Vector3i chunk = player.getLocation().getChunkPosition();
-
-                Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
+                    final World world = player.getWorld();
+                    final Vector3i chunk = player.getLocation().getChunkPosition();
+                    final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
 
                 if (optionalChunkFaction.isPresent())
                 {
-                    Faction chunkFaction = optionalChunkFaction.get();
+                        final Faction chunkFaction = optionalChunkFaction.get();
 
                     if (chunkFaction.getName().equals(playerFaction.getName()))
                     {
-                        if (optionalChunkFaction.get().getHome() != null)
+                            if (!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
                         {
                             if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                             {
-                                Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
-
-                                if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString())) getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                                    final Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
+                                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
+                                        super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
                             }
                         }
 

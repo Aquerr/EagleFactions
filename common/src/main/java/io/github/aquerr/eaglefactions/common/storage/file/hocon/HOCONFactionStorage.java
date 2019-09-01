@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
 import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.entities.*;
+import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.*;
@@ -12,16 +13,19 @@ import io.github.aquerr.eaglefactions.common.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import io.github.aquerr.eaglefactions.common.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
-import io.github.aquerr.eaglefactions.common.storage.StorageManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -43,10 +47,11 @@ public class FactionLogicImpl implements FactionLogic
     private final StorageManager storageManager;
     private final ConfigFields _configFields;
     private final PlayerManager _playerManager;
+    private final EagleFactionsPlugin plugin;
 
     private final UUID DUMMY_UUID = new UUID(0, 0);
 
-    public static FactionLogic getInstance(EagleFactionsPlugin eagleFactions)
+    public static FactionLogic getInstance(final EagleFactionsPlugin eagleFactions)
     {
         if (INSTANCE == null)
             return new FactionLogicImpl(eagleFactions);
@@ -56,6 +61,7 @@ public class FactionLogicImpl implements FactionLogic
     public FactionLogicImpl(EagleFactionsPlugin plugin)
     {
         INSTANCE = this;
+        this.plugin = plugin;
         _configFields = plugin.getConfiguration().getConfigFields();
         _playerManager = plugin.getPlayerManager();
         this.storageManager = plugin.getStorageManager();
@@ -770,5 +776,41 @@ public class FactionLogicImpl implements FactionLogic
     {
         final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
         this.storageManager.addOrUpdateFaction(updatedFaction);
+    }
+
+    @Override
+    public Inventory convertFactionChestToInventory(final FactionChest factionChest)
+    {
+        Inventory inventory = Inventory.builder()
+                .of(InventoryArchetypes.CHEST)
+                .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
+                .listener(InteractInventoryEvent.Close.class, new FactionChestCloseListener(this.plugin, factionChest.getFactionName()))
+                .build(EagleFactionsPlugin.getPlugin());
+
+        //Fill it with items
+        int column = 1;
+        int row = 1;
+
+        for(final Inventory slot : inventory.slots())
+        {
+            ItemStack itemStack = null;
+            for(final FactionChest.SlotItem slotItem : factionChest.getItems())
+            {
+                if(slotItem.getRow() == row && slotItem.getColumn() == column)
+                    itemStack = ItemStack.builder().fromContainer(slotItem.getItem().toContainer()).build();
+            }
+
+            if(itemStack != null)
+                slot.offer(itemStack);
+
+            column++;
+            if(column > 9)
+            {
+                column = 1;
+                row++;
+            }
+        }
+
+        return inventory;
     }
 }

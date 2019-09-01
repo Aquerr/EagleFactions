@@ -27,55 +27,51 @@ public class SetHomeCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        if((source instanceof Player))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+
+        final Player player = (Player)source;
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+
+        if (!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+
+        final Faction playerFaction = optionalPlayerFaction.get();
+        final World world = player.getWorld();
+        final Vector3i newHome = new Vector3i(player.getLocation().getBlockPosition());
+
+        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            Player player = (Player)source;
+            super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+            return CommandResult.success();
+        }
 
-            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-            if(optionalPlayerFaction.isPresent())
+        if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
+        {
+            final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
+            if (!chunkFaction.isPresent() && super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
             {
-                Faction playerFaction = optionalPlayerFaction.get();
-                World world = player.getWorld();
-
-                if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
-                {
-                    Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
-                    getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);
-                    source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
-
-                    return CommandResult.success();
-                }
-
-                if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
-                {
-                    Optional<Faction> chunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
-
-                    if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
-                    {
-                        Vector3i home = new Vector3i(player.getLocation().getBlockPosition());
-
-                        getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, home);
-                        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
-                    }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
-                    }
-                }
-                else
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
-                }
+                super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+            }
+            else if (!chunkFaction.isPresent() && !super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
+            {
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction home must be placed inside the faction claim!"));
+            }
+            if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
+            {
+                super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
         }
 
         return CommandResult.success();
