@@ -189,9 +189,9 @@ public class StorageManagerImpl implements StorageManager, Runnable
     }
 
     @Override
-    public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float globalMaxPower)
+    public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float maxpower)
     {
-        return CompletableFuture.supplyAsync(() -> playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower)).isDone();
+        return CompletableFuture.supplyAsync(() -> playerStorage.addPlayer(playerUUID, playerName, startingPower, maxpower)).isDone();
         //return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
     }
 
