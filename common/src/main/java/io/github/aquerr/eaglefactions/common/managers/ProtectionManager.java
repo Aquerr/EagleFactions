@@ -14,6 +14,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -163,7 +164,7 @@ public class ProtectionManager implements IProtectionManager
         if (hasAdminMode(user.getUniqueId()))
             return true;
 
-        if (isItemWhitelisted(usedItem.getType()))
+        if (isItemWhitelisted(usedItem.getType().getId()))
             return true;
 
         final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
@@ -470,9 +471,9 @@ public class ProtectionManager implements IProtectionManager
     }
 
     @Override
-    public boolean isItemWhitelisted(CatalogType itemType)
+    public boolean isItemWhitelisted(final String itemId)
     {
-        return this.plugin.getConfiguration().getConfigFields().getWhiteListedItems().contains(itemType.getId());
+        return this.plugin.getConfiguration().getConfigFields().getWhiteListedItems().contains(itemId);
     }
 
     @Override

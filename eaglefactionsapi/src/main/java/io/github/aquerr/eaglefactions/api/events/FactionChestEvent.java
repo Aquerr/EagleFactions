@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.api.events;
 
-public interface FactionJoinEvent extends FactionEvent
+interface FactionChestEvent extends FactionEvent
 {
 
 }

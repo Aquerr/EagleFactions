@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.api.events;
 
-public interface FactionLeaveEvent
+public interface FactionLeaveEvent extends FactionEvent
 {
+
 }

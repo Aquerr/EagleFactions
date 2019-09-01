@@ -62,28 +62,29 @@ public class PVPLoggerImpl implements PVPLogger
     }
 
     @Override
-    public boolean shouldBlockCommand(Player player, String usedCommand)
+    public boolean shouldBlockCommand(final Player player, final String command)
     {
-        if (isPlayerBlocked(player))
+        if (!isPlayerBlocked(player))
+            return false;
+
+        String usedCommand = command;
+        if (command.charAt(0) == '/')
         {
-            if (usedCommand.charAt(0) == '/')
+            usedCommand = command.substring(1);
+        }
+
+        usedCommand = usedCommand.toLowerCase();
+
+        for (String blockedCommand : _blockedCommandsDuringFight)
+        {
+            if (blockedCommand.charAt(0) == '/')
             {
-                usedCommand = usedCommand.substring(1);
+                blockedCommand = blockedCommand.substring(1);
             }
 
-            usedCommand = usedCommand.toLowerCase();
-
-            for (String blockedCommand : _blockedCommandsDuringFight)
+            if (blockedCommand.equals("*") || usedCommand.equals(blockedCommand) || usedCommand.startsWith(blockedCommand))
             {
-                if (blockedCommand.charAt(0) == '/')
-                {
-                    blockedCommand = blockedCommand.substring(1);
-                }
-
-                if (blockedCommand.equals("*") || usedCommand.equals(blockedCommand) || usedCommand.startsWith(blockedCommand))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -162,6 +163,9 @@ public class PVPLoggerImpl implements PVPLogger
     @Override
     public void removePlayer(Player player)
     {
+        if (!isPlayerBlocked(player))
+            return;
+
         synchronized(_attackedPlayers)
         {
             //Remove PVPLoggerImpl objective

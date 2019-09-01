@@ -1,5 +1,11 @@
 package io.github.aquerr.eaglefactions.api.events;
 
-public interface FactionInviteEvent
+import org.spongepowered.api.entity.living.player.Player;
+
+public interface FactionInviteEvent extends FactionEvent
 {
+    /**
+     * @return {@link Player} who has been invited to the faction.
+     */
+    Player getInvitedPlayer();
 }

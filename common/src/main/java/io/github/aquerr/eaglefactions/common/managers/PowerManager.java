@@ -55,7 +55,7 @@ public class PowerManager implements IPowerManager
         }
     }
 
-    public int getFactionMaxClaims(Faction faction)
+    public int getFactionMaxClaims(final Faction faction)
     {
         float power = getFactionPower(faction);
         return (int)power;
@@ -186,30 +186,26 @@ public class PowerManager implements IPowerManager
         return bd.floatValue();
     }
 
-    public void setPower(UUID playerUUID, float power)
+    public void setPower(final UUID playerUUID, final float power)
     {
         plugin.getPlayerManager().setPlayerPower(playerUUID, power);
     }
 
-    public void startIncreasingPower(UUID playerUUID)
+    public void startIncreasingPower(final UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.interval(1, TimeUnit.MINUTES).execute(new Consumer<Task>()
+        taskBuilder.interval(1, TimeUnit.MINUTES).execute(task ->
         {
-            @Override
-            public void accept(Task task)
-            {
-                if (!plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
+            if (!plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
 
-                if(getPlayerPower(playerUUID) + _configFields.getPowerIncrement() < getPlayerMaxPower(playerUUID))
-                {
-                    addPower(playerUUID, false);
-                }
-                else
-                {
-                    setPower(playerUUID, getPlayerMaxPower(playerUUID));
-                }
+            if(getPlayerPower(playerUUID) + _configFields.getPowerIncrement() < getPlayerMaxPower(playerUUID))
+            {
+                addPower(playerUUID, false);
+            }
+            else
+            {
+                setPower(playerUUID, getPlayerMaxPower(playerUUID));
             }
         }).async().submit(plugin);
     }

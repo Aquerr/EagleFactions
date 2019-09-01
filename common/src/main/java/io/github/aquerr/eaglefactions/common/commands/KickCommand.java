@@ -5,7 +5,8 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.events.FactionKickEvent;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
+import io.github.aquerr.eaglefactions.common.events.FactionKickEventImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -70,17 +71,17 @@ public class KickCommand extends AbstractCommand
             source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_KICK_THIS_PLAYER));
             return CommandResult.success();
         }
-        final boolean isCancelled = FactionKickEvent.runEvent(selectedPlayer, player, playerFaction);
+        final boolean isCancelled = EventRunner.runFactionKickEvent(selectedPlayer, player, playerFaction);
         if(!isCancelled)
         {
-            getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
+            super.getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
             //TODO: Add listener that will inform players in a faction that someone has left their faction.
 
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_KICKED + " ", TextColors.GOLD, selectedPlayer.getName(), TextColors.GREEN, " " + PluginMessages.FROM_THE_FACTION));
 
-            if(getPlugin().getPlayerManager().isPlayerOnline(selectedPlayer.getUniqueId()))
+            if(super.getPlugin().getPlayerManager().isPlayerOnline(selectedPlayer.getUniqueId()))
             {
-                getPlugin().getPlayerManager().getPlayer(selectedPlayer.getUniqueId()).get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
+                super.getPlugin().getPlayerManager().getPlayer(selectedPlayer.getUniqueId()).get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_WERE_KICKED_FROM_THE_FACTION));
             }
 
             EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(selectedPlayer.getUniqueId());

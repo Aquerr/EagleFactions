@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -41,6 +42,9 @@ public class ChestCommand extends AbstractCommand
         {
             if(optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(optionalFactionName.get()))
             {
+                final boolean isCancelled = EventRunner.runFactionChestEvent(player, optionalPlayerFaction.get());
+                if (isCancelled)
+                    return CommandResult.success();
                 openFactionChest(player, optionalPlayerFaction.get());
                 return CommandResult.success();
             }
@@ -51,6 +55,9 @@ public class ChestCommand extends AbstractCommand
             final Faction nullableFaction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());
             if(nullableFaction != null)
             {
+                final boolean isCancelled = EventRunner.runFactionChestEvent(player, nullableFaction);
+                if (isCancelled)
+                    return CommandResult.success();
                 openFactionChest(player, nullableFaction);
                 return CommandResult.success();
             }
@@ -60,6 +67,9 @@ public class ChestCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         final Faction faction = optionalPlayerFaction.get();
+        final boolean isCancelled = EventRunner.runFactionChestEvent(player, faction);
+        if (isCancelled)
+            return CommandResult.success();
         openFactionChest(player, faction);
         return CommandResult.success();
     }

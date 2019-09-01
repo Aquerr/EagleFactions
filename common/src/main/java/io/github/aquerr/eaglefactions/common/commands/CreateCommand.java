@@ -3,7 +3,8 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.events.FactionCreateEvent;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
+import io.github.aquerr.eaglefactions.common.events.FactionCreateEventImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -80,7 +81,7 @@ public class CreateCommand extends AbstractCommand
         else if (factionName.length() < getPlugin().getConfiguration().getConfigFields().getMinNameLength())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
 
-        if (getPlugin().getConfiguration().getConfigFields().getFactionCreationByItems())
+        if (super.getPlugin().getConfiguration().getConfigFields().getFactionCreationByItems())
         {
             return createByItems(factionName, factionTag, player);
         }
@@ -89,12 +90,12 @@ public class CreateCommand extends AbstractCommand
             final Faction faction = Faction.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
             //Testing with events
-            final boolean isCancelled = FactionCreateEvent.runEvent(player, faction);
+            final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
             if (isCancelled)
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
             //Testing with events
 
-            getPlugin().getFactionLogic().addFaction(faction);
+            super.getPlugin().getFactionLogic().addFaction(faction);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " " + factionName + " " + PluginMessages.HAS_BEEN_CREATED));
             return CommandResult.success();
         }
@@ -171,7 +172,7 @@ public class CreateCommand extends AbstractCommand
 
         final Faction faction = Faction.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
-        final boolean isCancelled = FactionCreateEvent.runEvent(player, faction);
+        final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
         if (isCancelled)
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
 
