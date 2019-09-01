@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.events.FactionClaimEventImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -83,7 +84,7 @@ public class SquareClaimCommand extends AbstractCommand
             //Check if admin mode
             if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
-                boolean isCancelled = FactionClaimEventImpl.runEvent(player, playerFaction, world, chunk);
+                boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
                 if (isCancelled)
                     continue;
 //                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));
@@ -111,7 +112,7 @@ public class SquareClaimCommand extends AbstractCommand
 
             if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
             {
-                boolean isCancelled = FactionClaimEventImpl.runEvent(player, playerFaction, world, chunk);
+                boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
                 if (isCancelled)
                     continue;
 //                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));
@@ -126,7 +127,7 @@ public class SquareClaimCommand extends AbstractCommand
                 continue;
 //                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.CLAIMS_NEED_TO_BE_CONNECTED));
 
-            boolean isCancelled = FactionClaimEventImpl.runEvent(player, playerFaction, world, chunk);
+            boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
             if (isCancelled)
                 continue;
 //                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));

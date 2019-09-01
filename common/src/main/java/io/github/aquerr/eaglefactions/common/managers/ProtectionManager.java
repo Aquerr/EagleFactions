@@ -68,7 +68,7 @@ public class ProtectionManager implements IProtectionManager
         if (hasAdminMode(user.getUniqueId()))
             return true;
 
-        if (isBlockWhitelistedForInteraction(location.getBlockType()))
+        if (isBlockWhitelistedForInteraction(location.getBlockType().getId()))
         {
             return true;
         }
@@ -226,7 +226,7 @@ public class ProtectionManager implements IProtectionManager
         }
 
         World world = location.getExtent();
-        if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
+        if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
         final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
@@ -287,7 +287,7 @@ public class ProtectionManager implements IProtectionManager
     {
         final World world = location.getExtent();
 
-        if(isBlockWhitelistedForPlaceDestroy(location.getBlockType()))
+        if(isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
         if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()))
@@ -329,7 +329,7 @@ public class ProtectionManager implements IProtectionManager
         }
 
         World world = location.getExtent();
-        if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType())))
+        if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId())))
             return true;
 
         final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
@@ -477,15 +477,15 @@ public class ProtectionManager implements IProtectionManager
     }
 
     @Override
-    public boolean isBlockWhitelistedForInteraction(CatalogType blockType)
+    public boolean isBlockWhitelistedForInteraction(final String blockId)
     {
-        return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(blockType.getId());
+        return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(blockId);
     }
 
     @Override
-    public boolean isBlockWhitelistedForPlaceDestroy(CatalogType blockOrItemType)
+    public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId)
     {
-        return this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks().contains(blockOrItemType.getId());
+        return this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks().contains(blockOrItemId);
     }
 
 //    private boolean canUseItem(User user)
