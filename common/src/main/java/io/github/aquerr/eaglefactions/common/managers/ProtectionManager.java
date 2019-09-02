@@ -91,7 +91,7 @@ public class ProtectionManager implements IProtectionManager
                 return true;
             }
 
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+            notifyPlayer(user);
             return false;
         }
 
@@ -122,7 +122,7 @@ public class ProtectionManager implements IProtectionManager
                 return true;
             }
 
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
+            notifyPlayer(user);
             return false;
         }
 
@@ -138,7 +138,7 @@ public class ProtectionManager implements IProtectionManager
                 return true;
             }
 
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
+            notifyPlayer(user);
             return false;
         }
     }
@@ -159,7 +159,7 @@ public class ProtectionManager implements IProtectionManager
             }
         }
 
-        World world = location.getExtent();
+        final World world = location.getExtent();
 
         if (hasAdminMode(user.getUniqueId()))
             return true;
@@ -178,7 +178,7 @@ public class ProtectionManager implements IProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                 return true;
 
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+            notifyPlayer(user);
             return false;
         }
 
@@ -196,7 +196,7 @@ public class ProtectionManager implements IProtectionManager
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
         {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
+            notifyPlayer(user);
             return false;
         }
 
@@ -205,13 +205,13 @@ public class ProtectionManager implements IProtectionManager
             return true;
         else
         {
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_INTERACT_HERE)));
+            notifyPlayer(user);
             return false;
         }
     }
 
     @Override
-    public boolean canBreak(Location<World> location, User user)
+    public boolean canBreak(final Location<World> location, final User user)
     {
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
@@ -225,7 +225,7 @@ public class ProtectionManager implements IProtectionManager
             }
         }
 
-        World world = location.getExtent();
+        final World world = location.getExtent();
         if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
@@ -240,12 +240,12 @@ public class ProtectionManager implements IProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 return true;
 
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
+            notifyPlayer(user);
             return false;
         }
 
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(optionalChunkFaction.isPresent())
         {
             if(optionalChunkFaction.get().getName().equals("WarZone") || optionalChunkFaction.get().getName().equals("SafeZone"))
@@ -260,7 +260,7 @@ public class ProtectionManager implements IProtectionManager
                 }
                 else
                 {
-                    user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
+                    notifyPlayer(user);
                     return false;
                 }
             }
@@ -269,13 +269,13 @@ public class ProtectionManager implements IProtectionManager
             {
                 if (!this.plugin.getFlagManager().canBreakBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
-                    user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
+                    notifyPlayer(user);
                     return false;
                 }
             }
             else
             {
-                user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_PRIVILEGES_TO_DESTROY_BLOCKS_HERE)));
+                notifyPlayer(user);
                 return false;
             }
         }
@@ -283,7 +283,7 @@ public class ProtectionManager implements IProtectionManager
     }
 
     @Override
-    public boolean canBreak(Location<World> location)
+    public boolean canBreak(final Location<World> location)
     {
         final World world = location.getExtent();
 
@@ -343,7 +343,7 @@ public class ProtectionManager implements IProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 return true;
 
-            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+            notifyPlayer(user);
             return false;
         }
 
@@ -363,7 +363,7 @@ public class ProtectionManager implements IProtectionManager
                 }
                 else
                 {
-                    user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+                    notifyPlayer(user);
                     return false;
                 }
             }
@@ -372,13 +372,13 @@ public class ProtectionManager implements IProtectionManager
             {
                 if (!this.plugin.getFlagManager().canPlaceBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
-                    user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+                    notifyPlayer(user);
                     return false;
                 }
             }
             else
             {
-                user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+                notifyPlayer(user);
                 return false;
             }
         }
@@ -501,7 +501,7 @@ public class ProtectionManager implements IProtectionManager
 //        return blockType != BlockTypes.AIR && isBlockWhitelistedForInteraction(blockType);
 //    }
 
-    private boolean hasAdminMode(UUID playerUUID)
+    private boolean hasAdminMode(final UUID playerUUID)
     {
         return EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(playerUUID);
     }
@@ -519,5 +519,13 @@ public class ProtectionManager implements IProtectionManager
         final ItemStack feather = user.getItemInHand(HandTypes.MAIN_HAND).get();
         feather.setQuantity(feather.getQuantity() - 1);
         user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!")));
+    }
+
+    private void notifyPlayer(final User user)
+    {
+        if (this.plugin.getConfiguration().getConfigFields().shouldDisplayProtectionSystemMessages())
+        {
+            user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
+        }
     }
 }
