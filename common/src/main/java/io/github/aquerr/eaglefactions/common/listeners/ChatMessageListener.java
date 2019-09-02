@@ -64,15 +64,15 @@ public class ChatMessageListener extends AbstractListener
         }
 
         MessageChannel messageChannel = event.getOriginalChannel();
-        Faction playerFaction = optionalPlayerFaction.get();
+        final Faction playerFaction = optionalPlayerFaction.get();
 
-        Text.Builder formattedMessage = Text.builder();
+        final Text.Builder formattedMessage = Text.builder();
 
-        Text.Builder factionAndRankPrefix = Text.builder();
-        Text.Builder otherPrefixesAndPlayer = Text.builder();
-        Text.Builder factionPrefixText = Text.builder();
-        Text.Builder rankPrefixText = Text.builder();
-        Text.Builder message = Text.builder();
+        final Text.Builder factionAndRankPrefix = Text.builder();
+        final Text.Builder otherPrefixesAndPlayer = Text.builder();
+        final Text.Builder factionPrefixText = Text.builder();
+        final Text.Builder rankPrefixText = Text.builder();
+        final Text.Builder message = Text.builder();
 
         //Message = Prefixes + Player NAME + Text
         //OriginalMessage = Player NAME + Text

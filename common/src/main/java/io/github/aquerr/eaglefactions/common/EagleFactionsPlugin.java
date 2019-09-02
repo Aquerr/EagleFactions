@@ -215,7 +215,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         //Create faction command.
         SUBCOMMANDS.put(Arrays.asList("c", "create"), CommandSpec.builder()
-                .description(Text.of("Create Faction Command"))
+                .description(Text.of("Create FactionImpl Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
                 .arguments(GenericArguments.string(Text.of("tag")),
                         GenericArguments.string(Text.of("faction name")))
@@ -224,7 +224,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         //Disband faction command.
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
-                .description(Text.of("Disband Faction Command"))
+                .description(Text.of("Disband FactionImpl Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
                 .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new DisbandCommand(this))

@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -19,13 +20,13 @@ import java.util.Optional;
 
 public class SetHomeCommand extends AbstractCommand
 {
-    public SetHomeCommand(EagleFactions plugin)
+    public SetHomeCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if((source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -57,7 +58,7 @@ public class SetHomeCommand extends AbstractCommand
             }
             else if (!chunkFaction.isPresent() && !super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction home must be placed inside the faction claim!"));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "FactionImpl home must be placed inside the faction claim!"));
             }
             if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
             {

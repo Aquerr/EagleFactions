@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.entity.living.player.Player;
@@ -15,24 +16,23 @@ import java.util.Optional;
 
 public class PlayerDeathListener extends AbstractListener
 {
-    public PlayerDeathListener(EagleFactions plugin)
+    public PlayerDeathListener(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Listener(order = Order.POST)
-    public void onPlayerDeath(DestructEntityEvent.Death event)
+    public void onPlayerDeath(final DestructEntityEvent.Death event)
     {
         if(event.getTargetEntity() instanceof Player)
         {
-            Player player = (Player)event.getTargetEntity();
-
+            final Player player = (Player)event.getTargetEntity();
             super.getPlugin().getPowerManager().decreasePower(player.getUniqueId());
 
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(getPlugin().getConfiguration().getConfigFields().getPowerDecrement()) + "\n",
                     TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
 
-            Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+            final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
 
             if (super.getPlugin().getConfiguration().getConfigFields().getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
             {
@@ -41,7 +41,7 @@ public class PlayerDeathListener extends AbstractListener
 
             if (super.getPlugin().getConfiguration().getConfigFields().shouldBlockHomeAfterDeathInOwnFaction())
             {
-                Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                 if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().getName().equals(optionalPlayerFaction.get().getName()))
                 {

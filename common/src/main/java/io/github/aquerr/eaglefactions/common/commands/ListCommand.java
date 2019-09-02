@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -22,21 +23,21 @@ import java.util.Set;
 
 public class ListCommand extends AbstractCommand
 {
-    public ListCommand(EagleFactions plugin)
+    public ListCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Set<Faction> factionsList = new HashSet<Faction>(getPlugin().getFactionLogic().getFactions().values());
+        Set<Faction> factionsList = new HashSet<>(super.getPlugin().getFactionLogic().getFactions().values());
         List<Text> helpList = new ArrayList<>();
 
         Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
         Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
 
-        for(Faction faction : factionsList)
+        for(final Faction faction : factionsList)
         {
             Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSufix, Text.of(" ")).build();
 

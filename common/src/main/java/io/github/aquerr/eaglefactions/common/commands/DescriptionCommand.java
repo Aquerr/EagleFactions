@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -58,7 +59,7 @@ public class DescriptionCommand extends AbstractCommand
         }
 
         super.getPlugin().getFactionLogic().setDescription(optionalPlayerFaction.get(), description);
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, "Faction's description has been updated!")));
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, "FactionImpl's description has been updated!")));
         return CommandResult.success();
     }
 }

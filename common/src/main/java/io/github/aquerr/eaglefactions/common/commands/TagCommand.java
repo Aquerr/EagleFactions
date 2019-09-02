@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -16,15 +17,15 @@ import java.util.Optional;
 
 public class TagCommand extends AbstractCommand
 {
-    public TagCommand(EagleFactions plugin)
+    public TagCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Optional<String> optionalNewTag = context.<String>getOne("tag");
+        final Optional<String> optionalNewTag = context.<String>getOne("tag");
 
         if (!optionalNewTag.isPresent())
         {
@@ -40,10 +41,10 @@ public class TagCommand extends AbstractCommand
                 return CommandResult.success();
             }
 
-            Player player = (Player) source;
-            String newFactionTag = optionalNewTag.get();
+            final Player player = (Player) source;
+            final String newFactionTag = optionalNewTag.get();
 
-            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             if (!optionalPlayerFaction.isPresent())
             {
                 source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));

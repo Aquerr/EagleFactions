@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.storage;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -124,7 +125,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
     }
 
     @Override
-    public void addOrUpdateFaction(Faction faction)
+    public void addOrUpdateFaction(final Faction faction)
     {
         FactionsCache.addOrUpdateFactionCache(faction);
         queueStorageTask(new UpdateFactionTask(faction));
@@ -132,7 +133,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
     }
 
     @Override
-    public boolean deleteFaction(String factionName)
+    public boolean deleteFaction(final String factionName)
     {
         FactionsCache.removeFactionCache(factionName);
         queueStorageTask(new DeleteFactionTask(factionName));
@@ -140,7 +141,8 @@ public class StorageManagerImpl implements StorageManager, Runnable
     }
 
     @Override
-    public @Nullable Faction getFaction(String factionName)
+    public @Nullable
+    Faction getFaction(final String factionName)
     {
         try
         {
@@ -168,7 +170,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
     private void prepareFactionsCache()
     {
         final Set<Faction> factionSet = this.factionsStorage.getFactions();
-        for (Faction faction : factionSet)
+        for (final Faction faction : factionSet)
         {
             FactionsCache.addOrUpdateFactionCache(faction);
         }

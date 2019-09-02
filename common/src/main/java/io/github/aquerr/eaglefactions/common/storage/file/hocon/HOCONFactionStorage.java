@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -131,7 +133,8 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
-    public @Nullable Faction getFaction(String factionName)
+    public @Nullable
+    Faction getFaction(String factionName)
     {
             if(configNode.getNode("factions", factionName).getValue() == null)
                 return null;
@@ -156,7 +159,7 @@ public class HOCONFactionStorage implements IFactionStorage
         final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
         final FactionChest chest = getFactionChest(factionName);
 
-        final Faction faction = Faction.builder(factionName, tag, leader)
+        final Faction faction = FactionImpl.builder(factionName, tag, leader)
                 .setDescription(description)
                 .setMessageOfTheDay(messageOfTheDay)
                 .setHome(home)
@@ -190,7 +193,7 @@ public class HOCONFactionStorage implements IFactionStorage
             slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
         } catch (ObjectMappingException e) {
             e.printStackTrace();
-            return new FactionChest(factionName);
+            return new FactionChestImpl(factionName);
         }
 
 //        if(factionChest != null)
@@ -199,13 +202,13 @@ public class HOCONFactionStorage implements IFactionStorage
 //        }
         if(slotItems != null)
         {
-            return new FactionChest(factionName, slotItems);
+            return new FactionChestImpl(factionName, slotItems);
         }
         else
         {
             configNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
             needToSave = true;
-            return new FactionChest(factionName);
+            return new FactionChestImpl(factionName);
         }
     }
 

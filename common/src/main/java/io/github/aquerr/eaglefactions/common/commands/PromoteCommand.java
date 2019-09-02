@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -21,7 +22,7 @@ import java.util.Optional;
  */
 public class PromoteCommand extends AbstractCommand
 {
-    public PromoteCommand(EagleFactions plugin)
+    public PromoteCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
@@ -35,10 +36,10 @@ public class PromoteCommand extends AbstractCommand
         {
             if(source instanceof Player)
             {
-                Player player = (Player)source;
-                Player promotedPlayer = optionalPromotedPlayer.get();
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalPromotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(promotedPlayer.getUniqueId());
+                final Player player = (Player)source;
+                final Player promotedPlayer = optionalPromotedPlayer.get();
+                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Optional<Faction> optionalPromotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(promotedPlayer.getUniqueId());
 
                 if(optionalPlayerFaction.isPresent())
                 {

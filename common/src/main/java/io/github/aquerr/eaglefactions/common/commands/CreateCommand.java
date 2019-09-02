@@ -2,9 +2,9 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
-import io.github.aquerr.eaglefactions.common.events.FactionCreateEventImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -51,7 +51,7 @@ public class CreateCommand extends AbstractCommand
         final String factionTag = optionalFactionTag.get();
 
         if(!factionName.matches("^[A-Za-z][A-Za-z0-9]*$") || !factionTag.matches("^[A-Za-z][A-Za-z0-9]*$")){
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction name and tag must be alphanumeric!"));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "FactionImpl name and tag must be alphanumeric!"));
         }
 
         if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
@@ -87,7 +87,7 @@ public class CreateCommand extends AbstractCommand
         }
         else
         {
-            final Faction faction = Faction.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
+            final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
             //Testing with events
             final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
@@ -170,7 +170,7 @@ public class CreateCommand extends AbstractCommand
             inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
         }
 
-        final Faction faction = Faction.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
+        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
         final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
         if (isCancelled)

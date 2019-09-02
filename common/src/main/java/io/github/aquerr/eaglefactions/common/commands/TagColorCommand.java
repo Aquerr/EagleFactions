@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -18,13 +19,13 @@ import java.util.Optional;
 
 public class TagColorCommand extends AbstractCommand
 {
-    public TagColorCommand(EagleFactions plugin)
+    public TagColorCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if (!getPlugin().getConfiguration().getConfigFields().canColorTags())
         {
@@ -32,14 +33,14 @@ public class TagColorCommand extends AbstractCommand
             return CommandResult.success();
         }
 
-        Optional<TextColor> optionalColor = context.<TextColor>getOne("color");
+        final Optional<TextColor> optionalColor = context.<TextColor>getOne("color");
 
         if (optionalColor.isPresent())
         {
             if (source instanceof Player)
             {
-                Player player = (Player)source;
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Player player = (Player)source;
+                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
                 if (optionalPlayerFaction.isPresent())
                 {

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.managers;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
@@ -157,7 +158,7 @@ public class PlayerManager implements IPlayerManager
 
     @Override
     @Nullable
-    public FactionMemberType getFactionMemberType(UUID playerUUID, Faction faction)
+    public FactionMemberType getFactionMemberType(final UUID playerUUID, final Faction faction)
     {
         if(faction.getLeader() != null && faction.getLeader().equals(playerUUID))
         {
@@ -190,14 +191,14 @@ public class PlayerManager implements IPlayerManager
     }
 
     @Override
-    public void updatePlayerName(UUID playerUUID, String playerName)
+    public void updatePlayerName(final UUID playerUUID, final String playerName)
     {
         this.storageManager.updatePlayerName(playerUUID, playerName);
     }
 
-    private Optional<User> getUser(UUID playerUUID)
+    private Optional<User> getUser(final UUID playerUUID)
     {
-        Optional<User> oUser = userStorageService.get(playerUUID);
+        final Optional<User> oUser = userStorageService.get(playerUUID);
         return oUser;
     }
 }

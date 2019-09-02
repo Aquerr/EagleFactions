@@ -6,7 +6,7 @@ public class UpdateFactionTask implements IStorageTask
 {
     private final Faction faction;
 
-    public UpdateFactionTask(Faction faction)
+    public UpdateFactionTask(final Faction faction)
     {
         this.faction = faction;
     }

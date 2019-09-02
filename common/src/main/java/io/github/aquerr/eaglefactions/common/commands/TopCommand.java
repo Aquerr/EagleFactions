@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -25,14 +26,14 @@ public class TopCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        List<Faction> factionsList = new ArrayList<>(getPlugin().getFactionLogic().getFactions().values());
-        List<Text> helpList = new ArrayList<>();
+        final List<Faction> factionsList = new ArrayList<>(getPlugin().getFactionLogic().getFactions().values());
+        final List<Text> helpList = new ArrayList<>();
         int index = 0;
-        Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
-        Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
+        final Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
+        final Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
 
         factionsList.sort((o1, o2) -> {
-            if (getPlugin().getPowerManager().getFactionPower(o2) > getPlugin().getPowerManager().getFactionPower(o1))
+            if (super.getPlugin().getPowerManager().getFactionPower(o2) > super.getPlugin().getPowerManager().getFactionPower(o1))
             {
                 return 1;
             }
@@ -44,7 +45,7 @@ public class TopCommand extends AbstractCommand
 
         //This should show only top 10 factions on the server.
 
-        for(Faction faction : factionsList)
+        for(final Faction faction : factionsList)
         {
             if(faction.getName().equalsIgnoreCase("safezone") || faction.getName().equalsIgnoreCase("warzone")) continue;
             if(index == 11) break;
@@ -62,8 +63,8 @@ public class TopCommand extends AbstractCommand
             helpList.add(factionHelp);
         }
 
-        PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
+        final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
+        final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success();

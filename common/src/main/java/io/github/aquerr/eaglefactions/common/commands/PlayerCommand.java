@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
@@ -26,15 +27,15 @@ import java.util.Optional;
  */
 public class PlayerCommand extends AbstractCommand
 {
-    public PlayerCommand(EagleFactions plugin)
+    public PlayerCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Optional<Player> optionalPlayer = context.<Player>getOne("player");
+        final Optional<Player> optionalPlayer = context.<Player>getOne("player");
 
         //TODO: This command should work even for players that are offline.
         //TODO: Add check if provided player has played on this server.
@@ -42,14 +43,14 @@ public class PlayerCommand extends AbstractCommand
 
         if(optionalPlayer.isPresent())
         {
-            Player player = optionalPlayer.get();
+            final Player player = optionalPlayer.get();
             showPlayerInfo(source, player);
         }
         else
         {
             if(source instanceof Player)
             {
-                Player player = (Player)source;
+                final Player player = (Player)source;
                 showPlayerInfo(source, player);
             }
         }

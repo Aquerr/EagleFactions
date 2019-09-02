@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -21,27 +22,27 @@ import java.util.concurrent.TimeUnit;
 
 public class InviteCommand extends AbstractCommand
 {
-    public InviteCommand(EagleFactions plugin)
+    public InviteCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Optional<Player> optionalInvitedPlayer = context.<Player>getOne("player");
+        final Optional<Player> optionalInvitedPlayer = context.<Player>getOne("player");
 
         if(optionalInvitedPlayer.isPresent())
         {
             if(source instanceof Player)
             {
-                Player senderPlayer = (Player)source;
-                Player invitedPlayer = optionalInvitedPlayer.get();
-                Optional<Faction> optionalSenderFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(senderPlayer.getUniqueId());
+                final Player senderPlayer = (Player)source;
+                final Player invitedPlayer = optionalInvitedPlayer.get();
+                final Optional<Faction> optionalSenderFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(senderPlayer.getUniqueId());
 
                 if(optionalSenderFaction.isPresent())
                 {
-                    Faction senderFaction = optionalSenderFaction.get();
+                    final Faction senderFaction = optionalSenderFaction.get();
 
                     if (this.getPlugin().getFlagManager().canInvite(senderPlayer.getUniqueId(), senderFaction))
                     {

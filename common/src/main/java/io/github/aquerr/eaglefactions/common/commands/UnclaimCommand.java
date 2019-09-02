@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -21,13 +22,13 @@ import java.util.Optional;
 
 public class UnclaimCommand extends AbstractCommand
 {
-    public UnclaimCommand(EagleFactions plugin)
+    public UnclaimCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -68,7 +69,7 @@ public class UnclaimCommand extends AbstractCommand
         //Check if player is in the faction.
         if(optionalPlayerFaction.isPresent())
         {
-                final Faction playerFaction = optionalPlayerFaction.get();
+            final Faction playerFaction = optionalPlayerFaction.get();
             if (this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
             {
                     final World world = player.getWorld();
@@ -77,7 +78,7 @@ public class UnclaimCommand extends AbstractCommand
 
                 if (optionalChunkFaction.isPresent())
                 {
-                        final Faction chunkFaction = optionalChunkFaction.get();
+                    final Faction chunkFaction = optionalChunkFaction.get();
 
                     if (chunkFaction.getName().equals(playerFaction.getName()))
                     {

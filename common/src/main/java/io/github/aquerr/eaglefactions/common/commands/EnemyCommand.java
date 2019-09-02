@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.entities.StopWarRequest;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -29,16 +30,15 @@ public class EnemyCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<String> optionalFactionName = context.<String>getOne(Text.of("faction name"));
-
+        final Optional<String> optionalFactionName = context.<String>getOne(Text.of("faction name"));
         if(optionalFactionName.isPresent())
         {
             if(source instanceof Player)
             {
-                Player player = (Player) source;
-                String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                Faction enemyFaction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
+                final Player player = (Player) source;
+                final String rawFactionName = context.<String>getOne(Text.of("faction name")).get();
+                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Faction enemyFaction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
 
                 if(enemyFaction == null)
                 {
@@ -48,8 +48,7 @@ public class EnemyCommand extends AbstractCommand
 
                 if(optionalPlayerFaction.isPresent())
                 {
-                    Faction playerFaction = optionalPlayerFaction.get();
-
+                    final Faction playerFaction = optionalPlayerFaction.get();
                     if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                     {
                         if(!playerFaction.getAlliances().contains(enemyFaction.getName()))

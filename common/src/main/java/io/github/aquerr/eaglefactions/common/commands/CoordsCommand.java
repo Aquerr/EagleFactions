@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 public class CoordsCommand extends AbstractCommand
 {
-    public CoordsCommand(EagleFactions plugin)
+    public CoordsCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
@@ -32,15 +33,13 @@ public class CoordsCommand extends AbstractCommand
     {
         if(source instanceof Player)
         {
-            Player player = (Player)source;
-
-            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-            List<Text> teamCoords = new ArrayList<>();
+            final Player player = (Player)source;
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final List<Text> teamCoords = new ArrayList<>();
 
             if(optionalPlayerFaction.isPresent())
             {
-                Faction playerFaction = optionalPlayerFaction.get();
+                final Faction playerFaction = optionalPlayerFaction.get();
                 if(playerFaction.getHome() != null)
                 {
                     Text textBuilder = Text.builder()
@@ -52,8 +51,7 @@ public class CoordsCommand extends AbstractCommand
 
                 if (!playerFaction.getLeader().toString().equals(""))
                 {
-                    Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(playerFaction.getLeader());
-
+                    final Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(playerFaction.getLeader());
                     if(leader.isPresent())
                     {
                         Text textBuilder = Text.builder()
@@ -66,10 +64,9 @@ public class CoordsCommand extends AbstractCommand
 
                 if(!playerFaction.getOfficers().isEmpty())
                 {
-                    for (UUID officerUUID: playerFaction.getOfficers())
+                    for (final UUID officerUUID: playerFaction.getOfficers())
                     {
-                        Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
-
+                        final Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
                         if(officer.isPresent())
                         {
                             Text textBuilder = Text.builder()
@@ -83,10 +80,9 @@ public class CoordsCommand extends AbstractCommand
 
                 if(!playerFaction.getMembers().isEmpty())
                 {
-                    for (UUID memberUUID: playerFaction.getMembers())
+                    for (final UUID memberUUID: playerFaction.getMembers())
                     {
-                        Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
-
+                        final Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
                         if(member.isPresent())
                         {
                             Text textBuilder = Text.builder()
@@ -100,10 +96,9 @@ public class CoordsCommand extends AbstractCommand
 
                 if(!playerFaction.getRecruits().isEmpty())
                 {
-                    for (UUID recruitUUID: playerFaction.getRecruits())
+                    for (final UUID recruitUUID: playerFaction.getRecruits())
                     {
-                        Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
-
+                        final Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
                         if(recruit.isPresent())
                         {
                             Text textBuilder = Text.builder()
@@ -115,9 +110,8 @@ public class CoordsCommand extends AbstractCommand
                     }
                 }
 
-
-                PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-                PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
+                final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
+                final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
                 paginationBuilder.sendTo(source);
 
             }

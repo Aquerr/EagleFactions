@@ -187,7 +187,7 @@ public class ExplosionListener extends AbstractListener
                 }
             }
 
-//            Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+//            Optional<FactionImpl> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
 //
 //            if(!optionalChunkFaction.isPresent())
 //                continue;

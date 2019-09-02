@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 public class PlayerJoinListener extends AbstractListener
 {
-    public PlayerJoinListener(EagleFactions plugin)
+    public PlayerJoinListener(final EagleFactions plugin)
     {
         super(plugin);
     }

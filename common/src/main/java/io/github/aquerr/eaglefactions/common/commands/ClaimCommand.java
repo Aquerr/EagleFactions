@@ -4,10 +4,10 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
-import io.github.aquerr.eaglefactions.common.events.FactionClaimEventImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -22,13 +22,13 @@ import java.util.Optional;
 
 public class ClaimCommand extends AbstractCommand
 {
-    public ClaimCommand(EagleFactions plugin)
+    public ClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));

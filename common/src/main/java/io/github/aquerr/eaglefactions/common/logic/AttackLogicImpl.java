@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -127,7 +128,7 @@ public class AttackLogicImpl implements AttackLogic
     }
 
     @Override
-    public void informAboutAttack(Faction faction)
+    public void informAboutAttack(final Faction faction)
     {
         List<Player> playersList = factionLogic.getOnlinePlayers(faction);
 
@@ -135,7 +136,7 @@ public class AttackLogicImpl implements AttackLogic
     }
 
     @Override
-    public void informAboutDestroying(Faction faction)
+    public void informAboutDestroying(final Faction faction)
     {
         List<Player> playersList = factionLogic.getOnlinePlayers(faction);
 
@@ -143,7 +144,7 @@ public class AttackLogicImpl implements AttackLogic
     }
 
     @Override
-    public void blockHome(UUID playerUUID)
+    public void blockHome(final UUID playerUUID)
     {
         if(EagleFactionsPlugin.BLOCKED_HOME.containsKey(playerUUID))
         {
@@ -157,7 +158,7 @@ public class AttackLogicImpl implements AttackLogic
     }
 
     @Override
-    public void runHomeUsageRestorer(UUID playerUUID)
+    public void runHomeUsageRestorer(final UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 

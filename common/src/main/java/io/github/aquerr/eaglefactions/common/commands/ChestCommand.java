@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
@@ -19,13 +20,13 @@ import java.util.Optional;
 
 public class ChestCommand extends AbstractCommand
 {
-    public ChestCommand(EagleFactions plugin)
+    public ChestCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         final Optional<String> optionalFactionName = context.<String>getOne("faction name");
 
@@ -76,7 +77,7 @@ public class ChestCommand extends AbstractCommand
 
     private void openFactionChest(final Player player, final Faction faction)
     {
-        final Optional<Container> optionalContainer = player.openInventory(super.getPlugin().getFactionLogic().convertFactionChestToInventory(faction.getChest()));
+        final Optional<Container> optionalContainer = player.openInventory(faction.getChest().toInventory());
         if(optionalContainer.isPresent())
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Text.of("You opened " + faction.getName() + " faction's chest!")));

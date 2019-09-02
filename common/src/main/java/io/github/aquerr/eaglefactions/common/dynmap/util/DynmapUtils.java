@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.dynmap.util;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -17,7 +18,7 @@ import java.util.*;
  */
 
 public class DynmapUtils {
-    public static String getFactionInfoWindow(Faction faction) {
+    public static String getFactionInfoWindow(final Faction faction) {
         // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
         ConfigFields config = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
         Optional<UserStorageService> userStorage = Sponge.getServiceManager().provide(UserStorageService.class);
@@ -64,7 +65,7 @@ public class DynmapUtils {
         return description.toString();
     }
 
-    public static int getAreaColor(Faction faction) {
+    public static int getAreaColor(final Faction faction) {
         ConfigFields config = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
 
         int areaColor = config.getDynmapFactionColor();

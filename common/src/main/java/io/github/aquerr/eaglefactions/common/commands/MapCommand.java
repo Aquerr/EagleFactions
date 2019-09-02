@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -27,17 +28,17 @@ import java.util.function.Consumer;
 
 public class MapCommand extends AbstractCommand
 {
-    public MapCommand(EagleFactions plugin)
+    public MapCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if (source instanceof Player)
         {
-            Player player = (Player) source;
+            final Player player = (Player) source;
             if (getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
             {
                 generateMap(player);
@@ -57,25 +58,25 @@ public class MapCommand extends AbstractCommand
 
     private void generateMap(Player player)
     {
-        Set<Claim> claimsList = super.getPlugin().getFactionLogic().getAllClaims();
-        Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        boolean showPlayerFactionClaimsOnly = super.getPlugin().getConfiguration().getConfigFields().shouldShowOnlyPlayerFactionsClaimsInMap();
+        final Set<Claim> claimsList = super.getPlugin().getFactionLogic().getAllClaims();
+        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final boolean showPlayerFactionClaimsOnly = super.getPlugin().getConfiguration().getConfigFields().shouldShowOnlyPlayerFactionsClaimsInMap();
 
-        World world = player.getWorld();
+        final World world = player.getWorld();
 
-        Text notCapturedMark = Text.of(TextColors.GRAY, "/");
-        Text factionMark = Text.of(TextColors.GREEN, "+");
-        Text allianceMark = Text.of(TextColors.AQUA, "+");
-        Text enemyMark = Text.of(TextColors.RED, "#");
-        Text normalFactionMark = Text.of(TextColors.WHITE, "+");
-        Text playerLocationMark = Text.of(TextColors.GOLD, "+");
+        final Text notCapturedMark = Text.of(TextColors.GRAY, "/");
+        final Text factionMark = Text.of(TextColors.GREEN, "+");
+        final Text allianceMark = Text.of(TextColors.AQUA, "+");
+        final Text enemyMark = Text.of(TextColors.RED, "#");
+        final Text normalFactionMark = Text.of(TextColors.WHITE, "+");
+        final Text playerLocationMark = Text.of(TextColors.GOLD, "+");
 
-        Vector3i playerPosition = player.getLocation().getChunkPosition();
+        final Vector3i playerPosition = player.getLocation().getChunkPosition();
 
-        List<Text> map = new ArrayList<>();
-        List<String> normalFactions = new ArrayList<>();
-        List<String> allianceFactions = new ArrayList<>();
-        List<String> enemyFactions = new ArrayList<>();
+        final List<Text> map = new ArrayList<>();
+        final List<String> normalFactions = new ArrayList<>();
+        final List<String> allianceFactions = new ArrayList<>();
+        final List<String> enemyFactions = new ArrayList<>();
         //String playerFaction = "";
 
         //Map resolution

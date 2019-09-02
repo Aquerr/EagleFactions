@@ -2,11 +2,8 @@ package io.github.aquerr.eaglefactions.common.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionCreateEvent;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
 
 public class FactionCreateEventImpl extends FactionAbstractEvent implements FactionCreateEvent
 {

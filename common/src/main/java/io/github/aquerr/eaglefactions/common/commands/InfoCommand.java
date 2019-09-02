@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -25,20 +26,19 @@ import java.util.stream.Collectors;
  */
 public class InfoCommand extends AbstractCommand
 {
-    public InfoCommand(EagleFactions plugin)
+    public InfoCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Optional<String> optionalFactionName = context.<String>getOne("faction name");
-
+        final Optional<String> optionalFactionName = context.<String>getOne("faction name");
         if (optionalFactionName.isPresent())
         {
-            String rawFactionName = optionalFactionName.get();
-            Faction faction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
+            final String rawFactionName = optionalFactionName.get();
+            final Faction faction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
 
             if (faction == null)
             {
@@ -89,9 +89,9 @@ public class InfoCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void showFactionInfo(CommandSource source, Faction faction)
+    private void showFactionInfo(final CommandSource source, final Faction faction)
     {
-        List<Text> factionInfo = new ArrayList<>();
+        final List<Text> factionInfo = new ArrayList<>();
 
         String leaderName = "";
         if(faction.getLeader() != null && !faction.getLeader().equals(new UUID(0,0)))
@@ -163,14 +163,14 @@ public class InfoCommand extends AbstractCommand
         paginationBuilder.sendTo(source);
     }
 
-    private Text lastOnline(Faction faction)
+    private Text lastOnline(final Faction faction)
     {
         if(getPlugin().getFactionLogic().hasOnlinePlayers(faction))
             return Text.of(TextColors.GREEN, PluginMessages.NOW);
 
-        Date date = Date.from(faction.getLastOnline());
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        String formattedDate = formatter.format(date);
+        final Date date = Date.from(faction.getLastOnline());
+        final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        final String formattedDate = formatter.format(date);
         return Text.of(TextColors.RED, formattedDate);
     }
 }

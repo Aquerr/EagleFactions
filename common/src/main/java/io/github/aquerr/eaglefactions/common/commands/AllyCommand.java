@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -29,16 +30,16 @@ public class AllyCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<String> optionalFactionName = context.<String>getOne(Text.of("faction name"));
+        final Optional<String> optionalFactionName = context.<String>getOne(Text.of("faction name"));
 
         if(optionalFactionName.isPresent())
         {
             if(source instanceof Player)
             {
-                Player player = (Player) source;
-                String rawFactionName = optionalFactionName.get();
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                Faction selectedFaction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
+                final Player player = (Player) source;
+                final String rawFactionName = optionalFactionName.get();
+                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Faction selectedFaction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
 
                 if(selectedFaction == null)
                 {

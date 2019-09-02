@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -22,19 +23,18 @@ import java.util.function.Consumer;
 
 public class FlagsCommand extends AbstractCommand
 {
-    public FlagsCommand(EagleFactions plugin)
+    public FlagsCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if (source instanceof Player)
         {
-            Player player = (Player)source;
-
-            Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final Player player = (Player)source;
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
             if (optionalPlayerFaction.isPresent())
             {
@@ -62,19 +62,17 @@ public class FlagsCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void showFlags(Player player, Faction faction)
+    private void showFlags(final Player player, final Faction faction)
     {
-        Text.Builder textBuilder = Text.builder();
-        
-        for (Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.getFlags().entrySet())
+        final Text.Builder textBuilder = Text.builder();
+        for (final Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.getFlags().entrySet())
         {
-            Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
-
+            final Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
             textBuilder.append(Text.of(TextColors.AQUA, memberEntry.getKey().toString() + ": "));
 
-            for (Map.Entry<FactionFlagTypes, Boolean> flagEntry : memberFlags.entrySet())
+            for (final Map.Entry<FactionFlagTypes, Boolean> flagEntry : memberFlags.entrySet())
             {
-                Text.Builder flagTextBuilder = Text.builder();
+                final Text.Builder flagTextBuilder = Text.builder();
 
                 if(flagEntry.getValue())
                 {
@@ -103,7 +101,7 @@ public class FlagsCommand extends AbstractCommand
         player.sendMessage(textBuilder.build());
     }
 
-    private Consumer<CommandSource> toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean flagValue)
+    private Consumer<CommandSource> toggleFlag(final Faction faction, final FactionMemberType factionMemberType, final FactionFlagTypes factionFlagTypes, final Boolean flagValue)
     {
         return commandSource ->
         {

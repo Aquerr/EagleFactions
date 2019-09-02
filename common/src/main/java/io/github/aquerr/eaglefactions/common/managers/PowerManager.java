@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.managers;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.managers.IPowerManager;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -18,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Singleton
 public class PowerManager implements IPowerManager
@@ -31,14 +31,14 @@ public class PowerManager implements IPowerManager
     private CommentedConfigurationNode _factionsNode;
     private final UUID dummyUUID = new UUID(0, 0);
 
-    public static PowerManager getInstance(EagleFactions eagleFactions)
+    public static PowerManager getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new PowerManager(eagleFactions);
         else return INSTANCE;
     }
 
-    private PowerManager(EagleFactions eagleFactions)
+    private PowerManager(final EagleFactions eagleFactions)
     {
         INSTANCE = this;
         plugin = eagleFactions;
@@ -56,14 +56,14 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public int getFactionMaxClaims(Faction faction)
+    public int getFactionMaxClaims(final Faction faction)
     {
         float power = getFactionPower(faction);
         return (int)power;
     }
 
     @Override
-    public float getPlayerPower(@Nullable UUID playerUUID)
+    public float getPlayerPower(@Nullable final UUID playerUUID)
     {
         if (playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
@@ -71,7 +71,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public float getFactionPower(Faction faction)
+    public float getFactionPower(final Faction faction)
     {
         if(faction.getName().equals("SafeZone") || faction.getName().equals("WarZone"))
         {
@@ -114,7 +114,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public float getFactionMaxPower(Faction faction)
+    public float getFactionMaxPower(final Faction faction)
     {
         if(faction.getName().equals("SafeZone") || faction.getName().equals("WarZone"))
         {
@@ -158,7 +158,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public float getPlayerMaxPower(UUID playerUUID)
+    public float getPlayerMaxPower(final UUID playerUUID)
     {
         if(playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
@@ -167,7 +167,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public void addPower(UUID playerUUID, boolean isKillAward)
+    public void addPower(final UUID playerUUID, final boolean isKillAward)
     {
         float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
 
@@ -186,20 +186,20 @@ public class PowerManager implements IPowerManager
         }
     }
 
-    public static float round(float number, int decimalPlace) {
+    public static float round(final float number, final int decimalPlace) {
         BigDecimal bd = new BigDecimal(number);
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
         return bd.floatValue();
     }
 
     @Override
-    public void setPower(UUID playerUUID, float power)
+    public void setPower(final UUID playerUUID, final float power)
     {
         plugin.getPlayerManager().setPlayerPower(playerUUID, power);
     }
 
     @Override
-    public void startIncreasingPower(UUID playerUUID)
+    public void startIncreasingPower(final UUID playerUUID)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -219,7 +219,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public void decreasePower(UUID playerUUID)
+    public void decreasePower(final UUID playerUUID)
     {
         float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
 
@@ -234,7 +234,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public void penalty(UUID playerUUID)
+    public void penalty(final UUID playerUUID)
     {
         float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
         float penalty = _configFields.getPenalty();
@@ -250,7 +250,7 @@ public class PowerManager implements IPowerManager
     }
 
     @Override
-    public void setMaxPower(UUID playerUUID, float power)
+    public void setMaxPower(final UUID playerUUID, final float power)
     {
         plugin.getPlayerManager().setPlayerMaxPower(playerUUID, power);
     }

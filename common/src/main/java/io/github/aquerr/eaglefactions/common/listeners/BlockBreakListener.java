@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -164,8 +165,8 @@ public class BlockBreakListener extends AbstractListener
                         event.setCancelled(true);
                         return;
                     }
-//                    Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-//                    Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+//                    Optional<FactionImpl> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+//                    Optional<FactionImpl> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
 //                    if(optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent())
 //                    {
 //                        if(super.getPlugin().getFlagManager().canInteract(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))

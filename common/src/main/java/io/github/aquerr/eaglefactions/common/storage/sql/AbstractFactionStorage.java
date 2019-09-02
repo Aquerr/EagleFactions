@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
-import com.sun.nio.zipfs.ZipPath;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
+import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
@@ -13,11 +13,8 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
@@ -26,12 +23,10 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
-import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 public abstract class AbstractFactionStorage implements IFactionStorage
@@ -237,7 +232,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     }
 
     @Override
-    public boolean addOrUpdateFaction(Faction faction)
+    public boolean addOrUpdateFaction(final Faction faction)
     {
         Connection connection = null;
         try
@@ -334,7 +329,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 preparedStatement.close();
             }
 
-            List<DataView> dataViews = InventorySerializer.serializeInventory(this.plugin.getFactionLogic().convertFactionChestToInventory(faction.getChest()));
+            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().toInventory());
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
@@ -510,7 +505,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 final FactionChest factionChest = getFactionChest(connection, factionName);
                 final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(connection, factionName);
 
-                final Faction faction = Faction.builder(factionName, Text.of(textColor, tag), leaderUUID)
+                final Faction faction = FactionImpl.builder(factionName, Text.of(textColor, tag), leaderUUID)
                         .setHome(factionHome)
                         .setAlliances(alliances)
                         .setEnemies(enemies)
@@ -656,7 +651,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
 
     private FactionChest getFactionChest(final Connection connection, final String factionName) throws SQLException, IOException, ClassNotFoundException
     {
-        FactionChest factionChest = new FactionChest(factionName);
+        FactionChest factionChest = new FactionChestImpl(factionName);
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -668,7 +663,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             byteArrayInputStream.close();
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(this.plugin);
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
-            factionChest = FactionChest.fromInventory(factionName, inventory);
+            factionChest = FactionChestImpl.fromInventory(factionName, inventory);
         }
         resultSet.close();
         preparedStatement.close();

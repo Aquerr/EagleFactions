@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -25,20 +26,20 @@ public class SetLeaderCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<Player> optionalNewLeaderPlayer = context.<Player>getOne("player");
+        final Optional<Player> optionalNewLeaderPlayer = context.<Player>getOne("player");
 
         if (optionalNewLeaderPlayer.isPresent())
         {
             if (source instanceof Player)
             {
-                Player player = (Player) source;
-                Player newLeaderPlayer = optionalNewLeaderPlayer.get();
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalNewLeaderPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(newLeaderPlayer.getUniqueId());
+                final Player player = (Player) source;
+                final Player newLeaderPlayer = optionalNewLeaderPlayer.get();
+                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Optional<Faction> optionalNewLeaderPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(newLeaderPlayer.getUniqueId());
 
                 if (optionalPlayerFaction.isPresent())
                 {
-                    Faction playerFaction = optionalPlayerFaction.get();
+                    final Faction playerFaction = optionalPlayerFaction.get();
 
                     if (optionalNewLeaderPlayerFaction.isPresent() && optionalNewLeaderPlayerFaction.get().getName().equals(playerFaction.getName()))
                     {
