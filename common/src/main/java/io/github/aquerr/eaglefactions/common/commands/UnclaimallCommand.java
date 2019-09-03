@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -36,6 +37,10 @@ public class UnclaimallCommand extends AbstractCommand
                 final Faction playerFaction = optionalPlayerFaction.get();
                 if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()) || EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 {
+                    final boolean isCancelled = EventRunner.runFactionUnclaimEvent(player, playerFaction, player.getWorld(), null);
+                    if (isCancelled)
+                        return CommandResult.success();
+
                     if(!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
                     {
                         super.getPlugin().getFactionLogic().setHome(null, playerFaction, null);
