@@ -58,8 +58,9 @@ public class PlayerCommand extends AbstractCommand
 
     private void showPlayerInfo(CommandSource source, Player player)
     {
-        if(player.hasPlayedBefore())
-        {
+        //TODO: hasPlayedBefore prevents new players from using /f player
+//        if(player.hasPlayedBefore())
+//        {
             List<Text> playerInfo = new ArrayList<Text>();
 
             String playerFactionName = "";
@@ -84,10 +85,10 @@ public class PlayerCommand extends AbstractCommand
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
             PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
             paginationBuilder.sendTo(source);
-        }
-        else
-        {
-            player.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
-        }
+//        }
+//        else
+//        {
+//            player.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_HAS_NOT_PLAYED_ON_THIS_SERVER));
+//        }
     }
 }

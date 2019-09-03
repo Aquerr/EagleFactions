@@ -27,7 +27,7 @@ public class SetHomeCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        if((source instanceof Player))
+        if(!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player)source;
@@ -59,7 +59,7 @@ public class SetHomeCommand extends AbstractCommand
             {
                 source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction home must be placed inside the faction claim!"));
             }
-            if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
+            else if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
             {
                 super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
                 source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));

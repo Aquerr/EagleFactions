@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION, authors = PluginInfo.AUTHOR,
@@ -140,11 +141,13 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
 
-        if(!VersionChecker.isLatest(PluginInfo.VERSION))
-        {
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
-        }
+        CompletableFuture.runAsync(() -> {
+            if(!VersionChecker.isLatest(PluginInfo.VERSION))
+            {
+                Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
+                Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+            }
+        });
     }
 
     private void registerAPI() {
@@ -374,6 +377,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("home"), CommandSpec.builder()
                 .description(Text.of("Teleport to faction's home"))
                 .permission(PluginPermissions.HOME_COMMAND)
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new HomeCommand(this))
                 .build());
 
