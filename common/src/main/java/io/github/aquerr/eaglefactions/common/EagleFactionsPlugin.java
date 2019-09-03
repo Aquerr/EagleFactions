@@ -545,6 +545,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void registerListeners()
     {
+        //Sponge events
         Sponge.getEventManager().registerListeners(this, new EntityDamageListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerJoinListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerDeathListener(this));
@@ -558,7 +559,10 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
         Sponge.getEventManager().registerListeners(this, new ExplosionListener(this));
         Sponge.getEventManager().registerListeners(this, new ModifyBlockListener(this));
+
+        //EF events
         Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
+        Sponge.getEventManager().registerListeners(this, new FactionLeaveListener(this));
     }
 
     public IConfiguration getConfiguration()

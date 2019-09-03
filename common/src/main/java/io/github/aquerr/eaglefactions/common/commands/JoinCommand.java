@@ -68,7 +68,7 @@ public class JoinCommand extends AbstractCommand
                 {
                     try
                     {
-                        if(getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
+                        if(super.getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
                         {
                             int playerCount = 0;
                             playerCount += faction.getLeader().toString().equals("") ? 0 : 1;
