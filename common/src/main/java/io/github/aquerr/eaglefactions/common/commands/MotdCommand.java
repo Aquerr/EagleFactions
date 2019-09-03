@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.command.CommandException;
@@ -59,7 +58,7 @@ public class MotdCommand extends AbstractCommand
         }
 
         super.getPlugin().getFactionLogic().setMessageOfTheDay(optionalPlayerFaction.get(), motd);
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, "FactionImpl's message of the day has been updated!")));
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, "Faction message of the day has been updated!")));
         return CommandResult.success();
     }
 }

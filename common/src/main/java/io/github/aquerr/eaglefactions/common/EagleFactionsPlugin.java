@@ -33,6 +33,8 @@ import io.github.aquerr.eaglefactions.common.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
 import io.github.aquerr.eaglefactions.common.version.VersionChecker;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
@@ -102,6 +104,10 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         return _configDir;
     }
+
+    @Inject
+    @AssetId("Settings.conf")
+    private Asset configAsset;
 
     @Listener
     public void onServerInitialization(final GameInitializationEvent event)
@@ -215,7 +221,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         //Create faction command.
         SUBCOMMANDS.put(Arrays.asList("c", "create"), CommandSpec.builder()
-                .description(Text.of("Create FactionImpl Command"))
+                .description(Text.of("Create Faction Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
                 .arguments(GenericArguments.string(Text.of("tag")),
                         GenericArguments.string(Text.of("faction name")))
@@ -224,7 +230,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         //Disband faction command.
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
-                .description(Text.of("Disband FactionImpl Command"))
+                .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
                 .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new DisbandCommand(this))
@@ -613,7 +619,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void setupConfigs()
     {
-        _configuration = new Configuration(_configDir);
+        _configuration = new Configuration(_configDir, configAsset);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
 
         _pvpLogger = new PVPLoggerImpl(getConfiguration());

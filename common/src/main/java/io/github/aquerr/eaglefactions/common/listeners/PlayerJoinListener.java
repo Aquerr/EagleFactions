@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -16,6 +15,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class PlayerJoinListener extends AbstractListener
 {
@@ -25,7 +25,7 @@ public class PlayerJoinListener extends AbstractListener
     }
 
     @Listener(order = Order.POST)
-    public void onPlayerJoin(ClientConnectionEvent.Join event, @Root Player player)
+    public void onPlayerJoin(final ClientConnectionEvent.Join event, final @Root Player player)
     {
         if (player.hasPermission(PluginPermissions.VERSION_NOTIFY) && !VersionChecker.isLatest(PluginInfo.VERSION))
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + PluginMessages.IS_AVAILABLE));
@@ -40,7 +40,7 @@ public class PlayerJoinListener extends AbstractListener
 
         //Check if the world that player is connecting to is already in the config file
         if (!super.getPlugin().getConfiguration().getConfigFields().getDetectedWorldNames().contains(player.getWorld().getName()))
-            super.getPlugin().getConfiguration().getConfigFields().addWorld(player.getWorld().getName());
+            CompletableFuture.runAsync(() -> super.getPlugin().getConfiguration().getConfigFields().addWorld(player.getWorld().getName()));
 
         //Send motd
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());

@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.storage;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;

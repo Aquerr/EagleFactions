@@ -109,7 +109,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
 
             //Get all .sql files
             final List<Path> filePaths = new ArrayList<>();
-            final URL url = this.plugin.getClass().getResource("/queries/" + this.sqlProvider.getProviderName());
+            final URL url = this.plugin.getClass().getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getProviderName());
             if (url != null)
             {
                 final URI uri = url.toURI();
@@ -117,7 +117,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 if (uri.getScheme().equals("jar"))
                 {
                     final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                    myPath = fileSystem.getPath("/queries/" + this.sqlProvider.getProviderName());
+                    myPath = fileSystem.getPath("/assets/eaglefactions/queries/" + this.sqlProvider.getProviderName());
                 }
                 else
                 {

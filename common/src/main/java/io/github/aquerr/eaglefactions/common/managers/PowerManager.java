@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.common.managers;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.api.managers.IPowerManager;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;

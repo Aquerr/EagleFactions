@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.common.dynmap;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.dynmap.util.DynmapUtils;
 import io.github.aquerr.eaglefactions.common.dynmap.util.TempAreaMarker;
@@ -55,7 +54,7 @@ public class DynmapUpdateTask implements Runnable {
         }
 
         for (Faction faction : new HashSet<>(EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values())) {
-            if (faction.getClaims().size() < 1 || drawnFactions.contains(faction)) continue; /* FactionImpl does not have any claims or it's already drawn */
+            if (faction.getClaims().size() < 1 || drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
 
             if (faction.getHome() != null) { /* Let's draw faction home first */
                 World factionHomeWorld = Sponge.getServer().getWorld(faction.getHome().getWorldUUID()).isPresent()

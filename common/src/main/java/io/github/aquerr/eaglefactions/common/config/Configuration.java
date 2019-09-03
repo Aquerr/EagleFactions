@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.config.IConfiguration;
 import ninja.leaping.configurate.ConfigurationOptions;
@@ -8,12 +9,11 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetId;
 
-import javax.inject.Inject;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -28,13 +28,9 @@ public class Configuration implements IConfiguration
     private CommentedConfigurationNode configNode;
 
     private ConfigFields configFields;
+    private Asset confgAsset;
 
-
-    @Inject
-    @AssetId("Settings.conf")
-    private Asset asset;
-
-    public Configuration(Path configDir)
+    public Configuration(final Path configDir, final Asset confgAsset)
     {
         if (!Files.exists(configDir))
         {
@@ -52,7 +48,7 @@ public class Configuration implements IConfiguration
 
         try
         {
-            asset.copyToDirectory(this.configPath, false, true);
+            confgAsset.copyToFile(this.configPath, false, true);
         }
         catch (final IOException e)
         {
@@ -61,7 +57,7 @@ public class Configuration implements IConfiguration
 
         this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
         loadConfiguration();
-        save();
+//        save();
 
         this.configFields = new ConfigFields(this);
     }

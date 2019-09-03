@@ -96,7 +96,7 @@ public class FactionChestImpl implements FactionChest
 
         this.inventory = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
-                .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("FactionImpl's chest"))))
+                .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
 //                .listener(InteractInventoryEvent.Close.class, new FactionChestCloseListener())
                 .listener(InteractInventoryEvent.Close.class, (x) ->
                 {

@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.common.dynmap.util;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.user.UserStorageService;

@@ -7,12 +7,16 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.asset.Asset;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 @Singleton
 public class MessageLoader
@@ -26,7 +30,7 @@ public class MessageLoader
         return instance;
     }
 
-    private MessageLoader(EagleFactions eagleFactions)
+    private MessageLoader(final EagleFactions eagleFactions)
     {
         instance = this;
         Path configDir = eagleFactions.getConfigDir();
@@ -45,23 +49,32 @@ public class MessageLoader
             }
         }
 
-        if (!Files.exists(messagesFilePath))
+        Optional<Asset> optionalMessagesFile = Sponge.getAssetManager().getAsset(eagleFactions, "messages" + File.separator + messagesFileName);
+        if (optionalMessagesFile.isPresent())
         {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages/" + messagesFileName);
-
-            //If there is not such language...
-            if(inputStream == null)
-                inputStream = getClass().getClassLoader().getResourceAsStream("messages/english.conf");
-            
             try
             {
-                Files.copy(inputStream, messagesFilePath);
-                inputStream.close();
+                optionalMessagesFile.get().copyToFile(messagesFilePath, false, true);
             }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
+        }
+        else
+        {
+            optionalMessagesFile = Sponge.getAssetManager().getAsset(eagleFactions, "messages" + File.separator + "english.conf");
+            optionalMessagesFile.ifPresent(x->
+            {
+                try
+                {
+                    x.copyToFile(messagesFilePath, false, true);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            });
         }
 
         ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(messagesFilePath).build();
