@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.events;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.events.FactionJoinEvent;
 import io.github.aquerr.eaglefactions.api.events.FactionLeaveEvent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -29,6 +30,19 @@ public final class EventRunner
 
         final Cause creationEventCause = Cause.of(eventContext, player);
         final FactionLeaveEvent event = new FactionLeaveEventImpl(player, faction, creationEventCause);
+        return Sponge.getEventManager().post(event);
+    }
+
+    public static boolean runFactionJoinEvent(final Player player, final Faction faction)
+    {
+        final EventContext eventContext = EventContext.builder()
+            .add(EventContextKeys.OWNER, player)
+            .add(EventContextKeys.PLAYER, player)
+            .add(EventContextKeys.CREATOR, player)
+            .build();
+
+        final Cause eventCause = Cause.of(eventContext, player);
+        final FactionJoinEvent event = new FactionJoinEventImpl(player, faction, eventCause);
         return Sponge.getEventManager().post(event);
     }
 
