@@ -22,7 +22,7 @@ public class FactionsCache
         return factionsCacheMap;
     }
 
-    public static void addOrUpdateFactionCache(Faction faction)
+    public static void addOrUpdateFactionCache(final Faction faction)
     {
         synchronized (factionsCacheMap)
         {
@@ -45,7 +45,7 @@ public class FactionsCache
         }
     }
 
-    public static void removeFactionCache(String factionName)
+    public static void removeFactionCache(final String factionName)
     {
         synchronized (factionsCacheMap)
         {
@@ -55,7 +55,7 @@ public class FactionsCache
     }
 
     @Nullable
-    public static Faction getFactionCache(String factionName)
+    public static Faction getFactionCache(final String factionName)
     {
         Faction optionalFaction = factionsCacheMap.get(factionName.toLowerCase());
 
@@ -72,7 +72,7 @@ public class FactionsCache
         return claimsCacheSet;
     }
 
-    public static void removeClaimCache(Claim claim)
+    public static void removeClaimCache(final Claim claim)
     {
         claimsCacheSet.remove(claim);
     }

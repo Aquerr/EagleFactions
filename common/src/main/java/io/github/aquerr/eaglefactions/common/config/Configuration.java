@@ -28,7 +28,6 @@ public class Configuration implements IConfiguration
     private CommentedConfigurationNode configNode;
 
     private ConfigFields configFields;
-    private Asset confgAsset;
 
     public Configuration(final Path configDir, final Asset confgAsset)
     {
