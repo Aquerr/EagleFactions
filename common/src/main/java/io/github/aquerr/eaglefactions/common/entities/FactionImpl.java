@@ -23,6 +23,7 @@ public class FactionImpl implements Faction
     private final Set<Claim> claims;
     private final FactionHome home;
     private final Instant lastOnline;
+    private final boolean isPublic;
     private final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
 
     private FactionChest chest;
@@ -44,78 +45,94 @@ public class FactionImpl implements Faction
         this.lastOnline = builder.lastOnline;
         this.flags = builder.flags;
         this.chest = builder.chest;
+        this.isPublic = builder.isPublic;
     }
 
+    @Override
     public String getName()
     {
         return this.name;
     }
 
+    @Override
     public Text getTag()
     {
         return this.tag;
     }
 
+    @Override
     public String getDescription()
     {
         return this.description;
     }
 
+    @Override
     public String getMessageOfTheDay()
     {
         return this.messageOfTheDay;
     }
 
+    @Override
     public FactionHome getHome()
     {
         return this.home;
     }
 
+    @Override
     public Set<String> getAlliances()
     {
         return Collections.unmodifiableSet(this.alliances);
     }
 
+    @Override
     public Set<Claim> getClaims()
     {
         return Collections.unmodifiableSet(this.claims);
     }
 
+    @Override
     public Set<String> getEnemies()
     {
         return Collections.unmodifiableSet(enemies);
     }
 
+    @Override
     public Set<UUID> getMembers()
     {
         return Collections.unmodifiableSet(this.members);
     }
 
+    @Override
     public Set<UUID> getOfficers()
     {
         return Collections.unmodifiableSet(officers);
     }
 
+    @Override
     public Set<UUID> getRecruits()
     {
         return Collections.unmodifiableSet(this.recruits);
     }
 
+    @Override
     public Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFlags()
     {
         return Collections.unmodifiableMap(flags);
     }
 
+    @Override
     public UUID getLeader()
     {
         return this.leader;
     }
 
+    @Override
     public Instant getLastOnline()
     {
         return this.lastOnline;
     }
 
+    @Override
     public FactionMemberType getPlayerMemberType(UUID playerUUID)
     {
         if (this.leader.equals(playerUUID))
@@ -130,11 +147,19 @@ public class FactionImpl implements Faction
             return null;
     }
 
+    @Override
     public FactionChest getChest()
     {
         return this.chest;
     }
 
+    @Override
+    public boolean isPublic()
+    {
+        return this.isPublic;
+    }
+
+    @Override
     public boolean containsPlayer(UUID playerUUID)
     {
         if (this.leader.equals(playerUUID))
@@ -149,6 +174,7 @@ public class FactionImpl implements Faction
             return false;
     }
 
+    @Override
     public Faction.Builder toBuilder()
     {
         final Faction.Builder factionBuilder = new BuilderImpl();
@@ -194,6 +220,7 @@ public class FactionImpl implements Faction
         private Instant lastOnline;
         private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
         private FactionChest chest;
+        private boolean isPublic;
 
         private BuilderImpl()
         {
@@ -206,6 +233,7 @@ public class FactionImpl implements Faction
             this.officers = new HashSet<>();
             this.claims = new HashSet<>();
             this.home = null;
+            this.isPublic = false;
         }
 
         public BuilderImpl(final String name, final Text tag, final UUID leader)
@@ -304,6 +332,12 @@ public class FactionImpl implements Faction
         public Builder setChest(final FactionChest chest)
         {
             this.chest = chest;
+            return this;
+        }
+
+        public Builder setIsPublic(final boolean isPublic)
+        {
+            this.isPublic = isPublic;
             return this;
         }
 
