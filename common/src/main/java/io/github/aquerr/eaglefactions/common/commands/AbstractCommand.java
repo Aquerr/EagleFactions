@@ -9,18 +9,18 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 
 public abstract class AbstractCommand implements CommandExecutor
 {
-    private EagleFactions _eagleFactions;
+    private EagleFactions plugin;
 
-    public AbstractCommand(EagleFactions plugin)
+    public AbstractCommand(final EagleFactions plugin)
     {
-        this._eagleFactions = plugin;
+        this.plugin = plugin;
     }
 
     public EagleFactions getPlugin()
     {
-        return _eagleFactions;
+        return plugin;
     }
 
     @Override
-    public abstract CommandResult execute(CommandSource source, CommandContext context) throws CommandException;
+    public abstract CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException;
 }

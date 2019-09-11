@@ -91,6 +91,7 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
             configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+            configNode.getNode("factions", faction.getName(), "isPublic").setValue(faction.isPublic());
 
             if(faction.getHome() == null)
             {
@@ -158,6 +159,7 @@ public class HOCONFactionStorage implements IFactionStorage
         final Instant lastOnline = getLastOnline(factionName);
         final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
         final FactionChest chest = getFactionChest(factionName);
+        final boolean isPublic = getFactionIsPublic(factionName);
 
         final Faction faction = FactionImpl.builder(factionName, tag, leader)
                 .setDescription(description)
@@ -543,6 +545,19 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode(new Object[]{"factions", factionName, "motd"}).setValue("");
             needToSave = true;
             return "";
+        }
+    }
+
+    private boolean getFactionIsPublic(String factionName)
+    {
+        final Object isPublicObject = configNode.getNode("factions", factionName, "isPublic").getValue();
+        if(isPublicObject != null)
+            return (boolean)isPublicObject;
+        else
+        {
+            configNode.getNode("factions", factionName, "isPublic").setValue(false);
+            needToSave = true;
+            return false;
         }
     }
 

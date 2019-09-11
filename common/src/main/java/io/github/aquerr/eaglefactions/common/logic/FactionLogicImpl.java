@@ -733,32 +733,32 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setLastOnline(Faction faction, Instant instantTime)
+    public void setLastOnline(final Faction faction, final Instant instantTime)
     {
         final Faction updatedFaction = faction.toBuilder().setLastOnline(instantTime).build();
         this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     @Override
-    public void renameFaction(Faction faction, String newFactionName)
+    public void renameFaction(final Faction faction, final String newFactionName)
     {
         this.storageManager.deleteFaction(faction.getName());
-        faction = faction.toBuilder().setName(newFactionName).build();
-        this.storageManager.addOrUpdateFaction(faction);
+        Faction updatedFaction = faction.toBuilder().setName(newFactionName).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     @Override
-    public void changeTag(Faction faction, String newTag)
+    public void changeTag(final Faction faction, final String newTag)
     {
-        faction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
-        this.storageManager.addOrUpdateFaction(faction);
+        Faction updatedFaction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     @Override
-    public void setChest(Faction faction, FactionChest inventory)
+    public void setChest(final Faction faction, final FactionChest inventory)
     {
-        faction = faction.toBuilder().setChest(inventory).build();
-        this.storageManager.addOrUpdateFaction(faction);
+        Faction updatedFaction = faction.toBuilder().setChest(inventory).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 
     @Override
@@ -772,6 +772,13 @@ public class FactionLogicImpl implements FactionLogic
     public void setMessageOfTheDay(final Faction faction, final String motd)
     {
         final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
+    }
+
+    @Override
+    public void setIsPublic(final Faction playerFaction, final boolean isPublic)
+    {
+        final Faction updatedFaction = playerFaction.toBuilder().setIsPublic(isPublic).build();
         this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 }

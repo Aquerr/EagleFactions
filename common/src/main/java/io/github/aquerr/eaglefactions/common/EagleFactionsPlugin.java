@@ -525,6 +525,14 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new ChestCommand(this))
                 .build());
 
+        //Public Command
+        SUBCOMMANDS.put(Collections.singletonList("public"), CommandSpec.builder()
+                .description(Text.of("Sets faction as public or not"))
+                .permission(PluginPermissions.PUBLIC_COMMAND)
+                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .executor(new PublicCommand(this))
+                .build());
+
         //Debug Command
         SUBCOMMANDS.put(Collections.singletonList("debug"), CommandSpec.builder()
                 .description(Text.of("Toggles debug mode"))
