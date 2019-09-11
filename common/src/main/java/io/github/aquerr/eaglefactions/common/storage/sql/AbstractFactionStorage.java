@@ -51,9 +51,9 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
     private static final String DELETE_FACTION_CHEST_WHERE_FACTIONNAME = "DELETE FROM FactionChests WHERE FactionName=?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ? WHERE Name = ?";
+    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
 
 
 //    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -281,8 +281,9 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement.setString(8, enemies);
             preparedStatement.setString(9, faction.getDescription());
             preparedStatement.setString(10, faction.getMessageOfTheDay());
+            preparedStatement.setString(11, faction.isPublic() ? "1" : "0");
             if(exists)
-                preparedStatement.setString(11, faction.getName()); //Where part
+                preparedStatement.setString(12, faction.getName()); //Where part
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -489,6 +490,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 final String factionHomeAsString = factionsResultSet.getString("Home");
                 final String description = factionsResultSet.getString("Description");
                 final String messageOfTheDay = factionsResultSet.getString("Motd");
+                final boolean isPublic = factionsResultSet.getBoolean("IsPublic");
                 FactionHome factionHome = null;
                 if (factionHomeAsString != null)
                     factionHome = FactionHome.from(factionHomeAsString);
@@ -518,6 +520,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                         .setFlags(flags)
                         .setDescription(description)
                         .setMessageOfTheDay(messageOfTheDay)
+                        .setIsPublic(isPublic)
                         .build();
                 return faction;
             }
@@ -865,6 +868,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement.setString(8, "");
             preparedStatement.setString(9, "");
             preparedStatement.setString(10, "");
+            preparedStatement.setString(11, "0");
 
             PreparedStatement preparedStatement1 = connection.prepareStatement(INSERT_FACTION);
             preparedStatement1.setString(1, "SafeZone");
@@ -877,6 +881,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement1.setString(8, "");
             preparedStatement1.setString(9, "");
             preparedStatement1.setString(10, "");
+            preparedStatement.setString(11, "0");
 
             preparedStatement.execute();
             preparedStatement1.execute();
