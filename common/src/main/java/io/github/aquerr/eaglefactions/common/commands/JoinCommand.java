@@ -52,58 +52,49 @@ public class JoinCommand extends AbstractCommand
             //If player has admin mode then force join.
             if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
-                final boolean isCancelled = EventRunner.runFactionJoinEvent(player, faction);
-                if (isCancelled)
-                    return CommandResult.success();
-
-                super.getPlugin().getFactionLogic().joinFaction(player.getUniqueId(), faction.getName());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
-
-                return CommandResult.success();
+                return joinFactionAndNotify(player, faction);
             }
 
-            for (final Invite invite: EagleFactionsPlugin.INVITE_LIST)
+            if(!faction.isPublic())
             {
-                if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(faction.getName()))
+                boolean hasInvite = false;
+                for (final Invite invite: EagleFactionsPlugin.INVITE_LIST)
                 {
-                    try
+                    if(invite.getPlayerUUID().equals(player.getUniqueId()) && invite.getFactionName().equals(faction.getName()))
                     {
-                        if(super.getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
-                        {
-                            int playerCount = 0;
-                            playerCount += faction.getLeader().toString().equals("") ? 0 : 1;
-                            playerCount += faction.getOfficers().isEmpty() ? 0 : faction.getOfficers().size();
-                            playerCount += faction.getMembers().isEmpty() ? 0 : faction.getMembers().size();
-                            playerCount += faction.getRecruits().isEmpty() ? 0 : faction.getRecruits().size();
-
-                            if(playerCount >= getPlugin().getConfiguration().getConfigFields().getPlayerLimit())
-                            {
-                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT));
-                                return CommandResult.success();
-                            }
-                        }
-
-                        //TODO: Create a listener which will notify all players in faction that someone has joined.
-                        final boolean isCancelled = EventRunner.runFactionJoinEvent(player, faction);
-                        if (isCancelled)
-                            return CommandResult.success();
-
-                        super.getPlugin().getFactionLogic().joinFaction(player.getUniqueId(), faction.getName());
-
-                        EagleFactionsPlugin.INVITE_LIST.remove(new Invite(faction.getName(), player.getUniqueId()));
-
-                        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
-                        return CommandResult.success();
-                    }
-                    catch (Exception exception)
-                    {
-                        exception.printStackTrace();
+                        hasInvite = true;
                     }
                 }
+                if(!hasInvite)
+                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_HAVENT_BEEN_INVITED_TO_THIS_FACTION));
             }
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_HAVENT_BEEN_INVITED_TO_THIS_FACTION));
-        }
 
+            //TODO: Should public factions bypass this restriction?
+            if(super.getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
+            {
+                int playerCount = 0;
+                playerCount += faction.getLeader().toString().equals("") ? 0 : 1;
+                playerCount += faction.getOfficers().isEmpty() ? 0 : faction.getOfficers().size();
+                playerCount += faction.getMembers().isEmpty() ? 0 : faction.getMembers().size();
+                playerCount += faction.getRecruits().isEmpty() ? 0 : faction.getRecruits().size();
+
+                if(playerCount >= super.getPlugin().getConfiguration().getConfigFields().getPlayerLimit())
+                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT));
+            }
+
+            return joinFactionAndNotify(player, faction);
+        }
+    }
+
+    private CommandResult joinFactionAndNotify(final Player player, final Faction faction)
+    {
+        final boolean isCancelled = EventRunner.runFactionJoinEvent(player, faction);
+        if (isCancelled)
+            return CommandResult.success();
+
+        super.getPlugin().getFactionLogic().joinFaction(player.getUniqueId(), faction.getName());
+        EagleFactionsPlugin.INVITE_LIST.remove(new Invite(faction.getName(), player.getUniqueId()));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.SUCCESSFULLY_JOINED_FACTION + " ", TextColors.GOLD, faction.getName()));
         return CommandResult.success();
     }
 }

@@ -2,11 +2,6 @@ package io.github.aquerr.eaglefactions.common;
 
 public final class PluginPermissions
 {
-    //public static final String AllPermissions = "eaglefactions";
-
-    //public static final String PlayerCommands = "eaglefactions.player";
-    //public static final String AdminCommands = "eaglefactions.admin";
-
     public static final String ALLY_COMMAND = "eaglefactions.player.ally";
     public static final String ENEMY_COMMAND = "eaglefactions.player.enemy";
 
@@ -39,8 +34,6 @@ public final class PluginPermissions
     public static final String UNCLAIM_ALL_COMMAND = "eaglefactions.player.unclaimall";
 
     public static final String SET_LEADER_COMMAND = "eaglefactions.player.setleader";
-//    public static final String OfficerCommand = "eaglefactions.player.officer";
-//    public static final String MemberCommand = "eaglefactions.player.member";
     public static final String PROMOTE_COMMAND = "eaglefactions.player.promote";
     public static final String DEMOTE_COMMAND = "eaglefactions.player.demote";
     public static final String SET_HOME_COMMAND = "eaglefactions.player.sethome";
