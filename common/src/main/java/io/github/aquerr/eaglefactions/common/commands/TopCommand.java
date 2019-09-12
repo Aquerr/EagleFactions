@@ -29,17 +29,12 @@ public class TopCommand extends AbstractCommand
         final List<Text> helpList = new ArrayList<>();
         int index = 0;
         final Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
-        final Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
+        final Text tagSuffix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
 
         factionsList.sort((o1, o2) -> {
-            if (super.getPlugin().getPowerManager().getFactionPower(o2) > super.getPlugin().getPowerManager().getFactionPower(o1))
-            {
-                return 1;
-            }
-            else
-            {
-                return -1;
-            }
+            final float firstFactionPower = super.getPlugin().getPowerManager().getFactionPower(o1);
+            final float secondFactionPower = super.getPlugin().getPowerManager().getFactionPower(o2);
+            return Float.compare(secondFactionPower, firstFactionPower);
         });
 
         //This should show only top 10 factions on the server.
@@ -51,7 +46,7 @@ public class TopCommand extends AbstractCommand
 
             index++;
 
-            Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSufix, Text.of(" ")).build();
+            Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSuffix, Text.of(" ")).build();
 
             Text factionHelp = Text.builder()
                     .append(Text.builder()
