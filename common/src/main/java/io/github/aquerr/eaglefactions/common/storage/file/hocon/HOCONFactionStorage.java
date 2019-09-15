@@ -174,6 +174,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 .setLastOnline(lastOnline)
                 .setFlags(flags)
                 .setChest(chest)
+                .setIsPublic(isPublic)
                 .build();
 
         if(needToSave)
