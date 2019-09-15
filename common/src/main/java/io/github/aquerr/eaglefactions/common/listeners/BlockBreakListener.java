@@ -13,6 +13,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
+import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -253,6 +254,18 @@ public class BlockBreakListener extends AbstractListener
 
         if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
             return;
+
+        final Object source = event.getSource();
+
+        //For ICBM
+        if(source instanceof Entity)
+        {
+            final Entity entity = (Entity)source;
+            final String id = entity.getType().getId();
+            final String name = entity.getType().getName();
+            if(id.startsWith("icbmclassic:missile") || name.contains("missile"))
+                return;
+        }
 
         User user = null;
         if(event.getCause().containsType(Player.class))

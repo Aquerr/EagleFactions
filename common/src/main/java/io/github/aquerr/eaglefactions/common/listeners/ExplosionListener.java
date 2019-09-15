@@ -141,8 +141,8 @@ public class ExplosionListener extends AbstractListener
         User user = null;
         final Cause cause = event.getCause();
         final EventContext context = event.getContext();
+        // Thanks to GriefPrevention
         // Always use owner for ticking TE's
-        // See issue MinecraftPortCentral/GriefPrevention#610 for more information
         if (cause.root() instanceof TileEntity) {
             user = context.get(EventContextKeys.OWNER)
                     .orElse(context.get(EventContextKeys.NOTIFIER)
@@ -186,22 +186,6 @@ public class ExplosionListener extends AbstractListener
                     return;
                 }
             }
-
-//            Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-//
-//            if(!optionalChunkFaction.isPresent())
-//                continue;
-//
-//            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user))
-//            {
-//                event.setCancelled(true);
-//                return;
-//            }
-//            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
-//            {
-//                event.setCancelled(true);
-//                return;
-//            }
         }
     }
 }
