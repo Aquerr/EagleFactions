@@ -145,6 +145,7 @@ public class InfoCommand extends AbstractCommand
                 .append(Text.of(TextColors.AQUA, PluginMessages.LAST_ONLINE + ": "), lastOnline(faction), Text.of("\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.DESCRIPTION + ": ", TextColors.GOLD, faction.getDescription() + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.MOTD + ": ", TextColors.GOLD, faction.getMessageOfTheDay() + "\n"))
+                .append(Text.of(TextColors.AQUA, PluginMessages.PUBLIC + ": ", TextColors.GOLD, faction.isPublic() + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
                 .append(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))

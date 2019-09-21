@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.message;
 
 public class PluginMessages
 {
-    public static String SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES;
+	public static String SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES;
     public static String YOU_ARE_IN_WAR_WITH_THIS_FACTION;
     public static String YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS;
     public static String YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND;
@@ -145,6 +145,7 @@ public class PluginMessages
     public static String YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND;
     public static String NAME;
     public static String TAG;
+    public static String PUBLIC;
     public static String DESCRIPTION;
     public static String MOTD;
     public static String OFFICERS;
