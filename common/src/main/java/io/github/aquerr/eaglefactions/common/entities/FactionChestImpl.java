@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
@@ -17,19 +18,17 @@ import java.util.Optional;
 public class FactionChestImpl implements FactionChest
 {
     private String factionName; //Reference to faction holding this chest
-    private List<SlotItem> items;
     private Inventory inventory;
 
     public FactionChestImpl(final String factionName)
     {
         this.factionName = factionName;
-        items = new ArrayList<>();
     }
 
     public FactionChestImpl(final String factionName, final List<SlotItem> items)
     {
         this.factionName = factionName;
-        this.items = items;
+        this.inventory = buildInventory(items);
     }
 
     public FactionChestImpl(final String factionName, final Inventory inventory)
@@ -38,10 +37,20 @@ public class FactionChestImpl implements FactionChest
         this.inventory = inventory;
     }
 
-    public static FactionChest fromInventory(final String factionName, final Inventory inventory)
+    @Override
+    public String getFactionName()
     {
+        return this.factionName;
+    }
+
+    @Override
+    public List<SlotItem> getItems()
+    {
+        if(this.inventory == null)
+            return new ArrayList<>();
+
         final List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
-        final Iterable<Inventory> slots = inventory.slots();
+        final Iterable<Inventory> slots = this.inventory.slots();
         int column = 1;
         int row = 1;
         for(Inventory slot : slots)
@@ -62,60 +71,27 @@ public class FactionChestImpl implements FactionChest
             if(row > 3)
                 break;
         }
-
-        return new FactionChestImpl(factionName, slotItemList);
+        return slotItemList;
     }
 
-    public String getFactionName()
+    @Override
+    public Inventory getInventory()
     {
-        return this.factionName;
+        return this.inventory;
     }
 
-    public List<FactionChest.SlotItem> getItems()
-    {
-        return this.items;
-    }
-
-    public ItemStack getAtPosition(int row, int column)
-    {
-        ItemStack itemStack = null;
-        for(SlotItem slotItem : this.items)
-        {
-            if(slotItem.getRow() == row && slotItem.getColumn() == column)
-                itemStack = ItemStack.builder().fromContainer(slotItem.getItem().toContainer()).build();
-        }
-
-        return itemStack;
-    }
-
-    public Inventory toInventory()
+    private Inventory buildInventory(final List<SlotItem> slotItems)
     {
         //Create inventory
-        if(this.inventory != null)
-            return this.inventory;
-
         this.inventory = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
-//                .listener(InteractInventoryEvent.Close.class, new FactionChestCloseListener())
                 .listener(InteractInventoryEvent.Close.class, (x) ->
                 {
-                    // x is actually an Inventory that contains both player and chest inventory
-                    FactionChest factionChest = null;
-                    for (final Inventory inv : x.getTargetInventory()) {
-                        //Ensure that it is a chest.
-                        if (inv.capacity() == 27) {
-                            factionChest = FactionChestImpl.fromInventory(this.factionName, inv);
-                            break;
-                        }
-                    }
-
-                    if(factionChest == null)
-                        factionChest = new FactionChestImpl(factionName);
                     final Faction faction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(factionName);
                     if(faction != null)
                     {
-                        EagleFactionsPlugin.getPlugin().getFactionLogic().setChest(faction, factionChest);
+                        EagleFactionsPlugin.getPlugin().getFactionLogic().setChest(faction, this);
                     }
                 })
                 .build(EagleFactionsPlugin.getPlugin());
@@ -126,7 +102,7 @@ public class FactionChestImpl implements FactionChest
 
         for(final Inventory slot : inventory.slots())
         {
-            ItemStack itemStack = getAtPosition(row, column);
+            ItemStack itemStack = getAtPosition(slotItems, row, column);
             if(itemStack != null)
                 slot.offer(itemStack);
 
@@ -138,9 +114,22 @@ public class FactionChestImpl implements FactionChest
             }
         }
 
-        return inventory;
+        return this.inventory;
     }
 
+    private ItemStack getAtPosition(final List<SlotItem> items, int row, int column)
+    {
+        ItemStack itemStack = null;
+        for(SlotItem slotItem : items)
+        {
+            if(slotItem.getRow() == row && slotItem.getColumn() == column)
+                itemStack = ItemStack.builder().fromContainer(slotItem.getItem().toContainer()).build();
+        }
+
+        return itemStack;
+    }
+
+    @ConfigSerializable
     public static final class SlotItemImpl implements FactionChest.SlotItem
     {
         @Setting

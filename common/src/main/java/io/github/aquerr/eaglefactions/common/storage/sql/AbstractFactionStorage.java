@@ -330,7 +330,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 preparedStatement.close();
             }
 
-            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().toInventory());
+            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory());
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
@@ -666,7 +666,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             byteArrayInputStream.close();
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(this.plugin);
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
-            factionChest = FactionChestImpl.fromInventory(factionName, inventory);
+            factionChest = new FactionChestImpl(factionName, inventory);
         }
         resultSet.close();
         preparedStatement.close();
