@@ -193,6 +193,7 @@ public class FactionImpl implements Faction
         factionBuilder.setHome(this.home);
         factionBuilder.setFlags(this.flags);
         factionBuilder.setChest(this.chest);
+        factionBuilder.setIsPublic(this.isPublic);
 
         return factionBuilder;
     }

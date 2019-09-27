@@ -35,7 +35,7 @@ public class PublicCommand extends AbstractCommand
 			if(!optionalFaction.isPresent())
 				throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Provided faction does not exist!"));
 			super.getPlugin().getFactionLogic().setIsPublic(optionalFaction.get(), !optionalFaction.get().isPublic());
-			final String publicMessage = optionalFaction.get().isPublic() ? "Faction is now public." : "Faction is no longer public.";
+			final String publicMessage = !optionalFaction.get().isPublic() ? "Faction is now public." : "Faction is no longer public.";
 			source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, publicMessage));
 			return CommandResult.success();
 		}
@@ -55,7 +55,7 @@ public class PublicCommand extends AbstractCommand
 			throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
 		final Faction faction = optionalFaction.get();
-		final String publicMessage = faction.isPublic() ? "Faction is now public." : "Faction is no longer public.";
+		final String publicMessage = !faction.isPublic() ? "Faction is now public." : "Faction is no longer public.";
 
 		if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
 		{
