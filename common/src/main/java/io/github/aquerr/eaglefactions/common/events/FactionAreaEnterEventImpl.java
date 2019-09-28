@@ -20,16 +20,12 @@ public class FactionAreaEnterEventImpl extends AbstractEvent implements FactionA
 	private final Player creator;
 	private final Optional<Faction> enteredFaction;
 	private final Optional<Faction> leftFaction;
-	private final Transform<World> fromTransform;
-	private final Transform<World> toTransform;
 
 	private boolean isCancelled = false;
 
 	public FactionAreaEnterEventImpl(final MoveEntityEvent moveEntityEvent, final Player creator, final Optional<Faction> enteredFaction, final Optional<Faction> leftFaction, final Cause cause)
 	{
 		this.moveEntityEvent = moveEntityEvent;
-		this.fromTransform = moveEntityEvent.getFromTransform();
-		this.toTransform = moveEntityEvent.getToTransform();
 		this.creator = creator;
 		this.cause = cause;
 		this.enteredFaction = enteredFaction;
@@ -75,13 +71,13 @@ public class FactionAreaEnterEventImpl extends AbstractEvent implements FactionA
 	@Override
 	public Transform<World> getFromTransform()
 	{
-		return this.fromTransform;
+		return this.moveEntityEvent.getFromTransform();
 	}
 
 	@Override
 	public Transform<World> getToTransform()
 	{
-		return this.toTransform;
+		return this.moveEntityEvent.getToTransform();
 	}
 
 	@Override
