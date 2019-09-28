@@ -187,22 +187,16 @@ public class HOCONFactionStorage implements IFactionStorage
 
     private FactionChest getFactionChest(String factionName)
     {
-//        FactionChest factionChest = null;
         List<FactionChest.SlotItem> slotItems = null;
         try
         {
-
-//            factionChest = configNode.getNode("factions", factionName, "chest").getValue(objectToFactionChestTransformer);
             slotItems = configNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
-        } catch (ObjectMappingException e) {
+        }
+        catch (ObjectMappingException e)
+        {
             e.printStackTrace();
             return new FactionChestImpl(factionName);
         }
-
-//        if(factionChest != null)
-//        {
-//            return factionChest;
-//        }
         if(slotItems != null)
         {
             return new FactionChestImpl(factionName, slotItems);

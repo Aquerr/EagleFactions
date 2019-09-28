@@ -77,6 +77,8 @@ public class FactionChestImpl implements FactionChest
     @Override
     public Inventory getInventory()
     {
+        if(this.inventory == null)
+            this.inventory = buildInventory(new ArrayList<>());
         return this.inventory;
     }
 
