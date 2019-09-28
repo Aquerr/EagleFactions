@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionAreaEnterEvent;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
@@ -84,11 +83,5 @@ public class FactionAreaEnterEventImpl extends AbstractEvent implements FactionA
 	public void setToTransform(Transform<World> transform)
 	{
 		this.moveEntityEvent.setToTransform(transform);
-	}
-
-	@Override
-	public Entity getTargetEntity()
-	{
-		return this.creator;
 	}
 }
