@@ -571,6 +571,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //EF events
         Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionLeaveListener(this));
+        Sponge.getEventManager().registerListeners(this, new FactionJoinListener(this));
     }
 
     public IConfiguration getConfiguration()
