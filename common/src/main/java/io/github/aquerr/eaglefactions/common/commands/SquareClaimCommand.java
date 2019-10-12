@@ -47,7 +47,12 @@ public class SquareClaimCommand extends AbstractCommand
 
         //Check if it is a claimable world
         if (!super.getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "You can not claim territories in this world!")));
+        {
+            if(super.getPlugin().getConfiguration().getConfigFields().getNotClaimableWorldNames().contains(player.getWorld().getName()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            {
+                throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "You can not claim territories in this world!")));
+            }
+        }
 
         final int number = optionalNumber.get();
         final Faction playerFaction = optionalPlayerFaction.get();

@@ -33,19 +33,32 @@ public class ClaimCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player) source;
+        final World world = player.getWorld();
+        final Vector3i chunk = player.getLocation().getChunkPosition();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         if (!optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
+        final Faction playerFaction = optionalPlayerFaction.get();
+
         //Check if it is a claimable world
         if (!super.getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
         {
-            throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "You can not claim territories in this world!")));
+            //If it is not claimable world but player is in admin mode
+            if(super.getPlugin().getConfiguration().getConfigFields().getNotClaimableWorldNames().contains(player.getWorld().getName()) && EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            {
+                final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
+                if (optionalChunkFaction.isPresent())
+                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
+
+                return runClaimEventAndClaim(player, playerFaction, world, chunk);
+            }
+            else
+            {
+                throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "You can not claim territories in this world!")));
+            }
         }
 
-        final Faction playerFaction = optionalPlayerFaction.get();
-        final World world = player.getWorld();
-        final Vector3i chunk = player.getLocation().getChunkPosition();
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
         if (optionalChunkFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
@@ -53,13 +66,7 @@ public class ClaimCommand extends AbstractCommand
         //Check if admin mode
         if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
-            if (isCancelled)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));
-
-            super.getPlugin().getFactionLogic().addClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-            return CommandResult.success();
+            return runClaimEventAndClaim(player, playerFaction, world, chunk);
         }
 
         //If not admin then check faction flags for player
@@ -76,13 +83,7 @@ public class ClaimCommand extends AbstractCommand
 
         if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
         {
-            boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
-            if (isCancelled)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));
-
-            super.getPlugin().getFactionLogic().addClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-            return CommandResult.success();
+            return runClaimEventAndClaim(player, playerFaction, world, chunk);
         }
 
         if (super.getPlugin().getConfiguration().getConfigFields().requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
@@ -94,6 +95,17 @@ public class ClaimCommand extends AbstractCommand
 
         super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
 //        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+        return CommandResult.success();
+    }
+
+    private CommandResult runClaimEventAndClaim(final Player player, Faction playerFaction, final World world, final Vector3i chunk) throws CommandException
+    {
+        boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
+        if (isCancelled)
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));
+
+        super.getPlugin().getFactionLogic().addClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
         return CommandResult.success();
     }
 }
