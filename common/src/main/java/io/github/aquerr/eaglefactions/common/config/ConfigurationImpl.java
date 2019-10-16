@@ -1,17 +1,14 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
-import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
-import io.github.aquerr.eaglefactions.api.config.IConfiguration;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.asset.AssetId;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +18,7 @@ import java.util.*;
 /**
  * Created by Aquerr on 2017-07-12.
  */
-public class Configuration implements IConfiguration
+public class ConfigurationImpl implements Configuration
 {
     private Path configPath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
@@ -29,7 +26,7 @@ public class Configuration implements IConfiguration
 
     private ConfigFields configFields;
 
-    public Configuration(final Path configDir, final Asset confgAsset)
+    public ConfigurationImpl(final Path configDir, final Asset confgAsset)
     {
         if (!Files.exists(configDir))
         {

@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.IConfiguration;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
-    private final IConfiguration configuration;
+    private final Configuration configuration;
     private final FactionLogic factionLogic;
 
     public FactionRemoverTask(final EagleFactions eagleFactions)

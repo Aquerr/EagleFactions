@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.api.managers.FlagManager;
+import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
 import org.spongepowered.api.text.Text;
 
 import java.time.Instant;
@@ -355,7 +355,7 @@ public class FactionImpl implements Faction
             }
             if(this.flags == null)
             {
-                this.flags = FlagManager.getDefaultFactionFlags();
+                this.flags = FlagManagerImpl.getDefaultFactionFlags();
             }
             if(this.chest == null)
             {

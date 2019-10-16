@@ -9,7 +9,7 @@ import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.common.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import io.github.aquerr.eaglefactions.common.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
@@ -42,7 +42,7 @@ public class FactionLogicImpl implements FactionLogic
 
     private final StorageManager storageManager;
     private final ConfigFields _configFields;
-    private final PlayerManager _playerManager;
+    private final PlayerManagerImpl _playerManager;
     private final EagleFactionsPlugin plugin;
 
     private final UUID DUMMY_UUID = new UUID(0, 0);

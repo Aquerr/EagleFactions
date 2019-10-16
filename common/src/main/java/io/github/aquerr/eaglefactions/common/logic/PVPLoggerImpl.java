@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
-import io.github.aquerr.eaglefactions.api.config.IConfiguration;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -34,7 +34,7 @@ public class PVPLoggerImpl implements PVPLogger
 
     private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLoggerImpl";
 
-    public PVPLoggerImpl(IConfiguration configuration)
+    public PVPLoggerImpl(Configuration configuration)
     {
         _configFields = configuration.getConfigFields();
         _isActive = _configFields.isPVPLoggerActive();

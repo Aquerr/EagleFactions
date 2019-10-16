@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.managers;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.managers.IPowerManager;
+import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -20,9 +20,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
-public class PowerManager implements IPowerManager
+public class PowerManagerImpl implements PowerManager
 {
-    private static PowerManager INSTANCE = null;
+    private static PowerManagerImpl INSTANCE = null;
 
     private final EagleFactions plugin;
     private final ConfigFields _configFields;
@@ -30,14 +30,14 @@ public class PowerManager implements IPowerManager
     private CommentedConfigurationNode _factionsNode;
     private final UUID dummyUUID = new UUID(0, 0);
 
-    public static PowerManager getInstance(final EagleFactions eagleFactions)
+    public static PowerManagerImpl getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
-            return new PowerManager(eagleFactions);
+            return new PowerManagerImpl(eagleFactions);
         else return INSTANCE;
     }
 
-    private PowerManager(final EagleFactions eagleFactions)
+    private PowerManagerImpl(final EagleFactions eagleFactions)
     {
         INSTANCE = this;
         plugin = eagleFactions;

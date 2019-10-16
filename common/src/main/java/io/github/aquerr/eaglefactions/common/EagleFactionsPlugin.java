@@ -12,17 +12,17 @@ import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.api.managers.*;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
-import io.github.aquerr.eaglefactions.api.config.IConfiguration;
-import io.github.aquerr.eaglefactions.common.config.Configuration;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.dynmap.DynmapMain;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.PVPLoggerImpl;
-import io.github.aquerr.eaglefactions.api.managers.FlagManager;
-import io.github.aquerr.eaglefactions.common.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.common.managers.PowerManager;
-import io.github.aquerr.eaglefactions.common.managers.ProtectionManager;
+import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
+import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
+import io.github.aquerr.eaglefactions.common.managers.PowerManagerImpl;
+import io.github.aquerr.eaglefactions.common.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.common.message.MessageLoader;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import io.github.aquerr.eaglefactions.common.parsers.FactionNameArgument;
@@ -79,12 +79,12 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private static EagleFactionsPlugin eagleFactions;
 
-    private IConfiguration _configuration;
+    private Configuration _configuration;
     private PVPLogger _pvpLogger;
-    private PlayerManager _playerManager;
-    private FlagManager _flagManager;
-    private IProtectionManager _protectionManager;
-    private PowerManager _powerManager;
+    private PlayerManagerImpl _playerManager;
+    private FlagManagerImpl _flagManager;
+    private ProtectionManager _protectionManager;
+    private PowerManagerImpl _powerManager;
     private AttackLogic _attackLogic;
     private FactionLogic _factionLogic;
     private StorageManager _storageManager;
@@ -152,7 +152,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void registerAPI() {
         Sponge.getServiceManager().setProvider(this, FactionLogic.class, this._factionLogic);
-        Sponge.getServiceManager().setProvider(this, IPowerManager.class, this._powerManager);
+        Sponge.getServiceManager().setProvider(this, PowerManager.class, this._powerManager);
     }
 
     @Listener
@@ -574,7 +574,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new FactionJoinListener(this));
     }
 
-    public IConfiguration getConfiguration()
+    public Configuration getConfiguration()
     {
         return this._configuration;
     }
@@ -584,22 +584,22 @@ public class EagleFactionsPlugin implements EagleFactions
         return this._pvpLogger;
     }
 
-    public FlagManager getFlagManager()
+    public FlagManagerImpl getFlagManager()
     {
         return _flagManager;
     }
 
-    public PlayerManager getPlayerManager()
+    public PlayerManagerImpl getPlayerManager()
     {
         return _playerManager;
     }
 
-    public PowerManager getPowerManager()
+    public PowerManagerImpl getPowerManager()
     {
         return _powerManager;
     }
 
-    public IProtectionManager getProtectionManager()
+    public ProtectionManager getProtectionManager()
     {
         return _protectionManager;
     }
@@ -636,7 +636,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void setupConfigs()
     {
-        _configuration = new Configuration(_configDir, configAsset);
+        _configuration = new ConfigurationImpl(_configDir, configAsset);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
 
         _pvpLogger = new PVPLoggerImpl(getConfiguration());
@@ -645,12 +645,12 @@ public class EagleFactionsPlugin implements EagleFactions
     private void setupManagers()
     {
         _storageManager = StorageManagerImpl.getInstance(this);
-        _playerManager = PlayerManager.getInstance(this);
-        _powerManager = PowerManager.getInstance(this);
-        _flagManager = FlagManager.getInstance(this);
+        _playerManager = PlayerManagerImpl.getInstance(this);
+        _powerManager = PowerManagerImpl.getInstance(this);
+        _flagManager = FlagManagerImpl.getInstance(this);
         _factionLogic = FactionLogicImpl.getInstance(this);
         _attackLogic = AttackLogicImpl.getInstance(this);
-        _protectionManager = ProtectionManager.getInstance(this);
+        _protectionManager = ProtectionManagerImpl.getInstance(this);
     }
 
     private void startFactionsRemover()
