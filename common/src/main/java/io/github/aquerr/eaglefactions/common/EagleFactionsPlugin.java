@@ -626,7 +626,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public URL getResource(final String fileName)
     {
-        return this.getClass().getClassLoader().getResource(fileName);
+        return this.getClass().getResource(fileName);
     }
 
     public void printInfo(final String message)

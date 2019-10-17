@@ -49,7 +49,7 @@ public class MySQLProvider implements SQLProvider
     private MySQLProvider(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
         //Load MySQL driver
-        Class.forName("com.mysql.cj.jdbc.Driver");
+        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 
         ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
         this.databaseUrl = configFields.getDatabaseUrl();

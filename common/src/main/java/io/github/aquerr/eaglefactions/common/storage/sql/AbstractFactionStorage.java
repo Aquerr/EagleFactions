@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -110,7 +111,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
 
             //Get all .sql files
             final List<Path> filePaths = new ArrayList<>();
-            final URL url = this.plugin.getClass().getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getProviderName());
+            final URL url = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getProviderName());
             if (url != null)
             {
                 final URI uri = url.toURI();
@@ -184,6 +185,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             {
                 System.out.println("There may be a problem with database script files...");
                 System.out.println("Searched for them in: " + this.sqlProvider.getProviderName());
+                Sponge.getServer().shutdown();
             }
             if (databaseVersionNumber == 0)
                 precreate();
