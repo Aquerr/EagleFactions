@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
+import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
@@ -51,7 +52,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
     private static final String DELETE_FACTION_CHEST_WHERE_FACTIONNAME = "DELETE FROM FactionChests WHERE FactionName=?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd, IsPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
 
@@ -203,7 +204,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             {
                 preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VERSION'");
             }
-            else if(this.sqlProvider instanceof MySQLProvider)
+            else if(this.sqlProvider instanceof MySQLProvider || this.sqlProvider instanceof MariaDbProvider)
             {
                 preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
                 preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
@@ -881,7 +882,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement1.setString(8, "");
             preparedStatement1.setString(9, "");
             preparedStatement1.setString(10, "");
-            preparedStatement.setString(11, "0");
+            preparedStatement1.setString(11, "0");
 
             preparedStatement.execute();
             preparedStatement1.execute();

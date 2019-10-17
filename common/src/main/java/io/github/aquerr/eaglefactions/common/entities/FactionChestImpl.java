@@ -34,7 +34,7 @@ public class FactionChestImpl implements FactionChest
     public FactionChestImpl(final String factionName, final Inventory inventory)
     {
         this.factionName = factionName;
-        this.inventory = inventory;
+        this.inventory = buildInventory(toSlotItems(inventory));
     }
 
     @Override
@@ -48,30 +48,7 @@ public class FactionChestImpl implements FactionChest
     {
         if(this.inventory == null)
             return new ArrayList<>();
-
-        final List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
-        final Iterable<Inventory> slots = this.inventory.slots();
-        int column = 1;
-        int row = 1;
-        for(Inventory slot : slots)
-        {
-            Optional<ItemStack> optionalItemStack = slot.peek();
-            if(optionalItemStack.isPresent())
-            {
-                slotItemList.add(new FactionChestImpl.SlotItemImpl(column, row, optionalItemStack.get()));
-            }
-
-            column++;
-            if(column > 9)
-            {
-                row++;
-                column = 1;
-            }
-
-            if(row > 3)
-                break;
-        }
-        return slotItemList;
+        return toSlotItems(this.inventory);
     }
 
     @Override
@@ -85,7 +62,7 @@ public class FactionChestImpl implements FactionChest
     private Inventory buildInventory(final List<SlotItem> slotItems)
     {
         //Create inventory
-        this.inventory = Inventory.builder()
+        final Inventory inventory = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
                 .listener(InteractInventoryEvent.Close.class, (x) ->
@@ -116,7 +93,34 @@ public class FactionChestImpl implements FactionChest
             }
         }
 
-        return this.inventory;
+        return inventory;
+    }
+
+    private List<SlotItem> toSlotItems(final Inventory inventory)
+    {
+        final List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
+        final Iterable<Inventory> slots = inventory.slots();
+        int column = 1;
+        int row = 1;
+        for(Inventory slot : slots)
+        {
+            Optional<ItemStack> optionalItemStack = slot.peek();
+            if(optionalItemStack.isPresent())
+            {
+                slotItemList.add(new FactionChestImpl.SlotItemImpl(column, row, optionalItemStack.get()));
+            }
+
+            column++;
+            if(column > 9)
+            {
+                row++;
+                column = 1;
+            }
+
+            if(row > 3)
+                break;
+        }
+        return slotItemList;
     }
 
     private ItemStack getAtPosition(final List<SlotItem> items, int row, int column)

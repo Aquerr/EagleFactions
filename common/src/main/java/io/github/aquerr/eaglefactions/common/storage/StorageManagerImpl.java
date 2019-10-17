@@ -10,6 +10,8 @@ import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2FactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2PlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.file.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.file.hocon.HOCONPlayerStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbFactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbPlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLPlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.utils.DeleteFactionTask;
@@ -68,6 +70,11 @@ public class StorageManagerImpl implements StorageManager, Runnable
                 factionsStorage = new MySQLFactionStorage(eagleFactions);
                 playerStorage = new MySQLPlayerStorage(eagleFactions);
                 this.plugin.printInfo("MySQL storage has been initialized!");
+                break;
+            case "mariadb":
+                factionsStorage = new MariaDbFactionStorage(eagleFactions);
+                playerStorage = new MariaDbPlayerStorage(eagleFactions);
+                this.plugin.printInfo("MariaDB storage has been initialized!");
                 break;
             default: //HOCON
                 this.plugin.printInfo("Couldn't find provided storage type.");

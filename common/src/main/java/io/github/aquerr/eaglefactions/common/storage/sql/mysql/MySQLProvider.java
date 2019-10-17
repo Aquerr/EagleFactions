@@ -10,7 +10,7 @@ public class MySQLProvider implements SQLProvider
 {
     private static MySQLProvider INSTANCE = null;
 
-    private static final String TIME_ZONE_PROPERTY = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&&disableMariaDbDriver";
 
     private final String databaseUrl;
     private final String databaseName;
@@ -37,7 +37,7 @@ public class MySQLProvider implements SQLProvider
 
     public Connection getConnection() throws SQLException
     {
-        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + TIME_ZONE_PROPERTY, this.username, this.password);
+        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + CONNECTION_OPTIONS, this.username, this.password);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class MySQLProvider implements SQLProvider
     private boolean databaseExists() throws SQLException
     {
         //Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + "&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + CONNECTION_OPTIONS);
         final ResultSet resultSet = connection.getMetaData().getCatalogs();
 
         while(resultSet.next())
@@ -82,7 +82,7 @@ public class MySQLProvider implements SQLProvider
 
     private void createDatabase() throws SQLException
     {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + "&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + CONNECTION_OPTIONS);
         Statement statement = connection.createStatement();
         statement.execute("CREATE SCHEMA " + this.databaseName + ";");
         statement.close();
