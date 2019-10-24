@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.parsers;
+package io.github.aquerr.eaglefactions.common.commands.args;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.spongepowered.api.command.CommandSource;

@@ -28,22 +28,21 @@ public class AttackLogicImpl implements AttackLogic
     private final ConfigFields configFields;
     private final FactionLogic factionLogic;
 
-    public AttackLogicImpl(EagleFactions eagleFactions)
+    private AttackLogicImpl(EagleFactions eagleFactions)
     {
-        INSTANCE = this;
         configFields = eagleFactions.getConfiguration().getConfigFields();
         factionLogic = eagleFactions.getFactionLogic();
     }
 
-    public static AttackLogic getInstance(EagleFactions eagleFactions)
+    public static AttackLogic getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
-            return new AttackLogicImpl(eagleFactions);
-        else return INSTANCE;
+            INSTANCE = new AttackLogicImpl(eagleFactions);
+        return INSTANCE;
     }
 
     @Override
-    public void attack(Player player, Vector3i attackedChunk)
+    public void attack(final Player player, final Vector3i attackedChunk)
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -64,7 +63,8 @@ public class AttackLogicImpl implements AttackLogic
                         informAboutDestroying(chunkFaction);
                         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
 
-                        factionLogic.removeClaim(chunkFaction, new Claim(player.getWorld().getUniqueId(), attackedChunk));
+                        final Claim claim = new Claim(player.getWorld().getUniqueId(), attackedChunk);
+                        factionLogic.destroyClaim(chunkFaction, claim);
                         task.cancel();
                     }
                     else
@@ -102,25 +102,20 @@ public class AttackLogicImpl implements AttackLogic
 
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
         {
-            @Override
-            public void accept(Task task)
+            if(EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(factionName))
             {
+                int seconds = EagleFactionsPlugin.ATTACKED_FACTIONS.get(factionName);
 
-                if(EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(factionName))
+                if (seconds <= 0)
                 {
-                    int seconds = EagleFactionsPlugin.ATTACKED_FACTIONS.get(factionName);
-
-                    if (seconds <= 0)
-                    {
-                        EagleFactionsPlugin.ATTACKED_FACTIONS.remove(factionName);
-                        task.cancel();
-                    }
-                    else
-                    {
-                        EagleFactionsPlugin.ATTACKED_FACTIONS.replace(factionName, seconds, seconds - 1);
-                    }
+                    EagleFactionsPlugin.ATTACKED_FACTIONS.remove(factionName);
+                    task.cancel();
+                }
+                else
+                {
+                    EagleFactionsPlugin.ATTACKED_FACTIONS.replace(factionName, seconds, seconds - 1);
                 }
             }
         }).submit(EagleFactionsPlugin.getPlugin());

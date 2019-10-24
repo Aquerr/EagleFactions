@@ -1,23 +1,20 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import io.github.aquerr.eaglefactions.common.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -26,7 +23,6 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -369,14 +365,7 @@ public class FactionLogicImpl implements FactionLogic
         for(final Claim claim : claims)
         {
             factionClaims.add(claim);
-            final World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
-            final Vector3i chunkPosition = claim.getChunkPosition();
-            final double x = (chunkPosition.getX() << 4) + 8;
-            final double z = (chunkPosition.getZ() << 4) + 8;
-            final double y = world.getHighestYAt((int)x, (int)z);
-            final Vector3d position = new Vector3d(x, y, z);
-            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
-            world.playSound(SoundTypes.ITEM_ARMOR_EQUIP_IRON, position, 5, -10);
+            ParticlesUtil.spawnClaimParticles(claim);
         }
 
         final Faction updatedFaction = faction.toBuilder().setClaims(factionClaims).build();
@@ -384,31 +373,28 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void addClaim(Faction faction, Claim claim)
+    public void addClaim(final Faction faction, final Claim claim)
     {
         final Set<Claim> claims = new HashSet<>(faction.getClaims());
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
-        this.storageManager.addOrUpdateFaction(updatedFaction);
+//        this.storageManager.addOrUpdateFaction(updatedFaction);
 
-        World world = Sponge.getServer().getWorld(claim.getWorldUUID()).get();
-        Vector3i chunkPosition = claim.getChunkPosition();
-        double x = (chunkPosition.getX() << 4) + 8;
-        double z = (chunkPosition.getZ() << 4) + 8;
-        double y = world.getHighestYAt((int)x, (int)z);
-        Vector3d position = new Vector3d(x, y, z);
-        world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).quantity(400).offset(new Vector3d(4, 1, 4)).build(), position);
-        world.playSound(SoundTypes.ITEM_ARMOR_EQUIP_IRON, position, 5, -10);
+		ParticlesUtil.spawnClaimParticles(claim);
     }
 
     @Override
-    public void removeClaim(Faction faction, Claim claim)
+    public void removeClaim(final Faction faction, final Claim claim)
     {
-        final Set<Claim> claims = new HashSet<>(faction.getClaims());
-        claims.remove(claim);
-        final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
-        FactionsCache.removeClaimCache(claim);
-        this.storageManager.addOrUpdateFaction(updatedFaction);
+        removeClaimInternal(faction, claim);
+		ParticlesUtil.spawnUnclaimParticles(claim);
+    }
+
+    @Override
+    public void destroyClaim(final Faction faction, final Claim claim)
+    {
+        removeClaimInternal(faction, claim);
+        ParticlesUtil.spawnDestroyClaimParticles(claim);
     }
 
     @Override
@@ -779,6 +765,15 @@ public class FactionLogicImpl implements FactionLogic
     public void setIsPublic(final Faction playerFaction, final boolean isPublic)
     {
         final Faction updatedFaction = playerFaction.toBuilder().setIsPublic(isPublic).build();
+        this.storageManager.addOrUpdateFaction(updatedFaction);
+    }
+
+    private void removeClaimInternal(final Faction faction, final Claim claim)
+    {
+        final Set<Claim> claims = new HashSet<>(faction.getClaims());
+        claims.remove(claim);
+        final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
+        FactionsCache.removeClaimCache(claim);
         this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 }

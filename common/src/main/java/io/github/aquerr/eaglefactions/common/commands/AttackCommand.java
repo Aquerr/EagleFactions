@@ -17,108 +17,67 @@ import java.util.Optional;
 
 public class AttackCommand extends AbstractCommand
 {
-    public AttackCommand(EagleFactions plugin)
+    public AttackCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
-        {
-            Player player = (Player)source;
-            if(getPlugin().getConfiguration().getConfigFields().canAttackOnlyAtNight())
-            {
-                if((player.getWorld().getProperties().getWorldTime() % 24000L) >= 12000)
-                {
-                    attackChunk(player);
-                }
-                else
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CAN_ATTACK_SOMEONES_TERRITORY_ONLY_AT_NIGHT));
-                }
-            }
-            else
-            {
-                attackChunk(player);
-            }
-        }
-        else
-        {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-        }
+        if(!(source instanceof Player))
+            throw new CommandException(Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
-        return CommandResult.success();
+        final Player player = (Player)source;
+
+        if(super.getPlugin().getConfiguration().getConfigFields().canAttackOnlyAtNight() && player.getWorld().getProperties().getWorldTime() % 24000L < 12000)
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CAN_ATTACK_SOMEONES_TERRITORY_ONLY_AT_NIGHT));
+
+        return attackChunk(player);
     }
 
-    private void attackChunk(Player player)
+    private CommandResult attackChunk(Player player) throws CommandException
     {
-        Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if(!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
-        if(optionalPlayerFaction.isPresent())
-        {
-            Faction playerFaction = optionalPlayerFaction.get();
+        final Faction playerFaction = optionalPlayerFaction.get();
+        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+        if(!optionalChunkFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
 
-            Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-            if(optionalChunkFaction.isPresent())
-            {
-                if(optionalChunkFaction.get().getName().equals("SafeZone") || optionalChunkFaction.get().getName().equals("WarZone"))
-                {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION));
-                    return;
-                }
-                else
-                {
-                    if (this.getPlugin().getFlagManager().canAttack(player.getUniqueId(), playerFaction))
-                    {
-                        Faction attackedFaction = optionalChunkFaction.get();
+        if(optionalChunkFaction.get().getName().equals("SafeZone") || optionalChunkFaction.get().getName().equals("WarZone"))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION));
 
-                        if (!playerFaction.getName().equals(attackedFaction.getName()))
-                        {
-                            if(!playerFaction.getAlliances().contains(attackedFaction.getName()))
-                            {
-                                if(getPlugin().getPowerManager().getFactionMaxPower(attackedFaction) * getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack() >= getPlugin().getPowerManager().getFactionPower(attackedFaction) && getPlugin().getPowerManager().getFactionPower(playerFaction) > getPlugin().getPowerManager().getFactionPower(attackedFaction))
-                                {
-                                    int attackTime = getPlugin().getConfiguration().getConfigFields().getAttackTime();
-                                    Vector3i attackedClaim = player.getLocation().getChunkPosition();
+        if(!super.getPlugin().getFlagManager().canAttack(player.getUniqueId(), playerFaction))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_ATTACK_LANDS));
 
-                                    getPlugin().getAttackLogic().informAboutAttack(attackedFaction);
-                                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
+        final Faction attackedFaction = optionalChunkFaction.get();
 
-                                    getPlugin().getAttackLogic().blockClaiming(attackedFaction.getName());
-                                    getPlugin().getAttackLogic().attack(player, attackedClaim);
-                                    return;
-                                }
-                                else
-                                {
-                                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.THEIR_POWER_IS_TO_HIGH));
-                                }
-                            }
-                            else
-                            {
-                                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.YOU_ARE_IN_THE_SAME_ALLIANCE));
-                            }
-                        }
-                        else
-                        {
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_YOURSELF));
-                        }
-                    }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_ATTACK_LANDS));
-                    }
-                }
-            }
-            else
-            {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
-            }
-        }
-        else
-        {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-        }
+        if(playerFaction.getName().equals(attackedFaction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_YOURSELF));
+
+        if(playerFaction.getAlliances().contains(attackedFaction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.YOU_ARE_IN_THE_SAME_ALLIANCE));
+
+        final float neededPowerPercentageToAttack = super.getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack();
+        final float attackedFactionMaxPower = super.getPlugin().getPowerManager().getFactionMaxPower(attackedFaction);
+        final float attackedFactionPower = super.getPlugin().getPowerManager().getFactionPower(attackedFaction);
+        final float playerFactionPower = super.getPlugin().getPowerManager().getFactionPower(playerFaction);
+
+        if(attackedFactionMaxPower * neededPowerPercentageToAttack < attackedFactionPower || playerFactionPower < attackedFactionPower)
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.THEIR_POWER_IS_TO_HIGH));
+
+        int attackTime = super.getPlugin().getConfiguration().getConfigFields().getAttackTime();
+        Vector3i attackedClaim = player.getLocation().getChunkPosition();
+
+        super.getPlugin().getAttackLogic().informAboutAttack(attackedFaction);
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, attackTime + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_DESTROY_IT));
+
+        super.getPlugin().getAttackLogic().blockClaiming(attackedFaction.getName());
+        super.getPlugin().getAttackLogic().attack(player, attackedClaim);
+
+        return CommandResult.success();
     }
 }
