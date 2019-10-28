@@ -21,9 +21,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Singleton
 public class ProtectionManagerImpl implements ProtectionManager
@@ -471,33 +469,36 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean isItemWhitelisted(final String itemId)
     {
-        return this.plugin.getConfiguration().getConfigFields().getWhiteListedItems().contains(itemId);
+        final Set<String> whiteListedItems = this.plugin.getConfiguration().getConfigFields().getWhiteListedItems();
+        return isWhiteListed(whiteListedItems, itemId);
     }
 
     @Override
     public boolean isBlockWhitelistedForInteraction(final String blockId)
     {
-        return this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks().contains(blockId);
+        final Set<String> whiteListedBlocks = this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks();
+        return isWhiteListed(whiteListedBlocks, blockId);
     }
 
     @Override
     public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId)
     {
-        return this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks().contains(blockOrItemId);
+        final Set<String> whiteListedBlocks = this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks();
+        return isWhiteListed(whiteListedBlocks, blockOrItemId);
     }
 
-//    private boolean canUseItem(User user)
-//    {
-//        Optional<ItemStack> optionalItemStack = user.getItemInHand(HandTypes.MAIN_HAND);
-//        return optionalItemStack.isPresent() && isItemWhitelisted(optionalItemStack.get().getType());
-//
-//    }
+    private boolean isWhiteListed(final Collection<String> collection, final String itemId)
+    {
+        for(final String whiteListedItemId : collection)
+        {
+            if(whiteListedItemId.equals(itemId))
+                return true;
 
-//    private boolean canUseBlock(Location<World> location)
-//    {
-//        BlockType blockType = location.getBlockType();
-//        return blockType != BlockTypes.AIR && isBlockWhitelistedForInteraction(blockType);
-//    }
+            if(itemId.matches(whiteListedItemId))
+                return true;
+        }
+        return false;
+    }
 
     private boolean hasAdminMode(final UUID playerUUID)
     {
