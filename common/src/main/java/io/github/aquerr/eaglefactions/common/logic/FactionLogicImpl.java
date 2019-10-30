@@ -378,7 +378,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<Claim> claims = new HashSet<>(faction.getClaims());
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
-//        this.storageManager.addOrUpdateFaction(updatedFaction);
+        this.storageManager.addOrUpdateFaction(updatedFaction);
 
 		ParticlesUtil.spawnClaimParticles(claim);
     }
