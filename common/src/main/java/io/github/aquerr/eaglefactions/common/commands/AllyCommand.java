@@ -14,6 +14,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
@@ -95,19 +96,17 @@ public class AllyCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private CommandResult acceptInvite(final Player player, final Faction playerFaction, final Faction senderFaction)
+    private void acceptInvite(final Player player, final Faction playerFaction, final Faction senderFaction)
 	{
 		super.getPlugin().getFactionLogic().addAlly(playerFaction.getName(), senderFaction.getName());
 		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM + " ", TextColors.GOLD, senderFaction.getName() + "!"));
 
 		final Optional<Player> optionalSenderFactionLeader = super.getPlugin().getPlayerManager().getPlayer(senderFaction.getLeader());
-		optionalSenderFactionLeader.ifPresent(x-> optionalSenderFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
-		senderFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
-
-		return CommandResult.success();
+		optionalSenderFactionLeader.ifPresent(x-> optionalSenderFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.GREEN, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
+		senderFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.GREEN, " " + PluginMessages.ACCEPTED_YOUR_YOUR_INVITE_TO_THE_ALLIANCE)));
 	}
 
-	private CommandResult sendInvite(final Player player, final Faction playerFaction, final Faction targetFaction) throws CommandException
+	private void sendInvite(final Player player, final Faction playerFaction, final Faction targetFaction) throws CommandException
 	{
 		final AllyRequest invite = new AllyRequest(playerFaction.getName(), targetFaction.getName());
 		if(EagleFactionsPlugin.ALLY_INVITE_LIST.contains(invite))
@@ -117,15 +116,24 @@ public class AllyCommand extends AbstractCommand
 
 		final Optional<Player> optionalInvitedFactionLeader = super.getPlugin().getPlayerManager().getPlayer(targetFaction.getLeader());
 
-		optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
-				" " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION)));
-		targetFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.WHITE, "! " + PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT +
-				" " + PluginMessages.TYPE + " ", TextColors.GOLD, "/f ally " + playerFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_ACCEPT_INVITATION)));
+		optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(getInviteGetMessage(playerFaction)));
+		targetFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> getInviteGetMessage(playerFaction)));
 
-		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, targetFaction.getName(), TextColors.WHITE, " " + PluginMessages.TO_THE_ALLIANCE));
+		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_INVITED_FACTION + " ", TextColors.GOLD, targetFaction.getName(), TextColors.GREEN, " " + PluginMessages.TO_THE_ALLIANCE));
 
 		final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 		taskBuilder.execute(() -> EagleFactionsPlugin.ALLY_INVITE_LIST.remove(invite)).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(super.getPlugin());
-		return CommandResult.success();
+	}
+
+	private Text getInviteGetMessage(final Faction senderFaction)
+	{
+		final Text clickHereText = Text.builder()
+				.append(Text.of(TextColors.GOLD, "[Click Here]"))
+				.onClick(TextActions.runCommand("/f ally " + senderFaction.getName()))
+				.onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click here to run ", TextColors.GOLD, "/f ally " + senderFaction.getName()))).build();
+
+		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, senderFaction.getName(), TextColors.GREEN,
+				" " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.GREEN, "! "
+				+ PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT + " ", clickHereText, TextColors.GREEN, " " + PluginMessages.TO_ACCEPT_INVITATION_OR_TYPE + " ", TextColors.GOLD, "/f ally " + senderFaction.getName());
 	}
 }

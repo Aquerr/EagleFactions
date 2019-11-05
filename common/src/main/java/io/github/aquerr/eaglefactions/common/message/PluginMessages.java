@@ -33,7 +33,7 @@ public class PluginMessages
     public static String ALLIANCE;
 
     public static String TYPE;
-    public static String TO_ACCEPT_INVITATION;
+    public static String TO_ACCEPT_INVITATION_OR_TYPE;
 
     //Admin Mode
     public static String ADMIN_MODE;
