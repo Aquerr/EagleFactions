@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.events.FactionJoinEvent;
 import io.github.aquerr.eaglefactions.api.events.FactionLeaveEvent;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import org.spongepowered.api.entity.living.player.Player;
@@ -24,7 +25,7 @@ public class FactionJoinListener extends AbstractListener
 
 	@Listener(order = Order.POST)
 	@IsCancelled(value = Tristate.FALSE)
-	public void onFactionJoin(final FactionLeaveEvent event, @Root final Player player)
+	public void onFactionJoin(final FactionJoinEvent event, @Root final Player player)
 	{
 		//Notify other faction members about someone joining the faction.
 		final Faction faction = event.getFaction();

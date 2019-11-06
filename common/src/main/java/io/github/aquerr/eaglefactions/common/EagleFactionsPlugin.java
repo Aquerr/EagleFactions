@@ -250,7 +250,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("invite"), CommandSpec.builder()
                 .description(Text.of("Invites a player to the faction"))
                 .permission(PluginPermissions.INVITE_COMMAND)
-                .arguments(GenericArguments.player(Text.of("player")))
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
                 .executor(new InviteCommand(this))
                 .build());
 

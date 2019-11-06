@@ -167,6 +167,7 @@ public class PluginMessages
     public static String TO_JOIN;
     public static String YOU_INVITED;
     public static String TO_YOUR_FACTION;
+    public static String CLICK_HERE;
 
     //Join
     public static String SUCCESSFULLY_JOINED_FACTION;

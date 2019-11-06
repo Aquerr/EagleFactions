@@ -128,12 +128,13 @@ public class AllyCommand extends AbstractCommand
 	private Text getInviteGetMessage(final Faction senderFaction)
 	{
 		final Text clickHereText = Text.builder()
-				.append(Text.of(TextColors.GOLD, "[Click Here]"))
+				.append(Text.of(TextColors.AQUA, "[", TextColors.GOLD, PluginMessages.CLICK_HERE, TextColors.AQUA, "]"))
 				.onClick(TextActions.runCommand("/f ally " + senderFaction.getName()))
-				.onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click here to run ", TextColors.GOLD, "/f ally " + senderFaction.getName()))).build();
+				.onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f ally " + senderFaction.getName()))).build();
 
 		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, senderFaction.getName(), TextColors.GREEN,
-				" " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.GREEN, "! "
-				+ PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT + " ", clickHereText, TextColors.GREEN, " " + PluginMessages.TO_ACCEPT_INVITATION_OR_TYPE + " ", TextColors.GOLD, "/f ally " + senderFaction.getName());
+				" " + PluginMessages.HAS_SENT_YOU_AN_INVITE_TO_THE + " ", TextColors.AQUA, PluginMessages.ALLIANCE, TextColors.GREEN, "!" + "\n",
+				PluginMessages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT + "\n",
+				clickHereText, TextColors.GREEN, " " + PluginMessages.TO_ACCEPT_INVITATION_OR_TYPE + " ", TextColors.GOLD, "/f ally " + senderFaction.getName());
 	}
 }

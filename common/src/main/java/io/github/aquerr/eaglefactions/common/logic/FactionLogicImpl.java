@@ -117,14 +117,14 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public List<Player> getOnlinePlayers(Faction faction)
     {
-        List<Player> factionPlayers = new ArrayList<>();
-        UUID factionLeader = faction.getLeader();
+        final List<Player> factionPlayers = new ArrayList<>();
+        final UUID factionLeader = faction.getLeader();
         if(!faction.getLeader().equals(DUMMY_UUID) && _playerManager.isPlayerOnline(factionLeader))
         {
             factionPlayers.add(_playerManager.getPlayer(factionLeader).get());
         }
 
-        for(UUID uuid : faction.getOfficers())
+        for(final UUID uuid : faction.getOfficers())
         {
             if(_playerManager.isPlayerOnline(uuid))
             {
@@ -132,7 +132,7 @@ public class FactionLogicImpl implements FactionLogic
             }
         }
 
-        for(UUID uuid : faction.getMembers())
+        for(final UUID uuid : faction.getMembers())
         {
             if(_playerManager.isPlayerOnline(uuid))
             {
@@ -140,7 +140,7 @@ public class FactionLogicImpl implements FactionLogic
             }
         }
 
-        for(UUID uuid : faction.getRecruits())
+        for(final UUID uuid : faction.getRecruits())
         {
             if(_playerManager.isPlayerOnline(uuid))
             {
