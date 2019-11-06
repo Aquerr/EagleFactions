@@ -47,6 +47,9 @@ public class AllyCommand extends AbstractCommand
 
         final Faction playerFaction = optionalPlayerFaction.get();
 
+        if(playerFaction.getName().equals(selectedFaction.getName()))
+        	throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Are you serious? You cannot invite yourself to the alliance!"));
+
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             if(playerFaction.getEnemies().contains(selectedFaction.getName()))

@@ -235,7 +235,7 @@ public class PluginMessages
     public static String YOU_REMOVED_WAR_STATE_WITH;
     public static String YOU_ARE_NOT_IN_THE_WAR_WITH_THIS_FACTION;
     public static String YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM;
-    public static String TO_ACCEPT_IT;
+    public static String TO_ACCEPT_IT_OR_TYPE;
     public static String YOU_REQUESTED_END_OF_WAR_WITH_FACTION;
     public static String WANTS_TO_END_THE;
     public static String WAR;
