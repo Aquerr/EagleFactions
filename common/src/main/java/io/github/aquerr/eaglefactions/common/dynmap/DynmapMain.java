@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Main Dynmap Integration class, contains Dynmap API fields and activate void
  * @author Iterator
+ *
+ * Edited by Aquerr
  */
 
 public class DynmapMain {
@@ -40,19 +42,4 @@ public class DynmapMain {
             }
         });
     }
-
-//    public static void activate() {
-//        DynmapCommonAPIListener.register(new DynmapCommonAPIListener() {
-//            @Override
-//            public void apiEnabled(DynmapCommonAPI api) {
-//                markerapi = api.getMarkerAPI();
-//                markerSet = DynmapMain.markerapi.createMarkerSet("purpleflag", "EagleFactions", DynmapMain.markerapi.getMarkerIcons(), false);
-//
-//                Task.builder().execute(new DynmapUpdateTask())
-//                        .interval(10, TimeUnit.SECONDS)
-//                        .name("EagleFactions Dynmap Update Task")
-//                        .submit(EagleFactions.getPlugin());
-//            }
-//        });
-//    }
 }

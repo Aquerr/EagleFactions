@@ -47,7 +47,7 @@ public class EnemyCommand extends AbstractCommand
         final Faction playerFaction = optionalPlayerFaction.get();
 
         if(playerFaction.getName().equals(enemyFaction.getName()))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Are you serious? You cannot declare the war with yourself!"));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Are you serious? You cannot be in a war with yourself!"));
 
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
@@ -105,7 +105,7 @@ public class EnemyCommand extends AbstractCommand
                 final StopWarRequest stopWarRequest = new StopWarRequest(playerFaction.getName(), enemyFaction.getName());
                 if(EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.contains(stopWarRequest))
                 {
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already sent a war-end request to this faction. Wait for their response!"));
+                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already sent an armistice request to this faction. Wait for their response!"));
                     return CommandResult.success();
                 }
                 EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.add(stopWarRequest);

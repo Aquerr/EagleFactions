@@ -43,7 +43,7 @@ public class SetHomeCommand extends AbstractCommand
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
             return CommandResult.success();
         }
 
@@ -53,7 +53,7 @@ public class SetHomeCommand extends AbstractCommand
             if (!chunkFaction.isPresent() && super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
             {
                 super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
             }
             else if (!chunkFaction.isPresent() && !super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
             {
@@ -62,7 +62,7 @@ public class SetHomeCommand extends AbstractCommand
             else if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
             {
                 super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
             }
             else
             {

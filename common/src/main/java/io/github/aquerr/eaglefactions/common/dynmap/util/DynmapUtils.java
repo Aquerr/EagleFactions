@@ -14,12 +14,16 @@ import java.util.*;
  * to make code cleaner.
  *
  * @author Iterator
+ *
+ * Edited by Aquerr
  */
 
 public class DynmapUtils {
+
+    private static ConfigFields configFields = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
+
     public static String getFactionInfoWindow(final Faction faction) {
         // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
-        ConfigFields config = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
         Optional<UserStorageService> userStorage = Sponge.getServiceManager().provide(UserStorageService.class);
 
         StringBuilder description = new StringBuilder();
@@ -27,16 +31,16 @@ public class DynmapUtils {
         String factionName = faction.getName();
         String factionDesc = faction.getDescription();
 
-        description.append("<div class=\"infowindow\">\n" +
-                "<span style=\"font-weight: bold; font-size: 150%;\">%name%</span></br>\n".replace("%name%", factionName) +
-                "<span style=\"font-style: italic; font-size: 110%;\">%description%</span></br>\n".replace("%description%", factionDesc.length() > 0 ? factionDesc : "No description"));
+        description.append("<div class=\"infowindow\">\n")
+                .append("<span style=\"font-weight: bold; font-size: 150%;\">%name%</span></br>\n".replace("%name%", factionName))
+                .append("<span style=\"font-style: italic; font-size: 110%;\">%description%</span></br>\n".replace("%description%", factionDesc.length() > 0 ? factionDesc : "No description"));
 
         if (faction.getTag().toPlain().length() > 0) {
-            description.append("<span style=\"font-weight: bold;\">Tag:</span> %tag%</br>\n".replace("%tag%", faction.getTag().toPlain()) +
-                    "</br>\n");
+            description.append("<span style=\"font-weight: bold;\">Tag:</span> %tag%</br>\n".replace("%tag%", faction.getTag().toPlain()))
+                    .append("</br>\n");
         }
 
-        if (config.showDynmapFactionLeader() && userStorage.isPresent()) {
+        if (configFields.showDynmapFactionLeader() && userStorage.isPresent()) {
             if (userStorage.get().get(faction.getLeader()).isPresent()) {
                 description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
                         .replace("%leader%",
@@ -44,19 +48,11 @@ public class DynmapUtils {
             }
         }
 
-        if (config.showDynmapMemberInfo()) {
-            int memberCount = 0;
-
-            // Why isn't there a method to get all the faction people at one time?
-            memberCount += faction.getRecruits().size();
-            memberCount += faction.getMembers().size();
-            memberCount += faction.getOfficers().size();
-
-            if (memberCount > 0) {
-                description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
-                        .replace("%players%",
-                                String.valueOf(memberCount)));
-            }
+        if (configFields.showDynmapMemberInfo()) {
+            int memberCount = faction.getPlayers().size();
+            description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
+                    .replace("%players%",
+                            String.valueOf(memberCount)));
         }
 
         description.append("</br>\n</div>");
@@ -78,6 +74,10 @@ public class DynmapUtils {
         return areaColor;
     }
 
+    //TODO: Because Dynmap-Factions does not have a license, we should count it as it does not permit others to use their code.
+    //TODO: We should rewrite the code below so that it works as intended but with different strategy.
+    //TODO: If it turns out that the code must be the same as theirs then... well... it is not our fault I guess. ;D
+
     /**
      * WARNING: all code below is taken from Dynmap-Factions
      * https://github.com/webbukkit/Dynmap-Factions/
@@ -86,7 +86,7 @@ public class DynmapUtils {
 
     private static void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
     {
-        ArrayDeque<int[]> stack = new ArrayDeque<int[]>();
+        ArrayDeque<int[]> stack = new ArrayDeque<>();
         stack.push(new int[] { x, y });
 
         while (!stack.isEmpty())
@@ -160,7 +160,7 @@ public class DynmapUtils {
                 // Else, keep it in the list for the next polygon
                 else
                 {
-                    if (newChunks == null) newChunks = new LinkedList<Claim>();
+                    if (newChunks == null) newChunks = new LinkedList<>();
                     newChunks.add(chunk);
                 }
             }
@@ -176,7 +176,7 @@ public class DynmapUtils {
             int currentX = minimumX;
             int currentZ = minimumZ;
             Direction direction = Direction.XPLUS;
-            ArrayList<int[]> linelist = new ArrayList<int[]>();
+            ArrayList<int[]> linelist = new ArrayList<>();
             linelist.add(new int[]{ initialX, initialZ }); // Add start point
             while ((currentX != initialX) || (currentZ != initialZ) || (direction != Direction.ZMINUS))
             {

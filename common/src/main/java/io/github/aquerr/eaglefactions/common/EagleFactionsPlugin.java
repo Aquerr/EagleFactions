@@ -141,7 +141,8 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
 
-        CompletableFuture.runAsync(() -> {
+        CompletableFuture.runAsync(() ->
+        {
             if(!VersionChecker.isLatest(PluginInfo.VERSION))
             {
                 Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
@@ -150,7 +151,10 @@ public class EagleFactionsPlugin implements EagleFactions
         });
     }
 
-    private void registerAPI() {
+    private void registerAPI()
+    {
+        //This is not really needed as api consumers can access managers classes through EagleFactions interface instance.
+        //But we are still registering these managers just in case someone will try to access not through EagleFactions interface.
         Sponge.getServiceManager().setProvider(this, FactionLogic.class, this._factionLogic);
         Sponge.getServiceManager().setProvider(this, PowerManager.class, this._powerManager);
     }
@@ -167,29 +171,31 @@ public class EagleFactionsPlugin implements EagleFactions
                 _efPlaceholderService = EFPlaceholderService.getInstance(this, placeholderService);
                 printInfo("Registered Eagle Factions' placeholders.");
             });
-        } catch(NoClassDefFoundError error) {
-            printInfo("No PlaceholderAPI found. Skipping adding placeholders.");
         }
-        catch(ClassNotFoundException e)
+        catch(final NoClassDefFoundError | ClassNotFoundException error)
         {
-            printInfo("No PlaceholderAPI found. Skipping adding placeholders.");
+            printInfo("PlaceholderAPI could not be found. Skipping addition of placeholders.");
         }
 
         final Optional<PermissionService> permissionService = Sponge.getServiceManager().provide(PermissionService.class);
         if(permissionService.isPresent())
         {
-            permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "io.github.aquerr.eaglefactions.player", Tristate.TRUE);
+            permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
         }
 
-        if (_configuration.getConfigFields().isDynmapIntegrationEnabled()) {
-            try {
+        if (_configuration.getConfigFields().isDynmapIntegrationEnabled())
+        {
+            try
+            {
                 Class.forName("org.dynmap.DynmapCommonAPI");
                 this._dynmapMain = new DynmapMain(this);
                 this._dynmapMain.activate();
 
                 printInfo("Dynmap Integration is active!");
-            } catch (ClassNotFoundException error) {
-                printInfo("Failed to enable Dynmap Integration; Dynmap is not available");
+            }
+            catch (final ClassNotFoundException error)
+            {
+                printInfo("Dynmap could not be found. Dynmap integration will not be available.");
             }
         }
     }

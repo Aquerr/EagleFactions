@@ -7,6 +7,10 @@ import org.spongepowered.api.text.Text;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * The implementation of Faction interface.
+ * FactionImpl is an immutable object. To change its values, use FactionLogic or Faction.Builder
+ */
 public class FactionImpl implements Faction
 {
     private final String name;
@@ -115,6 +119,18 @@ public class FactionImpl implements Faction
     }
 
     @Override
+    public Set<UUID> getPlayers()
+    {
+        //This set does not need to unmodifiable as making changes in it won't affect the faction object.
+        final Set<UUID> players = new HashSet<>();
+        players.add(getLeader());
+        players.addAll(getRecruits());
+        players.addAll(getMembers());
+        players.addAll(getOfficers());
+        return players;
+    }
+
+    @Override
     public Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFlags()
     {
         return Collections.unmodifiableMap(flags);
@@ -133,7 +149,7 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public FactionMemberType getPlayerMemberType(UUID playerUUID)
+    public FactionMemberType getPlayerMemberType(final UUID playerUUID)
     {
         if (this.leader.equals(playerUUID))
             return FactionMemberType.LEADER;
@@ -160,7 +176,7 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public boolean containsPlayer(UUID playerUUID)
+    public boolean containsPlayer(final UUID playerUUID)
     {
         if (this.leader.equals(playerUUID))
             return true;
@@ -168,10 +184,7 @@ public class FactionImpl implements Faction
             return true;
         else if(this.members.contains(playerUUID))
             return true;
-        else if(this.recruits.contains(playerUUID))
-            return true;
-        else
-            return false;
+        else return this.recruits.contains(playerUUID);
     }
 
     @Override
