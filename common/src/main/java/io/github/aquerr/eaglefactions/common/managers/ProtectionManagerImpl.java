@@ -22,6 +22,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Singleton
 public class ProtectionManagerImpl implements ProtectionManager
@@ -494,8 +496,16 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(whiteListedItemId.equals(itemId))
                 return true;
 
-            if(itemId.matches(whiteListedItemId))
-                return true;
+            try
+            {
+                final Pattern pattern = Pattern.compile(whiteListedItemId);
+                if(pattern.matcher(whiteListedItemId).matches())
+                    return true;
+            }
+            catch(final PatternSyntaxException exception)
+            {
+                //I guess it must be empty...
+            }
         }
         return false;
     }
