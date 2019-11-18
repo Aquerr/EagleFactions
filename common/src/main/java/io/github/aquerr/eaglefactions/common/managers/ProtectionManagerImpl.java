@@ -499,7 +499,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             try
             {
                 final Pattern pattern = Pattern.compile(whiteListedItemId);
-                if(pattern.matcher(whiteListedItemId).matches())
+                if(pattern.matcher(itemId).matches())
                     return true;
             }
             catch(final PatternSyntaxException exception)

@@ -37,14 +37,14 @@ public class StorageManagerImpl implements StorageManager, Runnable
 
     private final Thread storageThread;
 
-    public static StorageManagerImpl getInstance(EagleFactions eagleFactions)
+    public static StorageManagerImpl getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new StorageManagerImpl(eagleFactions);
         else return INSTANCE;
     }
 
-    private StorageManagerImpl(EagleFactions eagleFactions)
+    private StorageManagerImpl(final EagleFactions eagleFactions)
     {
         INSTANCE = this;
         this.plugin = eagleFactions;
@@ -62,10 +62,6 @@ public class StorageManagerImpl implements StorageManager, Runnable
                 playerStorage = new H2PlayerStorage(eagleFactions);
                 this.plugin.printInfo("H2 storage has been initialized!");
                 break;
-                //TODO: Add SQLLite, JSON, etc...
-//            case "sqllite":
-//
-//                break;
             case "mysql":
                 factionsStorage = new MySQLFactionStorage(eagleFactions);
                 playerStorage = new MySQLPlayerStorage(eagleFactions);
@@ -84,7 +80,6 @@ public class StorageManagerImpl implements StorageManager, Runnable
                 break;
         }
         prepareFactionsCache();
-//        preparePlayerCache();
 
         this.storageTaskQueue = new LinkedList<>();
         this.storageThread = new Thread(this::run);
@@ -135,7 +130,6 @@ public class StorageManagerImpl implements StorageManager, Runnable
     {
         FactionsCache.addOrUpdateFactionCache(faction);
         queueStorageTask(new UpdateFactionTask(faction));
-//        queueStorageTask(new UpdateFactionTask(faction.toBuilder().build())); //Build new object to avoid concurrent modification.
     }
 
     @Override
