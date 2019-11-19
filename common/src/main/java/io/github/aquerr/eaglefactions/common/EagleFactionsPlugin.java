@@ -307,7 +307,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         //Build alliance commands.
         SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
-                .description(Text.of("Invite faction to the alliance"))
+                .description(Text.of("Invite or remove faction from the alliance"))
                 .permission(PluginPermissions.ALLY_COMMAND)
                 .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new AllyCommand(this))
@@ -315,7 +315,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         //Build enemy commands.
         SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
-                .description(Text.of("Declare someone a war"))
+                .description(Text.of("Declare or remove faction from war"))
                 .permission(PluginPermissions.ENEMY_COMMAND)
                 .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new EnemyCommand(this))

@@ -17,6 +17,8 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -34,11 +36,13 @@ public class EntitySpawnListener extends AbstractListener
     }
 
     @Listener(order = Order.EARLY, beforeModifications = true)
-    public void onEntitySpawn(SpawnEntityEvent event)
+    public void onEntitySpawn(final SpawnEntityEvent event)
     {
         Cause cause = event.getCause();
         Object rootCause = cause.root();
         EventContext eventContext = event.getContext();
+        final SpawnType spawnType = eventContext.get(EventContextKeys.SPAWN_TYPE).orElse(null);
+        final boolean isPlayerPlace = eventContext.get(EventContextKeys.PLAYER_PLACE).isPresent() && eventContext.get(EventContextKeys.OWNER).isPresent();
 
         Iterator<Entity> entitiesIterator = event.getEntities().iterator();
         while(entitiesIterator.hasNext())
@@ -64,6 +68,18 @@ public class EntitySpawnListener extends AbstractListener
             }
 
             if(entity.toString().contains("EntityCustomNpc")) return;
+
+            if(spawnType == SpawnTypes.PLACEMENT && isPlayerPlace)
+            {
+                //Entity spawned from a command or something similar... (can be a hammer that is being used with right-click on a machine block)
+                //Let's treat is as a place event for now...
+                final User user = eventContext.get(EventContextKeys.OWNER).get();
+                if(!super.getPlugin().getProtectionManager().canPlace(entity.getLocation(), user))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
 
             boolean isHostile = entity instanceof Hostile;
             boolean isPlayer = entity instanceof Player;
