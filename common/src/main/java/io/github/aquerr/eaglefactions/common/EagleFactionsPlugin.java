@@ -466,7 +466,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setleader"), CommandSpec.builder()
                 .description(Text.of("Set someone as leader (removes you as a leader if you are one)"))
                 .permission(PluginPermissions.SET_LEADER_COMMAND)
-                .arguments(GenericArguments.player(Text.of("player")))
+                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
                 .executor(new SetLeaderCommand(this))
                 .build());
 

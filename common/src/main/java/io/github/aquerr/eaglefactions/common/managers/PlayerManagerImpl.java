@@ -14,6 +14,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -187,7 +188,26 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public Set<FactionPlayer> getServerPlayers()
     {
-        return storageManager.getServerPlayers();
+        return this.storageManager.getServerPlayers();
+//        final Collection<Player> onlinePlayers = Sponge.getServer().getOnlinePlayers();
+//        final Set<FactionPlayer> factionPlayers = storageManager.getServerPlayers();
+//        for(final Player player : onlinePlayers)
+//        {
+//            boolean playerExist = false;
+//            for(final FactionPlayer factionPlayer : factionPlayers)
+//            {
+//                if(player.getUniqueId().equals(factionPlayer.getUniqueId()))
+//                {
+//                    playerExist = true;
+//                    break;
+//                }
+//            }
+//
+//            if(!playerExist)
+//                factionPlayers.add(new FactionPlayerImpl(player.getName(), player.getUniqueId(), null, null, 5, 10));
+//        }
+//
+//        return factionPlayers;
     }
 
     @Override

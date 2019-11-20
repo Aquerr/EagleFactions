@@ -28,10 +28,10 @@ public class ExplosionListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onExplosionPre(ExplosionEvent.Pre event)
+    public void onExplosionPre(final ExplosionEvent.Pre event)
     {
-        EventContext context = event.getContext();
-        Cause cause = event.getCause();
+        final EventContext context = event.getContext();
+        final Cause cause = event.getCause();
 
         User user = null;
         if (cause.root() instanceof TileEntity) {
@@ -55,7 +55,7 @@ public class ExplosionListener extends AbstractListener
             user = event.getCause().first(User.class).get();
         }
 
-        Location<World> location = event.getExplosion().getLocation();
+        final Location<World> location = event.getExplosion().getLocation();
         if (user == null)
         {
             if(!super.getPlugin().getProtectionManager().canExplode(location))
@@ -75,10 +75,10 @@ public class ExplosionListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onExplosion(ExplosionEvent.Detonate event)
+    public void onExplosion(final ExplosionEvent.Detonate event)
     {
-        List<Location<World>> locationList = new ArrayList<>(event.getAffectedLocations());
-        List<Entity> entityList = new ArrayList<>(event.getEntities());
+        final List<Location<World>> locationList = new ArrayList<>(event.getAffectedLocations());
+        final List<Entity> entityList = new ArrayList<>(event.getEntities());
         User user = null;
         final Cause cause = event.getCause();
         final EventContext context = event.getContext();
@@ -103,9 +103,9 @@ public class ExplosionListener extends AbstractListener
             user = event.getCause().first(User.class).get();
         }
 
-        for(Entity entity : entityList)
+        for(final Entity entity : entityList)
         {
-            Location<World> entityLocation = entity.getLocation();
+            final Location<World> entityLocation = entity.getLocation();
             if(user != null)
             {
                 if(!super.getPlugin().getProtectionManager().canExplode(entityLocation, user))
@@ -119,7 +119,7 @@ public class ExplosionListener extends AbstractListener
             }
         }
 
-        for(Location<World> location : locationList)
+        for(final Location<World> location : locationList)
         {
             if(user != null)
             {
@@ -136,7 +136,7 @@ public class ExplosionListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onExplosionPost(ExplosionEvent.Post event)
+    public void onExplosionPost(final ExplosionEvent.Post event)
     {
         User user = null;
         final Cause cause = event.getCause();
