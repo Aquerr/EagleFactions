@@ -3,8 +3,8 @@ package io.github.aquerr.eaglefactions.common.managers;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
@@ -94,7 +94,8 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public IFactionPlayer convertToFactionPlayer(User user) {
+    public FactionPlayer convertToFactionPlayer(User user)
+    {
         String factionName = "";
         FactionMemberType factionMemberType = null;
         Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
@@ -104,7 +105,7 @@ public class PlayerManagerImpl implements PlayerManager
             factionMemberType = optionalFaction.get().getPlayerMemberType(user.getUniqueId());
         }
 
-        return new FactionPlayer(user.getName(), user.getUniqueId(), factionName, factionMemberType, this.configFields.getStartingPower(),  this.configFields.getGlobalMaxPower());
+        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, factionMemberType, this.configFields.getStartingPower(),  this.configFields.getGlobalMaxPower());
     }
 
     private Optional<String> getLastKnownPlayerName(UUID playerUUID)
@@ -184,7 +185,7 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public Set<IFactionPlayer> getServerPlayers()
+    public Set<FactionPlayer> getServerPlayers()
     {
         return storageManager.getServerPlayers();
     }

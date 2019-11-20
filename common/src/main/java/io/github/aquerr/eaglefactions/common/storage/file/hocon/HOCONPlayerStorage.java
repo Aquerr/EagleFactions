@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -231,9 +231,9 @@ public class HOCONPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public Set<IFactionPlayer> getServerPlayers()
+    public Set<FactionPlayer> getServerPlayers()
     {
-        final Set<IFactionPlayer> playerSet = new HashSet<>();
+        final Set<FactionPlayer> playerSet = new HashSet<>();
         final File playerDir = new File(playersDirectoryPath.toUri());
         final File[] playerFiles = playerDir.listFiles();
 
@@ -265,7 +265,7 @@ public class HOCONPlayerStorage implements IPlayerStorage
                 if(!factionMemberTypeString.equals(""))
                     factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
-                FactionPlayer factionPlayer = new FactionPlayer(playerName, playerUUID, factionName, factionMemberType, power, maxpower);
+                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, factionMemberType, power, maxpower);
                 playerSet.add(factionPlayer);
             }
             catch(IOException e)

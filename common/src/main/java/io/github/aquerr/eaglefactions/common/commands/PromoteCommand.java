@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -27,88 +28,67 @@ public class PromoteCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Optional<Player> optionalPromotedPlayer = context.<Player>getOne("player");
+        final FactionPlayer promotedPlayer = context.requireOne("player");
 
-        if (optionalPromotedPlayer.isPresent())
+        if(!(source instanceof Player))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+
+        final Player player = (Player)source;
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalPromotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(promotedPlayer.getUniqueId());
+
+
+
+        if(!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+
+        final Faction playerFaction = optionalPlayerFaction.get();
+
+        if(!optionalPromotedPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
+
+        if(!optionalPromotedPlayerFaction.get().getName().equals(playerFaction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
+
+        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            if(source instanceof Player)
+            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
             {
-                final Player player = (Player)source;
-                final Player promotedPlayer = optionalPromotedPlayer.get();
-                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                final Optional<Faction> optionalPromotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(promotedPlayer.getUniqueId());
-
-                if(optionalPlayerFaction.isPresent())
-                {
-                    Faction playerFaction = optionalPlayerFaction.get();
-
-                    if(optionalPromotedPlayerFaction.isPresent() && optionalPromotedPlayerFaction.get().getName().equals(playerFaction.getName()))
-                    {
-                        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
-                        {
-                            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
-                            {
-                                FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, promotedPlayer.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
-                            }
-
-                            return CommandResult.success();
-                        }
-
-                        if(playerFaction.getLeader().equals(player.getUniqueId()))
-                        {
-                            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
-                            {
-                                FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, promotedPlayer.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
-                            }
-
-                            return CommandResult.success();
-                        }
-                        else if(playerFaction.getOfficers().contains(player.getUniqueId()))
-                        {
-                            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(promotedPlayer.getUniqueId()))
-                            {
-                                FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, promotedPlayer.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
-                            }
-
-                            return CommandResult.success();
-                        }
-                    }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
-                    }
-                }
-                else
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-                }
+                FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer.getUniqueId());
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, promotedPlayer.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            }
+            return CommandResult.success();
+        }
+
+        if(playerFaction.getLeader().equals(player.getUniqueId()))
+        {
+            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
+            {
+                FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer.getUniqueId());
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, promotedPlayer.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
+            }
+            else
+            {
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
             }
         }
-        else
+        else if(playerFaction.getOfficers().contains(player.getUniqueId()))
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f promote <player>"));
+            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(promotedPlayer.getUniqueId()))
+            {
+                FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer.getUniqueId());
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_PROMOTED + " ", TextColors.GOLD, promotedPlayer.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
+            }
+            else
+            {
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            }
         }
         return CommandResult.success();
     }

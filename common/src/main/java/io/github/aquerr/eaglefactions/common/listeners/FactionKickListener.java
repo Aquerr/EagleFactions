@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.FactionKickEventImpl;
 import org.spongepowered.api.entity.living.player.Player;
@@ -22,7 +22,7 @@ public class FactionKickListener extends AbstractListener
     public void onPlayerFactionKick(final FactionKickEventImpl event)
     {
         final Faction faction = event.getFaction();
-        final IFactionPlayer kickedPlayer = event.getKickedPlayer();
+        final FactionPlayer kickedPlayer = event.getKickedPlayer();
 
         final List<Player> onlineFactionPlayers = super.getPlugin().getFactionLogic().getOnlinePlayers(faction);
         for(final Player player : onlineFactionPlayers)

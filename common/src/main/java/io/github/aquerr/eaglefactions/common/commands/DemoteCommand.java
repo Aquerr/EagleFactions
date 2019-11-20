@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -21,94 +22,71 @@ import java.util.Optional;
  */
 public class DemoteCommand extends AbstractCommand
 {
-    public DemoteCommand(EagleFactions plugin)
+    public DemoteCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        Optional<Player> optionalDemotedPlayer = context.<Player>getOne("player");
+        final FactionPlayer demotedPlayer = context.requireOne("player");
 
-        if (optionalDemotedPlayer.isPresent())
+        if(!(source instanceof Player))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+
+        final Player player = (Player)source;
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalDemotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(demotedPlayer.getUniqueId());
+
+        if(!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+
+        final Faction playerFaction = optionalPlayerFaction.get();
+
+        if(!optionalDemotedPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
+
+        if(!optionalDemotedPlayerFaction.get().getName().equals(playerFaction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
+
+        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            if(source instanceof Player)
+            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()))
             {
-                Player player = (Player)source;
-                Player demotedPlayer = optionalDemotedPlayer.get();
-                Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-                Optional<Faction> optionalDemotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(demotedPlayer.getUniqueId());
-
-                if(optionalPlayerFaction.isPresent())
-                {
-                    Faction playerFaction = optionalPlayerFaction.get();
-
-                    if(optionalDemotedPlayerFaction.isPresent() && optionalDemotedPlayerFaction.get().getName().equals(playerFaction.getName()))
-                    {
-                        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
-                        {
-                            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()))
-                            {
-                                FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", demotedTo.toString() + "!"));
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-                            }
-
-                            return CommandResult.success();
-                        }
-
-                        if(playerFaction.getLeader().equals(player.getUniqueId()))
-                        {
-                            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
-                            {
-                                FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-                            }
-
-                            return CommandResult.success();
-                        }
-                        else if(playerFaction.getOfficers().contains(player.getUniqueId()))
-                        {
-                            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(demotedPlayer.getUniqueId()))
-                            {
-                                FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer);
-                                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
-                            }
-                            else
-                            {
-                                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-                            }
-
-                            return CommandResult.success();
-                        }
-                    }
-                    else
-                    {
-                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
-                    }
-                }
-                else
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-                }
+                FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer.getUniqueId());
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", demotedTo.toString() + "!"));
             }
             else
             {
-                source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+            }
+            return CommandResult.success();
+        }
+
+        if(playerFaction.getLeader().equals(player.getUniqueId()))
+        {
+            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
+            {
+                FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer.getUniqueId());
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
+            }
+            else
+            {
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
             }
         }
-        else
+        else if(playerFaction.getOfficers().contains(player.getUniqueId()))
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f demote <player>"));
+            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(demotedPlayer.getUniqueId()))
+            {
+                FactionMemberType promotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer.getUniqueId());
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOU_DEMOTED + " ", TextColors.GOLD, player.getName(), TextColors.RESET, " " + PluginMessages.TO, " ", promotedTo.toString() + "!"));
+            }
+            else
+            {
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+            }
         }
         return CommandResult.success();
     }

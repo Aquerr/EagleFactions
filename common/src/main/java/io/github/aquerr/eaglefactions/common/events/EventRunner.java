@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.events;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.FactionJoinEvent;
 import io.github.aquerr.eaglefactions.api.events.FactionLeaveEvent;
 import org.spongepowered.api.Sponge;
@@ -100,7 +100,7 @@ public final class EventRunner
     /**
      * @return True if cancelled, false if not
      */
-    public static boolean runFactionKickEvent(final IFactionPlayer kickedPlayer, final Player kickedBy, final Faction faction)
+    public static boolean runFactionKickEvent(final FactionPlayer kickedPlayer, final Player kickedBy, final Faction faction)
     {
         final EventContext eventContext = EventContext.builder()
                 .add(EventContextKeys.OWNER, kickedBy)

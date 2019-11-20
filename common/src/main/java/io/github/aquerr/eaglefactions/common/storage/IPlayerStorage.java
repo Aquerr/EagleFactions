@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.common.storage;
 
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 
 import java.util.Set;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public interface IPlayerStorage
 
     Set<String> getServerPlayerNames();
 
-    Set<IFactionPlayer> getServerPlayers();
+    Set<FactionPlayer> getServerPlayers();
 
     String getPlayerName(UUID playerUUID);
 

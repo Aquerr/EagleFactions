@@ -11,7 +11,7 @@ public class PluginMessages
     public static String THERE_IS_NO_FACTION_CALLED;
     public static String FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES;
     public static String THIS_FACTION_IS_YOUR_ALLY;
-    public static String REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR;
+    public static String DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR;
 
     public static String FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE;
     public static String YOU_HAVE_ACCEPTED_AN_INVITATION_FROM;
@@ -234,9 +234,9 @@ public class PluginMessages
     //Enemy
     public static String YOU_REMOVED_WAR_STATE_WITH;
     public static String YOU_ARE_NOT_IN_THE_WAR_WITH_THIS_FACTION;
-    public static String YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM;
+    public static String YOU_HAVE_ACCEPTED_ARMISITCE_REQUEST_FROM;
     public static String TO_ACCEPT_IT_OR_TYPE;
-    public static String YOU_REQUESTED_END_OF_WAR_WITH_FACTION;
+    public static String YOU_REQUESTED_ARMISTICE_WITH_FACTION;
     public static String WANTS_TO_END_THE;
     public static String WAR;
     public static String WITH_YOUR_FACTION;

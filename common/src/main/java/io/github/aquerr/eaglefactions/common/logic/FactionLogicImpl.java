@@ -666,7 +666,7 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public FactionMemberType promotePlayer(Faction faction, Player playerToPromote)
+    public FactionMemberType promotePlayer(Faction faction, UUID playerToPromote)
     {
         FactionMemberType promotedTo = FactionMemberType.RECRUIT;
 
@@ -674,16 +674,16 @@ public class FactionLogicImpl implements FactionLogic
         final Set<UUID> members = new HashSet<>(faction.getMembers());
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
 
-        if(recruits.contains(playerToPromote.getUniqueId()))
+        if(recruits.contains(playerToPromote))
         {
-            members.add(playerToPromote.getUniqueId());
-            recruits.remove(playerToPromote.getUniqueId());
+            members.add(playerToPromote);
+            recruits.remove(playerToPromote);
             promotedTo = FactionMemberType.MEMBER;
         }
-        else if (members.contains(playerToPromote.getUniqueId()))
+        else if (members.contains(playerToPromote))
         {
-            officers.add(playerToPromote.getUniqueId());
-            members.remove(playerToPromote.getUniqueId());
+            officers.add(playerToPromote);
+            members.remove(playerToPromote);
             promotedTo = FactionMemberType.OFFICER;
         }
 
@@ -693,23 +693,23 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public FactionMemberType demotePlayer(Faction faction, Player playerToDemote)
+    public FactionMemberType demotePlayer(Faction faction, UUID playerToDemote)
     {
         FactionMemberType demotedTo = FactionMemberType.RECRUIT;
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
 
-        if(members.contains(playerToDemote.getUniqueId()))
+        if(members.contains(playerToDemote))
         {
-            recruits.add(playerToDemote.getUniqueId());
-            members.remove(playerToDemote.getUniqueId());
+            recruits.add(playerToDemote);
+            members.remove(playerToDemote);
             demotedTo = FactionMemberType.RECRUIT;
         }
-        else if (officers.contains(playerToDemote.getUniqueId()))
+        else if (officers.contains(playerToDemote))
         {
-            members.add(playerToDemote.getUniqueId());
-            officers.remove(playerToDemote.getUniqueId());
+            members.add(playerToDemote);
+            officers.remove(playerToDemote);
             demotedTo = FactionMemberType.MEMBER;
         }
 

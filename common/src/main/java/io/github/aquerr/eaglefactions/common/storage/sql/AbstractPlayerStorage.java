@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
 import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
@@ -241,9 +241,9 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public Set<IFactionPlayer> getServerPlayers()
+    public Set<FactionPlayer> getServerPlayers()
     {
-        final Set<IFactionPlayer> factionPlayers = new HashSet<>();
+        final Set<FactionPlayer> factionPlayers = new HashSet<>();
         try(final Connection connection = this.sqlProvider.getConnection())
         {
             final Statement statement = connection.createStatement();
@@ -254,7 +254,7 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
                 final String name = resultSet.getString("Name");
                 final float power = resultSet.getInt("Power");
                 final float maxpower = resultSet.getInt("Maxpower");
-                final IFactionPlayer factionPlayer = new FactionPlayer(name, playerUUID, null, null, power, maxpower);
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null, power, maxpower);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();

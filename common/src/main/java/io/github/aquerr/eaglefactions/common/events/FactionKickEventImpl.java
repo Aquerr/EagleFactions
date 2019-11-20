@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.FactionKickEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
@@ -9,11 +9,11 @@ import org.spongepowered.api.event.cause.Cause;
 public class FactionKickEventImpl extends FactionAbstractEvent implements FactionKickEvent
 {
     private final Cause cause;
-    private final IFactionPlayer kickedPlayer;
+    private final FactionPlayer kickedPlayer;
     private final Player creator;
     private final Faction faction;
 
-    FactionKickEventImpl(final IFactionPlayer kickedPlayer, final Player kickedBy, final Faction faction, final Cause cause)
+    FactionKickEventImpl(final FactionPlayer kickedPlayer, final Player kickedBy, final Faction faction, final Cause cause)
     {
         super();
         this.kickedPlayer = kickedPlayer;
@@ -39,7 +39,7 @@ public class FactionKickEventImpl extends FactionAbstractEvent implements Factio
         return this.faction;
     }
 
-    public IFactionPlayer getKickedPlayer()
+    public FactionPlayer getKickedPlayer()
     {
         return this.kickedPlayer;
     }

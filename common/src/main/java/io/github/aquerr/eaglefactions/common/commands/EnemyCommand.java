@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.StopWarRequest;
+import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -47,12 +47,12 @@ public class EnemyCommand extends AbstractCommand
         final Faction playerFaction = optionalPlayerFaction.get();
 
         if(playerFaction.getName().equals(enemyFaction.getName()))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Are you serious? You cannot be in a war with yourself!"));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Are you serious? You cannot be in war with yourself!"));
 
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             if(playerFaction.getAlliances().contains(enemyFaction.getName()))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
 
             if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
             {
@@ -71,7 +71,7 @@ public class EnemyCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
 
         if(playerFaction.getAlliances().contains(enemyFaction.getName()))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.REMOVE_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_FACTION_IS_YOUR_ALLY + " " + PluginMessages.DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
 
         if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
         {
@@ -87,36 +87,36 @@ public class EnemyCommand extends AbstractCommand
         }
         else
         {
-            final StopWarRequest checkRemove = new StopWarRequest(enemyFaction.getName(), playerFaction.getName());
-            if(EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.contains(checkRemove))
+            final ArmisticeRequest checkRemove = new ArmisticeRequest(enemyFaction.getName(), playerFaction.getName());
+            if(EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.contains(checkRemove))
             {
                 super.getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_PEACE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.GREEN, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.YOU_HAVE_ACCEPTED_ARMISITCE_REQUEST_FROM + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.GREEN, "!"));
 
                 final Optional<Player> enemyFactionLeader = super.getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader());
                 enemyFactionLeader.ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.GREEN, " accepted your armistice request!")));
                 enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y->y.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION + " ", TextColors.GOLD, playerFaction.getName(), TextColors.GREEN, " accepted your armistice request!"))));
 
-                EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.remove(checkRemove);
+                EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.remove(checkRemove);
             }
-            else if(!EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.contains(checkRemove))
+            else if(!EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.contains(checkRemove))
             {
 
-                final StopWarRequest stopWarRequest = new StopWarRequest(playerFaction.getName(), enemyFaction.getName());
-                if(EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.contains(stopWarRequest))
+                final ArmisticeRequest armisticeRequest = new ArmisticeRequest(playerFaction.getName(), enemyFaction.getName());
+                if(EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.contains(armisticeRequest))
                 {
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "You have already sent an armistice request to this faction. Wait for their response!"));
                     return CommandResult.success();
                 }
-                EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.add(stopWarRequest);
+                EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.add(armisticeRequest);
 
                 final Optional<Player> enemyFactionLeader = super.getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader());
-                enemyFactionLeader.ifPresent(x->x.sendMessage(getWarStopRequestMessage(playerFaction)));
-                enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y->y.sendMessage(getWarStopRequestMessage(playerFaction))));
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.YOU_REQUESTED_END_OF_WAR_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.RESET, "!"));
+                enemyFactionLeader.ifPresent(x->x.sendMessage(getArmisticeRequestMessage(playerFaction)));
+                enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y->y.sendMessage(getArmisticeRequestMessage(playerFaction))));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, PluginMessages.YOU_REQUESTED_ARMISTICE_WITH_FACTION + " ", TextColors.GOLD, enemyFaction.getName(), TextColors.RESET, "!"));
 
                 final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-                taskBuilder.execute(() -> EagleFactionsPlugin.WAR_STOP_REQUEST_LIST.remove(stopWarRequest)).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(super.getPlugin());
+                taskBuilder.execute(() -> EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.remove(armisticeRequest)).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(super.getPlugin());
                 return CommandResult.success();
             }
         }
@@ -124,7 +124,7 @@ public class EnemyCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private Text getWarStopRequestMessage(final Faction senderFaction)
+    private Text getArmisticeRequestMessage(final Faction senderFaction)
     {
         final Text clickHereText = Text.builder()
                 .append(Text.of(TextColors.AQUA, "[", TextColors.GOLD, PluginMessages.CLICK_HERE, TextColors.AQUA, "]"))

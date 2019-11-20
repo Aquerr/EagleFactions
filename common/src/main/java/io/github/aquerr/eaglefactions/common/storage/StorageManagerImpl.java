@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.storage;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2FactionStorage;
@@ -241,7 +241,7 @@ public class StorageManagerImpl implements StorageManager, Runnable
     }
 
     @Override
-    public Set<IFactionPlayer> getServerPlayers()
+    public Set<FactionPlayer> getServerPlayers()
     {
         return this.playerStorage.getServerPlayers();
     }

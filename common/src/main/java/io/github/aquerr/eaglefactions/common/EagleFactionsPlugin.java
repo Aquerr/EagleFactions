@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
-import io.github.aquerr.eaglefactions.api.entities.StopWarRequest;
+import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
@@ -67,7 +67,7 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
     public static final List<Invite> INVITE_LIST = new ArrayList<>();
     public static final List<AllyRequest> ALLY_INVITE_LIST = new ArrayList<>();
-    public static final List<StopWarRequest> WAR_STOP_REQUEST_LIST = new ArrayList<>();
+    public static final List<ArmisticeRequest> ARMISTICE_REQUEST_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_MAP_LIST = new ArrayList<>();
     public static final List<UUID> ADMIN_MODE_PLAYERS = new ArrayList<>();
@@ -264,7 +264,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("kick"), CommandSpec.builder()
                 .description(Text.of("Kicks a player from the faction"))
                 .permission(PluginPermissions.KICK_COMMAND)
-                .arguments(new FactionPlayerArgument(this, Text.of("player")))
+                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
                 .executor(new KickCommand(this))
                 .build());
 
@@ -324,7 +324,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Promote command
         SUBCOMMANDS.put(Collections.singletonList("promote"), CommandSpec.builder()
                 .description(Text.of("Promotes the player to a higher rank"))
-                .arguments(GenericArguments.player(Text.of("player")))
+                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
                 .permission(PluginPermissions.PROMOTE_COMMAND)
                 .executor(new PromoteCommand(this))
                 .build());
@@ -332,7 +332,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Demote command
         SUBCOMMANDS.put(Collections.singletonList("demote"), CommandSpec.builder()
                 .description(Text.of("Demotes the player to a lower rank"))
-                .arguments(GenericArguments.player(Text.of("player")))
+                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
                 .permission(PluginPermissions.DEMOTE_COMMAND)
                 .executor(new DemoteCommand(this))
                 .build());

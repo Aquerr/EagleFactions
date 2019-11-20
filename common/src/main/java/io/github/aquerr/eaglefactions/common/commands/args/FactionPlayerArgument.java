@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands.args;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.entities.IFactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -27,16 +27,16 @@ public class FactionPlayerArgument extends CommandElement
 
     @Nullable
     @Override
-    protected IFactionPlayer parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
+    protected FactionPlayer parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
     {
         //Just in case someone new entered the server after start.
-        Set<IFactionPlayer> serverPlayers = plugin.getPlayerManager().getServerPlayers();
+        Set<FactionPlayer> serverPlayers = plugin.getPlayerManager().getServerPlayers();
 
         if (args.hasNext())
         {
             String argument = args.next();
 
-            for(IFactionPlayer player : serverPlayers)
+            for(FactionPlayer player : serverPlayers)
             {
                 if(player.getName().equals(argument))
                     return player;
@@ -51,7 +51,7 @@ public class FactionPlayerArgument extends CommandElement
     }
 
     @Override
-    public List<String> complete(CommandSource src, CommandArgs args, CommandContext context)
+    public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
     {
         List<String> list = new ArrayList<>(this.plugin.getPlayerManager().getServerPlayerNames());
 
