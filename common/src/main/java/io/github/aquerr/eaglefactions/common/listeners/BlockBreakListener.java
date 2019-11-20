@@ -13,7 +13,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
-import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -46,14 +45,14 @@ public class BlockBreakListener extends AbstractListener
 {
     private final ConfigFields configFields;
 
-    public BlockBreakListener(EagleFactions plugin)
+    public BlockBreakListener(final EagleFactions plugin)
     {
         super(plugin);
         this.configFields = plugin.getConfiguration().getConfigFields();
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onBlockPre(ChangeBlockEvent.Pre event)
+    public void onBlockPre(final ChangeBlockEvent.Pre event)
     {
         User user = null;
         if(event.getCause().containsType(Player.class))
@@ -246,7 +245,7 @@ public class BlockBreakListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onBlockBreak(ChangeBlockEvent.Break event)
+    public void onBlockBreak(final ChangeBlockEvent.Break event)
     {
         //SpawnType in break event? Should be located in Pre or global event in my opinion.
         //Custom Spawn Type = Can be a piston moving block or possibly any other "magically" spawned block.
@@ -258,12 +257,13 @@ public class BlockBreakListener extends AbstractListener
         final Object source = event.getSource();
 
         //For ICBM
+        //Missles and grenades should be handled by explosion listener.
         if(source instanceof Entity)
         {
             final Entity entity = (Entity)source;
             final String id = entity.getType().getId();
             final String name = entity.getType().getName();
-            if(id.startsWith("icbmclassic:missile") || name.contains("missile"))
+            if(id.startsWith("icbmclassic:missile") || id.startsWith("icbmclassic:grenade") || name.contains("missile") || name.contains("grenade"))
                 return;
         }
 
