@@ -1,21 +1,16 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.mysql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.StorageConfig;
+import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 
 import java.sql.*;
 
-public class MySQLProvider implements SQLProvider
+public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
 {
     private static MySQLProvider INSTANCE = null;
 
     private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&&disableMariaDbDriver";
-
-    private final String databaseUrl;
-    private final String databaseName;
-    private final String username;
-    private final String password;
 
     public static MySQLProvider getInstance(final EagleFactions eagleFactions)
     {
@@ -26,7 +21,7 @@ public class MySQLProvider implements SQLProvider
                 INSTANCE = new MySQLProvider(eagleFactions);
                 return INSTANCE;
             }
-            catch(IllegalAccessException | InstantiationException | ClassNotFoundException | SQLException e)
+            catch(final IllegalAccessException | InstantiationException | ClassNotFoundException | SQLException e)
             {
                 e.printStackTrace();
                 return null;
@@ -37,7 +32,7 @@ public class MySQLProvider implements SQLProvider
 
     public Connection getConnection() throws SQLException
     {
-        return DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + this.databaseName + CONNECTION_OPTIONS, this.username, this.password);
+        return DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + super.getDatabaseName() + CONNECTION_OPTIONS, super.getUsername(), super.getPassword());
     }
 
     @Override
@@ -48,14 +43,10 @@ public class MySQLProvider implements SQLProvider
 
     private MySQLProvider(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
     {
+        super(eagleFactions);
         //Load MySQL driver
         Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 
-        final StorageConfig storageConfig = eagleFactions.getConfiguration().getStorageConfig();
-        this.databaseUrl = storageConfig.getDatabaseUrl();
-        this.databaseName = storageConfig.getDatabaseName();
-        this.username = storageConfig.getStorageUsername();
-        this.password = storageConfig.getStoragePassword();
         if(!databaseExists())
             createDatabase();
     }
@@ -63,12 +54,12 @@ public class MySQLProvider implements SQLProvider
     private boolean databaseExists() throws SQLException
     {
         //Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + CONNECTION_OPTIONS);
+        Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
         final ResultSet resultSet = connection.getMetaData().getCatalogs();
 
         while(resultSet.next())
         {
-            if(resultSet.getString(1).equalsIgnoreCase(this.databaseName))
+            if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
             {
                 resultSet.close();
                 connection.close();
@@ -82,9 +73,9 @@ public class MySQLProvider implements SQLProvider
 
     private void createDatabase() throws SQLException
     {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password + CONNECTION_OPTIONS);
-        Statement statement = connection.createStatement();
-        statement.execute("CREATE SCHEMA " + this.databaseName + ";");
+        final Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
+        final Statement statement = connection.createStatement();
+        statement.execute("CREATE SCHEMA " + super.getDatabaseName() + ";");
         statement.close();
         connection.close();
     }

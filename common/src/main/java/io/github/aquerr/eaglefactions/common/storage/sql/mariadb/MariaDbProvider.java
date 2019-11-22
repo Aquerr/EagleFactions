@@ -1,19 +1,14 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.mariadb;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.StorageConfig;
+import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 
 import java.sql.*;
 
-public class MariaDbProvider implements SQLProvider
+public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 {
 	private static MariaDbProvider INSTANCE = null;
-
-	private final String databaseUrl;
-	private final String databaseName;
-	private final String username;
-	private final String password;
 
 	public static MariaDbProvider getInstance(final EagleFactions eagleFactions)
 	{
@@ -24,7 +19,7 @@ public class MariaDbProvider implements SQLProvider
 				INSTANCE = new MariaDbProvider(eagleFactions);
 				return INSTANCE;
 			}
-			catch(IllegalAccessException | InstantiationException | ClassNotFoundException | SQLException e)
+			catch(final SQLException e)
 			{
 				e.printStackTrace();
 				return null;
@@ -35,7 +30,7 @@ public class MariaDbProvider implements SQLProvider
 
 	public Connection getConnection() throws SQLException
 	{
-		return DriverManager.getConnection("jdbc:mariadb://" + this.databaseUrl + this.databaseName, this.username, this.password);
+		return DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl() + super.getDatabaseName(), super.getUsername(), super.getPassword());
 	}
 
 	@Override
@@ -44,13 +39,9 @@ public class MariaDbProvider implements SQLProvider
 		return "mariadb";
 	}
 
-	private MariaDbProvider(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
+	private MariaDbProvider(final EagleFactions eagleFactions) throws SQLException
 	{
-		final StorageConfig storageConfig = eagleFactions.getConfiguration().getStorageConfig();
-		this.databaseUrl = storageConfig.getDatabaseUrl();
-		this.databaseName = storageConfig.getDatabaseName();
-		this.username = storageConfig.getStorageUsername();
-		this.password = storageConfig.getStoragePassword();
+		super(eagleFactions);
 		if(!databaseExists())
 			createDatabase();
 	}
@@ -58,12 +49,12 @@ public class MariaDbProvider implements SQLProvider
 	private boolean databaseExists() throws SQLException
 	{
 		//Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-		Connection connection = DriverManager.getConnection("jdbc:mariadb://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password);
+		final Connection connection = DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword());
 		final ResultSet resultSet = connection.getMetaData().getCatalogs();
 
 		while(resultSet.next())
 		{
-			if(resultSet.getString(1).equalsIgnoreCase(this.databaseName))
+			if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
 			{
 				resultSet.close();
 				connection.close();
@@ -77,9 +68,9 @@ public class MariaDbProvider implements SQLProvider
 
 	private void createDatabase() throws SQLException
 	{
-		Connection connection = DriverManager.getConnection("jdbc:mariadb://" + this.databaseUrl + "?user=" + this.username + "&password=" + this.password);
-		Statement statement = connection.createStatement();
-		statement.execute("CREATE SCHEMA " + this.databaseName + ";");
+		final Connection connection = DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword());
+		final Statement statement = connection.createStatement();
+		statement.execute("CREATE SCHEMA " + super.getDatabaseName() + ";");
 		statement.close();
 		connection.close();
 	}
