@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.config;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.api.config.dynmap.DynmapConfig;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -25,6 +26,10 @@ public class ConfigurationImpl implements Configuration
     private CommentedConfigurationNode configNode;
 
     private ConfigFields configFields;
+
+
+    //Configs
+    private final DynmapConfig dynmapConfig;
 
     public ConfigurationImpl(final Path configDir, final Asset confgAsset)
     {
@@ -56,6 +61,13 @@ public class ConfigurationImpl implements Configuration
 //        save();
 
         this.configFields = new ConfigFields(this);
+        this.dynmapConfig = new DynmapConfigImpl(this);
+    }
+
+    @Override
+    public DynmapConfig getDynmapConfig()
+    {
+        return this.dynmapConfig;
     }
 
     @Override

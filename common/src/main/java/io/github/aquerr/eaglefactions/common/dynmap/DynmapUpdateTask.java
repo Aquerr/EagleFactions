@@ -70,7 +70,7 @@ public class DynmapUpdateTask implements Runnable {
                             blockPos.getX(),
                             blockPos.getY(),
                             blockPos.getZ(),
-                            DynmapMain.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields().getDynmapFactionHomeIcon()),
+                            DynmapMain.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig().getDynmapFactionHomeIcon()),
                             false);
 
                     drawnMarkers.put(faction.getName(), marker);

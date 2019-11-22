@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.dynmap.util;
 
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.dynmap.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -20,7 +21,7 @@ import java.util.*;
 
 public class DynmapUtils {
 
-    private static ConfigFields configFields = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
+    private static DynmapConfig dynmapConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig();
 
     public static String getFactionInfoWindow(final Faction faction) {
         // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
@@ -40,7 +41,7 @@ public class DynmapUtils {
                     .append("</br>\n");
         }
 
-        if (configFields.showDynmapFactionLeader() && userStorage.isPresent()) {
+        if (dynmapConfig.showDynmapFactionLeader() && userStorage.isPresent()) {
             if (userStorage.get().get(faction.getLeader()).isPresent()) {
                 description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
                         .replace("%leader%",
@@ -48,7 +49,7 @@ public class DynmapUtils {
             }
         }
 
-        if (configFields.showDynmapMemberInfo()) {
+        if (dynmapConfig.showDynmapMemberInfo()) {
             int memberCount = faction.getPlayers().size();
             description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
                     .replace("%players%",
@@ -61,14 +62,14 @@ public class DynmapUtils {
     }
 
     public static int getAreaColor(final Faction faction) {
-        ConfigFields config = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields();
+        DynmapConfig dynmapConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig();
 
-        int areaColor = config.getDynmapFactionColor();
+        int areaColor = dynmapConfig.getDynmapFactionColor();
 
         if (faction.getName().equals("SafeZone")) {
-            areaColor = config.getDynmapSafezoneColor();
+            areaColor = dynmapConfig.getDynmapSafezoneColor();
         } else if (faction.getName().equals("WarZone")) {
-            areaColor = config.getDynmapWarzoneColor();
+            areaColor = dynmapConfig.getDynmapWarzoneColor();
         }
 
         return areaColor;

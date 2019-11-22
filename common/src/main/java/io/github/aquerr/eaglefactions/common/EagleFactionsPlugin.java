@@ -183,7 +183,7 @@ public class EagleFactionsPlugin implements EagleFactions
             permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
         }
 
-        if (_configuration.getConfigFields().isDynmapIntegrationEnabled())
+        if (_configuration.getDynmapConfig().isDynmapIntegrationEnabled())
         {
             try
             {
