@@ -209,7 +209,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             else if(this.sqlProvider instanceof MySQLProvider || this.sqlProvider instanceof MariaDbProvider)
             {
                 preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
-                preparedStatement.setString(1, this.plugin.getConfiguration().getConfigFields().getDatabaseName());
+                preparedStatement.setString(1, this.plugin.getConfiguration().getStorageConfig().getDatabaseName());
             }
 
             final ResultSet resultSet = preparedStatement.executeQuery();

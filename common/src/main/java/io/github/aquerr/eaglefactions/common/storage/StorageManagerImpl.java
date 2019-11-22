@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
@@ -48,9 +48,9 @@ public class StorageManagerImpl implements StorageManager, Runnable
     {
         INSTANCE = this;
         this.plugin = eagleFactions;
-        ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
-        Path configDir = eagleFactions.getConfigDir();
-        switch(configFields.getStorageType().toLowerCase())
+        final StorageConfig storageConfig = eagleFactions.getConfiguration().getStorageConfig();
+        final Path configDir = eagleFactions.getConfigDir();
+        switch(storageConfig.getStorageType().toLowerCase())
         {
             case "hocon":
                 factionsStorage = new HOCONFactionStorage(configDir);

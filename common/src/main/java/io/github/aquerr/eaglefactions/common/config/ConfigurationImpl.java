@@ -3,7 +3,8 @@ package io.github.aquerr.eaglefactions.common.config;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
-import io.github.aquerr.eaglefactions.api.config.dynmap.DynmapConfig;
+import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
+import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -29,6 +30,7 @@ public class ConfigurationImpl implements Configuration
 
 
     //Configs
+    private final StorageConfig storageConfig;
     private final DynmapConfig dynmapConfig;
 
     public ConfigurationImpl(final Path configDir, final Asset confgAsset)
@@ -58,9 +60,10 @@ public class ConfigurationImpl implements Configuration
 
         this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
         loadConfiguration();
-//        save();
+        save();
 
         this.configFields = new ConfigFields(this);
+        this.storageConfig = new StorageConfigImpl(this);
         this.dynmapConfig = new DynmapConfigImpl(this);
     }
 
@@ -68,6 +71,12 @@ public class ConfigurationImpl implements Configuration
     public DynmapConfig getDynmapConfig()
     {
         return this.dynmapConfig;
+    }
+
+    @Override
+    public StorageConfig getStorageConfig()
+    {
+        return this.storageConfig;
     }
 
     @Override
@@ -81,6 +90,8 @@ public class ConfigurationImpl implements Configuration
     {
         loadConfiguration();
         this.configFields.reload();
+        this.storageConfig.reload();
+        this.dynmapConfig.reload();
     }
 
     private void loadConfiguration()
@@ -109,13 +120,13 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public int getInt(int defaultValue, Object... nodePath)
+    public int getInt(final int defaultValue, final Object... nodePath)
     {
         return configNode.getNode(nodePath).getInt(defaultValue);
     }
 
     @Override
-    public double getDouble(double defaultValue, Object... nodePath)
+    public double getDouble(final double defaultValue, final Object... nodePath)
     {
         Object value = configNode.getNode(nodePath).getValue(defaultValue);
 
@@ -132,25 +143,25 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public float getFloat(float defaultValue, Object... nodePath)
+    public float getFloat(final float defaultValue, final Object... nodePath)
     {
        return configNode.getNode(nodePath).getFloat(defaultValue);
     }
 
     @Override
-    public boolean getBoolean(boolean defaultValue, Object... nodePath)
+    public boolean getBoolean(final boolean defaultValue, final Object... nodePath)
     {
         return configNode.getNode(nodePath).getBoolean(defaultValue);
     }
 
     @Override
-    public String getString(String defaultValue, Object... nodePath)
+    public String getString(final String defaultValue, final Object... nodePath)
     {
         return configNode.getNode(nodePath).getString(defaultValue);
     }
 
     @Override
-    public List<String> getListOfStrings(Collection<String> defaultValue, Object... nodePath)
+    public List<String> getListOfStrings(final Collection<String> defaultValue, final Object... nodePath)
     {
         try
         {
@@ -164,7 +175,7 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public Set<String> getSetOfStrings(Collection<String> defaultValue, Object... nodePath)
+    public Set<String> getSetOfStrings(final Collection<String> defaultValue,final Object... nodePath)
     {
         try
         {
@@ -178,16 +189,10 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public boolean setListOfStrings(Collection<String> listOfStrings, Object... nodePath)
+    public boolean setCollectionOfStrings(final Collection<String> collection, final Object... nodePath)
     {
-        configNode.getNode(nodePath).setValue(listOfStrings);
+        configNode.getNode(nodePath).setValue(collection);
         save();
         return true;
-    }
-
-    @Override
-    public boolean setSetOfStrings(Collection<String> setOfStrings, Object... nodePath)
-    {
-        return false;
     }
 }

@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import io.github.aquerr.eaglefactions.api.config.Configuration;
-import io.github.aquerr.eaglefactions.api.config.dynmap.DynmapConfig;
+import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 
 public class DynmapConfigImpl implements DynmapConfig
 {
@@ -24,9 +24,9 @@ public class DynmapConfigImpl implements DynmapConfig
 		this.configuration = configuration;
 	}
 
-	private void reloadFields()
+	@Override
+	public void reload()
 	{
-		//Dynmap Integration
 		this.dynmapIntegrationEnabled = configuration.getBoolean(false, "dynmap", "enabled");
 
 		this.dynmapFactionColor = configuration.getInt(0x00FF00, "dynmap", "faction-color");
@@ -36,11 +36,6 @@ public class DynmapConfigImpl implements DynmapConfig
 
 		this.dynmapShowFactionLeader = configuration.getBoolean(true, "dynmap", "show-faction-leader");
 		this.dynmapMemberInfo = configuration.getBoolean(true, "dynmap", "members-info");
-	}
-
-	public void reload()
-	{
-		reloadFields();
 	}
 
 	@Override

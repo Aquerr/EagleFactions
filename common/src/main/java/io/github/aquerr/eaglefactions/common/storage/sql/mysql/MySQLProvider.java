@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.mysql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 
 import java.sql.*;
@@ -51,11 +51,11 @@ public class MySQLProvider implements SQLProvider
         //Load MySQL driver
         Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 
-        ConfigFields configFields = eagleFactions.getConfiguration().getConfigFields();
-        this.databaseUrl = configFields.getDatabaseUrl();
-        this.databaseName = configFields.getDatabaseName();
-        this.username = configFields.getStorageUsername();
-        this.password = configFields.getStoragePassword();
+        final StorageConfig storageConfig = eagleFactions.getConfiguration().getStorageConfig();
+        this.databaseUrl = storageConfig.getDatabaseUrl();
+        this.databaseName = storageConfig.getDatabaseName();
+        this.username = storageConfig.getStorageUsername();
+        this.password = storageConfig.getStoragePassword();
         if(!databaseExists())
             createDatabase();
     }

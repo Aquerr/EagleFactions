@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.common.dynmap.util;
 
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
-import io.github.aquerr.eaglefactions.api.config.dynmap.DynmapConfig;
+import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
