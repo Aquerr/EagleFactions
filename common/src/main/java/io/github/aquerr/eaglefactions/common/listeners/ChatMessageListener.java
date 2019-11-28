@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -22,12 +23,12 @@ import java.util.*;
 
 public class ChatMessageListener extends AbstractListener
 {
-    private final ConfigFields configFields;
+    private final ChatConfig chatConfig;
 
     public ChatMessageListener(EagleFactions plugin)
     {
         super(plugin);
-        this.configFields = plugin.getConfiguration().getConfigFields();
+        this.chatConfig = plugin.getConfiguration().getChatConfig();
     }
 
     @Listener
@@ -37,7 +38,7 @@ public class ChatMessageListener extends AbstractListener
 
         if(!optionalPlayerFaction.isPresent())
         {
-            if(this.configFields.shouldSupressOtherFactionsMessagesWhileInTeamChat())
+            if(this.chatConfig.shouldSupressOtherFactionsMessagesWhileInTeamChat())
             {
                 MessageChannel messageChannel = event.getOriginalChannel();
                 final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
@@ -131,7 +132,7 @@ public class ChatMessageListener extends AbstractListener
             message.append(event.getMessage().getChildren().get(1));
 
             //Suppress message for other factions if someone is in the faction's chat.
-            if(this.configFields.shouldSupressOtherFactionsMessagesWhileInTeamChat())
+            if(this.chatConfig.shouldSupressOtherFactionsMessagesWhileInTeamChat())
             {
                 final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
                 final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
@@ -165,16 +166,16 @@ public class ChatMessageListener extends AbstractListener
         }
 
         //Get faction prefix from Eagle Factions.
-        if(this.configFields.getChatPrefixType().equals("tag"))
+        if(this.chatConfig.getChatPrefixType().equals("tag"))
         {
             if(!playerFaction.getTag().toPlainSingle().equals(""))
             {
-                if (this.configFields.canColorTags())
+                if (this.chatConfig.canColorTags())
                 {
                     //Get faction's tag
                     Text factionTag = Text.builder()
                             //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                            .append(this.configFields.getFactionStartPrefix(), playerFaction.getTag(), this.configFields.getFactionEndPrefix())
+                            .append(this.chatConfig.getFactionStartPrefix(), playerFaction.getTag(), this.chatConfig.getFactionEndPrefix())
                             .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
                             .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                             .build();
@@ -186,7 +187,7 @@ public class ChatMessageListener extends AbstractListener
                     //Get faction's tag
                     Text factionTag = Text.builder()
                             //.append(Text.of("[" ,TextColors.GREEN, playerFaction.Tag, TextColors.RESET, "]"))
-                            .append(this.configFields.getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), this.configFields.getFactionEndPrefix())
+                            .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getTag()), this.chatConfig.getFactionEndPrefix())
                             .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
                             .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                             .build();
@@ -195,11 +196,11 @@ public class ChatMessageListener extends AbstractListener
                 }
             }
         }
-        else if (this.configFields.getChatPrefixType().equals("name"))
+        else if (this.chatConfig.getChatPrefixType().equals("name"))
         {
             //Add faction name
             Text factionNamePrefix = Text.builder()
-                    .append(this.configFields.getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), this.configFields.getFactionEndPrefix())
+                    .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), this.chatConfig.getFactionEndPrefix())
                     .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
                     .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                     .build();
@@ -207,13 +208,13 @@ public class ChatMessageListener extends AbstractListener
             factionPrefixText.append(factionNamePrefix);
         }
 
-        if(this.configFields.shouldDisplayRank())
+        if(this.chatConfig.shouldDisplayRank())
         {
             //Get leader prefix.
             if(playerFaction.getLeader().equals(player.getUniqueId()))
             {
                 Text leaderPrefix = Text.builder()
-                        .append(Text.of(this.configFields.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.LEADER, TextColors.RESET, this.configFields.getFactionEndPrefix()))
+                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.LEADER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                         .build();
 
                 rankPrefixText.append(leaderPrefix);
@@ -222,7 +223,7 @@ public class ChatMessageListener extends AbstractListener
             else if(playerFaction.getOfficers().contains(player.getUniqueId()))
             {
                 Text officerPrefix = Text.builder()
-                        .append(Text.of(this.configFields.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.OFFICER, TextColors.RESET, this.configFields.getFactionEndPrefix()))
+                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.OFFICER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                         .build();
 
                 rankPrefixText.append(officerPrefix);
@@ -231,14 +232,14 @@ public class ChatMessageListener extends AbstractListener
             else if(playerFaction.getRecruits().contains(player.getUniqueId()))
             {
                 Text recruitPrefix = Text.builder()
-                        .append(Text.of(this.configFields.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.RECRUIT, TextColors.RESET, this.configFields.getFactionEndPrefix()))
+                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.RECRUIT, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                         .build();
 
                 rankPrefixText.append(recruitPrefix);
             }
         }
 
-        if (this.configFields.isFactionPrefixFirstInChat())
+        if (this.chatConfig.isFactionPrefixFirstInChat())
         {
             factionAndRankPrefix.append(factionPrefixText.build());
             factionAndRankPrefix.append(rankPrefixText.build());
@@ -314,14 +315,14 @@ public class ChatMessageListener extends AbstractListener
     private Text getAlliancePrefix()
     {
         return Text.builder()
-                .append(this.configFields.getFactionStartPrefix(), Text.of(TextColors.BLUE, PluginMessages.ALLIANCE_CHAT, TextColors.RESET), this.configFields.getFactionEndPrefix())
+                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.BLUE, PluginMessages.ALLIANCE_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
                 .build();
     }
 
     private Text getFactionPrefix()
     {
         return Text.builder()
-                .append(this.configFields.getFactionStartPrefix(), Text.of(TextColors.GREEN, PluginMessages.FACTION_CHAT, TextColors.RESET), this.configFields.getFactionEndPrefix())
+                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, PluginMessages.FACTION_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
                 .build();
     }
 }

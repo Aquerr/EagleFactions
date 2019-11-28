@@ -1,10 +1,7 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
-import io.github.aquerr.eaglefactions.api.config.Configuration;
-import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
-import io.github.aquerr.eaglefactions.api.config.StorageConfig;
+import io.github.aquerr.eaglefactions.api.config.*;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -31,6 +28,7 @@ public class ConfigurationImpl implements Configuration
 
     //Configs
     private final StorageConfig storageConfig;
+    private final ChatConfig chatConfig;
     private final DynmapConfig dynmapConfig;
 
     public ConfigurationImpl(final Path configDir, final Asset confgAsset)
@@ -64,7 +62,14 @@ public class ConfigurationImpl implements Configuration
 
         this.configFields = new ConfigFields(this);
         this.storageConfig = new StorageConfigImpl(this);
+        this.chatConfig = new ChatConfigImpl(this);
         this.dynmapConfig = new DynmapConfigImpl(this);
+    }
+
+    @Override
+    public ChatConfig getChatConfig()
+    {
+        return this.chatConfig;
     }
 
     @Override
@@ -91,6 +96,7 @@ public class ConfigurationImpl implements Configuration
         loadConfiguration();
         this.configFields.reload();
         this.storageConfig.reload();
+        this.chatConfig.reload();
         this.dynmapConfig.reload();
     }
 

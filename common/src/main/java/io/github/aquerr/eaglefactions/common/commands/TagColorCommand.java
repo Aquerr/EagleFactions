@@ -26,7 +26,7 @@ public class TagColorCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        if (!getPlugin().getConfiguration().getConfigFields().canColorTags())
+        if (!getPlugin().getConfiguration().getChatConfig().canColorTags())
         {
             source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.TAG_COLORING_IS_TURNED_OFF_ON_THIS_SERVER));
             return CommandResult.success();

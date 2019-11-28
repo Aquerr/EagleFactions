@@ -37,7 +37,7 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
     private H2Provider(final EagleFactions eagleFactions) throws SQLException
     {
         super(eagleFactions);
-        this.databasePath = eagleFactions.getConfigDir().resolve("data/h2/database");
+        this.databasePath = eagleFactions.getConfigDir().resolve("data/h2/" + getDatabaseName());
         //Create database file
         final Connection connection = getConnection();
         connection.close();

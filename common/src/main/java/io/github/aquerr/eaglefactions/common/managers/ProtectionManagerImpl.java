@@ -532,7 +532,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private void notifyPlayer(final User user)
     {
-        if (this.plugin.getConfiguration().getConfigFields().shouldDisplayProtectionSystemMessages())
+        if (this.plugin.getConfiguration().getChatConfig().shouldDisplayProtectionSystemMessages())
         {
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
         }

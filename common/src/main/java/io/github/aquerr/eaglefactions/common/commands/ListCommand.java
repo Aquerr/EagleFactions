@@ -30,8 +30,8 @@ public class ListCommand extends AbstractCommand
         Set<Faction> factionsList = new HashSet<>(super.getPlugin().getFactionLogic().getFactions().values());
         List<Text> helpList = new ArrayList<>();
 
-        Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
-        Text tagSufix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
+        Text tagPrefix = getPlugin().getConfiguration().getChatConfig().getFactionStartPrefix();
+        Text tagSufix = getPlugin().getConfiguration().getChatConfig().getFactionEndPrefix();
 
         for(final Faction faction : factionsList)
         {

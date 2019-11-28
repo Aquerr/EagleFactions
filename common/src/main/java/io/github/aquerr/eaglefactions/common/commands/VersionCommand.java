@@ -8,7 +8,11 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class VersionCommand extends AbstractCommand
 {
@@ -20,7 +24,14 @@ public class VersionCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        source.sendMessage(Text.of(TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - " + PluginMessages.VERSION + " ", PluginInfo.VERSION, TextColors.WHITE, " made by ", TextColors.GOLD, PluginInfo.AUTHOR));
+        try
+        {
+            source.sendMessage(Text.of(TextActions.showText(Text.of(TextColors.BLUE, "Click to view Github")), TextActions.openUrl(new URL("https://github.com/Aquerr/EagleFactions")), PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - ", TextColors.GOLD, PluginMessages.VERSION + " ", PluginInfo.VERSION, TextColors.WHITE, " made by ", TextColors.GOLD, PluginInfo.AUTHOR));
+        }
+        catch(final MalformedURLException e)
+        {
+            e.printStackTrace();
+        }
         return CommandResult.success();
     }
 }

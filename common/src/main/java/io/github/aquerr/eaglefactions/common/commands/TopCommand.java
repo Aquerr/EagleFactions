@@ -28,8 +28,8 @@ public class TopCommand extends AbstractCommand
         final List<Faction> factionsList = new ArrayList<>(getPlugin().getFactionLogic().getFactions().values());
         final List<Text> helpList = new ArrayList<>();
         int index = 0;
-        final Text tagPrefix = getPlugin().getConfiguration().getConfigFields().getFactionStartPrefix();
-        final Text tagSuffix = getPlugin().getConfiguration().getConfigFields().getFactionEndPrefix();
+        final Text tagPrefix = getPlugin().getConfiguration().getChatConfig().getFactionStartPrefix();
+        final Text tagSuffix = getPlugin().getConfiguration().getChatConfig().getFactionEndPrefix();
 
         factionsList.sort((o1, o2) -> {
             final float firstFactionPower = super.getPlugin().getPowerManager().getFactionPower(o1);

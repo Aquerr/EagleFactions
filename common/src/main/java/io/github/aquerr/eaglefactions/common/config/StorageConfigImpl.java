@@ -17,6 +17,7 @@ public class StorageConfigImpl implements StorageConfig
 	public StorageConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
+		reload();
 	}
 
 	@Override
