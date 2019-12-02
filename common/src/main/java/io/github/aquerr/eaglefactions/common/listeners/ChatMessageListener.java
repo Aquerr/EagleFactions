@@ -50,17 +50,24 @@ public class ChatMessageListener extends AbstractListener
                         final Player receiver = (Player) messageReceiver;
                         if(EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()) && EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) != ChatEnum.GLOBAL)
                         {
-//                            final Optional<Faction> receiverFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(receiver.getUniqueId());
-//                            if(receiverFaction.isPresent())
-//                            {
-                                newReceivers.remove(receiver);
-//                            }
+                            newReceivers.remove(receiver);
                         }
                     }
                 }
                 messageChannel = MessageChannel.fixed(newReceivers);
                 event.setChannel(messageChannel);
             }
+
+            if(!this.chatConfig.getNonFactionPlayerPrefix().toPlain().equals(""))
+            {
+                final Text.Builder formattedMessage = Text.builder();
+                formattedMessage.append(this.chatConfig.getFactionStartPrefix())
+                        .append(this.chatConfig.getNonFactionPlayerPrefix())
+                        .append(this.chatConfig.getFactionEndPrefix())
+                        .append(event.getMessage());
+                event.setMessage(formattedMessage);
+            }
+
             return;
         }
 

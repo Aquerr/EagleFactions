@@ -18,6 +18,7 @@ public class ChatConfigImpl implements ChatConfig
 	private Text factionStartPrefix = Text.of("[");
 	private Text factionEndPrefix = Text.of("]");
 	private boolean isFactionPrefixFirstInChat = true;
+	private Text nonFactionPlayerPrefix = Text.of("");
 
 	public ChatConfigImpl(final Configuration configuration)
 	{
@@ -37,6 +38,7 @@ public class ChatConfigImpl implements ChatConfig
 		this.factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("[", "faction-prefix-start"));
 		this.factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("]", "faction-prefix-end"));
 		this.isFactionPrefixFirstInChat = configuration.getBoolean(true, "faction-prefix-first-in-chat");
+		this.nonFactionPlayerPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("", "non-faction-player-prefix"));
 	}
 
 	public Text getFactionStartPrefix()
@@ -80,5 +82,11 @@ public class ChatConfigImpl implements ChatConfig
 	public boolean shouldDisplayProtectionSystemMessages()
 	{
 		return this.displayProtectionSystemMessages;
+	}
+
+	@Override
+	public Text getNonFactionPlayerPrefix()
+	{
+		return this.nonFactionPlayerPrefix;
 	}
 }
