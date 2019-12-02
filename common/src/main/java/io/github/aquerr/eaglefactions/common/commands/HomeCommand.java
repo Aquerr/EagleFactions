@@ -160,9 +160,7 @@ public class HomeCommand extends AbstractCommand
     {
 		if(this.configFields.getHomeDelayTime() == 0)
 		{
-			player.setLocationSafely(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
-			player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.GREEN, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
-			startHomeCooldown(player.getUniqueId());
+            teleport(player, factionHome);
 			return;
 		}
 
@@ -176,28 +174,38 @@ public class HomeCommand extends AbstractCommand
             @Override
             public void accept(Task task)
             {
-                if (player.getLocation().getBlockPosition().equals(lastBlockPosition))
-                {
-                    if (seconds <= 0)
-                    {
-                        player.setLocationSafely(new Location<World>(Sponge.getServer().getWorld(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()));
-                        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.GREEN, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
-                        startHomeCooldown(player.getUniqueId());
-                        task.cancel();
-                    }
-                    else
-                    {
-                        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Teleporting to faction's home in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds."));
-                        seconds--;
-                    }
-                }
-                else
+                if(!player.getLocation().getBlockPosition().equals(lastBlockPosition))
                 {
                     player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.RED, PluginMessages.YOU_MOVED + " " + PluginMessages.TELEPORTING_HAS_BEEN_CANCELLED));
                     task.cancel();
+                    return;
+                }
+
+                if (seconds <= 0)
+                {
+                    teleport(player, factionHome);
+                    task.cancel();
+                }
+                else
+                {
+                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Teleporting to faction's home in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds."));
+                    seconds--;
                 }
             }
-        }).submit(EagleFactionsPlugin.getPlugin());
+        }).submit(super.getPlugin());
+    }
+
+    private void teleport(final Player player, final FactionHome factionHome)
+    {
+        final Optional<World> optionalWorld = Sponge.getServer().getWorld(factionHome.getWorldUUID());
+        if(!optionalWorld.isPresent())
+        {
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "The home you are trying teleport to is in a world that is missing or is corrupted. "));
+            return;
+        }
+        player.setLocationSafely(new Location<>(optionalWorld.get(), factionHome.getBlockPosition()));
+        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.GREEN, PluginMessages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
+        startHomeCooldown(player.getUniqueId());
     }
 
     private void startHomeCooldown(UUID playerUUID)
@@ -206,23 +214,19 @@ public class HomeCommand extends AbstractCommand
 
         final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
         {
-            @Override
-            public void accept(Task task)
+            if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(playerUUID))
             {
-                if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(playerUUID))
-                {
-                    int seconds = EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(playerUUID);
+                int seconds = EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(playerUUID);
 
-                    if(seconds < 1)
-                    {
-                        EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.remove(playerUUID);
-                        task.cancel();
-                    }
-                    EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.replace(playerUUID, seconds, seconds - 1);
+                if(seconds < 1)
+                {
+                    EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.remove(playerUUID);
+                    task.cancel();
                 }
+                EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.replace(playerUUID, seconds, seconds - 1);
             }
-        }).submit(EagleFactionsPlugin.getPlugin());
+        }).submit(super.getPlugin());
     }
 }
