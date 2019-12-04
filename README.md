@@ -2,9 +2,9 @@
 
 # Eagle Factions
 
-![License](https://img.shields.io/github/license/aquerr/eaglefactions.svg?label=License)
-![Version](https://img.shields.io/github/release/aquerr/eaglefactions.svg?label=Version)
-[![Downloads](https://img.shields.io/github/downloads/aquerr/eaglefactions/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
+![License](https://img.shields.io/github/license/aquerr/io.github.aquerr.eaglefactions.svg?label=License)
+![Version](https://img.shields.io/github/release/aquerr/io.github.aquerr.eaglefactions.svg?label=Version)
+[![Downloads](https://img.shields.io/github/downloads/aquerr/io.github.aquerr.eaglefactions/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
 [![Discord](https://img.shields.io/discord/447076657698963466.svg?color=blue&label=Discord&logo=Discord&logoColor=white)](https://discord.gg/bjZqmwP)
 
 
@@ -29,9 +29,8 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * Claim territories/lands
 * Faction Map with ability to claim territories from it
 * Set faction's home that will allow faction's members to teleport to it
-* Friendly Fire in faction can be disabled by its leaders.
-* Option for disabling friendly fire between alliances.
-* Unclaim other factions lands if their power is low.
+* Toggleable friendly fire in faction and between alliances
+* Unclaim other factions lands if their power is low
 * Factions' chests
 * Eagle's Feather - Command only item that will allow you to bypass chest protection
 * Factions' Tags
@@ -39,6 +38,7 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * PVP-Logger
 * Plugin Messages' Translations
 * Database support
+* Dynmap support
 * Fully configurable
 
 ## Translations

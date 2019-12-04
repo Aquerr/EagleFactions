@@ -1,15 +1,24 @@
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+    }
+}
+
 plugins {
     id 'java'
+    id "com.github.johnrengelman.shadow" version "2.0.4"
     id 'org.spongepowered.plugin' version '0.9.0'
 }
 
-group = pluginGroup
-version = pluginVersion
-description = 'A factions plugin that will make managing your battle-server easier. :)'
-
-sourceCompatibility = 1.8
-
 allprojects {
+    description = 'A factions plugin that will make managing your battle-server easier. :)'
+    group = "io.github.aquerr"
+    version = "v0.13.0"
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
     repositories {
         mavenCentral()
         jcenter()
@@ -17,34 +26,29 @@ allprojects {
     }
 }
 
+artifacts {
+    archives shadowJar
+}
+
 dependencies {
-    compile 'org.spongepowered:spongeapi:7.1.0'
-    compile 'com.github.rojo8399:PlaceholderAPI:4.5.1'
-    compile group: 'com.h2database', name: 'h2', version: '1.4.196'
-//    compile group: 'io.github.webbukkit', name: 'DynmapCoreAPI', version: '2.1'
-//    compile 'com.github.webbukkit:DynmapCoreAPI:v2.5'
-//    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
-    //compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
-//    compile 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
+    compile project(":common")
+    compile project(":sponge-api5")
+    compile project(":sponge-api6")
+    compile project(":sponge-api7")
+}
+
+shadowJar {
+    if(System.getenv("JENKINS_HOME")) {
+        version = version + "_" + System.getenv("BUILD_NUMBER")
+        println("File name => " + baseName)
+    } else {
+        version = version + "-SNAPSHOT"
+    }
 }
 
 jar {
-    if(System.getenv("JENKINS_HOME")) {
-        version = version + "_" + System.getenv("BUILD_NUMBER")
-        println("File name =>" + baseName)
-    }
-}
-
-task fatJar(type: Jar) {
     from {
-        configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
-    }
-    with jar
-}
-
-tasks.create("setPluginVersion") {
-    doLast {
-
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 

@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    maven { url 'https://repo.spongepowered.org/maven' }
+}
+
+sourceCompatibility = 1.8
+
+dependencies {
+    implementation project(':EagleFactionsAPI')
+    implementation project(':common')
+    compileOnly('org.spongepowered:spongeapi:5.1.0')
+}
