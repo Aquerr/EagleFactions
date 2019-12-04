@@ -1,6 +1,9 @@
 plugins {
     id 'java'
-    id 'org.spongepowered.plugin' version '0.9.0'
+}
+
+repositories {
+    maven { url 'https://repo.spongepowered.org/maven' }
 }
 
 sourceCompatibility = 1.8

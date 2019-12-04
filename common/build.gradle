@@ -1,10 +1,6 @@
 plugins {
     id 'java'
-    id 'org.spongepowered.plugin' version '0.9.0'
 }
-
-group 'io.github.aquerr'
-version 'v0.13.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -12,6 +8,7 @@ targetCompatibility = 1.8
 repositories {
     mavenCentral()
     jcenter()
+    maven { url 'https://repo.spongepowered.org/maven' }
 }
 
 dependencies {
@@ -21,4 +18,5 @@ dependencies {
     compileOnly group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.5.2'
     compileOnly group: 'com.h2database', name: 'h2', version: '1.4.196'
     compileOnly 'com.github.webbukkit:DynmapCoreAPI:v2.5'
+    annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
 }
