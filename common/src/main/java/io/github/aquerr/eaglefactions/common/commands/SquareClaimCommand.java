@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -23,9 +25,14 @@ import java.util.Optional;
 
 public class SquareClaimCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+    private final ProtectionConfig protectionConfig;
+
     public SquareClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Override
@@ -46,9 +53,9 @@ public class SquareClaimCommand extends AbstractCommand
 
 
         //Check if it is a claimable world
-        if (!super.getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
+        if (!this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
         {
-            if(super.getPlugin().getConfiguration().getConfigFields().getNotClaimableWorldNames().contains(player.getWorld().getName()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
                 throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "You can not claim territories in this world!")));
             }
@@ -127,7 +134,7 @@ public class SquareClaimCommand extends AbstractCommand
                 continue;
             }
 
-            if (super.getPlugin().getConfiguration().getConfigFields().requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
+            if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
                 continue;
 //                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.CLAIMS_NEED_TO_BE_CONNECTED));
 
@@ -137,7 +144,7 @@ public class SquareClaimCommand extends AbstractCommand
 //                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented claiming territory."));
 
 //            super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
-            if(super.getPlugin().getConfiguration().getConfigFields().shouldDelayClaim())
+            if(this.factionsConfig.shouldDelayClaim())
                 throw new CommandException(Text.of("Can't rectangleclaim if delayed claiming is turned on."));
 
             newFactionClaims.add(new Claim(world.getUniqueId(), chunk));

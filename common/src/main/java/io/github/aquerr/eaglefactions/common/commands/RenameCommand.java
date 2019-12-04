@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -16,9 +17,12 @@ import java.util.Optional;
 
 public class RenameCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public RenameCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -65,21 +69,21 @@ public class RenameCommand extends AbstractCommand
             }
 
             //Check if factions with such name already exists
-            if (getPlugin().getFactionLogic().getFactionsNames().contains(newFactionName.toLowerCase()))
+            if (super.getPlugin().getFactionLogic().getFactionsNames().contains(newFactionName.toLowerCase()))
             {
                 player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS));
                 return CommandResult.success();
             }
 
             //Check name length
-            if(newFactionName.length() > getPlugin().getConfiguration().getConfigFields().getMaxNameLength())
+            if(newFactionName.length() > this.factionsConfig.getMaxNameLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + this.factionsConfig.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
-            if(newFactionName.length() < getPlugin().getConfiguration().getConfigFields().getMinNameLength())
+            if(newFactionName.length() < this.factionsConfig.getMinNameLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
 

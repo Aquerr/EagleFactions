@@ -1,6 +1,8 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -30,9 +32,14 @@ import java.util.Optional;
 
 public class EntitySpawnListener extends AbstractListener
 {
+    private final FactionsConfig factionsConfig;
+    private final ProtectionConfig protectionConfig;
+
     public EntitySpawnListener(EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Listener(order = Order.EARLY, beforeModifications = true)
@@ -90,7 +97,7 @@ public class EntitySpawnListener extends AbstractListener
 
             if(isPlayer)
             {
-                if(super.getPlugin().getConfiguration().getConfigFields().shouldSpawnAtHomeAfterDeath())
+                if(this.factionsConfig.shouldSpawnAtHomeAfterDeath())
                 {
                     Player player = (Player)entity;
                     Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
@@ -117,12 +124,12 @@ public class EntitySpawnListener extends AbstractListener
             if(isHostile)
             {
                 //Check worlds
-                if(super.getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(entity.getWorld().getName()))
+                if(this.protectionConfig.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(super.getPlugin().getConfiguration().getConfigFields().getWarZoneWorldNames().contains(entity.getWorld().getName()) && !super.getPlugin().getConfiguration().getConfigFields().canSpawnHostileMobsInWarZone())
+                else if(this.protectionConfig.getWarZoneWorldNames().contains(entity.getWorld().getName()) && !this.protectionConfig.canSpawnHostileMobsInWarZone())
                 {
                     event.setCancelled(true);
                     return;
@@ -138,12 +145,12 @@ public class EntitySpawnListener extends AbstractListener
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.getName().equalsIgnoreCase("WarZone") && !super.getPlugin().getConfiguration().getConfigFields().canSpawnHostileMobsInWarZone())
+                else if(faction.getName().equalsIgnoreCase("WarZone") && !this.protectionConfig.canSpawnHostileMobsInWarZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(!super.getPlugin().getConfiguration().getConfigFields().canSpawnHostileMobsInFactionsTerritory())
+                else if(!this.protectionConfig.canSpawnHostileMobsInFactionsTerritory())
                 {
                     event.setCancelled(true);
                     return;
@@ -158,13 +165,13 @@ public class EntitySpawnListener extends AbstractListener
                     return;
 
                 //Check worlds
-                if(super.getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(entity.getWorld().getName())
-                    && !super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInSafeZone())
+                if(this.protectionConfig.getSafeZoneWorldNames().contains(entity.getWorld().getName())
+                    && !this.protectionConfig.canSpawnMobsInSafeZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(super.getPlugin().getConfiguration().getConfigFields().getWarZoneWorldNames().contains(entity.getWorld().getName()) && !super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInWarZone())
+                else if(this.protectionConfig.getWarZoneWorldNames().contains(entity.getWorld().getName()) && !this.protectionConfig.canSpawnMobsInWarZone())
                 {
                     event.setCancelled(true);
                     return;
@@ -175,17 +182,17 @@ public class EntitySpawnListener extends AbstractListener
                     return;
 
                 Faction faction = optionalFaction.get();
-                if(faction.getName().equalsIgnoreCase("SafeZone") && !super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInSafeZone())
+                if(faction.getName().equalsIgnoreCase("SafeZone") && !this.protectionConfig.canSpawnMobsInSafeZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.getName().equalsIgnoreCase("WarZone") && !super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInWarZone())
+                else if(faction.getName().equalsIgnoreCase("WarZone") && !this.protectionConfig.canSpawnMobsInWarZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(!super.getPlugin().getConfiguration().getConfigFields().canSpawnMobsInFactionsTerritory())
+                else if(!this.protectionConfig.canSpawnMobsInFactionsTerritory())
                 {
                     event.setCancelled(true);
                     return;

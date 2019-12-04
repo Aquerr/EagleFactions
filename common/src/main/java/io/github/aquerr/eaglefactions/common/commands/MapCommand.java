@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -27,9 +29,14 @@ import java.util.function.Consumer;
 
 public class MapCommand extends AbstractCommand
 {
+    private final ProtectionConfig protectionConfig;
+    private final FactionsConfig factionsConfig;
+
     public MapCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -38,7 +45,7 @@ public class MapCommand extends AbstractCommand
         if (source instanceof Player)
         {
             final Player player = (Player) source;
-            if (getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
+            if (this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
             {
                 generateMap(player);
             }
@@ -59,7 +66,7 @@ public class MapCommand extends AbstractCommand
     {
         final Set<Claim> claimsList = super.getPlugin().getFactionLogic().getAllClaims();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        final boolean showPlayerFactionClaimsOnly = super.getPlugin().getConfiguration().getConfigFields().shouldShowOnlyPlayerFactionsClaimsInMap();
+        final boolean showPlayerFactionClaimsOnly = this.factionsConfig.shouldShowOnlyPlayerFactionsClaimsInMap();
 
         final World world = player.getWorld();
 
@@ -201,7 +208,7 @@ public class MapCommand extends AbstractCommand
                 }
                 else
                 {
-                    if(!super.getPlugin().getConfiguration().getConfigFields().shouldDelayClaim()
+                    if(!this.factionsConfig.shouldDelayClaim()
                             && (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId())
                                 || (optionalPlayerFaction.isPresent()
                                     && (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId())
@@ -323,9 +330,9 @@ public class MapCommand extends AbstractCommand
                 }
                 else
                 {
-                    if (super.getPlugin().getConfiguration().getConfigFields().requireConnectedClaims())
+                    if(this.factionsConfig.requireConnectedClaims())
                     {
-                        if (super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, claim))
+                        if(super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, claim))
                         {
                             super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                         }

@@ -1,7 +1,8 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -43,12 +44,14 @@ import java.util.function.Predicate;
 
 public class BlockBreakListener extends AbstractListener
 {
-    private final ConfigFields configFields;
+    private final FactionsConfig factionsConfig;
+    private final ProtectionConfig protectionConfig;
 
     public BlockBreakListener(final EagleFactions plugin)
     {
         super(plugin);
-        this.configFields = plugin.getConfiguration().getConfigFields();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
@@ -221,7 +224,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
-                    if(configFields.getSafeZoneWorldNames().contains(location.getExtent().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone")))
+                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.getExtent().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone")))
                     {
                         event.setCancelled(true);
                         return;
@@ -447,7 +450,7 @@ public class BlockBreakListener extends AbstractListener
                 if(sourceEntity.getType().getName().contains("projectile"))
                 {
                     final Player player = (Player) entity;
-                    if(configFields.getSafeZoneWorldNames().contains(player.getWorld().getName()))
+                    if(this.protectionConfig.getSafeZoneWorldNames().contains(player.getWorld().getName()))
                     {
                         sourceEntity.remove();
                         event.setCancelled(true);
@@ -493,8 +496,8 @@ public class BlockBreakListener extends AbstractListener
 
                                 //We got shooter player
                                 //Check friendly fire
-                                final boolean isFactionFriendlyFireOn = configFields.isFactionFriendlyFire();
-                                final boolean isAllianceFriendlyFireOn = configFields.isAllianceFriendlyFire();
+                                final boolean isFactionFriendlyFireOn = factionsConfig.isFactionFriendlyFire();
+                                final boolean isAllianceFriendlyFireOn = factionsConfig.isAllianceFriendlyFire();
                                 if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
                                     continue;
 

@@ -23,13 +23,14 @@ public class ConfigurationImpl implements Configuration
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
-    private ConfigFields configFields;
-
-
     //Configs
     private final StorageConfig storageConfig;
     private final ChatConfig chatConfig;
     private final DynmapConfig dynmapConfig;
+    private final PowerConfig powerConfig;
+    private final ProtectionConfig protectionConfig;
+    private final PVPLoggerConfig pvpLoggerConfig;
+    private final FactionsConfig factionsConfig;
 
     public ConfigurationImpl(final Path configDir, final Asset confgAsset)
     {
@@ -60,10 +61,20 @@ public class ConfigurationImpl implements Configuration
         loadConfiguration();
         save();
 
-        this.configFields = new ConfigFields(this);
         this.storageConfig = new StorageConfigImpl(this);
         this.chatConfig = new ChatConfigImpl(this);
         this.dynmapConfig = new DynmapConfigImpl(this);
+        this.powerConfig = new PowerConfigImpl(this);
+        this.protectionConfig = new ProtectionConfigImpl(this);
+        this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
+        this.factionsConfig = new FactionsConfigImpl(this);
+        save();
+    }
+
+    @Override
+    public FactionsConfig getFactionsConfig()
+    {
+        return this.factionsConfig;
     }
 
     @Override
@@ -85,19 +96,34 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public ConfigFields getConfigFields()
+    public PowerConfig getPowerConfig()
     {
-        return configFields;
+        return this.powerConfig;
+    }
+
+    @Override
+    public ProtectionConfig getProtectionConfig()
+    {
+        return this.protectionConfig;
+    }
+
+    @Override
+    public PVPLoggerConfig getPvpLoggerConfig()
+    {
+        return this.pvpLoggerConfig;
     }
 
     @Override
     public void reloadConfiguration()
     {
         loadConfiguration();
-        this.configFields.reload();
         this.storageConfig.reload();
         this.chatConfig.reload();
         this.dynmapConfig.reload();
+        this.powerConfig.reload();
+        this.protectionConfig.reload();
+        this.pvpLoggerConfig.reload();
+        this.factionsConfig.reload();
     }
 
     private void loadConfiguration()
@@ -139,7 +165,7 @@ public class ConfigurationImpl implements Configuration
         if (value instanceof Integer)
         {
             int number = (Integer) value;
-            return (double) number;
+            return number;
         }
         else if(value instanceof Double)
         {

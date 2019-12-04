@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 public class PVPLoggerImpl implements PVPLogger
 {
-    private ConfigFields _configFields;
+    private PVPLoggerConfig pvpLoggerConfig;
     private Map<UUID, Integer> _attackedPlayers;
     private Map<UUID, Integer> _playersIdTaskMap;
     private boolean _isActive;
@@ -34,18 +34,18 @@ public class PVPLoggerImpl implements PVPLogger
 
     private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLoggerImpl";
 
-    public PVPLoggerImpl(Configuration configuration)
+    public PVPLoggerImpl(final Configuration configuration)
     {
-        _configFields = configuration.getConfigFields();
-        _isActive = _configFields.isPVPLoggerActive();
+        pvpLoggerConfig = configuration.getPvpLoggerConfig();
+        _isActive = pvpLoggerConfig.isPVPLoggerActive();
 
         if (_isActive)
         {
             _attackedPlayers = new HashMap<>();
             _playersIdTaskMap = new HashMap<>();
-            _blockTime = _configFields.getPVPLoggerBlockTime();
-            _blockedCommandsDuringFight = _configFields.getBlockedCommandsDuringFight();
-            _shouldDisplayInScoreboard = _configFields.shouldDisplayPvpLoggerInScoreboard();
+            _blockTime = pvpLoggerConfig.getPVPLoggerBlockTime();
+            _blockedCommandsDuringFight = pvpLoggerConfig.getBlockedCommandsDuringFight();
+            _shouldDisplayInScoreboard = pvpLoggerConfig.shouldDisplayPvpLoggerInScoreboard();
         }
     }
 

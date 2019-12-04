@@ -662,7 +662,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private void startFactionsRemover()
     {
         //Do not turn on faction's remover if max inactive time == 0
-        if(this.getConfiguration().getConfigFields().getMaxInactiveTime() == 0)
+        if(this.getConfiguration().getFactionsConfig().getMaxInactiveTime() == 0)
             return;
 
         EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);

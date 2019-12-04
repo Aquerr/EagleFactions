@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -38,7 +37,7 @@ public class ChatMessageListener extends AbstractListener
 
         if(!optionalPlayerFaction.isPresent())
         {
-            if(this.chatConfig.shouldSupressOtherFactionsMessagesWhileInTeamChat())
+            if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
             {
                 MessageChannel messageChannel = event.getOriginalChannel();
                 final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
@@ -139,7 +138,7 @@ public class ChatMessageListener extends AbstractListener
             message.append(event.getMessage().getChildren().get(1));
 
             //Suppress message for other factions if someone is in the faction's chat.
-            if(this.chatConfig.shouldSupressOtherFactionsMessagesWhileInTeamChat())
+            if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
             {
                 final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
                 final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);

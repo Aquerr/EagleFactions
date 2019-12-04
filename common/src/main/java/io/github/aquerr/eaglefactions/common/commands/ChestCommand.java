@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -19,9 +20,12 @@ import java.util.Optional;
 
 public class ChestCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public ChestCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -32,7 +36,7 @@ public class ChestCommand extends AbstractCommand
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
-        if (!super.getPlugin().getConfiguration().getConfigFields().canUseFactionChest())
+        if (!this.factionsConfig.canUseFactionChest())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Factions' chests are turned off on this server."));
 
         final Player player = (Player) source;

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -28,9 +29,12 @@ import java.util.Optional;
  */
 public class CreateCommand extends AbstractCommand
 {
-    public CreateCommand(EagleFactions plugin)
+    private final FactionsConfig factionsConfig;
+
+    public CreateCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -67,21 +71,21 @@ public class CreateCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
 
         //Check tag length
-        if (factionTag.length() > getPlugin().getConfiguration().getConfigFields().getMaxTagLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
-        else if (factionTag.length() < getPlugin().getConfiguration().getConfigFields().getMinTagLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
+        if (factionTag.length() > this.factionsConfig.getMaxTagLength())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + this.factionsConfig.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
+        else if (factionTag.length() < this.factionsConfig.getMinTagLength())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + this.factionsConfig.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
 
         if (getPlugin().getFactionLogic().getFactionsNames().contains(factionName.toLowerCase()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS));
 
         //Check name length
-        if (factionName.length() > getPlugin().getConfiguration().getConfigFields().getMaxNameLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
-        else if (factionName.length() < getPlugin().getConfiguration().getConfigFields().getMinNameLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinNameLength() + " " + PluginMessages.CHARS + ")"));
+        if (factionName.length() > this.factionsConfig.getMaxNameLength())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + this.factionsConfig.getMaxNameLength() + " " + PluginMessages.CHARS + ")"));
+        else if (factionName.length() < this.factionsConfig.getMinNameLength())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + PluginMessages.CHARS + ")"));
 
-        if (super.getPlugin().getConfiguration().getConfigFields().getFactionCreationByItems())
+        if (this.factionsConfig.getFactionCreationByItems())
         {
             return createByItems(factionName, factionTag, player);
         }
@@ -103,7 +107,7 @@ public class CreateCommand extends AbstractCommand
 
     private CommandResult createByItems(String factionName, String factionTag, Player player) throws CommandException
     {
-        final Map<String, Integer> requiredItems = getPlugin().getConfiguration().getConfigFields().getRequiredItemsToCreateFaction();
+        final Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToCreateFaction();
         final Inventory inventory = player.getInventory();
         final int allRequiredItems = requiredItems.size();
         int foundItems = 0;

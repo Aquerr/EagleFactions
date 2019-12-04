@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -16,9 +17,12 @@ import java.util.Optional;
 
 public class TagCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public TagCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -65,14 +69,14 @@ public class TagCommand extends AbstractCommand
             }
 
             //Check tag length
-            if(newFactionTag.length() > getPlugin().getConfiguration().getConfigFields().getMaxTagLength())
+            if(newFactionTag.length() > this.factionsConfig.getMaxTagLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + getPlugin().getConfiguration().getConfigFields().getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + PluginMessages.MAX + " " + this.factionsConfig.getMaxTagLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
-            if(newFactionTag.length() < getPlugin().getConfiguration().getConfigFields().getMinTagLength())
+            if(newFactionTag.length() < this.factionsConfig.getMinTagLength())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + getPlugin().getConfiguration().getConfigFields().getMinTagLength() + " " + PluginMessages.CHARS + ")"));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + PluginMessages.MIN + " " + this.factionsConfig.getMinTagLength() + " " + PluginMessages.CHARS + ")"));
                 return CommandResult.success();
             }
 

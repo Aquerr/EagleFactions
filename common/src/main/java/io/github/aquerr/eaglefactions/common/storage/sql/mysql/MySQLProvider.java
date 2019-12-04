@@ -10,7 +10,8 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
 {
     private static MySQLProvider INSTANCE = null;
 
-    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&&disableMariaDbDriver";
+//    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&&disableMariaDbDriver";
+    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
     public static MySQLProvider getInstance(final EagleFactions eagleFactions)
     {
@@ -45,7 +46,7 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
     {
         super(eagleFactions);
         //Load MySQL driver
-        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+//        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 
         if(!databaseExists())
             createDatabase();
@@ -54,7 +55,8 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
     private boolean databaseExists() throws SQLException
     {
         //Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-        Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
+//        Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
+        final Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl(), super.getUsername(),super.getPassword());
         final ResultSet resultSet = connection.getMetaData().getCatalogs();
 
         while(resultSet.next())

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
@@ -19,9 +20,12 @@ import java.util.concurrent.CompletableFuture;
 
 public class PlayerJoinListener extends AbstractListener
 {
+    private final ProtectionConfig protectionConfig;
+
     public PlayerJoinListener(final EagleFactions plugin)
     {
         super(plugin);
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Listener(order = Order.POST)
@@ -39,8 +43,8 @@ public class PlayerJoinListener extends AbstractListener
 
 
         //Check if the world that player is connecting to is already in the config file
-        if (!super.getPlugin().getConfiguration().getConfigFields().getDetectedWorldNames().contains(player.getWorld().getName()))
-            CompletableFuture.runAsync(() -> super.getPlugin().getConfiguration().getConfigFields().addWorld(player.getWorld().getName()));
+        if (!this.protectionConfig.getDetectedWorldNames().contains(player.getWorld().getName()))
+            CompletableFuture.runAsync(() -> this.protectionConfig.addWorld(player.getWorld().getName()));
 
         //Send motd
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());

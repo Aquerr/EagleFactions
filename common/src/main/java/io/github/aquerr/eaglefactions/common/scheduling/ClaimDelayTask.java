@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
 import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 public class ClaimDelayTask implements EagleFactionsConsumerTask<Task>
 {
+    private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic = EagleFactionsPlugin.getPlugin().getFactionLogic();
     private final Player player;
     private final Vector3i chunkPosition;
@@ -29,8 +31,9 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<Task>
     {
         this.player = player;
         this.chunkPosition = chunkPosition;
-        this.claimDelay = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields().getClaimDelay();
-        this.shouldClaimByItems = EagleFactionsPlugin.getPlugin().getConfiguration().getConfigFields().shouldClaimByItems();
+        this.factionsConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig();
+        this.claimDelay = this.factionsConfig.getClaimDelay();
+        this.shouldClaimByItems = this.factionsConfig.shouldClaimByItems();
     }
 
     @Override

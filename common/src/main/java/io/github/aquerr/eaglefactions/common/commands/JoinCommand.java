@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -19,9 +20,12 @@ import java.util.Optional;
 
 public class JoinCommand extends AbstractCommand
 {
-    public JoinCommand(EagleFactions plugin)
+    private final FactionsConfig factionsConfig;
+
+    public JoinCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -70,7 +74,7 @@ public class JoinCommand extends AbstractCommand
             }
 
             //TODO: Should public factions bypass this restriction?
-            if(super.getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
+            if(this.factionsConfig.isPlayerLimit())
             {
                 int playerCount = 0;
                 playerCount += faction.getLeader().toString().equals("") ? 0 : 1;
@@ -78,7 +82,7 @@ public class JoinCommand extends AbstractCommand
                 playerCount += faction.getMembers().isEmpty() ? 0 : faction.getMembers().size();
                 playerCount += faction.getRecruits().isEmpty() ? 0 : faction.getRecruits().size();
 
-                if(playerCount >= super.getPlugin().getConfiguration().getConfigFields().getPlayerLimit())
+                if(playerCount >= this.factionsConfig.getPlayerLimit())
                     throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT));
             }
 

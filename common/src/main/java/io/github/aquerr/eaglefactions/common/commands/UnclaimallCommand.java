@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -18,9 +19,12 @@ import java.util.Optional;
 
 public class UnclaimallCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public UnclaimallCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -41,7 +45,7 @@ public class UnclaimallCommand extends AbstractCommand
                     if (isCancelled)
                         return CommandResult.success();
 
-                    if(!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
+                    if(!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
                     {
                         super.getPlugin().getFactionLogic().setHome(null, playerFaction, null);
                     }

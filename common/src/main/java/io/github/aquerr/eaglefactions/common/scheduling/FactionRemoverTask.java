@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.scheduling;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -19,19 +20,21 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
     private final Configuration configuration;
     private final FactionLogic factionLogic;
+    private final FactionsConfig factionsConfig;
 
-    public FactionRemoverTask(final EagleFactions eagleFactions)
+    public FactionRemoverTask(final EagleFactions plugin)
     {
-        this.configuration = eagleFactions.getConfiguration();
-        this.factionLogic = eagleFactions.getFactionLogic();
+        this.configuration = plugin.getConfiguration();
+        this.factionLogic = plugin.getFactionLogic();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
     public void run()
     {
-        final long maxInactiveTimeInSeconds = configuration.getConfigFields().getMaxInactiveTime();
+        final long maxInactiveTimeInSeconds = this.factionsConfig.getMaxInactiveTime();
         final Map<String, Faction> factionsList = new HashMap<>(this.factionLogic.getFactions());
-        final boolean shouldNotifyWhenRemoved = this.configuration.getConfigFields().shouldNotifyWhenFactionRemoved();
+        final boolean shouldNotifyWhenRemoved = this.factionsConfig.shouldNotifyWhenFactionRemoved();
         for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
         {
             if(factionLogic.hasOnlinePlayers(factionEntry.getValue()))

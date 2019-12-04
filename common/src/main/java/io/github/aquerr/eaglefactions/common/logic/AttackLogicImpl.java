@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
@@ -25,12 +25,12 @@ public class AttackLogicImpl implements AttackLogic
 {
     private static AttackLogic INSTANCE = null;
 
-    private final ConfigFields configFields;
+    private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic;
 
     private AttackLogicImpl(EagleFactions eagleFactions)
     {
-        configFields = eagleFactions.getConfiguration().getConfigFields();
+        factionsConfig = eagleFactions.getConfiguration().getFactionsConfig();
         factionLogic = eagleFactions.getFactionLogic();
     }
 
@@ -55,7 +55,7 @@ public class AttackLogicImpl implements AttackLogic
             {
                 if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
                 {
-                    if(seconds == configFields.getAttackTime())
+                    if(seconds == factionsConfig.getAttackTime())
                     {
                         //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
                         Faction chunkFaction = factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
@@ -142,11 +142,11 @@ public class AttackLogicImpl implements AttackLogic
     {
         if(EagleFactionsPlugin.BLOCKED_HOME.containsKey(playerUUID))
         {
-            EagleFactionsPlugin.BLOCKED_HOME.replace(playerUUID, configFields.getHomeBlockTimeAfterDeathInOwnFaction());
+            EagleFactionsPlugin.BLOCKED_HOME.replace(playerUUID, factionsConfig.getHomeBlockTimeAfterDeathInOwnFaction());
         }
         else
         {
-            EagleFactionsPlugin.BLOCKED_HOME.put(playerUUID, configFields.getHomeBlockTimeAfterDeathInOwnFaction());
+            EagleFactionsPlugin.BLOCKED_HOME.put(playerUUID, factionsConfig.getHomeBlockTimeAfterDeathInOwnFaction());
             runHomeUsageRestorer(playerUUID);
         }
     }
@@ -156,24 +156,20 @@ public class AttackLogicImpl implements AttackLogic
     {
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
         {
-            @Override
-            public void accept(Task task)
+            if (EagleFactionsPlugin.BLOCKED_HOME.containsKey(playerUUID))
             {
-                if (EagleFactionsPlugin.BLOCKED_HOME.containsKey(playerUUID))
-                {
-                    int seconds = EagleFactionsPlugin.BLOCKED_HOME.get(playerUUID);
+                int seconds = EagleFactionsPlugin.BLOCKED_HOME.get(playerUUID);
 
-                    if (seconds <= 0)
-                    {
-                        EagleFactionsPlugin.BLOCKED_HOME.remove(playerUUID);
-                        task.cancel();
-                    }
-                    else
-                    {
-                        EagleFactionsPlugin.BLOCKED_HOME.replace(playerUUID, seconds, seconds - 1);
-                    }
+                if (seconds <= 0)
+                {
+                    EagleFactionsPlugin.BLOCKED_HOME.remove(playerUUID);
+                    task.cancel();
+                }
+                else
+                {
+                    EagleFactionsPlugin.BLOCKED_HOME.replace(playerUUID, seconds, seconds - 1);
                 }
             }
         }).submit(EagleFactionsPlugin.getPlugin());

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -22,9 +23,12 @@ import java.util.Optional;
 
 public class UnclaimCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public UnclaimCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -48,7 +52,7 @@ public class UnclaimCommand extends AbstractCommand
                 if (isCancelled)
                     return CommandResult.success();
 
-                if (!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
+                if (!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
                 {
                     if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                     {
@@ -90,7 +94,7 @@ public class UnclaimCommand extends AbstractCommand
                         if (isCancelled)
                             return CommandResult.success();
 
-                        if (!super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
+                        if (!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
                         {
                             if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                             {

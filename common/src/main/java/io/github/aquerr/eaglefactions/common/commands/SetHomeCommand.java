@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -19,9 +20,12 @@ import java.util.Optional;
 
 public class SetHomeCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public SetHomeCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -50,12 +54,12 @@ public class SetHomeCommand extends AbstractCommand
         if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
         {
             final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
-            if (!chunkFaction.isPresent() && super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
+            if (!chunkFaction.isPresent() && this.factionsConfig.canPlaceHomeOutsideFactionClaim())
             {
                 super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, newHome);
                 source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.FACTION_HOME_HAS_BEEN_SET));
             }
-            else if (!chunkFaction.isPresent() && !super.getPlugin().getConfiguration().getConfigFields().canPlaceHomeOutsideFactionClaim())
+            else if (!chunkFaction.isPresent() && !this.factionsConfig.canPlaceHomeOutsideFactionClaim())
             {
                 source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction home must be placed inside the faction claim!"));
             }

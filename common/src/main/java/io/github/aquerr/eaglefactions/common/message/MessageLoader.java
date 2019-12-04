@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.message;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -21,20 +22,23 @@ import java.util.Optional;
 @Singleton
 public class MessageLoader
 {
+    private final FactionsConfig factionsConfig;
+
     private static MessageLoader instance = null;
 
-    public static MessageLoader getInstance(EagleFactions eagleFactions)
+    public static MessageLoader getInstance(EagleFactions plugin)
     {
         if (instance == null)
-            return new MessageLoader(eagleFactions);
+            return new MessageLoader(plugin);
         return instance;
     }
 
-    private MessageLoader(final EagleFactions eagleFactions)
+    private MessageLoader(final EagleFactions plugin)
     {
         instance = this;
-        Path configDir = eagleFactions.getConfigDir();
-        String messagesFileName = eagleFactions.getConfiguration().getConfigFields().getLanguageFileName();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        Path configDir = plugin.getConfigDir();
+        String messagesFileName = this.factionsConfig.getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
         if (!Files.exists(configDir.resolve("messages")))
@@ -49,7 +53,7 @@ public class MessageLoader
             }
         }
 
-        Optional<Asset> optionalMessagesFile = Sponge.getAssetManager().getAsset(eagleFactions, "messages" + File.separator + messagesFileName);
+        Optional<Asset> optionalMessagesFile = Sponge.getAssetManager().getAsset(plugin, "messages" + File.separator + messagesFileName);
         if (optionalMessagesFile.isPresent())
         {
             try
@@ -63,7 +67,7 @@ public class MessageLoader
         }
         else
         {
-            optionalMessagesFile = Sponge.getAssetManager().getAsset(eagleFactions, "messages" + File.separator + "english.conf");
+            optionalMessagesFile = Sponge.getAssetManager().getAsset(plugin, "messages" + File.separator + "english.conf");
             optionalMessagesFile.ifPresent(x->
             {
                 try

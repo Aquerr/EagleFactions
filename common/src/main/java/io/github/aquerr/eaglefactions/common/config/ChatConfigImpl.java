@@ -19,6 +19,7 @@ public class ChatConfigImpl implements ChatConfig
 	private Text factionEndPrefix = Text.of("]");
 	private boolean isFactionPrefixFirstInChat = true;
 	private Text nonFactionPlayerPrefix = Text.of("");
+	private boolean showFactionEnterPhrase = true;
 
 	public ChatConfigImpl(final Configuration configuration)
 	{
@@ -30,15 +31,16 @@ public class ChatConfigImpl implements ChatConfig
 	public void reload()
 	{
 		//Chat
-		this.chatPrefixType = configuration.getString("tag", "faction-prefix");
-		this.shouldDisplayRank = configuration.getBoolean(true, "faction-rank");
-		this.suppressOtherFactionsMessagesWhileInTeamChat = configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
-		this.displayProtectionSystemMessages = configuration.getBoolean(true, "display-protection-system-messages");
-		this.canColorTags = configuration.getBoolean(true, "colored-tags-allowed");
+		this.chatPrefixType = this.configuration.getString("tag", "faction-prefix");
+		this.shouldDisplayRank = this.configuration.getBoolean(true, "faction-rank");
+		this.suppressOtherFactionsMessagesWhileInTeamChat = this.configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
+		this.displayProtectionSystemMessages = this.configuration.getBoolean(true, "display-protection-system-messages");
+		this.canColorTags = this.configuration.getBoolean(true, "colored-tags-allowed");
 		this.factionStartPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("[", "faction-prefix-start"));
 		this.factionEndPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("]", "faction-prefix-end"));
-		this.isFactionPrefixFirstInChat = configuration.getBoolean(true, "faction-prefix-first-in-chat");
+		this.isFactionPrefixFirstInChat = this.configuration.getBoolean(true, "faction-prefix-first-in-chat");
 		this.nonFactionPlayerPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("", "non-faction-player-prefix"));
+		this.showFactionEnterPhrase = this.configuration.getBoolean(true, "show-faction-enter-phrase");
 	}
 
 	public Text getFactionStartPrefix()
@@ -73,7 +75,7 @@ public class ChatConfigImpl implements ChatConfig
 	}
 
 	@Override
-	public boolean shouldSupressOtherFactionsMessagesWhileInTeamChat()
+	public boolean shouldSuppressOtherFactionsMessagesWhileInTeamChat()
 	{
 		return this.suppressOtherFactionsMessagesWhileInTeamChat;
 	}
@@ -88,5 +90,11 @@ public class ChatConfigImpl implements ChatConfig
 	public Text getNonFactionPlayerPrefix()
 	{
 		return this.nonFactionPlayerPrefix;
+	}
+
+	@Override
+	public boolean shouldShowFactionEnterPhrase()
+	{
+		return this.showFactionEnterPhrase;
 	}
 }

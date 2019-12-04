@@ -1,12 +1,13 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -14,7 +15,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -28,7 +28,8 @@ public class PlayerManagerImpl implements PlayerManager
 
     private final EagleFactions plugin;
 
-    private final ConfigFields configFields;
+    private final FactionsConfig factionsConfig;
+    private final PowerConfig powerConfig;
     private final StorageManagerImpl storageManager;
 
     private UserStorageService userStorageService;
@@ -37,7 +38,8 @@ public class PlayerManagerImpl implements PlayerManager
     {
         INSTANCE = this;
         this.plugin = plugin;
-        this.configFields = plugin.getConfiguration().getConfigFields();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.powerConfig = plugin.getConfiguration().getPowerConfig();
         this.storageManager = StorageManagerImpl.getInstance(plugin);
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
@@ -54,7 +56,7 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public boolean addPlayer(UUID playerUUID, String playerName)
     {
-        return storageManager.addPlayer(playerUUID, playerName, configFields.getStartingPower(), configFields.getGlobalMaxPower());
+        return storageManager.addPlayer(playerUUID, playerName, this.powerConfig.getStartingPower(), this.powerConfig.getGlobalMaxPower());
     }
 
     @Override
@@ -106,7 +108,7 @@ public class PlayerManagerImpl implements PlayerManager
             factionMemberType = optionalFaction.get().getPlayerMemberType(user.getUniqueId());
         }
 
-        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, factionMemberType, this.configFields.getStartingPower(),  this.configFields.getGlobalMaxPower());
+        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, factionMemberType, this.powerConfig.getStartingPower(),  this.powerConfig.getGlobalMaxPower());
     }
 
     private Optional<String> getLastKnownPlayerName(UUID playerUUID)

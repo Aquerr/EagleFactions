@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -37,7 +37,7 @@ public class FactionLogicImpl implements FactionLogic
     private static FactionLogicImpl INSTANCE = null;
 
     private final StorageManager storageManager;
-    private final ConfigFields _configFields;
+    private final FactionsConfig factionsConfig;
     private final PlayerManagerImpl _playerManager;
     private final EagleFactionsPlugin plugin;
 
@@ -54,7 +54,7 @@ public class FactionLogicImpl implements FactionLogic
     {
         INSTANCE = this;
         this.plugin = plugin;
-        _configFields = plugin.getConfiguration().getConfigFields();
+        factionsConfig = plugin.getConfiguration().getFactionsConfig();
         _playerManager = plugin.getPlayerManager();
         this.storageManager = plugin.getStorageManager();
     }
@@ -543,15 +543,15 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        if(_configFields.shouldDelayClaim())
+        if(this.factionsConfig.shouldDelayClaim())
         {
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, _configFields.getClaimDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, this.factionsConfig.getClaimDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
             EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunk), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
 //            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactionsPlugin.getPlugin());
         }
         else
         {
-            if(_configFields.shouldClaimByItems())
+            if(this.factionsConfig.shouldClaimByItems())
             {
                 boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunk);
                 if(didSucceed)
@@ -570,7 +570,7 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
     {
-        Map<String, Integer> requiredItems = _configFields.getRequiredItemsToClaim();
+        Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToClaim();
         PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
         int allRequiredItems = requiredItems.size();
         int foundItems = 0;

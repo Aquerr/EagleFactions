@@ -2,9 +2,9 @@ package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -25,7 +25,7 @@ public class PowerManagerImpl implements PowerManager
     private static PowerManagerImpl INSTANCE = null;
 
     private final EagleFactions plugin;
-    private final ConfigFields _configFields;
+    private final PowerConfig powerConfig;
 
     private CommentedConfigurationNode _factionsNode;
     private final UUID dummyUUID = new UUID(0, 0);
@@ -41,7 +41,7 @@ public class PowerManagerImpl implements PowerManager
     {
         INSTANCE = this;
         plugin = eagleFactions;
-        _configFields = eagleFactions.getConfiguration().getConfigFields();
+        powerConfig = eagleFactions.getConfiguration().getPowerConfig();
         Path configDir = eagleFactions.getConfigDir();
 
         try
@@ -170,16 +170,16 @@ public class PowerManagerImpl implements PowerManager
     {
         float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
 
-        if(playerPower + _configFields.getPowerIncrement() < getPlayerMaxPower(playerUUID))
+        if(playerPower + powerConfig.getPowerIncrement() < getPlayerMaxPower(playerUUID))
         {
             if(isKillAward)
             {
-                float killAward = _configFields.getKillAward();
+                float killAward = powerConfig.getKillAward();
                 plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower + killAward);
             }
             else
             {
-                float newPower = round(playerPower + _configFields.getPowerIncrement(), 2);
+                float newPower = round(playerPower + powerConfig.getPowerIncrement(), 2);
                 plugin.getPlayerManager().setPlayerPower(playerUUID, newPower);
             }
         }
@@ -206,7 +206,7 @@ public class PowerManagerImpl implements PowerManager
         {
             if (!plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
 
-            if(getPlayerPower(playerUUID) + _configFields.getPowerIncrement() < getPlayerMaxPower(playerUUID))
+            if(getPlayerPower(playerUUID) + powerConfig.getPowerIncrement() < getPlayerMaxPower(playerUUID))
             {
                 addPower(playerUUID, false);
             }
@@ -222,9 +222,9 @@ public class PowerManagerImpl implements PowerManager
     {
         float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
 
-        if(playerPower - _configFields.getPowerDecrement() > 0)
+        if(playerPower - powerConfig.getPowerDecrement() > 0)
         {
-                plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - _configFields.getPowerDecrement());
+                plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - powerConfig.getPowerDecrement());
         }
         else
         {
@@ -236,7 +236,7 @@ public class PowerManagerImpl implements PowerManager
     public void penalty(final UUID playerUUID)
     {
         float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
-        float penalty = _configFields.getPenalty();
+        float penalty = powerConfig.getPenalty();
 
         if(playerPower - penalty > 0)
         {

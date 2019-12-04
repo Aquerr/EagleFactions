@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
@@ -30,11 +31,12 @@ public class ProtectionManagerImpl implements ProtectionManager
 {
     private static ProtectionManagerImpl INSTANCE = null;
     private final EagleFactions plugin;
+    private final ProtectionConfig protectionConfig;
 
-    public static ProtectionManagerImpl getInstance(final EagleFactions eagleFactions)
+    public static ProtectionManagerImpl getInstance(final EagleFactions plugin)
     {
         if (INSTANCE == null)
-            return new ProtectionManagerImpl(eagleFactions);
+            return new ProtectionManagerImpl(plugin);
         else return INSTANCE;
     }
 
@@ -42,6 +44,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     {
         INSTANCE = this;
         this.plugin = plugin;
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Override
@@ -71,8 +74,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
         }
 
-        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -165,8 +168,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (isItemWhitelisted(usedItem.getType().getId()))
             return true;
 
-        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -227,8 +230,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
-        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -288,10 +291,10 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
-        if(this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
             return false;
 
-        if(this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(world.getName()) && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief())
+        if(this.protectionConfig.getWarZoneWorldNames().contains(world.getName()) && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
             return false;
 
         final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
@@ -301,10 +304,10 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
             return false;
 
-        if(optionalChunkFaction.get().getName().equalsIgnoreCase("WarZone") && this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief())
+        if(optionalChunkFaction.get().getName().equalsIgnoreCase("WarZone") && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
             return false;
 
-        if(this.plugin.getConfiguration().getConfigFields().shouldProtectClaimFromMobGrief())
+        if(this.protectionConfig.shouldProtectClaimFromMobGrief())
             return false;
 
         return true;
@@ -330,8 +333,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId())))
             return true;
 
-        final Set<String> safeZoneWorlds = this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames();
-        final Set<String> warZoneWorlds = this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames();
+        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
+        final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
@@ -398,18 +401,18 @@ public class ProtectionManagerImpl implements ProtectionManager
             }
         }
 
-        boolean shouldProtectWarZoneFromPlayers = this.plugin.getConfiguration().getConfigFields().shouldProtectWarzoneFromPlayers();
-        boolean allowExplosionsByOtherPlayersInClaims = this.plugin.getConfiguration().getConfigFields().shouldAllowExplosionsByOtherPlayersInClaims();
+        boolean shouldProtectWarZoneFromPlayers = this.protectionConfig.shouldProtectWarzoneFromPlayers();
+        boolean allowExplosionsByOtherPlayersInClaims = this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims();
 
         //Check if admin
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(user.getUniqueId()))
             return true;
 
         //Check world
-        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(location.getExtent().getName()))
+        if (this.protectionConfig.getSafeZoneWorldNames().contains(location.getExtent().getName()))
             return false;
 
-        if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(location.getExtent().getName()))
+        if (this.protectionConfig.getWarZoneWorldNames().contains(location.getExtent().getName()))
             return !shouldProtectWarZoneFromPlayers;
 
         //If no faction
@@ -446,14 +449,14 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean canExplode(final Location<World> location)
     {
-        boolean shouldProtectWarZoneFromMobGrief = this.plugin.getConfiguration().getConfigFields().shouldProtectWarZoneFromMobGrief();
-        boolean shouldProtectClaimsFromMobGrief = this.plugin.getConfiguration().getConfigFields().shouldProtectClaimFromMobGrief();
+        boolean shouldProtectWarZoneFromMobGrief = this.protectionConfig.shouldProtectWarZoneFromMobGrief();
+        boolean shouldProtectClaimsFromMobGrief = this.protectionConfig.shouldProtectClaimFromMobGrief();
 
         //Check world
-        if (this.plugin.getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(location.getExtent().getName()))
+        if (this.protectionConfig.getSafeZoneWorldNames().contains(location.getExtent().getName()))
             return false;
 
-        if (this.plugin.getConfiguration().getConfigFields().getWarZoneWorldNames().contains(location.getExtent().getName()))
+        if (this.protectionConfig.getWarZoneWorldNames().contains(location.getExtent().getName()))
             return !shouldProtectWarZoneFromMobGrief;
 
         Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
@@ -471,21 +474,21 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean isItemWhitelisted(final String itemId)
     {
-        final Set<String> whiteListedItems = this.plugin.getConfiguration().getConfigFields().getWhiteListedItems();
+        final Set<String> whiteListedItems = this.protectionConfig.getWhiteListedItems();
         return isWhiteListed(whiteListedItems, itemId);
     }
 
     @Override
     public boolean isBlockWhitelistedForInteraction(final String blockId)
     {
-        final Set<String> whiteListedBlocks = this.plugin.getConfiguration().getConfigFields().getWhiteListedInteractBlocks();
+        final Set<String> whiteListedBlocks = this.protectionConfig.getWhiteListedInteractBlocks();
         return isWhiteListed(whiteListedBlocks, blockId);
     }
 
     @Override
     public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId)
     {
-        final Set<String> whiteListedBlocks = this.plugin.getConfiguration().getConfigFields().getWhiteListedPlaceDestroyBlocks();
+        final Set<String> whiteListedBlocks = this.protectionConfig.getWhiteListedPlaceDestroyBlocks();
         return isWhiteListed(whiteListedBlocks, blockOrItemId);
     }
 

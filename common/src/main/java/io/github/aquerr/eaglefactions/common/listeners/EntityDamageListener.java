@@ -2,7 +2,9 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.ConfigFields;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.PowerConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -30,11 +32,17 @@ import java.util.Optional;
 public class EntityDamageListener extends AbstractListener
 {
     private final PVPLogger pvpLogger;
+    private final ProtectionConfig protectionConfig;
+    private final FactionsConfig factionsConfig;
+    private final PowerConfig powerConfig;
 
     public EntityDamageListener(final EagleFactions plugin)
     {
         super(plugin);
         this.pvpLogger = plugin.getPVPLogger();
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.powerConfig = plugin.getConfiguration().getPowerConfig();
     }
 
     @Listener(order = Order.EARLY, beforeModifications = true)
@@ -50,7 +58,7 @@ public class EntityDamageListener extends AbstractListener
         final World world = attackedPlayer.getWorld();
         final boolean willCauseDeath = event.willCauseDeath();
 
-        if(super.getPlugin().getConfiguration().getConfigFields().getSafeZoneWorldNames().contains(world.getName()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
         {
             event.setBaseDamage(0);
             event.setCancelled(true);
@@ -188,7 +196,7 @@ public class EntityDamageListener extends AbstractListener
         if(sourcePlayerFaction.getName().equals(attackedPlayerFaction.getName()))
         {
             //If friendlyfire is off then block the damage.
-            if(!super.getPlugin().getConfiguration().getConfigFields().isFactionFriendlyFire())
+            if(!this.factionsConfig.isFactionFriendlyFire())
             {
                 return true;
             }
@@ -204,7 +212,7 @@ public class EntityDamageListener extends AbstractListener
         }//Check if players are in the alliance.
         else if(sourcePlayerFaction.getAlliances().contains(attackedPlayerFaction.getName()))
         {
-            if(!super.getPlugin().getConfiguration().getConfigFields().isAllianceFriendlyFire())
+            if(!this.factionsConfig.isAllianceFriendlyFire())
             {
                 return true;
             }
@@ -241,7 +249,6 @@ public class EntityDamageListener extends AbstractListener
     @Listener
     public void onIgniteEntity(final IgniteEntityEvent event)
     {
-        final ConfigFields configFields = super.getPlugin().getConfiguration().getConfigFields();
         final EventContext eventContext = event.getContext();
         final Entity entity = event.getTargetEntity();
         final World world = event.getTargetEntity().getWorld();
@@ -251,7 +258,7 @@ public class EntityDamageListener extends AbstractListener
             return;
 
         //Check safezone world
-        if(configFields.getSafeZoneWorldNames().contains(world.getName()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
         {
             event.setCancelled(true);
             return;
@@ -274,8 +281,8 @@ public class EntityDamageListener extends AbstractListener
 //            return;
 
         final Player igniterPlayer = (Player) eventContext.get(EventContextKeys.OWNER).get();
-        final boolean isFactionFriendlyFireOn = configFields.isFactionFriendlyFire();
-        final boolean isAllianceFriendlyFireOn = configFields.isAllianceFriendlyFire();
+        final boolean isFactionFriendlyFireOn = this.factionsConfig.isFactionFriendlyFire();
+        final boolean isAllianceFriendlyFireOn = this.factionsConfig.isAllianceFriendlyFire();
 
         if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
             return;
@@ -310,15 +317,15 @@ public class EntityDamageListener extends AbstractListener
 
     private void sendPenaltyMessageAndDecreasePower(Player player)
     {
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(getPlugin().getConfiguration().getConfigFields().getPenalty()) + "\n",
-                TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(getPlugin().getPowerManager().getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPenalty() + "\n",
+                TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().penalty(player.getUniqueId());
     }
 
     private void sendKillAwardMessageAndIncreasePower(Player player)
     {
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_INCREASED_BY + " ", TextColors.GOLD, String.valueOf(getPlugin().getConfiguration().getConfigFields().getKillAward()) + "\n",
-                TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(getPlugin().getPowerManager().getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_INCREASED_BY + " ", TextColors.GOLD, this.powerConfig.getKillAward() + "\n",
+                TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().addPower(player.getUniqueId(), true);
     }
 }

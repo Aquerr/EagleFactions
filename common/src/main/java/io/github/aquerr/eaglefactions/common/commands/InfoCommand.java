@@ -67,12 +67,12 @@ public class InfoCommand extends AbstractCommand
                 }
             }
         }
-        else if(source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
+        else if(source instanceof Player && super.getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
         {
             //Check permissions
             if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF))
             {
-                showFactionInfo(source, getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
+                showFactionInfo(source, super.getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
             }
             else
             {

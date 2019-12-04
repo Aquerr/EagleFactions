@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -22,9 +23,12 @@ import java.util.concurrent.TimeUnit;
 
 public class InviteCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+
     public InviteCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -46,7 +50,7 @@ public class InviteCommand extends AbstractCommand
         if (!super.getPlugin().getFlagManager().canInvite(senderPlayer.getUniqueId(), senderFaction))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION));
 
-        if(super.getPlugin().getConfiguration().getConfigFields().isPlayerLimit())
+        if(this.factionsConfig.isPlayerLimit())
         {
             int playerCount = 0;
             playerCount += senderFaction.getLeader().toString().equals("") ? 0 : 1;
@@ -54,7 +58,7 @@ public class InviteCommand extends AbstractCommand
             playerCount += senderFaction.getMembers().isEmpty() ? 0 : senderFaction.getMembers().size();
             playerCount += senderFaction.getRecruits().isEmpty() ? 0 : senderFaction.getRecruits().size();
 
-            if(playerCount >= getPlugin().getConfiguration().getConfigFields().getPlayerLimit())
+            if(playerCount >= this.factionsConfig.getPlayerLimit())
             {
                 senderPlayer.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + PluginMessages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
                 return CommandResult.success();

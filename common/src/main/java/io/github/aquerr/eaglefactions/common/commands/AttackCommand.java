@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -17,9 +19,14 @@ import java.util.Optional;
 
 public class AttackCommand extends AbstractCommand
 {
+    private final FactionsConfig factionsConfig;
+    private final PowerConfig powerConfig;
+
     public AttackCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.powerConfig = plugin.getConfiguration().getPowerConfig();
     }
 
     @Override
@@ -30,7 +37,7 @@ public class AttackCommand extends AbstractCommand
 
         final Player player = (Player)source;
 
-        if(super.getPlugin().getConfiguration().getConfigFields().canAttackOnlyAtNight() && player.getWorld().getProperties().getWorldTime() % 24000L < 12000)
+        if(this.factionsConfig.canAttackOnlyAtNight() && player.getWorld().getProperties().getWorldTime() % 24000L < 12000)
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CAN_ATTACK_SOMEONES_TERRITORY_ONLY_AT_NIGHT));
 
         return attackChunk(player);
@@ -61,7 +68,7 @@ public class AttackCommand extends AbstractCommand
         if(playerFaction.getAlliances().contains(attackedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.YOU_ARE_IN_THE_SAME_ALLIANCE));
 
-        final float neededPowerPercentageToAttack = super.getPlugin().getConfiguration().getConfigFields().getNeededPowerPercentageToAttack();
+        final float neededPowerPercentageToAttack = this.powerConfig.getNeededPowerPercentageToAttack();
         final float attackedFactionMaxPower = super.getPlugin().getPowerManager().getFactionMaxPower(attackedFaction);
         final float attackedFactionPower = super.getPlugin().getPowerManager().getFactionPower(attackedFaction);
         final float playerFactionPower = super.getPlugin().getPowerManager().getFactionPower(playerFaction);
@@ -69,7 +76,7 @@ public class AttackCommand extends AbstractCommand
         if(attackedFactionMaxPower * neededPowerPercentageToAttack < attackedFactionPower || playerFactionPower < attackedFactionPower)
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_ATTACK_THIS_FACTION + " " + PluginMessages.THEIR_POWER_IS_TO_HIGH));
 
-        int attackTime = super.getPlugin().getConfiguration().getConfigFields().getAttackTime();
+        int attackTime = this.factionsConfig.getAttackTime();
         Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
         super.getPlugin().getAttackLogic().informAboutAttack(attackedFaction);

@@ -49,7 +49,7 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 	private boolean databaseExists() throws SQLException
 	{
 		//Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-		final Connection connection = DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword());
+		final Connection connection = DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl(), super.getUsername(), super.getPassword());
 		final ResultSet resultSet = connection.getMetaData().getCatalogs();
 
 		while(resultSet.next())

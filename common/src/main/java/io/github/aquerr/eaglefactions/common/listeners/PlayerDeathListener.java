@@ -1,6 +1,9 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.PowerConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
@@ -15,9 +18,16 @@ import java.util.Optional;
 
 public class PlayerDeathListener extends AbstractListener
 {
+    private final FactionsConfig factionsConfig;
+    private final ProtectionConfig protectionConfig;
+    private final PowerConfig powerConfig;
+
     public PlayerDeathListener(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.powerConfig = plugin.getConfiguration().getPowerConfig();
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Listener(order = Order.POST)
@@ -28,17 +38,17 @@ public class PlayerDeathListener extends AbstractListener
             final Player player = (Player)event.getTargetEntity();
             super.getPlugin().getPowerManager().decreasePower(player.getUniqueId());
 
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, String.valueOf(getPlugin().getConfiguration().getConfigFields().getPowerDecrement()) + "\n",
-                    TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", String.valueOf(super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId())) + "/" + String.valueOf(getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPowerDecrement() + "\n",
+                    TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
 
             final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
 
-            if (super.getPlugin().getConfiguration().getConfigFields().getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
+            if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
             {
                 super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
             }
 
-            if (super.getPlugin().getConfiguration().getConfigFields().shouldBlockHomeAfterDeathInOwnFaction())
+            if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction())
             {
                 final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 

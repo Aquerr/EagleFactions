@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -21,9 +23,14 @@ import java.util.Optional;
 
 public class ClaimCommand extends AbstractCommand
 {
+    private final ProtectionConfig protectionConfig;
+    private final FactionsConfig factionsConfig;
+
     public ClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
 
     @Override
@@ -42,10 +49,10 @@ public class ClaimCommand extends AbstractCommand
         final Faction playerFaction = optionalPlayerFaction.get();
 
         //Check if it is a claimable world
-        if (!super.getPlugin().getConfiguration().getConfigFields().getClaimableWorldNames().contains(player.getWorld().getName()))
+        if (!this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
         {
             //If it is not claimable world but player is in admin mode
-            if(super.getPlugin().getConfiguration().getConfigFields().getNotClaimableWorldNames().contains(player.getWorld().getName()) && EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
                 final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
                 if (optionalChunkFaction.isPresent())
@@ -86,7 +93,7 @@ public class ClaimCommand extends AbstractCommand
             return runClaimEventAndClaim(player, playerFaction, world, chunk);
         }
 
-        if (super.getPlugin().getConfiguration().getConfigFields().requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
+        if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.CLAIMS_NEED_TO_BE_CONNECTED));
 
         boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
