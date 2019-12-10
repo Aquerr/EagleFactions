@@ -40,7 +40,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public class BlockBreakListener extends AbstractListener
 {
@@ -548,20 +547,16 @@ public class BlockBreakListener extends AbstractListener
         if(!(rootCause instanceof ItemFrame))
             return;
 
-        event.filterEntities(new Predicate<Entity>()
+        event.filterEntities(entity ->
         {
-            @Override
-            public boolean test(Entity entity)
+            if(entity instanceof Living)
             {
-                if(entity instanceof Living)
+                if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity))
                 {
-                    if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-                return true;
             }
+            return true;
         });
     }
 }

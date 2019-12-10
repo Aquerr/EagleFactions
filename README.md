@@ -5,8 +5,7 @@
 ![License](https://img.shields.io/github/license/aquerr/eaglefactions.svg?label=License)
 ![Version](https://img.shields.io/github/release/aquerr/eaglefactions.svg?label=Version)
 [![Downloads](https://img.shields.io/github/downloads/aquerr/eaglefactions/total.svg?label=Total%20Downloads)](https://github.com/Aquerr/EagleFactions/releases)
-[![Discord](https://img.shields.io/discord/447076657698963466.svg?color=blue&label=Discord&logo=Discord&logoColor=white)](https://discord.gg/bjZqmwP)
-
+[![Discord](https://img.shields.io/discord/447076657698963466.svg?color=blue&label=Discord&logo=Discord&logoColor=white)](https://discord.gg/Zg3rWta)
 
 ## General
 Eagle Faction is a factions/war plugin for SpongeForge. You can simply create factions and claim territories by using **power**. Yes! Power! Just like in the original factions plugin made for Bukkit (and Spigot).
@@ -45,7 +44,7 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 
 Eagle Factions provides support for translations. In other words, it is possible to change plugin messages to your own language.
 
-You can see all available translations [here](https://github.com/Aquerr/EagleFactions/tree/1.12.2/api-7.0.0/src/main/resources/messages).
+You can see all available translations [here](https://github.com/Aquerr/EagleFactions/tree/develop/common/src/main/resources/assets/eaglefactions/messages).
 
 If there is no translation for your language you can make your own and add it as a pull request.
 
@@ -54,8 +53,9 @@ If there is no translation for your language you can make your own and add it as
 * [Download Links](https://github.com/Aquerr/EagleFactions/releases)
 * [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * [Permissions](https://github.com/Aquerr/EagleFactions/wiki/Permissions)
-* [Translations](https://github.com/Aquerr/EagleFactions/tree/1.12.2/api-7.0.0/src/main/resources/messages)
+* [Translations](https://github.com/Aquerr/EagleFactions/tree/develop/common/src/main/resources/assets/eaglefactions/messages)
 * [Ore](https://ore.spongepowered.org/Niebek/Eagle-Factions)
+* [Discord](https://discord.gg/Zg3rWta)
 
 ## Credits
 
