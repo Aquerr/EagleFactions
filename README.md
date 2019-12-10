@@ -73,4 +73,4 @@ Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 
 ## Donation
 
-If you would like to support me and motivate me even more for making this plugin, you can send my some cookies here [Paypal](https://www.paypal.me/aquerr) :grin:
+Creation of this plugin is really a time consuming task. If you would like to support me then you can send me some cookies through [PayPal](https://www.paypal.me/aquerr)
