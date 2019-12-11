@@ -59,9 +59,7 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
 
-        final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults();
-        final ConfigParseOptions configParseOptions = ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF);
-        this.configLoader = HoconConfigurationLoader.builder().setFile(this.configPath.toFile()).setDefaultOptions(configurationOptions).setParseOptions(configParseOptions).build();
+        this.configLoader = HoconConfigurationLoader.builder().setFile(this.configPath.toFile()).build();
         loadConfiguration();
         save();
 
