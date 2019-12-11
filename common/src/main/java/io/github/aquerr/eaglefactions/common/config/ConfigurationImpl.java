@@ -1,6 +1,8 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
+import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.ConfigSyntax;
 import io.github.aquerr.eaglefactions.api.config.*;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -32,7 +34,7 @@ public class ConfigurationImpl implements Configuration
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
 
-    public ConfigurationImpl(final Path configDir, final Asset confgAsset)
+    public ConfigurationImpl(final Path configDir, final Asset configAsset)
     {
         if (!Files.exists(configDir))
         {
@@ -50,14 +52,16 @@ public class ConfigurationImpl implements Configuration
 
         try
         {
-            confgAsset.copyToFile(this.configPath, false, true);
+            configAsset.copyToFile(this.configPath, false, true);
         }
         catch (final IOException e)
         {
             e.printStackTrace();
         }
 
-        this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
+        final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults();
+        final ConfigParseOptions configParseOptions = ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF);
+        this.configLoader = HoconConfigurationLoader.builder().setFile(this.configPath.toFile()).setDefaultOptions(configurationOptions).setParseOptions(configParseOptions).build();
         loadConfiguration();
         save();
 
@@ -68,6 +72,7 @@ public class ConfigurationImpl implements Configuration
         this.protectionConfig = new ProtectionConfigImpl(this);
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
+        reloadConfiguration();
         save();
     }
 

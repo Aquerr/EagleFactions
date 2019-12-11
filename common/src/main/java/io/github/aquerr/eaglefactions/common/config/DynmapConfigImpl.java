@@ -22,7 +22,6 @@ public class DynmapConfigImpl implements DynmapConfig
 	public DynmapConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
-		reload();
 	}
 
 	@Override

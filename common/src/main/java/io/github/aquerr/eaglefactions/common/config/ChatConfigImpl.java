@@ -24,7 +24,6 @@ public class ChatConfigImpl implements ChatConfig
 	public ChatConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
-		reload();
 	}
 
 	@Override
