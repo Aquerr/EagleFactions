@@ -20,7 +20,7 @@ public class SendCommandListener extends AbstractListener
     }
 
     @Listener(order = Order.EARLY)
-    public void onCommandSend(SendCommandEvent event, @Root Player player)
+    public void onCommandSend(final SendCommandEvent event, @Root Player player)
     {
         if (EagleFactionsPlugin.getPlugin().getPVPLogger().isActive() && EagleFactionsPlugin.getPlugin().getPVPLogger().shouldBlockCommand(player, event.getCommand() + " " + event.getArguments()))
         {

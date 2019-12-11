@@ -42,7 +42,7 @@ public class ModifyBlockListener extends AbstractListener
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
                 final Optional<Location<World>> optionalLocation = transaction.getFinal().getLocation();
-                if(optionalLocation.isPresent() && !super.getPlugin().getProtectionManager().canInteractWithBlock(optionalLocation.get(), user))
+                if(optionalLocation.isPresent() && !super.getPlugin().getProtectionManager().canInteractWithBlock(optionalLocation.get(), user, true))
                     event.setCancelled(true);
             }
         }

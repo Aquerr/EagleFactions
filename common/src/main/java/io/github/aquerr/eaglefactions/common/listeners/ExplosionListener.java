@@ -66,7 +66,7 @@ public class ExplosionListener extends AbstractListener
         }
         else
         {
-            if (!super.getPlugin().getProtectionManager().canExplode(location, user))
+            if (!super.getPlugin().getProtectionManager().canExplode(location, user, false))
             {
                 event.setCancelled(true);
                 return;
@@ -108,7 +108,7 @@ public class ExplosionListener extends AbstractListener
             final Location<World> entityLocation = entity.getLocation();
             if(user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canExplode(entityLocation, user))
+                if(!super.getPlugin().getProtectionManager().canExplode(entityLocation, user, false))
                 {
                     event.getEntities().remove(entity);
                 }
@@ -123,7 +123,7 @@ public class ExplosionListener extends AbstractListener
         {
             if(user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canExplode(location, user))
+                if(!super.getPlugin().getProtectionManager().canExplode(location, user, false))
                 {
                     event.getAffectedLocations().remove(location);
                 }
@@ -172,7 +172,7 @@ public class ExplosionListener extends AbstractListener
 
             if (user != null)
             {
-                if (!super.getPlugin().getProtectionManager().canExplode(location, user))
+                if (!super.getPlugin().getProtectionManager().canExplode(location, user, false))
                 {
                     event.setCancelled(true);
                     return;

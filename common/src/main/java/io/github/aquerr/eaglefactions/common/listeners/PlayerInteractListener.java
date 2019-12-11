@@ -50,7 +50,7 @@ public class PlayerInteractListener extends AbstractListener
             location = hitEntity.getLocation();
         }
 
-        boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack());
+        boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
         if (!canUseItem)
         {
             event.setCancelled(true);
@@ -71,7 +71,7 @@ public class PlayerInteractListener extends AbstractListener
             return;
 
         final Location<World> location = new Location<>(targetEntity.getWorld(), optionalInteractionPoint.get());
-        boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player);
+        boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true);
         if(!canInteractWithEntity)
         {
             event.setCancelled(true);
@@ -92,7 +92,7 @@ public class PlayerInteractListener extends AbstractListener
 
         final Location<World> blockLocation = optionalLocation.get();
 
-        boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player);
+        boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player, true);
         if (!canInteractWithBlock)
         {
             event.setCancelled(true);

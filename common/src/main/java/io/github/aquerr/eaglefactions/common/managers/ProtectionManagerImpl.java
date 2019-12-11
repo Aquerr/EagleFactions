@@ -48,7 +48,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public boolean canInteractWithBlock(final Location<World> location, final User user)
+    public boolean canInteractWithBlock(final Location<World> location, final User user, final boolean shouldNotify)
     {
         final boolean isTileEntityAtLocation = location.getTileEntity().isPresent();
 
@@ -92,7 +92,8 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return true;
             }
 
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
 
@@ -123,7 +124,8 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return true;
             }
 
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
 
@@ -139,13 +141,14 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return true;
             }
 
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
     }
 
     @Override
-    public boolean canUseItem(final Location<World> location, final User user, final ItemStackSnapshot usedItem)
+    public boolean canUseItem(final Location<World> location, final User user, final ItemStackSnapshot usedItem, final boolean shouldNotify)
     {
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
@@ -179,7 +182,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                 return true;
 
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
 
@@ -197,7 +201,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
         {
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
 
@@ -206,20 +211,21 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
         else
         {
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
     }
 
     @Override
-    public boolean canBreak(final Location<World> location, final User user)
+    public boolean canBreak(final Location<World> location, final User user, final boolean shouldNotify)
     {
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
             {
                 Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block break:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block break event!")));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
@@ -241,7 +247,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 return true;
 
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
 
@@ -261,7 +268,8 @@ public class ProtectionManagerImpl implements ProtectionManager
                 }
                 else
                 {
-                    notifyPlayer(user);
+                    if(shouldNotify)
+                        notifyPlayer(user);
                     return false;
                 }
             }
@@ -270,13 +278,15 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if (!this.plugin.getFlagManager().canBreakBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
-                    notifyPlayer(user);
+                    if(shouldNotify)
+                        notifyPlayer(user);
                     return false;
                 }
             }
             else
             {
-                notifyPlayer(user);
+                if(shouldNotify)
+                    notifyPlayer(user);
                 return false;
             }
         }
@@ -314,7 +324,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public boolean canPlace(Location<World> location, User user)
+    public boolean canPlace(final Location<World> location, final User user, final boolean shouldNotify)
     {
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
@@ -344,7 +354,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 return true;
 
-            notifyPlayer(user);
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
         }
 
@@ -364,7 +375,8 @@ public class ProtectionManagerImpl implements ProtectionManager
                 }
                 else
                 {
-                    notifyPlayer(user);
+                    if(shouldNotify)
+                        notifyPlayer(user);
                     return false;
                 }
             }
@@ -373,13 +385,15 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if (!this.plugin.getFlagManager().canPlaceBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
-                    notifyPlayer(user);
+                    if(shouldNotify)
+                        notifyPlayer(user);
                     return false;
                 }
             }
             else
             {
-                notifyPlayer(user);
+                if(shouldNotify)
+                    notifyPlayer(user);
                 return false;
             }
         }
@@ -387,13 +401,13 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public boolean canExplode(Location<World> location, User user)
+    public boolean canExplode(final Location<World> location, final User user, final boolean shouldNotify)
     {
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
             {
-                Player player = (Player)user;
+                final Player player = (Player)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Explosion:")));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
@@ -410,40 +424,68 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Check world
         if (this.protectionConfig.getSafeZoneWorldNames().contains(location.getExtent().getName()))
+        {
+            if(shouldNotify)
+                notifyPlayer(user);
             return false;
-
-        if (this.protectionConfig.getWarZoneWorldNames().contains(location.getExtent().getName()))
-            return !shouldProtectWarZoneFromPlayers;
+        }
+        else if (this.protectionConfig.getWarZoneWorldNames().contains(location.getExtent().getName()))
+        {
+            if(shouldProtectWarZoneFromPlayers)
+            {
+                if(shouldNotify)
+                    notifyPlayer(user);
+                return false;
+            }
+            else return true;
+        }
 
         //If no faction
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
         if (!optionalChunkFaction.isPresent())
             return true;
 
         //If SafeZone or WarZone
-        Faction chunkFaction = optionalChunkFaction.get();
-        if (chunkFaction.getName().equalsIgnoreCase("SafeZone"))
-            return false;
-        if (chunkFaction.getName().equalsIgnoreCase("WarZone") && shouldProtectWarZoneFromPlayers)
-            return false;
+        final Faction chunkFaction = optionalChunkFaction.get();
+
+        if(chunkFaction.getName().equals("WarZone") || chunkFaction.getName().equals("SafeZone"))
+        {
+            if(chunkFaction.getName().equals("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                return true;
+            else if(chunkFaction.getName().equals("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                return true;
+            else
+            {
+                if(shouldNotify)
+                    notifyPlayer(user);
+                return false;
+            }
+        }
 
         //If player is in faction
-        Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-        if (optionalPlayerFaction.isPresent())
+        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        if(optionalPlayerFaction.isPresent())
         {
-            Faction playerFaction = optionalPlayerFaction.get();
-            //If same faction
+            final Faction playerFaction = optionalPlayerFaction.get();
             if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
             {
-                //Check faction's flags
-                return this.plugin.getFlagManager().canBreakBlock(user.getUniqueId(), playerFaction, chunkFaction);
+                if (!this.plugin.getFlagManager().canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction))
+                {
+                    if(shouldNotify)
+                        notifyPlayer(user);
+                    return false;
+                }
+                else return true;
             }
-            return allowExplosionsByOtherPlayersInClaims;
         }
-        else //If player is not in faction but faction exists at chunk
+
+        if(!allowExplosionsByOtherPlayersInClaims)
         {
-            return allowExplosionsByOtherPlayersInClaims;
+            if(shouldNotify)
+                notifyPlayer(user);
+            return false;
         }
+        else return true;
     }
 
     @Override

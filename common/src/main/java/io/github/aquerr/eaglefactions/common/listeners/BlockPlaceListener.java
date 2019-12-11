@@ -42,7 +42,7 @@ public class BlockPlaceListener extends AbstractListener
             final Player player = (Player) user;
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player))
+                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true))
                     event.setCancelled(true);
             }
         }
