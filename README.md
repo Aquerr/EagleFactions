@@ -18,6 +18,8 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 
 **If you find any issues while using **Eagle Factions** or you want to share your thoughts on what could be added, post them at [Github](https://github.com/Aquerr/EagleFactions/issues)**
 
+**If you enjoy using Eagle Factions, give this repo a star!**
+
 ## Features
 
 * Create factions
@@ -73,4 +75,4 @@ Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 
 ## Donation
 
-Creation of this plugin is really a time consuming task. If you would like to support me then you can send me some cookies through [PayPal](https://www.paypal.me/aquerr)
+Creation of this plugin is really a time consuming task. If you would like to support me then you can star this repo or send me some cookies through [PayPal](https://www.paypal.me/aquerr).
