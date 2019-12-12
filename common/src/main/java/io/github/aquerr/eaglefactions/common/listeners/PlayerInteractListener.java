@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -64,13 +65,11 @@ public class PlayerInteractListener extends AbstractListener
         final Entity targetEntity = event.getTargetEntity();
         final Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
 
-        if(targetEntity instanceof Living)
+        if((targetEntity instanceof Living) && !(targetEntity instanceof ArmorStand))
             return;
 
-        if(!optionalInteractionPoint.isPresent())
-            return;
-
-        final Location<World> location = new Location<>(targetEntity.getWorld(), optionalInteractionPoint.get());
+        final Vector3d blockPosition = optionalInteractionPoint.orElseGet(() -> targetEntity.getLocation().getPosition());
+        final Location<World> location = new Location<>(targetEntity.getWorld(), blockPosition);
         boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true);
         if(!canInteractWithEntity)
         {
