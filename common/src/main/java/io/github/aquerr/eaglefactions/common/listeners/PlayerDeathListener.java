@@ -11,6 +11,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -31,37 +32,33 @@ public class PlayerDeathListener extends AbstractListener
     }
 
     @Listener(order = Order.POST)
-    public void onPlayerDeath(final DestructEntityEvent.Death event)
+    public void onPlayerDeath(final DestructEntityEvent.Death event, final @Getter("getTargetEntity") Player player)
     {
-        if(event.getTargetEntity() instanceof Player)
+        super.getPlugin().getPowerManager().decreasePower(player.getUniqueId());
+
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPowerDecrement() + "\n",
+                TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
+
+        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+
+        if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
         {
-            final Player player = (Player)event.getTargetEntity();
-            super.getPlugin().getPowerManager().decreasePower(player.getUniqueId());
+            super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
+        }
 
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPowerDecrement() + "\n",
-                    TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
+        if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction())
+        {
+            final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-            final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-
-            if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
+            if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().getName().equals(optionalPlayerFaction.get().getName()))
             {
-                super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
+                super.getPlugin().getAttackLogic().blockHome(player.getUniqueId());
             }
+        }
 
-            if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction())
-            {
-                final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-                if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().getName().equals(optionalPlayerFaction.get().getName()))
-                {
-                    super.getPlugin().getAttackLogic().blockHome(player.getUniqueId());
-                }
-            }
-
-            if(super.getPlugin().getPVPLogger().isActive() && super.getPlugin().getPVPLogger().isPlayerBlocked(player))
-            {
-                super.getPlugin().getPVPLogger().removePlayer(player);
-            }
+        if(super.getPlugin().getPVPLogger().isActive() && super.getPlugin().getPVPLogger().isPlayerBlocked(player))
+        {
+            super.getPlugin().getPVPLogger().removePlayer(player);
         }
     }
 }

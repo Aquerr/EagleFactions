@@ -13,9 +13,13 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -23,6 +27,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
+import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
@@ -45,8 +50,44 @@ public class EntityDamageListener extends AbstractListener
         this.powerConfig = plugin.getConfiguration().getPowerConfig();
     }
 
-    @Listener(order = Order.EARLY, beforeModifications = true)
+    //Method used for handling damaging entities like ArmorStands and Item Frames.
+    @Listener(order = Order.FIRST, beforeModifications = true)
     public void onEntityDamage(final DamageEntityEvent event)
+    {
+        final Entity targetEntity = event.getTargetEntity();
+        final Cause cause = event.getCause();
+        final EventContext eventContext = event.getContext();
+
+        //Handle damaging player in separate method.
+        if(targetEntity instanceof Player)
+            return;
+
+        //It should be possible to attack living mobs always. Maybe we will provide a config for it in the future but not now.
+        if((targetEntity instanceof Living) && !(targetEntity instanceof ArmorStand))
+            return;
+
+        User user = null;
+
+        if(cause.root() instanceof IndirectEntityDamageSource)
+        {
+            IndirectEntityDamageSource indirectEntityDamageSource = (IndirectEntityDamageSource) cause.root();
+            final Entity sourceEntity = indirectEntityDamageSource.getIndirectSource();
+            if(sourceEntity instanceof Player)
+                user = (Player) sourceEntity;
+        }
+
+        if(user == null)
+            return;
+
+        if(!super.getPlugin().getProtectionManager().canInteractWithBlock(targetEntity.getLocation(), user, true))
+        {
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    @Listener(order = Order.EARLY, beforeModifications = true)
+    public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "getTargetEntity") Player player)
     {
         if(!(event.getCause().root() instanceof DamageSource))
             return;
@@ -126,7 +167,7 @@ public class EntityDamageListener extends AbstractListener
 
             if(entitySource instanceof Player)
             {
-                final Player player = (Player) entitySource;
+//                final Player player = (Player) entitySource;
                 final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
                 if(shouldBlockDamage)
                 {
@@ -315,14 +356,14 @@ public class EntityDamageListener extends AbstractListener
         }
     }
 
-    private void sendPenaltyMessageAndDecreasePower(Player player)
+    private void sendPenaltyMessageAndDecreasePower(final Player player)
     {
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPenalty() + "\n",
                 TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().penalty(player.getUniqueId());
     }
 
-    private void sendKillAwardMessageAndIncreasePower(Player player)
+    private void sendKillAwardMessageAndIncreasePower(final Player player)
     {
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_POWER_HAS_BEEN_INCREASED_BY + " ", TextColors.GOLD, this.powerConfig.getKillAward() + "\n",
                 TextColors.GRAY, PluginMessages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));

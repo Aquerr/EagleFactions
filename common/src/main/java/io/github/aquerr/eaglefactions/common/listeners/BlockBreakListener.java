@@ -15,9 +15,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.hanging.ItemFrame;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -28,6 +30,9 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.TargetEntityEvent;
+import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -168,15 +173,6 @@ public class BlockBreakListener extends AbstractListener
                         event.setCancelled(true);
                         return;
                     }
-//                    Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-//                    Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
-//                    if(optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent())
-//                    {
-//                        if(super.getPlugin().getFlagManager().canInteract(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
-//                        {
-//                            event.setCancelled(true);
-//                        }
-//                    }
                 }
 
                 if(isFireSource)
@@ -328,7 +324,7 @@ public class BlockBreakListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onBlockCollide(CollideBlockEvent event)
+    public void onBlockCollide(final CollideBlockEvent event)
     {
         if(event instanceof CollideBlockEvent.Impact)
             return;
@@ -382,7 +378,7 @@ public class BlockBreakListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onProjectileImpactBlock(CollideBlockEvent.Impact event)
+    public void onProjectileImpactBlock(final CollideBlockEvent.Impact event)
     {
         if(!(event.getSource() instanceof Entity))
             return;
@@ -440,25 +436,50 @@ public class BlockBreakListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onEntityCollideEntity(CollideEntityEvent event)
+    public void onEntityCollideEntity(final CollideEntityEvent event)
     {
         final List<Entity> entityList = event.getEntities();
+        final EventContext eventContext = event.getContext();
+        final Cause cause = event.getCause();
+        final Object source = event.getSource();
+        User user = null;
+        boolean isProjectileSource = eventContext.containsKey(EventContextKeys.PROJECTILE_SOURCE);
+
+        if(isProjectileSource)
+        {
+            final ProjectileSource projectileSource = eventContext.get(EventContextKeys.PROJECTILE_SOURCE).get();
+            if(projectileSource instanceof Player)
+            {
+                user = (Player)projectileSource;
+            }
+        }
+
         for(final Entity entity : entityList)
         {
-            if(entity instanceof Player && event.getSource() instanceof Entity)
+            //Check if projectile fired by user collided with ItemFrame.
+            if(entity instanceof ItemFrame && isProjectileSource && user != null)
             {
-                final Entity sourceEntity = (Entity) event.getSource();
+                if(!super.getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), user, true))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
+            if(entity instanceof Player && source instanceof Entity)
+            {
+                final Entity sourceEntity = (Entity) source;
+
                 if(sourceEntity.getType().getName().contains("projectile"))
                 {
-                    final Player player = (Player) entity;
-                    if(this.protectionConfig.getSafeZoneWorldNames().contains(player.getWorld().getName()))
+                    if(this.protectionConfig.getSafeZoneWorldNames().contains(entity.getWorld().getName()))
                     {
                         sourceEntity.remove();
                         event.setCancelled(true);
                         return;
                     }
 
-                    final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+                    final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition());
                     if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
                     {
                         sourceEntity.remove();
@@ -467,9 +488,12 @@ public class BlockBreakListener extends AbstractListener
                     }
 
                     //TechGuns - Should be better to find more generic way of doing this...
+                    //If sourceEntity = projectile that comes from techguns
                     if(sourceEntity.getType().getId().contains("techguns"))
                     {
-                        //If sourceEntity = projectile that comes from techguns
+                        final Player player = (Player) entity;
+
+                        //This code will break if techguns will change theirs code. Hope they won't.
                         final Class sourceEntityClass = sourceEntity.getClass();
                         try
                         {
@@ -545,7 +569,7 @@ public class BlockBreakListener extends AbstractListener
             return;
 
         //Handle Item Frames
-        Object rootCause = event.getCause().root();
+        Object rootCause = cause.root();
         if(!(rootCause instanceof ItemFrame))
             return;
 
