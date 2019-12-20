@@ -26,8 +26,8 @@ public class VersionChecker
 
     public static boolean isLatest(String version)
     {
-        String latest = "https://api.github.com/repos/Aquerr/EagleFactions/releases";
-        String currentTag = "https://api.github.com/repos/Aquerr/EagleFactions/releases/tags/v" + version;
+        String latest = "https://ore.spongepowered.org/api/v1/projects/eaglefactions/versions";
+        String currentTag = "https://ore.spongepowered.org/api/v1/projects/eaglefactions/versions/" + version;
 
         String latestJsonData = sendRequest(latest);
         String currentJsonData = sendRequest(currentTag);
@@ -43,8 +43,8 @@ public class VersionChecker
                 JsonArray latestJsonArray = latestJsonElement.getAsJsonArray();
                 JsonElement latestRelease = latestJsonArray.get(0);
 
-                Date latestReleaseDate = Date.from(Instant.parse(latestRelease.getAsJsonObject().get("published_at").getAsString()));
-                Date currentReleaseDate = Date.from(Instant.parse(currentJsonElement.getAsJsonObject().get("published_at").getAsString()));
+                Date latestReleaseDate = Date.from(Instant.parse(latestRelease.getAsJsonObject().get("createdAt").getAsString()));
+                Date currentReleaseDate = Date.from(Instant.parse(currentJsonElement.getAsJsonObject().get("createdAt").getAsString()));
 
                 if (currentReleaseDate.before(latestReleaseDate)) return false;
             }
