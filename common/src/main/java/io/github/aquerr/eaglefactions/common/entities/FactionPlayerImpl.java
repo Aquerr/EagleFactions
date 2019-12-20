@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -18,10 +19,10 @@ public class FactionPlayerImpl implements FactionPlayer
     private String factionName;
     private FactionMemberType factionRole;
 
-    private float power;
-    private float maxpower;
+//    private float power;
+//    private float maxpower;
 
-    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final FactionMemberType factionRole, final float power, final float maxpower)
+    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final FactionMemberType factionRole)
     {
         this.name = playerName;
         this.uniqueId = uniqueId;
@@ -29,8 +30,8 @@ public class FactionPlayerImpl implements FactionPlayer
         this.factionName = factionName;
         this.factionRole = factionRole;
 
-        this.power = power;
-        this.maxpower = maxpower;
+//        this.power = power;
+//        this.maxpower = maxpower;
     }
 
     @Override
@@ -71,6 +72,26 @@ public class FactionPlayerImpl implements FactionPlayer
         }
     }
 
+    @Override
+    public boolean isOnline()
+    {
+        final Optional<User> optionalUser = getUser();
+        return optionalUser.map(User::isOnline).orElse(false);
+    }
+
+    @Override
+    public float getPower()
+    {
+        return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(this.uniqueId);
+    }
+
+    @Override
+    public float getMaxPower()
+    {
+        return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerMaxPower(this.uniqueId);
+    }
+
+    @Override
     public Optional<User> getUser()
     {
         final Optional<UserStorageService> userStorageService = Sponge.getServiceManager().provide(UserStorageService.class);

@@ -46,7 +46,7 @@ public class PlayerManagerImpl implements PlayerManager
         optionalUserStorageService.ifPresent(x -> userStorageService = x);
     }
 
-    public static PlayerManagerImpl getInstance(EagleFactions eagleFactions)
+    public static PlayerManagerImpl getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new PlayerManagerImpl(eagleFactions);
@@ -54,37 +54,37 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public boolean addPlayer(UUID playerUUID, String playerName)
+    public boolean addPlayer(final UUID playerUUID, final String playerName)
     {
         return storageManager.addPlayer(playerUUID, playerName, this.powerConfig.getStartingPower(), this.powerConfig.getGlobalMaxPower());
     }
 
     @Override
-    public float getPlayerPower(UUID playerUUID)
+    public float getPlayerPower(final UUID playerUUID)
     {
         return storageManager.getPlayerPower(playerUUID);
     }
 
     @Override
-    public boolean setPlayerPower(UUID playerUUID, float power)
+    public boolean setPlayerPower(final UUID playerUUID, final float power)
     {
         return storageManager.setPlayerPower(playerUUID, power);
     }
 
     @Override
-    public float getPlayerMaxPower(UUID playerUUID)
+    public float getPlayerMaxPower(final UUID playerUUID)
     {
         return storageManager.getPlayerMaxPower(playerUUID);
     }
 
     @Override
-    public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
+    public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
     {
         return storageManager.setPlayerMaxPower(playerUUID, maxpower);
     }
 
     @Override
-    public Optional<String> getPlayerName(UUID playerUUID)
+    public Optional<String> getPlayerName(final UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
 
@@ -97,30 +97,29 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public FactionPlayer convertToFactionPlayer(User user)
+    public FactionPlayer convertToFactionPlayer(final User user)
     {
         String factionName = "";
         FactionMemberType factionMemberType = null;
-        Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if (optionalFaction.isPresent())
         {
             factionName = optionalFaction.get().getName();
             factionMemberType = optionalFaction.get().getPlayerMemberType(user.getUniqueId());
         }
-
-        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, factionMemberType, this.powerConfig.getStartingPower(),  this.powerConfig.getGlobalMaxPower());
+        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, factionMemberType);
     }
 
-    private Optional<String> getLastKnownPlayerName(UUID playerUUID)
+    private Optional<String> getLastKnownPlayerName(final UUID playerUUID)
     {
-        String playerName = storageManager.getPlayerName(playerUUID);
+        final String playerName = storageManager.getPlayerName(playerUUID);
         if(playerName.equals(""))
             return Optional.empty();
         return Optional.of(playerName);
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID playerUUID)
+    public Optional<Player> getPlayer(final UUID playerUUID)
     {
         final Optional<User> oUser = getUser(playerUUID);
         if(!oUser.isPresent())
@@ -129,7 +128,7 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public boolean isPlayerOnline(UUID playerUUID)
+    public boolean isPlayerOnline(final UUID playerUUID)
     {
         Optional<User> oUser = getUser(playerUUID);
         return oUser.map(User::isOnline).orElse(false);
@@ -142,19 +141,19 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public void setDeathInWarZone(UUID playerUUID, boolean didDieInWarZone)
+    public void setDeathInWarZone(final UUID playerUUID, final boolean didDieInWarZone)
     {
         storageManager.setDeathInWarzone(playerUUID, didDieInWarZone);
     }
 
     @Override
-    public boolean lastDeathAtWarZone(UUID playerUUID)
+    public boolean lastDeathAtWarZone(final UUID playerUUID)
     {
        return storageManager.getLastDeathInWarzone(playerUUID);
     }
 
     @Override
-    public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
+    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
     {
         return storageManager.checkIfPlayerExists(playerUUID, playerName);
     }

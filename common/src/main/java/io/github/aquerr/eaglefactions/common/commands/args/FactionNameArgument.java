@@ -35,7 +35,7 @@ public class FactionNameArgument extends CommandElement
         }
         else
         {
-            return null;
+            throw new ArgumentParseException(Text.of("Argument is not a valid faction!"), "", 0);
         }
     }
 

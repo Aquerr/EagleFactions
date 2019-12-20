@@ -47,7 +47,7 @@ public class UnclaimallCommand extends AbstractCommand
 
                     if(!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
                     {
-                        super.getPlugin().getFactionLogic().setHome(null, playerFaction, null);
+                        super.getPlugin().getFactionLogic().setHome(playerFaction, null, null);
                     }
 
                     super.getPlugin().getFactionLogic().removeAllClaims(playerFaction);

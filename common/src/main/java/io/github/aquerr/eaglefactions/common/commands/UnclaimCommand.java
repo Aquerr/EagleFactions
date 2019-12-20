@@ -58,7 +58,7 @@ public class UnclaimCommand extends AbstractCommand
                     {
                             final Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
                             if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
-                                super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                                super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
                     }
                 }
 
@@ -100,7 +100,7 @@ public class UnclaimCommand extends AbstractCommand
                             {
                                     final Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
                                     if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
-                                        super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), optionalChunkFaction.get(), null);
+                                        super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
                             }
                         }
 

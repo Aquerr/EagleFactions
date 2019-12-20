@@ -435,11 +435,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setHome(@Nullable UUID worldUUID, Faction faction, @Nullable Vector3i home)
+    public void setHome(Faction faction, @Nullable UUID worldUUID, @Nullable Vector3i blockPosition)
     {
-        if(home != null && worldUUID != null)
+        if(blockPosition != null && worldUUID != null)
         {
-            faction = faction.toBuilder().setHome(new FactionHome(worldUUID, home)).build();
+            faction = faction.toBuilder().setHome(new FactionHome(worldUUID, blockPosition)).build();
         }
         else
         {
@@ -541,34 +541,34 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
+    public void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunkPosition)
     {
         if(this.factionsConfig.shouldDelayClaim())
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIMING_HAS_BEEN_STARTED + " " + PluginMessages.STAY_IN_THE_CHUNK_FOR + " ", TextColors.GOLD, this.factionsConfig.getClaimDelay() + " " + PluginMessages.SECONDS, TextColors.GREEN, " " + PluginMessages.TO_CLAIM_IT));
-            EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunk), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
+            EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunkPosition), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
 //            taskBuilder.delay(1, TimeUnit.SECONDS).interval(1, TimeUnit.SECONDS).execute(addClaimWithDelay(player, faction, worldUUID, chunk)).submit(EagleFactionsPlugin.getPlugin());
         }
         else
         {
             if(this.factionsConfig.shouldClaimByItems())
             {
-                boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunk);
+                boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunkPosition);
                 if(didSucceed)
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
                 else
                     player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
-                addClaim(faction, new Claim(worldUUID, chunk));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                addClaim(faction, new Claim(worldUUID, chunkPosition));
             }
         }
     }
 
     @Override
-    public boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunk)
+    public boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunkPosition)
     {
         Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToClaim();
         PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
@@ -638,7 +638,7 @@ public class FactionLogicImpl implements FactionLogic
                 }
             }
 
-            addClaim(faction, new Claim(worldUUID, chunk));
+            addClaim(faction, new Claim(worldUUID, chunkPosition));
             return true;
         }
         else
@@ -762,9 +762,9 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setIsPublic(final Faction playerFaction, final boolean isPublic)
+    public void setIsPublic(final Faction faction, final boolean isPublic)
     {
-        final Faction updatedFaction = playerFaction.toBuilder().setIsPublic(isPublic).build();
+        final Faction updatedFaction = faction.toBuilder().setIsPublic(isPublic).build();
         this.storageManager.addOrUpdateFaction(updatedFaction);
     }
 

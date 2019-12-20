@@ -302,7 +302,7 @@ public class MapCommand extends AbstractCommand
                         Location homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
                         if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                         {
-                            super.getPlugin().getFactionLogic().setHome(world.getUniqueId(), playerFaction, null);
+                            super.getPlugin().getFactionLogic().setHome(playerFaction, world.getUniqueId(), null);
                         }
                     }
                 }

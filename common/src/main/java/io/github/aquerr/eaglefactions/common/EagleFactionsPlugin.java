@@ -14,7 +14,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
-import io.github.aquerr.eaglefactions.common.dynmap.DynmapMain;
+import io.github.aquerr.eaglefactions.common.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
@@ -79,18 +79,19 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private static EagleFactionsPlugin eagleFactions;
 
-    private Configuration _configuration;
-    private PVPLogger _pvpLogger;
-    private PlayerManagerImpl _playerManager;
-    private FlagManagerImpl _flagManager;
-    private ProtectionManager _protectionManager;
-    private PowerManagerImpl _powerManager;
-    private AttackLogic _attackLogic;
-    private FactionLogic _factionLogic;
-    private StorageManager _storageManager;
-    private EFPlaceholderService _efPlaceholderService;
+    private Configuration configuration;
+    private PVPLogger pvpLogger;
+    private PlayerManagerImpl playerManager;
+    private FlagManagerImpl flagManager;
+    private ProtectionManager protectionManager;
+    private PowerManagerImpl powerManager;
+    private AttackLogic attackLogic;
+    private FactionLogic factionLogic;
+    private StorageManager storageManager;
+    private EFPlaceholderService efPlaceholderService;
 
-    private DynmapMain _dynmapMain;
+    //Integrations
+    private DynmapService dynmapService;
 
     public static EagleFactionsPlugin getPlugin()
     {
@@ -99,11 +100,11 @@ public class EagleFactionsPlugin implements EagleFactions
 
     @Inject
     @ConfigDir(sharedRoot = false)
-    private Path _configDir;
+    private Path configDir;
 
     public Path getConfigDir()
     {
-        return _configDir;
+        return configDir;
     }
 
     @Inject
@@ -155,8 +156,8 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         //This is not really needed as api consumers can access managers classes through EagleFactions interface instance.
         //But we are still registering these managers just in case someone will try to access not through EagleFactions interface.
-        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this._factionLogic);
-        Sponge.getServiceManager().setProvider(this, PowerManager.class, this._powerManager);
+        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this.factionLogic);
+        Sponge.getServiceManager().setProvider(this, PowerManager.class, this.powerManager);
     }
 
     @Listener
@@ -168,7 +169,7 @@ public class EagleFactionsPlugin implements EagleFactions
             Optional placeholderService1 = Sponge.getServiceManager().provide(placeholderInterface);
             placeholderService1.ifPresent(placeholderService -> {
                 printInfo("Found PlaceholderAPI! Registering placeholders...");
-                _efPlaceholderService = EFPlaceholderService.getInstance(this, placeholderService);
+                efPlaceholderService = EFPlaceholderService.getInstance(this, placeholderService);
                 printInfo("Registered Eagle Factions' placeholders.");
             });
         }
@@ -183,13 +184,13 @@ public class EagleFactionsPlugin implements EagleFactions
             permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
         }
 
-        if (_configuration.getDynmapConfig().isDynmapIntegrationEnabled())
+        if (configuration.getDynmapConfig().isDynmapIntegrationEnabled())
         {
             try
             {
                 Class.forName("org.dynmap.DynmapCommonAPI");
-                this._dynmapMain = new DynmapMain(this);
-                this._dynmapMain.activate();
+                this.dynmapService = new DynmapService(this);
+                this.dynmapService.activate();
 
                 printInfo("Dynmap Integration is active!");
             }
@@ -209,8 +210,8 @@ public class EagleFactionsPlugin implements EagleFactions
     @Listener
     public void onReload(final GameReloadEvent event)
     {
-        this._configuration.reloadConfiguration();
-        this._storageManager.reloadStorage();
+        this.configuration.reloadConfiguration();
+        this.storageManager.reloadStorage();
 
         if(event.getSource() instanceof Player)
         {
@@ -583,47 +584,47 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public Configuration getConfiguration()
     {
-        return this._configuration;
+        return this.configuration;
     }
 
     public PVPLogger getPVPLogger()
     {
-        return this._pvpLogger;
+        return this.pvpLogger;
     }
 
     public FlagManagerImpl getFlagManager()
     {
-        return _flagManager;
+        return flagManager;
     }
 
     public PlayerManagerImpl getPlayerManager()
     {
-        return _playerManager;
+        return playerManager;
     }
 
     public PowerManagerImpl getPowerManager()
     {
-        return _powerManager;
+        return powerManager;
     }
 
     public ProtectionManager getProtectionManager()
     {
-        return _protectionManager;
+        return protectionManager;
     }
 
     public AttackLogic getAttackLogic()
     {
-        return _attackLogic;
+        return attackLogic;
     }
 
     public FactionLogic getFactionLogic()
     {
-        return _factionLogic;
+        return factionLogic;
     }
 
     public StorageManager getStorageManager()
     {
-        return this._storageManager;
+        return this.storageManager;
     }
 
     public InputStream getResourceAsStream(String fileName)
@@ -643,21 +644,21 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void setupConfigs()
     {
-        _configuration = new ConfigurationImpl(_configDir, configAsset);
+        configuration = new ConfigurationImpl(configDir, configAsset);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
 
-        _pvpLogger = new PVPLoggerImpl(getConfiguration());
+        pvpLogger = new PVPLoggerImpl(getConfiguration());
     }
 
     private void setupManagers()
     {
-        _storageManager = StorageManagerImpl.getInstance(this);
-        _playerManager = PlayerManagerImpl.getInstance(this);
-        _powerManager = PowerManagerImpl.getInstance(this);
-        _flagManager = FlagManagerImpl.getInstance(this);
-        _factionLogic = FactionLogicImpl.getInstance(this);
-        _attackLogic = AttackLogicImpl.getInstance(this);
-        _protectionManager = ProtectionManagerImpl.getInstance(this);
+        storageManager = StorageManagerImpl.getInstance(this);
+        playerManager = PlayerManagerImpl.getInstance(this);
+        powerManager = PowerManagerImpl.getInstance(this);
+        flagManager = FlagManagerImpl.getInstance(this);
+        factionLogic = FactionLogicImpl.getInstance(this);
+        attackLogic = AttackLogicImpl.getInstance(this);
+        protectionManager = ProtectionManagerImpl.getInstance(this);
     }
 
     private void startFactionsRemover()
@@ -671,6 +672,6 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public EFPlaceholderService getEfPlaceholderService()
     {
-        return _efPlaceholderService;
+        return efPlaceholderService;
     }
 }

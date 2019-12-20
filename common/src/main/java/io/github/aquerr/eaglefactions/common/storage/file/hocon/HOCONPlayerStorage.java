@@ -258,14 +258,12 @@ public class HOCONPlayerStorage implements IPlayerStorage
                 }
                 String factionName = configurationNode.getNode("faction").getString("");
                 String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
-                float power = configurationNode.getNode("power").getFloat(5f);
-                float maxpower = configurationNode.getNode("maxpower").getFloat(10f);
                 FactionMemberType factionMemberType = null;
 
                 if(!factionMemberTypeString.equals(""))
                     factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
-                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, factionMemberType, power, maxpower);
+                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, factionMemberType);
                 playerSet.add(factionPlayer);
             }
             catch(IOException e)

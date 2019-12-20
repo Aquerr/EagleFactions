@@ -64,13 +64,13 @@ public class DynmapUpdateTask implements Runnable {
                 if (factionHomeWorld != null) {
                     Vector3i blockPos = faction.getHome().getBlockPosition();
 
-                    Marker marker = DynmapMain.markerSet.createMarker(null,
+                    Marker marker = DynmapService.markerSet.createMarker(null,
                             faction.getName() + " Home",
                             factionHomeWorld.getName(),
                             blockPos.getX(),
                             blockPos.getY(),
                             blockPos.getZ(),
-                            DynmapMain.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig().getDynmapFactionHomeIcon()),
+                            DynmapService.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig().getDynmapFactionHomeIcon()),
                             false);
 
                     drawnMarkers.put(faction.getName(), marker);
@@ -109,7 +109,7 @@ public class DynmapUpdateTask implements Runnable {
 
                     if (world == null) continue; /* Somehow there's no world for that area */
 
-                    AreaMarker areaMarker = DynmapMain.markerSet.createAreaMarker(null,
+                    AreaMarker areaMarker = DynmapService.markerSet.createAreaMarker(null,
                             faction.getName(),
                             false,
                             world.getName(),

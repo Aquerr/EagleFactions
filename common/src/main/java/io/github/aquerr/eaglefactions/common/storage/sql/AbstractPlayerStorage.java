@@ -252,9 +252,7 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             {
                 final UUID playerUUID = resultSet.getObject("PlayerUUID", UUID.class);
                 final String name = resultSet.getString("Name");
-                final float power = resultSet.getInt("Power");
-                final float maxpower = resultSet.getInt("Maxpower");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null, power, maxpower);
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();
