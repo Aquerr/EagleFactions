@@ -165,10 +165,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final World world = location.getExtent();
 
-        if (hasAdminMode(user.getUniqueId()))
-            return true;
-
-        if (isItemWhitelisted(usedItem.getType().getId()))
+        if (hasAdminMode(user.getUniqueId()) || isItemWhitelisted(usedItem.getType().getId()))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
@@ -207,7 +204,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         Faction playerFaction = optionalPlayerFaction.get();
-        if (plugin.getFlagManager().canInteract(user.getUniqueId(), playerFaction, chunkFaction))
+        if (this.plugin.getFlagManager().canInteract(user.getUniqueId(), playerFaction, chunkFaction))
             return true;
         else
         {
@@ -229,6 +226,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block id: " + location.getBlockType().getId())));
             }
         }
 

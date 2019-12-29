@@ -37,11 +37,8 @@ public class PlayerInteractListener extends AbstractListener
         if (event.getItemStack() == ItemStackSnapshot.NONE)
             return;
 
-        final Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
-        if (!optionalInteractionPoint.isPresent())
-            return;
-
-        Location<World> location = new Location<>(player.getWorld(), optionalInteractionPoint.get());
+        final Vector3d interactionPoint = event.getInteractionPoint().orElse(player.getLocation().getPosition());
+        Location<World> location = new Location<>(player.getWorld(), interactionPoint);
 
         //Handle hitting entities
         boolean hasHitEntity = event.getContext().containsKey(EventContextKeys.ENTITY_HIT);
