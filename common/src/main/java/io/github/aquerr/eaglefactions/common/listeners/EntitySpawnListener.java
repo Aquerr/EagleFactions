@@ -22,6 +22,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
@@ -50,6 +51,7 @@ public class EntitySpawnListener extends AbstractListener
         EventContext eventContext = event.getContext();
         final SpawnType spawnType = eventContext.get(EventContextKeys.SPAWN_TYPE).orElse(null);
         final boolean isPlayerPlace = eventContext.get(EventContextKeys.PLAYER_PLACE).isPresent() && eventContext.get(EventContextKeys.OWNER).isPresent();
+        final boolean isItemUsed = eventContext.get(EventContextKeys.USED_ITEM).isPresent() && eventContext.get(EventContextKeys.OWNER).isPresent();
 
         Iterator<Entity> entitiesIterator = event.getEntities().iterator();
         while(entitiesIterator.hasNext())
@@ -76,11 +78,21 @@ public class EntitySpawnListener extends AbstractListener
 
             if(entity.toString().contains("EntityCustomNpc")) return;
 
-            if(spawnType == SpawnTypes.PLACEMENT && isPlayerPlace)
+            if (isItemUsed)
             {
+                final User user = eventContext.get(EventContextKeys.OWNER).get();
+                final ItemStackSnapshot itemStackSnapshot = eventContext.get(EventContextKeys.USED_ITEM).get();
+                if (!super.getPlugin().getProtectionManager().canUseItem(entity.getLocation(), user, itemStackSnapshot, true))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            else if(spawnType == SpawnTypes.PLACEMENT && isPlayerPlace)
+            {
+                final User user = eventContext.get(EventContextKeys.OWNER).get();
                 //Entity spawned from a command or something similar... (can be a hammer that is being used with right-click on a machine block)
                 //Let's treat is as a place event for now...
-                final User user = eventContext.get(EventContextKeys.OWNER).get();
                 if(!super.getPlugin().getProtectionManager().canPlace(entity.getLocation(), user, false))
                 {
                     event.setCancelled(true);

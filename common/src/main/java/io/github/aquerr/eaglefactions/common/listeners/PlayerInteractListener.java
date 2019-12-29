@@ -31,9 +31,6 @@ public class PlayerInteractListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onItemUse(final InteractItemEvent event, @Root final Player player)
     {
-        if(event instanceof InteractBlockEvent)
-            return;
-
         if (event.getItemStack() == ItemStackSnapshot.NONE)
             return;
 

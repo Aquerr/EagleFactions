@@ -249,7 +249,7 @@ public class BlockBreakListener extends AbstractListener
     {
         //SpawnType in break event? Should be located in Pre or global event in my opinion.
         //Custom Spawn Type = Can be a piston moving block or possibly any other "magically" spawned block.
-        final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
+            final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
 
         if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
             return;
