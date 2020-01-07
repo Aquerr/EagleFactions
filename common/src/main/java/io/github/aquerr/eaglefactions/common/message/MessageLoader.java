@@ -3,6 +3,8 @@ package io.github.aquerr.eaglefactions.common.message;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -10,21 +12,29 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Singleton
 public class MessageLoader
 {
+    private final EagleFactions plugin;
     private final FactionsConfig factionsConfig;
 
     private static MessageLoader instance = null;
+
+    private Locale locale = Locale.getDefault();
 
     public static MessageLoader getInstance(EagleFactions plugin)
     {
@@ -36,6 +46,15 @@ public class MessageLoader
     private MessageLoader(final EagleFactions plugin)
     {
         instance = this;
+        this.plugin = plugin;
+        String test1 = locale.getDisplayName();
+        String test2 = locale.getCountry();
+        String test3 = locale.getDisplayCountry();
+        String test4 = locale.getDisplayScript();
+        String test5 = locale.getLanguage();
+        String test6 = locale.getDisplayVariant();
+        String test7 = locale.toLanguageTag();
+
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         Path configDir = plugin.getConfigDir();
         String messagesFileName = this.factionsConfig.getLanguageFileName();
@@ -95,7 +114,7 @@ public class MessageLoader
         }
     }
 
-    private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader configLoader)
+    private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader<CommentedConfigurationNode> configLoader)
     {
         Field[] messageFields = PluginMessages.class.getFields();
         boolean missingNodes = false;
@@ -132,5 +151,55 @@ public class MessageLoader
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String parseMessage(String message, Object supplier)
+    {
+        String result = message;
+        if (supplier instanceof Faction)
+        {
+            Faction faction = (Faction) supplier;
+            result = result.replace(Placeholders.FACTION_NAME.getPlaceholder(), faction.getName());
+        }
+        else if (supplier instanceof User)
+        {
+            User user = (User) supplier;
+            result = result.replace(Placeholders.PLAYER_NAME.getPlaceholder(), user.getName());
+            result = result.replace(Placeholders.POWER.getPlaceholder(), String.valueOf(EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(user.getUniqueId())));
+        }
+        else if (supplier instanceof String)
+        {
+            for (final Placeholders.Placeholder placeholder : Placeholders.PLACEHOLDERS)
+            {
+                result = result.replace(placeholder.getPlaceholder(), (String) supplier);
+            }
+        }
+        else if (supplier instanceof Integer)
+        {
+            result = result.replace(Placeholders.NUMBER.getPlaceholder(), String.valueOf(supplier));
+        }
+        return result;
+    }
+
+    public static Text parseMessage(final String message, final Map<Placeholders.Placeholder, Text> supplierMap)
+    {
+        final Text.Builder resultText = Text.builder();
+        final String[] splitMessage = message.split(" ");
+        for (final String word : splitMessage)
+        {
+            final Text.Builder textBuilder = Text.builder();
+            for (final Map.Entry<Placeholders.Placeholder, Text> mapEntry : supplierMap.entrySet())
+            {
+                if (word.contains(mapEntry.getKey().getPlaceholder()))
+                {
+                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlain() + " ");
+                    resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder));
+                }
+                resultText.append(textBuilder.build());
+            }
+
+            resultText.append(Text.of(word + " "));
+        }
+        return resultText.build();
     }
 }

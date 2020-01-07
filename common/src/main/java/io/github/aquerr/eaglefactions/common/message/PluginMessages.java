@@ -1,7 +1,12 @@
 package io.github.aquerr.eaglefactions.common.message;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class PluginMessages
 {
+    public static String THERE_IS_NO_FACTION_CALLED_FACTION_NAME;
+
 	public static String SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES;
     public static String YOU_ARE_IN_WAR_WITH_THIS_FACTION;
     public static String YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS;

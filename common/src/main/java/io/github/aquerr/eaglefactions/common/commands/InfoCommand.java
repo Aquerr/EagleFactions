@@ -1,9 +1,12 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
+import com.google.common.collect.Maps;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
+import io.github.aquerr.eaglefactions.common.message.MessageLoader;
+import io.github.aquerr.eaglefactions.common.message.Placeholders;
 import io.github.aquerr.eaglefactions.common.message.PluginMessages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -41,7 +44,7 @@ public class InfoCommand extends AbstractCommand
 
             if (faction == null)
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THERE_IS_NO_FACTION_CALLED + " ", TextColors.GOLD, rawFactionName + "!"));
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(PluginMessages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, rawFactionName)))));
             }
             else
             {

@@ -15,6 +15,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	//TODO: Maybe move to GeneralConfig class?
 	//TODO: This should be possibly changed to .lang file.
 	private String languageFile = "english.conf";
+	private String language = "en_us";
 
 	private int maxNameLength = 30;
 	private int minNameLength = 3;
