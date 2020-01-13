@@ -14,6 +14,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.io.File;
@@ -178,17 +179,24 @@ public class MessageLoader
         final String[] splitMessage = message.split(" ");
         for (final String word : splitMessage)
         {
-            final Text.Builder textBuilder = Text.builder();
+            boolean didFill = false;
             for (final Map.Entry<Placeholder, Text> mapEntry : supplierMap.entrySet())
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {
-                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlain() + " ");
-                    resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder));
-                    continue;
+                    //TODO: Preserve colors..
+//                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), TextSerializers.FORMATTING_CODE.serialize(mapEntry.getValue()));
+//                    resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder));
+//                    didFill = true;
+
+                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlainSingle());
+                    resultText.append(Text.builder().append(Text.of(filledPlaceholder)).build());
+                    didFill = true;
                 }
-                resultText.append(textBuilder.build());
             }
+
+            if (didFill)
+                continue;
 
             resultText.append(Text.of(word + " "));
         }
