@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -24,7 +24,7 @@ public class EagleFeatherCommand extends AbstractCommand
     {
         if(!(source instanceof Player))
         {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
             return CommandResult.success();
         }
 

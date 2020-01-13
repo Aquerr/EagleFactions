@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.dynmap.util;
+package io.github.aquerr.eaglefactions.common.integrations.dynmap.util;
 
 import java.util.HashMap;
 

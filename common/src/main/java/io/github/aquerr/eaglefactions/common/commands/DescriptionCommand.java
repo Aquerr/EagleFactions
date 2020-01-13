@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -28,23 +28,23 @@ public class DescriptionCommand extends AbstractCommand
 
         if (!optionalDescription.isPresent())
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f desc <description>"));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.WRONG_COMMAND_ARGUMENTS));
+            source.sendMessage(Text.of(TextColors.RED, Messages.USAGE + " /f desc <description>"));
             return CommandResult.success();
         }
 
         if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player) source;
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         //Check if player is leader
         if (!optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) && !optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId()))
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
             return CommandResult.success();
         }
 
@@ -53,7 +53,7 @@ public class DescriptionCommand extends AbstractCommand
         //Check description length
         if(description.length() > 255)
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Description is too long " + " (" + PluginMessages.MAX + " " + 255 + " " + PluginMessages.CHARS + ")"));
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Description is too long " + " (" + Messages.MAX + " " + 255 + " " + Messages.CHARS + ")"));
             return CommandResult.success();
         }
 

@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -24,42 +24,27 @@ public class MaxPowerCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Optional<Player> optionalSelectedPlayer = context.<Player>getOne(Text.of("player"));
-        Optional<String> optionalPower = context.<String>getOne(Text.of("power"));
+        final Player selectedPlayer = context.requireOne(Text.of("player"));
+        final double power = context.requireOne(Text.of("power"));
 
-        if (optionalSelectedPlayer.isPresent() && optionalPower.isPresent())
+        if (source instanceof Player)
         {
-            if (source instanceof Player)
-            {
-                Player player = (Player) source;
-
-                if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
-                {
-                    setMaxPower(source, optionalSelectedPlayer.get(), optionalPower.get());
-                }
-                else
-                {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
-                }
-            }
-            else
-            {
-                setMaxPower(source, optionalSelectedPlayer.get(), optionalPower.get());
-            }
+            final Player player = (Player) source;
+            if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
+            setMaxPower(source, selectedPlayer, (float) power);
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, PluginMessages.USAGE + " /f maxpower <player> <power>"));
+            setMaxPower(source, selectedPlayer, (float)power);
         }
 
         return CommandResult.success();
     }
 
-    private void setMaxPower(CommandSource source, Player player, String power)
+    private void setMaxPower(CommandSource source, Player player, float power)
     {
-        float newPower = Float.valueOf(power);
-        super.getPlugin().getPowerManager().setMaxPower(player.getUniqueId(), newPower);
-        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PLAYERS_MAXPOWER_HAS_BEEN_CHANGED));
+        super.getPlugin().getPowerManager().setMaxPower(player.getUniqueId(), power);
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PLAYERS_MAXPOWER_HAS_BEEN_CHANGED));
     }
 }

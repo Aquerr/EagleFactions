@@ -8,7 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -35,11 +35,11 @@ public class UnclaimCommand extends AbstractCommand
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+
         final Player player = (Player)source;
         final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-        //Check if player has admin mode.
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             final World world = player.getWorld();
@@ -56,7 +56,7 @@ public class UnclaimCommand extends AbstractCommand
                 {
                     if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
                     {
-                            final Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
+                            final Location<World> homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
                             if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                                 super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
                     }
@@ -64,71 +64,50 @@ public class UnclaimCommand extends AbstractCommand
 
                 super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
 
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
                 return CommandResult.success();
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
                 return CommandResult.success();
             }
         }
 
         //Check if player is in the faction.
-        if(optionalPlayerFaction.isPresent())
+        if (!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+
+        final Faction playerFaction = optionalPlayerFaction.get();
+        if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_UNCLAIM_LANDS));
+
+        final World world = player.getWorld();
+        final Vector3i chunk = player.getLocation().getChunkPosition();
+        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
+        if (!optionalChunkFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_IS_ALREADY_CLAIMED));
+
+        final Faction chunkFaction = optionalChunkFaction.get();
+        if (!chunkFaction.getName().equals(playerFaction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, Messages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
+
+        final boolean isCancelled = EventRunner.runFactionUnclaimEvent(player, chunkFaction, world, chunk);
+        if (isCancelled)
+            return CommandResult.success();
+
+        if (!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
         {
-            final Faction playerFaction = optionalPlayerFaction.get();
-            if (this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
+            if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
             {
-                final World world = player.getWorld();
-                final Vector3i chunk = player.getLocation().getChunkPosition();
-                final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
-
-                if (optionalChunkFaction.isPresent())
-                {
-                    final Faction chunkFaction = optionalChunkFaction.get();
-
-                    if (chunkFaction.getName().equals(playerFaction.getName()))
-                    {
-                        final boolean isCancelled = EventRunner.runFactionUnclaimEvent(player, chunkFaction, world, chunk);
-                        if (isCancelled)
-                            return CommandResult.success();
-
-                        if (!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
-                        {
-                            if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
-                            {
-                                    final Location homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
-                                    if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
-                                        super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
-                            }
-                        }
-
-                        super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
-
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
-                        return CommandResult.success();
-                    }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, PluginMessages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
-                    }
-                }
-                else
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
-                }
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_UNCLAIM_LANDS));
+                final Location<World> homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
+                if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
+                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
             }
         }
-        else
-        {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-        }
 
+        super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
         return CommandResult.success();
     }
 }

@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -28,12 +28,12 @@ public class ChatCommand extends AbstractCommand
         final Optional<ChatEnum> optionalChatType = context.<ChatEnum>getOne("chat");
 
         if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         Player player = (Player) source;
 
         if(!super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId()).isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         if(optionalChatType.isPresent())
         {
@@ -66,15 +66,15 @@ public class ChatCommand extends AbstractCommand
         {
             case GLOBAL:
                 EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.GLOBAL_CHAT, TextColors.RESET, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO + " ", TextColors.GOLD, Messages.GLOBAL_CHAT, TextColors.RESET, "!"));
                 break;
             case ALLIANCE:
                 EagleFactionsPlugin.CHAT_LIST.put(player.getUniqueId(), chatType);
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.ALLIANCE_CHAT, TextColors.RESET, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO + " ", TextColors.GOLD, Messages.ALLIANCE_CHAT, TextColors.RESET, "!"));
                 break;
             case FACTION:
                 EagleFactionsPlugin.CHAT_LIST.put(player.getUniqueId(), chatType);
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CHANGED_CHAT_TO + " ", TextColors.GOLD, PluginMessages.FACTION_CHAT, TextColors.RESET, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO + " ", TextColors.GOLD, Messages.FACTION_CHAT, TextColors.RESET, "!"));
                 break;
         }
     }

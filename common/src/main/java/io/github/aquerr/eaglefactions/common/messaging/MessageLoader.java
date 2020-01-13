@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.message;
+package io.github.aquerr.eaglefactions.common.messaging;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Singleton
 public class MessageLoader
@@ -47,20 +46,12 @@ public class MessageLoader
     {
         instance = this;
         this.plugin = plugin;
-        String test1 = locale.getDisplayName();
-        String test2 = locale.getCountry();
-        String test3 = locale.getDisplayCountry();
-        String test4 = locale.getDisplayScript();
-        String test5 = locale.getLanguage();
-        String test6 = locale.getDisplayVariant();
-        String test7 = locale.toLanguageTag();
-
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         Path configDir = plugin.getConfigDir();
         String messagesFileName = this.factionsConfig.getLanguageFileName();
         Path messagesFilePath = configDir.resolve("messages").resolve(messagesFileName);
 
-        if (!Files.exists(configDir.resolve("messages")))
+        if (Files.notExists(configDir.resolve("messages")))
         {
             try
             {
@@ -72,7 +63,7 @@ public class MessageLoader
             }
         }
 
-        Optional<Asset> optionalMessagesFile = Sponge.getAssetManager().getAsset(plugin, "messages" + File.separator + messagesFileName);
+        Optional<Asset> optionalMessagesFile = Sponge.getAssetManager().getAsset(plugin, "messages/" + messagesFileName);
         if (optionalMessagesFile.isPresent())
         {
             try
@@ -86,7 +77,7 @@ public class MessageLoader
         }
         else
         {
-            optionalMessagesFile = Sponge.getAssetManager().getAsset(plugin, "messages" + File.separator + "english.conf");
+            optionalMessagesFile = Sponge.getAssetManager().getAsset(plugin, "messages/english.conf");
             optionalMessagesFile.ifPresent(x->
             {
                 try
@@ -100,7 +91,7 @@ public class MessageLoader
             });
         }
 
-        ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(messagesFilePath).build();
+        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(messagesFilePath).build();
         ConfigurationNode configNode;
 
         try
@@ -116,7 +107,7 @@ public class MessageLoader
 
     private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader<CommentedConfigurationNode> configLoader)
     {
-        Field[] messageFields = PluginMessages.class.getFields();
+        Field[] messageFields = Messages.class.getFields();
         boolean missingNodes = false;
 
         for (Field messageField : messageFields)
@@ -132,7 +123,7 @@ public class MessageLoader
 
             try
             {
-                messageField.set(PluginMessages.class.getClass(), message);
+                messageField.set(Messages.class.getClass(), message);
             }
             catch (IllegalAccessException e)
             {
@@ -169,7 +160,7 @@ public class MessageLoader
         }
         else if (supplier instanceof String)
         {
-            for (final Placeholders.Placeholder placeholder : Placeholders.PLACEHOLDERS)
+            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
             {
                 result = result.replace(placeholder.getPlaceholder(), (String) supplier);
             }
@@ -181,14 +172,14 @@ public class MessageLoader
         return result;
     }
 
-    public static Text parseMessage(final String message, final Map<Placeholders.Placeholder, Text> supplierMap)
+    public static Text parseMessage(final String message, final Map<Placeholder, Text> supplierMap)
     {
         final Text.Builder resultText = Text.builder();
         final String[] splitMessage = message.split(" ");
         for (final String word : splitMessage)
         {
             final Text.Builder textBuilder = Text.builder();
-            for (final Map.Entry<Placeholders.Placeholder, Text> mapEntry : supplierMap.entrySet())
+            for (final Map.Entry<Placeholder, Text> mapEntry : supplierMap.entrySet())
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {

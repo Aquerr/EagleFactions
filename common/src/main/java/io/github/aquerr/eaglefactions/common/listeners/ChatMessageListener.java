@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -220,7 +220,7 @@ public class ChatMessageListener extends AbstractListener
             if(playerFaction.getLeader().equals(player.getUniqueId()))
             {
                 Text leaderPrefix = Text.builder()
-                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.LEADER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.LEADER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                         .build();
 
                 rankPrefixText.append(leaderPrefix);
@@ -229,7 +229,7 @@ public class ChatMessageListener extends AbstractListener
             else if(playerFaction.getOfficers().contains(player.getUniqueId()))
             {
                 Text officerPrefix = Text.builder()
-                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.OFFICER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.OFFICER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                         .build();
 
                 rankPrefixText.append(officerPrefix);
@@ -238,7 +238,7 @@ public class ChatMessageListener extends AbstractListener
             else if(playerFaction.getRecruits().contains(player.getUniqueId()))
             {
                 Text recruitPrefix = Text.builder()
-                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, PluginMessages.RECRUIT, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                        .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.RECRUIT, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                         .build();
 
                 rankPrefixText.append(recruitPrefix);
@@ -321,14 +321,14 @@ public class ChatMessageListener extends AbstractListener
     private Text getAlliancePrefix()
     {
         return Text.builder()
-                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.BLUE, PluginMessages.ALLIANCE_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
+                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.BLUE, Messages.ALLIANCE_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
                 .build();
     }
 
     private Text getFactionPrefix()
     {
         return Text.builder()
-                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, PluginMessages.FACTION_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
+                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, Messages.FACTION_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
                 .build();
     }
 }

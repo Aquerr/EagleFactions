@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionFlagTypes;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -45,17 +45,17 @@ public class FlagsCommand extends AbstractCommand
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
                 }
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -83,7 +83,7 @@ public class FlagsCommand extends AbstractCommand
                 }
 
                 flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), !flagEntry.getValue())));
-                flagTextBuilder.onHover(TextActions.showText(Text.of(PluginMessages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
+                flagTextBuilder.onHover(TextActions.showText(Text.of(Messages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
 
                 textBuilder.append(flagTextBuilder.build());
                 textBuilder.append(Text.of(" | "));
@@ -93,9 +93,9 @@ public class FlagsCommand extends AbstractCommand
         }
 
         //player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.NAME + ":"));
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
-        player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = " + PluginMessages.HAS_NOT_PERMISSIONS_FOR));
-        player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = " + PluginMessages.HAS_PERMISSIONS_FOR));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
+        player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = " + Messages.HAS_NOT_PERMISSIONS_FOR));
+        player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = " + Messages.HAS_PERMISSIONS_FOR));
         player.sendMessage(Text.of("=============================="));
         player.sendMessage(textBuilder.build());
     }

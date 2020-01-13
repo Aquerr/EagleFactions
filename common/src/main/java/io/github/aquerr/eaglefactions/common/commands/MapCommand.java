@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
@@ -8,7 +9,9 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -21,10 +24,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class MapCommand extends AbstractCommand
@@ -51,12 +51,12 @@ public class MapCommand extends AbstractCommand
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_VIEW_MAP_IN_THIS_WORLD));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_VIEW_MAP_IN_THIS_WORLD));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();
@@ -235,32 +235,32 @@ public class MapCommand extends AbstractCommand
         }
 
         //Print map
-        player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_MAP_HEADER));
+        player.sendMessage(Text.of(TextColors.GREEN, Messages.FACTIONS_MAP_HEADER));
         for (Text text : map)
         {
             player.sendMessage(Text.of(text));
         }
-        player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_MAP_FOOTER));
+        player.sendMessage(Text.of(TextColors.GREEN, Messages.FACTIONS_MAP_FOOTER));
 
         //Print factions on map
         if (optionalPlayerFaction.isPresent())
         {
-            player.sendMessage(Text.of(TextColors.GREEN, PluginMessages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().getName()));
+            player.sendMessage(Text.of(TextColors.GREEN, Messages.YOUR_FACTION + ": ", TextColors.GREEN, optionalPlayerFaction.get().getName()));
         }
         if (!normalFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.WHITE, PluginMessages.FACTIONS + ": ", TextColors.RESET, String.join(",", normalFactions)));
+            player.sendMessage(Text.of(TextColors.WHITE, Messages.FACTIONS + ": ", TextColors.RESET, String.join(",", normalFactions)));
         }
         if (!allianceFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.AQUA, PluginMessages.ALLIANCES + ": " + String.join("," ,allianceFactions)));
+            player.sendMessage(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": " + String.join("," ,allianceFactions)));
         }
         if (!enemyFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.RED, PluginMessages.ENEMIES + ": " + String.join(",", enemyFactions)));
+            player.sendMessage(Text.of(TextColors.RED, Messages.ENEMIES + ": " + String.join(",", enemyFactions)));
         }
 
-        player.sendMessage(Text.of(PluginMessages.CURRENTLY_STANDING_AT + ": ", TextColors.GOLD, playerPosition.toString(), TextColors.WHITE, " " + PluginMessages.WHICH_IS_CLAIMED_BY + " ", TextColors.GOLD, playerPositionClaim));
+        player.sendMessage(Text.of(MessageLoader.parseMessage(Messages.CURRENTLY_STANDING_AT_CLAIM_WHICH_IS_CLAIMED_BY, ImmutableMap.of(Placeholders.CLAIM, Text.of(TextColors.GOLD, playerPosition.toString()), Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerPositionClaim)))));
     }
 
 
@@ -277,7 +277,7 @@ public class MapCommand extends AbstractCommand
 
             if(!optionalPlayerFaction.isPresent())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
                 return;
             }
 
@@ -287,7 +287,7 @@ public class MapCommand extends AbstractCommand
 
             if(!hasFactionsAdminMode && !hasClaimPermission)
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
+                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
                 return;
             }
 
@@ -307,26 +307,26 @@ public class MapCommand extends AbstractCommand
                     }
                 }
                 super.getPlugin().getFactionLogic().removeClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND_HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.UNCLAIMED, TextColors.WHITE, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
             }
             else
             {
                 if(isFactionAttacked)
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOUR_FACTION_IS_UNDER_ATTACK + " " + PluginMessages.YOU_NEED_TO_WAIT + " ", TextColors.GOLD, PluginMessages.TWO_MINUTES, TextColors.RED, " " + PluginMessages.TO_BE_ABLE_TO_CLAIM_AGAIN));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " " + MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))))));
                     return;
                 }
 
                 if(super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size())
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
                     return;
                 }
 
                 if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
                 {
                     super.getPlugin().getFactionLogic().addClaim(playerFaction, claim);
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + PluginMessages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, PluginMessages.CLAIMED, TextColors.WHITE, "!"));
+                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
                 }
                 else
                 {
@@ -338,7 +338,7 @@ public class MapCommand extends AbstractCommand
                         }
                         else
                         {
-                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.CLAIMS_NEED_TO_BE_CONNECTED));
+                            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.CLAIMS_NEED_TO_BE_CONNECTED));
                         }
                     }
                     else

@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -26,7 +26,10 @@ public class VersionCommand extends AbstractCommand
     {
         try
         {
-            source.sendMessage(Text.of(TextActions.showText(Text.of(TextColors.BLUE, "Click to view Github")), TextActions.openUrl(new URL("https://github.com/Aquerr/EagleFactions")), PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - ", TextColors.GOLD, PluginMessages.VERSION + " ", PluginInfo.VERSION, TextColors.WHITE, " made by ", TextColors.GOLD, PluginInfo.AUTHOR));
+            source.sendMessage(Text.of(
+                    TextActions.showText(Text.of(TextColors.BLUE, "Click to view Github")),
+                    TextActions.openUrl(new URL("https://github.com/Aquerr/EagleFactions")),
+                    PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - ", TextColors.GOLD, Messages.VERSION + " ", PluginInfo.VERSION, TextColors.WHITE, " made by ", TextColors.GOLD, PluginInfo.AUTHOR));
         }
         catch(final MalformedURLException e)
         {

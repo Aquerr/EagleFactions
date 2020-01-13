@@ -1,11 +1,11 @@
-package io.github.aquerr.eaglefactions.common.dynmap;
+package io.github.aquerr.eaglefactions.common.integrations.dynmap;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.dynmap.util.DynmapUtils;
-import io.github.aquerr.eaglefactions.common.dynmap.util.TempAreaMarker;
+import io.github.aquerr.eaglefactions.common.integrations.dynmap.util.DynmapUtils;
+import io.github.aquerr.eaglefactions.common.integrations.dynmap.util.TempAreaMarker;
 import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.Marker;
 import org.spongepowered.api.Sponge;

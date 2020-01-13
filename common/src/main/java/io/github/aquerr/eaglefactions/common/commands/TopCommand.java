@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -46,9 +46,9 @@ public class TopCommand extends AbstractCommand
 
             index++;
 
-            Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSuffix, Text.of(" ")).build();
+            final Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSuffix, Text.of(" ")).build();
 
-            Text factionHelp = Text.builder()
+            final Text factionHelp = Text.builder()
                     .append(Text.builder()
                             .append(Text.of(TextColors.AQUA, "- ")).append(tag).append(Text.of(faction.getName(), " (", getPlugin().getPowerManager().getFactionPower(faction), "/", getPlugin().getPowerManager().getFactionMaxPower(faction), ")"))
                             .build())
@@ -58,7 +58,7 @@ public class TopCommand extends AbstractCommand
         }
 
         final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
+        final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success();

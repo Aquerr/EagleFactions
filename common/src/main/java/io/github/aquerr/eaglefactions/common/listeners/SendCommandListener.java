@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -24,8 +24,8 @@ public class SendCommandListener extends AbstractListener
     {
         if (EagleFactionsPlugin.getPlugin().getPVPLogger().isActive() && EagleFactionsPlugin.getPlugin().getPVPLogger().shouldBlockCommand(player, event.getCommand() + " " + event.getArguments()))
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT));
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.TIME_LEFT + " ", TextColors.YELLOW, EagleFactionsPlugin.getPlugin().getPVPLogger().getPlayerBlockTime(player) + " " + PluginMessages.SECONDS));
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT));
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.TIME_LEFT + " ", TextColors.YELLOW, EagleFactionsPlugin.getPlugin().getPVPLogger().getPlayerBlockTime(player) + " " + Messages.SECONDS));
             event.setCancelled(true);
             return;
         }

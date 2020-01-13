@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.dynmap.util;
+package io.github.aquerr.eaglefactions.common.integrations.dynmap.util;
 
 import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;

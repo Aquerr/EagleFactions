@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -42,7 +42,7 @@ public class CoordsCommand extends AbstractCommand
                 if(playerFaction.getHome() != null)
                 {
                     Text textBuilder = Text.builder()
-                            .append(Text.of( PluginMessages.FACTIONS_HOME + ": " + playerFaction.getHome().getWorldUUID().toString() + '|' + playerFaction.getHome().getBlockPosition().toString()))
+                            .append(Text.of( Messages.FACTIONS_HOME + ": " + playerFaction.getHome().getWorldUUID().toString() + '|' + playerFaction.getHome().getBlockPosition().toString()))
                             .build();
 
                     teamCoords.add(textBuilder);
@@ -54,7 +54,7 @@ public class CoordsCommand extends AbstractCommand
                     if(leader.isPresent())
                     {
                         Text textBuilder = Text.builder()
-                                .append(Text.of(PluginMessages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
+                                .append(Text.of(Messages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
                                 .build();
 
                         teamCoords.add(textBuilder);
@@ -69,7 +69,7 @@ public class CoordsCommand extends AbstractCommand
                         if(officer.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of(PluginMessages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(Messages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -85,7 +85,7 @@ public class CoordsCommand extends AbstractCommand
                         if(member.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of(PluginMessages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(Messages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -101,7 +101,7 @@ public class CoordsCommand extends AbstractCommand
                         if(recruit.isPresent())
                         {
                             Text textBuilder = Text.builder()
-                                    .append(Text.of(PluginMessages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
+                                    .append(Text.of(Messages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
                                     .build();
 
                             teamCoords.add(textBuilder);
@@ -110,19 +110,19 @@ public class CoordsCommand extends AbstractCommand
                 }
 
                 final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-                final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.TEAM_COORDS)).contents(teamCoords);
+                final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.TEAM_COORDS)).contents(teamCoords);
                 paginationBuilder.sendTo(source);
 
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
             }
 
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
         }
 
         return CommandResult.success();

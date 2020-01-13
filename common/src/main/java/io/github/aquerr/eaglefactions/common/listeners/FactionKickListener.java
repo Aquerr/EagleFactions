@@ -7,7 +7,10 @@ import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.FactionKickEventImpl;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
 
@@ -18,7 +21,8 @@ public class FactionKickListener extends AbstractListener
         super(plugin);
     }
 
-    @Listener
+    @Listener(order = Order.POST)
+    @IsCancelled(value = Tristate.FALSE)
     public void onPlayerFactionKick(final FactionKickEventImpl event)
     {
         final Faction faction = event.getFaction();

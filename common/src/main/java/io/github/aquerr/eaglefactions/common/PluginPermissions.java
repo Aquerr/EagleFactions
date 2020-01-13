@@ -7,7 +7,7 @@ public final class PluginPermissions
 
     public static final String CREATE_COMMAND = "eaglefactions.player.create";
     public static final String DISBAND_COMMAND = "eaglefactions.player.disband";
-    public static final String RENAMECOMMAND = "eaglefactions.player.rename";
+    public static final String RENAME_COMMAND = "eaglefactions.player.rename";
     public static final String TAG_COMMAND = "eaglefactions.player.tag";
     public static final String DESCRIPTION_COMMAND = "eaglefactions.player.description";
     public static final String MOTD_COMMAND = "eaglefactions.player.motd";

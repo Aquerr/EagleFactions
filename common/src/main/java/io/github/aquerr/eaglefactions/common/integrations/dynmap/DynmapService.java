@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.dynmap;
+package io.github.aquerr.eaglefactions.common.integrations.dynmap;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import org.dynmap.DynmapCommonAPI;

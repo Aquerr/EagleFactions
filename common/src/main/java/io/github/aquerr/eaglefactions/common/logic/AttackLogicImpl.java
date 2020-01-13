@@ -9,7 +9,7 @@ import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -61,7 +61,7 @@ public class AttackLogicImpl implements AttackLogic
                         Faction chunkFaction = factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
 
                         informAboutDestroying(chunkFaction);
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.CLAIM_DESTROYED));
+                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CLAIM_DESTROYED));
 
                         final Claim claim = new Claim(player.getWorld().getUniqueId(), attackedChunk);
                         factionLogic.destroyClaim(chunkFaction, claim);
@@ -75,7 +75,7 @@ public class AttackLogicImpl implements AttackLogic
                 }
                 else
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.YOU_MOVED_FROM_THE_CHUNK));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MOVED_FROM_THE_CHUNK));
                     task.cancel();
                 }
             }
@@ -124,17 +124,15 @@ public class AttackLogicImpl implements AttackLogic
     @Override
     public void informAboutAttack(final Faction faction)
     {
-        List<Player> playersList = factionLogic.getOnlinePlayers(faction);
-
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.YOUR_FACTION_IS_UNDER + " ", TextColors.RED, PluginMessages.ATTACK, TextColors.RESET, "!")));
+        final List<Player> playersList = factionLogic.getOnlinePlayers(faction);
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK)));
     }
 
     @Override
     public void informAboutDestroying(final Faction faction)
     {
-        List<Player> playersList = factionLogic.getOnlinePlayers(faction);
-
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.ONE_OF_YOUR_CLAIMS_HAS_BEEN + " ", TextColors.RED, PluginMessages.DESTROYED, TextColors.RESET, " " + PluginMessages.BY_AN_ENEMY)));
+        final List<Player> playersList = factionLogic.getOnlinePlayers(faction);
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY)));
     }
 
     @Override

@@ -14,7 +14,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
-import io.github.aquerr.eaglefactions.common.dynmap.DynmapService;
+import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
@@ -23,11 +23,11 @@ import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.ProtectionManagerImpl;
-import io.github.aquerr.eaglefactions.common.message.MessageLoader;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
-import io.github.aquerr.eaglefactions.common.placeholders.EFPlaceholderService;
+import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
@@ -216,7 +216,7 @@ public class EagleFactionsPlugin implements EagleFactions
         if(event.getSource() instanceof Player)
         {
             Player player = (Player)event.getSource();
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, PluginMessages.CONFIGS_HAS_BEEN_RELOADED));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CONFIG_HAS_BEEN_RELOADED));
         }
     }
 
@@ -348,7 +348,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("squareclaim"), CommandSpec.builder()
                 .description(Text.of("Claim land in form of square with a given radius"))
                 .permission(PluginPermissions.RADIUS_CLAIM_COMMAND)
-                .arguments(GenericArguments.integer(Text.of("radius")))
+                .arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("radius"))))
                 .executor(new SquareClaimCommand(this))
                 .build());
 
@@ -363,7 +363,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("unclaimall"), CommandSpec.builder()
                 .description(Text.of("Remove all claims"))
                 .permission(PluginPermissions.UNCLAIM_ALL_COMMAND)
-                .executor(new UnclaimallCommand(this))
+                .executor(new UnclaimAllCommand(this))
                 .build());
 
         //Map command
@@ -429,8 +429,8 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("maxpower"), CommandSpec.builder()
                 .description(Text.of("Set player's maxpower"))
                 .permission(PluginPermissions.MAX_POWER_COMMAND)
-                .arguments(GenericArguments.player(Text.of("player")),
-                        GenericArguments.string(Text.of("power")))
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
                 .executor(new MaxPowerCommand(this))
                 .build());
 
@@ -489,8 +489,8 @@ public class EagleFactionsPlugin implements EagleFactions
         //Rename Command
         SUBCOMMANDS.put(Collections.singletonList("rename"), CommandSpec.builder()
                 .description(Text.of("Rename faction"))
-                .permission(PluginPermissions.RENAMECOMMAND)
-                .arguments(GenericArguments.string(Text.of("faction name")))
+                .permission(PluginPermissions.RENAME_COMMAND)
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
                 .executor(new RenameCommand(this))
                 .build());
 

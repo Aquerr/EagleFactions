@@ -2,8 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -74,16 +73,16 @@ public class PlayerCommand extends AbstractCommand
             //TODO: Show if player is online or offline.
 
             Text info = Text.builder()
-                    .append(Text.of(TextColors.AQUA, PluginMessages.NAME + ": ", TextColors.GOLD, getPlugin().getPlayerManager().getPlayerName(player.getUniqueId()).get() + "\n"))
-                    .append(Text.of(TextColors.AQUA, PluginMessages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
-                    .append(Text.of(TextColors.AQUA, PluginMessages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
-                    .append(Text.of(TextColors.AQUA, PluginMessages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())))
+                    .append(Text.of(TextColors.AQUA, Messages.NAME + ": ", TextColors.GOLD, getPlugin().getPlayerManager().getPlayerName(player.getUniqueId()).get() + "\n"))
+                    .append(Text.of(TextColors.AQUA, Messages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
+                    .append(Text.of(TextColors.AQUA, Messages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
+                    .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())))
                     .build();
 
             playerInfo.add(info);
 
             PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-            PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
+            PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
             paginationBuilder.sendTo(source);
 //        }
 //        else

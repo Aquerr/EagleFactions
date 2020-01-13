@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 import com.google.common.collect.Lists;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.message.PluginMessages;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -54,7 +54,7 @@ public class HelpCommand extends AbstractCommand
                             .append(Text.of(TextColors.WHITE, " - " + commandSpec.getShortDescription(source).get().toPlain() + "\n"))
                             .build())
                     .append(Text.builder()
-                            .append(Text.of(TextColors.GRAY, PluginMessages.USAGE + " /f " + aliases.toString().replace("[","").replace("]","") + " " + commandSpec.getUsage(source).toPlain()))
+                            .append(Text.of(TextColors.GRAY, Messages.USAGE + " /f " + aliases.toString().replace("[","").replace("]","") + " " + commandSpec.getUsage(source).toPlain()))
                             .build())
                     .build();
 
@@ -71,7 +71,7 @@ public class HelpCommand extends AbstractCommand
         helpList.sort(Text::compareTo);
 
         PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, PluginMessages.EAGLEFACTIONS_COMMAND_LIST)).padding(Text.of("-")).contents(helpList).linesPerPage(14);
+        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.EAGLEFACTIONS_COMMAND_LIST)).padding(Text.of("-")).contents(helpList).linesPerPage(14);
         paginationBuilder.sendTo(source);
 
         return CommandResult.success();

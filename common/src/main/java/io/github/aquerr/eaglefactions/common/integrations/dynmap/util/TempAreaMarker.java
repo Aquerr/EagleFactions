@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.dynmap.util;
+package io.github.aquerr.eaglefactions.common.integrations.dynmap.util;
 
 public class TempAreaMarker {
     public double[] x;

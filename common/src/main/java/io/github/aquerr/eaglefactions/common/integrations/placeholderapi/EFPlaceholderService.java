@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.placeholders;
+package io.github.aquerr.eaglefactions.common.integrations.placeholderapi;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
