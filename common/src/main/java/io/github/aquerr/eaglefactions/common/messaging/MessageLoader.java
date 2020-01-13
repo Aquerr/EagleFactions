@@ -185,6 +185,7 @@ public class MessageLoader
                 {
                     final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlain() + " ");
                     resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder));
+                    continue;
                 }
                 resultText.append(textBuilder.build());
             }
