@@ -14,6 +14,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -22,9 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Singleton
 public class MessageLoader
@@ -108,10 +107,10 @@ public class MessageLoader
 
     private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader<CommentedConfigurationNode> configLoader)
     {
-        Field[] messageFields = Messages.class.getFields();
+        final Field[] messageFields = Messages.class.getFields();
         boolean missingNodes = false;
 
-        for (Field messageField : messageFields)
+        for (final Field messageField : messageFields)
         {
             Object object = configNode.getNode(messageField.getName()).getString("MISSING_MESSAGE");
 
@@ -121,6 +120,19 @@ public class MessageLoader
             }
 
             String message = object.toString();
+
+            if (messageField.getName().equals("YOU_OPENED_FACTION_CHEST"))
+            {
+                try
+                {
+                    messageField.set(Messages.class.getClass(), toTextTemplate(message));
+                }
+                catch (IllegalAccessException e)
+                {
+                    e.printStackTrace();
+                }
+                continue;
+            }
 
             try
             {
@@ -192,6 +204,7 @@ public class MessageLoader
                     final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlainSingle());
                     resultText.append(Text.builder().append(Text.of(filledPlaceholder)).build());
                     didFill = true;
+                    break;
                 }
             }
 
@@ -201,5 +214,31 @@ public class MessageLoader
             resultText.append(Text.of(word + " "));
         }
         return resultText.build();
+    }
+
+    public static TextTemplate toTextTemplate(final String message)
+    {
+        final String[] splitMessage = message.split(" ");
+        final List<Object> newWords = new ArrayList<>();
+        for (final String word : splitMessage)
+        {
+            boolean didReplace = false;
+            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
+            {
+                if (word.contains(placeholder.getPlaceholder()))
+                {
+                    newWords.add(TextTemplate.arg(word.replace("%", "")).color(TextColors.GOLD).build());
+                    didReplace = true;
+                    break;
+                }
+            }
+
+            if (didReplace)
+                continue;
+
+            newWords.add(word);
+            newWords.add(" ");
+        }
+        return TextTemplate.of(newWords);
     }
 }

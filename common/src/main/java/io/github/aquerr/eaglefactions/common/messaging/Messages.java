@@ -1,15 +1,17 @@
 package io.github.aquerr.eaglefactions.common.messaging;
 
 import com.google.inject.Singleton;
+import org.spongepowered.api.text.TextTemplate;
 
 @Singleton
 //@ConfigSerializable
 public class Messages
 {
     //    @Setting(value = "THERE_IS_NO_FACTION_CALLED_FACTION_NAME")
+//    public static TextTemplate THERE_IS_NO_FACTION_CALLED_FACTION_NAME;
     public static String THERE_IS_NO_FACTION_CALLED_FACTION_NAME;
 
-	public static String SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES;
+    public static String SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES;
     public static String YOU_ARE_IN_WAR_WITH_THIS_FACTION;
     public static String YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS;
     public static String YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND;
@@ -55,7 +57,8 @@ public class Messages
 
     //Chest
     public static String FACTION_CHESTS_ARE_DISABLED;
-    public static String YOU_OPENED_FACTION_CHEST;
+    public static TextTemplate YOU_OPENED_FACTION_CHEST;
+    //    public static String YOU_OPENED_FACTION_CHEST;
 
     //Claiming
     public static String LAND;

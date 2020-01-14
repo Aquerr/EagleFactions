@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -86,7 +87,8 @@ public class ChestCommand extends AbstractCommand
         final Optional<Container> optionalContainer = player.openInventory(faction.getChest().getInventory());
         if(optionalContainer.isPresent())
         {
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_OPENED_FACTION_CHEST, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+            player.sendMessage(Messages.YOU_OPENED_FACTION_CHEST.apply(ImmutableMap.of("FACTION_NAME", Text.of(faction.getName()))).build());
+            //            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_OPENED_FACTION_CHEST, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
         }
     }
 }
