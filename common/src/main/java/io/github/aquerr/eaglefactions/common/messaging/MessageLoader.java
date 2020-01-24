@@ -121,18 +121,18 @@ public class MessageLoader
 
             String message = object.toString();
 
-            if (messageField.getName().equals("YOU_OPENED_FACTION_CHEST"))
-            {
-                try
-                {
-                    messageField.set(Messages.class.getClass(), toTextTemplate(message));
-                }
-                catch (IllegalAccessException e)
-                {
-                    e.printStackTrace();
-                }
-                continue;
-            }
+//            if (messageField.getName().equals("YOU_OPENED_FACTION_CHEST"))
+//            {
+//                try
+//                {
+//                    messageField.set(Messages.class.getClass(), toTextTemplate(message));
+//                }
+//                catch (IllegalAccessException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//                continue;
+//            }
 
             try
             {
@@ -216,29 +216,29 @@ public class MessageLoader
         return resultText.build();
     }
 
-    public static TextTemplate toTextTemplate(final String message)
-    {
-        final String[] splitMessage = message.split(" ");
-        final List<Object> newWords = new ArrayList<>();
-        for (final String word : splitMessage)
-        {
-            boolean didReplace = false;
-            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
-            {
-                if (word.contains(placeholder.getPlaceholder()))
-                {
-                    newWords.add(TextTemplate.arg(word.replace("%", "")).color(TextColors.GOLD).build());
-                    didReplace = true;
-                    break;
-                }
-            }
-
-            if (didReplace)
-                continue;
-
-            newWords.add(word);
-            newWords.add(" ");
-        }
-        return TextTemplate.of(newWords);
-    }
+//    public static TextTemplate toTextTemplate(final String message)
+//    {
+//        final String[] splitMessage = message.split(" ");
+//        final List<Object> newWords = new ArrayList<>();
+//        for (final String word : splitMessage)
+//        {
+//            boolean didReplace = false;
+//            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
+//            {
+//                if (word.contains(placeholder.getPlaceholder()))
+//                {
+//                    newWords.add(TextTemplate.arg(word.replace("%", "")).color(TextColors.GOLD).build());
+//                    didReplace = true;
+//                    break;
+//                }
+//            }
+//
+//            if (didReplace)
+//                continue;
+//
+//            newWords.add(word);
+//            newWords.add(" ");
+//        }
+//        return TextTemplate.of(newWords);
+//    }
 }

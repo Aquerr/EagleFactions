@@ -16,6 +16,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class PlayerDeathListener extends AbstractListener
 {
@@ -34,13 +35,11 @@ public class PlayerDeathListener extends AbstractListener
     @Listener(order = Order.POST)
     public void onPlayerDeath(final DestructEntityEvent.Death event, final @Getter("getTargetEntity") Player player)
     {
-        super.getPlugin().getPowerManager().decreasePower(player.getUniqueId());
-
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPowerDecrement() + "\n",
-                TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
+        CompletableFuture.runAsync(() -> super.getPlugin().getPowerManager().decreasePower(player.getUniqueId()))
+                .thenRun(() -> player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPowerDecrement() + "\n",
+                TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
 
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-
         if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
         {
             super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
@@ -49,7 +48,6 @@ public class PlayerDeathListener extends AbstractListener
         if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction())
         {
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
             if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().getName().equals(optionalPlayerFaction.get().getName()))
             {
                 super.getPlugin().getAttackLogic().blockHome(player.getUniqueId());

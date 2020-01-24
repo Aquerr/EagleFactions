@@ -57,8 +57,8 @@ public class Messages
 
     //Chest
     public static String FACTION_CHESTS_ARE_DISABLED;
-    public static TextTemplate YOU_OPENED_FACTION_CHEST;
-    //    public static String YOU_OPENED_FACTION_CHEST;
+//    public static TextTemplate YOU_OPENED_FACTION_CHEST;
+    public static String YOU_OPENED_FACTION_CHEST;
 
     //Claiming
     public static String LAND;
@@ -245,8 +245,8 @@ public class Messages
     //Unclaim
     public static String SUCCESSFULLY_REMOVED_ALL_CLAIMS;
 
-    //VERSION
-    public static String VERSION;
+    //Motd
+    public static String FACTION_MESSAGE_OF_THE_DAY;
 
     //World
     public static String THIS_LAND_BELONGS_TO_SOMEONE_ELSE;
@@ -269,6 +269,7 @@ public class Messages
     public static String CURRENT_POWER;
 
     //VERSION
+    public static String VERSION;
     public static String A_NEW_VERSION_OF;
     public static String IS_AVAILABLE;
 

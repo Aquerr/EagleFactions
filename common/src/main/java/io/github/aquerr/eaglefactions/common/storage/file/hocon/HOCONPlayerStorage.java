@@ -37,9 +37,9 @@ public class HOCONPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public boolean checkIfPlayerExists(UUID playerUUID, String playerName)
+    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
     {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+        final Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
         return Files.exists(playerFile);
     }
 

@@ -24,18 +24,17 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
-public class StorageManagerImpl implements StorageManager, Runnable
+public class StorageManagerImpl implements StorageManager
 {
     private static StorageManagerImpl INSTANCE = null;
 
+    private final EagleFactions plugin;
     private final IFactionStorage factionsStorage;
     private final IPlayerStorage playerStorage;
-    private final Queue<IStorageTask> storageTaskQueue;
-    private final EagleFactions plugin;
 
-    private final Thread storageThread;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public static StorageManagerImpl getInstance(final EagleFactions eagleFactions)
     {
@@ -80,63 +79,25 @@ public class StorageManagerImpl implements StorageManager, Runnable
                 break;
         }
         prepareFactionsCache();
-
-        this.storageTaskQueue = new LinkedList<>();
-        this.storageThread = new Thread(this::run);
-        this.storageThread.start();
     }
 
     private void queueStorageTask(IStorageTask task)
     {
-        synchronized(this.storageTaskQueue)
-        {
-            this.storageTaskQueue.add(task);
-            this.storageTaskQueue.notify();
-        }
-    }
-
-    @Override
-    public void run()
-    {
-        while(true)
-        {
-            synchronized(this.storageTaskQueue)
-            {
-                if(storageTaskQueue.size() > 0)
-                {
-                    IStorageTask storageTask = storageTaskQueue.poll();
-                    if (storageTask instanceof DeleteFactionTask)
-                        factionsStorage.deleteFaction(((DeleteFactionTask) storageTask).getFactionName());
-                    else if (storageTask instanceof UpdateFactionTask)
-                        factionsStorage.addOrUpdateFaction(((UpdateFactionTask) storageTask).getFaction());
-                }
-                else
-                {
-                    try
-                    {
-                        this.storageTaskQueue.wait();
-                    }
-                    catch(InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
+        this.executorService.execute(task);
     }
 
     @Override
     public void addOrUpdateFaction(final Faction faction)
     {
         FactionsCache.addOrUpdateFactionCache(faction);
-        queueStorageTask(new UpdateFactionTask(faction));
+        queueStorageTask(new UpdateFactionTask(faction, () -> this.factionsStorage.addOrUpdateFaction(faction)));
     }
 
     @Override
     public boolean deleteFaction(final String factionName)
     {
         FactionsCache.removeFactionCache(factionName);
-        queueStorageTask(new DeleteFactionTask(factionName));
+        queueStorageTask(new DeleteFactionTask(factionName, () -> this.factionsStorage.deleteFaction(factionName)));
         return true;
     }
 
