@@ -256,7 +256,7 @@ public class Messages
     public static String YOU_CANT_ENTER_SAFEZONE_WHEN_YOU_ARE_IN_WARZONE;
     public static String YOU_HAVE_ENTERED_FACTION;
     public static String YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT;
-    public static String TIME_LEFT;
+    public static String TIME_LEFT_NUMBER_SECONDS;
 
     public static String PVPLOGGER_HAS_TURNED_ON;
     public static String PVPLOGGER_HAS_TURNED_OFF;

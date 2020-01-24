@@ -132,7 +132,7 @@ public final class EventRunner
     /**
      * @return True if cancelled, false if not
      */
-	public static boolean runFactionClaimEnterEvent(final MoveEntityEvent moveEntityEvent, final Player player, final Optional<Faction> enteredFaction, final Optional<Faction> leftFaction)
+	public static boolean runFactionAreaEnterEvent(final MoveEntityEvent moveEntityEvent, final Player player, final Optional<Faction> enteredFaction, final Optional<Faction> leftFaction)
 	{
 	    final EventContext eventContext = EventContext.builder()
             .add(EventContextKeys.OWNER, player)
