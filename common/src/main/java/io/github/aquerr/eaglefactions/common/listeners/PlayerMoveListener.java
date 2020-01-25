@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -8,7 +9,9 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -112,7 +115,7 @@ public class PlayerMoveListener extends AbstractListener
                 if(optionalNewChunkFaction.isPresent())
                 {
                     information = Text.builder()
-                            .append(Text.of(Messages.YOU_HAVE_ENTERED_FACTION + " ", TextColors.GOLD, newChunkFactionName))
+                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
                             .build();
                     //TODO: Further consideration needed for code below... Long description does not look so good
 //                    if(optionalNewChunkFaction.get().getDescription().equals(""))
@@ -135,7 +138,7 @@ public class PlayerMoveListener extends AbstractListener
                 else
                 {
                     information = Text.builder()
-                            .append(Text.of(Messages.YOU_HAVE_ENTERED_FACTION + " ", TextColors.GOLD, newChunkFactionName))
+                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
                             .build();
                 }
 

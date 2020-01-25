@@ -196,14 +196,13 @@ public class MessageLoader
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {
-                    //TODO: Preserve colors..
-//                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), TextSerializers.FORMATTING_CODE.serialize(mapEntry.getValue()));
-//                    resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder));
-//                    didFill = true;
-
-                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlainSingle());
-                    resultText.append(Text.builder().append(Text.of(filledPlaceholder)).build());
+                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), TextSerializers.FORMATTING_CODE.serialize(mapEntry.getValue()));
+                    resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder + " "));
                     didFill = true;
+
+//                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlainSingle());
+//                    resultText.append(Text.builder().append(Text.of(filledPlaceholder)).build());
+//                    didFill = true;
                     break;
                 }
             }
@@ -211,7 +210,7 @@ public class MessageLoader
             if (didFill)
                 continue;
 
-            resultText.append(Text.of(word + " "));
+            resultText.append(Text.of(TextColors.RESET, word + " "));
         }
         return resultText.build();
     }
