@@ -29,12 +29,12 @@ public class AdminCommand extends AbstractCommand
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
             EagleFactionsPlugin.ADMIN_MODE_PLAYERS.remove(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.ADMIN_MODE_HAS_BEEN_TURNED_OFF));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, Messages.ADMIN_MODE_HAS_BEEN_TURNED_OFF));
         }
         else
         {
             EagleFactionsPlugin.ADMIN_MODE_PLAYERS.add(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.ADMIN_MODE_HAS_BEEN_TURNED_ON));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, Messages.ADMIN_MODE_HAS_BEEN_TURNED_ON));
         }
         return CommandResult.success();
     }

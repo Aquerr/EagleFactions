@@ -3,6 +3,9 @@ package io.github.aquerr.eaglefactions.common.storage.sql.mariadb;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.sql.*;
 
@@ -17,15 +20,15 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 			try
 			{
 				INSTANCE = new MariaDbProvider(eagleFactions);
-				return INSTANCE;
 			}
 			catch(final SQLException e)
 			{
+				Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Error Code: " + e.getErrorCode() + " | SQL State: " + e.getSQLState() + " | Error Message: " + e.getMessage()));
 				e.printStackTrace();
 				return null;
 			}
 		}
-		else return INSTANCE;
+		return INSTANCE;
 	}
 
 	public Connection getConnection() throws SQLException
