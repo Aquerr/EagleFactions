@@ -68,7 +68,7 @@ public class AttackCommand extends AbstractCommand
         if(playerFaction.getName().equals(attackedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_YOURSELF));
 
-        if(playerFaction.getAlliances().contains(attackedFaction.getName()))
+        if(playerFaction.getAlliances().contains(attackedFaction.getName()) || playerFaction.getTruces().contains(attackedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION + " " + Messages.YOU_ARE_IN_THE_SAME_ALLIANCE));
 
         final float neededPowerPercentageToAttack = this.powerConfig.getNeededPowerPercentageToAttack();

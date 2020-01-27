@@ -100,7 +100,7 @@ public class ChatMessageListener extends AbstractListener
                 chatTypePrefix.append(getAlliancePrefix());
                 messageChannel.asMutable().clearMembers();
 
-                for (String allianceName : playerFaction.getAlliances())
+                for (final String allianceName : playerFaction.getAlliances())
                 {
                     Faction allyFaction = super.getPlugin().getFactionLogic().getFactionByName(allianceName);
                     if(allyFaction != null)

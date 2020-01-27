@@ -44,6 +44,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String SELECT_OFFICER_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM OfficerFlags WHERE FactionName=?";
     private static final String SELECT_MEMBER_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM MemberFlags WHERE FactionName=?";
     private static final String SELECT_RECRUIT_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM RecruitFlags WHERE FactionName=?";
+    private static final String SELECT_TRUCE_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM TruceFlags WHERE FactionName=?";
     private static final String SELECT_ALLY_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM AllyFlags WHERE FactionName=?";
     private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM Factions WHERE Name=?";
 
@@ -53,9 +54,9 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
     private static final String DELETE_FACTION_CHEST_WHERE_FACTIONNAME = "DELETE FROM FactionChests WHERE FactionName=?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd, IsPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Truces, Alliances, Enemies, Description, Motd, IsPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
+    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Truces = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
 
 
 //    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -241,6 +242,13 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         try
         {
             StringBuilder stringBuilder = new StringBuilder();
+            for (String truce : faction.getTruces())
+            {
+                stringBuilder.append(truce);
+                stringBuilder.append(",");
+            }
+            String truces = stringBuilder.toString();
+            stringBuilder.setLength(0);
             for (String alliance : faction.getAlliances())
             {
                 stringBuilder.append(alliance);
@@ -255,6 +263,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             }
             String enemies = stringBuilder.toString();
 
+            if(truces.endsWith(","))
+                truces = truces.substring(0, truces.length() - 1);
             if (alliances.endsWith(","))
                 alliances = alliances.substring(0, alliances.length() - 1);
             if (enemies.endsWith(","))
@@ -280,13 +290,14 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 preparedStatement.setString(5, faction.getHome().toString());
             else preparedStatement.setString(5, null);
             preparedStatement.setString(6, faction.getLastOnline().toString());
-            preparedStatement.setString(7, alliances);
-            preparedStatement.setString(8, enemies);
-            preparedStatement.setString(9, faction.getDescription());
-            preparedStatement.setString(10, faction.getMessageOfTheDay());
-            preparedStatement.setString(11, faction.isPublic() ? "1" : "0");
+            preparedStatement.setString(7, truces);
+            preparedStatement.setString(8, alliances);
+            preparedStatement.setString(9, enemies);
+            preparedStatement.setString(10, faction.getDescription());
+            preparedStatement.setString(11, faction.getMessageOfTheDay());
+            preparedStatement.setString(12, faction.isPublic() ? "1" : "0");
             if(exists)
-                preparedStatement.setString(12, faction.getName()); //Where part
+                preparedStatement.setString(13, faction.getName()); //Where part
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -499,6 +510,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                     factionHome = FactionHome.from(factionHomeAsString);
                 final String lastOnlineString = factionsResultSet.getString("LastOnline");
                 final Instant lastOnline = Instant.parse(lastOnlineString);
+                final Set<String> truces = new HashSet<>(Arrays.asList(factionsResultSet.getString("Truces").split(",")));
                 final Set<String> alliances = new HashSet<>(Arrays.asList(factionsResultSet.getString("Alliances").split(",")));
                 final Set<String> enemies = new HashSet<>(Arrays.asList(factionsResultSet.getString("Enemies").split(",")));
 
@@ -512,6 +524,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
 
                 final Faction faction = FactionImpl.builder(factionName, Text.of(textColor, tag), leaderUUID)
                         .setHome(factionHome)
+                        .setTruces(truces)
                         .setAlliances(alliances)
                         .setEnemies(enemies)
                         .setClaims(claims)
@@ -709,6 +722,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         final Map<FactionFlagTypes, Boolean> membersMap = new LinkedHashMap<>();
         final Map<FactionFlagTypes, Boolean> recruitMap = new LinkedHashMap<>();
         final Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
+        final Map<FactionFlagTypes, Boolean> truceMap = new LinkedHashMap<>();
 
         //Get leader flags
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LEADER_FLAGS_WHERE_FACTIONNAME);
@@ -798,13 +812,29 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         recruitResult.close();
         preparedStatement.close();
 
+        //Get truce flags
+        preparedStatement = connection.prepareStatement(SELECT_TRUCE_FLAGS_WHERE_FACTIONNAME);
+        preparedStatement.setString(1, factionName);
+        ResultSet truceResult = preparedStatement.executeQuery();
+        boolean truceUSE = true;
+        boolean trucePLACE = false;
+        boolean truceDESTROY = false;
+        if (truceResult.first())
+        {
+            truceUSE = truceResult.getBoolean("Use");
+            trucePLACE = truceResult.getBoolean("Place");
+            truceDESTROY = truceResult.getBoolean("Destroy");
+        }
+        truceResult.close();
+        preparedStatement.close();
+
         //Get ally flags
         preparedStatement = connection.prepareStatement(SELECT_ALLY_FLAGS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet allyResult = preparedStatement.executeQuery();
         boolean allyUSE = true;
-        boolean allyPLACE = false;
-        boolean allyDESTROY = false;
+        boolean allyPLACE = true;
+        boolean allyDESTROY = true;
         if (allyResult.first())
         {
             allyUSE = allyResult.getBoolean("Use");
@@ -842,6 +872,10 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         recruitMap.put(FactionFlagTypes.ATTACK, recruitATTACK);
         recruitMap.put(FactionFlagTypes.INVITE, recruitINVITE);
 
+        truceMap.put(FactionFlagTypes.USE, truceUSE);
+        truceMap.put(FactionFlagTypes.PLACE, trucePLACE);
+        truceMap.put(FactionFlagTypes.DESTROY, truceDESTROY);
+
         allyMap.put(FactionFlagTypes.USE, allyUSE);
         allyMap.put(FactionFlagTypes.PLACE, allyPLACE);
         allyMap.put(FactionFlagTypes.DESTROY, allyDESTROY);
@@ -850,6 +884,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         flagMap.put(FactionMemberType.OFFICER, officerMap);
         flagMap.put(FactionMemberType.MEMBER, membersMap);
         flagMap.put(FactionMemberType.RECRUIT, recruitMap);
+        flagMap.put(FactionMemberType.TRUCE, truceMap);
         flagMap.put(FactionMemberType.ALLY, allyMap);
 
         return flagMap;
@@ -871,7 +906,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement.setString(8, "");
             preparedStatement.setString(9, "");
             preparedStatement.setString(10, "");
-            preparedStatement.setString(11, "0");
+            preparedStatement.setString(11, "");
+            preparedStatement.setString(12, "0");
 
             PreparedStatement preparedStatement1 = connection.prepareStatement(INSERT_FACTION);
             preparedStatement1.setString(1, "SafeZone");
@@ -884,7 +920,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement1.setString(8, "");
             preparedStatement1.setString(9, "");
             preparedStatement1.setString(10, "");
-            preparedStatement1.setString(11, "0");
+            preparedStatement1.setString(11, "");
+            preparedStatement1.setString(12, "0");
 
             preparedStatement.execute();
             preparedStatement1.execute();

@@ -54,7 +54,7 @@ public class EnemyCommand extends AbstractCommand
 
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            if(playerFaction.getAlliances().contains(enemyFaction.getName()))
+            if(playerFaction.getAlliances().contains(enemyFaction.getName()) || playerFaction.getTruces().contains(enemyFaction.getName()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_IS_YOUR_ALLY + " " + Messages.DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
 
             if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
@@ -73,7 +73,7 @@ public class EnemyCommand extends AbstractCommand
         if(!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
 
-        if(playerFaction.getAlliances().contains(enemyFaction.getName()))
+        if(playerFaction.getAlliances().contains(enemyFaction.getName()) || playerFaction.getTruces().contains(enemyFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_IS_YOUR_ALLY + " " + Messages.DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
 
         if(!playerFaction.getEnemies().contains(enemyFaction.getName()))

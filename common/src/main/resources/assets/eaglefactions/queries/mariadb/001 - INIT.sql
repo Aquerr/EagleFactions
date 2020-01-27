@@ -15,6 +15,7 @@ CREATE TABLE `Factions` (
   `Leader` VARCHAR(36) NOT NULL,
   `Home` VARCHAR(200) NULL,
   `LastOnline` VARCHAR(200) NOT NULL,
+  `Truces` VARCHAR(255) NOT NULL,
   `Alliances` VARCHAR(255) NOT NULL,
   `Enemies` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`, `Name`)
@@ -153,6 +154,19 @@ CREATE TABLE `AllyFlags` (
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `AllyFlags` (`FactionName`);
+
+-- Create TruceFlags Table
+CREATE TABLE `TruceFlags` (
+    `FactionName` VARCHAR(200) NOT NULL,
+    `Use` TINYINT(1) NOT NULL,
+    `Place` TINYINT(1) NOT NULL,
+    `Destroy` TINYINT(1) NOT NULL,
+    FOREIGN KEY (`FactionName`)
+        REFERENCES `Factions` (`Name`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) DEFAULT CHARSET = utf8mb4;
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `TruceFlags` (`FactionName`);
 
 -- Create Claims Table
 CREATE TABLE `Claims` (

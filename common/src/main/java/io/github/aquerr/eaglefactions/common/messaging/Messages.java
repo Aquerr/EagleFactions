@@ -138,6 +138,7 @@ public class Messages
     public static String DESCRIPTION;
     public static String MOTD;
     public static String OFFICERS;
+    public static String TRUCES;
     public static String ALLIANCES;
     public static String MEMBERS;
     public static String RECRUITS;
@@ -209,6 +210,9 @@ public class Messages
 
     //Rename
     public static String SUCCESSFULLY_RENAMED_FACTION_TO_FACTION_NAME;
+
+    //Truce
+    public static String DISBAND_TRUCE_FIRST_TO_INVITE_FACTION_TO_THE_ALLIANCE;
 
     //Ally
     public static String YOU_DISBANDED_YOUR_ALLIANCE_WITH_FACTION;

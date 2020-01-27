@@ -546,7 +546,7 @@ public class BlockBreakListener extends AbstractListener
 
                                     if(!isAllianceFriendlyFireOn)
                                     {
-                                        if(affectedPlayerFaction.getAlliances().contains(shooterPlayerFaction.getName()))
+                                        if(affectedPlayerFaction.getAlliances().contains(shooterPlayerFaction.getName()) || affectedPlayerFaction.getTruces().contains(shooterPlayerFaction.getName()))
                                         {
                                             sourceEntity.remove();
                                             event.setCancelled(true);

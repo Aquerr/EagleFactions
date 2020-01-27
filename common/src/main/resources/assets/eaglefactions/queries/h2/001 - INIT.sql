@@ -12,6 +12,7 @@ CREATE TABLE Factions (
    Leader      VARCHAR(36)                     NOT NULL,
    Home        VARCHAR(200)                    NULL,
    LastOnline  VARCHAR(200)                    NOT NULL,
+   Truces      VARCHAR                      NOT NULL,
    Alliances    VARCHAR                     NOT NULL,
    Enemies      VARCHAR                     NOT NULL,
    PRIMARY KEY (Name)
@@ -126,6 +127,16 @@ CREATE TABLE AllyFlags (
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX ON AllyFlags (FactionName);
+
+-- Create TruceFlags Table
+CREATE TABLE TruceFlags (
+   FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
+   Use         BOOLEAN                         NOT NULL,
+   Place       BOOLEAN                         NOT NULL,
+   Destroy     BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX ON TruceFlags (FactionName);
 
 -- Create Claims Table
 CREATE TABLE Claims (

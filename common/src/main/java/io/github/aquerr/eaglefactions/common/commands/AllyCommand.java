@@ -58,6 +58,14 @@ public class AllyCommand extends AbstractCommand
             if(playerFaction.getEnemies().contains(selectedFaction.getName()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + Messages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
 
+            if(playerFaction.getTruces().contains(selectedFaction.getName()))
+			{
+				super.getPlugin().getFactionLogic().removeTruce(playerFaction.getName(), selectedFaction.getName());
+				//Add ally
+				super.getPlugin().getFactionLogic().addAlly(playerFaction.getName(), selectedFaction.getName());
+				player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
+			}
+
 			if(playerFaction.getAlliances().contains(selectedFaction.getName()))
 			{
 				//Remove ally
@@ -78,6 +86,9 @@ public class AllyCommand extends AbstractCommand
 
         if(playerFaction.getEnemies().contains(selectedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + Messages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
+
+		if(playerFaction.getTruces().contains(selectedFaction.getName()))
+			throw new CommandException(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.DISBAND_TRUCE_FIRST_TO_INVITE_FACTION_TO_THE_ALLIANCE));
 
         if(playerFaction.getAlliances().contains(selectedFaction.getName()))
         {

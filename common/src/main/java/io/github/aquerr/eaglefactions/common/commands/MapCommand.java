@@ -72,6 +72,7 @@ public class MapCommand extends AbstractCommand
 
         final Text notCapturedMark = Text.of(TextColors.GRAY, "/");
         final Text factionMark = Text.of(TextColors.GREEN, "+");
+        final Text truceMark = Text.of(TextColors.GRAY, "+");
         final Text allianceMark = Text.of(TextColors.AQUA, "+");
         final Text enemyMark = Text.of(TextColors.RED, "#");
         final Text normalFactionMark = Text.of(TextColors.WHITE, "+");
@@ -81,13 +82,14 @@ public class MapCommand extends AbstractCommand
 
         final List<Text> map = new ArrayList<>();
         final List<String> normalFactions = new ArrayList<>();
+        final List<String> truceFactions = new ArrayList<>();
         final List<String> allianceFactions = new ArrayList<>();
         final List<String> enemyFactions = new ArrayList<>();
         //String playerFaction = "";
 
         //Map resolution
         int mapWidth = 18;
-        int mapHeight = 7;
+        int mapHeight = 8;
 
         //Half map resolution + 1 (for player column/row in the center)
         //Needs to be an odd number so the map will have equal distance to the left and right.
@@ -132,6 +134,14 @@ public class MapCommand extends AbstractCommand
                                 if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
                                 {
                                     allianceFactions.add(optionalChunkFaction.get().getName());
+                                }
+                            }
+                            else if(!showPlayerFactionClaimsOnly && playerFaction.getTruces().contains(optionalChunkFaction.get().getName()))
+                            {
+                                textBuilder.append(truceMark);
+                                if(!truceFactions.contains(optionalChunkFaction.get().getName()))
+                                {
+                                    truceFactions.add(optionalChunkFaction.get().getName());
                                 }
                             }
                             else if (!showPlayerFactionClaimsOnly && playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
@@ -251,9 +261,13 @@ public class MapCommand extends AbstractCommand
         {
             player.sendMessage(Text.of(TextColors.WHITE, Messages.FACTIONS + ": ", TextColors.RESET, String.join(",", normalFactions)));
         }
+        if(!truceFactions.isEmpty())
+        {
+            player.sendMessage(Text.of(TextColors.AQUA, Messages.TRUCES + ": " + String.join(",", truceFactions)));
+        }
         if (!allianceFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": " + String.join("," ,allianceFactions)));
+            player.sendMessage(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": " + String.join(",", allianceFactions)));
         }
         if (!enemyFactions.isEmpty())
         {

@@ -85,8 +85,9 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getOfficers()));
             configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getMembers()));
             configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getRecruits()));
-            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
+            configNode.getNode("factions", faction.getName(), "truces").setValue(faction.getTruces());
             configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
+            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
             configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(Claim::toString).collect(Collectors.toList()));
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Strings;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
@@ -218,12 +219,54 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
+    public void addTruce(String playerFactionName, String invitedFactionName)
+    {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction invitedFaction = getFactionByName(invitedFactionName);
+
+        final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
+        final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getTruces());
+
+        playerFactionAlliances.add(invitedFactionName);
+        invitedFactionAlliances.add(playerFactionName);
+
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setTruces(playerFactionAlliances).build();
+        final Faction updatedInvitedFaction = invitedFaction.toBuilder().setTruces(invitedFactionAlliances).build();
+
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedInvitedFaction);
+    }
+
+    @Override
+    public void removeTruce(String playerFactionName, String removedFactionName)
+    {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(removedFactionName))
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction removedFaction = getFactionByName(removedFactionName);
+
+        final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
+        final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getTruces());
+
+        playerFactionAlliances.remove(removedFactionName);
+        removedFactionAlliances.remove(playerFactionName);
+
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setTruces(playerFactionAlliances).build();
+        final Faction updatedRemovedFaction = removedFaction.toBuilder().setTruces(removedFactionAlliances).build();
+
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedRemovedFaction);
+    }
+
+    @Override
     public void addAlly(String playerFactionName, String invitedFactionName)
     {
-        if(playerFactionName == null || invitedFactionName == null || playerFactionName.equals("") || invitedFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
@@ -244,10 +287,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeAlly(String playerFactionName, String removedFactionName)
     {
-        if(playerFactionName == null || removedFactionName == null || playerFactionName.equals("") || removedFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(removedFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
@@ -268,10 +309,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addEnemy(String playerFactionName, String enemyFactionName)
     {
-        if(playerFactionName == null || enemyFactionName == null || playerFactionName.equals("") || enemyFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(enemyFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -292,10 +331,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeEnemy(String playerFactionName, String enemyFactionName)
     {
-        if(playerFactionName == null || enemyFactionName == null || playerFactionName.equals("") || enemyFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(enemyFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);

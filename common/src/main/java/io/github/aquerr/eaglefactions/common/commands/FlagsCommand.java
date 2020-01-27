@@ -30,34 +30,20 @@ public class FlagsCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        if (source instanceof Player)
-        {
-            final Player player = (Player)source;
-            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if(!(source instanceof Player))
+            throw new CommandException(Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
-            if (optionalPlayerFaction.isPresent())
-            {
-                Faction faction = optionalPlayerFaction.get();
+        final Player player = (Player)source;
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-                if (faction.getLeader().equals(player.getUniqueId()) || EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
-                {
-                    showFlags(player, faction);
-                }
-                else
-                {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
-                }
-            }
-            else
-            {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-            }
-        }
-        else
-        {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-        }
+        if(!optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
+        final Faction faction = optionalPlayerFaction.get();
+        if(!faction.getLeader().equals(player.getUniqueId()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
+
+        showFlags(player, faction);
         return CommandResult.success();
     }
 

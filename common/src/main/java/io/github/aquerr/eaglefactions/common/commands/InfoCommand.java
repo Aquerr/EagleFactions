@@ -122,7 +122,13 @@ public class InfoCommand extends AbstractCommand
         			.map(officer -> getPlugin().getPlayerManager().getPlayerName(officer))
         			.filter(Optional::isPresent).map(Optional::get)
         			.collect(Collectors.joining(", "));		
-        }		 
+        }
+
+        String trucesList = "";
+        if(!faction.getTruces().isEmpty())
+        {
+            trucesList = String.join(", ", faction.getTruces());
+        }
 
         String alliancesList = "";
         if(!faction.getAlliances().isEmpty())
@@ -146,6 +152,7 @@ public class InfoCommand extends AbstractCommand
                 .append(Text.of(TextColors.AQUA, Messages.PUBLIC + ": ", TextColors.GOLD, faction.isPublic() + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
+                .append(Text.of(TextColors.AQUA, Messages.TRUCES + ": ", TextColors.GOLD, trucesList + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))
