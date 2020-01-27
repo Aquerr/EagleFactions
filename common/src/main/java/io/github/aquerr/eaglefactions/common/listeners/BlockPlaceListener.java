@@ -1,10 +1,12 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
@@ -14,9 +16,12 @@ import org.spongepowered.api.event.cause.EventContext;
 
 public class BlockPlaceListener extends AbstractListener
 {
+    private final ProtectionConfig protectionConfig;
+
     public BlockPlaceListener(EagleFactions plugin)
     {
         super(plugin);
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
     @Listener(order = Order.EARLY)
@@ -40,6 +45,11 @@ public class BlockPlaceListener extends AbstractListener
         if(user instanceof Player)
         {
             final Player player = (Player) user;
+
+            //Requested for sand/tnt cannons by Turner
+            if(source instanceof FallingBlock && this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims())
+                return;
+
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
                 if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true))
