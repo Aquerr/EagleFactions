@@ -73,13 +73,13 @@ public class DummyEagleFactionsInstance implements EagleFactions
 	@Override
 	public PVPLogger getPVPLogger()
 	{
-		return new PVPLoggerImpl(getConfiguration());
+		return null;
 	}
 
 	@Override
 	public FactionLogic getFactionLogic()
 	{
-		return new FactionLogicImpl(this);
+		return null;
 	}
 
 	@Override
