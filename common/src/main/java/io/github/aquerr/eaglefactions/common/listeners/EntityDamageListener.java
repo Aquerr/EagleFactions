@@ -232,8 +232,6 @@ public class EntityDamageListener extends AbstractListener
         }
 
         final Faction attackedPlayerFaction = optionalAttackedPlayerFaction.get();
-
-        //Check if players are in the same faction
         if(sourcePlayerFaction.getName().equals(attackedPlayerFaction.getName()))
         {
             //If friendlyfire is off then block the damage.
@@ -250,7 +248,22 @@ public class EntityDamageListener extends AbstractListener
                     return false;
                 }
             }
-        }//Check if players are in the alliance.
+        }
+        else if(sourcePlayerFaction.getTruces().contains(attackedPlayerFaction.getName()))
+        {
+            if(!this.factionsConfig.isTruceFriendlyFire())
+                return true;
+            if(willCauseDeath)
+            {
+                sendPenaltyMessageAndDecreasePower(sourcePlayer);
+                return false;
+            }
+            if(this.pvpLogger.isActive())
+            {
+                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
+            }
+            return false;
+        }
         else if(sourcePlayerFaction.getAlliances().contains(attackedPlayerFaction.getName()))
         {
             if(!this.factionsConfig.isAllianceFriendlyFire())
@@ -324,8 +337,9 @@ public class EntityDamageListener extends AbstractListener
         final Player igniterPlayer = (Player) eventContext.get(EventContextKeys.OWNER).get();
         final boolean isFactionFriendlyFireOn = this.factionsConfig.isFactionFriendlyFire();
         final boolean isAllianceFriendlyFireOn = this.factionsConfig.isAllianceFriendlyFire();
+        final boolean isTruceFriendlyFireOn = this.factionsConfig.isTruceFriendlyFire();
 
-        if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
+        if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn && isTruceFriendlyFireOn)
             return;
 
         final Optional<Faction> optionalIgnitedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(ignitedPlayer.getUniqueId());
@@ -339,6 +353,15 @@ public class EntityDamageListener extends AbstractListener
             if(!isFactionFriendlyFireOn)
             {
                 if(ignitedPlayerFaction.getName().equals(igniterPlayerFaction.getName()))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
+            if(!isTruceFriendlyFireOn)
+            {
+                if(ignitedPlayerFaction.getTruces().contains(igniterPlayerFaction.getName()))
                 {
                     event.setCancelled(true);
                     return;

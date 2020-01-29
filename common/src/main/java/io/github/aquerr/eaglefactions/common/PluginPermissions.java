@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common;
 
 public final class PluginPermissions
 {
+    public static final String TRUCE_COMMAND = "eaglefactions.player.truce";
     public static final String ALLY_COMMAND = "eaglefactions.player.ally";
     public static final String ENEMY_COMMAND = "eaglefactions.player.enemy";
 

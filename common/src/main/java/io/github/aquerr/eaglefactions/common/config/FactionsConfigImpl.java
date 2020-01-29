@@ -27,6 +27,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	private int attackTime = 10;
 
 	private boolean isFactionFriendlyFire = false;
+	private boolean isTruceFriendlyFire = true;
 	private boolean isAllianceFriendlyFire = false;
 
 	private int homeDelay = 5;
@@ -75,6 +76,7 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.attackTime = this.configuration.getInt(10, "attack-time");
 
 		this.isFactionFriendlyFire = this.configuration.getBoolean(false, "friendlyfire-faction");
+		this.isTruceFriendlyFire = this.configuration.getBoolean(true, "friendlyfire-truce");
 		this.isAllianceFriendlyFire = this.configuration.getBoolean(false, "friendlyfire-alliance");
 
 		this.homeDelay = this.configuration.getInt(5, "home-delay");
@@ -158,6 +160,12 @@ public class FactionsConfigImpl implements FactionsConfig
 	public boolean isFactionFriendlyFire()
 	{
 		return this.isFactionFriendlyFire;
+	}
+
+	@Override
+	public boolean isTruceFriendlyFire()
+	{
+		return this.isTruceFriendlyFire;
 	}
 
 	@Override

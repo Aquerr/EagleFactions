@@ -67,6 +67,7 @@ public class EagleFactionsPlugin implements EagleFactions
 {
     public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
     public static final List<Invite> INVITE_LIST = new ArrayList<>();
+    public static final List<AllyRequest> TRUCE_INVITE_LIST = new ArrayList<>();
     public static final List<AllyRequest> ALLY_INVITE_LIST = new ArrayList<>();
     public static final List<ArmisticeRequest> ARMISTICE_REQUEST_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
@@ -307,15 +308,23 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new PlayerCommand(this))
                 .build());
 
-        //Build alliance commands.
+        //Truce command
+        SUBCOMMANDS.put(Collections.singletonList("truce"), CommandSpec.builder()
+                .description(Text.of("Invite or remove faction from truce"))
+                .permission(PluginPermissions.TRUCE_COMMAND)
+                .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
+                .executor(new TruceCommand(this))
+                .build());
+
+        //Ally command
         SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
-                .description(Text.of("Invite or remove faction from the alliance"))
+                .description(Text.of("Invite or remove faction from alliance"))
                 .permission(PluginPermissions.ALLY_COMMAND)
                 .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
                 .executor(new AllyCommand(this))
                 .build());
 
-        //Build enemy commands.
+        //Enemy command
         SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare or remove faction from war"))
                 .permission(PluginPermissions.ENEMY_COMMAND)

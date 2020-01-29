@@ -54,8 +54,10 @@ public class EnemyCommand extends AbstractCommand
 
         if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
         {
-            if(playerFaction.getAlliances().contains(enemyFaction.getName()) || playerFaction.getTruces().contains(enemyFaction.getName()))
+            if(playerFaction.getAlliances().contains(enemyFaction.getName()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_IS_YOUR_ALLY + " " + Messages.DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR));
+            if(playerFaction.getTruces().contains(enemyFaction.getName()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_IS_IN_TRUCE_WITH_YOU + " " + Messages.DISBAND_TRUCE_FIRST_TO_DECLARE_A_WAR));
 
             if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
             {

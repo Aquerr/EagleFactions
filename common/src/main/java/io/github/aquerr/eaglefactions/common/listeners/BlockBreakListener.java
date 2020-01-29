@@ -522,8 +522,9 @@ public class BlockBreakListener extends AbstractListener
                                 //We got shooter player
                                 //Check friendly fire
                                 final boolean isFactionFriendlyFireOn = factionsConfig.isFactionFriendlyFire();
+                                final boolean isTruceFriendlyFireOn = factionsConfig.isTruceFriendlyFire();
                                 final boolean isAllianceFriendlyFireOn = factionsConfig.isAllianceFriendlyFire();
-                                if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
+                                if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn && isTruceFriendlyFireOn)
                                     continue;
 
                                 final Optional<Faction> optionalAffectedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
@@ -544,9 +545,19 @@ public class BlockBreakListener extends AbstractListener
                                         }
                                     }
 
+                                    if(!isTruceFriendlyFireOn)
+                                    {
+                                        if(affectedPlayerFaction.getTruces().contains(shooterPlayerFaction.getName()))
+                                        {
+                                            sourceEntity.remove();
+                                            event.setCancelled(true);
+                                            return;
+                                        }
+                                    }
+
                                     if(!isAllianceFriendlyFireOn)
                                     {
-                                        if(affectedPlayerFaction.getAlliances().contains(shooterPlayerFaction.getName()) || affectedPlayerFaction.getTruces().contains(shooterPlayerFaction.getName()))
+                                        if(affectedPlayerFaction.getAlliances().contains(shooterPlayerFaction.getName()))
                                         {
                                             sourceEntity.remove();
                                             event.setCancelled(true);
