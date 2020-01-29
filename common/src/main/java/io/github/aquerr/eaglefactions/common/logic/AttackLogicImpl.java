@@ -28,7 +28,7 @@ public class AttackLogicImpl implements AttackLogic
     private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic;
 
-    private AttackLogicImpl(EagleFactions eagleFactions)
+    private AttackLogicImpl(final EagleFactions eagleFactions)
     {
         factionsConfig = eagleFactions.getConfiguration().getFactionsConfig();
         factionLogic = eagleFactions.getFactionLogic();

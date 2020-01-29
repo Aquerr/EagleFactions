@@ -2,14 +2,15 @@ package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Strings;
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -41,24 +42,24 @@ public class FactionLogicImpl implements FactionLogic
 
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
-    private final PlayerManagerImpl _playerManager;
-    private final EagleFactionsPlugin plugin;
+    private final PlayerManager playerManager;
+    private final EagleFactions plugin;
 
     private final UUID DUMMY_UUID = new UUID(0, 0);
 
-    public static FactionLogic getInstance(final EagleFactionsPlugin eagleFactions)
+    public static FactionLogic getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
             return new FactionLogicImpl(eagleFactions);
         else return INSTANCE;
     }
 
-    public FactionLogicImpl(EagleFactionsPlugin plugin)
+    private FactionLogicImpl(EagleFactions plugin)
     {
         INSTANCE = this;
         this.plugin = plugin;
         factionsConfig = plugin.getConfiguration().getFactionsConfig();
-        _playerManager = plugin.getPlayerManager();
+        playerManager = plugin.getPlayerManager();
         this.storageManager = plugin.getStorageManager();
     }
 
@@ -122,32 +123,32 @@ public class FactionLogicImpl implements FactionLogic
     {
         final List<Player> factionPlayers = new ArrayList<>();
         final UUID factionLeader = faction.getLeader();
-        if(!faction.getLeader().equals(DUMMY_UUID) && _playerManager.isPlayerOnline(factionLeader))
+        if(!faction.getLeader().equals(DUMMY_UUID) && playerManager.isPlayerOnline(factionLeader))
         {
-            factionPlayers.add(_playerManager.getPlayer(factionLeader).get());
+            factionPlayers.add(playerManager.getPlayer(factionLeader).get());
         }
 
         for(final UUID uuid : faction.getOfficers())
         {
-            if(_playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(uuid))
             {
-                factionPlayers.add(_playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(uuid).get());
             }
         }
 
         for(final UUID uuid : faction.getMembers())
         {
-            if(_playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(uuid))
             {
-                factionPlayers.add(_playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(uuid).get());
             }
         }
 
         for(final UUID uuid : faction.getRecruits())
         {
-            if(_playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(uuid))
             {
-                factionPlayers.add(_playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(uuid).get());
             }
         }
 
@@ -507,7 +508,7 @@ public class FactionLogicImpl implements FactionLogic
     {
         if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
         {
-            if(_playerManager.isPlayerOnline(faction.getLeader()))
+            if(playerManager.isPlayerOnline(faction.getLeader()))
             {
                 return true;
             }
@@ -515,7 +516,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(UUID playerUUID : faction.getOfficers())
         {
-            if(_playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(playerUUID))
             {
                 return true;
             }
@@ -523,7 +524,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(UUID playerUUID : faction.getMembers())
         {
-            if(_playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(playerUUID))
             {
                 return true;
             }
@@ -531,7 +532,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(UUID playerUUID : faction.getRecruits())
         {
-            if(_playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(playerUUID))
             {
                 return true;
             }

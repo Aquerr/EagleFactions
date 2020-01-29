@@ -2,32 +2,33 @@ package io.github.aquerr.eaglefactions.common;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
+import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
-import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.api.managers.*;
+import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
+import io.github.aquerr.eaglefactions.api.managers.PowerManager;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
-import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.common.commands.args.FactionNameArgument;
+import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
+import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.PVPLoggerImpl;
-import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
-import io.github.aquerr.eaglefactions.common.commands.args.FactionNameArgument;
-import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
-import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
@@ -646,8 +647,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         configuration = new ConfigurationImpl(configDir, configAsset);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
-
-        pvpLogger = new PVPLoggerImpl(getConfiguration());
+        pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void setupManagers()
