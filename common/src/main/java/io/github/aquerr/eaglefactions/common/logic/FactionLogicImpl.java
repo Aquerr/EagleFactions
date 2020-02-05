@@ -176,7 +176,20 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public boolean disbandFaction(String factionName)
     {
-        return this.storageManager.deleteFaction(factionName);
+        Objects.requireNonNull(factionName);
+
+        final boolean isDisbanded = this.storageManager.deleteFaction(factionName);
+        final List<Faction> tempFactions = new ArrayList<>(getFactions().values());
+        for (final Faction faction : tempFactions)
+        {
+            if (faction.getTruces().contains(factionName))
+                removeTruce(faction.getName(), factionName);
+            else if (faction.getAlliances().contains(factionName))
+                removeAlly(faction.getName(), factionName);
+            else if (faction.getEnemies().contains(factionName))
+                removeEnemy(faction.getName(), factionName);
+        }
+        return isDisbanded;
     }
 
     @Override

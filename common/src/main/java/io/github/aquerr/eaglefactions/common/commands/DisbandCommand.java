@@ -16,6 +16,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 public class DisbandCommand extends AbstractCommand
@@ -43,13 +44,12 @@ public class DisbandCommand extends AbstractCommand
             if (faction == null)
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, optionalFactionName.get())))));
 
-            boolean didSecceed = super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
-            if (didSecceed) {
+            boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
+            if (didSucceed) {
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
             } else {
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.SOMETHING_WENT_WRONG));
             }
-
             return CommandResult.success();
         }
 
