@@ -104,6 +104,9 @@ public class PVPLoggerImpl implements PVPLogger
     @Override
     public synchronized void addOrUpdatePlayer(final Player player)
     {
+        if(!isActive())
+            return;
+
         //Update player's time if player is already blocked.
         if (attackedPlayers.containsKey(player.getUniqueId()))
         {

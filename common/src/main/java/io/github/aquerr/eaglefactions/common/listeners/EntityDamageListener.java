@@ -22,6 +22,8 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
@@ -32,7 +34,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.function.DoubleUnaryOperator;
 
 public class EntityDamageListener extends AbstractListener
 {
@@ -56,7 +60,6 @@ public class EntityDamageListener extends AbstractListener
     {
         final Entity targetEntity = event.getTargetEntity();
         final Cause cause = event.getCause();
-        final EventContext eventContext = event.getContext();
 
         //Handle damaging player in separate method.
         if(targetEntity instanceof Player)
@@ -82,7 +85,6 @@ public class EntityDamageListener extends AbstractListener
         if(!super.getPlugin().getProtectionManager().canInteractWithBlock(targetEntity.getLocation(), user, true))
         {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -92,30 +94,25 @@ public class EntityDamageListener extends AbstractListener
         if(!(event.getCause().root() instanceof DamageSource))
             return;
 
-        if(event.getTargetEntity().getType() != EntityTypes.PLAYER)
-            return;
-
         final Player attackedPlayer = (Player) event.getTargetEntity();
         final World world = attackedPlayer.getWorld();
         final boolean willCauseDeath = event.willCauseDeath();
 
-        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
-        {
-            event.setBaseDamage(0);
-            event.setCancelled(true);
-            return;
-        }
-
-        //Block all damage an attacked player would get if location is a SafeZone.
-        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
-        if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
-        {
-            event.setBaseDamage(0);
-            event.setCancelled(true);
-            return;
-        }
-
         final Object rootCause = event.getCause().root();
+
+        //Percentage damage reduction operator
+        final DoubleUnaryOperator doubleUnaryOperator = operand ->
+        {
+            final double difference = operand * (this.factionsConfig.getPercentageDamageReductionInOwnTerritory() / 100);
+            return -difference;
+        };
+        final DamageModifier damageReductionModifier = DamageModifier.builder()
+                .type(DamageModifierTypes.ARMOR)
+                .cause(
+                        Cause.builder()
+                                .append(super.getPlugin())
+                                .build(EventContext.builder().build()))
+                .build();
 
         //Handle projectiles
         if(rootCause instanceof IndirectEntityDamageSource)
@@ -136,7 +133,13 @@ public class EntityDamageListener extends AbstractListener
                         indirectEntityDamageSource.getSource().remove();
                     }
                     world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
-                    return;
+                }
+                else
+                {
+                    if (isInOwnTerritory(attackedPlayer))
+                    {
+                        event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
+                    }
                 }
             }
         }
@@ -174,7 +177,20 @@ public class EntityDamageListener extends AbstractListener
                     event.setBaseDamage(0);
                     event.setCancelled(true);
                     world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
-                    return;
+                }
+                else
+                {
+                    if (isInOwnTerritory(attackedPlayer))
+                    {
+                        event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
+                    }
+                }
+            }
+            else
+            {
+                if (isInOwnTerritory(attackedPlayer))
+                {
+                    event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
                 }
             }
         }
@@ -182,18 +198,26 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean shouldBlockDamageFromPlayer(final Player attackedPlayer, final Player sourcePlayer, boolean willCauseDeath)
     {
-        //Block all damage a player could deal if location is SafeZone.
         final World world = attackedPlayer.getWorld();
 
-        final Optional<Faction> playerChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), sourcePlayer.getLocation().getChunkPosition());
-        if(playerChunkFaction.isPresent() && playerChunkFaction.get().getName().equals("SafeZone"))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(attackedPlayer.getWorld().getName()))
+            return true;
+
+        //Block all damage an attacked player would get if location is a SafeZone.
+        final Optional<Faction> optionalAttackedChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(attackedPlayer.getWorld().getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
+        if(optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().getName().equals("SafeZone"))
             return true;
 
         //If player attacked herself/himself
         if(attackedPlayer.equals(sourcePlayer))
             return false;
 
-        //Check if player is not in a faction.
+        //Block all damage a player could deal if location is SafeZone.
+        final Optional<Faction> optionalSourceChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), sourcePlayer.getLocation().getChunkPosition());
+        if(optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().getName().equals("SafeZone"))
+            return true;
+
+        //Check if source player is not in a faction.
         final Optional<Faction> optionalSourcePlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
         if(!optionalSourcePlayerFaction.isPresent())
         {
@@ -203,11 +227,7 @@ public class EntityDamageListener extends AbstractListener
                 return false;
             }
 
-            if(this.pvpLogger.isActive())
-            {
-                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-            }
-
+            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
 
@@ -223,15 +243,12 @@ public class EntityDamageListener extends AbstractListener
                 return false;
             }
 
-            if(this.pvpLogger.isActive())
-            {
-                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-            }
-
+            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
 
         final Faction attackedPlayerFaction = optionalAttackedPlayerFaction.get();
+
         if(sourcePlayerFaction.getName().equals(attackedPlayerFaction.getName()))
         {
             //If friendlyfire is off then block the damage.
@@ -258,10 +275,7 @@ public class EntityDamageListener extends AbstractListener
                 sendPenaltyMessageAndDecreasePower(sourcePlayer);
                 return false;
             }
-            if(this.pvpLogger.isActive())
-            {
-                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-            }
+            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
         else if(sourcePlayerFaction.getAlliances().contains(attackedPlayerFaction.getName()))
@@ -277,10 +291,7 @@ public class EntityDamageListener extends AbstractListener
                     sendPenaltyMessageAndDecreasePower(sourcePlayer);
                     return false;
                 }
-                if(this.pvpLogger.isActive())
-                {
-                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-                }
+                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
                 return false;
             }
         }
@@ -291,10 +302,7 @@ public class EntityDamageListener extends AbstractListener
                 sendKillAwardMessageAndIncreasePower(sourcePlayer);
                 return false;
             }
-            if(this.pvpLogger.isActive())
-            {
-                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-            }
+            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
         return false;
@@ -391,5 +399,15 @@ public class EntityDamageListener extends AbstractListener
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY + " ", TextColors.GOLD, this.powerConfig.getKillAward() + "\n",
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().addPower(player.getUniqueId(), true);
+    }
+
+    private boolean isInOwnTerritory(final Player player)
+    {
+        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if (!optionalPlayerFaction.isPresent())
+            return false;
+
+        final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+        return optionalFaction.map(faction -> faction.getName().equals(optionalPlayerFaction.get().getName())).orElse(false);
     }
 }
