@@ -31,6 +31,7 @@ public class AllianceMessageChannelImpl extends AbstractMutableMessageChannel im
 			allianceFactions.add(allianceFaction);
 		}
 		factions = Collections.unmodifiableSet(allianceFactions);
+		getReceivers();
 	}
 
 	public AllianceMessageChannelImpl(final Set<Faction> factions)

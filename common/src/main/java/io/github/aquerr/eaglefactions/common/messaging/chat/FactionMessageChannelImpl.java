@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.common.messaging.chat;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.messaging.chat.AllianceMessageChannel;
 import io.github.aquerr.eaglefactions.api.messaging.chat.FactionMessageChannel;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.entity.living.player.Player;
