@@ -4,8 +4,11 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.chat.AllianceMessageChannel;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.chat.AllianceMessageChannelImpl;
+import io.github.aquerr.eaglefactions.common.messaging.chat.FactionMessageChannelImpl;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -18,6 +21,7 @@ import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -92,98 +96,65 @@ public class ChatMessageListener extends AbstractListener
         //OriginalMessage = Player NAME + Text
         //RawMessage = Text
 
-//        switch(EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()))
-//        {
-//            case FACTION:
-//                message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
-//                break;
-//            case ALLIANCE:
-//                message.append(Text.of(TextColors.BLUE, event.getRawMessage()));
-//                break;
-//            case GLOBAL:
-//            default:
-//        }
-
-        //Get ChatType from Eagle Faction and add it to the formattedMessage
-        if (EagleFactionsPlugin.CHAT_LIST.containsKey(player.getUniqueId()))
+        switch(EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()))
         {
-            Set<MessageReceiver> receivers = new HashSet<>();
-
-            if (EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
-            {
-                message.append(Text.of(TextColors.BLUE, event.getRawMessage()));
-                chatTypePrefix.append(getAllianceChatPrefix());
-                messageChannel.asMutable().clearMembers();
-
-                for (final String allianceName : playerFaction.getAlliances())
-                {
-                    Faction allyFaction = super.getPlugin().getFactionLogic().getFactionByName(allianceName);
-                    if(allyFaction != null)
-                        receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(allyFaction));
-                }
-                receivers.addAll(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
-            }
-            else if (EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()).equals(ChatEnum.FACTION))
+            case FACTION:
             {
                 message.append(Text.of(TextColors.GREEN, event.getRawMessage()));
                 chatTypePrefix.append(getFactionChatPrefix());
-                messageChannel.asMutable().clearMembers();
-                receivers = new HashSet<>(getPlugin().getFactionLogic().getOnlinePlayers(playerFaction));
+                messageChannel = new FactionMessageChannelImpl(playerFaction);
+                final MutableMessageChannel channel = messageChannel.asMutable();
+                channel.addMember(Sponge.getServer().getConsole());
+                getAdmins().forEach(channel::addMember);
+                break;
             }
-
-            //Add users with factions-admin mode to the collection. Admins should see all chats.
-            for(final UUID adminUUID : EagleFactionsPlugin.ADMIN_MODE_PLAYERS)
+            case ALLIANCE:
             {
-                final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
-                if(optionalAdminPlayer.isPresent())
-                {
-                    receivers.add(optionalAdminPlayer.get());
-                }
+                message.append(Text.of(TextColors.BLUE, event.getRawMessage()));
+                chatTypePrefix.append(getAllianceChatPrefix());
+                messageChannel = new AllianceMessageChannelImpl(playerFaction);
+                final MutableMessageChannel channel = messageChannel.asMutable();
+                channel.addMember(Sponge.getServer().getConsole());
+                getAdmins().forEach(channel::addMember);
+                break;
             }
+            case GLOBAL:
+            default:
+                //If player is chatting in global chat then directly get raw message from event.
+                message.append(event.getFormatter().getBody().format());
 
-            receivers.add(Sponge.getServer().getConsole());
-            messageChannel = MessageChannel.fixed(receivers);
-
-            //Add chatType to formattedMessage
-//            formattedMessage.append(chatTypePrefix.build());
-        }
-        else
-        {
-            //If player is chatting in global chat then directly get raw message from event.
-            message.append(event.getFormatter().getBody().format());
-
-            //Suppress message for other factions if someone is in the faction's chat.
-            if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
-            {
-                final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
-                final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
-                for(final MessageReceiver messageReceiver : chatMembers)
+                //Suppress message for other factions if someone is in the faction's chat.
+                if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
                 {
-                    if (!(messageReceiver instanceof Player))
-                        continue;
-
-                    final Player receiver = (Player) messageReceiver;
-                    if (!EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()))
-                        continue;
-
-                    if (EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) == ChatEnum.GLOBAL)
-                        continue;
-
-                    final Optional<Faction> receiverFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(receiver.getUniqueId());
-                    if (!receiverFaction.isPresent())
-                        continue;
-
-                    if(playerFaction.getAlliances().contains(receiverFaction.get().getName()))
+                    final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
+                    final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
+                    for(final MessageReceiver messageReceiver : chatMembers)
                     {
-                        continue;
+                        if (!(messageReceiver instanceof Player))
+                            continue;
+
+                        final Player receiver = (Player) messageReceiver;
+                        if (!EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()))
+                            continue;
+
+                        if (EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) == ChatEnum.GLOBAL)
+                            continue;
+
+                        final Optional<Faction> receiverFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(receiver.getUniqueId());
+                        if (!receiverFaction.isPresent())
+                            continue;
+
+                        if(playerFaction.getAlliances().contains(receiverFaction.get().getName()))
+                        {
+                            continue;
+                        }
+                        else if(!receiverFaction.get().getName().equals(playerFaction.getName()))
+                        {
+                            newReceivers.remove(receiver);
+                        }
                     }
-                    else if(!receiverFaction.get().getName().equals(playerFaction.getName()))
-                    {
-                        newReceivers.remove(receiver);
-                    }
+                    messageChannel = MessageChannel.fixed(newReceivers);
                 }
-                messageChannel = MessageChannel.fixed(newReceivers);
-            }
         }
 
         factionPrefixText.append(getFactionPrefix(playerFaction));
@@ -334,5 +305,17 @@ public class ChatMessageListener extends AbstractListener
                     .build();
         }
         return Text.of("");
+    }
+
+    private List<MessageReceiver> getAdmins()
+    {
+        final List<MessageReceiver> admins = new ArrayList<>();
+        //Add users with factions-admin mode to the collection. Admins should see all chats.
+        for(final UUID adminUUID : EagleFactionsPlugin.ADMIN_MODE_PLAYERS)
+        {
+            final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
+            optionalAdminPlayer.ifPresent(admins::add);
+        }
+        return admins;
     }
 }
