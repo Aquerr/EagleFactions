@@ -61,7 +61,7 @@ public class ChatMessageListener extends AbstractListener
             if(!this.chatConfig.getNonFactionPlayerPrefix().toPlain().equals(""))
             {
                 //TODO: Try to use placeholder instead of having "start" and "end" prefix.
-                messageFormatter.getHeader().set(0, new SimpleTextTemplateApplier(TextTemplate.of(Text.of(this.chatConfig.getFactionStartPrefix(), this.chatConfig.getNonFactionPlayerPrefix(), this.chatConfig.getFactionEndPrefix()))));
+                messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(Text.of(this.chatConfig.getFactionStartPrefix(), this.chatConfig.getNonFactionPlayerPrefix(), this.chatConfig.getFactionEndPrefix()))));
             }
             return;
         }
@@ -176,7 +176,7 @@ public class ChatMessageListener extends AbstractListener
 
             return Text.builder()
                     .append(this.chatConfig.getFactionStartPrefix(), factionTag, this.chatConfig.getFactionEndPrefix())
-                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
+                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
                     .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                     .build();
         }
@@ -184,7 +184,7 @@ public class ChatMessageListener extends AbstractListener
         {
             return Text.builder()
                     .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), this.chatConfig.getFactionEndPrefix())
-                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, TextStyles.ITALIC, "Click to view more information about the faction!")))
+                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
                     .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                     .build();
         }
