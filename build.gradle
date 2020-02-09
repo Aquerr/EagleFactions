@@ -1,12 +1,6 @@
-buildscript {
-    dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
-    }
-}
-
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow" version "2.0.4"
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'org.spongepowered.plugin' version '0.9.0'
 }
 
@@ -15,7 +9,7 @@ allprojects {
     group = "io.github.aquerr"
     version = "0.14.0"
 
-    tasks.withType(JavaCompile) {
+    project.tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
 
@@ -41,17 +35,12 @@ dependencies {
 
 shadowJar {
     if(System.getenv("JENKINS_HOME")) {
-        version = version + "_" + System.getenv("BUILD_NUMBER")
-        println("File name => " + baseName)
+        version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        println("File name => " + archivesBaseName)
     } else {
         version = version + "-SNAPSHOT"
     }
-}
-
-jar {
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+    archiveClassifier = ''
 }
 
 test {
