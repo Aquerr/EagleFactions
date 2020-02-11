@@ -36,7 +36,7 @@ public class CoordsCommand extends AbstractCommand
         {
             if(!optionalFaction.isPresent())
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You must specify faction name!"));
-            showCoordsList(source, getTeamCoordsList(optionalFaction.get()));
+            return showCoordsList(source, getTeamCoordsList(optionalFaction.get()));
         }
         else
         {
@@ -46,17 +46,16 @@ public class CoordsCommand extends AbstractCommand
             {
                 final Faction faction = optionalFaction.get();
                 if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()) || (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName())))
-                    showCoordsList(player, getTeamCoordsList(faction));
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+                    return showCoordsList(player, getTeamCoordsList(faction));
+                else throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
             }
 
             if(!optionalPlayerFaction.isPresent())
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
             final Faction playerFaction = optionalPlayerFaction.get();
-            showCoordsList(player, getTeamCoordsList(playerFaction));
+            return showCoordsList(player, getTeamCoordsList(playerFaction));
         }
-        return CommandResult.success();
     }
 
     private List<Text> getTeamCoordsList(final Faction faction)
@@ -123,10 +122,11 @@ public class CoordsCommand extends AbstractCommand
         return teamCoords;
     }
 
-    private void showCoordsList(final CommandSource commandSource, final List<Text> teamCoords)
+    private CommandResult showCoordsList(final CommandSource commandSource, final List<Text> teamCoords) throws CommandException
     {
         final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
         final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.TEAM_COORDS)).contents(teamCoords);
         paginationBuilder.sendTo(commandSource);
+        return CommandResult.success();
     }
 }

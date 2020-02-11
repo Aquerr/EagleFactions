@@ -6,7 +6,6 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
@@ -41,6 +40,7 @@ public class ClaimCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
+        final Optional<Faction> optionalFaction = context.getOne(Text.of("faction"));
 //        super.execute(source, context);
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -49,75 +49,81 @@ public class ClaimCommand extends AbstractCommand
         final World world = player.getWorld();
         final Vector3i chunk = player.getLocation().getChunkPosition();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
-
-        //Check if it is a claimable world
-        if (!this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
-        {
-            //If it is not claimable world but player is in admin mode
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
-            {
-                final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
-                if (optionalChunkFaction.isPresent())
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_IS_ALREADY_CLAIMED));
-
-                return runClaimEventAndClaim(player, playerFaction, world, chunk);
-            }
-            else
-            {
-                throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD)));
-            }
-        }
-
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
+        final boolean hasAdminMode = EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
+
         if (optionalChunkFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_IS_ALREADY_CLAIMED));
 
-        //Check if admin mode
-        if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(optionalFaction.isPresent())
         {
-            return runClaimEventAndClaim(player, playerFaction, world, chunk);
+            final Faction faction = optionalFaction.get();
+            return preformClaimByFaction(player, faction, chunk);
         }
-
-        //If not admin then check faction flags for player
-        if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
-
-        //Check if faction has enough power to claim territory
-        if (super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
-
-        //If attacked then It should not be able to claim territories
-        if (EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName()))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " " + MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))))));
-
-        if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+        else
         {
-            return runClaimEventAndClaim(player, playerFaction, world, chunk);
+            if (!optionalPlayerFaction.isPresent())
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+            final Faction faction = optionalPlayerFaction.get();
+            if(hasAdminMode)
+                return preformAdminClaim(player, faction, chunk);
+            else return preformNormalClaim(player, faction, chunk);
         }
+    }
 
-        if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.CLAIMS_NEED_TO_BE_CONNECTED));
+    private CommandResult preformClaimByFaction(final Player player, final Faction faction, final Vector3i chunk) throws CommandException
+    {
+        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final boolean hasAdminMode = EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
 
-        boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
+        if(hasAdminMode)
+        {
+            return preformAdminClaim(player, faction, chunk);
+        }
+        else if(!optionalPlayerFaction.isPresent() || !optionalPlayerFaction.get().getName().equals(faction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+        return preformNormalClaim(player, faction, chunk);
+    }
+
+    private CommandResult preformAdminClaim(final Player player, final Faction faction, final Vector3i chunk) throws CommandException
+    {
+        boolean isCancelled = EventRunner.runFactionClaimEvent(player, faction, player.getWorld(), chunk);
         if (isCancelled)
             return CommandResult.empty();
 
-        super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
+        super.getPlugin().getFactionLogic().addClaim(faction, new Claim(player.getWorld().getUniqueId(), chunk));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
         return CommandResult.success();
     }
 
-    private CommandResult runClaimEventAndClaim(final Player player, Faction playerFaction, final World world, final Vector3i chunk) throws CommandException
+    private CommandResult preformNormalClaim(final Player player, final Faction faction, final Vector3i chunk) throws CommandException
     {
-        boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
+        final World world = player.getWorld();
+        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.getName());
+
+        if(!isClaimableWorld)
+            throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD)));
+
+        //If not admin then check faction flags for player
+        if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), faction))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
+
+        //Check if faction has enough power to claim territory
+        if (super.getPlugin().getPowerManager().getFactionMaxClaims(faction) <= faction.getClaims().size())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
+
+        //If attacked then It should not be able to claim territories
+        if (EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(faction.getName()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " " + MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()))))));
+
+        if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(faction, new Claim(world.getUniqueId(), chunk)))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.CLAIMS_NEED_TO_BE_CONNECTED));
+
+        boolean isCancelled = EventRunner.runFactionClaimEvent(player, faction, world, chunk);
         if (isCancelled)
             return CommandResult.empty();
 
-        super.getPlugin().getFactionLogic().addClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+        super.getPlugin().getFactionLogic().startClaiming(player, faction, world.getUniqueId(), chunk);
         return CommandResult.success();
     }
 }

@@ -353,6 +353,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))
                 .permission(PluginPermissions.CLAIM_COMMAND)
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new ClaimCommand(this))
                 .build());
 
