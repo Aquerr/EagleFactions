@@ -15,6 +15,7 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
+import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
@@ -423,6 +424,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("coords"), CommandSpec.builder()
                 .description(Text.of("Show your teammates coords"))
                 .permission(PluginPermissions.COORDS_COMMAND)
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new CoordsCommand(this))
                 .build());
 

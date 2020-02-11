@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
@@ -28,103 +29,104 @@ public class CoordsCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        if(source instanceof Player)
+        final Optional<Faction> optionalFaction = context.getOne(Text.of("faction"));
+        if (!(source instanceof Player))
         {
-            final Player player = (Player)source;
-            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-            final List<Text> teamCoords = new ArrayList<>();
-
-            if(optionalPlayerFaction.isPresent())
-            {
-                final Faction playerFaction = optionalPlayerFaction.get();
-                if(playerFaction.getHome() != null)
-                {
-                    Text textBuilder = Text.builder()
-                            .append(Text.of( Messages.FACTIONS_HOME + ": " + playerFaction.getHome().getWorldUUID().toString() + '|' + playerFaction.getHome().getBlockPosition().toString()))
-                            .build();
-
-                    teamCoords.add(textBuilder);
-                }
-
-                if (!playerFaction.getLeader().toString().equals(""))
-                {
-                    final Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(playerFaction.getLeader());
-                    if(leader.isPresent())
-                    {
-                        Text textBuilder = Text.builder()
-                                .append(Text.of(Messages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
-                                .build();
-
-                        teamCoords.add(textBuilder);
-                    }
-                }
-
-                if(!playerFaction.getOfficers().isEmpty())
-                {
-                    for (final UUID officerUUID: playerFaction.getOfficers())
-                    {
-                        final Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
-                        if(officer.isPresent())
-                        {
-                            Text textBuilder = Text.builder()
-                                    .append(Text.of(Messages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
-                                    .build();
-
-                            teamCoords.add(textBuilder);
-                        }
-                    }
-                }
-
-                if(!playerFaction.getMembers().isEmpty())
-                {
-                    for (final UUID memberUUID: playerFaction.getMembers())
-                    {
-                        final Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
-                        if(member.isPresent())
-                        {
-                            Text textBuilder = Text.builder()
-                                    .append(Text.of(Messages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
-                                    .build();
-
-                            teamCoords.add(textBuilder);
-                        }
-                    }
-                }
-
-                if(!playerFaction.getRecruits().isEmpty())
-                {
-                    for (final UUID recruitUUID: playerFaction.getRecruits())
-                    {
-                        final Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
-                        if(recruit.isPresent())
-                        {
-                            Text textBuilder = Text.builder()
-                                    .append(Text.of(Messages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
-                                    .build();
-
-                            teamCoords.add(textBuilder);
-                        }
-                    }
-                }
-
-                final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-                final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.TEAM_COORDS)).contents(teamCoords);
-                paginationBuilder.sendTo(source);
-
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-            }
-
+            if(!optionalFaction.isPresent())
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You must specify faction name!"));
+            showCoordsList(source, getTeamCoordsList(optionalFaction.get()));
         }
         else
         {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            final Player player = (Player)source;
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            if(optionalFaction.isPresent())
+            {
+                final Faction faction = optionalFaction.get();
+                if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()) || (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName())))
+                    showCoordsList(player, getTeamCoordsList(faction));
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+            }
+
+            if(!optionalPlayerFaction.isPresent())
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+
+            final Faction playerFaction = optionalPlayerFaction.get();
+            showCoordsList(player, getTeamCoordsList(playerFaction));
+        }
+        return CommandResult.success();
+    }
+
+    private List<Text> getTeamCoordsList(final Faction faction)
+    {
+        final List<Text> teamCoords = new ArrayList<>();
+
+        if(faction.getHome() != null)
+        {
+            final Text textBuilder = Text.builder()
+                    .append(Text.of( Messages.FACTIONS_HOME + ": " + faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString()))
+                    .build();
+
+            teamCoords.add(textBuilder);
         }
 
-        return CommandResult.success();
+        final Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(faction.getLeader());
+        if(leader.isPresent())
+        {
+            final Text textBuilder = Text.builder()
+                    .append(Text.of(Messages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
+                    .build();
+
+            teamCoords.add(textBuilder);
+        }
+
+        for (final UUID officerUUID: faction.getOfficers())
+        {
+            final Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
+            if(officer.isPresent())
+            {
+                Text textBuilder = Text.builder()
+                        .append(Text.of(Messages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
+                        .build();
+
+                teamCoords.add(textBuilder);
+            }
+        }
+
+        for (final UUID memberUUID: faction.getMembers())
+        {
+            final Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
+            if(member.isPresent())
+            {
+                Text textBuilder = Text.builder()
+                        .append(Text.of(Messages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                        .build();
+
+                teamCoords.add(textBuilder);
+            }
+        }
+
+        for (final UUID recruitUUID: faction.getRecruits())
+        {
+            final Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
+            if(recruit.isPresent())
+            {
+                Text textBuilder = Text.builder()
+                        .append(Text.of(Messages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
+                        .build();
+
+                teamCoords.add(textBuilder);
+            }
+        }
+        return teamCoords;
+    }
+
+    private void showCoordsList(final CommandSource commandSource, final List<Text> teamCoords)
+    {
+        final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
+        final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.TEAM_COORDS)).contents(teamCoords);
+        paginationBuilder.sendTo(commandSource);
     }
 }
