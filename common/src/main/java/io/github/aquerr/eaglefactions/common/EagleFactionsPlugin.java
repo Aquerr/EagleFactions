@@ -16,7 +16,6 @@ import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
-import io.github.aquerr.eaglefactions.common.commands.args.FactionNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
@@ -237,7 +236,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .description(Text.of("Create Faction Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
                 .arguments(GenericArguments.string(Text.of("tag")),
-                        GenericArguments.string(Text.of("faction name")))
+                        GenericArguments.string(Text.of("name")))
                 .executor(new CreateCommand(this))
                 .build());
 
@@ -245,7 +244,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new DisbandCommand(this))
                 .build());
 
@@ -276,7 +275,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("j", "join"), CommandSpec.builder()
                 .description(Text.of("Join a specific faction"))
                 .permission(PluginPermissions.JOIN_COMMAND)
-                .arguments(new FactionNameArgument(this, Text.of("faction name")))
+                .arguments(new FactionArgument(this, Text.of("faction")))
                 .executor(new JoinCommand(this))
                 .build());
 
@@ -297,7 +296,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Info command. Shows info about a faction.
         SUBCOMMANDS.put(Arrays.asList("i", "info"), CommandSpec.builder()
                 .description(Text.of("Show info about a faction"))
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new InfoCommand(this))
                 .build());
 
@@ -313,7 +312,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("truce"), CommandSpec.builder()
                 .description(Text.of("Invite or remove faction from truce"))
                 .permission(PluginPermissions.TRUCE_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
                 .executor(new TruceCommand(this))
                 .build());
 
@@ -321,7 +320,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
                 .description(Text.of("Invite or remove faction from alliance"))
                 .permission(PluginPermissions.ALLY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
                 .executor(new AllyCommand(this))
                 .build());
 
@@ -329,7 +328,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare or remove faction from war"))
                 .permission(PluginPermissions.ENEMY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
                 .executor(new EnemyCommand(this))
                 .build());
 
@@ -396,7 +395,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("home"), CommandSpec.builder()
                 .description(Text.of("Teleport to faction's home"))
                 .permission(PluginPermissions.HOME_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new HomeCommand(this))
                 .build());
 
@@ -503,7 +502,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("rename"), CommandSpec.builder()
                 .description(Text.of("Rename faction"))
                 .permission(PluginPermissions.RENAME_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))))
                 .executor(new RenameCommand(this))
                 .build());
 
@@ -541,7 +540,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("chest"), CommandSpec.builder()
                 .description(Text.of("Opens faction's chest"))
                 .permission(PluginPermissions.CHEST_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new ChestCommand(this))
                 .build());
 
@@ -549,7 +548,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("public"), CommandSpec.builder()
                 .description(Text.of("Sets faction as public or not"))
                 .permission(PluginPermissions.PUBLIC_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new PublicCommand(this))
                 .build());
 

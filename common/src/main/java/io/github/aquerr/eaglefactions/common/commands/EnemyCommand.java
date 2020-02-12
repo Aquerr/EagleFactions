@@ -33,16 +33,12 @@ public class EnemyCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final String factionName = context.requireOne(Text.of("faction name"));
+        final Faction enemyFaction = context.requireOne(Text.of("faction"));
         if(!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player) source;
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        final Faction enemyFaction = super.getPlugin().getFactionLogic().getFactionByName(factionName);
-
-        if(enemyFaction == null)
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, factionName)))));
 
         if(!optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));

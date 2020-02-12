@@ -39,21 +39,18 @@ public class HomeCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final Optional<String> optionalFactionName = context.getOne(Text.of("faction name"));
+        final Optional<Faction> optionalFaction = context.getOne(Text.of("faction"));
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player)source;
 
-        if (optionalFactionName.isPresent())
+        if (optionalFaction.isPresent())
         {
             if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
             {
-                final Faction faction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());
-                if (faction == null)
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Provided faction does not exist!"));
-
+                final Faction faction = optionalFaction.get();
                 if (faction.getHome() == null)
                     throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction does not have its home set!"));
 
@@ -65,10 +62,7 @@ public class HomeCommand extends AbstractCommand
                 if (!optionalPlayerFaction.isPresent())
                     throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
-                final Faction faction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());
-                if (faction == null)
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Provided faction does not exist!"));
-
+                final Faction faction = optionalFaction.get();
                 if (!optionalPlayerFaction.get().getName().equals(faction.getName()) && !optionalPlayerFaction.get().getAlliances().contains(faction.getName()))
                     throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You can't teleport to this faction's home! You must be its ally first!"));
 

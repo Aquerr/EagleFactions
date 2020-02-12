@@ -25,15 +25,12 @@ public class PublicCommand extends AbstractCommand
 	@Override
 	public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
 	{
-		final Optional<String> providedFactionName = context.getOne(Text.of("faction name"));
+		Optional<Faction> optionalFaction = context.getOne(Text.of("faction"));
 
 		if(!(source instanceof Player))
 		{
-			if(!providedFactionName.isPresent())
-				throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You must specify the name of the faction!"));
-			Optional<Faction> optionalFaction = Optional.ofNullable(super.getPlugin().getFactionLogic().getFactionByName(providedFactionName.get()));
 			if(!optionalFaction.isPresent())
-				throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Provided faction does not exist!"));
+				throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You must specify faction name!"));
 			super.getPlugin().getFactionLogic().setIsPublic(optionalFaction.get(), !optionalFaction.get().isPublic());
 			final String publicMessage = !optionalFaction.get().isPublic() ? "Faction is now public." : "Faction is no longer public.";
 			source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, publicMessage));
@@ -41,15 +38,8 @@ public class PublicCommand extends AbstractCommand
 		}
 
 		final Player player = (Player)source;
-		Optional<Faction> optionalFaction;
-		if(providedFactionName.isPresent())
-		{
-			optionalFaction = Optional.ofNullable(super.getPlugin().getFactionLogic().getFactionByName(providedFactionName.get()));
-		}
-		else
-		{
+		if(!optionalFaction.isPresent())
 			optionalFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-		}
 
 		if(!optionalFaction.isPresent())
 			throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));

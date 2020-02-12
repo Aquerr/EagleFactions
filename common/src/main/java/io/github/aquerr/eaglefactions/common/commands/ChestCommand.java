@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -35,7 +34,7 @@ public class ChestCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final Optional<String> optionalFactionName = context.<String>getOne("faction name");
+        final Optional<Faction> optionalFaction = context.getOne("faction");
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -46,9 +45,9 @@ public class ChestCommand extends AbstractCommand
         final Player player = (Player) source;
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-        if(optionalFactionName.isPresent())
+        if(optionalFaction.isPresent())
         {
-            if(optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(optionalFactionName.get()))
+            if(optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(optionalFaction.get().getName()))
             {
                 final boolean isCancelled = EventRunner.runFactionChestEvent(player, optionalPlayerFaction.get());
                 if (isCancelled)
@@ -60,15 +59,12 @@ public class ChestCommand extends AbstractCommand
             if(!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
 
-            final Faction nullableFaction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());
-            if(nullableFaction != null)
-            {
-                final boolean isCancelled = EventRunner.runFactionChestEvent(player, nullableFaction);
-                if (isCancelled)
-                    return CommandResult.success();
-                openFactionChest(player, nullableFaction);
+            final Faction faction = optionalFaction.get();
+            final boolean isCancelled = EventRunner.runFactionChestEvent(player, faction);
+            if (isCancelled)
                 return CommandResult.success();
-            }
+            openFactionChest(player, faction);
+            return CommandResult.success();
         }
 
         if (!optionalPlayerFaction.isPresent())
@@ -87,7 +83,6 @@ public class ChestCommand extends AbstractCommand
         final Optional<Container> optionalContainer = player.openInventory(faction.getChest().getInventory());
         if(optionalContainer.isPresent())
         {
-//            player.sendMessage(Messages.YOU_OPENED_FACTION_CHEST.apply(ImmutableMap.of("FACTION_NAME", Text.of(faction.getName()))).build());
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_OPENED_FACTION_CHEST, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
         }
     }
