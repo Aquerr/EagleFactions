@@ -100,7 +100,15 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
+        {
+            if(this.protectionConfig.shouldProtectWildernessFromPlayers())
+            {
+                if(shouldNotify)
+                    notifyPlayer(user);
+                return false;
+            }
             return true;
+        }
 
         final Faction chunkFaction = optionalChunkFaction.get();
         if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
@@ -187,7 +195,15 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
+        {
+            if(this.protectionConfig.shouldProtectWildernessFromPlayers())
+            {
+                if(shouldNotify)
+                    notifyPlayer(user);
+                return false;
+            }
             return true;
+        }
 
         final Faction chunkFaction = optionalChunkFaction.get();
         if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
@@ -287,6 +303,12 @@ public class ProtectionManagerImpl implements ProtectionManager
                     notifyPlayer(user);
                 return false;
             }
+        }
+        else if(this.protectionConfig.shouldProtectWildernessFromPlayers())
+        {
+            if(shouldNotify)
+                notifyPlayer(user);
+            return false;
         }
         return true;
     }
@@ -395,6 +417,12 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return false;
             }
         }
+        else if(this.protectionConfig.shouldProtectWildernessFromPlayers())
+        {
+            if(shouldNotify)
+                notifyPlayer(user);
+            return false;
+        }
         return true;
     }
 
@@ -441,7 +469,15 @@ public class ProtectionManagerImpl implements ProtectionManager
         //If no faction
         final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
         if (!optionalChunkFaction.isPresent())
-            return true;
+        {
+            if(this.protectionConfig.shouldProtectWildernessFromPlayers())
+            {
+                if(shouldNotify)
+                    notifyPlayer(user);
+                return false;
+            }
+            else return true;
+        }
 
         //If SafeZone or WarZone
         final Faction chunkFaction = optionalChunkFaction.get();

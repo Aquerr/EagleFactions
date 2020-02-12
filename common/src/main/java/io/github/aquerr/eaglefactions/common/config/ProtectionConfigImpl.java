@@ -11,6 +11,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 {
 	private final Configuration configuration;
 
+	private boolean protectWildernessFromPlayers = false;
 	private boolean protectFromMobGrief = false;
 	private boolean protectFromMobGriefWarZone = false;
 	private boolean allowExplosionsByOtherPlayersInClaims = false;
@@ -42,6 +43,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	@Override
 	public void reload()
 	{
+		this.protectWildernessFromPlayers = this.configuration.getBoolean(false, "protect-wilderness-from-players");
 		this.protectFromMobGrief = this.configuration.getBoolean(false, "protect-from-mob-grief");
 		this.protectFromMobGriefWarZone = this.configuration.getBoolean(false, "protect-from-mob-grief-warzone");
 		this.allowExplosionsByOtherPlayersInClaims = this.configuration.getBoolean(false, "allow-explosions-by-other-players-in-claims");
@@ -179,5 +181,11 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public boolean shouldProtectWarzoneFromPlayers()
 	{
 		return this.protectWarZoneFromPlayers;
+	}
+
+	@Override
+	public boolean shouldProtectWildernessFromPlayers()
+	{
+		return this.protectWildernessFromPlayers;
 	}
 }
