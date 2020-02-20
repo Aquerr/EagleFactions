@@ -20,7 +20,6 @@ import java.util.Set;
 
 public class ProtectionConfigImpl implements ProtectionConfig
 {
-	private final
 	private final Configuration configuration;
 
 	private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
@@ -59,7 +58,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 			Optional<Asset> worldsFile = Sponge.getAssetManager().getAsset(EagleFactionsPlugin.getPlugin(), "Worlds.conf");
 			if (worldsFile.isPresent())
 			{
-				worldsFile.get().copyToFile(configuration.getConfigDirectoryPath().resolve("Worlds.conf"), false, true);
+				worldsFile.get().copyToDirectory(configuration.getConfigDirectoryPath(), false, true);
 			}
 		}
 		catch (final IOException e)
