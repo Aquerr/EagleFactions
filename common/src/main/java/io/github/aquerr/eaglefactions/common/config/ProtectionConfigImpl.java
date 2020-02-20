@@ -3,19 +3,24 @@ package io.github.aquerr.eaglefactions.common.config;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.asset.Asset;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class ProtectionConfigImpl implements ProtectionConfig
 {
+	private final
 	private final Configuration configuration;
 
 	private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
@@ -37,8 +42,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	//Worlds
 	private Set<String> claimableWorldNames = new HashSet<>();
 	private Set<String> notClaimableWorldNames = new HashSet<>();
-	private Set<String> safezoneWorldNames = new HashSet<>();
-	private Set<String> warzoneWorldNames = new HashSet<>();
+	private Set<String> safeZoneWorldNames = new HashSet<>();
+	private Set<String> warZoneWorldNames = new HashSet<>();
 
 	//Whitelisted items and blocks
 	private Set<String> whitelistedItems = new HashSet<>();
@@ -48,6 +53,20 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public ProtectionConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
+
+		try
+		{
+			Optional<Asset> worldsFile = Sponge.getAssetManager().getAsset(EagleFactionsPlugin.getPlugin(), "Worlds.conf");
+			if (worldsFile.isPresent())
+			{
+				worldsFile.get().copyToFile(configuration.getConfigDirectoryPath().resolve("Worlds.conf"), false, true);
+			}
+		}
+		catch (final IOException e)
+		{
+			e.printStackTrace();
+		}
+
 		this.configurationLoader = HoconConfigurationLoader.builder().setPath(configuration.getConfigDirectoryPath().resolve("Worlds.conf")).build();
 		saveWorldsFile();
 	}
@@ -75,8 +94,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		{
 			this.claimableWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "CLAIMABLE").getList(TypeToken.of(String.class), new ArrayList<>()));
 			this.notClaimableWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "NOT_CLAIMABLE").getList(TypeToken.of(String.class), new ArrayList<>()));
-			this.safezoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "SAFE_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
-			this.warzoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "WAR_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
+			this.safeZoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "SAFE_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
+			this.warZoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "WAR_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
 		}
 		catch (final ObjectMappingException e)
 		{
@@ -104,13 +123,13 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	@Override
 	public Set<String> getSafeZoneWorldNames()
 	{
-		return this.safezoneWorldNames;
+		return this.safeZoneWorldNames;
 	}
 
 	@Override
 	public Set<String> getWarZoneWorldNames()
 	{
-		return this.warzoneWorldNames;
+		return this.warZoneWorldNames;
 	}
 
 	@Override
