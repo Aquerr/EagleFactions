@@ -1,13 +1,9 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
-import com.typesafe.config.ConfigParseOptions;
-import com.typesafe.config.ConfigRenderOptions;
-import com.typesafe.config.ConfigSyntax;
 import io.github.aquerr.eaglefactions.api.config.*;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -23,6 +19,7 @@ import java.util.*;
  */
 public class ConfigurationImpl implements Configuration
 {
+    private Path configDirectoryPath;
     private Path configPath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
@@ -38,11 +35,12 @@ public class ConfigurationImpl implements Configuration
 
     public ConfigurationImpl(final Path configDir, final Asset configAsset)
     {
-        if (!Files.exists(configDir))
+        this.configDirectoryPath = configDir;
+        if (!Files.exists(this.configDirectoryPath))
         {
             try
             {
-                Files.createDirectory(configDir);
+                Files.createDirectory(this.configDirectoryPath);
             }
             catch (IOException exception)
             {
@@ -50,7 +48,7 @@ public class ConfigurationImpl implements Configuration
             }
         }
 
-        this.configPath = configDir.resolve("Settings.conf");
+        this.configPath = this.configDirectoryPath.resolve("Settings.conf");
 
         try
         {
@@ -80,6 +78,16 @@ public class ConfigurationImpl implements Configuration
     public FactionsConfig getFactionsConfig()
     {
         return this.factionsConfig;
+    }
+
+    @Override
+    public Path getConfigDirectoryPath() {
+        return this.configDirectoryPath;
+    }
+
+    @Override
+    public Path getConfigPath() {
+        return this.configPath;
     }
 
     @Override

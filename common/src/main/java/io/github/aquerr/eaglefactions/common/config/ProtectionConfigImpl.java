@@ -1,8 +1,15 @@
 package io.github.aquerr.eaglefactions.common.config;
 
+import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import ninja.leaping.configurate.ConfigurationOptions;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,6 +17,9 @@ import java.util.Set;
 public class ProtectionConfigImpl implements ProtectionConfig
 {
 	private final Configuration configuration;
+
+	private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
+	private CommentedConfigurationNode worldsConfigNode;
 
 	private boolean protectWildernessFromPlayers = false;
 	private boolean protectFromMobGrief = false;
@@ -38,11 +48,15 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public ProtectionConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
+		this.configurationLoader = HoconConfigurationLoader.builder().setPath(configuration.getConfigDirectoryPath().resolve("Worlds.conf")).build();
+		saveWorldsFile();
 	}
 
 	@Override
 	public void reload()
 	{
+		loadWorldsFile();
+
 		this.protectWildernessFromPlayers = this.configuration.getBoolean(false, "protect-wilderness-from-players");
 		this.protectFromMobGrief = this.configuration.getBoolean(false, "protect-from-mob-grief");
 		this.protectFromMobGriefWarZone = this.configuration.getBoolean(false, "protect-from-mob-grief-warzone");
@@ -56,12 +70,18 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		this.spawnMobsInFactionsTerritory = this.configuration.getBoolean(true, "spawn-mobs-in-factions-territory");
 		this.spawnHostileMobsInFactionsTerritory = this.configuration.getBoolean(true, "spawn-hostile-mobs-in-factions-territory");
 
-		//TODO: Add separate file for worlds...
 		//Worlds
-		this.claimableWorldNames = new HashSet<>(this.configuration.getListOfStrings(new ArrayList<>(), "worlds", "CLAIMABLE"));
-		this.notClaimableWorldNames = new HashSet<>(this.configuration.getListOfStrings(new ArrayList<>(), "worlds", "NOT_CLAIMABLE"));
-		this.safezoneWorldNames = new HashSet<>(this.configuration.getListOfStrings(new ArrayList<>(), "worlds", "SAFE_ZONE"));
-		this.warzoneWorldNames = new HashSet<>(this.configuration.getListOfStrings(new ArrayList<>(), "worlds", "WAR_ZONE"));
+		try
+		{
+			this.claimableWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "CLAIMABLE").getList(TypeToken.of(String.class), new ArrayList<>()));
+			this.notClaimableWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "NOT_CLAIMABLE").getList(TypeToken.of(String.class), new ArrayList<>()));
+			this.safezoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "SAFE_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
+			this.warzoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "WAR_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
+		}
+		catch (final ObjectMappingException e)
+		{
+			e.printStackTrace();
+		}
 
 		//Whitelisted items and blocks
 		this.whitelistedItems = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "items-whitelist");
@@ -126,7 +146,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public void addWorld(final String name)
 	{
 		this.claimableWorldNames.add(name);
-		this.configuration.setCollectionOfStrings(claimableWorldNames, "worlds", "CLAIMABLE");
+		this.worldsConfigNode.getNode("worlds", "CLAIMABLE").setValue(this.claimableWorldNames);
+		saveWorldsFile();
 	}
 
 	//Mob spawning methods
@@ -188,5 +209,29 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public boolean shouldProtectWildernessFromPlayers()
 	{
 		return this.protectWildernessFromPlayers;
+	}
+
+	private void loadWorldsFile()
+	{
+		try
+		{
+			this.worldsConfigNode = this.configurationLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void saveWorldsFile()
+	{
+		try
+		{
+			this.configurationLoader.save(this.worldsConfigNode);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
