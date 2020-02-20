@@ -20,62 +20,46 @@ import io.github.aquerr.eaglefactions.common.storage.utils.UpdateFactionTask;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
 public class StorageManagerImpl implements StorageManager
 {
-    private static StorageManagerImpl INSTANCE = null;
-
-    private final EagleFactions plugin;
     private final IFactionStorage factionsStorage;
     private final IPlayerStorage playerStorage;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public static StorageManagerImpl getInstance(final EagleFactions eagleFactions)
+    public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
-        if (INSTANCE == null)
-            return new StorageManagerImpl(eagleFactions);
-        else return INSTANCE;
-    }
-
-    private StorageManagerImpl(final EagleFactions eagleFactions)
-    {
-        INSTANCE = this;
-        this.plugin = eagleFactions;
-        final StorageConfig storageConfig = eagleFactions.getConfiguration().getStorageConfig();
-        final Path configDir = eagleFactions.getConfigDir();
         switch(storageConfig.getStorageType().toLowerCase())
         {
             case "hocon":
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
-                this.plugin.printInfo("HOCON storage has been initialized!");
+                plugin.printInfo("HOCON storage has been initialized!");
                 break;
             case "h2":
-                factionsStorage = new H2FactionStorage(eagleFactions);
-                playerStorage = new H2PlayerStorage(eagleFactions);
-                this.plugin.printInfo("H2 storage has been initialized!");
+                factionsStorage = new H2FactionStorage(plugin);
+                playerStorage = new H2PlayerStorage(plugin);
+                plugin.printInfo("H2 storage has been initialized!");
                 break;
             case "mysql":
-                factionsStorage = new MySQLFactionStorage(eagleFactions);
-                playerStorage = new MySQLPlayerStorage(eagleFactions);
-                this.plugin.printInfo("MySQL storage has been initialized!");
+                factionsStorage = new MySQLFactionStorage(plugin);
+                playerStorage = new MySQLPlayerStorage(plugin);
+                plugin.printInfo("MySQL storage has been initialized!");
                 break;
             case "mariadb":
-                factionsStorage = new MariaDbFactionStorage(eagleFactions);
-                playerStorage = new MariaDbPlayerStorage(eagleFactions);
-                this.plugin.printInfo("MariaDB storage has been initialized!");
+                factionsStorage = new MariaDbFactionStorage(plugin);
+                playerStorage = new MariaDbPlayerStorage(plugin);
+                plugin.printInfo("MariaDB storage has been initialized!");
                 break;
             default: //HOCON
-                this.plugin.printInfo("Couldn't find provided storage type.");
+                plugin.printInfo("Couldn't find provided storage type.");
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
-                this.plugin.printInfo("Initialized default HOCON storage.");
+                plugin.printInfo("Initialized default HOCON storage.");
                 break;
         }
         prepareFactionsCache();

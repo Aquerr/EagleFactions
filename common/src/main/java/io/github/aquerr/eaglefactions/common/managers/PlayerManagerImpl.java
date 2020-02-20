@@ -5,6 +5,8 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
@@ -24,33 +26,22 @@ import java.util.UUID;
  */
 public class PlayerManagerImpl implements PlayerManager
 {
-    private static PlayerManagerImpl INSTANCE = null;
-
-    private final EagleFactions plugin;
-
+    private final StorageManager storageManager;
+    private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
-    private final StorageManagerImpl storageManager;
 
     private UserStorageService userStorageService;
 
-    private PlayerManagerImpl(final EagleFactions plugin)
+    public PlayerManagerImpl(final StorageManager storageManager, final FactionLogic factionLogic, final FactionsConfig factionsConfig, final PowerConfig powerConfig)
     {
-        INSTANCE = this;
-        this.plugin = plugin;
-        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
-        this.powerConfig = plugin.getConfiguration().getPowerConfig();
-        this.storageManager = StorageManagerImpl.getInstance(plugin);
+        this.storageManager = storageManager;
+        this.factionLogic = factionLogic;
+        this.factionsConfig = factionsConfig;
+        this.powerConfig = powerConfig;
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         optionalUserStorageService.ifPresent(x -> userStorageService = x);
-    }
-
-    public static PlayerManagerImpl getInstance(final EagleFactions eagleFactions)
-    {
-        if (INSTANCE == null)
-            return new PlayerManagerImpl(eagleFactions);
-        else return INSTANCE;
     }
 
     @Override
@@ -101,7 +92,7 @@ public class PlayerManagerImpl implements PlayerManager
     {
         String factionName = "";
         FactionMemberType factionMemberType = null;
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if (optionalFaction.isPresent())
         {
             factionName = optionalFaction.get().getName();
@@ -122,9 +113,7 @@ public class PlayerManagerImpl implements PlayerManager
     public Optional<Player> getPlayer(final UUID playerUUID)
     {
         final Optional<User> oUser = getUser(playerUUID);
-        if(!oUser.isPresent())
-            return Optional.empty();
-        return oUser.get().getPlayer();
+        return oUser.flatMap(User::getPlayer);
     }
 
     @Override

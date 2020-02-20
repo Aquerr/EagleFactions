@@ -2,10 +2,12 @@ package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
 import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.ConfigRenderOptions;
 import com.typesafe.config.ConfigSyntax;
 import io.github.aquerr.eaglefactions.api.config.*;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;

@@ -56,6 +56,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		this.spawnMobsInFactionsTerritory = this.configuration.getBoolean(true, "spawn-mobs-in-factions-territory");
 		this.spawnHostileMobsInFactionsTerritory = this.configuration.getBoolean(true, "spawn-hostile-mobs-in-factions-territory");
 
+		//TODO: Add separate file for worlds...
 		//Worlds
 		this.claimableWorldNames = new HashSet<>(this.configuration.getListOfStrings(new ArrayList<>(), "worlds", "CLAIMABLE"));
 		this.notClaimableWorldNames = new HashSet<>(this.configuration.getListOfStrings(new ArrayList<>(), "worlds", "NOT_CLAIMABLE"));

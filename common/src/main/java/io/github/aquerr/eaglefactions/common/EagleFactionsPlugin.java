@@ -663,13 +663,13 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void setupManagers()
     {
-        storageManager = StorageManagerImpl.getInstance(this);
-        playerManager = PlayerManagerImpl.getInstance(this);
-        powerManager = PowerManagerImpl.getInstance(this);
-        flagManager = FlagManagerImpl.getInstance(this);
-        factionLogic = FactionLogicImpl.getInstance(this);
-        attackLogic = AttackLogicImpl.getInstance(this);
-        protectionManager = ProtectionManagerImpl.getInstance(this);
+        storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
+        playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
+        powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig(), this.configDir);
+        flagManager = new FlagManagerImpl(this.playerManager);
+        factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
+        attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
+        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig());
     }
 
     private void startFactionsRemover()

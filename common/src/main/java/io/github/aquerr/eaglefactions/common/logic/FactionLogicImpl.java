@@ -38,29 +38,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class FactionLogicImpl implements FactionLogic
 {
-    private static FactionLogicImpl INSTANCE = null;
-
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
-    private final EagleFactions plugin;
 
     private final UUID DUMMY_UUID = new UUID(0, 0);
 
-    public static FactionLogic getInstance(final EagleFactions eagleFactions)
+    public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig)
     {
-        if (INSTANCE == null)
-            return new FactionLogicImpl(eagleFactions);
-        else return INSTANCE;
-    }
-
-    private FactionLogicImpl(EagleFactions plugin)
-    {
-        INSTANCE = this;
-        this.plugin = plugin;
-        factionsConfig = plugin.getConfiguration().getFactionsConfig();
-        playerManager = plugin.getPlayerManager();
-        this.storageManager = plugin.getStorageManager();
+        this.storageManager = storageManager;
+        this.playerManager = playerManager;
+        this.factionsConfig = factionsConfig;
     }
 
     @Override

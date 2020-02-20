@@ -4,7 +4,11 @@ import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.common.scheduling.PowerIncrementTask;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -22,28 +26,16 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class PowerManagerImpl implements PowerManager
 {
-    private static PowerManagerImpl INSTANCE = null;
-
-    private final EagleFactions plugin;
+    private final PlayerManager playerManager;
     private final PowerConfig powerConfig;
 
     private CommentedConfigurationNode _factionsNode;
     private final UUID dummyUUID = new UUID(0, 0);
 
-    public static PowerManagerImpl getInstance(final EagleFactions eagleFactions)
+    public PowerManagerImpl(final PlayerManager playerManager, final PowerConfig powerConfig, final Path configDir)
     {
-        if (INSTANCE == null)
-            return new PowerManagerImpl(eagleFactions);
-        else return INSTANCE;
-    }
-
-    private PowerManagerImpl(final EagleFactions eagleFactions)
-    {
-        INSTANCE = this;
-        plugin = eagleFactions;
-        powerConfig = eagleFactions.getConfiguration().getPowerConfig();
-        Path configDir = eagleFactions.getConfigDir();
-
+        this.playerManager = playerManager;
+        this.powerConfig = powerConfig;
         try
         {
             _factionsNode = HoconConfigurationLoader.builder().setPath(Paths.get(configDir.resolve("data") + "/factions.conf")).build().load();
@@ -66,7 +58,7 @@ public class PowerManagerImpl implements PowerManager
     {
         if (playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
-        return plugin.getPlayerManager().getPlayerPower(playerUUID);
+        return this.playerManager.getPlayerPower(playerUUID);
     }
 
     @Override
@@ -162,25 +154,25 @@ public class PowerManagerImpl implements PowerManager
         if(playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
 
-        return plugin.getPlayerManager().getPlayerMaxPower(playerUUID);
+        return this.playerManager.getPlayerMaxPower(playerUUID);
     }
 
     @Override
     public void addPower(final UUID playerUUID, final boolean isKillAward)
     {
-        float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
+        float playerPower = this.playerManager.getPlayerPower(playerUUID);
 
         if(playerPower + powerConfig.getPowerIncrement() < getPlayerMaxPower(playerUUID))
         {
             if(isKillAward)
             {
                 float killAward = powerConfig.getKillAward();
-                plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower + killAward);
+                this.playerManager.setPlayerPower(playerUUID, playerPower + killAward);
             }
             else
             {
                 float newPower = round(playerPower + powerConfig.getPowerIncrement(), 2);
-                plugin.getPlayerManager().setPlayerPower(playerUUID, newPower);
+                this.playerManager.setPlayerPower(playerUUID, newPower);
             }
         }
     }
@@ -194,37 +186,24 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public void setPower(final UUID playerUUID, final float power)
     {
-        plugin.getPlayerManager().setPlayerPower(playerUUID, power);
+        this.playerManager.setPlayerPower(playerUUID, power);
     }
 
     @Override
     public void startIncreasingPower(final UUID playerUUID)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-
-        taskBuilder.interval(1, TimeUnit.MINUTES).execute(task ->
-        {
-            if (!plugin.getPlayerManager().isPlayerOnline(playerUUID)) task.cancel();
-
-            if(getPlayerPower(playerUUID) + powerConfig.getPowerIncrement() < getPlayerMaxPower(playerUUID))
-            {
-                addPower(playerUUID, false);
-            }
-            else
-            {
-                setPower(playerUUID, getPlayerMaxPower(playerUUID));
-            }
-        }).async().submit(plugin);
+        final EagleFactionsScheduler eagleFactionsScheduler = EagleFactionsScheduler.getInstance();
+        eagleFactionsScheduler.scheduleWithDelayedInterval(new PowerIncrementTask(this.playerManager, this, this.powerConfig, playerUUID), 0, TimeUnit.SECONDS, 1, TimeUnit.MINUTES);
     }
 
     @Override
     public void decreasePower(final UUID playerUUID)
     {
-        float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
+        float playerPower = this.playerManager.getPlayerPower(playerUUID);
 
         if(playerPower - powerConfig.getPowerDecrement() > 0)
         {
-                plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - powerConfig.getPowerDecrement());
+            this.playerManager.setPlayerPower(playerUUID, playerPower - powerConfig.getPowerDecrement());
         }
         else
         {
@@ -235,22 +214,22 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public void penalty(final UUID playerUUID)
     {
-        float playerPower = plugin.getPlayerManager().getPlayerPower(playerUUID);
+        float playerPower = this.playerManager.getPlayerPower(playerUUID);
         float penalty = powerConfig.getPenalty();
 
         if(playerPower - penalty > 0)
         {
-            plugin.getPlayerManager().setPlayerPower(playerUUID, playerPower - penalty);
+            this.playerManager.setPlayerPower(playerUUID, playerPower - penalty);
         }
         else
         {
-            plugin.getPlayerManager().setPlayerPower(playerUUID, 0);
+            this.playerManager.setPlayerPower(playerUUID, 0);
         }
     }
 
     @Override
     public void setMaxPower(final UUID playerUUID, final float power)
     {
-        plugin.getPlayerManager().setPlayerMaxPower(playerUUID, power);
+        this.playerManager.setPlayerMaxPower(playerUUID, power);
     }
 }

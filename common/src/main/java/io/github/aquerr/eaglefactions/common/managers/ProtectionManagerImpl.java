@@ -2,9 +2,12 @@ package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.FlagManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -29,22 +32,17 @@ import java.util.regex.PatternSyntaxException;
 @Singleton
 public class ProtectionManagerImpl implements ProtectionManager
 {
-    private static ProtectionManagerImpl INSTANCE = null;
-    private final EagleFactions plugin;
+    private final FactionLogic factionLogic;
+    private final FlagManager flagManager;
     private final ProtectionConfig protectionConfig;
+    private final ChatConfig chatConfig;
 
-    public static ProtectionManagerImpl getInstance(final EagleFactions plugin)
+    public ProtectionManagerImpl(final FactionLogic factionLogic, final FlagManager flagManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig)
     {
-        if (INSTANCE == null)
-            return new ProtectionManagerImpl(plugin);
-        else return INSTANCE;
-    }
-
-    private ProtectionManagerImpl(final EagleFactions plugin)
-    {
-        INSTANCE = this;
-        this.plugin = plugin;
-        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.protectionConfig = protectionConfig;
+        this.chatConfig = chatConfig;
+        this.factionLogic = factionLogic;
+        this.flagManager = flagManager;
     }
 
     @Override
@@ -70,9 +68,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
 
         if (isBlockWhitelistedForInteraction(location.getBlockType().getId()))
-        {
             return true;
-        }
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
@@ -97,8 +93,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             return false;
         }
 
-        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
         {
             if(this.protectionConfig.shouldProtectWildernessFromPlayers())
@@ -138,7 +134,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final Faction playerFaction = optionalPlayerFaction.get();
-        if (plugin.getFlagManager().canInteract(user.getUniqueId(), playerFaction, chunkFaction))
+        if (this.flagManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
             return true;
         else
         {
@@ -192,8 +188,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             return false;
         }
 
-        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
         {
             if(this.protectionConfig.shouldProtectWildernessFromPlayers())
@@ -220,7 +216,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         Faction playerFaction = optionalPlayerFaction.get();
-        if (this.plugin.getFlagManager().canInteract(user.getUniqueId(), playerFaction, chunkFaction))
+        if (this.flagManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
             return true;
         else
         {
@@ -266,8 +262,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             return false;
         }
 
-        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
-        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if(optionalChunkFaction.isPresent())
         {
             if(optionalChunkFaction.get().getName().equals("WarZone") || optionalChunkFaction.get().getName().equals("SafeZone"))
@@ -290,7 +286,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
             if(optionalPlayerFaction.isPresent())
             {
-                if (!this.plugin.getFlagManager().canBreakBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                if (!this.flagManager.canBreakBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
                     if(shouldNotify)
                         notifyPlayer(user);
@@ -327,7 +323,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(this.protectionConfig.getWarZoneWorldNames().contains(world.getName()) && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
             return false;
 
-        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if(!optionalChunkFaction.isPresent())
             return true;
 
@@ -379,8 +375,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             return false;
         }
 
-        Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
+        Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
+        Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if(optionalChunkFaction.isPresent())
         {
             if(optionalChunkFaction.get().getName().equals("WarZone") || optionalChunkFaction.get().getName().equals("SafeZone"))
@@ -403,7 +399,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
             if(optionalPlayerFaction.isPresent())
             {
-                if (!this.plugin.getFlagManager().canPlaceBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                if (!this.flagManager.canPlaceBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
                     if(shouldNotify)
                         notifyPlayer(user);
@@ -467,7 +463,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         //If no faction
-        final Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
         if (!optionalChunkFaction.isPresent())
         {
             if(this.protectionConfig.shouldProtectWildernessFromPlayers())
@@ -497,13 +493,13 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         //If player is in faction
-        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if(optionalPlayerFaction.isPresent())
         {
             final Faction playerFaction = optionalPlayerFaction.get();
             if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
             {
-                if (!this.plugin.getFlagManager().canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction))
+                if (!this.flagManager.canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction))
                 {
                     if(shouldNotify)
                         notifyPlayer(user);
@@ -535,7 +531,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (this.protectionConfig.getWarZoneWorldNames().contains(location.getExtent().getName()))
             return !shouldProtectWarZoneFromMobGrief;
 
-        Optional<Faction> optionalChunkFaction = this.plugin.getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
         if (!optionalChunkFaction.isPresent())
             return true;
 
@@ -611,7 +607,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private void notifyPlayer(final User user)
     {
-        if (this.plugin.getConfiguration().getChatConfig().shouldDisplayProtectionSystemMessages())
+        if (this.chatConfig.shouldDisplayProtectionSystemMessages())
         {
             user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS)));
         }
