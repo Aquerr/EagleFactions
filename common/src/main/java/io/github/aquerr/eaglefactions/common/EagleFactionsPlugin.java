@@ -432,8 +432,8 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission(PluginPermissions.SET_POWER_COMMAND)
-                .arguments(GenericArguments.player(Text.of("player")),
-                        GenericArguments.string(Text.of("power")))
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
                 .executor(new SetPowerCommand(this))
                 .build());
 
