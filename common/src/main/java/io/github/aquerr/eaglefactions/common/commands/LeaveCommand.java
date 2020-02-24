@@ -64,7 +64,7 @@ public class LeaveCommand extends AbstractCommand
             super.getPlugin().getFactionLogic().leaveFaction(player.getUniqueId(), faction.getName());
         }
 
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_LEFT_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, optionalPlayerFaction.get().getName())))));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_LEFT_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
 
         EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
         EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
