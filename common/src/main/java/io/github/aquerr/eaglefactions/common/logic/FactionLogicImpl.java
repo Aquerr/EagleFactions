@@ -356,7 +356,9 @@ public class FactionLogicImpl implements FactionLogic
     public void setLeader(UUID newLeaderUUID, String playerFactionName)
     {
         final Faction faction = getFactionByName(playerFactionName);
-        UUID leader = faction.getLeader();
+        if (faction == null)
+            return;
+
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
@@ -369,21 +371,18 @@ public class FactionLogicImpl implements FactionLogic
         if(faction.getOfficers().contains(newLeaderUUID))
         {
             officers.remove(newLeaderUUID);
-            leader = newLeaderUUID;
         }
         else if(faction.getMembers().contains(newLeaderUUID))
         {
             members.remove(newLeaderUUID);
-            leader = newLeaderUUID;
         }
         else if(faction.getRecruits().contains(newLeaderUUID))
         {
             recruits.remove(newLeaderUUID);
-            leader = newLeaderUUID;
         }
 
         final Faction updatedFaction = faction.toBuilder()
-                .setLeader(leader)
+                .setLeader(newLeaderUUID)
                 .setOfficers(officers)
                 .setMembers(members)
                 .setRecruits(recruits)
