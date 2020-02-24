@@ -44,7 +44,7 @@ public class JoinCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
 
         //If player has admin mode then force join.
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             return joinFactionAndNotify(player, faction);
         }

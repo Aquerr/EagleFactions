@@ -35,7 +35,7 @@ public class AutoClaimCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         final Faction playerFaction = optionalPlayerFaction.get();
-        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
 
         if(EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.getUniqueId()))

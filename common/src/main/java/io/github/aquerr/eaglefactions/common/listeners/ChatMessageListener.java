@@ -231,7 +231,7 @@ public class ChatMessageListener extends AbstractListener
     private List<MessageReceiver> getAdminReceivers()
     {
         final List<MessageReceiver> admins = new ArrayList<>();
-        for(final UUID adminUUID : EagleFactionsPlugin.ADMIN_MODE_PLAYERS)
+        for(final UUID adminUUID : super.getPlugin().getPlayerManager().getAdminModePlayers())
         {
             final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
             optionalAdminPlayer.ifPresent(admins::add);

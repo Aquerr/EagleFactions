@@ -55,7 +55,7 @@ public class SquareClaimCommand extends AbstractCommand
         //Check if it is a claimable world
         if (!this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
         {
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
             }
@@ -92,7 +92,7 @@ public class SquareClaimCommand extends AbstractCommand
                 //throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
 
             //Check if admin mode
-            if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
                 if (isCancelled)

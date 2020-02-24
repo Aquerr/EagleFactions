@@ -65,6 +65,7 @@ import java.util.concurrent.TimeUnit;
         dependencies = {@Dependency(id = "placeholderapi", optional = true)})
 public class EagleFactionsPlugin implements EagleFactions
 {
+    //TODO: Convert these fields to instance fields.
     public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
     public static final List<Invite> INVITE_LIST = new ArrayList<>();
     public static final List<AllyRequest> TRUCE_INVITE_LIST = new ArrayList<>();
@@ -72,7 +73,6 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final List<ArmisticeRequest> ARMISTICE_REQUEST_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_MAP_LIST = new ArrayList<>();
-    public static final List<UUID> ADMIN_MODE_PLAYERS = new ArrayList<>();
     public static final Map<String, Integer> ATTACKED_FACTIONS = new HashMap<>();
     public static final Map<UUID, Integer> BLOCKED_HOME = new HashMap<>();
     public static final Map<UUID, ChatEnum> CHAT_LIST = new HashMap<>();
@@ -669,7 +669,7 @@ public class EagleFactionsPlugin implements EagleFactions
         flagManager = new FlagManagerImpl(this.playerManager);
         factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
         attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
-        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig());
+        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig());
     }
 
     private void startFactionsRemover()

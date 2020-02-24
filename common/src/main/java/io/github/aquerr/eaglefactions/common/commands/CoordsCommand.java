@@ -45,7 +45,7 @@ public class CoordsCommand extends AbstractCommand
             if(optionalFaction.isPresent())
             {
                 final Faction faction = optionalFaction.get();
-                if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()) || (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName())))
+                if(super.getPlugin().getPlayerManager().hasAdminMode(player) || (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName())))
                     return showCoordsList(player, getTeamCoordsList(faction));
                 else throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
             }

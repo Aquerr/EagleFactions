@@ -37,7 +37,7 @@ public class DisbandCommand extends AbstractCommand
         // There's a bit of code duplicating, but...
         Optional<Faction> faction = context.getOne("faction");
         if (faction.isPresent()) {
-            if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
 
             boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(faction.get().getName());
@@ -59,7 +59,7 @@ public class DisbandCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
 
         //If player has adminmode
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
             if(didSucceed)

@@ -47,7 +47,7 @@ public class PublicCommand extends AbstractCommand
 		final Faction faction = optionalFaction.get();
 		final String publicMessage = !faction.isPublic() ? "Faction is now public." : "Faction is no longer public.";
 
-		if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+		if(super.getPlugin().getPlayerManager().hasAdminMode(player))
 		{
 			source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, publicMessage));
 			super.getPlugin().getFactionLogic().setIsPublic(faction, !faction.isPublic());

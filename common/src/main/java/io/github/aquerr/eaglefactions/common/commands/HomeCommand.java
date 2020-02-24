@@ -48,7 +48,7 @@ public class HomeCommand extends AbstractCommand
 
         if (optionalFaction.isPresent())
         {
-            if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 final Faction faction = optionalFaction.get();
                 if (faction.getHome() == null)
@@ -112,7 +112,7 @@ public class HomeCommand extends AbstractCommand
             if (playerFaction.getHome() == null)
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTIONS_HOME_IS_NOT_SET));
 
-            if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
                 return CommandResult.success();

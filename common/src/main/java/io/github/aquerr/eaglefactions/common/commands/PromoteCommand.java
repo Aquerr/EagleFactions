@@ -53,7 +53,7 @@ public class PromoteCommand extends AbstractCommand
         if(!optionalPromotedPlayerFaction.get().getName().equals(playerFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
 
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
             {

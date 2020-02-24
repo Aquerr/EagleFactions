@@ -40,7 +40,7 @@ public class FlagsCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         final Faction faction = optionalPlayerFaction.get();
-        if(!faction.getLeader().equals(player.getUniqueId()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(!faction.getLeader().equals(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
 
         showFlags(player, faction);

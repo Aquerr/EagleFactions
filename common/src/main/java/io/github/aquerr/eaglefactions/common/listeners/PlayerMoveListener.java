@@ -77,7 +77,7 @@ public class PlayerMoveListener extends AbstractListener
 
             if (!newChunkFactionName.equals("SafeZone") && !newChunkFactionName.equals("WarZone") && !newChunkFactionName.equals("Wilderness"))
             {
-                if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+                if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 {
                     if (!getPlugin().getFactionLogic().hasOnlinePlayers(optionalNewChunkFaction.get()) && this.factionsConfig.getBlockEnteringFactions())
                     {
@@ -90,7 +90,7 @@ public class PlayerMoveListener extends AbstractListener
             }
             else if (oldChunkFactionName.equals("WarZone") && newChunkFactionName.equals("SafeZone"))
             {
-                if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
+                if (!super.getPlugin().getPlayerManager().hasAdminMode(player) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
                 {
                     if (super.getPlugin().getPlayerManager().lastDeathAtWarZone(player.getUniqueId()))
                     {

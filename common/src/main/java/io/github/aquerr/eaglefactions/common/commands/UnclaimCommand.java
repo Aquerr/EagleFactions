@@ -40,7 +40,7 @@ public class UnclaimCommand extends AbstractCommand
         final Player player = (Player)source;
         final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
 
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             final World world = player.getWorld();
             final Vector3i chunk = player.getLocation().getChunkPosition();

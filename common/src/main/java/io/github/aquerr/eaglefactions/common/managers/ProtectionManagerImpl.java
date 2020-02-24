@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.FlagManager;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
@@ -34,15 +35,17 @@ public class ProtectionManagerImpl implements ProtectionManager
 {
     private final FactionLogic factionLogic;
     private final FlagManager flagManager;
+    private final PlayerManager playerManager;
     private final ProtectionConfig protectionConfig;
     private final ChatConfig chatConfig;
 
-    public ProtectionManagerImpl(final FactionLogic factionLogic, final FlagManager flagManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig)
+    public ProtectionManagerImpl(final FactionLogic factionLogic, final FlagManager flagManager, final PlayerManager playerManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig)
     {
         this.protectionConfig = protectionConfig;
         this.chatConfig = chatConfig;
         this.factionLogic = factionLogic;
         this.flagManager = flagManager;
+        this.playerManager = playerManager;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final World world = location.getExtent();
 
-        if (hasAdminMode(user.getUniqueId()))
+        if (this.playerManager.hasAdminMode(user))
             return true;
 
         if (isBlockWhitelistedForInteraction(location.getBlockType().getId()))
@@ -169,7 +172,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final World world = location.getExtent();
 
-        if (hasAdminMode(user.getUniqueId()) || isItemWhitelisted(usedItem.getType().getId()))
+        if (this.playerManager.hasAdminMode(user) || isItemWhitelisted(usedItem.getType().getId()))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
@@ -243,7 +246,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final World world = location.getExtent();
-        if(hasAdminMode(user.getUniqueId()) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
+        if(this.playerManager.hasAdminMode(user) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
@@ -356,7 +359,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         World world = location.getExtent();
-        if(hasAdminMode(user.getUniqueId()) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId())))
+        if(this.playerManager.hasAdminMode(user) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId())))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
@@ -441,7 +444,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         boolean allowExplosionsByOtherPlayersInClaims = this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims();
 
         //Check if admin
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(user.getUniqueId()))
+        if(this.playerManager.hasAdminMode(user))
             return true;
 
         //Check world
@@ -583,11 +586,6 @@ public class ProtectionManagerImpl implements ProtectionManager
             }
         }
         return false;
-    }
-
-    private boolean hasAdminMode(final UUID playerUUID)
-    {
-        return EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(playerUUID);
     }
 
     private boolean isHoldingEagleFeather(final User user)

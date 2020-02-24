@@ -50,7 +50,7 @@ public class ClaimCommand extends AbstractCommand
         final Vector3i chunk = player.getLocation().getChunkPosition();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
-        final boolean hasAdminMode = EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
+        final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
 
         if (optionalChunkFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_IS_ALREADY_CLAIMED));
@@ -74,7 +74,7 @@ public class ClaimCommand extends AbstractCommand
     private CommandResult preformClaimByFaction(final Player player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        final boolean hasAdminMode = EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
+        final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
 
         if(hasAdminMode)
         {

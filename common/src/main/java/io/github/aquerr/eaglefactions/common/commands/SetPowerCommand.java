@@ -31,7 +31,7 @@ public class SetPowerCommand extends AbstractCommand
         else
         {
             final Player player = (Player) source;
-            if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
             setPower(source, selectedPlayer, (float)power);
         }

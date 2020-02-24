@@ -219,7 +219,7 @@ public class MapCommand extends AbstractCommand
                 else
                 {
                     if(!this.factionsConfig.shouldDelayClaim()
-                            && (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId())
+                            && (super.getPlugin().getPlayerManager().hasAdminMode(player)
                                 || (optionalPlayerFaction.isPresent()
                                     && (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId())
                                         || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
@@ -287,7 +287,7 @@ public class MapCommand extends AbstractCommand
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             final World world = player.getWorld();
             final Claim claim = new Claim(player.getWorld().getUniqueId(), chunk);
-            final boolean hasFactionsAdminMode = EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
+            final boolean hasFactionsAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
 
             if(!optionalPlayerFaction.isPresent())
             {

@@ -42,7 +42,7 @@ public class LeaveCommand extends AbstractCommand
         final Faction faction = optionalPlayerFaction.get();
         if (faction.getLeader().equals(player.getUniqueId()))
         {
-            if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
                 return leaveFaction(player, faction, true);
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_LEAVE_YOUR_FACTION_BECAUSE_YOU_ARE_ITS_LEADER + " " + Messages.DISBAND_YOUR_FACTION_OR_SET_SOMEONE_AS_LEADER));
         }

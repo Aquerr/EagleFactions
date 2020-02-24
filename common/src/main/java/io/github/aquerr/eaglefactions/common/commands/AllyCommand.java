@@ -49,7 +49,7 @@ public class AllyCommand extends AbstractCommand
         if(playerFaction.getName().equals(selectedFaction.getName()))
         	throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_INVITE_YOURSELF_TO_THE_ALLIANCE));
 
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             if(playerFaction.getEnemies().contains(selectedFaction.getName()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + Messages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));

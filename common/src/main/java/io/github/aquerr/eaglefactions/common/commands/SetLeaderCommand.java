@@ -49,7 +49,7 @@ public class SetLeaderCommand extends AbstractCommand
         if(!optionalNewLeaderPlayerFaction.get().getName().equals(playerFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
 
-        if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if (super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             if(playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
