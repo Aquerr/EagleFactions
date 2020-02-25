@@ -168,7 +168,7 @@ public class ChatMessageListener extends AbstractListener
         if(this.chatConfig.getChatPrefixType().equals("tag"))
         {
             if(playerFaction.getTag().toPlain().equals(""))
-                return Text.of("");
+                return playerFaction.getTag();
 
             Text factionTag = playerFaction.getTag();
             if (!this.chatConfig.canColorTags())
@@ -188,7 +188,7 @@ public class ChatMessageListener extends AbstractListener
                     .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                     .build();
         }
-        return Text.of("");
+        return playerFaction.getTag();
     }
 
     private Text getAllianceChatPrefix()
@@ -219,13 +219,18 @@ public class ChatMessageListener extends AbstractListener
                     .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.OFFICER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                     .build();
         }
-        else if(faction.getRecruits().contains(player.getUniqueId()))
+        else if (faction.getMembers().contains(player.getUniqueId()))
+        {
+            return Text.builder()
+                    .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.MEMBER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                    .build();
+        }
+        else
         {
             return Text.builder()
                     .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.RECRUIT, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
                     .build();
         }
-        return Text.of("");
     }
 
     private List<MessageReceiver> getAdminReceivers()
