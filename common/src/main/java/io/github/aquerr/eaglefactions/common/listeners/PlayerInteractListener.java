@@ -45,12 +45,12 @@ public class PlayerInteractListener extends AbstractListener
             location = hitEntity.getLocation();
         }
 
-        boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
-        if (!canUseItem)
-        {
-            event.setCancelled(true);
-            return;
-        }
+             //  boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
+  //      if (!canUseItem)
+   //     {
+   //         event.setCancelled(true);
+    //        return;
+    //    }
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
