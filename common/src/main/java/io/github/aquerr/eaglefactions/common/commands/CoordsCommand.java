@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
@@ -15,6 +14,7 @@ import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +64,9 @@ public class CoordsCommand extends AbstractCommand
 
         if(faction.getHome() != null)
         {
+            final Optional<World> optionalHomeWorld = Sponge.getServer().getWorld(faction.getHome().getWorldUUID());
             final Text textBuilder = Text.builder()
-                    .append(Text.of( Messages.FACTIONS_HOME + ": " + faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString()))
+                    .append(Text.of( Messages.FACTIONS_HOME + ": " + (optionalHomeWorld.map(World::getName).orElse("Unknown World")) + '|' + faction.getHome().getBlockPosition().toString()))
                     .build();
 
             teamCoords.add(textBuilder);
