@@ -67,6 +67,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		}
 
 		this.configurationLoader = HoconConfigurationLoader.builder().setPath(configuration.getConfigDirectoryPath().resolve("Worlds.conf")).build();
+		loadWorldsFile();
 		saveWorldsFile();
 	}
 
