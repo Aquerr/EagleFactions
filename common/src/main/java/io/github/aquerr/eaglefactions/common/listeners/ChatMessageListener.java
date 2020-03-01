@@ -45,7 +45,6 @@ public class ChatMessageListener extends AbstractListener
     {
         MessageChannel messageChannel = event.getOriginalChannel();
         final MessageEvent.MessageFormatter messageFormatter = event.getFormatter();
-        final Text rawMessage = event.getRawMessage();
 
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         if(!optionalPlayerFaction.isPresent())
@@ -88,7 +87,7 @@ public class ChatMessageListener extends AbstractListener
         {
             case FACTION:
             {
-                message.append(Text.of(TextColors.GREEN, rawMessage));
+                message.append(Text.of(TextColors.GREEN, messageFormatter.getBody().format()));
                 chatTypePrefix.append(getFactionChatPrefix());
                 messageChannel = new FactionMessageChannelImpl(playerFaction);
                 final MutableMessageChannel channel = messageChannel.asMutable();
@@ -98,7 +97,7 @@ public class ChatMessageListener extends AbstractListener
             }
             case ALLIANCE:
             {
-                message.append(Text.of(TextColors.BLUE, rawMessage));
+                message.append(Text.of(TextColors.BLUE, messageFormatter.getBody().format()));
                 chatTypePrefix.append(getAllianceChatPrefix());
                 messageChannel = new AllianceMessageChannelImpl(playerFaction);
                 final MutableMessageChannel channel = messageChannel.asMutable();
