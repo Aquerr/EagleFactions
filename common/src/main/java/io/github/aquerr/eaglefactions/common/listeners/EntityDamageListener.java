@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.listeners;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
@@ -8,7 +9,9 @@ import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
@@ -205,7 +208,7 @@ public class EntityDamageListener extends AbstractListener
 
         //Block all damage an attacked player would get if location is a SafeZone.
         final Optional<Faction> optionalAttackedChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(attackedPlayer.getWorld().getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
-        if(optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().getName().equals("SafeZone"))
+        if(optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
             return true;
 
         //If player attacked herself/himself
@@ -214,7 +217,7 @@ public class EntityDamageListener extends AbstractListener
 
         //Block all damage a player could deal if location is SafeZone.
         final Optional<Faction> optionalSourceChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), sourcePlayer.getLocation().getChunkPosition());
-        if(optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().getName().equals("SafeZone"))
+        if(optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
             return true;
 
         //Check if source player is not in a faction.
@@ -389,14 +392,15 @@ public class EntityDamageListener extends AbstractListener
 
     private void sendPenaltyMessageAndDecreasePower(final Player player)
     {
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY + " ", TextColors.GOLD, this.powerConfig.getPenalty() + "\n",
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader
+                        .parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, ImmutableMap.of(Placeholders.NUMBER, this.powerConfig.getPenalty())) + "\n",
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().penalty(player.getUniqueId());
     }
 
     private void sendKillAwardMessageAndIncreasePower(final Player player)
     {
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY + " ", TextColors.GOLD, this.powerConfig.getKillAward() + "\n",
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY, ImmutableMap.of(Placeholders.NUMBER, this.powerConfig.getKillAward())) + "\n",
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().addPower(player.getUniqueId(), true);
     }
