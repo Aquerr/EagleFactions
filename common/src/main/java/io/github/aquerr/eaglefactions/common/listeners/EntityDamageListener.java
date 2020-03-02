@@ -15,7 +15,6 @@ import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -190,6 +189,18 @@ public class EntityDamageListener extends AbstractListener
             }
             else
             {
+                final Optional<Faction> optionalAttackedChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(attackedPlayer.getWorld().getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
+                if(this.protectionConfig.getSafeZoneWorldNames().contains(attackedPlayer.getWorld().getName()))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                else if (optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+
                 if (isInOwnTerritory(attackedPlayer))
                 {
                     event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
