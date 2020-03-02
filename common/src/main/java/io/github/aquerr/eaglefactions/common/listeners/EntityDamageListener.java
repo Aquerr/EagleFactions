@@ -92,12 +92,11 @@ public class EntityDamageListener extends AbstractListener
     }
 
     @Listener(order = Order.EARLY, beforeModifications = true)
-    public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "getTargetEntity") Player player)
+    public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "getTargetEntity") Player attackedPlayer)
     {
         if(!(event.getCause().root() instanceof DamageSource))
             return;
 
-        final Player attackedPlayer = (Player) event.getTargetEntity();
         final World world = attackedPlayer.getWorld();
         final boolean willCauseDeath = event.willCauseDeath();
 
@@ -173,7 +172,7 @@ public class EntityDamageListener extends AbstractListener
 
             if(entitySource instanceof Player)
             {
-//                final Player player = (Player) entitySource;
+                final Player player = (Player) entitySource;
                 final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
                 if(shouldBlockDamage)
                 {

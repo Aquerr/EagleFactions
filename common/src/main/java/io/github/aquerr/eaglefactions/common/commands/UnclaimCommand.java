@@ -5,7 +5,6 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
@@ -101,8 +100,8 @@ public class UnclaimCommand extends AbstractCommand
             if (world.getUniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
             {
                 final Location<World> homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
-                if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
-                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
+                if(homeLocation.getChunkPosition().equals(chunk))
+                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null, null);
             }
         }
 
