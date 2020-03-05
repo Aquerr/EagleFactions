@@ -57,7 +57,7 @@ public class UnclaimCommand extends AbstractCommand
                     {
                             final Location<World> homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
                             if(homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
-                                super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), world.getUniqueId(), null);
+                                super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
                     }
                 }
 
@@ -85,7 +85,7 @@ public class UnclaimCommand extends AbstractCommand
         final Vector3i chunk = player.getLocation().getChunkPosition();
         final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
         if (!optionalChunkFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_IS_ALREADY_CLAIMED));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
 
         final Faction chunkFaction = optionalChunkFaction.get();
         if (!chunkFaction.getName().equals(playerFaction.getName()))
@@ -101,11 +101,13 @@ public class UnclaimCommand extends AbstractCommand
             {
                 final Location<World> homeLocation = world.getLocation(optionalChunkFaction.get().getHome().getBlockPosition());
                 if(homeLocation.getChunkPosition().equals(chunk))
-                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null, null);
+                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
             }
         }
 
-        super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
+        //We need to get faction again to see changes made after removing home.
+        final Faction faction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk).get();
+        super.getPlugin().getFactionLogic().removeClaim(faction, new Claim(world.getUniqueId(), chunk));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
         return CommandResult.success();
     }

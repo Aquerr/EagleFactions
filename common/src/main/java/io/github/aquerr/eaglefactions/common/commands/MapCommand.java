@@ -313,10 +313,10 @@ public class MapCommand extends AbstractCommand
                 {
                     if (world.getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                     {
-                        Location homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
+                        final Location<World> homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
                         if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                         {
-                            super.getPlugin().getFactionLogic().setHome(playerFaction, world.getUniqueId(), null);
+                            super.getPlugin().getFactionLogic().setHome(playerFaction, null);
                         }
                     }
                 }

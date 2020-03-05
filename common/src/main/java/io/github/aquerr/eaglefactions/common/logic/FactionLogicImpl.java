@@ -93,17 +93,9 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public @Nullable
-    Faction getFactionByName(String factionName)
+    public @Nullable Faction getFactionByName(String factionName)
     {
-        Faction faction = storageManager.getFaction(factionName);
-
-        if(faction != null)
-        {
-            return faction;
-        }
-
-        return null;
+        return storageManager.getFaction(factionName);
     }
 
     @Override
@@ -475,11 +467,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setHome(Faction faction, @Nullable UUID worldUUID, @Nullable Vector3i blockPosition)
+    public void setHome(Faction faction, @Nullable FactionHome home)
     {
-        if(blockPosition != null && worldUUID != null)
+        if (home != null && home.getBlockPosition() != null && home.getWorldUUID() != null)
         {
-            faction = faction.toBuilder().setHome(new FactionHome(worldUUID, blockPosition)).build();
+            faction = faction.toBuilder().setHome(home).build();
         }
         else
         {

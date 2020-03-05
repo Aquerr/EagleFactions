@@ -66,15 +66,15 @@ public class ChatCommand extends AbstractCommand
         {
             case GLOBAL:
                 EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO + " ", TextColors.GOLD, Messages.GLOBAL_CHAT, TextColors.RESET, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO, TextColors.GOLD, Messages.GLOBAL_CHAT, TextColors.RESET, "!"));
                 break;
             case ALLIANCE:
                 EagleFactionsPlugin.CHAT_LIST.put(player.getUniqueId(), chatType);
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO + " ", TextColors.GOLD, Messages.ALLIANCE_CHAT, TextColors.RESET, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO, TextColors.GOLD, Messages.ALLIANCE_CHAT, TextColors.RESET, "!"));
                 break;
             case FACTION:
                 EagleFactionsPlugin.CHAT_LIST.put(player.getUniqueId(), chatType);
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO + " ", TextColors.GOLD, Messages.FACTION_CHAT, TextColors.RESET, "!"));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO, TextColors.GOLD, Messages.FACTION_CHAT, TextColors.RESET, "!"));
                 break;
         }
     }

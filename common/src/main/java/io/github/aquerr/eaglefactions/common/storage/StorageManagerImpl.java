@@ -86,8 +86,7 @@ public class StorageManagerImpl implements StorageManager
     }
 
     @Override
-    public @Nullable
-    Faction getFaction(final String factionName)
+    public @Nullable Faction getFaction(final String factionName)
     {
         try
         {

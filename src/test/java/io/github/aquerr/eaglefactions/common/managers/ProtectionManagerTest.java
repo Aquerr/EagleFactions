@@ -57,7 +57,7 @@ public class ProtectionManagerTest
 		final Set<String> items = new HashSet<>();
 		items.add("minecraft:bucket");
 
-		when(protectionConfig.getWhiteListedItems()).thenReturn(Collections.EMPTY_SET);
+		when(protectionConfig.getWhiteListedItems()).thenReturn(Collections.emptySet());
 
 		//then
 
@@ -90,7 +90,7 @@ public class ProtectionManagerTest
 	{
 		//given
 		//when
-		when(protectionConfig.getWhiteListedPlaceDestroyBlocks()).thenReturn(Collections.EMPTY_SET);
+		when(protectionConfig.getWhiteListedPlaceDestroyBlocks()).thenReturn(Collections.emptySet());
 
 		//then
 
