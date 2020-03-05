@@ -64,7 +64,7 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public float getFactionPower(final Faction faction)
     {
-        if(faction.getName().equals("SafeZone") || faction.getName().equals("WarZone"))
+        if(faction.isSafeZone() || faction.isWarZone())
         {
             ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.getName(), "power");
 
@@ -107,7 +107,7 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public float getFactionMaxPower(final Faction faction)
     {
-        if(faction.getName().equals("SafeZone") || faction.getName().equals("WarZone"))
+        if(faction.isSafeZone() || faction.isWarZone())
         {
             ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.getName(), "power");
 

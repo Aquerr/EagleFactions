@@ -154,11 +154,11 @@ public class MapCommand extends AbstractCommand
                             }
                             else
                             {
-                                if (optionalChunkFaction.get().getName().equals("SafeZone"))
+                                if (optionalChunkFaction.get().isSafeZone())
                                 {
                                     textBuilder.append(Text.of(TextColors.AQUA, "+"));
                                 }
-                                else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                                else if (optionalChunkFaction.get().isWarZone())
                                 {
                                     textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                 }
@@ -181,11 +181,11 @@ public class MapCommand extends AbstractCommand
                         }
                         else
                         {
-                            if (optionalChunkFaction.get().getName().equals("SafeZone"))
+                            if (optionalChunkFaction.get().isSafeZone())
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
                             }
-                            else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                            else if (optionalChunkFaction.get().isWarZone())
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                             }
@@ -337,7 +337,7 @@ public class MapCommand extends AbstractCommand
                     return;
                 }
 
-                if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+                if (playerFaction.isSafeZone() || playerFaction.isWarZone())
                 {
                     super.getPlugin().getFactionLogic().addClaim(playerFaction, claim);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));

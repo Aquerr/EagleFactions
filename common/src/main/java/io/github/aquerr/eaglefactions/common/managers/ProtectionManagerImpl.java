@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -15,6 +16,9 @@ import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.ItemTypes;
@@ -37,11 +41,13 @@ public class ProtectionManagerImpl implements ProtectionManager
     private final PlayerManager playerManager;
     private final ProtectionConfig protectionConfig;
     private final ChatConfig chatConfig;
+    private final FactionsConfig factionsConfig;
 
-    public ProtectionManagerImpl(final FactionLogic factionLogic, final PermsManager permsManager, final PlayerManager playerManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig)
+    public ProtectionManagerImpl(final FactionLogic factionLogic, final PermsManager permsManager, final PlayerManager playerManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig, final FactionsConfig factionsConfig)
     {
         this.protectionConfig = protectionConfig;
         this.chatConfig = chatConfig;
+        this.factionsConfig = factionsConfig;
         this.factionLogic = factionLogic;
         this.permsManager = permsManager;
         this.playerManager = playerManager;
@@ -109,12 +115,12 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final Faction chunkFaction = optionalChunkFaction.get();
-        if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+        if (chunkFaction.isSafeZone() && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
             return true;
-        if (chunkFaction.getName().equalsIgnoreCase("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+        if (chunkFaction.isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
             return true;
 
-        if(chunkFaction.getName().equalsIgnoreCase("WarZone") && isTileEntityAtLocation && isHoldingEagleFeather(user))
+        if(chunkFaction.isWarZone() && isTileEntityAtLocation && isHoldingEagleFeather(user))
         {
             removeEagleFeather(user);
             return true;
@@ -204,9 +210,9 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final Faction chunkFaction = optionalChunkFaction.get();
-        if (chunkFaction.getName().equalsIgnoreCase("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
+        if (chunkFaction.isSafeZone() && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
             return true;
-        if (chunkFaction.getName().equalsIgnoreCase("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+        if (chunkFaction.isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
             return true;
 
         //If player is not in a faction but there is a faction at chunk
@@ -268,13 +274,13 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if(optionalChunkFaction.isPresent())
         {
-            if(optionalChunkFaction.get().getName().equals("WarZone") || optionalChunkFaction.get().getName().equals("SafeZone"))
+            if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
             {
-                if(optionalChunkFaction.get().getName().equals("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                if(optionalChunkFaction.get().isSafeZone() && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                 {
                     return true;
                 }
-                else if(optionalChunkFaction.get().getName().equals("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                else if(optionalChunkFaction.get().isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 {
                     return true;
                 }
@@ -329,10 +335,10 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(!optionalChunkFaction.isPresent())
             return true;
 
-        if(optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+        if(optionalChunkFaction.get().isSafeZone())
             return false;
 
-        if(optionalChunkFaction.get().getName().equalsIgnoreCase("WarZone") && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
+        if(optionalChunkFaction.get().isWarZone() && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
             return false;
 
         if(this.protectionConfig.shouldProtectClaimFromMobGrief())
@@ -381,13 +387,13 @@ public class ProtectionManagerImpl implements ProtectionManager
         Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if(optionalChunkFaction.isPresent())
         {
-            if(optionalChunkFaction.get().getName().equals("WarZone") || optionalChunkFaction.get().getName().equals("SafeZone"))
+            if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
             {
-                if(optionalChunkFaction.get().getName().equals("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+                if(optionalChunkFaction.get().isSafeZone() && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                 {
                     return true;
                 }
-                else if(optionalChunkFaction.get().getName().equals("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+                else if(optionalChunkFaction.get().isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 {
                     return true;
                 }
@@ -480,11 +486,11 @@ public class ProtectionManagerImpl implements ProtectionManager
         //If SafeZone or WarZone
         final Faction chunkFaction = optionalChunkFaction.get();
 
-        if(chunkFaction.getName().equals("WarZone") || chunkFaction.getName().equals("SafeZone"))
+        if(chunkFaction.isSafeZone() || chunkFaction.isWarZone())
         {
-            if(chunkFaction.getName().equals("SafeZone") && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
+            if(chunkFaction.isSafeZone() && user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                 return true;
-            else if(chunkFaction.getName().equals("WarZone") && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
+            else if(chunkFaction.isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 return true;
             else
             {
@@ -538,11 +544,88 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
 
         Faction chunkFaction = optionalChunkFaction.get();
-        if (chunkFaction.getName().equalsIgnoreCase("SafeZone"))
+        if (chunkFaction.isSafeZone())
             return false;
-        else if (chunkFaction.getName().equalsIgnoreCase("WarZone") && shouldProtectWarZoneFromMobGrief)
+        else if (chunkFaction.isWarZone() && shouldProtectWarZoneFromMobGrief)
             return false;
         else return !shouldProtectClaimsFromMobGrief;
+    }
+
+    @Override
+    public boolean canAttackEntity(final Entity attackedEntity, final Player player, final boolean shouldNotify)
+    {
+        final boolean canAttack = canAttackEntity(attackedEntity, player);
+        if (shouldNotify && canAttack)
+            notifyPlayer(player);
+        return canAttack;
+    }
+
+    private boolean canAttackEntity(final Entity attackedEntity, final Player player)
+    {
+        if (this.playerManager.hasAdminMode(player))
+            return true;
+
+        final boolean isPlayer = attackedEntity instanceof Player;
+        final boolean isMob = (attackedEntity instanceof Living && !(attackedEntity instanceof ArmorStand));
+        if (isMob && !isPlayer)
+            return true;
+
+        final Location<World> entityLocation = attackedEntity.getLocation();
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.getExtent().getUniqueId(), entityLocation.getChunkPosition());
+        final Optional<Faction> optionalAttackerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
+        final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(entityLocation.getExtent().getName());
+
+        if (isPlayer)
+        {
+            final Player attackedPlayer = (Player) attackedEntity;
+            final Optional<Faction> optionalAttackedPlayerFaction = this.factionLogic
+                    .getFactionByPlayerUUID(attackedPlayer.getUniqueId());
+            if (isSafeZoneWorld)
+                return false;
+            if (!optionalChunkFaction.isPresent())
+                return true;
+            final Faction chunkFaction = optionalChunkFaction.get();
+            if (chunkFaction.isSafeZone())
+                return false;
+            if (attackedEntity.equals(player))
+                return true;
+            if (optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().isSafeZone())
+                return false;
+            if (!optionalAttackerPlayerFaction.isPresent())
+                return true;
+            if (!optionalAttackedPlayerFaction.isPresent())
+                return true;
+            final Faction attackedFaction = optionalAttackedPlayerFaction.get();
+            final Faction attackerFaction = optionalAttackerPlayerFaction.get();
+            if (!attackerFaction.getName().equals(attackedFaction.getName()))
+            {
+                if (!this.factionsConfig.isAllianceFriendlyFire() && attackerFaction.getAlliances().contains(attackedFaction.getName()))
+                    return false;
+                else if (!this.factionsConfig.isTruceFriendlyFire() && attackerFaction.getTruces().contains(attackedFaction.getName()))
+                    return false;
+            }
+            else
+            {
+                return this.factionsConfig.isFactionFriendlyFire();
+            }
+        }
+        else
+        {
+            if (isSafeZoneWorld)
+                return false;
+            if (!optionalChunkFaction.isPresent())
+                return true;
+            final Faction chunkFaction = optionalChunkFaction.get();
+            if (chunkFaction.isSafeZone())
+                return false;
+            if (!optionalAttackerPlayerFaction.isPresent())
+                return false;
+            final Faction attackerFaction = optionalAttackerPlayerFaction.get();
+            return this.permsManager.canBreakBlock(player.getUniqueId(), attackerFaction, chunkFaction);
+        }
+
+        return true;
     }
 
     @Override

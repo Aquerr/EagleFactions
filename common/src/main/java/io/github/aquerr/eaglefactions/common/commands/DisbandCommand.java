@@ -55,7 +55,7 @@ public class DisbandCommand extends AbstractCommand
 
         Faction playerFaction = optionalPlayerFaction.get();
 
-        if(playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+        if(playerFaction.isSafeZone() || playerFaction.isWarZone())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
 
         //If player has adminmode

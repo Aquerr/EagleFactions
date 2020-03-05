@@ -669,7 +669,7 @@ public class EagleFactionsPlugin implements EagleFactions
         flagManager = new PermsManagerImpl(this.playerManager);
         factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
         attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
-        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig());
+        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
     }
 
     private void startFactionsRemover()

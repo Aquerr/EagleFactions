@@ -57,7 +57,7 @@ public class AttackCommand extends AbstractCommand
         if(!optionalChunkFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
 
-        if(optionalChunkFaction.get().getName().equals("SafeZone") || optionalChunkFaction.get().getName().equals("WarZone"))
+        if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION));
 
         if(!super.getPlugin().getPermsManager().canAttack(player.getUniqueId(), playerFaction))

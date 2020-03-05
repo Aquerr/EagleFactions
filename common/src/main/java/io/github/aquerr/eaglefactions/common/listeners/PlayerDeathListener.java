@@ -40,7 +40,7 @@ public class PlayerDeathListener extends AbstractListener
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
 
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-        if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("WarZone")))
+        if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isWarZone()))
         {
             super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
         }

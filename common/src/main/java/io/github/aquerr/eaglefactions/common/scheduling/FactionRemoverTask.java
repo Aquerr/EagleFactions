@@ -40,7 +40,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             if(factionLogic.hasOnlinePlayers(factionEntry.getValue()))
                 continue;
 
-            if(factionEntry.getValue().getName().equalsIgnoreCase("safezone") || factionEntry.getValue().getName().equalsIgnoreCase("warzone"))
+            if(factionEntry.getValue().isSafeZone() || factionEntry.getValue().isWarZone())
                 continue;
 
             final Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());

@@ -41,7 +41,7 @@ public class TopCommand extends AbstractCommand
 
         for(final Faction faction : factionsList)
         {
-            if(faction.getName().equalsIgnoreCase("safezone") || faction.getName().equalsIgnoreCase("warzone")) continue;
+            if(faction.isSafeZone() || faction.isWarZone()) continue;
             if(index == 11) break;
 
             index++;

@@ -178,7 +178,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     final Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
-                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                     {
                         event.setCancelled(true);
                         return;
@@ -480,7 +480,7 @@ public class BlockBreakListener extends AbstractListener
                     }
 
                     final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition());
-                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
+                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                     {
                         sourceEntity.remove();
                         event.setCancelled(true);

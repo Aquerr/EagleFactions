@@ -137,6 +137,7 @@ public class EntityDamageListener extends AbstractListener
                 }
                 else
                 {
+                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
                     if (isInOwnTerritory(attackedPlayer))
                     {
                         event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
@@ -181,6 +182,7 @@ public class EntityDamageListener extends AbstractListener
                 }
                 else
                 {
+                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
                     if (isInOwnTerritory(attackedPlayer))
                     {
                         event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
@@ -195,7 +197,7 @@ public class EntityDamageListener extends AbstractListener
                     event.setCancelled(true);
                     return;
                 }
-                else if (optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+                else if (optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().isSafeZone())
                 {
                     event.setCancelled(true);
                     return;
@@ -218,7 +220,7 @@ public class EntityDamageListener extends AbstractListener
 
         //Block all damage an attacked player would get if location is a SafeZone.
         final Optional<Faction> optionalAttackedChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(attackedPlayer.getWorld().getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
-        if(optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+        if(optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().isSafeZone())
             return true;
 
         //If player attacked herself/himself
@@ -227,7 +229,7 @@ public class EntityDamageListener extends AbstractListener
 
         //Block all damage a player could deal if location is SafeZone.
         final Optional<Faction> optionalSourceChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), sourcePlayer.getLocation().getChunkPosition());
-        if(optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+        if(optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().isSafeZone())
             return true;
 
         //Check if source player is not in a faction.
@@ -240,7 +242,6 @@ public class EntityDamageListener extends AbstractListener
                 return false;
             }
 
-            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
 
@@ -256,7 +257,6 @@ public class EntityDamageListener extends AbstractListener
                 return false;
             }
 
-            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
 
@@ -288,7 +288,6 @@ public class EntityDamageListener extends AbstractListener
                 sendPenaltyMessageAndDecreasePower(sourcePlayer);
                 return false;
             }
-            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
         else if(sourcePlayerFaction.getAlliances().contains(attackedPlayerFaction.getName()))
@@ -304,7 +303,6 @@ public class EntityDamageListener extends AbstractListener
                     sendPenaltyMessageAndDecreasePower(sourcePlayer);
                     return false;
                 }
-                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
                 return false;
             }
         }
@@ -315,7 +313,6 @@ public class EntityDamageListener extends AbstractListener
                 sendKillAwardMessageAndIncreasePower(sourcePlayer);
                 return false;
             }
-            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
             return false;
         }
         return false;
@@ -343,7 +340,7 @@ public class EntityDamageListener extends AbstractListener
 
         //Check if location is safezone
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), ignitedPlayer.getLocation().getChunkPosition());
-        if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+        if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
         {
             event.setCancelled(true);
             return;

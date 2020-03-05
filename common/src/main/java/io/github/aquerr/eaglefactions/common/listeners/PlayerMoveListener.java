@@ -75,7 +75,7 @@ public class PlayerMoveListener extends AbstractListener
                 return;
             }
 
-            if (!newChunkFactionName.equals("SafeZone") && !newChunkFactionName.equals("WarZone") && !newChunkFactionName.equals("Wilderness"))
+            if (!newChunkFactionName.equalsIgnoreCase("SafeZone") && !newChunkFactionName.equalsIgnoreCase("WarZone") && !newChunkFactionName.equalsIgnoreCase("Wilderness"))
             {
                 if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 {
@@ -88,7 +88,7 @@ public class PlayerMoveListener extends AbstractListener
                     }
                 }
             }
-            else if (oldChunkFactionName.equals("WarZone") && newChunkFactionName.equals("SafeZone"))
+            else if (oldChunkFactionName.equalsIgnoreCase("WarZone") && newChunkFactionName.equalsIgnoreCase("SafeZone"))
             {
                 if (!super.getPlugin().getPlayerManager().hasAdminMode(player) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
                 {
@@ -162,11 +162,5 @@ public class PlayerMoveListener extends AbstractListener
                 Sponge.getCommandManager().process(player, "f map");
             }
         }).submit(super.getPlugin());
-    }
-
-    @Listener(order = Order.POST)
-    public void onPostPlayerMove(final MoveEntityEvent event, final @Root Player player)
-    {
-        
     }
 }
