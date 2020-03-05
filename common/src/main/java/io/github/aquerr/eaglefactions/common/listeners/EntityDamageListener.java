@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
@@ -46,6 +47,7 @@ public class EntityDamageListener extends AbstractListener
     private final ProtectionConfig protectionConfig;
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
+    private final ProtectionManager protectionManager;
 
     public EntityDamageListener(final EagleFactions plugin)
     {
@@ -54,6 +56,7 @@ public class EntityDamageListener extends AbstractListener
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.powerConfig = plugin.getConfiguration().getPowerConfig();
+        this.protectionManager = plugin.getProtectionManager();
     }
 
     //Method used for handling damaging entities like ArmorStands and Item Frames.
@@ -213,108 +216,42 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean shouldBlockDamageFromPlayer(final Player attackedPlayer, final Player sourcePlayer, boolean willCauseDeath)
     {
-        final World world = attackedPlayer.getWorld();
-
-        if(this.protectionConfig.getSafeZoneWorldNames().contains(attackedPlayer.getWorld().getName()))
+        final boolean canAttack = this.protectionManager.canAttackEntity(attackedPlayer, sourcePlayer, false);
+        if (!canAttack)
             return true;
 
-        //Block all damage an attacked player would get if location is a SafeZone.
-        final Optional<Faction> optionalAttackedChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(attackedPlayer.getWorld().getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
-        if(optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().isSafeZone())
-            return true;
-
-        //If player attacked herself/himself
-        if(attackedPlayer.equals(sourcePlayer))
+        if (!willCauseDeath)
             return false;
 
-        //Block all damage a player could deal if location is SafeZone.
-        final Optional<Faction> optionalSourceChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), sourcePlayer.getLocation().getChunkPosition());
-        if(optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().isSafeZone())
-            return true;
+        final Optional<Faction> attackedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(attackedPlayer.getUniqueId());
+        final Optional<Faction> sourcePlayerFFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
 
-        //Check if source player is not in a faction.
-        final Optional<Faction> optionalSourcePlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
-        if(!optionalSourcePlayerFaction.isPresent())
+        if (attackedPlayerFaction.isPresent() && sourcePlayerFFaction.isPresent())
         {
-            if(willCauseDeath)
-            {
-                sendKillAwardMessageAndIncreasePower(sourcePlayer);
-                return false;
-            }
-
-            return false;
-        }
-
-        final Faction sourcePlayerFaction = optionalSourcePlayerFaction.get();
-
-        final Optional<Faction> optionalAttackedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(attackedPlayer.getUniqueId());
-        //Check if attackedPlayer is not in a faction.
-        if(!optionalAttackedPlayerFaction.isPresent())
-        {
-            if(willCauseDeath)
-            {
-                sendKillAwardMessageAndIncreasePower(sourcePlayer);
-                return false;
-            }
-
-            return false;
-        }
-
-        final Faction attackedPlayerFaction = optionalAttackedPlayerFaction.get();
-
-        if(sourcePlayerFaction.getName().equals(attackedPlayerFaction.getName()))
-        {
-            //If friendlyfire is off then block the damage.
-            if(!this.factionsConfig.isFactionFriendlyFire())
-            {
-                return true;
-            }
-            else
-            {
-                //If friendlyfire is on and damage will kill attackedPlayer then punish the player.
-                if(willCauseDeath)
-                {
-                    sendPenaltyMessageAndDecreasePower(sourcePlayer);
-                    return false;
-                }
-            }
-        }
-        else if(sourcePlayerFaction.getTruces().contains(attackedPlayerFaction.getName()))
-        {
-            if(!this.factionsConfig.isTruceFriendlyFire())
-                return true;
-            if(willCauseDeath)
+            final Faction attackedFaction = attackedPlayerFaction.get();
+            final Faction sourceFaction = sourcePlayerFFaction.get();
+            if (attackedFaction.equals(sourceFaction))
             {
                 sendPenaltyMessageAndDecreasePower(sourcePlayer);
-                return false;
             }
-            return false;
-        }
-        else if(sourcePlayerFaction.getAlliances().contains(attackedPlayerFaction.getName()))
-        {
-            if(!this.factionsConfig.isAllianceFriendlyFire())
+            else if (attackedFaction.isTruce(sourceFaction))
             {
-                return true;
+                sendPenaltyMessageAndDecreasePower(sourcePlayer);
+            }
+            else if (attackedFaction.isAlly(sourceFaction))
+            {
+                sendPenaltyMessageAndDecreasePower(sourcePlayer);
             }
             else
             {
-                if(willCauseDeath)
-                {
-                    sendPenaltyMessageAndDecreasePower(sourcePlayer);
-                    return false;
-                }
-                return false;
-            }
-        }
-        else //Different factions
-        {
-            if(willCauseDeath)
-            {
                 sendKillAwardMessageAndIncreasePower(sourcePlayer);
-                return false;
             }
-            return false;
         }
+        else
+        {
+            sendKillAwardMessageAndIncreasePower(sourcePlayer);
+        }
+
         return false;
     }
 
@@ -414,11 +351,7 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean isInOwnTerritory(final Player player)
     {
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        if (!optionalPlayerFaction.isPresent())
-            return false;
-
         final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-        return optionalFaction.map(faction -> faction.getName().equals(optionalPlayerFaction.get().getName())).orElse(false);
+        return optionalFaction.filter(x-> x.getPlayerMemberType(player.getUniqueId()) != null).isPresent();
     }
 }
