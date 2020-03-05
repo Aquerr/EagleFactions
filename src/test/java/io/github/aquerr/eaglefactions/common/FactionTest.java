@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.managers.PermsManagerImpl;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +44,6 @@ public class FactionTest
 	@Test
 	void builderShouldSetDefaultFlagsIfNotSpecified()
 	{
-		Assertions.assertEquals(PermsManagerImpl.getDefaultFactionPerms(), faction.getPerms());
+		Assertions.assertEquals(PermsManager.getDefaultFactionPerms(), faction.getPerms());
 	}
 }

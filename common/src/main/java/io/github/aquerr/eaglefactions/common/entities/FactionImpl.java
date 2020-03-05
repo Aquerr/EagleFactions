@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.api.managers.PermsManagerImpl;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.text.Text;
 
@@ -19,7 +19,6 @@ public class FactionImpl implements Faction
     private final Text tag;
     private final String description;
     private final String messageOfTheDay;
-    //public BigDecimal Power;
     private final Set<UUID> recruits;
     private final Set<UUID> members;
     private final Set<String> truces;
@@ -235,6 +234,12 @@ public class FactionImpl implements Faction
         return new BuilderImpl(name, tag, leader);
     }
 
+    @Override
+    public int compareTo(final Faction object)
+    {
+        return this.name.compareTo(object.getName());
+    }
+
     //Builder
     public static final class BuilderImpl implements Faction.Builder
     {
@@ -385,22 +390,14 @@ public class FactionImpl implements Faction
         public Faction build()
         {
             if(this.name == null || this.tag == null || this.leader == null)
-            {
-                throw new IllegalStateException("Couldn't build FACTION object! FACTION must have a name, a tag and a leader.");
-            }
+                throw new IllegalStateException("Couldn't build Faction object! Faction must have a name, a tag and a leader!");
 
             if(this.lastOnline == null)
-            {
                 this.lastOnline = Instant.now();
-            }
             if(this.perms == null)
-            {
-                this.perms = PermsManagerImpl.getDefaultFactionPerms();
-            }
+                this.perms = PermsManager.getDefaultFactionPerms();
             if(this.chest == null)
-            {
                 this.chest = new FactionChestImpl(this.name);
-            }
 
             return new FactionImpl(this);
         }
