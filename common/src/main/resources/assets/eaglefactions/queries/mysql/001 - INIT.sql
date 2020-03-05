@@ -85,8 +85,8 @@ CREATE TABLE `FactionOfficers` (
 -- );
 -- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
 
--- Create LeaderFlags Table
-CREATE TABLE `LeaderFlags` (
+-- Create LeaderPerms Table
+CREATE TABLE `LeaderPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -95,15 +95,15 @@ CREATE TABLE `LeaderFlags` (
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_LeaderFlags`
+  CONSTRAINT `Faction_LeaderPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 
--- Create OfficerFlags Table
-CREATE TABLE `OfficerFlags` (
+-- Create OfficerPerms Table
+CREATE TABLE `OfficerPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -112,15 +112,15 @@ CREATE TABLE `OfficerFlags` (
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_OfficerFlags`
+  CONSTRAINT `Faction_OfficerPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 
--- Create MemberFlags Table
-CREATE TABLE `MemberFlags` (
+-- Create MemberPerms Table
+CREATE TABLE `MemberPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -129,15 +129,15 @@ CREATE TABLE `MemberFlags` (
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_MemberFlags`
+  CONSTRAINT `Faction_MemberPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 
--- Create RecruitFlags Table
-CREATE TABLE `RecruitFlags` (
+-- Create RecruitPerms Table
+CREATE TABLE `RecruitPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -146,35 +146,35 @@ CREATE TABLE `RecruitFlags` (
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_RecruitFlags`
+  CONSTRAINT `Faction_RecruitPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 
--- Create AllyFlags Table
-CREATE TABLE `AllyFlags` (
+-- Create AllyPerms Table
+CREATE TABLE `AllyPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
   `Destroy` TINYINT(1) NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_AllyFlags`
+  CONSTRAINT `Faction_AllyPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
 
--- Create TruceFlags Table
-CREATE TABLE `TruceFlags` (
+-- Create TrucePerms Table
+CREATE TABLE `TrucePerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
   `Destroy` TINYINT(1) NOT NULL,
   UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_TruceFlags`
+  CONSTRAINT `Faction_TrucePerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE

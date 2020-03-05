@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.managers;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.api.managers.FlagManager;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +29,7 @@ public class ProtectionManagerTest
 	@Mock
 	private FactionLogic factionLogic;
 	@Mock
-	private FlagManager flagManager;
+	private PermsManager permsManager;
 
 	@InjectMocks
 	private ProtectionManagerImpl protectionManager;

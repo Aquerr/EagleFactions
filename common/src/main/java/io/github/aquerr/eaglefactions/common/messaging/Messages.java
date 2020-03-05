@@ -99,7 +99,7 @@ public class Messages
     public static String FACTION_HAS_BEEN_DISBANDED;
     public static String SOMETHING_WENT_WRONG;
 
-    //Flags
+    //Perms
     public static String SET_TO;
     public static String CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE;
     public static String PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS;

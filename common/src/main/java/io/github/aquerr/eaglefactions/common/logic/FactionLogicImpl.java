@@ -2,13 +2,11 @@ package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Strings;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
@@ -679,12 +677,12 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean flagValue)
+    public void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionPermType factionPermType, Boolean flagValue)
     {
-        final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = new HashMap<>(faction.getFlags());
-        flags.get(factionMemberType).replace(factionFlagTypes, flagValue);
+        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = new HashMap<>(faction.getPerms());
+        perms.get(factionMemberType).replace(factionPermType, flagValue);
 
-        final Faction updatedFaction = faction.toBuilder().setFlags(flags).build();
+        final Faction updatedFaction = faction.toBuilder().setPerms(perms).build();
         storageManager.addOrUpdateFaction(updatedFaction);
     }
 

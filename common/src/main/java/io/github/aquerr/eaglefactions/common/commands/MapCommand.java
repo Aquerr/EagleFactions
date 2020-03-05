@@ -296,7 +296,7 @@ public class MapCommand extends AbstractCommand
             }
 
             final Faction playerFaction = optionalPlayerFaction.get();
-            final boolean hasClaimPermission = super.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction);
+            final boolean hasClaimPermission = super.getPlugin().getPermsManager().canClaim(player.getUniqueId(), playerFaction);
             final boolean isFactionAttacked = EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName());
 
             if(!hasFactionsAdminMode && !hasClaimPermission)

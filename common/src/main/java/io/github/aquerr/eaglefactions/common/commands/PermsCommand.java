@@ -2,9 +2,8 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionFlagTypes;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
@@ -20,9 +19,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FlagsCommand extends AbstractCommand
+public class PermsCommand extends AbstractCommand
 {
-    public FlagsCommand(final EagleFactions plugin)
+    public PermsCommand(final EagleFactions plugin)
     {
         super(plugin);
     }
@@ -43,42 +42,41 @@ public class FlagsCommand extends AbstractCommand
         if(!faction.getLeader().equals(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
 
-        showFlags(player, faction);
+        showPerms(player, faction);
         return CommandResult.success();
     }
 
-    private void showFlags(final Player player, final Faction faction)
+    private void showPerms(final Player player, final Faction faction)
     {
         final Text.Builder textBuilder = Text.builder();
-        for (final Map.Entry<FactionMemberType, Map<FactionFlagTypes, Boolean>> memberEntry : faction.getFlags().entrySet())
+        for (final Map.Entry<FactionMemberType, Map<FactionPermType, Boolean>> memberEntry : faction.getPerms().entrySet())
         {
-            final Map<FactionFlagTypes, Boolean> memberFlags = memberEntry.getValue();
+            final Map<FactionPermType, Boolean> memberPerms = memberEntry.getValue();
             textBuilder.append(Text.of(TextColors.AQUA, memberEntry.getKey().toString() + ": "));
 
-            for (final Map.Entry<FactionFlagTypes, Boolean> flagEntry : memberFlags.entrySet())
+            for (final Map.Entry<FactionPermType, Boolean> permEntry : memberPerms.entrySet())
             {
-                final Text.Builder flagTextBuilder = Text.builder();
+                final Text.Builder permTextBuilder = Text.builder();
 
-                if(flagEntry.getValue())
+                if(permEntry.getValue())
                 {
-                    flagTextBuilder.append(Text.of(TextColors.GREEN, flagEntry.getKey().toString()));
+                    permTextBuilder.append(Text.of(TextColors.GREEN, permEntry.getKey().toString()));
                 }
                 else
                 {
-                    flagTextBuilder.append(Text.of(TextColors.RED, flagEntry.getKey().toString()));
+                    permTextBuilder.append(Text.of(TextColors.RED, permEntry.getKey().toString()));
                 }
 
-                flagTextBuilder.onClick(TextActions.executeCallback(toggleFlag(faction, memberEntry.getKey(), flagEntry.getKey(), !flagEntry.getValue())));
-                flagTextBuilder.onHover(TextActions.showText(Text.of(Messages.SET_TO + " " + String.valueOf(!flagEntry.getValue()).toUpperCase())));
+                permTextBuilder.onClick(TextActions.executeCallback(togglePerm(faction, memberEntry.getKey(), permEntry.getKey(), !permEntry.getValue())));
+                permTextBuilder.onHover(TextActions.showText(Text.of(Messages.SET_TO + " " + String.valueOf(!permEntry.getValue()).toUpperCase())));
 
-                textBuilder.append(flagTextBuilder.build());
+                textBuilder.append(permTextBuilder.build());
                 textBuilder.append(Text.of(" | "));
             }
 
             textBuilder.append(Text.of("\n"));
         }
 
-        //player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, PluginMessages.PERMISSIONS_FLAGS_FOR + " " + faction.NAME + ":"));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE));
         player.sendMessage(Text.of(TextColors.RED, "RED", TextColors.RESET, " = " + Messages.HAS_NOT_PERMISSIONS_FOR));
         player.sendMessage(Text.of(TextColors.GREEN, "GREEN", TextColors.RESET, " = " + Messages.HAS_PERMISSIONS_FOR));
@@ -86,12 +84,12 @@ public class FlagsCommand extends AbstractCommand
         player.sendMessage(textBuilder.build());
     }
 
-    private Consumer<CommandSource> toggleFlag(final Faction faction, final FactionMemberType factionMemberType, final FactionFlagTypes factionFlagTypes, final Boolean flagValue)
+    private Consumer<CommandSource> togglePerm(final Faction faction, final FactionMemberType factionMemberType, final FactionPermType factionPermType, final Boolean flagValue)
     {
         return commandSource ->
         {
-            getPlugin().getFactionLogic().toggleFlag(faction, factionMemberType, factionFlagTypes, flagValue);
-            showFlags((Player)commandSource, faction);
+            getPlugin().getFactionLogic().toggleFlag(faction, factionMemberType, factionPermType, flagValue);
+            showPerms((Player)commandSource, faction);
         };
     }
 }

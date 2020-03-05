@@ -50,7 +50,7 @@ public class InviteCommand extends AbstractCommand
 
         final Faction senderFaction = optionalSenderFaction.get();
 
-        if (!super.getPlugin().getFlagManager().canInvite(senderPlayer.getUniqueId(), senderFaction))
+        if (!super.getPlugin().getPermsManager().canInvite(senderPlayer.getUniqueId(), senderFaction))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION));
 
         if(this.factionsConfig.isPlayerLimit())

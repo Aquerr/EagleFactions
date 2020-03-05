@@ -78,7 +78,7 @@ public class UnclaimCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         final Faction playerFaction = optionalPlayerFaction.get();
-        if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
+        if (!this.getPlugin().getPermsManager().canClaim(player.getUniqueId(), playerFaction))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_UNCLAIM_LANDS));
 
         final World world = player.getWorld();

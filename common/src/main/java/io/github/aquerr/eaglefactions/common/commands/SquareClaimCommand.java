@@ -105,8 +105,8 @@ public class SquareClaimCommand extends AbstractCommand
                 continue;
             }
 
-            //If not admin then check faction flags for player
-            if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
+            //If not admin then check faction perms for player
+            if (!this.getPlugin().getPermsManager().canClaim(player.getUniqueId(), playerFaction))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
 
             //Check if faction has enough power to claim territory

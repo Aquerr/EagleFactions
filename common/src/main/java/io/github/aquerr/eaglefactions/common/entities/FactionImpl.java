@@ -2,7 +2,7 @@ package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
+import io.github.aquerr.eaglefactions.api.managers.PermsManagerImpl;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.text.Text;
 
@@ -31,7 +31,7 @@ public class FactionImpl implements Faction
     private final FactionHome home;
     private final Instant lastOnline;
     private final boolean isPublic;
-    private final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+    private final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
 
     private FactionChest chest;
 
@@ -51,7 +51,7 @@ public class FactionImpl implements Faction
         this.enemies = builder.enemies;
         this.home = builder.home;
         this.lastOnline = builder.lastOnline;
-        this.flags = builder.flags;
+        this.perms = builder.perms;
         this.chest = builder.chest;
         this.isPublic = builder.isPublic;
     }
@@ -141,9 +141,9 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFlags()
+    public Map<FactionMemberType, Map<FactionPermType, Boolean>> getPerms()
     {
-        return Collections.unmodifiableMap(flags);
+        return Collections.unmodifiableMap(perms);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class FactionImpl implements Faction
         factionBuilder.setClaims(this.claims);
         factionBuilder.setLastOnline(this.lastOnline);
         factionBuilder.setHome(this.home);
-        factionBuilder.setFlags(this.flags);
+        factionBuilder.setPerms(this.perms);
         factionBuilder.setChest(this.chest);
         factionBuilder.setIsPublic(this.isPublic);
 
@@ -252,7 +252,7 @@ public class FactionImpl implements Faction
         private Set<Claim> claims;
         private FactionHome home;
         private Instant lastOnline;
-        private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+        private Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
         private FactionChest chest;
         private boolean isPublic;
 
@@ -364,9 +364,9 @@ public class FactionImpl implements Faction
             return this;
         }
 
-        public Builder setFlags(final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+        public Builder setPerms(final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms)
         {
-            this.flags = flags;
+            this.perms = perms;
             return this;
         }
 
@@ -393,9 +393,9 @@ public class FactionImpl implements Faction
             {
                 this.lastOnline = Instant.now();
             }
-            if(this.flags == null)
+            if(this.perms == null)
             {
-                this.flags = FlagManagerImpl.getDefaultFactionFlags();
+                this.perms = PermsManagerImpl.getDefaultFactionPerms();
             }
             if(this.chest == null)
             {

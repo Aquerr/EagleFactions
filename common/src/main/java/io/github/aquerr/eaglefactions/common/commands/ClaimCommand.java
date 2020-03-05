@@ -104,8 +104,8 @@ public class ClaimCommand extends AbstractCommand
         if(!isClaimableWorld)
             throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD)));
 
-        //If not admin then check faction flags for player
-        if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), faction))
+        //If not admin then check faction perms for player
+        if (!this.getPlugin().getPermsManager().canClaim(player.getUniqueId(), faction))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
 
         //Check if faction has enough power to claim territory

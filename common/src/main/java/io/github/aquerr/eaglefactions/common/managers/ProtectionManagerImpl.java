@@ -1,13 +1,12 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.api.managers.FlagManager;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -34,17 +33,17 @@ import java.util.regex.PatternSyntaxException;
 public class ProtectionManagerImpl implements ProtectionManager
 {
     private final FactionLogic factionLogic;
-    private final FlagManager flagManager;
+    private final PermsManager permsManager;
     private final PlayerManager playerManager;
     private final ProtectionConfig protectionConfig;
     private final ChatConfig chatConfig;
 
-    public ProtectionManagerImpl(final FactionLogic factionLogic, final FlagManager flagManager, final PlayerManager playerManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig)
+    public ProtectionManagerImpl(final FactionLogic factionLogic, final PermsManager permsManager, final PlayerManager playerManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig)
     {
         this.protectionConfig = protectionConfig;
         this.chatConfig = chatConfig;
         this.factionLogic = factionLogic;
-        this.flagManager = flagManager;
+        this.permsManager = permsManager;
         this.playerManager = playerManager;
     }
 
@@ -137,7 +136,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final Faction playerFaction = optionalPlayerFaction.get();
-        if (this.flagManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
+        if (this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
             return true;
         else
         {
@@ -219,7 +218,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         Faction playerFaction = optionalPlayerFaction.get();
-        if (this.flagManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
+        if (this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
             return true;
         else
         {
@@ -289,7 +288,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
             if(optionalPlayerFaction.isPresent())
             {
-                if (!this.flagManager.canBreakBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                if (!this.permsManager.canBreakBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
                     if(shouldNotify)
                         notifyPlayer(user);
@@ -402,7 +401,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
             if(optionalPlayerFaction.isPresent())
             {
-                if (!this.flagManager.canPlaceBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
+                if (!this.permsManager.canPlaceBlock(user.getUniqueId(), optionalPlayerFaction.get(), optionalChunkFaction.get()))
                 {
                     if(shouldNotify)
                         notifyPlayer(user);
@@ -502,7 +501,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             final Faction playerFaction = optionalPlayerFaction.get();
             if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
             {
-                if (!this.flagManager.canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction))
+                if (!this.permsManager.canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction))
                 {
                     if(shouldNotify)
                         notifyPlayer(user);

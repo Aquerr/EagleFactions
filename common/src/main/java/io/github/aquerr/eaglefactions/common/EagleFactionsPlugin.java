@@ -10,7 +10,7 @@ import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
+import io.github.aquerr.eaglefactions.api.managers.PermsManagerImpl;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -84,7 +84,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private Configuration configuration;
     private PVPLogger pvpLogger;
     private PlayerManagerImpl playerManager;
-    private FlagManagerImpl flagManager;
+    private PermsManagerImpl flagManager;
     private ProtectionManager protectionManager;
     private PowerManagerImpl powerManager;
     private AttackLogic attackLogic;
@@ -483,11 +483,11 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new SetLeaderCommand(this))
                 .build());
 
-        //Flags Command
-        SUBCOMMANDS.put(Collections.singletonList("flags"), CommandSpec.builder()
-                .description(Text.of("Set flags/privileges for members in faction."))
-                .permission(PluginPermissions.FLAGS_COMMAND)
-                .executor(new FlagsCommand(this))
+        //Perms Command
+        SUBCOMMANDS.put(Collections.singletonList("perms"), CommandSpec.builder()
+                .description(Text.of("Set perms for members in faction."))
+                .permission(PluginPermissions.PERMS_COMMAND)
+                .executor(new PermsCommand(this))
                 .build());
 
         //TagColor Command
@@ -604,7 +604,7 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.pvpLogger;
     }
 
-    public FlagManagerImpl getFlagManager()
+    public PermsManagerImpl getPermsManager()
     {
         return flagManager;
     }
@@ -666,7 +666,7 @@ public class EagleFactionsPlugin implements EagleFactions
         storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
         powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig(), this.configDir);
-        flagManager = new FlagManagerImpl(this.playerManager);
+        flagManager = new PermsManagerImpl(this.playerManager);
         factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
         attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
         protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig());
