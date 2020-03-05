@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -84,7 +85,7 @@ public class AllyCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + Messages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
 
 		if(playerFaction.getTruces().contains(selectedFaction.getName()))
-			throw new CommandException(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.DISBAND_TRUCE_FIRST_TO_INVITE_FACTION_TO_THE_ALLIANCE));
+			throw new CommandException(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.DISBAND_TRUCE_FIRST_TO_INVITE_FACTION_TO_THE_ALLIANCE));
 
         if(playerFaction.getAlliances().contains(selectedFaction.getName()))
         {
@@ -145,7 +146,7 @@ public class AllyCommand extends AbstractCommand
 				.onClick(TextActions.runCommand("/f ally " + senderFaction.getName()))
 				.onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f ally " + senderFaction.getName()))).build();
 
-		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE,
+		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
                 "\n", Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
                 "\n", clickHereText, Messages.TO_ACCEPT_INVITATION_OR_TYPE, " ", TextColors.GOLD, "/f ally ", senderFaction.getName());
 	}

@@ -493,10 +493,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                     .getFactionByPlayerUUID(attackedPlayer.getUniqueId());
             if (isSafeZoneWorld)
                 return false;
-            if (!optionalChunkFaction.isPresent())
-                return true;
-            final Faction chunkFaction = optionalChunkFaction.get();
-            if (chunkFaction.isSafeZone())
+            if (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                 return false;
             if (attackedEntity.equals(player))
                 return true;
@@ -510,9 +507,9 @@ public class ProtectionManagerImpl implements ProtectionManager
             final Faction attackerFaction = optionalAttackerPlayerFaction.get();
             if (!attackerFaction.getName().equals(attackedFaction.getName()))
             {
-                if (!this.factionsConfig.isAllianceFriendlyFire() && attackerFaction.isAlly(attackedFaction))
+                if (attackerFaction.isAlly(attackedFaction) && !this.factionsConfig.isAllianceFriendlyFire())
                     return false;
-                else if (!this.factionsConfig.isTruceFriendlyFire() && attackerFaction.isTruce(attackedFaction))
+                else if (attackerFaction.isTruce(attackedFaction) && !this.factionsConfig.isTruceFriendlyFire())
                     return false;
             }
             else

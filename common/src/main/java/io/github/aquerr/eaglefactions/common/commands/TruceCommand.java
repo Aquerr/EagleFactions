@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -144,7 +145,7 @@ public class TruceCommand extends AbstractCommand
 				.onClick(TextActions.runCommand("/f truce " + senderFaction.getName()))
 				.onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f truce " + senderFaction.getName()))).build();
 
-		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_TRUCE,
+		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_TRUCE, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
 				"\n", Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
 				"\n", clickHereText, Messages.TO_ACCEPT_INVITATION_OR_TYPE, " ", TextColors.GOLD, "/f truce ", senderFaction.getName());
 	}
