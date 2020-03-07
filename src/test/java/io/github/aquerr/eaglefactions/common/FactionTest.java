@@ -11,6 +11,8 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class FactionTest
 {
 	private Faction faction;
@@ -45,5 +47,32 @@ public class FactionTest
 	void builderShouldSetDefaultFlagsIfNotSpecified()
 	{
 		Assertions.assertEquals(PermsManager.getDefaultFactionPerms(), faction.getPerms());
+	}
+
+	@Test
+	void buildingAFactionWithoutNameShouldThrowException()
+	{
+		//given
+		//when
+		//then
+		assertThrows(IllegalStateException.class, () -> faction.toBuilder().setName(null).build());
+	}
+
+	@Test
+	void buildingAFactionWithoutTagShouldThrowException()
+	{
+		//given
+		//when
+		//then
+		assertThrows(IllegalStateException.class, () -> faction.toBuilder().setTag(null).build());
+	}
+
+	@Test
+	void buildingAFactionWithoutLeaderShouldThrowException()
+	{
+		//given
+		//when
+		//then
+		assertThrows(IllegalStateException.class, () -> faction.toBuilder().setLeader(null).build());
 	}
 }
