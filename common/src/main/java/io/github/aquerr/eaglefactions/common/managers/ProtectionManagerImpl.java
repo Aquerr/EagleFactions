@@ -57,7 +57,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canInteractWithBlock(final Location<World> location, final User user, final boolean shouldNotify)
     {
         final boolean canInteract = canInteractWithBlock(location, user);
-        if (shouldNotify && canInteract)
+        if (shouldNotify && !canInteract)
             notifyPlayer(user);
         return canInteract;
     }
@@ -160,7 +160,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canUseItem(final Location<World> location, final User user, final ItemStackSnapshot usedItem, final boolean shouldNotify)
     {
         final boolean canUseItem = canUseItem(location, user, usedItem);
-        if (shouldNotify && canUseItem)
+        if (shouldNotify && !canUseItem)
             notifyPlayer(user);
         return canUseItem;
     }
@@ -222,7 +222,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canBreak(final Location<World> location, final User user, final boolean shouldNotify)
     {
         final boolean canBreak = canBreak(location, user);
-        if (shouldNotify && canBreak)
+        if (shouldNotify && !canBreak)
             notifyPlayer(user);
         return canBreak;
     }
@@ -308,7 +308,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canPlace(final Location<World> location, final User user, final boolean shouldNotify)
     {
         final boolean canPlace = canPlace(location, user);
-        if (shouldNotify && canPlace)
+        if (shouldNotify && !canPlace)
             notifyPlayer(user);
         return canPlace;
     }
@@ -368,7 +368,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canExplode(final Location<World> location, final User user, final boolean shouldNotify)
     {
         final boolean canExplode = canExplode(location, user);
-        if (shouldNotify && canExplode)
+        if (shouldNotify && !canExplode)
             notifyPlayer(user);
         return canExplode;
     }
@@ -464,7 +464,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canAttackEntity(final Entity attackedEntity, final Player player, final boolean shouldNotify)
     {
         final boolean canAttack = canAttackEntity(attackedEntity, player);
-        if (shouldNotify && canAttack)
+        if (shouldNotify && !canAttack)
             notifyPlayer(player);
         return canAttack;
     }
