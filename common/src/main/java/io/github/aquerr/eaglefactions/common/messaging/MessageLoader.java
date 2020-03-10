@@ -94,19 +94,7 @@ public class MessageLoader
             });
         }
 
-        final ConfigParseOptions configParseOptions = ConfigParseOptions.defaults()
-                .setSyntax(ConfigSyntax.CONF);
-        final ConfigRenderOptions configRenderOptions = ConfigRenderOptions.defaults()
-                .setJson(false)
-                .setComments(true)
-                .setOriginComments(false);
-        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader
-                .builder()
-                .setParseOptions(configParseOptions)
-                .setRenderOptions(configRenderOptions)
-//                .setHeaderMode(HeaderMode.PRESERVE)
-                .setPath(messagesFilePath)
-                .build();
+        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(messagesFilePath).build();
         ConfigurationNode configNode;
 
         try

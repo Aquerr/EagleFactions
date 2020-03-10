@@ -64,29 +64,8 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
 
-        final ConfigParseOptions configParseOptions = ConfigParseOptions.defaults()
-                .setSyntax(ConfigSyntax.CONF);
-        final ConfigRenderOptions configRenderOptions = ConfigRenderOptions.defaults()
-                .setJson(false)
-                .setComments(true)
-                .setOriginComments(false);
-//        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader
-//                .builder()
-//                .setParseOptions(configParseOptions)
-//                .setRenderOptions(configRenderOptions)
-//                .setHeaderMode(HeaderMode.PRESERVE)
-//                .setPath(messagesFilePath)
-//                .build();
-//        ConfigurationNode configNode;
-
-        this.configLoader = HoconConfigurationLoader.builder()
-                .setParseOptions(configParseOptions)
-                .setRenderOptions(configRenderOptions)
-                .setPath(this.configPath)
-                .build();
-
+        this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
         loadConfiguration();
-//        save();
 
         this.storageConfig = new StorageConfigImpl(this);
         this.chatConfig = new ChatConfigImpl(this);
@@ -96,7 +75,6 @@ public class ConfigurationImpl implements Configuration
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
         reloadConfiguration();
-//        save();
     }
 
     @Override
