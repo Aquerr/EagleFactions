@@ -18,10 +18,6 @@ public class Messages
     public static String ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND;
     public static String YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS;
     public static String FACTION_HAS_BEEN_ADDED_TO_THE_ENEMIES;
-    public static String THIS_FACTION_IS_YOUR_ALLY;
-    public static String DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR;
-
-    public static String FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE;
     public static String ENEMIES;
 
     public static String FACTION;
@@ -103,7 +99,7 @@ public class Messages
     public static String FACTION_HAS_BEEN_DISBANDED;
     public static String SOMETHING_WENT_WRONG;
 
-    //Flags
+    //Perms
     public static String SET_TO;
     public static String CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE;
     public static String PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS;
@@ -138,6 +134,7 @@ public class Messages
     public static String DESCRIPTION;
     public static String MOTD;
     public static String OFFICERS;
+    public static String TRUCES;
     public static String ALLIANCES;
     public static String MEMBERS;
     public static String RECRUITS;
@@ -210,7 +207,20 @@ public class Messages
     //Rename
     public static String SUCCESSFULLY_RENAMED_FACTION_TO_FACTION_NAME;
 
+    //Truce
+    public static String FACTION_HAS_BEEN_ADDED_TO_THE_TRUCE;
+    public static String YOU_DISBANDED_YOUR_TRUCE_WITH_FACTION;
+    public static String DISBAND_TRUCE_FIRST_TO_INVITE_FACTION_TO_THE_ALLIANCE;
+    public static String YOU_HAVE_ALREADY_INVITED_THIS_FACTION_TO_THE_TRUCE;
+    public static String YOU_CANNOT_INVITE_YOURSELF_TO_THE_TRUCE;
+    public static String YOU_HAVE_INVITED_FACTION_TO_THE_TRUCE;
+    public static String FACTION_ACCEPTED_YOUR_INVITE_TO_THE_TRUCE;
+    public static String FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_TRUCE;
+    public static String DISBAND_TRUCE_FIRST_TO_DECLARE_A_WAR;
+    public static String THIS_FACTION_IS_IN_TRUCE_WITH_YOU;
+
     //Ally
+    public static String FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE;
     public static String YOU_DISBANDED_YOUR_ALLIANCE_WITH_FACTION;
     public static String FACTION_ACCEPTED_YOUR_INVITE_TO_THE_ALLIANCE;
     public static String YOU_HAVE_ACCEPTED_AN_INVITATION_FROM_FACTION;
@@ -218,6 +228,9 @@ public class Messages
     public static String YOU_CANNOT_INVITE_YOURSELF_TO_THE_ALLIANCE;
     public static String YOU_HAVE_INVITED_FACTION_TO_THE_ALLIANCE;
     public static String FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE;
+    public static String DISBAND_ALLIANCE_FIRST_TO_DECLARE_A_WAR;
+    public static String DISBAND_ALLIANCE_FIRST_TO_INVITE_FACTION_TO_THE_TRUCE;
+    public static String THIS_FACTION_IS_YOUR_ALLY;
 
     //Enemy
     public static String YOU_REMOVED_WAR_STATE_WITH_FACTION;

@@ -65,9 +65,9 @@ public class DynmapUtils {
 
         int areaColor = dynmapConfig.getDynmapFactionColor();
 
-        if (faction.getName().equals("SafeZone")) {
+        if (faction.isSafeZone()) {
             areaColor = dynmapConfig.getDynmapSafezoneColor();
-        } else if (faction.getName().equals("WarZone")) {
+        } else if (faction.isWarZone()) {
             areaColor = dynmapConfig.getDynmapWarzoneColor();
         }
 

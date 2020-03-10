@@ -229,10 +229,8 @@ public class EFPlaceholderService
 
     private Set<String> getFactionTruce(final User player)
     {
-        //TODO
-//        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-//        return optionalFaction.map(Faction::getTruce).orElse(new HashSet<>());
-        return new HashSet<>();
+        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalFaction.map(Faction::getTruces).orElse(new HashSet<>());
     }
 
     //

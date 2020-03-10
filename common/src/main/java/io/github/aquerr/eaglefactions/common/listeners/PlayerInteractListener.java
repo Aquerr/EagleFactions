@@ -41,7 +41,10 @@ public class PlayerInteractListener extends AbstractListener
         boolean hasHitEntity = event.getContext().containsKey(EventContextKeys.ENTITY_HIT);
         if(hasHitEntity)
         {
-            Entity hitEntity = event.getContext().get(EventContextKeys.ENTITY_HIT).get();
+            final Entity hitEntity = event.getContext().get(EventContextKeys.ENTITY_HIT).get();
+            if (hitEntity instanceof Living && !(hitEntity instanceof ArmorStand))
+                return;
+
             location = hitEntity.getLocation();
         }
 

@@ -30,7 +30,7 @@ public class MaxPowerCommand extends AbstractCommand
         if (source instanceof Player)
         {
             final Player player = (Player) source;
-            if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
             setMaxPower(source, selectedPlayer, (float) power);
         }

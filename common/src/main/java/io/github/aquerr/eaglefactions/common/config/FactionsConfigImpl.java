@@ -25,8 +25,10 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean isPlayerLimit = false;
 	private int playerLimit = 15;
 	private int attackTime = 10;
+	private float percentageDamageReductionInOwnTerritory = 10.0f;
 
 	private boolean isFactionFriendlyFire = false;
+	private boolean isTruceFriendlyFire = true;
 	private boolean isAllianceFriendlyFire = false;
 
 	private int homeDelay = 5;
@@ -73,8 +75,10 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.isPlayerLimit = this.configuration.getBoolean(false, "player-limit", "toggled");
 		this.playerLimit = this.configuration.getInt(15, "player-limit", "limit");
 		this.attackTime = this.configuration.getInt(10, "attack-time");
+		this.percentageDamageReductionInOwnTerritory = this.configuration.getFloat(10.0f, "percentage-damage-reduction-in-own-territory");
 
 		this.isFactionFriendlyFire = this.configuration.getBoolean(false, "friendlyfire-faction");
+		this.isTruceFriendlyFire = this.configuration.getBoolean(true, "friendlyfire-truce");
 		this.isAllianceFriendlyFire = this.configuration.getBoolean(false, "friendlyfire-alliance");
 
 		this.homeDelay = this.configuration.getInt(5, "home-delay");
@@ -155,9 +159,21 @@ public class FactionsConfigImpl implements FactionsConfig
 	}
 
 	@Override
+	public float getPercentageDamageReductionInOwnTerritory()
+	{
+		return this.percentageDamageReductionInOwnTerritory;
+	}
+
+	@Override
 	public boolean isFactionFriendlyFire()
 	{
 		return this.isFactionFriendlyFire;
+	}
+
+	@Override
+	public boolean isTruceFriendlyFire()
+	{
+		return this.isTruceFriendlyFire;
 	}
 
 	@Override

@@ -178,7 +178,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     final Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
-                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone"))
+                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                     {
                         event.setCancelled(true);
                         return;
@@ -480,7 +480,7 @@ public class BlockBreakListener extends AbstractListener
                     }
 
                     final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(entity.getWorld().getUniqueId(), entity.getLocation().getChunkPosition());
-                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equals("SafeZone"))
+                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                     {
                         sourceEntity.remove();
                         event.setCancelled(true);
@@ -522,8 +522,9 @@ public class BlockBreakListener extends AbstractListener
                                 //We got shooter player
                                 //Check friendly fire
                                 final boolean isFactionFriendlyFireOn = factionsConfig.isFactionFriendlyFire();
+                                final boolean isTruceFriendlyFireOn = factionsConfig.isTruceFriendlyFire();
                                 final boolean isAllianceFriendlyFireOn = factionsConfig.isAllianceFriendlyFire();
-                                if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn)
+                                if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn && isTruceFriendlyFireOn)
                                     continue;
 
                                 final Optional<Faction> optionalAffectedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
@@ -537,6 +538,16 @@ public class BlockBreakListener extends AbstractListener
                                     if(!isFactionFriendlyFireOn)
                                     {
                                         if(affectedPlayerFaction.getName().equals(shooterPlayerFaction.getName()))
+                                        {
+                                            sourceEntity.remove();
+                                            event.setCancelled(true);
+                                            return;
+                                        }
+                                    }
+
+                                    if(!isTruceFriendlyFireOn)
+                                    {
+                                        if(affectedPlayerFaction.getTruces().contains(shooterPlayerFaction.getName()))
                                         {
                                             sourceEntity.remove();
                                             event.setCancelled(true);

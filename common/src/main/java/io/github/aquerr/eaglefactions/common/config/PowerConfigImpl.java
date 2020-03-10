@@ -13,7 +13,7 @@ public class PowerConfigImpl implements PowerConfig
 	private float powerDecrement = 2.00f;
 	private float killAward = 2.00f;
 	private float penalty = 1.0f;
-	private float neededPowerPercentageToAttack = 20.0f;
+	private float neededPowerPercentageToAttack = 0.20f;
 
 	public PowerConfigImpl(final Configuration configuration)
 	{
@@ -29,7 +29,7 @@ public class PowerConfigImpl implements PowerConfig
 		this.powerDecrement = configuration.getFloat(2.0f, "power", "decrement");
 		this.killAward = configuration.getFloat(2.0f, "power", "kill-award");
 		this.penalty = configuration.getFloat(1.0f, "power", "penalty");
-		this.neededPowerPercentageToAttack = configuration.getFloat(20, "attack-min-power-percentage") / 100;
+		this.neededPowerPercentageToAttack = configuration.getFloat(20.0f, "attack-min-power-percentage") / 100;
 	}
 
 	@Override

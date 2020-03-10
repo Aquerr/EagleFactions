@@ -75,9 +75,9 @@ public class PlayerMoveListener extends AbstractListener
                 return;
             }
 
-            if (!newChunkFactionName.equals("SafeZone") && !newChunkFactionName.equals("WarZone") && !newChunkFactionName.equals("Wilderness"))
+            if (!newChunkFactionName.equalsIgnoreCase("SafeZone") && !newChunkFactionName.equalsIgnoreCase("WarZone") && !newChunkFactionName.equalsIgnoreCase("Wilderness"))
             {
-                if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+                if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 {
                     if (!getPlugin().getFactionLogic().hasOnlinePlayers(optionalNewChunkFaction.get()) && this.factionsConfig.getBlockEnteringFactions())
                     {
@@ -88,9 +88,9 @@ public class PlayerMoveListener extends AbstractListener
                     }
                 }
             }
-            else if (oldChunkFactionName.equals("WarZone") && newChunkFactionName.equals("SafeZone"))
+            else if (oldChunkFactionName.equalsIgnoreCase("WarZone") && newChunkFactionName.equalsIgnoreCase("SafeZone"))
             {
-                if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
+                if (!super.getPlugin().getPlayerManager().hasAdminMode(player) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
                 {
                     if (super.getPlugin().getPlayerManager().lastDeathAtWarZone(player.getUniqueId()))
                     {
@@ -162,11 +162,5 @@ public class PlayerMoveListener extends AbstractListener
                 Sponge.getCommandManager().process(player, "f map");
             }
         }).submit(super.getPlugin());
-    }
-
-    @Listener(order = Order.POST)
-    public void onPostPlayerMove(final MoveEntityEvent event, final @Root Player player)
-    {
-        
     }
 }

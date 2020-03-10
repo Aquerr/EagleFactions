@@ -1,6 +1,10 @@
 package io.github.aquerr.eaglefactions.common.messaging;
 
 import com.google.inject.Singleton;
+import com.typesafe.config.ConfigIncluder;
+import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.ConfigRenderOptions;
+import com.typesafe.config.ConfigSyntax;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -10,6 +14,7 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.loader.HeaderMode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.entity.living.player.User;
@@ -32,8 +37,6 @@ public class MessageLoader
     private final FactionsConfig factionsConfig;
 
     private static MessageLoader instance = null;
-
-    private Locale locale = Locale.getDefault();
 
     public static MessageLoader getInstance(EagleFactions plugin)
     {

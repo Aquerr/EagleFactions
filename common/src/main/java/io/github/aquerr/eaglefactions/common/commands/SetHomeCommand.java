@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
@@ -42,11 +43,11 @@ public class SetHomeCommand extends AbstractCommand
 
         final Faction playerFaction = optionalPlayerFaction.get();
         final World world = player.getWorld();
-        final Vector3i newHome = new Vector3i(player.getLocation().getBlockPosition());
+        final FactionHome newHome = new FactionHome(world.getUniqueId(), new Vector3i(player.getLocation().getBlockPosition()));
 
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
-            super.getPlugin().getFactionLogic().setHome(playerFaction, world.getUniqueId(), newHome);
+            super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HOME_HAS_BEEN_SET));
             return CommandResult.success();
         }
@@ -56,7 +57,7 @@ public class SetHomeCommand extends AbstractCommand
             final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
             if (!chunkFaction.isPresent() && this.factionsConfig.canPlaceHomeOutsideFactionClaim())
             {
-                super.getPlugin().getFactionLogic().setHome(playerFaction, world.getUniqueId(), newHome);
+                super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
                 source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HOME_HAS_BEEN_SET));
             }
             else if (!chunkFaction.isPresent() && !this.factionsConfig.canPlaceHomeOutsideFactionClaim())
@@ -65,7 +66,7 @@ public class SetHomeCommand extends AbstractCommand
             }
             else if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
             {
-                super.getPlugin().getFactionLogic().setHome(playerFaction, world.getUniqueId(), newHome);
+                super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
                 source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HOME_HAS_BEEN_SET));
             }
             else

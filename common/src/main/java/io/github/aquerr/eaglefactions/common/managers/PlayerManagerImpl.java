@@ -1,56 +1,45 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Aquerr on 2017-08-04.
  */
 public class PlayerManagerImpl implements PlayerManager
 {
-    private static PlayerManagerImpl INSTANCE = null;
-
-    private final EagleFactions plugin;
-
+    private final StorageManager storageManager;
+    private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
-    private final StorageManagerImpl storageManager;
 
     private UserStorageService userStorageService;
 
-    private PlayerManagerImpl(final EagleFactions plugin)
+    private final Set<UUID> adminModePlayers = new HashSet<>();
+
+    public PlayerManagerImpl(final StorageManager storageManager, final FactionLogic factionLogic, final FactionsConfig factionsConfig, final PowerConfig powerConfig)
     {
-        INSTANCE = this;
-        this.plugin = plugin;
-        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
-        this.powerConfig = plugin.getConfiguration().getPowerConfig();
-        this.storageManager = StorageManagerImpl.getInstance(plugin);
+        this.storageManager = storageManager;
+        this.factionLogic = factionLogic;
+        this.factionsConfig = factionsConfig;
+        this.powerConfig = powerConfig;
 
         Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         optionalUserStorageService.ifPresent(x -> userStorageService = x);
-    }
-
-    public static PlayerManagerImpl getInstance(final EagleFactions eagleFactions)
-    {
-        if (INSTANCE == null)
-            return new PlayerManagerImpl(eagleFactions);
-        else return INSTANCE;
     }
 
     @Override
@@ -101,7 +90,7 @@ public class PlayerManagerImpl implements PlayerManager
     {
         String factionName = "";
         FactionMemberType factionMemberType = null;
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
+        final Optional<Faction> optionalFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if (optionalFaction.isPresent())
         {
             factionName = optionalFaction.get().getName();
@@ -122,9 +111,7 @@ public class PlayerManagerImpl implements PlayerManager
     public Optional<Player> getPlayer(final UUID playerUUID)
     {
         final Optional<User> oUser = getUser(playerUUID);
-        if(!oUser.isPresent())
-            return Optional.empty();
-        return oUser.get().getPlayer();
+        return oUser.flatMap(User::getPlayer);
     }
 
     @Override
@@ -221,5 +208,26 @@ public class PlayerManagerImpl implements PlayerManager
     {
         final Optional<User> oUser = userStorageService.get(playerUUID);
         return oUser;
+    }
+
+    @Override
+    public boolean hasAdminMode(final User player) {
+        return this.adminModePlayers.contains(player.getUniqueId());
+    }
+
+    @Override
+    public boolean activateAdminMode(final User player) {
+        return this.adminModePlayers.add(player.getUniqueId());
+    }
+
+    @Override
+    public boolean deactivateAdminMode(final User player) {
+        return this.adminModePlayers.remove(player.getUniqueId());
+    }
+
+    @Override
+    public Set<UUID> getAdminModePlayers()
+    {
+        return Collections.unmodifiableSet(this.adminModePlayers);
     }
 }

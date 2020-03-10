@@ -12,6 +12,7 @@ CREATE TABLE Factions (
    Leader      VARCHAR(36)                     NOT NULL,
    Home        VARCHAR(200)                    NULL,
    LastOnline  VARCHAR(200)                    NOT NULL,
+   Truces      VARCHAR                      NOT NULL,
    Alliances    VARCHAR                     NOT NULL,
    Enemies      VARCHAR                     NOT NULL,
    PRIMARY KEY (Name)
@@ -65,8 +66,8 @@ CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
 --);
 --CREATE UNIQUE INDEX ON FactionTruces (FactionName);
 
--- Create LeaderFlags Table
-CREATE TABLE LeaderFlags (
+-- Create LeaderPerms Table
+CREATE TABLE LeaderPerms (
    FactionName   VARCHAR(200)     UNIQUE       NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
@@ -76,10 +77,10 @@ CREATE TABLE LeaderFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON LeaderFlags (FactionName);
+CREATE UNIQUE INDEX ON LeaderPerms (FactionName);
 
--- Create OfficerFlags Table
-CREATE TABLE OfficerFlags (
+-- Create OfficerPerms Table
+CREATE TABLE OfficerPerms (
    FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
@@ -89,10 +90,10 @@ CREATE TABLE OfficerFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON OfficerFlags (FactionName);
+CREATE UNIQUE INDEX ON OfficerPerms (FactionName);
 
--- Create MemberFlags Table
-CREATE TABLE MemberFlags (
+-- Create MemberPerms Table
+CREATE TABLE MemberPerms (
    FactionName   VARCHAR(200)      UNIQUE      NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
@@ -102,10 +103,10 @@ CREATE TABLE MemberFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON MemberFlags (FactionName);
+CREATE UNIQUE INDEX ON MemberPerms (FactionName);
 
--- Create RecruitFlags Table
-CREATE TABLE RecruitFlags (
+-- Create RecruitPerms Table
+CREATE TABLE RecruitPerms (
    FactionName   VARCHAR(200)   UNIQUE         NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
@@ -115,17 +116,27 @@ CREATE TABLE RecruitFlags (
    Invite      BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON RecruitFlags (FactionName);
+CREATE UNIQUE INDEX ON RecruitPerms (FactionName);
 
--- Create AllyFlags Table
-CREATE TABLE AllyFlags (
+-- Create AllyPerms Table
+CREATE TABLE AllyPerms (
    FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON AllyFlags (FactionName);
+CREATE UNIQUE INDEX ON AllyPerms (FactionName);
+
+-- Create TrucePerms Table
+CREATE TABLE TrucePerms (
+   FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
+   Use         BOOLEAN                         NOT NULL,
+   Place       BOOLEAN                         NOT NULL,
+   Destroy     BOOLEAN                         NOT NULL,
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX ON TrucePerms (FactionName);
 
 -- Create Claims Table
 CREATE TABLE Claims (

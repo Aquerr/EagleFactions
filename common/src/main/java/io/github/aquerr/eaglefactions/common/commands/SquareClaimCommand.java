@@ -55,7 +55,7 @@ public class SquareClaimCommand extends AbstractCommand
         //Check if it is a claimable world
         if (!this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
         {
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
             }
@@ -92,7 +92,7 @@ public class SquareClaimCommand extends AbstractCommand
                 //throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, PluginMessages.THIS_PLACE_IS_ALREADY_CLAIMED));
 
             //Check if admin mode
-            if (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
                 if (isCancelled)
@@ -105,8 +105,8 @@ public class SquareClaimCommand extends AbstractCommand
                 continue;
             }
 
-            //If not admin then check faction flags for player
-            if (!this.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction))
+            //If not admin then check faction perms for player
+            if (!this.getPlugin().getPermsManager().canClaim(player.getUniqueId(), playerFaction))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
 
             //Check if faction has enough power to claim territory
@@ -120,7 +120,7 @@ public class SquareClaimCommand extends AbstractCommand
             if (EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " " + MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))))));
 
-            if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+            if (playerFaction.isSafeZone() || playerFaction.isWarZone())
             {
                 boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
                 if (isCancelled)

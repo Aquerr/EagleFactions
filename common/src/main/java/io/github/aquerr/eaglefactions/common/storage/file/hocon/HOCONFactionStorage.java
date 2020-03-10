@@ -85,11 +85,12 @@ public class HOCONFactionStorage implements IFactionStorage
             configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getOfficers()));
             configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getMembers()));
             configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getRecruits()));
-            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
+            configNode.getNode("factions", faction.getName(), "truces").setValue(faction.getTruces());
             configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
+            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
             configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(Claim::toString).collect(Collectors.toList()));
             configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
-            configNode.getNode("factions", faction.getName(), "flags").setValue(faction.getFlags());
+            configNode.getNode("factions", faction.getName(), "perms").setValue(faction.getPerms());
             configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
             configNode.getNode("factions", faction.getName(), "isPublic").setValue(faction.isPublic());
 
@@ -157,7 +158,7 @@ public class HOCONFactionStorage implements IFactionStorage
         final Set<String> enemies = getFactionEnemies(factionName);
         final Set<Claim> claims = getFactionClaims(factionName);
         final Instant lastOnline = getLastOnline(factionName);
-        final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(factionName);
+        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(factionName);
         final FactionChest chest = getFactionChest(factionName);
         final boolean isPublic = getFactionIsPublic(factionName);
 
@@ -172,7 +173,7 @@ public class HOCONFactionStorage implements IFactionStorage
                 .setEnemies(enemies)
                 .setClaims(claims)
                 .setLastOnline(lastOnline)
-                .setFlags(flags)
+                .setPerms(perms)
                 .setChest(chest)
                 .setIsPublic(isPublic)
                 .build();
@@ -209,108 +210,83 @@ public class HOCONFactionStorage implements IFactionStorage
         }
     }
 
-    private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFactionFlags(String factionName)
+    private Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPerms(String factionName)
     {
-        Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
+        Map<FactionMemberType, Map<FactionPermType, Boolean>> flagMap = new LinkedHashMap<>();
+        Map<FactionPermType, Boolean> leaderMap = new LinkedHashMap<>();
+        Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
+        Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
+        Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
+        Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
 
-    //    Object flagnode = configNode.getNode("factions", factionName, "flags");
+        //Get leader perms
+        boolean leaderUSE = configNode.getNode("factions", factionName, "perms", "LEADER", "USE").getBoolean(true);
+        boolean leaderPLACE = configNode.getNode("factions", factionName, "perms", "LEADER", "PLACE").getBoolean(true);
+        boolean leaderDESTROY = configNode.getNode("factions", factionName, "perms", "LEADER", "DESTROY").getBoolean(true);
+        boolean leaderCLAIM = configNode.getNode("factions", factionName, "perms", "LEADER", "CLAIM").getBoolean(true);
+        boolean leaderATTACK = configNode.getNode("factions", factionName, "perms", "LEADER", "ATTACK").getBoolean(true);
+        boolean leaderINVITE = configNode.getNode("factions", factionName, "perms", "LEADER", "INVITE").getBoolean(true);
 
-//        //TODO: Test this code.
-//        if(flagnode instanceof Map)
-//        {
-//            Map<String, Object> flags = new HashMap<>();
-//
-//            for(Map.Entry<String, Object> flagEntry : flags.entrySet())
-//            {
-//                Map<FactionFlagTypes, Boolean> memberTypeMap = new LinkedHashMap<>();
-//                if(flagEntry.getValue() instanceof Map)
-//                {
-//                    Map<String, Boolean> map = (Map<String, Boolean>)flagEntry.getValue();
-//                    for(Map.Entry<String, Boolean> testEntry : map.entrySet())
-//                    {
-//                        map.put(FactionFlagTypes.valueOf(testEntry.getKey()), testEntry.getValue());
-//                    }
-//                }
-//                flagMap.put(FactionMemberType.valueOf(flagEntry.getKey()), memberTypeMap);
-//            }
-//        }
+        //Get officer perms
+        boolean officerUSE = configNode.getNode("factions", factionName, "perms", "OFFICER", "USE").getBoolean(true);
+        boolean officerPLACE = configNode.getNode("factions", factionName, "perms", "OFFICER", "PLACE").getBoolean(true);
+        boolean officerDESTROY = configNode.getNode("factions", factionName, "perms", "OFFICER", "DESTROY").getBoolean(true);
+        boolean officerCLAIM = configNode.getNode("factions", factionName, "perms", "OFFICER", "CLAIM").getBoolean(true);
+        boolean officerATTACK = configNode.getNode("factions", factionName, "perms", "LEADER", "ATTACK").getBoolean(true);
+        boolean officerINVITE = configNode.getNode("factions", factionName, "perms", "OFFICER", "INVITE").getBoolean(true);
 
-        //Use TreeMap instead of LinkedHashMap to sort the map if needed.
+        //Get member perms
+        boolean memberUSE = configNode.getNode("factions", factionName, "perms", "MEMBER", "USE").getBoolean(true);
+        boolean memberPLACE = configNode.getNode("factions", factionName, "perms", "MEMBER", "PLACE").getBoolean(true);
+        boolean memberDESTROY = configNode.getNode("factions", factionName, "perms", "MEMBER", "DESTROY").getBoolean(true);
+        boolean memberCLAIM = configNode.getNode("factions", factionName, "perms", "MEMBER", "CLAIM").getBoolean(false);
+        boolean memberATTACK = configNode.getNode("factions", factionName, "perms", "LEADER", "ATTACK").getBoolean(false);
+        boolean memberINVITE = configNode.getNode("factions", factionName, "perms", "MEMBER", "INVITE").getBoolean(true);
 
-        Map<FactionFlagTypes, Boolean> leaderMap = new LinkedHashMap<>();
-        Map<FactionFlagTypes, Boolean> officerMap = new LinkedHashMap<>();
-        Map<FactionFlagTypes, Boolean> membersMap = new LinkedHashMap<>();
-        Map<FactionFlagTypes, Boolean> recruitMap = new LinkedHashMap<>();
-        Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
+        //Get recruit perms
+        boolean recruitUSE = configNode.getNode("factions", factionName, "perms", "RECRUIT", "USE").getBoolean(true);
+        boolean recruitPLACE = configNode.getNode("factions", factionName, "perms", "RECRUIT", "PLACE").getBoolean(true);
+        boolean recruitDESTROY = configNode.getNode("factions", factionName, "perms", "RECRUIT", "DESTROY").getBoolean(true);
+        boolean recruitCLAIM = configNode.getNode("factions", factionName, "perms", "RECRUIT", "CLAIM").getBoolean(false);
+        boolean recruitATTACK = configNode.getNode("factions", factionName, "perms", "RECRUIT", "ATTACK").getBoolean(false);
+        boolean recruitINVITE = configNode.getNode("factions", factionName, "perms", "RECRUIT", "INVITE").getBoolean(false);
 
-        //Get leader flags
-        boolean leaderUSE = configNode.getNode("factions", factionName, "flags", "LEADER", "USE").getBoolean(true);
-        boolean leaderPLACE = configNode.getNode("factions", factionName, "flags", "LEADER", "PLACE").getBoolean(true);
-        boolean leaderDESTROY = configNode.getNode("factions", factionName, "flags", "LEADER", "DESTROY").getBoolean(true);
-        boolean leaderCLAIM = configNode.getNode("factions", factionName, "flags", "LEADER", "CLAIM").getBoolean(true);
-        boolean leaderATTACK = configNode.getNode("factions", factionName, "flags", "LEADER", "ATTACK").getBoolean(true);
-        boolean leaderINVITE = configNode.getNode("factions", factionName, "flags", "LEADER", "INVITE").getBoolean(true);
+        //Get ally perms
+        boolean allyUSE = configNode.getNode("factions", factionName, "perms", "ALLY", "USE").getBoolean(true);
+        boolean allyPLACE = configNode.getNode("factions", factionName, "perms", "ALLY", "PLACE").getBoolean(false);
+        boolean allyDESTROY = configNode.getNode("factions", factionName, "perms", "ALLY", "DESTROY").getBoolean(false);
 
-        //Get officer flags
-        boolean officerUSE = configNode.getNode("factions", factionName, "flags", "OFFICER", "USE").getBoolean(true);
-        boolean officerPLACE = configNode.getNode("factions", factionName, "flags", "OFFICER", "PLACE").getBoolean(true);
-        boolean officerDESTROY = configNode.getNode("factions", factionName, "flags", "OFFICER", "DESTROY").getBoolean(true);
-        boolean officerCLAIM = configNode.getNode("factions", factionName, "flags", "OFFICER", "CLAIM").getBoolean(true);
-        boolean officerATTACK = configNode.getNode("factions", factionName, "flags", "LEADER", "ATTACK").getBoolean(true);
-        boolean officerINVITE = configNode.getNode("factions", factionName, "flags", "OFFICER", "INVITE").getBoolean(true);
+        leaderMap.put(FactionPermType.USE, leaderUSE);
+        leaderMap.put(FactionPermType.PLACE, leaderPLACE);
+        leaderMap.put(FactionPermType.DESTROY, leaderDESTROY);
+        leaderMap.put(FactionPermType.CLAIM, leaderCLAIM);
+        leaderMap.put(FactionPermType.ATTACK, leaderATTACK);
+        leaderMap.put(FactionPermType.INVITE, leaderINVITE);
 
-        //Get member flags
-        boolean memberUSE = configNode.getNode("factions", factionName, "flags", "MEMBER", "USE").getBoolean(true);
-        boolean memberPLACE = configNode.getNode("factions", factionName, "flags", "MEMBER", "PLACE").getBoolean(true);
-        boolean memberDESTROY = configNode.getNode("factions", factionName, "flags", "MEMBER", "DESTROY").getBoolean(true);
-        boolean memberCLAIM = configNode.getNode("factions", factionName, "flags", "MEMBER", "CLAIM").getBoolean(false);
-        boolean memberATTACK = configNode.getNode("factions", factionName, "flags", "LEADER", "ATTACK").getBoolean(false);
-        boolean memberINVITE = configNode.getNode("factions", factionName, "flags", "MEMBER", "INVITE").getBoolean(true);
+        officerMap.put(FactionPermType.USE, officerUSE);
+        officerMap.put(FactionPermType.PLACE, officerPLACE);
+        officerMap.put(FactionPermType.DESTROY, officerDESTROY);
+        officerMap.put(FactionPermType.CLAIM, officerCLAIM);
+        officerMap.put(FactionPermType.ATTACK, officerATTACK);
+        officerMap.put(FactionPermType.INVITE, officerINVITE);
 
-        //Get recruit flags
-        boolean recruitUSE = configNode.getNode("factions", factionName, "flags", "RECRUIT", "USE").getBoolean(true);
-        boolean recruitPLACE = configNode.getNode("factions", factionName, "flags", "RECRUIT", "PLACE").getBoolean(true);
-        boolean recruitDESTROY = configNode.getNode("factions", factionName, "flags", "RECRUIT", "DESTROY").getBoolean(true);
-        boolean recruitCLAIM = configNode.getNode("factions", factionName, "flags", "RECRUIT", "CLAIM").getBoolean(false);
-        boolean recruitATTACK = configNode.getNode("factions", factionName, "flags", "RECRUIT", "ATTACK").getBoolean(false);
-        boolean recruitINVITE = configNode.getNode("factions", factionName, "flags", "RECRUIT", "INVITE").getBoolean(false);
+        membersMap.put(FactionPermType.USE, memberUSE);
+        membersMap.put(FactionPermType.PLACE, memberPLACE);
+        membersMap.put(FactionPermType.DESTROY, memberDESTROY);
+        membersMap.put(FactionPermType.CLAIM, memberCLAIM);
+        membersMap.put(FactionPermType.ATTACK, memberATTACK);
+        membersMap.put(FactionPermType.INVITE, memberINVITE);
 
-        //Get ally flags
-        boolean allyUSE = configNode.getNode("factions", factionName, "flags", "ALLY", "USE").getBoolean(true);
-        boolean allyPLACE = configNode.getNode("factions", factionName, "flags", "ALLY", "PLACE").getBoolean(false);
-        boolean allyDESTROY = configNode.getNode("factions", factionName, "flags", "ALLY", "DESTROY").getBoolean(false);
+        recruitMap.put(FactionPermType.USE, recruitUSE);
+        recruitMap.put(FactionPermType.PLACE, recruitPLACE);
+        recruitMap.put(FactionPermType.DESTROY, recruitDESTROY);
+        recruitMap.put(FactionPermType.CLAIM, recruitCLAIM);
+        recruitMap.put(FactionPermType.ATTACK, recruitATTACK);
+        recruitMap.put(FactionPermType.INVITE, recruitINVITE);
 
-        leaderMap.put(FactionFlagTypes.USE, leaderUSE);
-        leaderMap.put(FactionFlagTypes.PLACE, leaderPLACE);
-        leaderMap.put(FactionFlagTypes.DESTROY, leaderDESTROY);
-        leaderMap.put(FactionFlagTypes.CLAIM, leaderCLAIM);
-        leaderMap.put(FactionFlagTypes.ATTACK, leaderATTACK);
-        leaderMap.put(FactionFlagTypes.INVITE, leaderINVITE);
-
-        officerMap.put(FactionFlagTypes.USE, officerUSE);
-        officerMap.put(FactionFlagTypes.PLACE, officerPLACE);
-        officerMap.put(FactionFlagTypes.DESTROY, officerDESTROY);
-        officerMap.put(FactionFlagTypes.CLAIM, officerCLAIM);
-        officerMap.put(FactionFlagTypes.ATTACK, officerATTACK);
-        officerMap.put(FactionFlagTypes.INVITE, officerINVITE);
-
-        membersMap.put(FactionFlagTypes.USE, memberUSE);
-        membersMap.put(FactionFlagTypes.PLACE, memberPLACE);
-        membersMap.put(FactionFlagTypes.DESTROY, memberDESTROY);
-        membersMap.put(FactionFlagTypes.CLAIM, memberCLAIM);
-        membersMap.put(FactionFlagTypes.ATTACK, memberATTACK);
-        membersMap.put(FactionFlagTypes.INVITE, memberINVITE);
-
-        recruitMap.put(FactionFlagTypes.USE, recruitUSE);
-        recruitMap.put(FactionFlagTypes.PLACE, recruitPLACE);
-        recruitMap.put(FactionFlagTypes.DESTROY, recruitDESTROY);
-        recruitMap.put(FactionFlagTypes.CLAIM, recruitCLAIM);
-        recruitMap.put(FactionFlagTypes.ATTACK, recruitATTACK);
-        recruitMap.put(FactionFlagTypes.INVITE, recruitINVITE);
-
-        allyMap.put(FactionFlagTypes.USE, allyUSE);
-        allyMap.put(FactionFlagTypes.PLACE, allyPLACE);
-        allyMap.put(FactionFlagTypes.DESTROY, allyDESTROY);
+        allyMap.put(FactionPermType.USE, allyUSE);
+        allyMap.put(FactionPermType.PLACE, allyPLACE);
+        allyMap.put(FactionPermType.DESTROY, allyDESTROY);
 
         flagMap.put(FactionMemberType.LEADER, leaderMap);
         flagMap.put(FactionMemberType.OFFICER, officerMap);

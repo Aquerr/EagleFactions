@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -33,17 +34,13 @@ public class AllyCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final String factionName = context.requireOne(Text.of("faction name"));
+        final Faction selectedFaction = context.requireOne(Text.of("faction"));
 
         if(!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player) source;
         final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        final Faction selectedFaction = getPlugin().getFactionLogic().getFactionByName(factionName);
-
-        if(selectedFaction == null)
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, factionName)))));
 
         if(!optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
@@ -53,10 +50,18 @@ public class AllyCommand extends AbstractCommand
         if(playerFaction.getName().equals(selectedFaction.getName()))
         	throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_INVITE_YOURSELF_TO_THE_ALLIANCE));
 
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             if(playerFaction.getEnemies().contains(selectedFaction.getName()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + Messages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
+
+            if(playerFaction.getTruces().contains(selectedFaction.getName()))
+			{
+				super.getPlugin().getFactionLogic().removeTruce(playerFaction.getName(), selectedFaction.getName());
+				//Add ally
+				super.getPlugin().getFactionLogic().addAlly(playerFaction.getName(), selectedFaction.getName());
+				player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_ADDED_TO_THE_ALLIANCE));
+			}
 
 			if(playerFaction.getAlliances().contains(selectedFaction.getName()))
 			{
@@ -78,6 +83,9 @@ public class AllyCommand extends AbstractCommand
 
         if(playerFaction.getEnemies().contains(selectedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_IN_WAR_WITH_THIS_FACTION + " " + Messages.SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES));
+
+		if(playerFaction.getTruces().contains(selectedFaction.getName()))
+			throw new CommandException(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.DISBAND_TRUCE_FIRST_TO_INVITE_FACTION_TO_THE_ALLIANCE));
 
         if(playerFaction.getAlliances().contains(selectedFaction.getName()))
         {
@@ -138,7 +146,7 @@ public class AllyCommand extends AbstractCommand
 				.onClick(TextActions.runCommand("/f ally " + senderFaction.getName()))
 				.onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f ally " + senderFaction.getName()))).build();
 
-		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE,
+		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
                 "\n", Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
                 "\n", clickHereText, Messages.TO_ACCEPT_INVITATION_OR_TYPE, " ", TextColors.GOLD, "/f ally ", senderFaction.getName());
 	}

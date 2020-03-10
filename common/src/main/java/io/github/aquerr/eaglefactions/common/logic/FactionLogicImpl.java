@@ -1,14 +1,14 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Strings;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -36,29 +36,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class FactionLogicImpl implements FactionLogic
 {
-    private static FactionLogicImpl INSTANCE = null;
-
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
-    private final PlayerManagerImpl _playerManager;
-    private final EagleFactionsPlugin plugin;
+    private final PlayerManager playerManager;
 
     private final UUID DUMMY_UUID = new UUID(0, 0);
 
-    public static FactionLogic getInstance(final EagleFactionsPlugin eagleFactions)
+    public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig)
     {
-        if (INSTANCE == null)
-            return new FactionLogicImpl(eagleFactions);
-        else return INSTANCE;
-    }
-
-    public FactionLogicImpl(EagleFactionsPlugin plugin)
-    {
-        INSTANCE = this;
-        this.plugin = plugin;
-        factionsConfig = plugin.getConfiguration().getFactionsConfig();
-        _playerManager = plugin.getPlayerManager();
-        this.storageManager = plugin.getStorageManager();
+        this.storageManager = storageManager;
+        this.playerManager = playerManager;
+        this.factionsConfig = factionsConfig;
     }
 
     @Override
@@ -103,17 +91,9 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public @Nullable
-    Faction getFactionByName(String factionName)
+    public @Nullable Faction getFactionByName(String factionName)
     {
-        Faction faction = storageManager.getFaction(factionName);
-
-        if(faction != null)
-        {
-            return faction;
-        }
-
-        return null;
+        return storageManager.getFaction(factionName);
     }
 
     @Override
@@ -121,32 +101,32 @@ public class FactionLogicImpl implements FactionLogic
     {
         final List<Player> factionPlayers = new ArrayList<>();
         final UUID factionLeader = faction.getLeader();
-        if(!faction.getLeader().equals(DUMMY_UUID) && _playerManager.isPlayerOnline(factionLeader))
+        if(!faction.getLeader().equals(DUMMY_UUID) && playerManager.isPlayerOnline(factionLeader))
         {
-            factionPlayers.add(_playerManager.getPlayer(factionLeader).get());
+            factionPlayers.add(playerManager.getPlayer(factionLeader).get());
         }
 
         for(final UUID uuid : faction.getOfficers())
         {
-            if(_playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(uuid))
             {
-                factionPlayers.add(_playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(uuid).get());
             }
         }
 
         for(final UUID uuid : faction.getMembers())
         {
-            if(_playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(uuid))
             {
-                factionPlayers.add(_playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(uuid).get());
             }
         }
 
         for(final UUID uuid : faction.getRecruits())
         {
-            if(_playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(uuid))
             {
-                factionPlayers.add(_playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(uuid).get());
             }
         }
 
@@ -174,7 +154,20 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public boolean disbandFaction(String factionName)
     {
-        return this.storageManager.deleteFaction(factionName);
+        Objects.requireNonNull(factionName);
+
+        final boolean isDisbanded = this.storageManager.deleteFaction(factionName);
+        final List<Faction> tempFactions = new ArrayList<>(getFactions().values());
+        for (final Faction faction : tempFactions)
+        {
+            if (faction.getTruces().contains(factionName))
+                removeTruce(faction.getName(), factionName);
+            else if (faction.getAlliances().contains(factionName))
+                removeAlly(faction.getName(), factionName);
+            else if (faction.getEnemies().contains(factionName))
+                removeEnemy(faction.getName(), factionName);
+        }
+        return isDisbanded;
     }
 
     @Override
@@ -218,12 +211,54 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
+    public void addTruce(String playerFactionName, String invitedFactionName)
+    {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction invitedFaction = getFactionByName(invitedFactionName);
+
+        final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
+        final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getTruces());
+
+        playerFactionAlliances.add(invitedFactionName);
+        invitedFactionAlliances.add(playerFactionName);
+
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setTruces(playerFactionAlliances).build();
+        final Faction updatedInvitedFaction = invitedFaction.toBuilder().setTruces(invitedFactionAlliances).build();
+
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedInvitedFaction);
+    }
+
+    @Override
+    public void removeTruce(String playerFactionName, String removedFactionName)
+    {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(removedFactionName))
+            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+
+        final Faction playerFaction = getFactionByName(playerFactionName);
+        final Faction removedFaction = getFactionByName(removedFactionName);
+
+        final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
+        final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getTruces());
+
+        playerFactionAlliances.remove(removedFactionName);
+        removedFactionAlliances.remove(playerFactionName);
+
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().setTruces(playerFactionAlliances).build();
+        final Faction updatedRemovedFaction = removedFaction.toBuilder().setTruces(removedFactionAlliances).build();
+
+        storageManager.addOrUpdateFaction(updatedPlayerFaction);
+        storageManager.addOrUpdateFaction(updatedRemovedFaction);
+    }
+
+    @Override
     public void addAlly(String playerFactionName, String invitedFactionName)
     {
-        if(playerFactionName == null || invitedFactionName == null || playerFactionName.equals("") || invitedFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
@@ -244,10 +279,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeAlly(String playerFactionName, String removedFactionName)
     {
-        if(playerFactionName == null || removedFactionName == null || playerFactionName.equals("") || removedFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(removedFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
@@ -268,10 +301,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addEnemy(String playerFactionName, String enemyFactionName)
     {
-        if(playerFactionName == null || enemyFactionName == null || playerFactionName.equals("") || enemyFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(enemyFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -292,10 +323,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeEnemy(String playerFactionName, String enemyFactionName)
     {
-        if(playerFactionName == null || enemyFactionName == null || playerFactionName.equals("") || enemyFactionName.equals(""))
-        {
+        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(enemyFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
-        }
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -317,7 +346,9 @@ public class FactionLogicImpl implements FactionLogic
     public void setLeader(UUID newLeaderUUID, String playerFactionName)
     {
         final Faction faction = getFactionByName(playerFactionName);
-        UUID leader = faction.getLeader();
+        if (faction == null)
+            return;
+
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
@@ -330,21 +361,18 @@ public class FactionLogicImpl implements FactionLogic
         if(faction.getOfficers().contains(newLeaderUUID))
         {
             officers.remove(newLeaderUUID);
-            leader = newLeaderUUID;
         }
         else if(faction.getMembers().contains(newLeaderUUID))
         {
             members.remove(newLeaderUUID);
-            leader = newLeaderUUID;
         }
         else if(faction.getRecruits().contains(newLeaderUUID))
         {
             recruits.remove(newLeaderUUID);
-            leader = newLeaderUUID;
         }
 
         final Faction updatedFaction = faction.toBuilder()
-                .setLeader(leader)
+                .setLeader(newLeaderUUID)
                 .setOfficers(officers)
                 .setMembers(members)
                 .setRecruits(recruits)
@@ -437,11 +465,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setHome(Faction faction, @Nullable UUID worldUUID, @Nullable Vector3i blockPosition)
+    public void setHome(Faction faction, @Nullable FactionHome home)
     {
-        if(blockPosition != null && worldUUID != null)
+        if (home != null && home.getBlockPosition() != null && home.getWorldUUID() != null)
         {
-            faction = faction.toBuilder().setHome(new FactionHome(worldUUID, blockPosition)).build();
+            faction = faction.toBuilder().setHome(home).build();
         }
         else
         {
@@ -470,7 +498,7 @@ public class FactionLogicImpl implements FactionLogic
     {
         if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
         {
-            if(_playerManager.isPlayerOnline(faction.getLeader()))
+            if(playerManager.isPlayerOnline(faction.getLeader()))
             {
                 return true;
             }
@@ -478,7 +506,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(UUID playerUUID : faction.getOfficers())
         {
-            if(_playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(playerUUID))
             {
                 return true;
             }
@@ -486,7 +514,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(UUID playerUUID : faction.getMembers())
         {
-            if(_playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(playerUUID))
             {
                 return true;
             }
@@ -494,7 +522,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(UUID playerUUID : faction.getRecruits())
         {
-            if(_playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(playerUUID))
             {
                 return true;
             }
@@ -649,12 +677,12 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionFlagTypes factionFlagTypes, Boolean flagValue)
+    public void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionPermType factionPermType, Boolean flagValue)
     {
-        final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = new HashMap<>(faction.getFlags());
-        flags.get(factionMemberType).replace(factionFlagTypes, flagValue);
+        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = new HashMap<>(faction.getPerms());
+        perms.get(factionMemberType).replace(factionPermType, flagValue);
 
-        final Faction updatedFaction = faction.toBuilder().setFlags(flags).build();
+        final Faction updatedFaction = faction.toBuilder().setPerms(perms).build();
         storageManager.addOrUpdateFaction(updatedFaction);
     }
 

@@ -26,14 +26,14 @@ public class AdminCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
         final Player player = (Player)source;
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
-            EagleFactionsPlugin.ADMIN_MODE_PLAYERS.remove(player.getUniqueId());
+            super.getPlugin().getPlayerManager().deactivateAdminMode(player);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, Messages.ADMIN_MODE_HAS_BEEN_TURNED_OFF));
         }
         else
         {
-            EagleFactionsPlugin.ADMIN_MODE_PLAYERS.add(player.getUniqueId());
+            super.getPlugin().getPlayerManager().activateAdminMode(player);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, Messages.ADMIN_MODE_HAS_BEEN_TURNED_ON));
         }
         return CommandResult.success();

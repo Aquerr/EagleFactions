@@ -43,8 +43,8 @@ public class CreateCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        final Optional<String> optionalFactionName = context.<String>getOne("faction name");
-        final Optional<String> optionalFactionTag = context.<String>getOne("tag");
+        final Optional<String> optionalFactionName = context.getOne("name");
+        final Optional<String> optionalFactionTag = context.getOne("tag");
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));

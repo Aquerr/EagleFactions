@@ -2,32 +2,33 @@ package io.github.aquerr.eaglefactions.common;
 
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
+import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Invite;
-import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.api.managers.*;
+import io.github.aquerr.eaglefactions.common.managers.PermsManagerImpl;
+import io.github.aquerr.eaglefactions.api.managers.PowerManager;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
-import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
+import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
+import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.PVPLoggerImpl;
-import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
-import io.github.aquerr.eaglefactions.common.commands.args.FactionNameArgument;
-import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
-import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
@@ -64,13 +65,14 @@ import java.util.concurrent.TimeUnit;
         dependencies = {@Dependency(id = "placeholderapi", optional = true)})
 public class EagleFactionsPlugin implements EagleFactions
 {
+    //TODO: Convert these fields to instance fields.
     public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
     public static final List<Invite> INVITE_LIST = new ArrayList<>();
+    public static final List<AllyRequest> TRUCE_INVITE_LIST = new ArrayList<>();
     public static final List<AllyRequest> ALLY_INVITE_LIST = new ArrayList<>();
     public static final List<ArmisticeRequest> ARMISTICE_REQUEST_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_MAP_LIST = new ArrayList<>();
-    public static final List<UUID> ADMIN_MODE_PLAYERS = new ArrayList<>();
     public static final Map<String, Integer> ATTACKED_FACTIONS = new HashMap<>();
     public static final Map<UUID, Integer> BLOCKED_HOME = new HashMap<>();
     public static final Map<UUID, ChatEnum> CHAT_LIST = new HashMap<>();
@@ -82,7 +84,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private Configuration configuration;
     private PVPLogger pvpLogger;
     private PlayerManagerImpl playerManager;
-    private FlagManagerImpl flagManager;
+    private PermsManagerImpl flagManager;
     private ProtectionManager protectionManager;
     private PowerManagerImpl powerManager;
     private AttackLogic attackLogic;
@@ -234,7 +236,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .description(Text.of("Create Faction Command"))
                 .permission(PluginPermissions.CREATE_COMMAND)
                 .arguments(GenericArguments.string(Text.of("tag")),
-                        GenericArguments.string(Text.of("faction name")))
+                        GenericArguments.string(Text.of("name")))
                 .executor(new CreateCommand(this))
                 .build());
 
@@ -242,7 +244,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
                 .description(Text.of("Disband Faction Command"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new DisbandCommand(this))
                 .build());
 
@@ -273,7 +275,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("j", "join"), CommandSpec.builder()
                 .description(Text.of("Join a specific faction"))
                 .permission(PluginPermissions.JOIN_COMMAND)
-                .arguments(new FactionNameArgument(this, Text.of("faction name")))
+                .arguments(new FactionArgument(this, Text.of("faction")))
                 .executor(new JoinCommand(this))
                 .build());
 
@@ -294,7 +296,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Info command. Shows info about a faction.
         SUBCOMMANDS.put(Arrays.asList("i", "info"), CommandSpec.builder()
                 .description(Text.of("Show info about a faction"))
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new InfoCommand(this))
                 .build());
 
@@ -306,19 +308,27 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new PlayerCommand(this))
                 .build());
 
-        //Build alliance commands.
+        //Truce command
+        SUBCOMMANDS.put(Collections.singletonList("truce"), CommandSpec.builder()
+                .description(Text.of("Invite or remove faction from truce"))
+                .permission(PluginPermissions.TRUCE_COMMAND)
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
+                .executor(new TruceCommand(this))
+                .build());
+
+        //Ally command
         SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
-                .description(Text.of("Invite or remove faction from the alliance"))
+                .description(Text.of("Invite or remove faction from alliance"))
                 .permission(PluginPermissions.ALLY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
                 .executor(new AllyCommand(this))
                 .build());
 
-        //Build enemy commands.
+        //Enemy command
         SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
                 .description(Text.of("Declare or remove faction from war"))
                 .permission(PluginPermissions.ENEMY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
                 .executor(new EnemyCommand(this))
                 .build());
 
@@ -342,6 +352,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))
                 .permission(PluginPermissions.CLAIM_COMMAND)
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new ClaimCommand(this))
                 .build());
 
@@ -384,7 +395,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("home"), CommandSpec.builder()
                 .description(Text.of("Teleport to faction's home"))
                 .permission(PluginPermissions.HOME_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new HomeCommand(this))
                 .build());
 
@@ -413,6 +424,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("coords"), CommandSpec.builder()
                 .description(Text.of("Show your teammates coords"))
                 .permission(PluginPermissions.COORDS_COMMAND)
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new CoordsCommand(this))
                 .build());
 
@@ -420,8 +432,8 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setpower"), CommandSpec.builder()
                 .description(Text.of("Set player's power"))
                 .permission(PluginPermissions.SET_POWER_COMMAND)
-                .arguments(GenericArguments.player(Text.of("player")),
-                        GenericArguments.string(Text.of("power")))
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
                 .executor(new SetPowerCommand(this))
                 .build());
 
@@ -471,11 +483,11 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new SetLeaderCommand(this))
                 .build());
 
-        //Flags Command
-        SUBCOMMANDS.put(Collections.singletonList("flags"), CommandSpec.builder()
-                .description(Text.of("Set flags/privileges for members in faction."))
-                .permission(PluginPermissions.FLAGS_COMMAND)
-                .executor(new FlagsCommand(this))
+        //Perms Command
+        SUBCOMMANDS.put(Collections.singletonList("perms"), CommandSpec.builder()
+                .description(Text.of("Set perms for members in faction."))
+                .permission(PluginPermissions.PERMS_COMMAND)
+                .executor(new PermsCommand(this))
                 .build());
 
         //TagColor Command
@@ -490,7 +502,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("rename"), CommandSpec.builder()
                 .description(Text.of("Rename faction"))
                 .permission(PluginPermissions.RENAME_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("faction name"))))
+                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))))
                 .executor(new RenameCommand(this))
                 .build());
 
@@ -528,7 +540,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("chest"), CommandSpec.builder()
                 .description(Text.of("Opens faction's chest"))
                 .permission(PluginPermissions.CHEST_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new ChestCommand(this))
                 .build());
 
@@ -536,7 +548,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("public"), CommandSpec.builder()
                 .description(Text.of("Sets faction as public or not"))
                 .permission(PluginPermissions.PUBLIC_COMMAND)
-                .arguments(GenericArguments.optional(new FactionNameArgument(this, Text.of("faction name"))))
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
                 .executor(new PublicCommand(this))
                 .build());
 
@@ -592,7 +604,7 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.pvpLogger;
     }
 
-    public FlagManagerImpl getFlagManager()
+    public PermsManagerImpl getPermsManager()
     {
         return flagManager;
     }
@@ -646,19 +658,18 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         configuration = new ConfigurationImpl(configDir, configAsset);
         MessageLoader messageLoader = MessageLoader.getInstance(this);
-
-        pvpLogger = new PVPLoggerImpl(getConfiguration());
+        pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void setupManagers()
     {
-        storageManager = StorageManagerImpl.getInstance(this);
-        playerManager = PlayerManagerImpl.getInstance(this);
-        powerManager = PowerManagerImpl.getInstance(this);
-        flagManager = FlagManagerImpl.getInstance(this);
-        factionLogic = FactionLogicImpl.getInstance(this);
-        attackLogic = AttackLogicImpl.getInstance(this);
-        protectionManager = ProtectionManagerImpl.getInstance(this);
+        storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
+        playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
+        powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig(), this.configDir);
+        flagManager = new PermsManagerImpl();
+        factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
+        attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
+        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
     }
 
     private void startFactionsRemover()

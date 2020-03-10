@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
+import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
@@ -24,6 +25,8 @@ import java.util.function.Consumer;
 
 public class PVPLoggerImpl implements PVPLogger
 {
+    private static PVPLogger INSTANCE = null;
+
     private final PVPLoggerConfig pvpLoggerConfig;
     private Map<UUID, Integer> attackedPlayers;
     private Map<UUID, Integer> playersIdTaskMap;
@@ -32,11 +35,18 @@ public class PVPLoggerImpl implements PVPLogger
     private boolean shouldDisplayInScoreboard;
     private Set<String> blockedCommandsDuringFight;
 
-    private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLoggerImpl";
+    private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLogger";
 
-    public PVPLoggerImpl(final Configuration configuration)
+    public static PVPLogger getInstance(final EagleFactions plugin)
     {
-        pvpLoggerConfig = configuration.getPvpLoggerConfig();
+        if (INSTANCE == null)
+            return new PVPLoggerImpl(plugin);
+        else return INSTANCE;
+    }
+
+    private PVPLoggerImpl(final EagleFactions plugin)
+    {
+        pvpLoggerConfig = plugin.getConfiguration().getPvpLoggerConfig();
         isActive = pvpLoggerConfig.isPVPLoggerActive();
 
         if (isActive)
@@ -92,108 +102,97 @@ public class PVPLoggerImpl implements PVPLogger
     }
 
     @Override
-    public void addOrUpdatePlayer(Player player)
+    public synchronized void addOrUpdatePlayer(final Player player)
     {
-        //Update player's time if it already in a list.
+        if(!isActive())
+            return;
 
-        synchronized(attackedPlayers)
+        //Update player's time if player is already blocked.
+        if (attackedPlayers.containsKey(player.getUniqueId()) && playersIdTaskMap.containsKey(player.getUniqueId()))
+        {
+            attackedPlayers.replace(player.getUniqueId(), getBlockTime());
+            return;
+        }
+
+        if (shouldDisplayInScoreboard)
+        {
+            final Scoreboard scoreboard = Scoreboard.builder().build();
+            final Objective objective = Objective.builder()
+                    .name(PVPLOGGER_OBJECTIVE_NAME + "-" + getNewTaskId(1))
+                    .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
+                    .criterion(Criteria.DUMMY)
+                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
+                    .build();
+            scoreboard.addObjective(objective);
+            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+            player.setScoreboard(scoreboard);
+        }
+
+        attackedPlayers.put(player.getUniqueId(), getBlockTime());
+        playersIdTaskMap.put(player.getUniqueId(), getNewTaskId(1));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!"));
+
+        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
         {
             if (attackedPlayers.containsKey(player.getUniqueId()))
             {
-                attackedPlayers.replace(player.getUniqueId(), getBlockTime());
+                int seconds = attackedPlayers.get(player.getUniqueId());
+
+                if (seconds <= 0)
+                {
+                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY));
+                    removePlayer(player);
+                    task.cancel();
+                    return;
+                }
+
+                attackedPlayers.replace(player.getUniqueId(), seconds - 1);
+                if(shouldDisplayInScoreboard)
+                {
+                    Scoreboard scoreboard = player.getScoreboard();
+                    final Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
+                    Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
+                    pvpTimer.setScore(seconds - 1);
+                }
             }
             else
             {
-                attackedPlayers.put(player.getUniqueId(), getBlockTime());
-                playersIdTaskMap.put(player.getUniqueId(), getNewTaskId(1));
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!"));
-
-                Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-                taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
-                {
-                    @Override
-                    public void accept(Task task)
-                    {
-                        if (attackedPlayers.containsKey(player.getUniqueId()))
-                        {
-                            int seconds = attackedPlayers.get(player.getUniqueId());
-
-                            if (seconds <= 0)
-                            {
-                                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY));
-                                removePlayer(player);
-                                task.cancel();
-                            }
-                            else
-                            {
-                                attackedPlayers.replace(player.getUniqueId(), seconds - 1);
-                                if(shouldDisplayInScoreboard)
-                                {
-                                    Scoreboard scoreboard = player.getScoreboard();
-                                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
-                                    if(!optionalObjective.isPresent())
-                                    {
-                                        optionalObjective = Optional.of(Objective.builder().name(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId())).displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
-                                        scoreboard.addObjective(optionalObjective.get());
-                                        scoreboard.updateDisplaySlot(optionalObjective.get(), DisplaySlots.SIDEBAR);
-                                    }
-
-                                    Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
-                                    pvpTimer.setScore(seconds - 1);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            task.cancel();
-                        }
-                    }
-                }).async().submit(EagleFactionsPlugin.getPlugin());
+                task.cancel();
             }
-        }
+        }).async().submit(EagleFactionsPlugin.getPlugin());
     }
 
     @Override
-    public boolean isPlayerBlocked(Player player)
+    public synchronized boolean isPlayerBlocked(final Player player)
     {
         return attackedPlayers.containsKey(player.getUniqueId());
     }
 
 
     @Override
-    public void removePlayer(Player player)
+    public synchronized void removePlayer(final Player player)
     {
         if (!isPlayerBlocked(player))
             return;
 
-        synchronized(attackedPlayers)
-        {
-            //Remove PVPLoggerImpl objective
-            Scoreboard scoreboard = player.getScoreboard();
-            Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + this.playersIdTaskMap.get(player.getUniqueId()));
-            if (pvploggerObjective.isPresent())
-                scoreboard.removeObjective(pvploggerObjective.get());
-            attackedPlayers.remove(player.getUniqueId());
-        }
-
-        synchronized(playersIdTaskMap)
-        {
-            playersIdTaskMap.remove(player.getUniqueId());
-        }
+        //Remove PVPLoggerImpl objective
+        Scoreboard scoreboard = player.getScoreboard();
+        Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + this.playersIdTaskMap.get(player.getUniqueId()));
+        pvploggerObjective.ifPresent(scoreboard::removeObjective);
+        attackedPlayers.remove(player.getUniqueId());
+        playersIdTaskMap.remove(player.getUniqueId());
     }
 
     @Override
-    public int getPlayerBlockTime(Player player)
+    public synchronized int getPlayerBlockTime(final Player player)
     {
-        synchronized(attackedPlayers)
-        {
-            return attackedPlayers.getOrDefault(player.getUniqueId(), 0);
-        }
+        return attackedPlayers.getOrDefault(player.getUniqueId(), 0);
     }
 
     private Integer getNewTaskId(int preferredId)
     {
-        if(this.playersIdTaskMap.values().contains(preferredId))
+        if(this.playersIdTaskMap.containsValue(preferredId))
         {
             return getNewTaskId(preferredId + 1);
         }

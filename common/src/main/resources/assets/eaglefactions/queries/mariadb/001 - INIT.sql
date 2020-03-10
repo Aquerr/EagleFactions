@@ -15,6 +15,7 @@ CREATE TABLE `Factions` (
   `Leader` VARCHAR(36) NOT NULL,
   `Home` VARCHAR(200) NULL,
   `LastOnline` VARCHAR(200) NOT NULL,
+  `Truces` VARCHAR(255) NOT NULL,
   `Alliances` VARCHAR(255) NOT NULL,
   `Enemies` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`, `Name`)
@@ -77,8 +78,8 @@ CREATE UNIQUE INDEX `OfficerUUID_UNIQUE` ON `FactionOfficers` (`OfficerUUID`);
 -- );
 -- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
 
--- Create LeaderFlags Table
-CREATE TABLE `LeaderFlags` (
+-- Create LeaderPerms Table
+CREATE TABLE `LeaderPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -91,10 +92,10 @@ CREATE TABLE `LeaderFlags` (
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `LeaderFlags` (`FactionName`);
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `LeaderPerms` (`FactionName`);
 
--- Create OfficerFlags Table
-CREATE TABLE `OfficerFlags` (
+-- Create OfficerPerms Table
+CREATE TABLE `OfficerPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -107,10 +108,10 @@ CREATE TABLE `OfficerFlags` (
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `OfficerFlags` (`FactionName`);
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `OfficerPerms` (`FactionName`);
 
--- Create MemberFlags Table
-CREATE TABLE `MemberFlags` (
+-- Create MemberPerms Table
+CREATE TABLE `MemberPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -123,10 +124,10 @@ CREATE TABLE `MemberFlags` (
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `MemberFlags` (`FactionName`);
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `MemberPerms` (`FactionName`);
 
--- Create RecruitFlags Table
-CREATE TABLE `RecruitFlags` (
+-- Create RecruitPerms Table
+CREATE TABLE `RecruitPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -139,10 +140,10 @@ CREATE TABLE `RecruitFlags` (
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `RecruitFlags` (`FactionName`);
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `RecruitPerms` (`FactionName`);
 
--- Create AllyFlags Table
-CREATE TABLE `AllyFlags` (
+-- Create AllyPerms Table
+CREATE TABLE `AllyPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
@@ -152,7 +153,20 @@ CREATE TABLE `AllyFlags` (
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `AllyFlags` (`FactionName`);
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `AllyPerms` (`FactionName`);
+
+-- Create TrucePerms Table
+CREATE TABLE `TrucePerms` (
+    `FactionName` VARCHAR(200) NOT NULL,
+    `Use` TINYINT(1) NOT NULL,
+    `Place` TINYINT(1) NOT NULL,
+    `Destroy` TINYINT(1) NOT NULL,
+    FOREIGN KEY (`FactionName`)
+        REFERENCES `Factions` (`Name`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) DEFAULT CHARSET = utf8mb4;
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `TrucePerms` (`FactionName`);
 
 -- Create Claims Table
 CREATE TABLE `Claims` (

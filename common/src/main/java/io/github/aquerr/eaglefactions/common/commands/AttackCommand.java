@@ -57,10 +57,10 @@ public class AttackCommand extends AbstractCommand
         if(!optionalChunkFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE));
 
-        if(optionalChunkFaction.get().getName().equals("SafeZone") || optionalChunkFaction.get().getName().equals("WarZone"))
+        if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION));
 
-        if(!super.getPlugin().getFlagManager().canAttack(player.getUniqueId(), playerFaction))
+        if(!super.getPlugin().getPermsManager().canAttack(player.getUniqueId(), playerFaction))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_ATTACK_LANDS));
 
         final Faction attackedFaction = optionalChunkFaction.get();
@@ -68,7 +68,7 @@ public class AttackCommand extends AbstractCommand
         if(playerFaction.getName().equals(attackedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_YOURSELF));
 
-        if(playerFaction.getAlliances().contains(attackedFaction.getName()))
+        if(playerFaction.getAlliances().contains(attackedFaction.getName()) || playerFaction.getTruces().contains(attackedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION + " " + Messages.YOU_ARE_IN_THE_SAME_ALLIANCE));
 
         final float neededPowerPercentageToAttack = this.powerConfig.getNeededPowerPercentageToAttack();

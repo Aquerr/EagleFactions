@@ -1,7 +1,9 @@
 package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.api.managers.FlagManagerImpl;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.text.Text;
 
 import java.time.Instant;
@@ -17,9 +19,9 @@ public class FactionImpl implements Faction
     private final Text tag;
     private final String description;
     private final String messageOfTheDay;
-    //public BigDecimal Power;
     private final Set<UUID> recruits;
     private final Set<UUID> members;
+    private final Set<String> truces;
     private final Set<String> alliances;
     private final Set<String> enemies;
     private final UUID leader;
@@ -28,7 +30,7 @@ public class FactionImpl implements Faction
     private final FactionHome home;
     private final Instant lastOnline;
     private final boolean isPublic;
-    private final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+    private final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
 
     private FactionChest chest;
 
@@ -43,11 +45,12 @@ public class FactionImpl implements Faction
         this.members = builder.members;
         this.claims = builder.claims;
         this.officers = builder.officers;
+        this.truces = builder.truces;
         this.alliances = builder.alliances;
         this.enemies = builder.enemies;
         this.home = builder.home;
         this.lastOnline = builder.lastOnline;
-        this.flags = builder.flags;
+        this.perms = builder.perms;
         this.chest = builder.chest;
         this.isPublic = builder.isPublic;
     }
@@ -80,6 +83,12 @@ public class FactionImpl implements Faction
     public FactionHome getHome()
     {
         return this.home;
+    }
+
+    @Override
+    public Set<String> getTruces()
+    {
+        return Collections.unmodifiableSet(this.truces);
     }
 
     @Override
@@ -131,9 +140,9 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFlags()
+    public Map<FactionMemberType, Map<FactionPermType, Boolean>> getPerms()
     {
-        return Collections.unmodifiableMap(flags);
+        return Collections.unmodifiableMap(perms);
     }
 
     @Override
@@ -160,7 +169,16 @@ public class FactionImpl implements Faction
         else if(this.recruits.contains(playerUUID))
             return FactionMemberType.RECRUIT;
         else
-            return null;
+        {
+            final FactionLogic factionLogic = EagleFactionsPlugin.getPlugin().getFactionLogic();
+            Optional<Faction> optionalFaction = this.alliances.stream().map(factionLogic::getFactionByName).filter(Objects::nonNull).filter(y->y.containsPlayer(playerUUID)).findAny();
+            if(optionalFaction.isPresent())
+                return FactionMemberType.ALLY;
+
+            optionalFaction = this.truces.stream().map(factionLogic::getFactionByName).filter(Objects::nonNull).filter(y->y.containsPlayer(playerUUID)).findAny();
+            if(optionalFaction.isPresent()) return FactionMemberType.TRUCE;
+        }
+        return null;
     }
 
     @Override
@@ -204,7 +222,7 @@ public class FactionImpl implements Faction
         factionBuilder.setClaims(this.claims);
         factionBuilder.setLastOnline(this.lastOnline);
         factionBuilder.setHome(this.home);
-        factionBuilder.setFlags(this.flags);
+        factionBuilder.setPerms(this.perms);
         factionBuilder.setChest(this.chest);
         factionBuilder.setIsPublic(this.isPublic);
 
@@ -214,6 +232,12 @@ public class FactionImpl implements Faction
     public static Faction.Builder builder(final String name, final Text tag, final UUID leader)
     {
         return new BuilderImpl(name, tag, leader);
+    }
+
+    @Override
+    public int compareTo(final Faction object)
+    {
+        return this.name.compareTo(object.getName());
     }
 
     //Builder
@@ -226,13 +250,14 @@ public class FactionImpl implements Faction
         private UUID leader;
         private Set<UUID> recruits;
         private Set<UUID> members;
+        private Set<String> truces;
         private Set<String> alliances;
         private Set<String> enemies;
         private Set<UUID> officers;
         private Set<Claim> claims;
         private FactionHome home;
         private Instant lastOnline;
-        private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags;
+        private Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
         private FactionChest chest;
         private boolean isPublic;
 
@@ -242,6 +267,7 @@ public class FactionImpl implements Faction
             this.messageOfTheDay = "";
             this.recruits = new HashSet<>();
             this.members = new HashSet<>();
+            this.truces = new HashSet<>();
             this.alliances = new HashSet<>();
             this.enemies = new HashSet<>();
             this.officers = new HashSet<>();
@@ -307,6 +333,12 @@ public class FactionImpl implements Faction
             return this;
         }
 
+        public Builder setTruces(final Set<String> truces)
+        {
+            this.truces = truces;
+            return this;
+        }
+
         public Builder setAlliances(final Set<String> alliances)
         {
             this.alliances = alliances;
@@ -337,9 +369,9 @@ public class FactionImpl implements Faction
             return this;
         }
 
-        public Builder setFlags(final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags)
+        public Builder setPerms(final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms)
         {
-            this.flags = flags;
+            this.perms = perms;
             return this;
         }
 
@@ -358,22 +390,14 @@ public class FactionImpl implements Faction
         public Faction build()
         {
             if(this.name == null || this.tag == null || this.leader == null)
-            {
-                throw new IllegalStateException("Couldn't build FACTION object! FACTION must have a name, a tag and a leader.");
-            }
+                throw new IllegalStateException("Couldn't build Faction object! Faction must have a name, a tag and a leader!");
 
             if(this.lastOnline == null)
-            {
                 this.lastOnline = Instant.now();
-            }
-            if(this.flags == null)
-            {
-                this.flags = FlagManagerImpl.getDefaultFactionFlags();
-            }
+            if(this.perms == null)
+                this.perms = PermsManager.getDefaultFactionPerms();
             if(this.chest == null)
-            {
                 this.chest = new FactionChestImpl(this.name);
-            }
 
             return new FactionImpl(this);
         }

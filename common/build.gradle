@@ -1,5 +1,6 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id "net.kyori.blossom" version "1.1.0"
 }
 
 sourceCompatibility = 1.8
@@ -11,8 +12,13 @@ repositories {
     maven { url 'https://repo.spongepowered.org/maven' }
 }
 
+blossom {
+    replaceTokenIn('src/main/java/io/github/aquerr/eaglefactions/common/PluginInfo.java')
+    replaceToken('%VERSION%', project.version)
+}
+
 dependencies {
-    implementation project(':EagleFactionsAPI')
+    compileOnly project(':EagleFactionsAPI')
     compileOnly 'org.spongepowered:spongeapi:7.1.0'
     compileOnly 'com.github.rojo8399:PlaceholderAPI:4.5.1'
     compileOnly group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.5.2'

@@ -41,7 +41,7 @@ public class UnclaimAllCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
         final Faction playerFaction = optionalPlayerFaction.get();
-        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
 
         final boolean isCancelled = EventRunner.runFactionUnclaimEvent(player, playerFaction, player.getWorld(), null);
@@ -50,10 +50,11 @@ public class UnclaimAllCommand extends AbstractCommand
 
         if(!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
         {
-            super.getPlugin().getFactionLogic().setHome(playerFaction, null, null);
+            super.getPlugin().getFactionLogic().setHome(playerFaction, null);
         }
 
-        super.getPlugin().getFactionLogic().removeAllClaims(playerFaction);
+        final Faction faction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId()).get();
+        super.getPlugin().getFactionLogic().removeAllClaims(faction);
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.SUCCESSFULLY_REMOVED_ALL_CLAIMS));
         return CommandResult.success();
     }

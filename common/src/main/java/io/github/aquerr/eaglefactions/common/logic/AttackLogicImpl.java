@@ -23,22 +23,13 @@ import java.util.function.Consumer;
 
 public class AttackLogicImpl implements AttackLogic
 {
-    private static AttackLogic INSTANCE = null;
-
     private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic;
 
-    private AttackLogicImpl(EagleFactions eagleFactions)
+    public AttackLogicImpl(final FactionLogic factionLogic, final FactionsConfig factionsConfig)
     {
-        factionsConfig = eagleFactions.getConfiguration().getFactionsConfig();
-        factionLogic = eagleFactions.getFactionLogic();
-    }
-
-    public static AttackLogic getInstance(final EagleFactions eagleFactions)
-    {
-        if (INSTANCE == null)
-            INSTANCE = new AttackLogicImpl(eagleFactions);
-        return INSTANCE;
+        this.factionLogic = factionLogic;
+        this.factionsConfig = factionsConfig;
     }
 
     @Override

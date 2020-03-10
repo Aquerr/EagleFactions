@@ -35,29 +35,23 @@ public class InfoCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final Optional<String> optionalFactionName = context.<String>getOne("faction name");
-        if (optionalFactionName.isPresent())
+        final Optional<Faction> faction = context.getOne("faction");
+        if (faction.isPresent())
         {
-            final String rawFactionName = optionalFactionName.get();
-            final Faction faction = getPlugin().getFactionLogic().getFactionByName(rawFactionName);
-
-            if (faction == null)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, rawFactionName)))));
-
             if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
             {
                 //Check permissions
-                if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
+                if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.get().getName())))
                 {
                     source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
                 }
-                else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
+                else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.get().getName())))
                 {
                     source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
                 }
                 else
                 {
-                    showFactionInfo(source, faction);
+                    showFactionInfo(source, faction.get());
                 }
             }
             else
@@ -122,7 +116,13 @@ public class InfoCommand extends AbstractCommand
         			.map(officer -> getPlugin().getPlayerManager().getPlayerName(officer))
         			.filter(Optional::isPresent).map(Optional::get)
         			.collect(Collectors.joining(", "));		
-        }		 
+        }
+
+        String trucesList = "";
+        if(!faction.getTruces().isEmpty())
+        {
+            trucesList = String.join(", ", faction.getTruces());
+        }
 
         String alliancesList = "";
         if(!faction.getAlliances().isEmpty())
@@ -146,6 +146,7 @@ public class InfoCommand extends AbstractCommand
                 .append(Text.of(TextColors.AQUA, Messages.PUBLIC + ": ", TextColors.GOLD, faction.isPublic() + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.LEADER + ": ", TextColors.GOLD, leaderName + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.OFFICERS + ": ", TextColors.GOLD, officersList + "\n"))
+                .append(Text.of(TextColors.AQUA, Messages.TRUCES + ": ", TextColors.GOLD, trucesList + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.MEMBERS + ": ", TextColors.GREEN, membersList + "\n"))

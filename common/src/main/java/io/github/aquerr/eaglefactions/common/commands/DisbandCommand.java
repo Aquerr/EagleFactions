@@ -16,6 +16,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 public class DisbandCommand extends AbstractCommand
@@ -34,22 +35,17 @@ public class DisbandCommand extends AbstractCommand
         final Player player = (Player) source;
 
         // There's a bit of code duplicating, but...
-        Optional<String> optionalFactionName = context.<String>getOne("faction name");
-        if (optionalFactionName.isPresent()) {
-            if (!EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        Optional<Faction> faction = context.getOne("faction");
+        if (faction.isPresent()) {
+            if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
 
-            Faction faction = super.getPlugin().getFactionLogic().getFactionByName(optionalFactionName.get());
-            if (faction == null)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, optionalFactionName.get())))));
-
-            boolean didSecceed = super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
-            if (didSecceed) {
+            boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(faction.get().getName());
+            if (didSucceed) {
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
             } else {
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.SOMETHING_WENT_WRONG));
             }
-
             return CommandResult.success();
         }
 
@@ -59,11 +55,11 @@ public class DisbandCommand extends AbstractCommand
 
         Faction playerFaction = optionalPlayerFaction.get();
 
-        if(playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+        if(playerFaction.isSafeZone() || playerFaction.isWarZone())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
 
         //If player has adminmode
-        if(EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId()))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
             boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(playerFaction.getName());
             if(didSucceed)

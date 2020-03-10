@@ -72,6 +72,7 @@ public class MapCommand extends AbstractCommand
 
         final Text notCapturedMark = Text.of(TextColors.GRAY, "/");
         final Text factionMark = Text.of(TextColors.GREEN, "+");
+        final Text truceMark = Text.of(TextColors.GRAY, "+");
         final Text allianceMark = Text.of(TextColors.AQUA, "+");
         final Text enemyMark = Text.of(TextColors.RED, "#");
         final Text normalFactionMark = Text.of(TextColors.WHITE, "+");
@@ -81,13 +82,14 @@ public class MapCommand extends AbstractCommand
 
         final List<Text> map = new ArrayList<>();
         final List<String> normalFactions = new ArrayList<>();
+        final List<String> truceFactions = new ArrayList<>();
         final List<String> allianceFactions = new ArrayList<>();
         final List<String> enemyFactions = new ArrayList<>();
         //String playerFaction = "";
 
         //Map resolution
         int mapWidth = 18;
-        int mapHeight = 7;
+        int mapHeight = 8;
 
         //Half map resolution + 1 (for player column/row in the center)
         //Needs to be an odd number so the map will have equal distance to the left and right.
@@ -134,6 +136,14 @@ public class MapCommand extends AbstractCommand
                                     allianceFactions.add(optionalChunkFaction.get().getName());
                                 }
                             }
+                            else if(!showPlayerFactionClaimsOnly && playerFaction.getTruces().contains(optionalChunkFaction.get().getName()))
+                            {
+                                textBuilder.append(truceMark);
+                                if(!truceFactions.contains(optionalChunkFaction.get().getName()))
+                                {
+                                    truceFactions.add(optionalChunkFaction.get().getName());
+                                }
+                            }
                             else if (!showPlayerFactionClaimsOnly && playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
                             {
                                 textBuilder.append(enemyMark);
@@ -144,11 +154,11 @@ public class MapCommand extends AbstractCommand
                             }
                             else
                             {
-                                if (optionalChunkFaction.get().getName().equals("SafeZone"))
+                                if (optionalChunkFaction.get().isSafeZone())
                                 {
                                     textBuilder.append(Text.of(TextColors.AQUA, "+"));
                                 }
-                                else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                                else if (optionalChunkFaction.get().isWarZone())
                                 {
                                     textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                                 }
@@ -171,11 +181,11 @@ public class MapCommand extends AbstractCommand
                         }
                         else
                         {
-                            if (optionalChunkFaction.get().getName().equals("SafeZone"))
+                            if (optionalChunkFaction.get().isSafeZone())
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
                             }
-                            else if (optionalChunkFaction.get().getName().equals("WarZone"))
+                            else if (optionalChunkFaction.get().isWarZone())
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                             }
@@ -209,7 +219,7 @@ public class MapCommand extends AbstractCommand
                 else
                 {
                     if(!this.factionsConfig.shouldDelayClaim()
-                            && (EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId())
+                            && (super.getPlugin().getPlayerManager().hasAdminMode(player)
                                 || (optionalPlayerFaction.isPresent()
                                     && (optionalPlayerFaction.get().getLeader().equals(player.getUniqueId())
                                         || optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId())))))
@@ -251,9 +261,13 @@ public class MapCommand extends AbstractCommand
         {
             player.sendMessage(Text.of(TextColors.WHITE, Messages.FACTIONS + ": ", TextColors.RESET, String.join(",", normalFactions)));
         }
+        if(!truceFactions.isEmpty())
+        {
+            player.sendMessage(Text.of(TextColors.AQUA, Messages.TRUCES + ": " + String.join(",", truceFactions)));
+        }
         if (!allianceFactions.isEmpty())
         {
-            player.sendMessage(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": " + String.join("," ,allianceFactions)));
+            player.sendMessage(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": " + String.join(",", allianceFactions)));
         }
         if (!enemyFactions.isEmpty())
         {
@@ -273,7 +287,7 @@ public class MapCommand extends AbstractCommand
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             final World world = player.getWorld();
             final Claim claim = new Claim(player.getWorld().getUniqueId(), chunk);
-            final boolean hasFactionsAdminMode = EagleFactionsPlugin.ADMIN_MODE_PLAYERS.contains(player.getUniqueId());
+            final boolean hasFactionsAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
 
             if(!optionalPlayerFaction.isPresent())
             {
@@ -282,7 +296,7 @@ public class MapCommand extends AbstractCommand
             }
 
             final Faction playerFaction = optionalPlayerFaction.get();
-            final boolean hasClaimPermission = super.getPlugin().getFlagManager().canClaim(player.getUniqueId(), playerFaction);
+            final boolean hasClaimPermission = super.getPlugin().getPermsManager().canClaim(player.getUniqueId(), playerFaction);
             final boolean isFactionAttacked = EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName());
 
             if(!hasFactionsAdminMode && !hasClaimPermission)
@@ -299,10 +313,10 @@ public class MapCommand extends AbstractCommand
                 {
                     if (world.getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
                     {
-                        Location homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
+                        final Location<World> homeLocation = world.getLocation(playerFaction.getHome().getBlockPosition());
                         if (homeLocation.getChunkPosition().toString().equals(player.getLocation().getChunkPosition().toString()))
                         {
-                            super.getPlugin().getFactionLogic().setHome(playerFaction, world.getUniqueId(), null);
+                            super.getPlugin().getFactionLogic().setHome(playerFaction, null);
                         }
                     }
                 }
@@ -323,7 +337,7 @@ public class MapCommand extends AbstractCommand
                     return;
                 }
 
-                if (playerFaction.getName().equalsIgnoreCase("SafeZone") || playerFaction.getName().equalsIgnoreCase("WarZone"))
+                if (playerFaction.isSafeZone() || playerFaction.isWarZone())
                 {
                     super.getPlugin().getFactionLogic().addClaim(playerFaction, claim);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));

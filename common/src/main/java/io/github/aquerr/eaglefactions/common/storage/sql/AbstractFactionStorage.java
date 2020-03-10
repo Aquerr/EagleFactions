@@ -10,7 +10,6 @@ import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -40,11 +39,12 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String SELECT_CLAIMS_WHERE_FACTIONNAME = "SELECT * FROM Claims WHERE FactionName=?";
     private static final String SELECT_CHEST_WHERE_FACTIONNAME = "SELECT ChestItems FROM FactionChests WHERE FactionName=?";
 
-    private static final String SELECT_LEADER_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM LeaderFlags WHERE FactionName=?";
-    private static final String SELECT_OFFICER_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM OfficerFlags WHERE FactionName=?";
-    private static final String SELECT_MEMBER_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM MemberFlags WHERE FactionName=?";
-    private static final String SELECT_RECRUIT_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM RecruitFlags WHERE FactionName=?";
-    private static final String SELECT_ALLY_FLAGS_WHERE_FACTIONNAME = "SELECT * FROM AllyFlags WHERE FactionName=?";
+    private static final String SELECT_LEADER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM LeaderPerms WHERE FactionName=?";
+    private static final String SELECT_OFFICER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM OfficerPerms WHERE FactionName=?";
+    private static final String SELECT_MEMBER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM MemberPerms WHERE FactionName=?";
+    private static final String SELECT_RECRUIT_PERMS_WHERE_FACTIONNAME = "SELECT * FROM RecruitPerms WHERE FactionName=?";
+    private static final String SELECT_TRUCE_PERMS_WHERE_FACTIONNAME = "SELECT * FROM TrucePerms WHERE FactionName=?";
+    private static final String SELECT_ALLY_PERMS_WHERE_FACTIONNAME = "SELECT * FROM AllyPerms WHERE FactionName=?";
     private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM Factions WHERE Name=?";
 
     private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM Factions WHERE Name=?";
@@ -53,9 +53,9 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
     private static final String DELETE_FACTION_CHEST_WHERE_FACTIONNAME = "DELETE FROM FactionChests WHERE FactionName=?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd, IsPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Truces, Alliances, Enemies, Description, Motd, IsPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
+    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Truces = ?, Alliances = ?, Enemies = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
 
 
 //    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -75,23 +75,23 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String INSERT_MEMBERS = "INSERT INTO FactionMembers (MemberUUID, FactionName) VALUES (?, ?)";
     private static final String INSERT_RECRUITS = "INSERT INTO FactionRecruits (RecruitUUID, FactionName) VALUES (?, ?)";
 
-    private static final String MERGE_LEADER_FLAGS = "MERGE INTO LeaderFlags (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_OFFICER_FLAGS = "MERGE INTO OfficerFlags (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_MEMBER_FLAGS = "MERGE INTO MemberFlags (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_RECRUIT_FLAGS = "MERGE INTO RecruitFlags (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_ALLY_FLAGS = "MERGE INTO AllyFlags (FactionName, Use, Place, Destroy) KEY (FactionName) VALUES (?, ?, ?, ?)";
+    private static final String MERGE_LEADER_PERMS = "MERGE INTO LeaderPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String MERGE_OFFICER_PERMS = "MERGE INTO OfficerPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String MERGE_MEMBER_PERMS = "MERGE INTO MemberPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String MERGE_RECRUIT_PERMS = "MERGE INTO RecruitPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String MERGE_ALLY_PERMS = "MERGE INTO AllyPerms (FactionName, Use, Place, Destroy) KEY (FactionName) VALUES (?, ?, ?, ?)";
 
-    private static final String INSERT_LEADER_FLAGS = "INSERT INTO LeaderFlags (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_OFFICER_FLAGS = "INSERT INTO OfficerFlags (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_MEMBER_FLAGS = "INSERT INTO MemberFlags (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_RECRUIT_FLAGS = "INSERT INTO RecruitFlags (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_ALLY_FLAGS = "INSERT INTO AllyFlags (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_LEADER_PERMS = "INSERT INTO LeaderPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_OFFICER_PERMS = "INSERT INTO OfficerPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_MEMBER_PERMS = "INSERT INTO MemberPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_RECRUIT_PERMS = "INSERT INTO RecruitPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_ALLY_PERMS = "INSERT INTO AllyPerms (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
 
-    private static final String UPDATE_LEADER_FLAGS = "UPDATE LeaderFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
-    private static final String UPDATE_OFFICER_FLAGS = "UPDATE OfficerFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
-    private static final String UPDATE_MEMBER_FLAGS = "UPDATE MemberFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
-    private static final String UPDATE_RECRUIT_FLAGS = "UPDATE RecruitFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
-    private static final String UPDATE_ALLY_FLAGS = "UPDATE AllyFlags SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
+    private static final String UPDATE_LEADER_PERMS = "UPDATE LeaderPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
+    private static final String UPDATE_OFFICER_PERMS = "UPDATE OfficerPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
+    private static final String UPDATE_MEMBER_PERMS = "UPDATE MemberPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
+    private static final String UPDATE_RECRUIT_PERMS = "UPDATE RecruitPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
+    private static final String UPDATE_ALLY_PERMS = "UPDATE AllyPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
 
     private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
@@ -241,6 +241,13 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         try
         {
             StringBuilder stringBuilder = new StringBuilder();
+            for (String truce : faction.getTruces())
+            {
+                stringBuilder.append(truce);
+                stringBuilder.append(",");
+            }
+            String truces = stringBuilder.toString();
+            stringBuilder.setLength(0);
             for (String alliance : faction.getAlliances())
             {
                 stringBuilder.append(alliance);
@@ -255,6 +262,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             }
             String enemies = stringBuilder.toString();
 
+            if(truces.endsWith(","))
+                truces = truces.substring(0, truces.length() - 1);
             if (alliances.endsWith(","))
                 alliances = alliances.substring(0, alliances.length() - 1);
             if (enemies.endsWith(","))
@@ -280,13 +289,14 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 preparedStatement.setString(5, faction.getHome().toString());
             else preparedStatement.setString(5, null);
             preparedStatement.setString(6, faction.getLastOnline().toString());
-            preparedStatement.setString(7, alliances);
-            preparedStatement.setString(8, enemies);
-            preparedStatement.setString(9, faction.getDescription());
-            preparedStatement.setString(10, faction.getMessageOfTheDay());
-            preparedStatement.setString(11, faction.isPublic() ? "1" : "0");
+            preparedStatement.setString(7, truces);
+            preparedStatement.setString(8, alliances);
+            preparedStatement.setString(9, enemies);
+            preparedStatement.setString(10, faction.getDescription());
+            preparedStatement.setString(11, faction.getMessageOfTheDay());
+            preparedStatement.setString(12, faction.isPublic() ? "1" : "0");
             if(exists)
-                preparedStatement.setString(12, faction.getName()); //Where part
+                preparedStatement.setString(13, faction.getName()); //Where part
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -354,67 +364,67 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement.execute();
             preparedStatement.close();
 
-            preparedStatement = connection.prepareStatement(exists ? UPDATE_LEADER_FLAGS : INSERT_LEADER_FLAGS);
+            preparedStatement = connection.prepareStatement(exists ? UPDATE_LEADER_PERMS : INSERT_LEADER_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.USE));
-            preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.PLACE));
-            preparedStatement.setBoolean(4, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.DESTROY));
-            preparedStatement.setBoolean(5, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.CLAIM));
-            preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.ATTACK));
-            preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.LEADER).get(FactionFlagTypes.INVITE));
+            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.USE));
+            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.PLACE));
+            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.DESTROY));
+            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.CLAIM));
+            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.ATTACK));
+            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.INVITE));
             if(exists)
                 preparedStatement.setString(8, faction.getName());
 
             preparedStatement.execute();
             preparedStatement.close();
 
-            preparedStatement = connection.prepareStatement(exists ? UPDATE_OFFICER_FLAGS : INSERT_OFFICER_FLAGS);
+            preparedStatement = connection.prepareStatement(exists ? UPDATE_OFFICER_PERMS : INSERT_OFFICER_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.USE));
-            preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.PLACE));
-            preparedStatement.setBoolean(4, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.DESTROY));
-            preparedStatement.setBoolean(5, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.CLAIM));
-            preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.ATTACK));
-            preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.OFFICER).get(FactionFlagTypes.INVITE));
+            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.USE));
+            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.PLACE));
+            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.DESTROY));
+            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CLAIM));
+            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.ATTACK));
+            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.INVITE));
             if(exists)
                 preparedStatement.setString(8, faction.getName());
 
             preparedStatement.execute();
             preparedStatement.close();
 
-            preparedStatement = connection.prepareStatement(exists ? UPDATE_MEMBER_FLAGS : INSERT_MEMBER_FLAGS);
+            preparedStatement = connection.prepareStatement(exists ? UPDATE_MEMBER_PERMS : INSERT_MEMBER_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.USE));
-            preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.PLACE));
-            preparedStatement.setBoolean(4, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.DESTROY));
-            preparedStatement.setBoolean(5, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.CLAIM));
-            preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.ATTACK));
-            preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.MEMBER).get(FactionFlagTypes.INVITE));
+            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.USE));
+            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.PLACE));
+            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.DESTROY));
+            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CLAIM));
+            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.ATTACK));
+            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.INVITE));
             if(exists)
                 preparedStatement.setString(8, faction.getName());
 
             preparedStatement.execute();
             preparedStatement.close();
 
-            preparedStatement = connection.prepareStatement(exists ? UPDATE_RECRUIT_FLAGS : INSERT_RECRUIT_FLAGS);
+            preparedStatement = connection.prepareStatement(exists ? UPDATE_RECRUIT_PERMS : INSERT_RECRUIT_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.USE));
-            preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.PLACE));
-            preparedStatement.setBoolean(4, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.DESTROY));
-            preparedStatement.setBoolean(5, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.CLAIM));
-            preparedStatement.setBoolean(6, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.ATTACK));
-            preparedStatement.setBoolean(7, faction.getFlags().get(FactionMemberType.RECRUIT).get(FactionFlagTypes.INVITE));
+            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.USE));
+            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.PLACE));
+            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.DESTROY));
+            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CLAIM));
+            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.ATTACK));
+            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.INVITE));
             if(exists)
                 preparedStatement.setString(8, faction.getName());
 
             preparedStatement.execute();
             preparedStatement.close();
 
-            preparedStatement = connection.prepareStatement(exists ? UPDATE_ALLY_FLAGS : INSERT_ALLY_FLAGS);
+            preparedStatement = connection.prepareStatement(exists ? UPDATE_ALLY_PERMS : INSERT_ALLY_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getFlags().get(FactionMemberType.ALLY).get(FactionFlagTypes.USE));
-            preparedStatement.setBoolean(3, faction.getFlags().get(FactionMemberType.ALLY).get(FactionFlagTypes.PLACE));
-            preparedStatement.setBoolean(4, faction.getFlags().get(FactionMemberType.ALLY).get(FactionFlagTypes.DESTROY));
+            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.USE));
+            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.PLACE));
+            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.DESTROY));
             if(exists)
                 preparedStatement.setString(5, faction.getName());
 
@@ -499,6 +509,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                     factionHome = FactionHome.from(factionHomeAsString);
                 final String lastOnlineString = factionsResultSet.getString("LastOnline");
                 final Instant lastOnline = Instant.parse(lastOnlineString);
+                final Set<String> truces = new HashSet<>(Arrays.asList(factionsResultSet.getString("Truces").split(",")));
                 final Set<String> alliances = new HashSet<>(Arrays.asList(factionsResultSet.getString("Alliances").split(",")));
                 final Set<String> enemies = new HashSet<>(Arrays.asList(factionsResultSet.getString("Enemies").split(",")));
 
@@ -508,10 +519,11 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                 final Set<Claim> claims = getFactionClaims(connection, factionName);
 
                 final FactionChest factionChest = getFactionChest(connection, factionName);
-                final Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flags = getFactionFlags(connection, factionName);
+                final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
 
                 final Faction faction = FactionImpl.builder(factionName, Text.of(textColor, tag), leaderUUID)
                         .setHome(factionHome)
+                        .setTruces(truces)
                         .setAlliances(alliances)
                         .setEnemies(enemies)
                         .setClaims(claims)
@@ -520,7 +532,7 @@ public abstract class AbstractFactionStorage implements IFactionStorage
                         .setRecruits(recruits)
                         .setOfficers(officers)
                         .setChest(factionChest)
-                        .setFlags(flags)
+                        .setPerms(perms)
                         .setDescription(description)
                         .setMessageOfTheDay(messageOfTheDay)
                         .setIsPublic(isPublic)
@@ -676,42 +688,18 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         return factionChest;
     }
 
-    private Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> getFactionFlags(final Connection connection, final String factionName) throws SQLException
+    private Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPerms(final Connection connection, final String factionName) throws SQLException
     {
-        Map<FactionMemberType, Map<FactionFlagTypes, Boolean>> flagMap = new LinkedHashMap<>();
+        Map<FactionMemberType, Map<FactionPermType, Boolean>> permMap = new LinkedHashMap<>();
+        final Map<FactionPermType, Boolean> leaderMap = new LinkedHashMap<>();
+        final Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
+        final Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
+        final Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
+        final Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
+        final Map<FactionPermType, Boolean> truceMap = new LinkedHashMap<>();
 
-        //    Object flagnode = configNode.getNode("factions", factionName, "flags");
-
-//        //TODO: Test this code.
-//        if(flagnode instanceof Map)
-//        {
-//            Map<String, Object> flags = new HashMap<>();
-//
-//            for(Map.Entry<String, Object> flagEntry : flags.entrySet())
-//            {
-//                Map<FactionFlagTypes, Boolean> memberTypeMap = new LinkedHashMap<>();
-//                if(flagEntry.getValue() instanceof Map)
-//                {
-//                    Map<String, Boolean> map = (Map<String, Boolean>)flagEntry.getValue();
-//                    for(Map.Entry<String, Boolean> testEntry : map.entrySet())
-//                    {
-//                        map.put(FactionFlagTypes.valueOf(testEntry.getKey()), testEntry.getValue());
-//                    }
-//                }
-//                flagMap.put(FactionMemberType.valueOf(flagEntry.getKey()), memberTypeMap);
-//            }
-//        }
-
-        //Use TreeMap instead of LinkedHashMap to sort the map if needed.
-
-        final Map<FactionFlagTypes, Boolean> leaderMap = new LinkedHashMap<>();
-        final Map<FactionFlagTypes, Boolean> officerMap = new LinkedHashMap<>();
-        final Map<FactionFlagTypes, Boolean> membersMap = new LinkedHashMap<>();
-        final Map<FactionFlagTypes, Boolean> recruitMap = new LinkedHashMap<>();
-        final Map<FactionFlagTypes, Boolean> allyMap = new LinkedHashMap<>();
-
-        //Get leader flags
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LEADER_FLAGS_WHERE_FACTIONNAME);
+        //Get leader perms
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LEADER_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet leaderResult = preparedStatement.executeQuery();
         boolean leaderUSE = true;
@@ -732,8 +720,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         leaderResult.close();
         preparedStatement.close();
 
-        //Get officer flags
-        preparedStatement = connection.prepareStatement(SELECT_OFFICER_FLAGS_WHERE_FACTIONNAME);
+        //Get officer perms
+        preparedStatement = connection.prepareStatement(SELECT_OFFICER_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet officerResult = preparedStatement.executeQuery();
         boolean officerUSE = true;
@@ -754,8 +742,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         officerResult.close();
         preparedStatement.close();
 
-        //Get member flags
-        preparedStatement = connection.prepareStatement(SELECT_MEMBER_FLAGS_WHERE_FACTIONNAME);
+        //Get member perms
+        preparedStatement = connection.prepareStatement(SELECT_MEMBER_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet memberResult = preparedStatement.executeQuery();
         boolean memberUSE = true;
@@ -776,8 +764,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         memberResult.close();
         preparedStatement.close();
 
-        //Get recruit flags
-        preparedStatement = connection.prepareStatement(SELECT_RECRUIT_FLAGS_WHERE_FACTIONNAME);
+        //Get recruit perms
+        preparedStatement = connection.prepareStatement(SELECT_RECRUIT_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet recruitResult = preparedStatement.executeQuery();
         boolean recruitUSE = true;
@@ -798,13 +786,29 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         recruitResult.close();
         preparedStatement.close();
 
-        //Get ally flags
-        preparedStatement = connection.prepareStatement(SELECT_ALLY_FLAGS_WHERE_FACTIONNAME);
+        //Get truce perms
+        preparedStatement = connection.prepareStatement(SELECT_TRUCE_PERMS_WHERE_FACTIONNAME);
+        preparedStatement.setString(1, factionName);
+        ResultSet truceResult = preparedStatement.executeQuery();
+        boolean truceUSE = true;
+        boolean trucePLACE = false;
+        boolean truceDESTROY = false;
+        if (truceResult.first())
+        {
+            truceUSE = truceResult.getBoolean("Use");
+            trucePLACE = truceResult.getBoolean("Place");
+            truceDESTROY = truceResult.getBoolean("Destroy");
+        }
+        truceResult.close();
+        preparedStatement.close();
+
+        //Get ally perms
+        preparedStatement = connection.prepareStatement(SELECT_ALLY_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet allyResult = preparedStatement.executeQuery();
         boolean allyUSE = true;
-        boolean allyPLACE = false;
-        boolean allyDESTROY = false;
+        boolean allyPLACE = true;
+        boolean allyDESTROY = true;
         if (allyResult.first())
         {
             allyUSE = allyResult.getBoolean("Use");
@@ -814,45 +818,50 @@ public abstract class AbstractFactionStorage implements IFactionStorage
         allyResult.close();
         preparedStatement.close();
 
-        leaderMap.put(FactionFlagTypes.USE, leaderUSE);
-        leaderMap.put(FactionFlagTypes.PLACE, leaderPLACE);
-        leaderMap.put(FactionFlagTypes.DESTROY, leaderDESTROY);
-        leaderMap.put(FactionFlagTypes.CLAIM, leaderCLAIM);
-        leaderMap.put(FactionFlagTypes.ATTACK, leaderATTACK);
-        leaderMap.put(FactionFlagTypes.INVITE, leaderINVITE);
+        leaderMap.put(FactionPermType.USE, leaderUSE);
+        leaderMap.put(FactionPermType.PLACE, leaderPLACE);
+        leaderMap.put(FactionPermType.DESTROY, leaderDESTROY);
+        leaderMap.put(FactionPermType.CLAIM, leaderCLAIM);
+        leaderMap.put(FactionPermType.ATTACK, leaderATTACK);
+        leaderMap.put(FactionPermType.INVITE, leaderINVITE);
 
-        officerMap.put(FactionFlagTypes.USE, officerUSE);
-        officerMap.put(FactionFlagTypes.PLACE, officerPLACE);
-        officerMap.put(FactionFlagTypes.DESTROY, officerDESTROY);
-        officerMap.put(FactionFlagTypes.CLAIM, officerCLAIM);
-        officerMap.put(FactionFlagTypes.ATTACK, officerATTACK);
-        officerMap.put(FactionFlagTypes.INVITE, officerINVITE);
+        officerMap.put(FactionPermType.USE, officerUSE);
+        officerMap.put(FactionPermType.PLACE, officerPLACE);
+        officerMap.put(FactionPermType.DESTROY, officerDESTROY);
+        officerMap.put(FactionPermType.CLAIM, officerCLAIM);
+        officerMap.put(FactionPermType.ATTACK, officerATTACK);
+        officerMap.put(FactionPermType.INVITE, officerINVITE);
 
-        membersMap.put(FactionFlagTypes.USE, memberUSE);
-        membersMap.put(FactionFlagTypes.PLACE, memberPLACE);
-        membersMap.put(FactionFlagTypes.DESTROY, memberDESTROY);
-        membersMap.put(FactionFlagTypes.CLAIM, memberCLAIM);
-        membersMap.put(FactionFlagTypes.ATTACK, memberATTACK);
-        membersMap.put(FactionFlagTypes.INVITE, memberINVITE);
+        membersMap.put(FactionPermType.USE, memberUSE);
+        membersMap.put(FactionPermType.PLACE, memberPLACE);
+        membersMap.put(FactionPermType.DESTROY, memberDESTROY);
+        membersMap.put(FactionPermType.CLAIM, memberCLAIM);
+        membersMap.put(FactionPermType.ATTACK, memberATTACK);
+        membersMap.put(FactionPermType.INVITE, memberINVITE);
 
-        recruitMap.put(FactionFlagTypes.USE, recruitUSE);
-        recruitMap.put(FactionFlagTypes.PLACE, recruitPLACE);
-        recruitMap.put(FactionFlagTypes.DESTROY, recruitDESTROY);
-        recruitMap.put(FactionFlagTypes.CLAIM, recruitCLAIM);
-        recruitMap.put(FactionFlagTypes.ATTACK, recruitATTACK);
-        recruitMap.put(FactionFlagTypes.INVITE, recruitINVITE);
+        recruitMap.put(FactionPermType.USE, recruitUSE);
+        recruitMap.put(FactionPermType.PLACE, recruitPLACE);
+        recruitMap.put(FactionPermType.DESTROY, recruitDESTROY);
+        recruitMap.put(FactionPermType.CLAIM, recruitCLAIM);
+        recruitMap.put(FactionPermType.ATTACK, recruitATTACK);
+        recruitMap.put(FactionPermType.INVITE, recruitINVITE);
 
-        allyMap.put(FactionFlagTypes.USE, allyUSE);
-        allyMap.put(FactionFlagTypes.PLACE, allyPLACE);
-        allyMap.put(FactionFlagTypes.DESTROY, allyDESTROY);
+        truceMap.put(FactionPermType.USE, truceUSE);
+        truceMap.put(FactionPermType.PLACE, trucePLACE);
+        truceMap.put(FactionPermType.DESTROY, truceDESTROY);
 
-        flagMap.put(FactionMemberType.LEADER, leaderMap);
-        flagMap.put(FactionMemberType.OFFICER, officerMap);
-        flagMap.put(FactionMemberType.MEMBER, membersMap);
-        flagMap.put(FactionMemberType.RECRUIT, recruitMap);
-        flagMap.put(FactionMemberType.ALLY, allyMap);
+        allyMap.put(FactionPermType.USE, allyUSE);
+        allyMap.put(FactionPermType.PLACE, allyPLACE);
+        allyMap.put(FactionPermType.DESTROY, allyDESTROY);
 
-        return flagMap;
+        permMap.put(FactionMemberType.LEADER, leaderMap);
+        permMap.put(FactionMemberType.OFFICER, officerMap);
+        permMap.put(FactionMemberType.MEMBER, membersMap);
+        permMap.put(FactionMemberType.RECRUIT, recruitMap);
+        permMap.put(FactionMemberType.TRUCE, truceMap);
+        permMap.put(FactionMemberType.ALLY, allyMap);
+
+        return permMap;
     }
 
     private void precreate()
@@ -871,7 +880,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement.setString(8, "");
             preparedStatement.setString(9, "");
             preparedStatement.setString(10, "");
-            preparedStatement.setString(11, "0");
+            preparedStatement.setString(11, "");
+            preparedStatement.setString(12, "0");
 
             PreparedStatement preparedStatement1 = connection.prepareStatement(INSERT_FACTION);
             preparedStatement1.setString(1, "SafeZone");
@@ -884,7 +894,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             preparedStatement1.setString(8, "");
             preparedStatement1.setString(9, "");
             preparedStatement1.setString(10, "");
-            preparedStatement1.setString(11, "0");
+            preparedStatement1.setString(11, "");
+            preparedStatement1.setString(12, "0");
 
             preparedStatement.execute();
             preparedStatement1.execute();

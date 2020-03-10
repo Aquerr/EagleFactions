@@ -152,12 +152,12 @@ public class EntitySpawnListener extends AbstractListener
                     return;
 
                 Faction faction = optionalFaction.get();
-                if(faction.getName().equalsIgnoreCase("SafeZone"))
+                if(faction.isSafeZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.getName().equalsIgnoreCase("WarZone") && !this.protectionConfig.canSpawnHostileMobsInWarZone())
+                else if(faction.isWarZone() && !this.protectionConfig.canSpawnHostileMobsInWarZone())
                 {
                     event.setCancelled(true);
                     return;
@@ -194,12 +194,12 @@ public class EntitySpawnListener extends AbstractListener
                     return;
 
                 Faction faction = optionalFaction.get();
-                if(faction.getName().equalsIgnoreCase("SafeZone") && !this.protectionConfig.canSpawnMobsInSafeZone())
+                if(faction.isSafeZone() && !this.protectionConfig.canSpawnMobsInSafeZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.getName().equalsIgnoreCase("WarZone") && !this.protectionConfig.canSpawnMobsInWarZone())
+                else if(faction.isWarZone() && !this.protectionConfig.canSpawnMobsInWarZone())
                 {
                     event.setCancelled(true);
                     return;

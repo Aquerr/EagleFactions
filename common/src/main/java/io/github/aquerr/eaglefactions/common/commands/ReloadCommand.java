@@ -8,6 +8,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 public class ReloadCommand extends AbstractCommand
 {
@@ -24,7 +25,7 @@ public class ReloadCommand extends AbstractCommand
             super.getPlugin().getConfiguration().reloadConfiguration();
             super.getPlugin().getStorageManager().reloadStorage();
 
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CONFIG_HAS_BEEN_RELOADED));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CONFIG_HAS_BEEN_RELOADED));
         }
         catch (Exception exception)
         {

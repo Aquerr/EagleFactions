@@ -55,7 +55,7 @@ public final class ParticlesUtil
 		world.playSound(SoundTypes.ENTITY_BLAZE_SHOOT, position, 5, -20);
 	}
 
-	private static Vector3d getChunkCenter(final World world, final Vector3i chunkPosition)
+	public static Vector3d getChunkCenter(final World world, final Vector3i chunkPosition)
 	{
 		final double x = (chunkPosition.getX() << 4) + 8;
 		final double z = (chunkPosition.getZ() << 4) + 8;
