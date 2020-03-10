@@ -108,10 +108,24 @@ public class PVPLoggerImpl implements PVPLogger
             return;
 
         //Update player's time if player is already blocked.
-        if (attackedPlayers.containsKey(player.getUniqueId()))
+        if (attackedPlayers.containsKey(player.getUniqueId()) && playersIdTaskMap.containsKey(player.getUniqueId()))
         {
             attackedPlayers.replace(player.getUniqueId(), getBlockTime());
             return;
+        }
+
+        if (shouldDisplayInScoreboard)
+        {
+            final Scoreboard scoreboard = Scoreboard.builder().build();
+            final Objective objective = Objective.builder()
+                    .name(PVPLOGGER_OBJECTIVE_NAME + "-" + getNewTaskId(1))
+                    .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
+                    .criterion(Criteria.DUMMY)
+                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
+                    .build();
+            scoreboard.addObjective(objective);
+            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+            player.setScoreboard(scoreboard);
         }
 
         attackedPlayers.put(player.getUniqueId(), getBlockTime());
@@ -137,14 +151,7 @@ public class PVPLoggerImpl implements PVPLogger
                 if(shouldDisplayInScoreboard)
                 {
                     Scoreboard scoreboard = player.getScoreboard();
-                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
-                    if(!optionalObjective.isPresent())
-                    {
-                        optionalObjective = Optional.of(Objective.builder().name(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId())).displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "===")).criterion(Criteria.DUMMY).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build());
-                        scoreboard.addObjective(optionalObjective.get());
-                        scoreboard.updateDisplaySlot(optionalObjective.get(), DisplaySlots.SIDEBAR);
-                    }
-
+                    final Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
                     Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
                     pvpTimer.setScore(seconds - 1);
                 }
@@ -174,7 +181,6 @@ public class PVPLoggerImpl implements PVPLogger
         Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + this.playersIdTaskMap.get(player.getUniqueId()));
         pvploggerObjective.ifPresent(scoreboard::removeObjective);
         attackedPlayers.remove(player.getUniqueId());
-
         playersIdTaskMap.remove(player.getUniqueId());
     }
 

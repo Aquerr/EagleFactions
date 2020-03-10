@@ -1,11 +1,16 @@
 package io.github.aquerr.eaglefactions.common.config;
 
 import com.google.common.reflect.TypeToken;
+import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.ConfigRenderOptions;
+import com.typesafe.config.ConfigSyntax;
 import io.github.aquerr.eaglefactions.api.config.*;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.asset.Asset;
 
@@ -59,9 +64,29 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
 
-        this.configLoader = HoconConfigurationLoader.builder().setFile(this.configPath.toFile()).build();
+        final ConfigParseOptions configParseOptions = ConfigParseOptions.defaults()
+                .setSyntax(ConfigSyntax.CONF);
+        final ConfigRenderOptions configRenderOptions = ConfigRenderOptions.defaults()
+                .setJson(false)
+                .setComments(true)
+                .setOriginComments(false);
+//        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader
+//                .builder()
+//                .setParseOptions(configParseOptions)
+//                .setRenderOptions(configRenderOptions)
+//                .setHeaderMode(HeaderMode.PRESERVE)
+//                .setPath(messagesFilePath)
+//                .build();
+//        ConfigurationNode configNode;
+
+        this.configLoader = HoconConfigurationLoader.builder()
+                .setParseOptions(configParseOptions)
+                .setRenderOptions(configRenderOptions)
+                .setPath(this.configPath)
+                .build();
+
         loadConfiguration();
-        save();
+//        save();
 
         this.storageConfig = new StorageConfigImpl(this);
         this.chatConfig = new ChatConfigImpl(this);
@@ -71,7 +96,7 @@ public class ConfigurationImpl implements Configuration
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
         reloadConfiguration();
-        save();
+//        save();
     }
 
     @Override
@@ -231,13 +256,5 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
         return new HashSet<>();
-    }
-
-    @Override
-    public boolean setCollectionOfStrings(final Collection<String> collection, final Object... nodePath)
-    {
-        configNode.getNode(nodePath).setValue(collection);
-        save();
-        return true;
     }
 }
