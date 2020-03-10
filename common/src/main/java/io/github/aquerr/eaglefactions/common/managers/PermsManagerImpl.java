@@ -62,9 +62,19 @@ public class PermsManagerImpl implements PermsManager
 
     private boolean checkFlag(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermType flagType)
     {
-        final FactionMemberType memberType = playerFaction.getPlayerMemberType(playerUUID);
-        if (memberType == null)
-            return false;
-        else return chunkFaction.getPerms().get(memberType).get(flagType);
+        if (playerFaction.getName().equals(chunkFaction.getName()))
+        {
+            final FactionMemberType memberType = chunkFaction.getPlayerMemberType(playerUUID);
+            return chunkFaction.getPerms().get(memberType).get(flagType);
+        }
+        else if (playerFaction.getAlliances().contains(chunkFaction.getName()))
+        {
+            return chunkFaction.getPerms().get(FactionMemberType.ALLY).get(flagType);
+        }
+        else if (playerFaction.getTruces().contains(chunkFaction.getName()))
+        {
+            return chunkFaction.getPerms().get(FactionMemberType.TRUCE).get(flagType);
+        }
+        return false;
     }
 }
