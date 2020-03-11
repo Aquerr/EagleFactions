@@ -492,7 +492,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public boolean canAttackEntity(final Entity attackedEntity, final Player player, final boolean shouldNotify)
+    public boolean canHitEntity(final Entity attackedEntity, final Player player, final boolean shouldNotify)
     {
         final boolean canAttack = canAttackEntity(attackedEntity, player);
         if (shouldNotify && !canAttack)
@@ -515,8 +515,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Optional<Faction> optionalAttackerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.getUniqueId());
         final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(entityLocation.getExtent().getName());
-        final boolean isWarZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(entityLocation.getExtent().getName());
-        final boolean notClaimableWorld = this.protectionConfig.getNotClaimableWorldNames().contains(entityLocation.getExtent().getName());
+        final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(entityLocation.getExtent().getName());
+        final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(entityLocation.getExtent().getName());
 
         if (isPlayer)
         {

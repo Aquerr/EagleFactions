@@ -16,7 +16,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -116,7 +115,7 @@ public class ProtectionManagerTest
 		when(playerManager.hasAdminMode(player)).thenReturn(true);
 
 		//then
-		final boolean result = protectionManager.canAttackEntity(entity, player, false);
+		final boolean result = protectionManager.canHitEntity(entity, player, false);
 		assertTrue(result);
 	}
 }

@@ -216,7 +216,7 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean shouldBlockDamageFromPlayer(final Player attackedPlayer, final Player sourcePlayer, boolean willCauseDeath)
     {
-        final boolean canAttack = this.protectionManager.canAttackEntity(attackedPlayer, sourcePlayer, false);
+        final boolean canAttack = this.protectionManager.canHitEntity(attackedPlayer, sourcePlayer, false);
         if (!canAttack)
             return true;
 
