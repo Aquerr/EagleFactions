@@ -22,6 +22,7 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -64,8 +65,6 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private boolean canInteractWithBlock(final Location<World> location, final User user)
     {
-        final boolean isTileEntityAtLocation = location.getTileEntity().isPresent();
-
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
@@ -80,6 +79,10 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final World world = location.getExtent();
 
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
+            return true;
+
         if (this.playerManager.hasAdminMode(user))
             return true;
 
@@ -89,6 +92,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
+        final boolean isBlockCarrierAtLocation = location.getTileEntity().isPresent() && location.getTileEntity().get() instanceof BlockCarrier;
+
         if(safeZoneWorlds.contains(world.getName()) || warZoneWorlds.contains(world.getName()))
         {
             if (safeZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT))
@@ -97,8 +102,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (warZoneWorlds.contains(world.getName()) && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                 return true;
 
-            //Warzone, chest and eaglefeather
-            if(warZoneWorlds.contains(world.getName()) && isTileEntityAtLocation && isHoldingEagleFeather(user))
+            //Warzone, tileentity and eaglefeather
+            if(warZoneWorlds.contains(world.getName()) && isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
                 removeEagleFeather(user);
                 return true;
@@ -123,7 +128,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (chunkFaction.isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
             return true;
 
-        if(chunkFaction.isWarZone() && isTileEntityAtLocation && isHoldingEagleFeather(user))
+        if(chunkFaction.isWarZone() && isBlockCarrierAtLocation && isHoldingEagleFeather(user))
         {
             removeEagleFeather(user);
             return true;
@@ -133,7 +138,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(!optionalPlayerFaction.isPresent())
         {
             //Holding Eagle Feather?
-            if(isTileEntityAtLocation && isHoldingEagleFeather(user))
+            if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
                 removeEagleFeather(user);
                 return true;
@@ -147,7 +152,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         else
         {
             //Holding Eagle Feather?
-            if(isTileEntityAtLocation && isHoldingEagleFeather(user))
+            if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
                 removeEagleFeather(user);
                 return true;
@@ -181,6 +186,10 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final World world = location.getExtent();
+
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
+            return true;
 
         if (this.playerManager.hasAdminMode(user) || isItemWhitelisted(usedItem.getType().getId()))
             return true;
@@ -243,6 +252,11 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final World world = location.getExtent();
+
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
+            return true;
+
         if(this.playerManager.hasAdminMode(user) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
 
@@ -278,6 +292,10 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean canBreak(final Location<World> location)
     {
         final World world = location.getExtent();
+
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
+            return true;
 
         if(isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
             return true;
@@ -329,6 +347,11 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         World world = location.getExtent();
+
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
+            return true;
+
         if(this.playerManager.hasAdminMode(user) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId())))
             return true;
 
@@ -387,6 +410,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             }
         }
 
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(location.getExtent().getName()))
+            return true;
+
         boolean shouldProtectWarZoneFromPlayers = this.protectionConfig.shouldProtectWarzoneFromPlayers();
         boolean allowExplosionsByOtherPlayersInClaims = this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims();
 
@@ -438,6 +465,10 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean canExplode(final Location<World> location)
     {
+        //Not claimable worlds should be always ignored by protection system.
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(location.getExtent().getName()))
+            return true;
+
         boolean shouldProtectWarZoneFromMobGrief = this.protectionConfig.shouldProtectWarZoneFromMobGrief();
         boolean shouldProtectClaimsFromMobGrief = this.protectionConfig.shouldProtectClaimFromMobGrief();
 
@@ -480,6 +511,12 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
 
         final Location<World> entityLocation = attackedEntity.getLocation();
+        final boolean notClaimableWorld = this.protectionConfig.getNotClaimableWorldNames().contains(entityLocation.getExtent().getName());
+        
+        //Not claimable worlds should be always ignored by protection system.
+        if (notClaimableWorld)
+            return true;
+
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.getExtent().getUniqueId(), entityLocation.getChunkPosition());
         final Optional<Faction> optionalAttackerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.getUniqueId());
         final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
