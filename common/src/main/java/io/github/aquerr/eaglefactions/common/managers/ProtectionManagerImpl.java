@@ -511,17 +511,12 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
 
         final Location<World> entityLocation = attackedEntity.getLocation();
-        final boolean notClaimableWorld = this.protectionConfig.getNotClaimableWorldNames().contains(entityLocation.getExtent().getName());
-        
-        //Not claimable worlds should be always ignored by protection system.
-        if (notClaimableWorld)
-            return true;
-
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.getExtent().getUniqueId(), entityLocation.getChunkPosition());
         final Optional<Faction> optionalAttackerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.getUniqueId());
         final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(entityLocation.getExtent().getName());
         final boolean isWarZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(entityLocation.getExtent().getName());
+        final boolean notClaimableWorld = this.protectionConfig.getNotClaimableWorldNames().contains(entityLocation.getExtent().getName());
 
         if (isPlayer)
         {
@@ -556,6 +551,9 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
         else //Item Frame, Minecraft, Painting etc.
         {
+            //Not claimable worlds should be always ignored by protection system.
+            if (notClaimableWorld)
+                return true;
             if (isSafeZoneWorld)
                 return false;
             if (isWarZoneWorld)
