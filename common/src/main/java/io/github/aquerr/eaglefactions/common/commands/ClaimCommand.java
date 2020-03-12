@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.commands;
+﻿package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
@@ -58,6 +58,10 @@ public class ClaimCommand extends AbstractCommand
         if(optionalFaction.isPresent())
         {
             final Faction faction = optionalFaction.get();
+            if(hasAdminMode)
+            {
+                return preformAdminClaim(player, faction, chunk);
+            }
             return preformClaimByFaction(player, faction, chunk);
         }
         else
@@ -73,20 +77,29 @@ public class ClaimCommand extends AbstractCommand
 
     private CommandResult preformClaimByFaction(final Player player, final Faction faction, final Vector3i chunk) throws CommandException
     {
+        final World world = player.getWorld();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
+        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.getName());
 
-        if(hasAdminMode)
-        {
-            return preformAdminClaim(player, faction, chunk);
-        }
-        else if(!optionalPlayerFaction.isPresent() || !optionalPlayerFaction.get().getName().equals(faction.getName()))
+        if(!optionalPlayerFaction.isPresent() || !optionalPlayerFaction.get().getName().equals(faction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+
+        if(!isClaimableWorld)
+            throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD)));
+
         return preformNormalClaim(player, faction, chunk);
     }
 
     private CommandResult preformAdminClaim(final Player player, final Faction faction, final Vector3i chunk) throws CommandException
     {
+        final World world = player.getWorld();
+        final boolean safeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(world.getName());
+        final boolean warZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(world.getName());
+
+        //Even admin cannot claim territories in safezone nor warzone world.
+        if (safeZoneWorld || warZoneWorld)
+            throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD)));
+
         boolean isCancelled = EventRunner.runFactionClaimEvent(player, faction, player.getWorld(), chunk);
         if (isCancelled)
             return CommandResult.empty();

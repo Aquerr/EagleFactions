@@ -51,19 +51,22 @@ public class SquareClaimCommand extends AbstractCommand
         if (!optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
-
-        //Check if it is a claimable world
-        if (!this.protectionConfig.getClaimableWorldNames().contains(player.getWorld().getName()))
-        {
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(player.getWorld().getName()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
-            {
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
-            }
-        }
-
         final Faction playerFaction = optionalPlayerFaction.get();
         final World world = player.getWorld();
         final Vector3i playerChunk = player.getLocation().getChunkPosition();
+        final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player);
+
+        //Check if it is a claimable world
+        if (!this.protectionConfig.getClaimableWorldNames().contains(world.getName()))
+        {
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()) && !isAdmin)
+            {
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
+            }
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
+        }
+
+
 
 
         //Radius claim

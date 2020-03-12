@@ -53,6 +53,8 @@ public class PlayerMoveListener extends AbstractListener
         final Vector3i oldChunk = lastLocation.getChunkPosition();
         final Vector3i newChunk = newLocation.getChunkPosition();
 
+        //TODO: Add checks for safezone, warzone and unclaimable worlds.
+
         final Optional<Faction> optionalOldChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), oldChunk);
         final Optional<Faction> optionalNewChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), newChunk);
         String oldChunkFactionName = "Wilderness";
