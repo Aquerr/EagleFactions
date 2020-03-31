@@ -27,9 +27,8 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
-	public void onNeighbourNotify(final NotifyNeighborBlockEvent event)
+	public void onNeighborNotify(final NotifyNeighborBlockEvent event)
 	{
-		//Test
 		final Cause cause = event.getCause();
 		final EventContext context = event.getContext();
 		final TileEntity tileEntity = event.getCause().first(TileEntity.class).orElse(null);
@@ -60,7 +59,28 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 		}
 
 		if(user == null)
+		{
+			if (sourceLocation == null)
+				return;
+
+			//TODO: Create new method in protection manager called "canNotifyBlock"
+			if (!super.getPlugin().getProtectionManager().canBreak(sourceLocation))
+			{
+				event.setCancelled(true);
+				return;
+			}
+			final Iterator<Direction> directionIterator = event.getNeighbors().keySet().iterator();
+			while(directionIterator.hasNext())
+			{
+				final Direction direction = directionIterator.next();
+				final Location<World> blockLocation = sourceLocation.getBlockRelative(direction);
+				if(!super.getPlugin().getProtectionManager().canBreak(blockLocation))
+				{
+					directionIterator.remove();
+				}
+			}
 			return;
+		}
 
 		if(sourceLocation == null)
 		{
