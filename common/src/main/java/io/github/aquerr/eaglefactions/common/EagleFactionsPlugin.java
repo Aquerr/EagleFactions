@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.managers.PermsManagerImpl;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
@@ -90,9 +91,20 @@ public class EagleFactionsPlugin implements EagleFactions
     private AttackLogic attackLogic;
     private FactionLogic factionLogic;
     private StorageManager storageManager;
-    private EFPlaceholderService efPlaceholderService;
+
+    @Inject
+    @AssetId("Settings.conf")
+    private Asset configAsset;
+
+    @Inject
+    @ConfigDir(sharedRoot = false)
+    private Path configDir;
 
     //Integrations
+    @Inject
+    private Metrics metrics;
+
+    private EFPlaceholderService efPlaceholderService;
     private DynmapService dynmapService;
 
     public static EagleFactionsPlugin getPlugin()
@@ -100,18 +112,10 @@ public class EagleFactionsPlugin implements EagleFactions
         return eagleFactions;
     }
 
-    @Inject
-    @ConfigDir(sharedRoot = false)
-    private Path configDir;
-
     public Path getConfigDir()
     {
         return configDir;
     }
-
-    @Inject
-    @AssetId("Settings.conf")
-    private Asset configAsset;
 
     @Listener
     public void onServerInitialization(final GameInitializationEvent event)
