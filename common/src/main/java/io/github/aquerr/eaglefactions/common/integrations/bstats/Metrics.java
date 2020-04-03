@@ -17,13 +17,12 @@ import org.spongepowered.api.scheduler.Task;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -31,29 +30,13 @@ import java.util.zip.GZIPOutputStream;
  *
  * Check out https://bStats.org/ to learn more about bStats!
  */
-public class Metrics {
-
-    static {
-        // You can use the property to disable the check in your test environment
-        if (System.getProperty("bstats.relocatecheck") == null || !System.getProperty("bstats.relocatecheck").equals("false")) {
-            // Maven's Relocate is clever and changes strings, too. So we have to use this little "trick" ... :D
-            final String defaultPackage = new String(new byte[]{'o', 'r', 'g', '.', 'b', 's', 't', 'a', 't', 's', '.', 's', 'p', 'o', 'n', 'g', 'e'});
-            final String examplePackage = new String(new byte[]{'y', 'o', 'u', 'r', '.', 'p', 'a', 'c', 'k', 'a', 'g', 'e'});
-            // We want to make sure nobody just copy & pastes the example and use the wrong package names
-            if (Metrics.class.getPackage().getName().equals(defaultPackage) || Metrics.class.getPackage().getName().equals(examplePackage)) {
-                throw new IllegalStateException("bStats Metrics class has not been relocated correctly!");
-            }
-        }
-    }
-
+public class Metrics
+{
     // The version deserialize this bStats class
     public static final int B_STATS_VERSION = 1;
 
     // The url to which the data is sent
     private static final String URL = "https://bStats.org/submitData/sponge";
-
-    // We use this flag to ensure only one instance deserialize this class exist
-    private static boolean created = false;
 
     // The logger
     private Logger logger;
@@ -72,9 +55,6 @@ public class Metrics {
     // Should failed requests be logged?
     private boolean logFailedRequests = false;
 
-    // A list with all known metrics class objects including this one
-    private static final List<Metrics> knownMetricsInstances = new ArrayList<>();
-
     // A list with all custom charts
     private final List<CustomChart> charts = new ArrayList<>();
 
@@ -87,65 +67,30 @@ public class Metrics {
     // The constructor is not meant to be called by the user himself.
     // The instance is created using Dependency Injection (https://docs.spongepowered.org/master/en/plugin/injection.html)
     @Inject
-    private Metrics(PluginContainer plugin, Logger logger, @ConfigDir(sharedRoot = true) Path configDir) {
-        if (created) {
-            // We don't want more than one instance deserialize this class
-            throw new IllegalStateException("There's already an instance deserialize this Metrics class!");
-        } else {
-            created = true;
-        }
-
+    private Metrics(PluginContainer plugin, Logger logger, @ConfigDir(sharedRoot = true) Path configDir)
+    {
         this.plugin = plugin;
         this.logger = logger;
         this.configDir = configDir;
 
-        try {
+        try
+        {
             loadConfig();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             // Failed to load configuration
             logger.warn("Failed to load bStats config!", e);
             return;
         }
 
         // We are not allowed to send data about this server :(
-        if (!enabled) {
+        if (!enabled)
+        {
             return;
         }
 
-        Class<?> usedMetricsClass = getFirstBStatsClass();
-        if (usedMetricsClass == null) {
-            // Failed to get first metrics class
-            return;
-        }
-        if (usedMetricsClass == getClass()) {
-            // We are the first! :)
-            linkMetrics(this);
-            startSubmitting();
-        } else {
-            // We aren't the first so we link to the first metrics class
-            try {
-                usedMetricsClass.getMethod("linkMetrics", Object.class).invoke(null,this);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                if (logFailedRequests) {
-                    logger.warn("Failed to link to first metrics class {}!", usedMetricsClass.getName(), e);
-                }
-            }
-        }
-    }
-
-    public PluginContainer getPluginContainer()
-    {
-        return plugin;
-    }
-
-    /**
-     * Links an other metrics class with this class.
-     * This method is called using Reflection.
-     *
-     * @param metrics An object deserialize the metrics class to link.
-     */
-    public static void linkMetrics(Metrics metrics) {
-        knownMetricsInstances.add(metrics);
+        startSubmitting();
     }
 
     /**
@@ -153,7 +98,8 @@ public class Metrics {
      *
      * @param chart The chart to add.
      */
-    public void addCustomChart(CustomChart chart) {
+    public void addCustomChart(CustomChart chart)
+    {
         Validate.notNull(chart, "Chart cannot be null");
         charts.add(chart);
     }
@@ -164,7 +110,8 @@ public class Metrics {
      *
      * @return The plugin specific data.
      */
-    public JsonObject getPluginData() {
+    public JsonObject getPluginData()
+    {
         JsonObject data = new JsonObject();
 
         String pluginName = plugin.getName();
@@ -188,49 +135,8 @@ public class Metrics {
         return data;
     }
 
-    private void startSubmitting() {
-        // bStats 1 cleanup. Runs once.
-        try {
-            File configPath = configDir.resolve("bStats").toFile();
-            configPath.mkdirs();
-            String className = readFile(new File(configPath, "temp.txt"));
-            if (className != null) {
-                try {
-                    // Let's check if a class with the given name exists.
-                    Class<?> clazz = Class.forName(className);
-
-                    // Time to eat it up!
-                    Field instancesField = clazz.getDeclaredField("knownMetricsInstances");
-                    instancesField.setAccessible(true);
-
-                    // Cancel its timer task
-                    // bStats for Sponge version 1 did not expose its timer task - gotta go find it!
-                    Map<Thread, StackTraceElement[]> threadSet = Thread.getAllStackTraces();
-                    for (Map.Entry<Thread, StackTraceElement[]> entry : threadSet.entrySet()) {
-                        try {
-                            if (entry.getKey().getName().startsWith("Timer")) {
-                                Field timerThreadField = entry.getKey().getClass().getDeclaredField("queue");
-                                timerThreadField.setAccessible(true);
-                                Object taskQueue = timerThreadField.get(entry.getKey());
-
-                                Field taskQueueField = taskQueue.getClass().getDeclaredField("queue");
-                                taskQueueField.setAccessible(true);
-                                Object[] tasks = (Object[]) taskQueueField.get(taskQueue);
-                                for (Object task : tasks) {
-                                    if (task == null) {
-                                        continue;
-                                    }
-                                    if (task.getClass().getName().startsWith(clazz.getName())) {
-                                        ((TimerTask) task).cancel();
-                                    }
-                                }
-                            }
-                        } catch (Exception ignored) { }
-                    }
-                } catch (ReflectiveOperationException ignored) { }
-            }
-        } catch (IOException ignored) { }
-
+    private void startSubmitting()
+    {
         // We use a timer cause want to be independent from the server tps
         final Timer timer = new Timer(true);
         timerTask = new TimerTask() {
@@ -247,35 +153,6 @@ public class Metrics {
         // Submit the data every 30 minutes, first time after 5 minutes to give other plugins enough time to start
         // WARNING: Changing the frequency has no effect but your plugin WILL be blocked/deleted!
         // WARNING: Just don't do it!
-
-        // Let's log if things are enabled or not, once at startup:
-        List<String> enabled = new ArrayList<>();
-        List<String> disabled = new ArrayList<>();
-        for (Metrics metrics : knownMetricsInstances) {
-            if (Sponge.getMetricsConfigManager().areMetricsEnabled(metrics.getPluginContainer())) {
-                enabled.add(metrics.getPluginContainer().getName());
-            } else {
-                disabled.add(metrics.getPluginContainer().getName());
-            }
-        }
-        StringBuilder builder = new StringBuilder().append(System.lineSeparator());
-        builder.append("bStats metrics is present in ").append((enabled.size() + disabled.size())).append(" plugins on this server.");
-        builder.append(System.lineSeparator());
-        if (enabled.isEmpty()) {
-            builder.append("Presently, none of them are allowed to send data.").append(System.lineSeparator());
-        } else {
-            builder.append("Presently, the following ").append(enabled.size()).append(" plugins are allowed to send data:").append(System.lineSeparator());
-            builder.append(enabled).append(System.lineSeparator());
-        }
-        if (disabled.isEmpty()) {
-            builder.append("None of them have data sending disabled.");
-            builder.append(System.lineSeparator());
-        } else {
-            builder.append("Presently, the following ").append(disabled.size()).append(" plugins are not allowed to send data:").append(System.lineSeparator());
-            builder.append(disabled).append(System.lineSeparator());
-        }
-        builder.append("To change the enabled/disabled state of any bStats use in a plugin, visit the Sponge config!");
-        logger.info(builder.toString());
     }
 
     /**
@@ -283,7 +160,8 @@ public class Metrics {
      *
      * @return The server specific data.
      */
-    private JsonObject getServerData() {
+    private JsonObject getServerData()
+    {
         // Minecraft specific data
         int playerAmount = Sponge.getServer().getOnlinePlayers().size();
         playerAmount = playerAmount > 200 ? 200 : playerAmount;
@@ -319,31 +197,32 @@ public class Metrics {
     /**
      * Collects the data and sends it afterwards.
      */
-    private void submitData() {
+    private void submitData()
+    {
         final JsonObject data = getServerData();
 
-        JsonArray pluginData = new JsonArray();
-        // Search for all other bStats Metrics classes to get their plugin data
-        for (Metrics metrics : knownMetricsInstances) {
-            JsonObject plugin = metrics.getPluginData();
-            if (pluginData != null)
-                pluginData.add(plugin);
-        }
+        if (!Sponge.getMetricsConfigManager().areMetricsEnabled(this.plugin))
+            return;
 
+        JsonArray pluginData = new JsonArray();
+        JsonObject plugin = getPluginData();
+        pluginData.add(plugin);
         data.add("plugins", pluginData);
 
         // Create a new thread for the connection to the bStats server
-        new Thread(() ->  {
-            try {
-                // Send the data
+        CompletableFuture.runAsync(() ->
+        {
+            try
+            {
                 sendData(data);
-            } catch (Exception e) {
-                // Something went wrong! :(
+            }
+            catch (Exception e)
+            {
                 if (logFailedRequests) {
                     logger.warn("Could not submit plugin stats!", e);
                 }
             }
-        }).start();
+        });
     }
 
     /**
@@ -357,7 +236,8 @@ public class Metrics {
         File configFile = new File(configPath.toFile(), "config.conf");
         HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setFile(configFile).build();
         CommentedConfigurationNode node;
-        if (!configFile.exists()) {
+        if (!configFile.exists())
+        {
             configFile.createNewFile();
             node = configurationLoader.load();
 
@@ -377,7 +257,9 @@ public class Metrics {
             );
 
             configurationLoader.save(node);
-        } else {
+        }
+        else
+        {
             node = configurationLoader.load();
         }
 
@@ -388,48 +270,21 @@ public class Metrics {
     }
 
     /**
-     * Gets the first bStat Metrics class.
-     *
-     * @return The first bStats metrics class.
-     */
-    private Class<?> getFirstBStatsClass() {
-        Path configPath = configDir.resolve("bStats");
-        configPath.toFile().mkdirs();
-        File tempFile = new File(configPath.toFile(), "temp.txt");
-
-        try {
-            String className = readFile(tempFile);
-            if (className != null) {
-                try {
-                    // Let's check if a class with the given name exists.
-                    return Class.forName(className);
-                } catch (ClassNotFoundException ignored) { }
-            }
-            writeFile(tempFile, getClass().getName());
-            return getClass();
-        } catch (IOException e) {
-            if (logFailedRequests) {
-                logger.warn("Failed to get first bStats class!", e);
-            }
-            return null;
-        }
-    }
-
-    /**
      * Reads the first line deserialize the file.
      *
      * @param file The file to read. Cannot be null.
      * @return The first line deserialize the file or <code>null</code> if the file does not exist or is empty.
      * @throws IOException If something did not work :(
      */
-    private String readFile(File file) throws IOException {
-        if (!file.exists()) {
+    private String readFile(File file) throws IOException
+    {
+        if (!file.exists())
+        {
             return null;
         }
-        try (
-                FileReader fileReader = new FileReader(file);
-                BufferedReader bufferedReader =  new BufferedReader(fileReader);
-        ) {
+        try (FileReader fileReader = new FileReader(file);
+             BufferedReader bufferedReader =  new BufferedReader(fileReader))
+        {
             return bufferedReader.readLine();
         }
     }
@@ -441,14 +296,15 @@ public class Metrics {
      * @param text The text to write.
      * @throws IOException If something did not work :(
      */
-    private void writeFile(File file, String text) throws IOException {
-        if (!file.exists()) {
+    private void writeFile(File file, String text) throws IOException
+    {
+        if (!file.exists())
+        {
             file.createNewFile();
         }
-        try (
-                FileWriter fileWriter = new FileWriter(file);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)
-        ) {
+        try (FileWriter fileWriter = new FileWriter(file);
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter))
+        {
             bufferedWriter.write(text);
             bufferedWriter.newLine();
             bufferedWriter.write("Note: This class only exists for internal purpose. You can ignore it :)");
@@ -461,7 +317,8 @@ public class Metrics {
      * @param data The data to send.
      * @throws Exception If the request failed.
      */
-    private static void sendData(JsonObject data) throws Exception {
+    private static void sendData(JsonObject data) throws Exception
+    {
         Validate.notNull(data, "Data cannot be null");
         HttpsURLConnection connection = (HttpsURLConnection) new URL(URL).openConnection();
 
@@ -479,7 +336,8 @@ public class Metrics {
 
         // Send data
         connection.setDoOutput(true);
-        try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
+        try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream()))
+        {
             outputStream.write(compressedData);
         }
 
@@ -493,12 +351,15 @@ public class Metrics {
      * @return The gzipped String.
      * @throws IOException If the compression failed.
      */
-    private static byte[] compress(final String str) throws IOException {
-        if (str == null) {
+    private static byte[] compress(final String str) throws IOException
+    {
+        if (str == null)
+        {
             return null;
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try (GZIPOutputStream gzip = new GZIPOutputStream(outputStream)) {
+        try (GZIPOutputStream gzip = new GZIPOutputStream(outputStream))
+        {
             gzip.write(str.getBytes(StandardCharsets.UTF_8));
         }
         return outputStream.toByteArray();
@@ -507,8 +368,8 @@ public class Metrics {
     /**
      * Represents a custom chart.
      */
-    public static abstract class CustomChart {
-
+    public static abstract class CustomChart
+    {
         // The id of the chart
         private final String chartId;
 
@@ -524,7 +385,8 @@ public class Metrics {
             this.chartId = chartId;
         }
 
-        private JsonObject getRequestJsonObject(Logger logger, boolean logFailedRequests) {
+        private JsonObject getRequestJsonObject(Logger logger, boolean logFailedRequests)
+        {
             JsonObject chart = new JsonObject();
             chart.addProperty("chartId", chartId);
             try {
