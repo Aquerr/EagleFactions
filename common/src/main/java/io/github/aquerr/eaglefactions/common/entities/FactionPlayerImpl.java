@@ -21,10 +21,10 @@ public class FactionPlayerImpl implements FactionPlayer
 
     private boolean diedInWarZone;
 
-//    private float power;
-//    private float maxpower;
+    private float power;
+    private float maxpower;
 
-    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final FactionMemberType factionRole, final boolean diedInWarZone)
+    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
     {
         this.name = playerName;
         this.uniqueId = uniqueId;
@@ -34,8 +34,8 @@ public class FactionPlayerImpl implements FactionPlayer
 
         this.diedInWarZone = diedInWarZone;
 
-//        this.power = power;
-//        this.maxpower = maxpower;
+        this.power = power;
+        this.maxpower = maxpower;
     }
 
     @Override
@@ -93,6 +93,18 @@ public class FactionPlayerImpl implements FactionPlayer
     public float getMaxPower()
     {
         return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerMaxPower(this.uniqueId);
+    }
+
+    @Override
+    public float getLastKnownPlayerPower()
+    {
+        return this.power;
+    }
+
+    @Override
+    public float getLastKnownPlayerMaxPower()
+    {
+        return this.maxpower;
     }
 
     @Override

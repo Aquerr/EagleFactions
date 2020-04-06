@@ -10,6 +10,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.sql.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -82,6 +83,33 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             final boolean didSucceed = statement.execute();
             statement.close();
             return didSucceed;
+        }
+        catch (final SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addPlayers(final List<FactionPlayer> players)
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            final PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER);
+            for (final FactionPlayer player : players)
+            {
+                statement.setString(1, player.getUniqueId().toString());
+                statement.setString(2, player.getName());
+                statement.setFloat(3, player.getLastKnownPlayerPower());
+                statement.setFloat(4, player.getLastKnownPlayerMaxPower());
+                statement.setBoolean(5, player.diedInWarZone());
+                statement.addBatch();
+            }
+            final int[] results = statement.executeBatch();
+
+            statement.close();
+            return results.length > 0;
         }
         catch (final SQLException e)
         {
@@ -254,8 +282,10 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             {
                 final UUID playerUUID = resultSet.getObject("PlayerUUID", UUID.class);
                 final String name = resultSet.getString("Name");
+                final float power = resultSet.getFloat("Power");
+                final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null, deathInWarzone);
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();

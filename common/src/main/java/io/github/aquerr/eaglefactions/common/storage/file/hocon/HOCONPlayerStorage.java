@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -65,6 +66,16 @@ public class HOCONPlayerStorage implements PlayerStorage
         }
 
         return false;
+    }
+
+    @Override
+    public boolean addPlayers(List<FactionPlayer> players)
+    {
+        for (final FactionPlayer player : players)
+        {
+            addPlayer(player.getUniqueId(), player.getName(), player.getLastKnownPlayerPower(), player.getLastKnownPlayerMaxPower());
+        }
+        return true;
     }
 
     @Override
@@ -258,13 +269,15 @@ public class HOCONPlayerStorage implements PlayerStorage
                 }
                 String factionName = configurationNode.getNode("faction").getString("");
                 String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
+                float power = configurationNode.getNode("power").getFloat(0.0f);
+                float maxpower = configurationNode.getNode("maxpower").getFloat(0.0f);
                 boolean diedInWarZone = configurationNode.getNode("death-in-warzone").getBoolean(false);
                 FactionMemberType factionMemberType = null;
 
                 if(!factionMemberTypeString.equals(""))
                     factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
-                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, factionMemberType, diedInWarZone);
+                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, factionMemberType, diedInWarZone);
                 playerSet.add(factionPlayer);
             }
             catch(IOException e)

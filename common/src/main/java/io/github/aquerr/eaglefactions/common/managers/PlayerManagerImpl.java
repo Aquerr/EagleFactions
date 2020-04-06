@@ -96,7 +96,7 @@ public class PlayerManagerImpl implements PlayerManager
             factionName = optionalFaction.get().getName();
             factionMemberType = optionalFaction.get().getPlayerMemberType(user.getUniqueId());
         }
-        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, factionMemberType, false);
+        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, 0, 0, factionMemberType, false);
     }
 
     private Optional<String> getLastKnownPlayerName(final UUID playerUUID)

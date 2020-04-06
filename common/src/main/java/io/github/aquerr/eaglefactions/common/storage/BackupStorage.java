@@ -176,10 +176,7 @@ public class BackupStorage
             FactionsCache.addOrUpdateFactionCache(faction);
         }
 
-        for (final FactionPlayer factionPlayer : players)
-        {
-            this.playerStorage.addPlayer(factionPlayer.getUniqueId(), factionPlayer.getName(), factionPlayer.getPower(), factionPlayer.getMaxPower());
-        }
+        this.playerStorage.addPlayers(players);
 
         // Remove temp files
         deleteDirectory(backupTempDirectory.toFile());
