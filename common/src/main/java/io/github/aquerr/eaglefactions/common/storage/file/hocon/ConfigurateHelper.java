@@ -63,8 +63,8 @@ public class ConfigurateHelper
             configNode.getNode("faction").setValue(factionPlayer.getFactionName().orElse(""));
             configNode.getNode("faction-member-type").setValue(factionPlayer.getFactionRole().isPresent() ? factionPlayer.getFactionRole().get().toString() : "");
             configNode.getNode("name").setValue(factionPlayer.getName());
-            configNode.getNode("power").setValue(factionPlayer.getPower());
-            configNode.getNode("maxpower").setValue(factionPlayer.getMaxPower());
+            configNode.getNode("power").setValue(factionPlayer.getLastKnownPlayerPower());
+            configNode.getNode("maxpower").setValue(factionPlayer.getLastKnownPlayerMaxPower());
             configNode.getNode("death-in-warzone").setValue(factionPlayer.diedInWarZone());
             return true;
         }

@@ -280,7 +280,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYERS);
             while (resultSet.next())
             {
-                final UUID playerUUID = resultSet.getObject("PlayerUUID", UUID.class);
+                final UUID playerUUID = UUID.fromString(resultSet.getString("PlayerUUID"));
                 final String name = resultSet.getString("Name");
                 final float power = resultSet.getFloat("Power");
                 final float maxpower = resultSet.getFloat("MaxPower");
