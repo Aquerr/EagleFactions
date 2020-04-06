@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import java.util.Set;
 import java.util.UUID;
 
-public interface IPlayerStorage
+public interface PlayerStorage
 {
     boolean checkIfPlayerExists(UUID playerUUID, String playerName);
 
@@ -30,4 +30,6 @@ public interface IPlayerStorage
     String getPlayerName(UUID playerUUID);
 
     boolean updatePlayerName(UUID playerUUID, String playerName);
+
+    void deletePlayers();
 }

@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.managers.PermsManagerImpl;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
@@ -561,6 +562,21 @@ public class EagleFactionsPlugin implements EagleFactions
                 .description(Text.of("Toggles debug mode"))
                 .permission(PluginPermissions.DEBUG_COMMAND)
                 .executor(new DebugCommand(this))
+                .build());
+
+        //Backup Command
+        SUBCOMMANDS.put(Collections.singletonList("createbackup"), CommandSpec.builder()
+                .description(Text.of("Creates a backup of Eagle Factions data"))
+                .permission(PluginPermissions.BACKUP_COMMAND)
+                .executor(new BackupCommand(this))
+                .build());
+
+        //Restore Backup Command
+        SUBCOMMANDS.put(Collections.singletonList("restorebackup"), CommandSpec.builder()
+                .description(Text.of("Restores Eagle Factions data from the given backup file"))
+                .permission(PluginPermissions.RESTORE_BACKUP_COMMAND)
+                .arguments(GenericArguments.onlyOne(new BackupNameArgument(this, Text.of("filename"))))
+                .executor(new RestoreBackupCommand(this))
                 .build());
 
         //Build all commands

@@ -42,11 +42,11 @@ public class FactionPlayerArgument extends CommandElement
                     return player;
             }
 
-            throw new ArgumentParseException(Text.of("Argument is not a valid player!"), argument, argument.length());
+            throw args.createError(Text.of("Argument is not a valid player!"));
         }
         else
         {
-            throw new ArgumentParseException(Text.of("Argument is not a valid player!"), "", 0);
+            throw args.createError(Text.of("Argument is not a valid player!"));
         }
     }
 

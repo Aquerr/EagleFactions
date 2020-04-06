@@ -14,25 +14,30 @@ import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbFactionS
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbPlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLPlayerStorage;
-import io.github.aquerr.eaglefactions.common.storage.utils.DeleteFactionTask;
-import io.github.aquerr.eaglefactions.common.storage.utils.IStorageTask;
-import io.github.aquerr.eaglefactions.common.storage.utils.UpdateFactionTask;
+import io.github.aquerr.eaglefactions.common.storage.util.DeleteFactionTask;
+import io.github.aquerr.eaglefactions.common.storage.util.IStorageTask;
+import io.github.aquerr.eaglefactions.common.storage.util.UpdateFactionTask;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
 public class StorageManagerImpl implements StorageManager
 {
-    private final IFactionStorage factionsStorage;
-    private final IPlayerStorage playerStorage;
+    private final FactionStorage factionsStorage;
+    private final PlayerStorage playerStorage;
+    private final BackupStorage backupStorage;
+    private final Path configDir;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
+        this.configDir = configDir;
         switch(storageConfig.getStorageType().toLowerCase())
         {
             case "hocon":
@@ -62,6 +67,7 @@ public class StorageManagerImpl implements StorageManager
                 plugin.printInfo("Initialized default HOCON storage.");
                 break;
         }
+        this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
         prepareFactionsCache();
     }
 
@@ -200,5 +206,31 @@ public class StorageManagerImpl implements StorageManager
     public boolean updatePlayerName(final UUID playerUUID, final String playerName)
     {
         return CompletableFuture.supplyAsync(()->this.playerStorage.updatePlayerName(playerUUID, playerName)).isDone();
+    }
+
+    @Override
+    public boolean createBackup()
+    {
+        return this.backupStorage.createBackup();
+    }
+
+    @Override
+    public boolean restoreBackup(final String backupName)
+    {
+        try
+        {
+            return this.backupStorage.restoreBackup(backupName);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<String> listBackups()
+    {
+        return this.backupStorage.listBackups();
     }
 }

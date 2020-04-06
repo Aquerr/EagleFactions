@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.storage.sql;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
+import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public abstract class AbstractPlayerStorage implements IPlayerStorage
+public abstract class AbstractPlayerStorage implements PlayerStorage
 {
     private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
@@ -31,6 +31,8 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     private static final String UPDATE_MAXPOWER_WHERE_PLAYERUUID = "UPDATE Players SET MaxPower=? WHERE PlayerUUID=?";
     private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
     private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
+
+    private static final String DELETE_PLAYERS = "DELETE FROM Players";
 
     private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
@@ -252,7 +254,8 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             {
                 final UUID playerUUID = resultSet.getObject("PlayerUUID", UUID.class);
                 final String name = resultSet.getString("Name");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null);
+                final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null, deathInWarzone);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();
@@ -306,5 +309,20 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void deletePlayers()
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            final Statement statement = connection.createStatement();
+            statement.execute(DELETE_PLAYERS);
+            statement.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 }
