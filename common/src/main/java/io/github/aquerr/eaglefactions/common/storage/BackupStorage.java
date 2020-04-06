@@ -41,9 +41,6 @@ public class BackupStorage
 
     public boolean createBackup()
     {
-        final Set<Faction> factions = factionStorage.getFactions();
-        final Set<FactionPlayer> players = playerStorage.getServerPlayers();
-
         try
         {
             final Path backupPath = this.backupsPath.resolve("backup-" + DATE_TIME_FORMATTER.format(LocalDateTime.now()));
@@ -59,6 +56,7 @@ public class BackupStorage
             final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(factionsFile).build();
             final ConfigurationNode rootNode = configurationLoader.createEmptyNode();
             final ConfigurationNode factionsNode = rootNode.getNode("factions");
+            final Set<Faction> factions = factionStorage.getFactions();
             for (final Faction faction : factions)
             {
                 ConfigurateHelper.putFactionInNode(factionsNode, faction);
@@ -66,6 +64,7 @@ public class BackupStorage
             configurationLoader.save(rootNode);
 
             // Backup players
+            final Set<FactionPlayer> players = playerStorage.getServerPlayers();
             for (final FactionPlayer factionPlayer : players)
             {
                 final UUID playerUniqueId = factionPlayer.getUniqueId();
@@ -78,11 +77,14 @@ public class BackupStorage
 
             // Now when factions and players are ready, we can move them into a zip file.
             FileOutputStream fileOutputStream = new FileOutputStream(backupPath.toAbsolutePath().toString() + ".zip");
-            ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+            ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
             File file = backupPath.toFile();
 
             zipFile(file, file.getName(), zipOutputStream);
+            bufferedOutputStream.flush();
             zipOutputStream.close();
+            bufferedOutputStream.close();
             fileOutputStream.close();
 
             //Delete temp files
@@ -249,14 +251,16 @@ public class BackupStorage
             return;
         }
         FileInputStream fileInputStream = new FileInputStream(file);
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
         ZipEntry zipEntry = new ZipEntry(fileName);
         zipOutputStream.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
+        byte[] bytes = new byte[2048];
         int length;
-        while ((length = fileInputStream.read(bytes)) >= 0)
+        while ((length = bufferedInputStream.read(bytes)) >= 0)
         {
             zipOutputStream.write(bytes, 0, length);
         }
+        bufferedInputStream.close();
         fileInputStream.close();
     }
 
