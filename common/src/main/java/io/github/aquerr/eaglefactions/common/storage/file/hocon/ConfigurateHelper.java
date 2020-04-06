@@ -41,11 +41,11 @@ public class ConfigurateHelper
 
             if(faction.getHome() == null)
             {
-                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome());
+                configNode.getNode(faction.getName(), "home").setValue(faction.getHome());
             }
             else
             {
-                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
+                configNode.getNode(faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
             return true;
         }
@@ -78,6 +78,7 @@ public class ConfigurateHelper
     public static List<Faction> getFactionsFromNode(final ConfigurationNode configNode)
     {
         final List<Faction> factions = new ArrayList<>();
+
         try
         {
             final Set<Object> keySet = configNode.getChildrenMap().keySet();
@@ -85,14 +86,14 @@ public class ConfigurateHelper
             {
                 if(object instanceof String)
                 {
-                    Faction faction = getFactionFromNode(configNode.getNode(object));
+                    final Faction faction = getFactionFromNode(configNode.getNode(object));
                     factions.add(faction);
                 }
             }
         }
-        catch (Exception exception)
+        catch (ObjectMappingException e)
         {
-            exception.printStackTrace();
+            e.printStackTrace();
         }
         return factions;
     }
