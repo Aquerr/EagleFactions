@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public abstract class AbstractPlayerStorage implements PlayerStorage
 {
-    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Faction, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Faction, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Faction = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
 //    private static final String MERGE_PLAYER = "MERGE INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) KEY (PlayerUUID) VALUES (?, ?, ?, ?, ?)";
 
