@@ -39,7 +39,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String SELECT_CLAIMS_WHERE_FACTIONNAME = "SELECT * FROM Claims WHERE FactionName=?";
     private static final String SELECT_CHEST_WHERE_FACTIONNAME = "SELECT ChestItems FROM FactionChests WHERE FactionName=?";
 
-    private static final String SELECT_LEADER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM LeaderPerms WHERE FactionName=?";
     private static final String SELECT_OFFICER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM OfficerPerms WHERE FactionName=?";
     private static final String SELECT_MEMBER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM MemberPerms WHERE FactionName=?";
     private static final String SELECT_RECRUIT_PERMS_WHERE_FACTIONNAME = "SELECT * FROM RecruitPerms WHERE FactionName=?";
@@ -83,13 +82,11 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String MERGE_RECRUIT_PERMS = "MERGE INTO RecruitPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String MERGE_ALLY_PERMS = "MERGE INTO AllyPerms (FactionName, Use, Place, Destroy) KEY (FactionName) VALUES (?, ?, ?, ?)";
 
-    private static final String INSERT_LEADER_PERMS = "INSERT INTO LeaderPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_OFFICER_PERMS = "INSERT INTO OfficerPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_MEMBER_PERMS = "INSERT INTO MemberPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_RECRUIT_PERMS = "INSERT INTO RecruitPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_ALLY_PERMS = "INSERT INTO AllyPerms (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
 
-    private static final String UPDATE_LEADER_PERMS = "UPDATE LeaderPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
     private static final String UPDATE_OFFICER_PERMS = "UPDATE OfficerPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
     private static final String UPDATE_MEMBER_PERMS = "UPDATE MemberPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
     private static final String UPDATE_RECRUIT_PERMS = "UPDATE RecruitPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ? WHERE FactionName = ?";
@@ -363,20 +360,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
             preparedStatement = connection.prepareStatement(INSERT_CHEST);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBytes(2, chestBytes);
-            preparedStatement.execute();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(exists ? UPDATE_LEADER_PERMS : INSERT_LEADER_PERMS);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.USE));
-            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.PLACE));
-            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.DESTROY));
-            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.CLAIM));
-            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.ATTACK));
-            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.LEADER).get(FactionPermType.INVITE));
-            if(exists)
-                preparedStatement.setString(8, faction.getName());
-
             preparedStatement.execute();
             preparedStatement.close();
 
@@ -708,37 +691,14 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPerms(final Connection connection, final String factionName) throws SQLException
     {
         Map<FactionMemberType, Map<FactionPermType, Boolean>> permMap = new LinkedHashMap<>();
-        final Map<FactionPermType, Boolean> leaderMap = new LinkedHashMap<>();
         final Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
         final Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
         final Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
         final Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
         final Map<FactionPermType, Boolean> truceMap = new LinkedHashMap<>();
 
-        //Get leader perms
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LEADER_PERMS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet leaderResult = preparedStatement.executeQuery();
-        boolean leaderUSE = true;
-        boolean leaderPLACE = true;
-        boolean leaderDESTROY = true;
-        boolean leaderCLAIM = true;
-        boolean leaderATTACK = true;
-        boolean leaderINVITE = true;
-        if (leaderResult.first())
-        {
-            leaderUSE = leaderResult.getBoolean("Use");
-            leaderPLACE = leaderResult.getBoolean("Place");
-            leaderDESTROY = leaderResult.getBoolean("Destroy");
-            leaderCLAIM = leaderResult.getBoolean("Claim");
-            leaderATTACK = leaderResult.getBoolean("Attack");
-            leaderINVITE = leaderResult.getBoolean("Invite");
-        }
-        leaderResult.close();
-        preparedStatement.close();
-
         //Get officer perms
-        preparedStatement = connection.prepareStatement(SELECT_OFFICER_PERMS_WHERE_FACTIONNAME);
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_OFFICER_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet officerResult = preparedStatement.executeQuery();
         boolean officerUSE = true;
@@ -835,13 +795,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
         allyResult.close();
         preparedStatement.close();
 
-        leaderMap.put(FactionPermType.USE, leaderUSE);
-        leaderMap.put(FactionPermType.PLACE, leaderPLACE);
-        leaderMap.put(FactionPermType.DESTROY, leaderDESTROY);
-        leaderMap.put(FactionPermType.CLAIM, leaderCLAIM);
-        leaderMap.put(FactionPermType.ATTACK, leaderATTACK);
-        leaderMap.put(FactionPermType.INVITE, leaderINVITE);
-
         officerMap.put(FactionPermType.USE, officerUSE);
         officerMap.put(FactionPermType.PLACE, officerPLACE);
         officerMap.put(FactionPermType.DESTROY, officerDESTROY);
@@ -871,7 +824,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
         allyMap.put(FactionPermType.PLACE, allyPLACE);
         allyMap.put(FactionPermType.DESTROY, allyDESTROY);
 
-        permMap.put(FactionMemberType.LEADER, leaderMap);
         permMap.put(FactionMemberType.OFFICER, officerMap);
         permMap.put(FactionMemberType.MEMBER, membersMap);
         permMap.put(FactionMemberType.RECRUIT, recruitMap);

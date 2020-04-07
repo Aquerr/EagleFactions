@@ -1,11 +1,13 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.text.Text;
@@ -181,19 +183,10 @@ public class ConfigurateHelper
     public static Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPermsFromNode(final ConfigurationNode factionNode)
     {
         Map<FactionMemberType, Map<FactionPermType, Boolean>> flagMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> leaderMap = new LinkedHashMap<>();
         Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
         Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
         Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
         Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
-
-        //Get leader perms
-        boolean leaderUSE = factionNode.getNode("LEADER", "USE").getBoolean(true);
-        boolean leaderPLACE = factionNode.getNode("LEADER", "PLACE").getBoolean(true);
-        boolean leaderDESTROY = factionNode.getNode("LEADER", "DESTROY").getBoolean(true);
-        boolean leaderCLAIM = factionNode.getNode("LEADER", "CLAIM").getBoolean(true);
-        boolean leaderATTACK = factionNode.getNode("LEADER", "ATTACK").getBoolean(true);
-        boolean leaderINVITE = factionNode.getNode("LEADER", "INVITE").getBoolean(true);
 
         //Get officer perms
         boolean officerUSE = factionNode.getNode("OFFICER", "USE").getBoolean(true);
@@ -224,13 +217,6 @@ public class ConfigurateHelper
         boolean allyPLACE = factionNode.getNode( "ALLY", "PLACE").getBoolean(false);
         boolean allyDESTROY = factionNode.getNode("ALLY", "DESTROY").getBoolean(false);
 
-        leaderMap.put(FactionPermType.USE, leaderUSE);
-        leaderMap.put(FactionPermType.PLACE, leaderPLACE);
-        leaderMap.put(FactionPermType.DESTROY, leaderDESTROY);
-        leaderMap.put(FactionPermType.CLAIM, leaderCLAIM);
-        leaderMap.put(FactionPermType.ATTACK, leaderATTACK);
-        leaderMap.put(FactionPermType.INVITE, leaderINVITE);
-
         officerMap.put(FactionPermType.USE, officerUSE);
         officerMap.put(FactionPermType.PLACE, officerPLACE);
         officerMap.put(FactionPermType.DESTROY, officerDESTROY);
@@ -256,12 +242,18 @@ public class ConfigurateHelper
         allyMap.put(FactionPermType.PLACE, allyPLACE);
         allyMap.put(FactionPermType.DESTROY, allyDESTROY);
 
-        flagMap.put(FactionMemberType.LEADER, leaderMap);
         flagMap.put(FactionMemberType.OFFICER, officerMap);
         flagMap.put(FactionMemberType.MEMBER, membersMap);
         flagMap.put(FactionMemberType.RECRUIT, recruitMap);
         flagMap.put(FactionMemberType.ALLY, allyMap);
 
         return flagMap;
+    }
+
+    public static ConfigurationOptions getDefaultOptions()
+    {
+        final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults();
+        return configurationOptions.setAcceptedTypes(ImmutableSet.of(Map.class, List.class, Double.class, Float.class, Long.class, Integer.class, Boolean.class, String.class,
+                Short.class, Byte.class, Number.class));
     }
 }

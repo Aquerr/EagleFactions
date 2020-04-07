@@ -65,6 +65,10 @@ public class PermsManagerImpl implements PermsManager
         if (playerFaction.getName().equals(chunkFaction.getName()))
         {
             final FactionMemberType memberType = chunkFaction.getPlayerMemberType(playerUUID);
+
+            //Leaders has permission for everything.
+            if (memberType == FactionMemberType.LEADER)
+                return true;
             return chunkFaction.getPerms().get(memberType).get(flagType);
         }
         else if (playerFaction.getAlliances().contains(chunkFaction.getName()))

@@ -85,23 +85,6 @@ CREATE TABLE `FactionOfficers` (
 -- );
 -- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
 
--- Create LeaderPerms Table
-CREATE TABLE `LeaderPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  `Claim` TINYINT(1) NOT NULL,
-  `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_LeaderPerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-);
-
 -- Create OfficerPerms Table
 CREATE TABLE `OfficerPerms` (
   `FactionName` VARCHAR(200) NOT NULL,

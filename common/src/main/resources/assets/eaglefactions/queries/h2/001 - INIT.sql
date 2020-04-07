@@ -66,19 +66,6 @@ CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
 --);
 --CREATE UNIQUE INDEX ON FactionTruces (FactionName);
 
--- Create LeaderPerms Table
-CREATE TABLE LeaderPerms (
-   FactionName   VARCHAR(200)     UNIQUE       NOT NULL,
-   Use         BOOLEAN                         NOT NULL,
-   Place       BOOLEAN                         NOT NULL,
-   Destroy     BOOLEAN                         NOT NULL,
-   Claim       BOOLEAN                         NOT NULL,
-   Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
-);
-CREATE UNIQUE INDEX ON LeaderPerms (FactionName);
-
 -- Create OfficerPerms Table
 CREATE TABLE OfficerPerms (
    FactionName   VARCHAR(200)    UNIQUE        NOT NULL,

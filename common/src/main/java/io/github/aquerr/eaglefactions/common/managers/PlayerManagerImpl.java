@@ -165,10 +165,6 @@ public class PlayerManagerImpl implements PlayerManager
         {
             return FactionMemberType.RECRUIT;
         }
-//        else if(faction.getAlliances().contains(factionPlayer.getUniqueId().toString()))
-//        {
-//            return FactionMemberType.ALLY;
-//        }
 
         return null;
     }
