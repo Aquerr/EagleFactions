@@ -1,11 +1,11 @@
-package io.github.aquerr.eaglefactions.common.listeners;
+package io.github.aquerr.eaglefactions.common.listeners.faction;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.FactionKickEvent;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.events.FactionKickEventImpl;
+import io.github.aquerr.eaglefactions.common.listeners.AbstractListener;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;

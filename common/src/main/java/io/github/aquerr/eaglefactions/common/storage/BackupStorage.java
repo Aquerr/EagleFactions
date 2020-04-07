@@ -1,10 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.storage.file.hocon.ConfigurateHelper;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -172,11 +170,11 @@ public class BackupStorage
 
         for (final Faction faction : factions)
         {
-            this.factionStorage.addOrUpdateFaction(faction);
-            FactionsCache.addOrUpdateFactionCache(faction);
+            this.factionStorage.saveFaction(faction);
+            FactionsCache.saveFaction(faction);
         }
 
-        this.playerStorage.addPlayers(players);
+        this.playerStorage.savePlayers(players);
 
         // Remove temp files
         deleteDirectory(backupTempDirectory.toFile());

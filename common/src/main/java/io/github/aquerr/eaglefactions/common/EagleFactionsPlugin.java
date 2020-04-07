@@ -10,22 +10,25 @@ import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
-import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
-import io.github.aquerr.eaglefactions.common.managers.PermsManagerImpl;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
+import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
+import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.common.listeners.*;
+import io.github.aquerr.eaglefactions.common.listeners.faction.FactionJoinListener;
+import io.github.aquerr.eaglefactions.common.listeners.faction.FactionKickListener;
+import io.github.aquerr.eaglefactions.common.listeners.faction.FactionLeaveListener;
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.PVPLoggerImpl;
+import io.github.aquerr.eaglefactions.common.managers.PermsManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.common.managers.ProtectionManagerImpl;
@@ -127,17 +130,17 @@ public class EagleFactionsPlugin implements EagleFactions
 
         setupConfigs();
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded."));
 
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
         setupManagers();
         registerAPI();
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded."));
 
         initializeCommands();
 
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded..."));
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded."));
 
         registerListeners();
 

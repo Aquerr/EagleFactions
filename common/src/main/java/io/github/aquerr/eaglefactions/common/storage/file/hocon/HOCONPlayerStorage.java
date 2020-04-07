@@ -1,11 +1,14 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,24 +41,50 @@ public class HOCONPlayerStorage implements PlayerStorage
     }
 
     @Override
-    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
+    public FactionPlayer getPlayer(final UUID playerUUID)
     {
-        final Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-        return Files.exists(playerFile);
-    }
+        final Path playerFilePath = this.playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
+        if (Files.notExists(playerFilePath))
+            return null;
 
-    @Override
-    public boolean addPlayer(UUID playerUUID, String playerName, float startingPower, float maxPower)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
+        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFilePath).build();
         try
         {
             ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("name").setValue(playerName);
-            configurationNode.getNode("power").setValue(startingPower);
-            configurationNode.getNode("maxpower").setValue(maxPower);
+            String playerName = configurationNode.getNode("name").getString("");
+            String factionName = configurationNode.getNode("faction").getString("");
+            String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
+            float power = configurationNode.getNode("power").getFloat(0.0f);
+            float maxpower = configurationNode.getNode("maxpower").getFloat(0.0f);
+            boolean diedInWarZone = configurationNode.getNode("death-in-warzone").getBoolean(false);
+            FactionMemberType factionMemberType = null;
+
+            if(!factionMemberTypeString.equals(""))
+                factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
+
+            return new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, factionMemberType, diedInWarZone);
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+            Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of("Could not get player from the file. Tried to get player for UUID: " + playerUUID)));
+        }
+        return null;
+    }
+
+    @Override
+    public boolean savePlayer(FactionPlayer player)
+    {
+        Path playerFile = playersDirectoryPath.resolve(player.getUniqueId().toString() + ".conf");
+
+        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile).build();
+        try
+        {
+            ConfigurationNode configurationNode = configurationLoader.load();
+            configurationNode.getNode("name").setValue(player.getName());
+            configurationNode.getNode("faction").setValue(player.getFactionName().orElse(""));
+            configurationNode.getNode("power").setValue(player.getPower());
+            configurationNode.getNode("maxpower").setValue(player.getMaxPower());
             configurationNode.getNode("death-in-warzone").setValue(false);
             configurationLoader.save(configurationNode);
             return true;
@@ -69,151 +98,13 @@ public class HOCONPlayerStorage implements PlayerStorage
     }
 
     @Override
-    public boolean addPlayers(List<FactionPlayer> players)
+    public boolean savePlayers(List<FactionPlayer> players)
     {
         for (final FactionPlayer player : players)
         {
-            addPlayer(player.getUniqueId(), player.getName(), player.getLastKnownPlayerPower(), player.getLastKnownPlayerMaxPower());
+            savePlayer(player);
         }
         return true;
-    }
-
-    @Override
-    public boolean setDeathInWarzone(UUID playerUUID, boolean didDieInWarZone)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        if(!Files.exists(playerFile))
-            return false;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("death-in-warzone").setValue(didDieInWarZone);
-            configurationLoader.save(configurationNode);
-            return true;
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean getLastDeathInWarzone(UUID playerUUID)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        if(!Files.exists(playerFile))
-            return false;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            return configurationNode.getNode("death-in-warzone").getBoolean();
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    @Override
-    public float getPlayerPower(UUID playerUUID)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        if(!Files.exists(playerFile))
-            return 0.0f;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            return configurationNode.getNode("power").getFloat(0.0f);
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return 0.0f;
-    }
-
-    @Override
-    public boolean setPlayerPower(UUID playerUUID, float power)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        if(!Files.exists(playerFile))
-            return false;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("power").setValue(power);
-            configurationLoader.save(configurationNode);
-            return true;
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    @Override
-    public float getPlayerMaxPower(UUID playerUUID)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        if(!Files.exists(playerFile))
-            return 0.0f;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            return configurationNode.getNode("maxpower").getFloat(0.0f);
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return 0.0f;
-    }
-
-    @Override
-    public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        if(!Files.exists(playerFile))
-            return false;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("maxpower").setValue(maxpower);
-            configurationLoader.save(configurationNode);
-            return true;
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
     }
 
     @Override
@@ -226,7 +117,7 @@ public class HOCONPlayerStorage implements PlayerStorage
 
         for(File playerFile : playerFiles)
         {
-            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile.toPath()).build();
+            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile.toPath()).build();
             try
             {
                 ConfigurationNode configurationNode = configurationLoader.load();
@@ -250,7 +141,7 @@ public class HOCONPlayerStorage implements PlayerStorage
 
         for(File playerFile : playerFiles)
         {
-            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile.toPath()).build();
+            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile.toPath()).build();
             try
             {
                 ConfigurationNode configurationNode = configurationLoader.load();
@@ -287,63 +178,6 @@ public class HOCONPlayerStorage implements PlayerStorage
         }
 
         return playerSet;
-    }
-
-    @Override
-    public String getPlayerName(UUID playerUUID)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            return configurationNode.getNode("name").getString("");
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return "";
-    }
-
-    @Override
-    public boolean updatePlayerName(UUID playerUUID, String playerName)
-    {
-        Path playerFile = playersDirectoryPath.resolve(playerUUID.toString() + ".conf");
-        if(!Files.exists(playerFile))
-            return false;
-
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-        ConfigurationNode configurationNode = null;
-        try
-        {
-            configurationNode = configurationLoader.load();
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-        Object playerNameInFile = configurationNode.getNode("name").getValue();
-        if(playerNameInFile != null)
-        {
-            String oldPlayerName = (String) playerNameInFile;
-            if(!oldPlayerName.equals(playerName))
-            {
-                configurationNode.getNode("name").setValue(playerName);
-                try
-                {
-                    configurationLoader.save(configurationNode);
-                    return true;
-                }
-                catch(IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return false;
     }
 
     @Override

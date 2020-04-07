@@ -2,8 +2,8 @@ package io.github.aquerr.eaglefactions.common.storage.sql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
@@ -24,6 +24,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.sql.*;
 import java.time.Instant;
@@ -234,7 +235,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     }
 
     @Override
-    public boolean addOrUpdateFaction(final Faction faction)
+    public boolean saveFaction(final Faction faction)
     {
         Connection connection = null;
         try
@@ -305,40 +306,53 @@ public abstract class AbstractFactionStorage implements FactionStorage
             deleteFactionRecruits(connection, faction.getName());
             deleteFactionClaims(connection, faction.getName());
 
+            //TODO: Convert to batch
             for (final UUID officer : faction.getOfficers())
             {
+                if (faction.getName().equalsIgnoreCase("anticonstitutionnellement"))
+                {
+                    String test = "";
+                }
+                else if(officer.toString().equalsIgnoreCase("anticonstitutionnellement"))
+                {
+                    String test = "";
+                }
+
                 preparedStatement = connection.prepareStatement(INSERT_OFFICERS);
                 preparedStatement.setString(1, officer.toString());
                 preparedStatement.setString(2, faction.getName());
-                preparedStatement.execute();
+                preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 
+            //TODO: Convert to batch
             for (UUID member : faction.getMembers())
             {
                 preparedStatement = connection.prepareStatement(INSERT_MEMBERS);
                 preparedStatement.setString(1, member.toString());
                 preparedStatement.setString(2, faction.getName());
-                preparedStatement.execute();
+                preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 
+            //TODO: Convert to batch
             for (final UUID recruit : faction.getRecruits())
             {
                 preparedStatement = connection.prepareStatement(INSERT_RECRUITS);
                 preparedStatement.setString(1, recruit.toString());
                 preparedStatement.setString(2, faction.getName());
-                preparedStatement.execute();
+                preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 
+            //TODO: Convert to batch
             for (final Claim claim : faction.getClaims())
             {
                 preparedStatement = connection.prepareStatement(INSERT_CLAIM);
                 preparedStatement.setString(1, faction.getName());
                 preparedStatement.setString(2, claim.getWorldUUID().toString());
                 preparedStatement.setString(3, claim.getChunkPosition().toString());
-                preparedStatement.execute();
+                preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 

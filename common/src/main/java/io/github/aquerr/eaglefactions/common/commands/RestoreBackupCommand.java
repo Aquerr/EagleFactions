@@ -26,7 +26,7 @@ public class RestoreBackupCommand extends AbstractCommand
 
         //We run it async so that It does not freeze the server.
         CompletableFuture.runAsync(() ->{
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "Restoring the backup..."));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "Restoring backup " + filename + "..."));
             final boolean result = super.getPlugin().getStorageManager().restoreBackup(filename);
             if (result)
             {

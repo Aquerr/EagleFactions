@@ -178,7 +178,7 @@ public class FactionImpl implements Faction
             optionalFaction = this.truces.stream().map(factionLogic::getFactionByName).filter(Objects::nonNull).filter(y->y.containsPlayer(playerUUID)).findAny();
             if(optionalFaction.isPresent()) return FactionMemberType.TRUCE;
         }
-        return null;
+        return FactionMemberType.NONE;
     }
 
     @Override

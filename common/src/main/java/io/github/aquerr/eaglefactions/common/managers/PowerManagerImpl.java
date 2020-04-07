@@ -1,25 +1,24 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.scheduling.PowerIncrementTask;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.scheduler.Task;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -58,7 +57,9 @@ public class PowerManagerImpl implements PowerManager
     {
         if (playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
-        return this.playerManager.getPlayerPower(playerUUID);
+
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        return optionalFactionPlayer.map(FactionPlayer::getPower).orElse(0F);
     }
 
     @Override
@@ -154,25 +155,58 @@ public class PowerManagerImpl implements PowerManager
         if(playerUUID == null || playerUUID.equals(dummyUUID))
             return 0;
 
-        return this.playerManager.getPlayerMaxPower(playerUUID);
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        return optionalFactionPlayer.map(FactionPlayer::getMaxPower).orElse(0F);
+    }
+
+    @Override
+    public boolean setPlayerPower(UUID playerUUID, float power)
+    {
+        if (playerUUID == null || playerUUID.equals(dummyUUID))
+            return false;
+
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        if (!optionalFactionPlayer.isPresent())
+            return false;
+        final FactionPlayer factionPlayer = optionalFactionPlayer.get();
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), power, factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        return this.playerManager.savePlayer(updatedPlayer);
+    }
+
+    @Override
+    public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
+    {
+        if (playerUUID == null || playerUUID.equals(dummyUUID))
+            return false;
+
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        if (!optionalFactionPlayer.isPresent())
+            return false;
+        final FactionPlayer factionPlayer = optionalFactionPlayer.get();
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getPower(), maxpower, factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        return this.playerManager.savePlayer(updatedPlayer);
     }
 
     @Override
     public void addPower(final UUID playerUUID, final boolean isKillAward)
     {
-        float playerPower = this.playerManager.getPlayerPower(playerUUID);
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        if (!optionalFactionPlayer.isPresent())
+            return;
+
+        float playerPower = optionalFactionPlayer.get().getPower();
 
         if(playerPower + powerConfig.getPowerIncrement() < getPlayerMaxPower(playerUUID))
         {
             if(isKillAward)
             {
                 float killAward = powerConfig.getKillAward();
-                this.playerManager.setPlayerPower(playerUUID, playerPower + killAward);
+                setPlayerPower(playerUUID, playerPower + killAward);
             }
             else
             {
                 float newPower = round(playerPower + powerConfig.getPowerIncrement(), 2);
-                this.playerManager.setPlayerPower(playerUUID, newPower);
+                setPlayerPower(playerUUID, newPower);
             }
         }
     }
@@ -181,12 +215,6 @@ public class PowerManagerImpl implements PowerManager
         BigDecimal bd = new BigDecimal(number);
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
         return bd.floatValue();
-    }
-
-    @Override
-    public void setPower(final UUID playerUUID, final float power)
-    {
-        this.playerManager.setPlayerPower(playerUUID, power);
     }
 
     @Override
@@ -199,37 +227,38 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public void decreasePower(final UUID playerUUID)
     {
-        float playerPower = this.playerManager.getPlayerPower(playerUUID);
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        if (!optionalFactionPlayer.isPresent())
+            return;
 
+        float playerPower = optionalFactionPlayer.get().getPower();
         if(playerPower - powerConfig.getPowerDecrement() > 0)
         {
-            this.playerManager.setPlayerPower(playerUUID, playerPower - powerConfig.getPowerDecrement());
+            setPlayerPower(playerUUID, playerPower - powerConfig.getPowerDecrement());
         }
         else
         {
-            setPower(playerUUID, 0);
+            setPlayerPower(playerUUID, 0);
         }
     }
 
     @Override
     public void penalty(final UUID playerUUID)
     {
-        float playerPower = this.playerManager.getPlayerPower(playerUUID);
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        if (!optionalFactionPlayer.isPresent())
+            return;
+
+        float playerPower = optionalFactionPlayer.get().getPower();
         float penalty = powerConfig.getPenalty();
 
         if(playerPower - penalty > 0)
         {
-            this.playerManager.setPlayerPower(playerUUID, playerPower - penalty);
+            setPlayerPower(playerUUID, playerPower - penalty);
         }
         else
         {
-            this.playerManager.setPlayerPower(playerUUID, 0);
+            setPlayerPower(playerUUID, 0);
         }
-    }
-
-    @Override
-    public void setMaxPower(final UUID playerUUID, final float power)
-    {
-        this.playerManager.setPlayerMaxPower(playerUUID, power);
     }
 }

@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -30,7 +29,10 @@ public class FactionPlayerImpl implements FactionPlayer
         this.uniqueId = uniqueId;
 
         this.factionName = factionName;
-        this.factionRole = factionRole;
+
+        if (factionRole == null)
+            this.factionRole = FactionMemberType.NONE;
+        else this.factionRole = factionRole;
 
         this.diedInWarZone = diedInWarZone;
 
@@ -64,16 +66,9 @@ public class FactionPlayerImpl implements FactionPlayer
     }
 
     @Override
-    public Optional<FactionMemberType> getFactionRole()
+    public FactionMemberType getFactionRole()
     {
-        if (this.factionRole == null)
-        {
-            return Optional.empty();
-        }
-        else
-        {
-            return Optional.of(this.factionRole);
-        }
+        return this.factionRole;
     }
 
     @Override
@@ -86,23 +81,11 @@ public class FactionPlayerImpl implements FactionPlayer
     @Override
     public float getPower()
     {
-        return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(this.uniqueId);
-    }
-
-    @Override
-    public float getMaxPower()
-    {
-        return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerMaxPower(this.uniqueId);
-    }
-
-    @Override
-    public float getLastKnownPlayerPower()
-    {
         return this.power;
     }
 
     @Override
-    public float getLastKnownPlayerMaxPower()
+    public float getMaxPower()
     {
         return this.maxpower;
     }

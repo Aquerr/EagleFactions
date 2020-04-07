@@ -19,7 +19,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Collections;
-import java.util.Optional;
 
 public class JoinCommand extends AbstractCommand
 {

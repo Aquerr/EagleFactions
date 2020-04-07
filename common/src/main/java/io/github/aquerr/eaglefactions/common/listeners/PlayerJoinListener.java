@@ -39,10 +39,12 @@ public class PlayerJoinListener extends AbstractListener
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + Messages.IS_AVAILABLE));
 
             //Create player file and set power if player does not exist.
-            if (!super.getPlugin().getPlayerManager().checkIfPlayerExists(player.getUniqueId(), player.getName()))
-                super.getPlugin().getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
+            if (!super.getPlugin().getPlayerManager().getFactionPlayer(player.getUniqueId()).isPresent())
+                super.getPlugin().getPlayerManager().addPlayer(player.getUniqueId(), player.getName()); //Maybe we could add loadCache method instead?
 
-            super.getPlugin().getPlayerManager().updatePlayerName(player.getUniqueId(), player.getName());
+//            super.getPlugin().getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
+
+//            super.getPlugin().getPlayerManager().updatePlayerName(player.getUniqueId(), player.getName());
             super.getPlugin().getPowerManager().startIncreasingPower(player.getUniqueId());
 
 

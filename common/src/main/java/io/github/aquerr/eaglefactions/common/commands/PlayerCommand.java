@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -72,11 +73,16 @@ public class PlayerCommand extends AbstractCommand
 
             //TODO: Show if player is online or offline.
 
+            final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(player.getUniqueId());
+            if (!optionalFactionPlayer.isPresent())
+                return;
+            final FactionPlayer factionPlayer = optionalFactionPlayer.get();
+
             Text info = Text.builder()
-                    .append(Text.of(TextColors.AQUA, Messages.NAME + ": ", TextColors.GOLD, getPlugin().getPlayerManager().getPlayerName(player.getUniqueId()).get() + "\n"))
+                    .append(Text.of(TextColors.AQUA, Messages.NAME + ": ", TextColors.GOLD, factionPlayer.getName() + "\n"))
                     .append(Text.of(TextColors.AQUA, Messages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
                     .append(Text.of(TextColors.AQUA, Messages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
-                    .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())))
+                    .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, factionPlayer.getPower() + "/" + factionPlayer.getMaxPower()))
                     .build();
 
             playerInfo.add(info);

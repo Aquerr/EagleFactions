@@ -4,11 +4,11 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
-import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -45,66 +45,23 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public boolean addPlayer(final UUID playerUUID, final String playerName)
     {
-        return storageManager.addPlayer(playerUUID, playerName, this.powerConfig.getStartingPower(), this.powerConfig.getGlobalMaxPower());
+        final FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, null, this.powerConfig.getStartingPower(), this.powerConfig.getGlobalMaxPower(), null, false);
+        return storageManager.savePlayer(factionPlayer);
     }
 
     @Override
-    public float getPlayerPower(final UUID playerUUID)
+    public boolean savePlayer(FactionPlayer factionPlayer)
     {
-        return storageManager.getPlayerPower(playerUUID);
+        return this.storageManager.savePlayer(factionPlayer);
     }
 
     @Override
-    public boolean setPlayerPower(final UUID playerUUID, final float power)
+    public Optional<FactionPlayer> getFactionPlayer(final UUID playerUUID)
     {
-        return storageManager.setPlayerPower(playerUUID, power);
-    }
-
-    @Override
-    public float getPlayerMaxPower(final UUID playerUUID)
-    {
-        return storageManager.getPlayerMaxPower(playerUUID);
-    }
-
-    @Override
-    public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
-    {
-        return storageManager.setPlayerMaxPower(playerUUID, maxpower);
-    }
-
-    @Override
-    public Optional<String> getPlayerName(final UUID playerUUID)
-    {
-        Optional<User> oUser = getUser(playerUUID);
-
-        if(oUser.isPresent())
-            return Optional.of(oUser.get().getName());
-        else
-        {
-            return getLastKnownPlayerName(playerUUID);
-        }
-    }
-
-    @Override
-    public FactionPlayer convertToFactionPlayer(final User user)
-    {
-        String factionName = "";
-        FactionMemberType factionMemberType = null;
-        final Optional<Faction> optionalFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
-        if (optionalFaction.isPresent())
-        {
-            factionName = optionalFaction.get().getName();
-            factionMemberType = optionalFaction.get().getPlayerMemberType(user.getUniqueId());
-        }
-        return new FactionPlayerImpl(user.getName(), user.getUniqueId(), factionName, 0, 0, factionMemberType, false);
-    }
-
-    private Optional<String> getLastKnownPlayerName(final UUID playerUUID)
-    {
-        final String playerName = storageManager.getPlayerName(playerUUID);
-        if(playerName.equals(""))
+        final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
+        if (factionPlayer == null)
             return Optional.empty();
-        return Optional.of(playerName);
+        else return Optional.of(factionPlayer);
     }
 
     @Override
@@ -128,82 +85,14 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public void setDeathInWarZone(final UUID playerUUID, final boolean didDieInWarZone)
-    {
-        storageManager.setDeathInWarzone(playerUUID, didDieInWarZone);
-    }
-
-    @Override
-    public boolean lastDeathAtWarZone(final UUID playerUUID)
-    {
-       return storageManager.getLastDeathInWarzone(playerUUID);
-    }
-
-    @Override
-    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
-    {
-        return storageManager.checkIfPlayerExists(playerUUID, playerName);
-    }
-
-    @Override
-    @Nullable
-    public FactionMemberType getFactionMemberType(final UUID playerUUID, final Faction faction)
-    {
-        if(faction.getLeader() != null && faction.getLeader().equals(playerUUID))
-        {
-            return FactionMemberType.LEADER;
-        }
-        else if(faction.getMembers().contains(playerUUID))
-        {
-            return FactionMemberType.MEMBER;
-        }
-        else if(faction.getOfficers().contains(playerUUID))
-        {
-            return FactionMemberType.OFFICER;
-        }
-        else if(faction.getRecruits().contains(playerUUID))
-        {
-            return FactionMemberType.RECRUIT;
-        }
-
-        return null;
-    }
-
-    @Override
     public Set<FactionPlayer> getServerPlayers()
     {
         return this.storageManager.getServerPlayers();
-//        final Collection<Player> onlinePlayers = Sponge.getServer().getOnlinePlayers();
-//        final Set<FactionPlayer> factionPlayers = storageManager.getServerPlayers();
-//        for(final Player player : onlinePlayers)
-//        {
-//            boolean playerExist = false;
-//            for(final FactionPlayer factionPlayer : factionPlayers)
-//            {
-//                if(player.getUniqueId().equals(factionPlayer.getUniqueId()))
-//                {
-//                    playerExist = true;
-//                    break;
-//                }
-//            }
-//
-//            if(!playerExist)
-//                factionPlayers.add(new FactionPlayerImpl(player.getName(), player.getUniqueId(), null, null, 5, 10));
-//        }
-//
-//        return factionPlayers;
-    }
-
-    @Override
-    public void updatePlayerName(final UUID playerUUID, final String playerName)
-    {
-        this.storageManager.updatePlayerName(playerUUID, playerName);
     }
 
     private Optional<User> getUser(final UUID playerUUID)
     {
-        final Optional<User> oUser = userStorageService.get(playerUUID);
-        return oUser;
+        return userStorageService.get(playerUUID);
     }
 
     @Override
@@ -225,5 +114,13 @@ public class PlayerManagerImpl implements PlayerManager
     public Set<UUID> getAdminModePlayers()
     {
         return Collections.unmodifiableSet(this.adminModePlayers);
+    }
+
+    @Override
+    public void setDeathInWarZone(UUID playerUUID, boolean didDie)
+    {
+        final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), didDie);
+        this.storageManager.savePlayer(updatedPlayer);
     }
 }

@@ -6,7 +6,7 @@ import java.util.Set;
 
 public interface FactionStorage
 {
-    boolean addOrUpdateFaction(Faction faction);
+    boolean saveFaction(Faction faction);
 
     Faction getFaction(String factionName);
 

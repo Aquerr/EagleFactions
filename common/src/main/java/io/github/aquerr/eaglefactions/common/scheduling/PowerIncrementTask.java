@@ -1,10 +1,12 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import org.spongepowered.api.scheduler.Task;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class PowerIncrementTask implements EagleFactionsConsumerTask<Task>
@@ -29,9 +31,15 @@ public class PowerIncrementTask implements EagleFactionsConsumerTask<Task>
         if (!this.playerManager.isPlayerOnline(playerUUID))
             task.cancel();
 
-        if(this.playerManager.getPlayerPower(playerUUID) + this.powerConfig.getPowerIncrement() < this.playerManager.getPlayerMaxPower(playerUUID))
+        final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
+        if (!optionalFactionPlayer.isPresent())
+            return;
+
+        final FactionPlayer factionPlayer=  optionalFactionPlayer.get();
+
+        if(factionPlayer.getPower() + this.powerConfig.getPowerIncrement() < factionPlayer.getMaxPower())
             this.powerManager.addPower(playerUUID, false);
         else
-            this.powerManager.setPower(playerUUID, this.playerManager.getPlayerMaxPower(playerUUID));
+            this.powerManager.setPlayerPower(playerUUID, factionPlayer.getMaxPower());
     }
 }

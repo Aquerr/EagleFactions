@@ -2,10 +2,9 @@ package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
-import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -87,17 +86,18 @@ public class InfoCommand extends AbstractCommand
         String leaderName = "";
         if(faction.getLeader() != null && !faction.getLeader().equals(new UUID(0,0)))
         {
-            Optional<String> optionalName = getPlugin().getPlayerManager().getPlayerName(faction.getLeader());
-            if(optionalName.isPresent())
-                leaderName = optionalName.get();
+            final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(faction.getLeader());
+            if (optionalFactionPlayer.isPresent())
+                leaderName = optionalFactionPlayer.get().getName();
         }
 
         String recruitList = "";
         if(!faction.getRecruits().isEmpty())
         {
         	recruitList = faction.getRecruits().stream()
-        			.map(recruit -> getPlugin().getPlayerManager().getPlayerName(recruit))
+        			.map(recruit -> getPlugin().getPlayerManager().getFactionPlayer(recruit))
         			.filter(Optional::isPresent).map(Optional::get)
+                    .map(FactionPlayer::getName)
         			.collect(Collectors.joining(", "));
         }
 
@@ -105,16 +105,18 @@ public class InfoCommand extends AbstractCommand
         if(!faction.getMembers().isEmpty())
         {
         	membersList = faction.getMembers().stream()
-        			.map(member -> getPlugin().getPlayerManager().getPlayerName(member))
+        			.map(member -> getPlugin().getPlayerManager().getFactionPlayer(member))
         			.filter(Optional::isPresent).map(Optional::get)
+                    .map(FactionPlayer::getName)
         			.collect(Collectors.joining(", "));
         }
 
         String officersList = "";
         if(!faction.getOfficers().isEmpty()) {
         	officersList = faction.getOfficers().stream()
-        			.map(officer -> getPlugin().getPlayerManager().getPlayerName(officer))
+        			.map(officer -> getPlugin().getPlayerManager().getPlayer(officer))
         			.filter(Optional::isPresent).map(Optional::get)
+                    .map(Player::getName)
         			.collect(Collectors.joining(", "));		
         }
 

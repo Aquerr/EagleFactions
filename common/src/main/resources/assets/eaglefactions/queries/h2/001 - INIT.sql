@@ -30,7 +30,7 @@ CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 -- Create Members Table
 CREATE TABLE FactionMembers (
     MemberUUID  VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    FactionName VARCHAR(200) NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
@@ -38,7 +38,7 @@ CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
 -- Create Officers Table
 CREATE TABLE FactionOfficers (
     OfficerUUID VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    FactionName VARCHAR(200) NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);

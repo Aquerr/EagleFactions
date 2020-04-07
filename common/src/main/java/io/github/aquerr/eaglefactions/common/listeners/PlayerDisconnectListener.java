@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.listeners;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -32,5 +33,8 @@ public class PlayerDisconnectListener extends AbstractListener
 
         final Optional<Faction> optionalFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         optionalFaction.ifPresent(faction -> getPlugin().getFactionLogic().setLastOnline(faction, Instant.now()));
+
+        //TODO: Unload player cache...
+        FactionsCache.removePlayer(player.getUniqueId());
     }
 }

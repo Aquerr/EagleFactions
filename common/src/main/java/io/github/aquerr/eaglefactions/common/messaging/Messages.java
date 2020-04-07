@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.common.messaging;
 
 import com.google.inject.Singleton;
-import org.spongepowered.api.text.TextTemplate;
 
 @Singleton
 //@ConfigSerializable

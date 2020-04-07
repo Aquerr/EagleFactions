@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -21,7 +20,6 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class PVPLoggerImpl implements PVPLogger
 {

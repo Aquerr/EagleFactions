@@ -94,7 +94,7 @@ public class PlayerMoveListener extends AbstractListener
             {
                 if (!super.getPlugin().getPlayerManager().hasAdminMode(player) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
                 {
-                    if (super.getPlugin().getPlayerManager().lastDeathAtWarZone(player.getUniqueId()))
+                    if (super.getPlugin().getPlayerManager().getFactionPlayer(player.getUniqueId()).get().diedInWarZone())
                     {
                         super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), false);
                     }
