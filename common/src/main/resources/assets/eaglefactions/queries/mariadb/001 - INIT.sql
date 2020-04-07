@@ -178,6 +178,7 @@ CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `FactionChests` (`FactionName`);
 CREATE TABLE `Players` (
   `PlayerUUID` VARCHAR(36) NOT NULL,
   `Name` VARCHAR(200) NOT NULL,
+  `Faction` VARCHAR(200) NULL,
   `Power` FLOAT NOT NULL,
   `MaxPower` FLOAT NOT NULL,
   `DeathInWarzone` TINYINT(1) NOT NULL,

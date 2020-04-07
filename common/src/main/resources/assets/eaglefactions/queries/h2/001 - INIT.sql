@@ -147,6 +147,7 @@ CREATE UNIQUE INDEX ON FactionChests (FactionName);
 CREATE TABLE Players (
     PlayerUUID VARCHAR(36) PRIMARY KEY NOT NULL,
     Name    VARCHAR(200)    NOT NULL,
+    Faction VARCHAR(200)    NULL,
     Power   REAL NOT NULL,
     MaxPower    REAL NOT NULL,
     DeathInWarzone BOOLEAN NOT NULL

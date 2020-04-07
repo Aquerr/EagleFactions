@@ -16,8 +16,8 @@ import java.util.UUID;
 
 public abstract class AbstractPlayerStorage implements PlayerStorage
 {
-    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?)";
-//    private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
+    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Faction, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?)";
+    private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Faction = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
 //    private static final String MERGE_PLAYER = "MERGE INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) KEY (PlayerUUID) VALUES (?, ?, ?, ?, ?)";
 
 //    private static final String SELECT_PLAYER_WHERE_PLAYERUUID = "SELECT Name FROM Players WHERE PlayerUUID=? LIMIT 1";
@@ -61,10 +61,11 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             if (resultSet.first())
             {
                 final String name = resultSet.getString("Name");
+                final String factionName = resultSet.getString("Faction");
                 final float power = resultSet.getFloat("Power");
                 final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
-                factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
+                factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, null, deathInWarzone);
             }
             resultSet.close();
             statement.close();
@@ -82,12 +83,23 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     {
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER);
+            //Add or update?
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PLAYER_WHERE_UUID);
+            preparedStatement.setString(1, player.getUniqueId().toString());
+            final ResultSet factionSelect = preparedStatement.executeQuery();
+            final boolean exists = factionSelect.next();
+
+            String queryToUse = exists ? UPDATE_PLAYER : INSERT_PLAYER;
+
+            final PreparedStatement statement = connection.prepareStatement(queryToUse);
             statement.setString(1, player.getUniqueId().toString());
             statement.setString(2, player.getName());
-            statement.setFloat(3, player.getPower());
-            statement.setFloat(4, player.getMaxPower());
-            statement.setBoolean(5, player.diedInWarZone());
+            statement.setString(3, player.getFactionName().orElse(null));
+            statement.setFloat(4, player.getPower());
+            statement.setFloat(5, player.getMaxPower());
+            statement.setBoolean(6, player.diedInWarZone());
+            if(exists)
+                preparedStatement.setString(7, player.getUniqueId().toString()); //Where part
             final boolean didSucceed = statement.execute();
             statement.close();
             return didSucceed;
@@ -109,9 +121,10 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             {
                 statement.setString(1, player.getUniqueId().toString());
                 statement.setString(2, player.getName());
-                statement.setFloat(3, player.getPower());
-                statement.setFloat(4, player.getMaxPower());
-                statement.setBoolean(5, player.diedInWarZone());
+                statement.setString(3, player.getFactionName().orElse(null));
+                statement.setFloat(4, player.getPower());
+                statement.setFloat(5, player.getMaxPower());
+                statement.setBoolean(6, player.diedInWarZone());
                 statement.addBatch();
             }
             final int[] results = statement.executeBatch();
@@ -161,10 +174,11 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             {
                 final UUID playerUUID = UUID.fromString(resultSet.getString("PlayerUUID"));
                 final String name = resultSet.getString("Name");
+                final String factionName = resultSet.getString("Faction");
                 final float power = resultSet.getFloat("Power");
                 final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, null, deathInWarzone);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();
