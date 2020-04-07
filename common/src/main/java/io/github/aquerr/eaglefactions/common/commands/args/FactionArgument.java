@@ -31,12 +31,12 @@ public class FactionArgument extends CommandElement
 	protected Faction parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
 	{
 		if(!args.hasNext())
-			throw new ArgumentParseException(Text.of("Argument is not a valid faction!"), "", 0);
+			throw args.createError(Text.of("Argument is not a valid faction!"));
 
 		final String factionName = args.next();
 		final Faction faction = this.plugin.getFactionLogic().getFactionByName(factionName);
 		if(faction == null)
-			throw new ArgumentParseException(Text.of("Argument is not a valid faction!"), "", 0);
+			throw args.createError(Text.of("Argument is not a valid faction!"));
 		return faction;
 	}
 

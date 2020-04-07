@@ -4,7 +4,7 @@ import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
-import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.FactionStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -18,9 +18,8 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-public class HOCONFactionStorage implements IFactionStorage
+public class HOCONFactionStorage implements FactionStorage
 {
     private Path filePath;
     private ConfigurationLoader<CommentedConfigurationNode> configLoader;
@@ -76,39 +75,10 @@ public class HOCONFactionStorage implements IFactionStorage
 
     public boolean saveFaction(Faction faction)
     {
-        try
-        {
-            configNode.getNode("factions", faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
-            configNode.getNode("factions", faction.getName(), "leader").setValue(faction.getLeader().toString());
-            configNode.getNode("factions", faction.getName(), "description").setValue(faction.getDescription());
-            configNode.getNode("factions", faction.getName(), "motd").setValue(faction.getMessageOfTheDay());
-            configNode.getNode("factions", faction.getName(), "officers").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getOfficers()));
-            configNode.getNode("factions", faction.getName(), "members").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getMembers()));
-            configNode.getNode("factions", faction.getName(), "recruits").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getRecruits()));
-            configNode.getNode("factions", faction.getName(), "truces").setValue(faction.getTruces());
-            configNode.getNode("factions", faction.getName(), "alliances").setValue(faction.getAlliances());
-            configNode.getNode("factions", faction.getName(), "enemies").setValue(faction.getEnemies());
-            configNode.getNode("factions", faction.getName(), "claims").setValue(faction.getClaims().stream().map(Claim::toString).collect(Collectors.toList()));
-            configNode.getNode("factions", faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
-            configNode.getNode("factions", faction.getName(), "perms").setValue(faction.getPerms());
-            configNode.getNode("factions", faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
-            configNode.getNode("factions", faction.getName(), "isPublic").setValue(faction.isPublic());
+        final boolean didSucceed = ConfigurateHelper.putFactionInNode(configNode.getNode("factions"), faction);
 
-            if(faction.getHome() == null)
-            {
-                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome());
-            }
-            else
-            {
-                configNode.getNode("factions", faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
-            }
+        if (didSucceed)
             return saveChanges();
-        }
-        catch(final Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
         return false;
     }
 
@@ -135,16 +105,23 @@ public class HOCONFactionStorage implements IFactionStorage
     }
 
     @Override
+    public void deleteFactions()
+    {
+        this.configNode.getNode("factions").setValue(null);
+        saveChanges();
+    }
+
+    @Override
     public @Nullable
     Faction getFaction(String factionName)
     {
             if(configNode.getNode("factions", factionName).getValue() == null)
                 return null;
 
-            return createFactionObject(factionName);
+            return getFactionFromFile(factionName);
     }
 
-    private Faction createFactionObject(String factionName)
+    private Faction getFactionFromFile(String factionName)
     {
         final Text tag = getFactionTag(factionName);
         final String description = getFactionDescription(factionName);
@@ -158,7 +135,7 @@ public class HOCONFactionStorage implements IFactionStorage
         final Set<String> enemies = getFactionEnemies(factionName);
         final Set<Claim> claims = getFactionClaims(factionName);
         final Instant lastOnline = getLastOnline(factionName);
-        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(factionName);
+        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = ConfigurateHelper.getFactionPermsFromNode(configNode.getNode("factions", factionName, "perms"));
         final FactionChest chest = getFactionChest(factionName);
         final boolean isPublic = getFactionIsPublic(factionName);
 
@@ -208,93 +185,6 @@ public class HOCONFactionStorage implements IFactionStorage
             needToSave = true;
             return new FactionChestImpl(factionName);
         }
-    }
-
-    private Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPerms(String factionName)
-    {
-        Map<FactionMemberType, Map<FactionPermType, Boolean>> flagMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> leaderMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
-
-        //Get leader perms
-        boolean leaderUSE = configNode.getNode("factions", factionName, "perms", "LEADER", "USE").getBoolean(true);
-        boolean leaderPLACE = configNode.getNode("factions", factionName, "perms", "LEADER", "PLACE").getBoolean(true);
-        boolean leaderDESTROY = configNode.getNode("factions", factionName, "perms", "LEADER", "DESTROY").getBoolean(true);
-        boolean leaderCLAIM = configNode.getNode("factions", factionName, "perms", "LEADER", "CLAIM").getBoolean(true);
-        boolean leaderATTACK = configNode.getNode("factions", factionName, "perms", "LEADER", "ATTACK").getBoolean(true);
-        boolean leaderINVITE = configNode.getNode("factions", factionName, "perms", "LEADER", "INVITE").getBoolean(true);
-
-        //Get officer perms
-        boolean officerUSE = configNode.getNode("factions", factionName, "perms", "OFFICER", "USE").getBoolean(true);
-        boolean officerPLACE = configNode.getNode("factions", factionName, "perms", "OFFICER", "PLACE").getBoolean(true);
-        boolean officerDESTROY = configNode.getNode("factions", factionName, "perms", "OFFICER", "DESTROY").getBoolean(true);
-        boolean officerCLAIM = configNode.getNode("factions", factionName, "perms", "OFFICER", "CLAIM").getBoolean(true);
-        boolean officerATTACK = configNode.getNode("factions", factionName, "perms", "LEADER", "ATTACK").getBoolean(true);
-        boolean officerINVITE = configNode.getNode("factions", factionName, "perms", "OFFICER", "INVITE").getBoolean(true);
-
-        //Get member perms
-        boolean memberUSE = configNode.getNode("factions", factionName, "perms", "MEMBER", "USE").getBoolean(true);
-        boolean memberPLACE = configNode.getNode("factions", factionName, "perms", "MEMBER", "PLACE").getBoolean(true);
-        boolean memberDESTROY = configNode.getNode("factions", factionName, "perms", "MEMBER", "DESTROY").getBoolean(true);
-        boolean memberCLAIM = configNode.getNode("factions", factionName, "perms", "MEMBER", "CLAIM").getBoolean(false);
-        boolean memberATTACK = configNode.getNode("factions", factionName, "perms", "LEADER", "ATTACK").getBoolean(false);
-        boolean memberINVITE = configNode.getNode("factions", factionName, "perms", "MEMBER", "INVITE").getBoolean(true);
-
-        //Get recruit perms
-        boolean recruitUSE = configNode.getNode("factions", factionName, "perms", "RECRUIT", "USE").getBoolean(true);
-        boolean recruitPLACE = configNode.getNode("factions", factionName, "perms", "RECRUIT", "PLACE").getBoolean(true);
-        boolean recruitDESTROY = configNode.getNode("factions", factionName, "perms", "RECRUIT", "DESTROY").getBoolean(true);
-        boolean recruitCLAIM = configNode.getNode("factions", factionName, "perms", "RECRUIT", "CLAIM").getBoolean(false);
-        boolean recruitATTACK = configNode.getNode("factions", factionName, "perms", "RECRUIT", "ATTACK").getBoolean(false);
-        boolean recruitINVITE = configNode.getNode("factions", factionName, "perms", "RECRUIT", "INVITE").getBoolean(false);
-
-        //Get ally perms
-        boolean allyUSE = configNode.getNode("factions", factionName, "perms", "ALLY", "USE").getBoolean(true);
-        boolean allyPLACE = configNode.getNode("factions", factionName, "perms", "ALLY", "PLACE").getBoolean(false);
-        boolean allyDESTROY = configNode.getNode("factions", factionName, "perms", "ALLY", "DESTROY").getBoolean(false);
-
-        leaderMap.put(FactionPermType.USE, leaderUSE);
-        leaderMap.put(FactionPermType.PLACE, leaderPLACE);
-        leaderMap.put(FactionPermType.DESTROY, leaderDESTROY);
-        leaderMap.put(FactionPermType.CLAIM, leaderCLAIM);
-        leaderMap.put(FactionPermType.ATTACK, leaderATTACK);
-        leaderMap.put(FactionPermType.INVITE, leaderINVITE);
-
-        officerMap.put(FactionPermType.USE, officerUSE);
-        officerMap.put(FactionPermType.PLACE, officerPLACE);
-        officerMap.put(FactionPermType.DESTROY, officerDESTROY);
-        officerMap.put(FactionPermType.CLAIM, officerCLAIM);
-        officerMap.put(FactionPermType.ATTACK, officerATTACK);
-        officerMap.put(FactionPermType.INVITE, officerINVITE);
-
-        membersMap.put(FactionPermType.USE, memberUSE);
-        membersMap.put(FactionPermType.PLACE, memberPLACE);
-        membersMap.put(FactionPermType.DESTROY, memberDESTROY);
-        membersMap.put(FactionPermType.CLAIM, memberCLAIM);
-        membersMap.put(FactionPermType.ATTACK, memberATTACK);
-        membersMap.put(FactionPermType.INVITE, memberINVITE);
-
-        recruitMap.put(FactionPermType.USE, recruitUSE);
-        recruitMap.put(FactionPermType.PLACE, recruitPLACE);
-        recruitMap.put(FactionPermType.DESTROY, recruitDESTROY);
-        recruitMap.put(FactionPermType.CLAIM, recruitCLAIM);
-        recruitMap.put(FactionPermType.ATTACK, recruitATTACK);
-        recruitMap.put(FactionPermType.INVITE, recruitINVITE);
-
-        allyMap.put(FactionPermType.USE, allyUSE);
-        allyMap.put(FactionPermType.PLACE, allyPLACE);
-        allyMap.put(FactionPermType.DESTROY, allyDESTROY);
-
-        flagMap.put(FactionMemberType.LEADER, leaderMap);
-        flagMap.put(FactionMemberType.OFFICER, officerMap);
-        flagMap.put(FactionMemberType.MEMBER, membersMap);
-        flagMap.put(FactionMemberType.RECRUIT, recruitMap);
-        flagMap.put(FactionMemberType.ALLY, allyMap);
-
-        return flagMap;
     }
 
     private Instant getLastOnline(String factionName)
@@ -542,7 +432,7 @@ public class HOCONFactionStorage implements IFactionStorage
         {
             if(object instanceof String)
             {
-                Faction faction = createFactionObject(String.valueOf(object));
+                Faction faction = getFactionFromFile(String.valueOf(object));
                 factions.add(faction);
             }
         }

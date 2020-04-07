@@ -4,11 +4,11 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
-import io.github.aquerr.eaglefactions.common.storage.IFactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
-import io.github.aquerr.eaglefactions.common.storage.utils.InventorySerializer;
+import io.github.aquerr.eaglefactions.common.storage.util.InventorySerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
-public abstract class AbstractFactionStorage implements IFactionStorage
+public abstract class AbstractFactionStorage implements FactionStorage
 {
     private static final String SELECT_FACTION_NAMES = "SELECT Name FROM Factions";
     private static final String SELECT_RECRUITS_WHERE_FACTIONNAME = "SELECT RecruitUUID FROM FactionRecruits WHERE FactionName=?";
@@ -46,6 +46,8 @@ public abstract class AbstractFactionStorage implements IFactionStorage
     private static final String SELECT_TRUCE_PERMS_WHERE_FACTIONNAME = "SELECT * FROM TrucePerms WHERE FactionName=?";
     private static final String SELECT_ALLY_PERMS_WHERE_FACTIONNAME = "SELECT * FROM AllyPerms WHERE FactionName=?";
     private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM Factions WHERE Name=?";
+
+    private static final String DELETE_FACTIONS = "DELETE FROM Factions";
 
     private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM Factions WHERE Name=?";
     private static final String DELETE_OFFICERS_WHERE_FACIONNAME = "DELETE FROM FactionOfficers WHERE FactionName=?";
@@ -599,6 +601,21 @@ public abstract class AbstractFactionStorage implements IFactionStorage
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void deleteFactions()
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            final Statement statement = connection.createStatement();
+            statement.execute(DELETE_FACTIONS);
+            statement.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private Set<UUID> getFactionRecruits(final Connection connection, final String factionName) throws SQLException

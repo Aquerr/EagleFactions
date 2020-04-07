@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
+import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 
@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class HOCONPlayerStorage implements IPlayerStorage
+public class HOCONPlayerStorage implements PlayerStorage
 {
     private Path playersDirectoryPath;
 
@@ -65,6 +66,16 @@ public class HOCONPlayerStorage implements IPlayerStorage
         }
 
         return false;
+    }
+
+    @Override
+    public boolean addPlayers(List<FactionPlayer> players)
+    {
+        for (final FactionPlayer player : players)
+        {
+            addPlayer(player.getUniqueId(), player.getName(), player.getLastKnownPlayerPower(), player.getLastKnownPlayerMaxPower());
+        }
+        return true;
     }
 
     @Override
@@ -258,12 +269,15 @@ public class HOCONPlayerStorage implements IPlayerStorage
                 }
                 String factionName = configurationNode.getNode("faction").getString("");
                 String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
+                float power = configurationNode.getNode("power").getFloat(0.0f);
+                float maxpower = configurationNode.getNode("maxpower").getFloat(0.0f);
+                boolean diedInWarZone = configurationNode.getNode("death-in-warzone").getBoolean(false);
                 FactionMemberType factionMemberType = null;
 
                 if(!factionMemberTypeString.equals(""))
                     factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
-                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, factionMemberType);
+                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, factionMemberType, diedInWarZone);
                 playerSet.add(factionPlayer);
             }
             catch(IOException e)
@@ -330,5 +344,17 @@ public class HOCONPlayerStorage implements IPlayerStorage
             }
         }
         return false;
+    }
+
+    @Override
+    public void deletePlayers()
+    {
+        final File[] files = this.playersDirectoryPath.toFile().listFiles();
+        if (files == null)
+            return;
+        for (int i = 0; i < files.length; i++)
+        {
+            files[i].delete();
+        }
     }
 }

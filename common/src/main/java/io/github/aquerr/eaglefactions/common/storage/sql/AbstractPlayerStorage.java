@@ -3,17 +3,18 @@ package io.github.aquerr.eaglefactions.common.storage.sql;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
+import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.sql.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public abstract class AbstractPlayerStorage implements IPlayerStorage
+public abstract class AbstractPlayerStorage implements PlayerStorage
 {
     private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
@@ -31,6 +32,8 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     private static final String UPDATE_MAXPOWER_WHERE_PLAYERUUID = "UPDATE Players SET MaxPower=? WHERE PlayerUUID=?";
     private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
     private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
+
+    private static final String DELETE_PLAYERS = "DELETE FROM Players";
 
     private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
@@ -80,6 +83,33 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             final boolean didSucceed = statement.execute();
             statement.close();
             return didSucceed;
+        }
+        catch (final SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addPlayers(final List<FactionPlayer> players)
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            final PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER);
+            for (final FactionPlayer player : players)
+            {
+                statement.setString(1, player.getUniqueId().toString());
+                statement.setString(2, player.getName());
+                statement.setFloat(3, player.getLastKnownPlayerPower());
+                statement.setFloat(4, player.getLastKnownPlayerMaxPower());
+                statement.setBoolean(5, player.diedInWarZone());
+                statement.addBatch();
+            }
+            final int[] results = statement.executeBatch();
+
+            statement.close();
+            return results.length > 0;
         }
         catch (final SQLException e)
         {
@@ -250,9 +280,12 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYERS);
             while (resultSet.next())
             {
-                final UUID playerUUID = resultSet.getObject("PlayerUUID", UUID.class);
+                final UUID playerUUID = UUID.fromString(resultSet.getString("PlayerUUID"));
                 final String name = resultSet.getString("Name");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null);
+                final float power = resultSet.getFloat("Power");
+                final float maxpower = resultSet.getFloat("MaxPower");
+                final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();
@@ -306,5 +339,20 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void deletePlayers()
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            final Statement statement = connection.createStatement();
+            statement.execute(DELETE_PLAYERS);
+            statement.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

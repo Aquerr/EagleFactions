@@ -19,10 +19,12 @@ public class FactionPlayerImpl implements FactionPlayer
     private String factionName;
     private FactionMemberType factionRole;
 
-//    private float power;
-//    private float maxpower;
+    private boolean diedInWarZone;
 
-    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final FactionMemberType factionRole)
+    private float power;
+    private float maxpower;
+
+    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
     {
         this.name = playerName;
         this.uniqueId = uniqueId;
@@ -30,8 +32,10 @@ public class FactionPlayerImpl implements FactionPlayer
         this.factionName = factionName;
         this.factionRole = factionRole;
 
-//        this.power = power;
-//        this.maxpower = maxpower;
+        this.diedInWarZone = diedInWarZone;
+
+        this.power = power;
+        this.maxpower = maxpower;
     }
 
     @Override
@@ -92,9 +96,27 @@ public class FactionPlayerImpl implements FactionPlayer
     }
 
     @Override
+    public float getLastKnownPlayerPower()
+    {
+        return this.power;
+    }
+
+    @Override
+    public float getLastKnownPlayerMaxPower()
+    {
+        return this.maxpower;
+    }
+
+    @Override
     public Optional<User> getUser()
     {
         final Optional<UserStorageService> userStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         return userStorageService.flatMap(storageService -> storageService.get(this.uniqueId));
+    }
+
+    @Override
+    public boolean diedInWarZone()
+    {
+        return this.diedInWarZone;
     }
 }

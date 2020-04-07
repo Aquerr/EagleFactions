@@ -65,8 +65,10 @@ public final class PluginPermissions
     public static final String WAR_ZONE_BUILD = "eaglefactions.warzone.build";
     public static final String SAFE_ZONE_INTERACT = "eaglefactions.safezone.interact";
     public static final String WAR_ZONE_INTERACT = "eaglefactions.warzone.interact";
+    public static final String BACKUP_COMMAND = "eaglefactions.admin.backup.create";
+    public static final String RESTORE_BACKUP_COMMAND = "eaglefactions.admin.backup.restore";
 
-	private PluginPermissions()
+    private PluginPermissions()
     {
 
     }

@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 
 import java.util.Set;
 
-public interface IFactionStorage
+public interface FactionStorage
 {
     boolean addOrUpdateFaction(Faction faction);
 
@@ -15,4 +15,6 @@ public interface IFactionStorage
     void load();
 
     boolean deleteFaction(String factionName);
+
+    void deleteFactions();
 }
