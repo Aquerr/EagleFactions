@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -150,43 +151,39 @@ public class HomeCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void teleportHome(Player player, Vector3i lastBlockPosition, FactionHome factionHome)
-    {
-		if(this.factionsConfig.getHomeDelayTime() == 0)
-		{
+    private void teleportHome(Player player, Vector3i lastBlockPosition, FactionHome factionHome) {
+        if (this.factionsConfig.getHomeDelayTime() == 0) {
             teleport(player, factionHome);
-			return;
-		}
+            return;
+        }
 
-		player.sendMessage(ChatTypes.ACTION_BAR, Text.of(Messages.STAND_STILL_FOR + " ", TextColors.GOLD, this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, TextColors.RESET, "!"));
+        if (!player.hasPermission(PluginPermissions.HOME_COMMAND_NO_DELAY)) {
+            player.sendMessage(ChatTypes.ACTION_BAR, Text.of(Messages.STAND_STILL_FOR + " ", TextColors.GOLD, this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, TextColors.RESET, "!"));
 
-		final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-        taskBuilder.interval(1, TimeUnit.SECONDS).delay(2, TimeUnit.SECONDS).execute(new Consumer<Task>()
-        {
-            int seconds = factionsConfig.getHomeDelayTime();
+            final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+            taskBuilder.interval(1, TimeUnit.SECONDS).delay(2, TimeUnit.SECONDS).execute(new Consumer<Task>() {
+                int seconds = factionsConfig.getHomeDelayTime();
 
-            @Override
-            public void accept(Task task)
-            {
-                if(!player.getLocation().getBlockPosition().equals(lastBlockPosition))
-                {
-                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.RED, Messages.YOU_MOVED + " " + Messages.TELEPORTING_HAS_BEEN_CANCELLED));
-                    task.cancel();
-                    return;
+                @Override
+                public void accept(Task task) {
+                    if (!player.getLocation().getBlockPosition().equals(lastBlockPosition)) {
+                        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.RED, Messages.YOU_MOVED + " " + Messages.TELEPORTING_HAS_BEEN_CANCELLED));
+                        task.cancel();
+                        return;
+                    }
+
+                    if (seconds <= 0) {
+                        teleport(player, factionHome);
+                        task.cancel();
+                    } else {
+                        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Teleporting to faction's home in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds."));
+                        seconds--;
+                    }
                 }
-
-                if (seconds <= 0)
-                {
-                    teleport(player, factionHome);
-                    task.cancel();
-                }
-                else
-                {
-                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Teleporting to faction's home in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds."));
-                    seconds--;
-                }
-            }
-        }).submit(super.getPlugin());
+            }).submit(super.getPlugin());
+        } else {
+            teleport(player, factionHome);
+        }
     }
 
     private void teleport(final Player player, final FactionHome factionHome)
