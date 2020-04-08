@@ -88,6 +88,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             preparedStatement.setString(1, player.getUniqueId().toString());
             final ResultSet factionSelect = preparedStatement.executeQuery();
             final boolean exists = factionSelect.next();
+            preparedStatement.close();
 
             String queryToUse = exists ? UPDATE_PLAYER : INSERT_PLAYER;
 
