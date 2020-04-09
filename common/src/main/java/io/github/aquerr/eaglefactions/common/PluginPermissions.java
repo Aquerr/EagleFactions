@@ -39,6 +39,7 @@ public final class PluginPermissions
     public static final String DEMOTE_COMMAND = "eaglefactions.player.demote";
     public static final String SET_HOME_COMMAND = "eaglefactions.player.sethome";
     public static final String HOME_COMMAND = "eaglefactions.player.home";
+    public static final String HOME_COMMAND_NO_DELAY = "eaglefactions.player.home.nodelay";
 
     public static final String MAP_COMMAND = "eaglefactions.player.map";
     public static final String AUTO_MAP_COMMAND = "eaglefactions.player.automap";
