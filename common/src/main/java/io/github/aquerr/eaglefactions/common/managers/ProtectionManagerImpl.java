@@ -15,7 +15,6 @@ import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;

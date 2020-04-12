@@ -312,7 +312,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("p", "player"), CommandSpec.builder()
                 .description(Text.of("Show info about a player"))
                 .permission(PluginPermissions.PLAYER_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.optional(new FactionPlayerArgument(this, Text.of("player"))))
                 .executor(new PlayerCommand(this))
                 .build());
 

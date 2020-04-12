@@ -78,6 +78,7 @@ public class StorageManagerImpl implements StorageManager
         this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Filling cache with data..."));
         prepareFactionsCache();
+        preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }
 
     private void queueStorageTask(IStorageTask task)

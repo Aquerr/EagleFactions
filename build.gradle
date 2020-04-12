@@ -43,6 +43,9 @@ shadowJar {
     archiveClassifier = ''
 }
 
+build.finalizedBy shadowJar
+jar.enabled = false
+
 test {
     useJUnitPlatform()
 }
