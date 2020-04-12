@@ -19,46 +19,48 @@ public class PermsManagerImpl implements PermsManager
     @Override
     public boolean canBreakBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction)
     {
-        return checkFlag(playerUUID, playerFaction, chunkFaction, FactionPermType.DESTROY);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.DESTROY);
     }
 
     @Override
     public boolean canPlaceBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction)
     {
-        return checkFlag(playerUUID, playerFaction, chunkFaction, FactionPermType.PLACE);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.PLACE);
     }
 
     @Override
     public boolean canInteract(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction)
     {
-        return checkFlag(playerUUID, playerFaction, chunkFaction, FactionPermType.USE);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.USE);
     }
 
     @Override
     public boolean canClaim(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkFlag(playerUUID, playerFaction, FactionPermType.CLAIM);
+        return checkPermission(playerUUID, playerFaction, FactionPermType.CLAIM);
     }
 
     @Override
     public boolean canAttack(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkFlag(playerUUID, playerFaction, FactionPermType.CLAIM);
+        return checkPermission(playerUUID, playerFaction, FactionPermType.CLAIM);
     }
 
     @Override
     public boolean canInvite(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkFlag(playerUUID, playerFaction, FactionPermType.INVITE);
+        return checkPermission(playerUUID, playerFaction, FactionPermType.INVITE);
     }
 
-    private boolean checkFlag(final UUID playerUUID, final Faction playerFaction, final FactionPermType flagTypes)
+    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final FactionPermType flagTypes)
     {
         final FactionMemberType memberType = playerFaction.getPlayerMemberType(playerUUID);
+        if (memberType == FactionMemberType.LEADER)
+            return true;
         return playerFaction.getPerms().get(memberType).get(flagTypes);
     }
 
-    private boolean checkFlag(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermType flagType)
+    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermType flagType)
     {
         if (playerFaction.getName().equals(chunkFaction.getName()))
         {

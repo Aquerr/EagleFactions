@@ -100,7 +100,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             statement.setFloat(5, player.getMaxPower());
             statement.setBoolean(6, player.diedInWarZone());
             if(exists)
-                preparedStatement.setString(7, player.getUniqueId().toString()); //Where part
+                statement.setString(7, player.getUniqueId().toString()); //Where part
             final boolean didSucceed = statement.execute();
             statement.close();
             return didSucceed;
