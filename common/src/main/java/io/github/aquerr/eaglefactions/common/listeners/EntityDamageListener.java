@@ -13,6 +13,8 @@ import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
+import io.github.aquerr.eaglefactions.common.util.ModSupport;
+import javafx.scene.effect.Bloom;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
@@ -35,10 +37,12 @@ import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
 
 public class EntityDamageListener extends AbstractListener
@@ -48,6 +52,11 @@ public class EntityDamageListener extends AbstractListener
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
     private final ProtectionManager protectionManager;
+
+    private final DamageModifier damageReductionModifier = DamageModifier.builder()
+            .type(DamageModifierTypes.ARMOR)
+            .cause(Cause.builder().append(super.getPlugin()).build(EventContext.builder().build()))
+            .build();
 
     public EntityDamageListener(final EagleFactions plugin)
     {
@@ -100,8 +109,20 @@ public class EntityDamageListener extends AbstractListener
             return;
 
         final World world = attackedPlayer.getWorld();
-        final boolean willCauseDeath = event.willCauseDeath();
+        final Location<World> location = attackedPlayer.getLocation();
 
+        //If it is safezone, protect the player from everything.
+        if (isSafeZone(location))
+        {
+            event.setBaseDamage(0);
+            event.setCancelled(true);
+            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
+            return;
+        }
+
+        //At this point we know that damage has NOT been dealt inside Safe Zone.
+
+        final boolean willCauseDeath = event.willCauseDeath();
         final Object rootCause = event.getCause().root();
 
         //Percentage damage reduction operator
@@ -110,13 +131,6 @@ public class EntityDamageListener extends AbstractListener
             final double difference = operand * (this.factionsConfig.getPercentageDamageReductionInOwnTerritory() / 100);
             return -difference;
         };
-        final DamageModifier damageReductionModifier = DamageModifier.builder()
-                .type(DamageModifierTypes.ARMOR)
-                .cause(
-                        Cause.builder()
-                                .append(super.getPlugin())
-                                .build(EventContext.builder().build()))
-                .build();
 
         //Handle projectiles
         if(rootCause instanceof IndirectEntityDamageSource)
@@ -154,23 +168,12 @@ public class EntityDamageListener extends AbstractListener
             final EntityDamageSource entityDamageSource = (EntityDamageSource) rootCause;
             Entity entitySource = entityDamageSource.getSource();
 
-            //Try closure for TechGuns
-            if(entityDamageSource.getClass().getName().contains("techguns"))
+            //TechGuns
+            if (ModSupport.isTechGuns(entityDamageSource.getClass()))
             {
-                try
-                {
-                    //Reflection
-                    final Object attacker = entityDamageSource.getClass().getField("attacker").get(entityDamageSource);
-                    if(attacker instanceof Player)
-                    {
-                        //We got attacker
-                        entitySource = (Player)attacker;
-                    }
-                }
-                catch(NoSuchFieldException | IllegalAccessException e)
-                {
-                    e.printStackTrace();
-                }
+                final Entity entity = ModSupport.getAttackerFromTechGuns(entityDamageSource);
+                if (entity != null)
+                    entitySource = entity;
             }
 
             if(entitySource instanceof Player)
@@ -192,21 +195,9 @@ public class EntityDamageListener extends AbstractListener
                     }
                 }
             }
-            else
+            else // Player attacked by mob
             {
-                final Optional<Faction> optionalAttackedChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(attackedPlayer.getWorld().getUniqueId(), attackedPlayer.getLocation().getChunkPosition());
-                if(this.protectionConfig.getSafeZoneWorldNames().contains(attackedPlayer.getWorld().getName()))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if (optionalAttackedChunkFaction.isPresent() && optionalAttackedChunkFaction.get().isSafeZone())
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                if (isInOwnTerritory(attackedPlayer))
+                if(isInOwnTerritory(attackedPlayer))
                 {
                     event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
                 }
@@ -353,5 +344,15 @@ public class EntityDamageListener extends AbstractListener
     {
         final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         return optionalFaction.filter(x-> x.getPlayerMemberType(player.getUniqueId()) != null).isPresent();
+    }
+
+    private boolean isSafeZone(final Location<World> location)
+    {
+        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
+        if (safeZoneWorlds.contains(location.getExtent().getName()))
+            return true;
+
+        final Optional<Faction> faction = super.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        return faction.map(Faction::isSafeZone).orElse(false);
     }
 }
