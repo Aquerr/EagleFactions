@@ -1,11 +1,13 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
+import com.google.common.base.Strings;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionType;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
@@ -31,6 +33,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -88,18 +91,21 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (this.playerManager.hasAdminMode(user))
             return true;
 
-        if (isBlockWhitelistedForInteraction(location.getBlockType().getId()))
-            return true;
-
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         final boolean isBlockCarrierAtLocation = location.getTileEntity().isPresent() && location.getTileEntity().get() instanceof BlockCarrier;
 
         if (safeZoneWorlds.contains(world.getName()))
+        {
+            if (isBlockWhitelistedForInteraction(location.getBlockType().getId(), FactionType.SAFE_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT);
+        }
         if (warZoneWorlds.contains(world.getName()))
         {
+            if (isBlockWhitelistedForInteraction(location.getBlockType().getId(), FactionType.WAR_ZONE))
+                return true;
             if (user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
                 return true;
             if (isBlockCarrierAtLocation && isHoldingEagleFeather(user))
@@ -113,25 +119,31 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
-        {
-            if(this.protectionConfig.shouldProtectWildernessFromPlayers())
-            {
-                return false;
-            }
-            return true;
-        }
+            return !this.protectionConfig.shouldProtectWildernessFromPlayers();
 
         final Faction chunkFaction = optionalChunkFaction.get();
         if (chunkFaction.isSafeZone())
-            return user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT);
-        if (chunkFaction.isWarZone())
-            return user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT);
-
-        if(chunkFaction.isWarZone() && isBlockCarrierAtLocation && isHoldingEagleFeather(user))
         {
-            removeEagleFeather(user);
-            return true;
+            if (isBlockWhitelistedForInteraction(location.getBlockType().getId(), FactionType.SAFE_ZONE))
+                return true;
+            return user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT);
         }
+        if (chunkFaction.isWarZone())
+        {
+            if (isBlockWhitelistedForInteraction(location.getBlockType().getId(), FactionType.WAR_ZONE))
+                return true;
+            if(user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT))
+                return true;
+            if (isBlockCarrierAtLocation && isHoldingEagleFeather(user))
+            {
+                removeEagleFeather(user);
+                return true;
+            }
+            return false;
+        }
+
+        if (isBlockWhitelistedForInteraction(location.getBlockType().getId(), FactionType.FACTION))
+            return true;
 
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
@@ -190,35 +202,50 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
             return true;
 
-        if (this.playerManager.hasAdminMode(user) || isItemWhitelisted(usedItem.getType().getId()))
+        if (this.playerManager.hasAdminMode(user))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if (safeZoneWorlds.contains(world.getName()))
+        {
+            if (isItemWhitelisted(usedItem.getType().getId(), FactionType.SAFE_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT);
+        }
         if (warZoneWorlds.contains(world.getName()))
+        {
+            if (isItemWhitelisted(usedItem.getType().getId(), FactionType.WAR_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT);
+        }
 
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         if (!optionalChunkFaction.isPresent())
-        {
             return !this.protectionConfig.shouldProtectWildernessFromPlayers();
-        }
 
         final Faction chunkFaction = optionalChunkFaction.get();
         if (chunkFaction.isSafeZone())
+        {
+            if (isItemWhitelisted(usedItem.getType().getId(), FactionType.SAFE_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.SAFE_ZONE_INTERACT);
+        }
         if (chunkFaction.isWarZone())
+        {
+            if (isItemWhitelisted(usedItem.getType().getId(), FactionType.WAR_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.WAR_ZONE_INTERACT);
+        }
+
+        if (isItemWhitelisted(usedItem.getType().getId(), FactionType.FACTION))
+            return true;
 
         //If player is not in a faction but there is a faction at chunk
         if(!optionalPlayerFaction.isPresent())
-        {
             return false;
-        }
 
         Faction playerFaction = optionalPlayerFaction.get();
         return this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction);
@@ -240,11 +267,11 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user instanceof Player)
             {
                 Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block break event!")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block id: " + location.getBlockType().getId())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block break event!")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: " + location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: " + user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: " + location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block id: " + location.getBlockType().getId())));
             }
         }
 
@@ -254,16 +281,24 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
             return true;
 
-        if(this.playerManager.hasAdminMode(user) || isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
+        if(this.playerManager.hasAdminMode(user))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if (safeZoneWorlds.contains(world.getName()))
+        {
+            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.SAFE_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD);
+        }
         if (warZoneWorlds.contains(world.getName()))
+        {
+            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.WAR_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.WAR_ZONE_BUILD);
+        }
 
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
@@ -272,9 +307,21 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
             {
                 if(optionalChunkFaction.get().isSafeZone())
+                {
+                    if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.SAFE_ZONE))
+                        return true;
                     return user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD);
-                else return optionalChunkFaction.get().isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD);
+                }
+                else //WarZone
+                {
+                    if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.WAR_ZONE))
+                        return true;
+                    return user.hasPermission(PluginPermissions.WAR_ZONE_BUILD);
+                }
             }
+
+            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.FACTION))
+                return true;
 
             return optionalPlayerFaction.filter(faction -> this.permsManager.canBreakBlock(user.getUniqueId(), faction, optionalChunkFaction.get())).isPresent();
         }
@@ -290,27 +337,27 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
             return true;
 
-        if(isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId()))
-            return true;
-
         if(this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
-            return false;
+            return isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.SAFE_ZONE);
 
         if(this.protectionConfig.getWarZoneWorldNames().contains(world.getName()) && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
-            return false;
+        {
+            //Not sure if we should use white-list for mobs...
+            return isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.WAR_ZONE);
+        }
 
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if(!optionalChunkFaction.isPresent())
             return true;
 
         if(optionalChunkFaction.get().isSafeZone())
-            return false;
+            return isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.SAFE_ZONE);
 
         if(optionalChunkFaction.get().isWarZone() && this.protectionConfig.shouldProtectWarZoneFromMobGrief())
-            return false;
+            return isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.WAR_ZONE);
 
         if(this.protectionConfig.shouldProtectClaimFromMobGrief())
-            return false;
+            return isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.FACTION);
 
         return true;
     }
@@ -340,21 +387,30 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         World world = location.getExtent();
+        final String itemId = user.getItemInHand(HandTypes.MAIN_HAND).isPresent() ? user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId() : "";
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
             return true;
 
-        if(this.playerManager.hasAdminMode(user) || (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() && isBlockWhitelistedForPlaceDestroy(user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getId())))
+        if(this.playerManager.hasAdminMode(user))
             return true;
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
         if (safeZoneWorlds.contains(world.getName()))
+        {
+            if (isBlockWhitelistedForPlaceDestroy(itemId, FactionType.SAFE_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD);
+        }
         if (warZoneWorlds.contains(world.getName()))
+        {
+            if (isBlockWhitelistedForPlaceDestroy(itemId, FactionType.WAR_ZONE))
+                return true;
             return user.hasPermission(PluginPermissions.WAR_ZONE_BUILD);
+        }
 
         Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.getUniqueId());
         Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
@@ -363,9 +419,21 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
             {
                 if(optionalChunkFaction.get().isSafeZone())
+                {
+                    if (isBlockWhitelistedForPlaceDestroy(itemId, FactionType.SAFE_ZONE))
+                        return true;
                     return user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD);
-                else return optionalChunkFaction.get().isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD);
+                }
+                else //WarZone
+                {
+                    if (isBlockWhitelistedForPlaceDestroy(itemId, FactionType.WAR_ZONE))
+                        return true;
+                    return user.hasPermission(PluginPermissions.WAR_ZONE_BUILD);
+                }
             }
+
+            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.FACTION))
+                return true;
 
             return optionalPlayerFaction.filter(faction -> this.permsManager.canPlaceBlock(user.getUniqueId(), faction, optionalChunkFaction.get())).isPresent();
         }
@@ -560,24 +628,60 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public boolean isItemWhitelisted(final String itemId)
+    public boolean isItemWhitelisted(final String itemId, final FactionType factionType)
     {
-        final Set<String> whiteListedItems = this.protectionConfig.getWhiteListedItems();
-        return isWhiteListed(whiteListedItems, itemId);
+        if (Strings.isNullOrEmpty(itemId) || Objects.isNull(factionType))
+            throw new IllegalArgumentException("Item id and faction type must be provided");
+
+        switch (factionType)
+        {
+            case FACTION:
+                return isWhiteListed(this.protectionConfig.getFactionWhitelists().getWhiteListedItems(), itemId);
+            case WAR_ZONE:
+                return isWhiteListed(this.protectionConfig.getWarZoneWhitelists().getWhiteListedItems(), itemId);
+            case SAFE_ZONE:
+                return isWhiteListed(this.protectionConfig.getSafeZoneWhitelists().getWhiteListedItems(), itemId);
+            default:
+                return false;
+        }
     }
 
     @Override
-    public boolean isBlockWhitelistedForInteraction(final String blockId)
+    public boolean isBlockWhitelistedForInteraction(final String blockId, final FactionType factionType)
     {
-        final Set<String> whiteListedBlocks = this.protectionConfig.getWhiteListedInteractBlocks();
-        return isWhiteListed(whiteListedBlocks, blockId);
+        if (Strings.isNullOrEmpty(blockId) || Objects.isNull(factionType))
+            throw new IllegalArgumentException("Item id and faction type must be provided");
+
+        switch (factionType)
+        {
+            case FACTION:
+                return isWhiteListed(this.protectionConfig.getFactionWhitelists().getWhiteListedInteractBlocks(), blockId);
+            case WAR_ZONE:
+                return isWhiteListed(this.protectionConfig.getWarZoneWhitelists().getWhiteListedInteractBlocks(), blockId);
+            case SAFE_ZONE:
+                return isWhiteListed(this.protectionConfig.getSafeZoneWhitelists().getWhiteListedInteractBlocks(), blockId);
+            default:
+                return false;
+        }
     }
 
     @Override
-    public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId)
+    public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId, final FactionType factionType)
     {
-        final Set<String> whiteListedBlocks = this.protectionConfig.getWhiteListedPlaceDestroyBlocks();
-        return isWhiteListed(whiteListedBlocks, blockOrItemId);
+        if (Strings.isNullOrEmpty(blockOrItemId) || Objects.isNull(factionType))
+            throw new IllegalArgumentException("Item id and faction type must be provided");
+
+        switch (factionType)
+        {
+            case FACTION:
+                return isWhiteListed(this.protectionConfig.getFactionWhitelists().getWhiteListedPlaceDestroyBlocks(), blockOrItemId);
+            case WAR_ZONE:
+                return isWhiteListed(this.protectionConfig.getWarZoneWhitelists().getWhiteListedPlaceDestroyBlocks(), blockOrItemId);
+            case SAFE_ZONE:
+                return isWhiteListed(this.protectionConfig.getSafeZoneWhitelists().getWhiteListedPlaceDestroyBlocks(), blockOrItemId);
+            default:
+                return false;
+        }
     }
 
     private boolean isWhiteListed(final Collection<String> collection, final String itemId)
