@@ -11,7 +11,7 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
     private static MySQLProvider INSTANCE = null;
 
 //    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&&disableMariaDbDriver";
-    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private static final String CONNECTION_OPTIONS = "&useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
     public static MySQLProvider getInstance(final EagleFactions eagleFactions)
     {
@@ -33,7 +33,7 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
 
     public Connection getConnection() throws SQLException
     {
-        return DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + super.getDatabaseName() + CONNECTION_OPTIONS, super.getUsername(), super.getPassword());
+        return DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + super.getDatabaseName() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
     }
 
     @Override
