@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.common.commands;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -12,7 +11,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -29,6 +27,8 @@ import java.util.Optional;
  */
 public class PlayerCommand extends AbstractCommand
 {
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+
     public PlayerCommand(final EagleFactions plugin)
     {
         super(plugin);
@@ -38,11 +38,6 @@ public class PlayerCommand extends AbstractCommand
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         final Optional<FactionPlayer> optionalPlayer = context.getOne("player");
-
-        //TODO: This command should work even for players that are offline.
-        //TODO: Add check if provided player has played on this server.
-        //player.hasPlayedBefore() is not a solution for this problem.
-
         if (optionalPlayer.isPresent())
         {
             final FactionPlayer player = optionalPlayer.get();
@@ -84,20 +79,21 @@ public class PlayerCommand extends AbstractCommand
                 lastPlayed = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
             }
         }
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        String formattedDate = dateTimeFormatter.format(lastPlayed);
 
+        String formattedDate = DATE_TIME_FORMATTER.format(lastPlayed);
+        final boolean isOnline = optionalUser.isPresent() && optionalUser.get().isOnline();
+        final Text online = isOnline ? Text.of(TextColors.GREEN, "ONLINE") : Text.of(TextColors.RED, "OFFLINE");
         Text info = Text.builder()
                 .append(Text.of(TextColors.AQUA, Messages.NAME + ": ", TextColors.GOLD, factionPlayer.getName() + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate + "\n"))
+                .append(Text.of(TextColors.AQUA, Messages.PLAYER_STATUS + ": ")).append(online).append(Text.of("\n"))
                 .append(Text.of(TextColors.AQUA, Messages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, factionPlayer.getPower() + "/" + factionPlayer.getMaxPower()))
+                .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, factionPlayer.getPower() + "/" + factionPlayer.getMaxPower() + "\n"))
+                .append(Text.of(TextColors.AQUA, Messages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate))
                 .build();
 
         playerInfo.add(info);
 
-        PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
+        PaginationList.Builder paginationBuilder = PaginationList.builder().title(Text.of(TextColors.GREEN, Messages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
         paginationBuilder.sendTo(source);
     }
 }

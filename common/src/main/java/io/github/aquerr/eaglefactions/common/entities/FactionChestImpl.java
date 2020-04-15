@@ -131,7 +131,7 @@ public class FactionChestImpl implements FactionChest
         for(SlotItem slotItem : items)
         {
             if(slotItem.getRow() == row && slotItem.getColumn() == column)
-                itemStack = ItemStack.builder().fromContainer(slotItem.getItem().toContainer()).build();
+                itemStack = slotItem.getItem().copy();
         }
 
         return itemStack;

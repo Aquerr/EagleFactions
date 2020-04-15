@@ -199,6 +199,7 @@ public class Messages
     //Player
     public static String PLAYER_INFO;
     public static String LAST_PLAYED;
+    public static String PLAYER_STATUS;
 
     //Reload
     public static String CONFIG_HAS_BEEN_RELOADED;
