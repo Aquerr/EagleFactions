@@ -61,10 +61,9 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
 
                 if (shouldRegenerateWhenRemoved)
                 {
-                    for (Claim claim : factionEntry.getValue().getClaims()) {
-                        Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> {
-                            world.regenerateChunk(claim.getChunkPosition());
-                        });
+                    for (Claim claim : factionEntry.getValue().getClaims())
+                    {
+                        Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition()));
                     }
                 }
             }

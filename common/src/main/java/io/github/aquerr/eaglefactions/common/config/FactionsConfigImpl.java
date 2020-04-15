@@ -323,7 +323,8 @@ public class FactionsConfigImpl implements FactionsConfig
 	}
 
 	@Override
-	public boolean shouldRegenerateChunksWhenFactionRemoved() {
+	public boolean shouldRegenerateChunksWhenFactionRemoved()
+	{
 		return this.regenerateChunksWhenFactionRemoved;
 	}
 
