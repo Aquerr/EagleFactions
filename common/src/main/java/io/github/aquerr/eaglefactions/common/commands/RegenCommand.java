@@ -14,6 +14,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
@@ -29,7 +30,8 @@ public class RegenCommand extends AbstractCommand
     {
         final Faction factionToRegen = context.requireOne("faction");
 
-        if (factionToRegen.isSafeZone() || factionToRegen.isWarZone()) {
+        if (factionToRegen.isSafeZone() || factionToRegen.isWarZone())
+        {
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
         }
 
@@ -38,7 +40,8 @@ public class RegenCommand extends AbstractCommand
         boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(factionToRegen.getName());
         if(didSucceed)
         {
-            if (source instanceof Player) {
+            if (source instanceof Player)
+            {
                 Player player = (Player) source;
 
                 EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
@@ -52,12 +55,17 @@ public class RegenCommand extends AbstractCommand
 
         /* After a successful disband we can regenerate faction claims. */
 
-        for (Claim claim : factionToRegen.getClaims()) {
-            Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> {
-                world.regenerateChunk(claim.getChunkPosition());
-            });
-        }
+        for (Claim claim : factionToRegen.getClaims())
+        {
+            Optional<World> world = Sponge.getServer().getWorld(claim.getWorldUUID());
 
+            if (!world.isPresent())
+            {
+                throw new CommandException((Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.SOMETHING_WENT_WRONG)));
+            }
+
+            world.get().regenerateChunk(claim.getChunkPosition());
+        }
 
         source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, "The faction was successfully regenerated!"));
 
