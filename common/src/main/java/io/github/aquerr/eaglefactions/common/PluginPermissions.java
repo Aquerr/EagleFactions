@@ -69,6 +69,8 @@ public final class PluginPermissions
     public static final String BACKUP_COMMAND = "eaglefactions.admin.backup.create";
     public static final String RESTORE_BACKUP_COMMAND = "eaglefactions.admin.backup.restore";
 
+    public static final String REGEN_COMMAND = "eaglefaction.admin.regen";
+
     private PluginPermissions()
     {
 
