@@ -582,6 +582,13 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new RestoreBackupCommand(this))
                 .build());
 
+        SUBCOMMANDS.put(Collections.singletonList("regen"), CommandSpec.builder()
+                .description(Text.of("Disband a faction and then regenerate the faction chunks"))
+                .permission(PluginPermissions.REGEN_COMMAND)
+                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
+                .executor(new RegenCommand(this))
+                .build());
+
         //Build all commands
         CommandSpec commandEagleFactions = CommandSpec.builder()
                 .description(Text.of("Help Command"))
