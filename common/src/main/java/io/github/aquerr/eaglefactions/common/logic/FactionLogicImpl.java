@@ -243,7 +243,7 @@ public class FactionLogicImpl implements FactionLogic
 
         //Save player...
         final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID).get();
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
     }
 
