@@ -17,6 +17,7 @@ import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
+import io.github.aquerr.eaglefactions.common.commands.args.OwnFactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
@@ -343,7 +344,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Promote command
         SUBCOMMANDS.put(Collections.singletonList("promote"), CommandSpec.builder()
                 .description(Text.of("Promotes the player to a higher rank"))
-                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
+                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
                 .permission(PluginPermissions.PROMOTE_COMMAND)
                 .executor(new PromoteCommand(this))
                 .build());
@@ -351,7 +352,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Demote command
         SUBCOMMANDS.put(Collections.singletonList("demote"), CommandSpec.builder()
                 .description(Text.of("Demotes the player to a lower rank"))
-                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
+                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
                 .permission(PluginPermissions.DEMOTE_COMMAND)
                 .executor(new DemoteCommand(this))
                 .build());
