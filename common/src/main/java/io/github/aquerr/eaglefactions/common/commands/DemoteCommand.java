@@ -92,7 +92,7 @@ public class DemoteCommand extends AbstractCommand
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You don't have permission to demote players."));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
         }
         return CommandResult.success();
     }
