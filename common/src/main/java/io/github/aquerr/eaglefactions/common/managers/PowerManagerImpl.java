@@ -102,7 +102,7 @@ public class PowerManagerImpl implements PowerManager
             }
         }
 
-        return factionPower;
+        return round(factionPower, 2);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class PowerManagerImpl implements PowerManager
             }
         }
 
-        return factionMaxPower;
+        return round(factionMaxPower, 2);
     }
 
     @Override
@@ -212,9 +212,11 @@ public class PowerManagerImpl implements PowerManager
     }
 
     public static float round(final float number, final int decimalPlace) {
-        BigDecimal bd = new BigDecimal(number);
-        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
-        return bd.floatValue();
+        int pow = 10;
+        for (int i = 1; i < decimalPlace; i++)
+            pow *= 10;
+        float tmp = number * pow;
+        return ( (float) ( (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) ) ) / pow;
     }
 
     @Override

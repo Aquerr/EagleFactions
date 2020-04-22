@@ -91,6 +91,10 @@ public class PromoteCommand extends AbstractCommand
                 source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
             }
         }
+        else
+        {
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You don't have permission to promote players."));
+        }
         return CommandResult.success();
     }
 }
