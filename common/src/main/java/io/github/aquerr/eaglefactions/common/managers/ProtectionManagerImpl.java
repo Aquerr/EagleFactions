@@ -16,6 +16,7 @@ import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
@@ -625,6 +626,78 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         return true;
+    }
+
+    @Override
+    public boolean canNotifyBlock(final Location<World> notifier, final Location<World> notifiedLocation)
+    {
+        //First, let's check the world.
+        //TODO: Maybe we should check notifier's world as well?
+        final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(notifiedLocation.getExtent().getName());
+        final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(notifiedLocation.getExtent().getName());
+        final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(notifiedLocation.getExtent().getName());
+
+        //Entire world is one claim type thus we should allow the notification.
+        if (isSafeZoneWorld || isWarZoneWorld || notClaimableWorld)
+            return true;
+
+        final Optional<Faction> notifierFaction = this.factionLogic.getFactionByChunk(notifier.getExtent().getUniqueId(), notifier.getChunkPosition());
+        final Optional<Faction> notifiedFaction = this.factionLogic.getFactionByChunk(notifiedLocation.getExtent().getUniqueId(), notifiedLocation.getChunkPosition());
+
+        // Factions can notify wilderness but wilderness cannot notify factions.
+        // Wilderness can only notify other factions if mob-gref is set to true.
+
+        //Source is wilderness.
+        if (!notifierFaction.isPresent())
+        {
+            //Both wilderness
+            if (!notifiedFaction.isPresent())
+                return true;
+            final Faction faction = notifiedFaction.get();
+            if (faction.isSafeZone()) //Notified SafeZone
+                return false;
+            else if(faction.isWarZone()) //Notified WarZone
+                return !this.protectionConfig.shouldProtectWarZoneFromMobGrief();
+            else return !this.protectionConfig.shouldProtectClaimFromMobGrief(); //Notified Regular faction
+
+        }
+
+        final Faction sourceFaction = notifierFaction.get();
+
+        //Regular factions can notify locations in wilderness.
+        if (!notifiedFaction.isPresent())
+            return true;
+
+        final Faction targetFaction = notifiedFaction.get();
+
+        // It would be best to compare object references but... because second thread could update the faction in cache
+        // and change its reference, we need to compare factions "manually".
+        if (sourceFaction.isSafeZone())
+        {
+            if(targetFaction.isSafeZone())
+                return true;
+            else if(targetFaction.isWarZone())
+                return !this.protectionConfig.shouldProtectWarZoneFromMobGrief();
+            else return !this.protectionConfig.shouldProtectClaimFromMobGrief();
+        }
+        else if (sourceFaction.isWarZone())
+        {
+            if(targetFaction.isWarZone())
+                return true;
+            else if(targetFaction.isSafeZone())
+                return false;
+            else return !this.protectionConfig.shouldProtectClaimFromMobGrief();
+        }
+        else
+        {
+            if(targetFaction.getName().equals(sourceFaction.getName()))
+                return true;
+            else if(targetFaction.isSafeZone())
+                return false;
+            else if(targetFaction.isWarZone())
+                return !this.protectionConfig.shouldProtectWarZoneFromMobGrief();
+            else return !this.protectionConfig.shouldProtectClaimFromMobGrief();
+        }
     }
 
     @Override
