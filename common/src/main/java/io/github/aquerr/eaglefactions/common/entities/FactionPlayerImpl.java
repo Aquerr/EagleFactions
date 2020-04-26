@@ -9,7 +9,6 @@ import org.spongepowered.api.service.user.UserStorageService;
 import java.util.Optional;
 import java.util.UUID;
 
-//TODO: Totally new class. Not really used in Eagle Factions yet. But it will be, in the future.
 public class FactionPlayerImpl implements FactionPlayer
 {
     private final UUID uniqueId;

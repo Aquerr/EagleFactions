@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -8,7 +9,9 @@ import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -19,6 +22,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -53,7 +57,7 @@ public class HomeCommand extends AbstractCommand
             {
                 final Faction faction = optionalFaction.get();
                 if (faction.getHome() == null)
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction does not have its home set!"));
+                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET));
 
                 teleportHome(player, player.getLocation().getBlockPosition(), faction.getHome());
             }
@@ -65,10 +69,10 @@ public class HomeCommand extends AbstractCommand
 
                 final Faction faction = optionalFaction.get();
                 if (!optionalPlayerFaction.get().getName().equals(faction.getName()) && !optionalPlayerFaction.get().getAlliances().contains(faction.getName()))
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You can't teleport to this faction's home! You must be its ally first!"));
+                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_TELEPORT_TO_THIS_FACTION_HOME_ALLIANCE_NEEDED));
 
                 if (faction.getHome() == null)
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction does not have its home set!"));
+                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET));
 
                 if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(player.getUniqueId()))
                 {
@@ -183,7 +187,7 @@ public class HomeCommand extends AbstractCommand
                 }
                 else
                 {
-                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Teleporting to faction's home in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds."));
+                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, MessageLoader.parseMessage(Messages.TELEPORTING_TO_FACTION_HOME, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, seconds)))));
                     seconds--;
                 }
             }
@@ -195,7 +199,7 @@ public class HomeCommand extends AbstractCommand
         final Optional<World> optionalWorld = Sponge.getServer().getWorld(factionHome.getWorldUUID());
         if (!optionalWorld.isPresent())
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "The home you are trying teleport to is in a world that is missing or is corrupted. "));
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.MISSING_OR_CORRUPTED_HOME));
             return;
         }
         player.setLocationSafely(new Location<>(optionalWorld.get(), factionHome.getBlockPosition()));

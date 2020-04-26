@@ -670,8 +670,10 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final Faction targetFaction = notifiedFaction.get();
 
-        // It would be best to compare object references but... because second thread could update the faction in cache
-        // and change its reference, we need to compare factions "manually".
+        //Reference check if factions are equal.
+        if(targetFaction.equals(sourceFaction))
+            return true;
+
         if (sourceFaction.isSafeZone())
         {
             if(targetFaction.isSafeZone())
@@ -690,9 +692,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
         else
         {
-            if(targetFaction.getName().equals(sourceFaction.getName()))
-                return true;
-            else if(targetFaction.isSafeZone())
+            if(targetFaction.isSafeZone())
                 return false;
             else if(targetFaction.isWarZone())
                 return !this.protectionConfig.shouldProtectWarZoneFromMobGrief();

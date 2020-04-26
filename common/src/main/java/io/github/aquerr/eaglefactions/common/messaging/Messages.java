@@ -97,6 +97,7 @@ public class Messages
     //Disbanding
     public static String FACTION_HAS_BEEN_DISBANDED;
     public static String SOMETHING_WENT_WRONG;
+    public static String FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME;
 
     //Perms
     public static String SET_TO;
@@ -187,6 +188,10 @@ public class Messages
     public static String YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS;
     public static String PLAYERS_MAXPOWER_HAS_BEEN_CHANGED;
 
+    //Description
+    public static String DESCRIPTION_IS_TOO_LONG;
+    public static String FACTION_DESCRIPTION_HAS_BEEN_UPDATED;
+
     //Motd
     public static String FACTION_MESSAGE_OF_THE_DAY_HAS_BEEN_UPDATED;
 
@@ -247,6 +252,10 @@ public class Messages
     //Home
     public static String FACTION_HOME_HAS_BEEN_SET;
     public static String FACTION_HOME_MUST_BE_PLACED_INSIDE_FACTION_TERRITORY;
+    public static String TELEPORTING_TO_FACTION_HOME;
+    public static String MISSING_OR_CORRUPTED_HOME;
+    public static String THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET;
+    public static String YOU_CANT_TELEPORT_TO_THIS_FACTION_HOME_ALLIANCE_NEEDED;
 
     //SetLeader
     public static String YOU_SET_PLAYER_AS_YOUR_NEW_LEADER;

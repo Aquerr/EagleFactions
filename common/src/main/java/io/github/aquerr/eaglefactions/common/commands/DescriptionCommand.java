@@ -53,12 +53,12 @@ public class DescriptionCommand extends AbstractCommand
         //Check description length
         if(description.length() > 255)
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Description is too long " + " (" + Messages.MAX + " " + 255 + " " + Messages.CHARS + ")"));
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.DESCRIPTION_IS_TOO_LONG + " (" + Messages.MAX + " " + 255 + " " + Messages.CHARS + ")"));
             return CommandResult.success();
         }
 
         super.getPlugin().getFactionLogic().setDescription(optionalPlayerFaction.get(), description);
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, "Faction description has been updated!")));
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, Messages.FACTION_DESCRIPTION_HAS_BEEN_UPDATED)));
         return CommandResult.success();
     }
 }

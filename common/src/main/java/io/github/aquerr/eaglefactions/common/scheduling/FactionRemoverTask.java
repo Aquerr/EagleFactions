@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -7,7 +8,9 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -20,13 +23,11 @@ import java.util.Map;
 
 public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
-    private final Configuration configuration;
     private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
 
     public FactionRemoverTask(final EagleFactions plugin)
     {
-        this.configuration = plugin.getConfiguration();
         this.factionLogic = plugin.getFactionLogic();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
@@ -56,7 +57,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             {
                 if (shouldNotifyWhenRemoved)
                 {
-                    Sponge.getServer().getBroadcastChannel().send(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.RED, Messages.FACTION + " ", TextColors.GOLD, factionEntry.getKey(), TextColors.RED, " has been removed due to its long inactivity time.")));
+                    Sponge.getServer().getBroadcastChannel().send(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, factionEntry.getKey())))));
                 }
 
                 if (shouldRegenerateWhenRemoved)

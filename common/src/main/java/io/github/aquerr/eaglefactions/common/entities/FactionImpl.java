@@ -240,6 +240,19 @@ public class FactionImpl implements Faction
         return this.name.compareTo(object.getName());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FactionImpl faction = (FactionImpl) o;
+        return Objects.equals(name, faction.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
     //Builder
     public static final class BuilderImpl implements Faction.Builder
     {
