@@ -59,13 +59,18 @@ If there is no translation for your language you can make your own and add it as
 * [Ore](https://ore.spongepowered.org/Niebek/Eagle-Factions)
 * [Discord](https://discord.gg/Zg3rWta)
 
-## Credits
+## Credits / Thanks
 
-Plugin creator: [Aquerr](https://github.com/Aquerr)
+Plugin author: [Aquerr](https://github.com/Aquerr)
 
 Logo by: joxuk
 
-## Thanks
+Many thanks to:
+- **[Iterator](https://github.com/IteratorW)** (Dynmap Support and his help at Discord)
+- **[ROM](https://github.com/ROMVoid95)** (French translation and his help at Discord)
+- **Turner** (Help with testing and helping others at Discord)
+
+Thanks to all of you who contributed to this project and were using it!
 
 Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 
