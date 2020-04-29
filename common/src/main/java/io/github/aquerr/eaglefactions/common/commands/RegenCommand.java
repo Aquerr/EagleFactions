@@ -17,6 +17,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class RegenCommand extends AbstractCommand
 {
@@ -34,6 +35,25 @@ public class RegenCommand extends AbstractCommand
         {
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
         }
+
+        /*
+        Update: 29.04.2020
+        Checking for a confirmation here. Since every command source can run this command, if the source is not a player,
+        a UUID from its name is being generated.
+         */
+
+        UUID uuid = source instanceof Player ? ((Player) source).getUniqueId() : UUID.fromString(source.getName());
+
+        if (!EagleFactionsPlugin.REGEN_CONFIRMATION_LIST.contains(uuid))
+        {
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, Messages.REGEN_WARNING_CONFIRMATION_REQUIRED));
+
+            EagleFactionsPlugin.REGEN_CONFIRMATION_LIST.add(uuid);
+
+            return CommandResult.success();
+        }
+
+        EagleFactionsPlugin.REGEN_CONFIRMATION_LIST.remove(uuid);
 
         /* Firstly, we're simply disbanding the faction. */
 
@@ -67,7 +87,7 @@ public class RegenCommand extends AbstractCommand
             world.get().regenerateChunk(claim.getChunkPosition());
         }
 
-        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, "The faction was successfully regenerated!"));
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, Messages.FACTION_HAS_BEEN_REGENERATED));
 
         return CommandResult.success();
     }
