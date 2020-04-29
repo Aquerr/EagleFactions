@@ -29,10 +29,11 @@ public class HelpCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        Map<List<String>, CommandSpec> commands = EagleFactionsPlugin.SUBCOMMANDS;
-        List<Text> helpList = Lists.newArrayList();
+        final int pageNumber = context.<Integer>getOne(Text.of("page")).orElse(1);
+        final Map<List<String>, CommandSpec> commands = EagleFactionsPlugin.SUBCOMMANDS;
+        final List<Text> helpList = Lists.newArrayList();
 
-        for (List<String> aliases: commands.keySet())
+        for (final List<String> aliases: commands.keySet())
         {
             CommandSpec commandSpec = commands.get(aliases);
 
@@ -46,7 +47,7 @@ public class HelpCommand extends AbstractCommand
                 }
             }
 
-            Text commandHelp = Text.builder()
+            final Text commandHelp = Text.builder()
                     .append(Text.builder()
                             .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
                             .build())
@@ -57,23 +58,14 @@ public class HelpCommand extends AbstractCommand
                             .append(Text.of(TextColors.GRAY, Messages.USAGE + " /f " + aliases.toString().replace("[","").replace("]","") + " " + commandSpec.getUsage(source).toPlain()))
                             .build())
                     .build();
-
-                   // .append(Text.builder()
-                   //         .append(Text.of(TextColors.GRAY, " - " + commandSpec.getShortDescription(source).get().toPlain()))
-                   //         .build())
-//
-                  //  .build();
-
             helpList.add(commandHelp);
         }
 
         //Sort commands alphabetically.
         helpList.sort(Text::compareTo);
 
-        PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.EAGLEFACTIONS_COMMAND_LIST)).padding(Text.of("-")).contents(helpList).linesPerPage(14);
-        paginationBuilder.sendTo(source);
-
+        PaginationList.Builder paginationBuilder = PaginationList.builder().title(Text.of(TextColors.GREEN, Messages.EAGLEFACTIONS_COMMAND_LIST)).padding(Text.of("-")).contents(helpList).linesPerPage(14);
+        paginationBuilder.build().sendTo(source, pageNumber);
         return CommandResult.success();
     }
 

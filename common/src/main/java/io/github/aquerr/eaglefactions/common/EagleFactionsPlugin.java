@@ -238,6 +238,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("help"), CommandSpec.builder()
                 .description(Text.of("Help"))
                 .permission(PluginPermissions.HELP_COMMAND)
+                .arguments(GenericArguments.optional(GenericArguments.integer(Text.of("page"))))
                 .executor(new HelpCommand(this))
                 .build());
 
