@@ -79,6 +79,7 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final List<ArmisticeRequest> ARMISTICE_REQUEST_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
     public static final List<UUID> AUTO_MAP_LIST = new ArrayList<>();
+    public static final List<UUID> REGEN_CONFIRMATION_LIST = new ArrayList<>();
     public static final Map<String, Integer> ATTACKED_FACTIONS = new HashMap<>();
     public static final Map<UUID, Integer> BLOCKED_HOME = new HashMap<>();
     public static final Map<UUID, ChatEnum> CHAT_LIST = new HashMap<>();

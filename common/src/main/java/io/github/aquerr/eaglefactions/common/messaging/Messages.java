@@ -94,10 +94,12 @@ public class Messages
     public static String YOU_ARE_ALREADY_IN_A_FACTION;
     public static String YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION;
 
-    //Disbanding
+    //Disbanding (and Regenerating)
     public static String FACTION_HAS_BEEN_DISBANDED;
     public static String SOMETHING_WENT_WRONG;
     public static String FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME;
+    public static String REGEN_WARNING_CONFIRMATION_REQUIRED;
+    public static String FACTION_HAS_BEEN_REGENERATED;
 
     //Perms
     public static String SET_TO;
