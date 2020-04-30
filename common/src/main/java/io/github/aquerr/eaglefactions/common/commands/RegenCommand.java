@@ -44,16 +44,16 @@ public class RegenCommand extends AbstractCommand
 
         UUID uuid = source instanceof Player ? ((Player) source).getUniqueId() : UUID.fromString(source.getName());
 
-        if (!EagleFactionsPlugin.REGEN_CONFIRMATION_LIST.contains(uuid))
+        if (!EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.containsKey(uuid) || !EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.get(uuid).equals(factionToRegen.getName()))
         {
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, Messages.REGEN_WARNING_CONFIRMATION_REQUIRED));
 
-            EagleFactionsPlugin.REGEN_CONFIRMATION_LIST.add(uuid);
+            EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.put(uuid, factionToRegen.getName());
 
             return CommandResult.success();
         }
 
-        EagleFactionsPlugin.REGEN_CONFIRMATION_LIST.remove(uuid);
+        EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.remove(uuid);
 
         /* Firstly, we're simply disbanding the faction. */
 
