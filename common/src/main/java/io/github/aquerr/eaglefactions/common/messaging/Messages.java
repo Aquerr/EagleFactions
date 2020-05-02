@@ -100,6 +100,7 @@ public class Messages
     public static String FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME;
     public static String REGEN_WARNING_CONFIRMATION_REQUIRED;
     public static String FACTION_HAS_BEEN_REGENERATED;
+    public static String THIS_FACTION_CANNOT_BE_DISBANDED;
 
     //Perms
     public static String SET_TO;
