@@ -3,8 +3,7 @@ package io.github.aquerr.eaglefactions.common.events;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.events.FactionJoinEvent;
-import io.github.aquerr.eaglefactions.api.events.FactionLeaveEvent;
+import io.github.aquerr.eaglefactions.api.events.*;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
@@ -61,7 +60,7 @@ public final class EventRunner
                 .build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
-        final FactionChestEventImpl event = new FactionChestEventImpl(player, faction, eventCause);
+        final FactionChestEvent event = new FactionChestEventImpl(player, faction, eventCause);
         return Sponge.getEventManager().post(event);
     }
 
@@ -77,7 +76,7 @@ public final class EventRunner
                 .build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
-        final FactionClaimEventImpl event = new FactionClaimEventImpl(player, faction, world, chunkPosition, eventCause);
+        final FactionClaimEvent event = new FactionClaimEventImpl(player, faction, world, chunkPosition, eventCause);
         return Sponge.getEventManager().post(event);
     }
 
@@ -93,7 +92,7 @@ public final class EventRunner
                 .build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
-        final FactionCreateEventImpl event = new FactionCreateEventImpl(player, faction, eventCause);
+        final FactionCreateEvent event = new FactionCreateEventImpl(player, faction, eventCause);
         return Sponge.getEventManager().post(event);
     }
 
@@ -109,7 +108,7 @@ public final class EventRunner
                 .build();
 
         final Cause eventCause = Cause.of(eventContext, kickedBy, faction);
-        final FactionKickEventImpl event = new FactionKickEventImpl(kickedPlayer, kickedBy, faction, eventCause);
+        final FactionKickEvent event = new FactionKickEventImpl(kickedPlayer, kickedBy, faction, eventCause);
         return Sponge.getEventManager().post(event);
     }
 
@@ -125,7 +124,7 @@ public final class EventRunner
                 .build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
-        final FactionUnclaimEventImpl event = new FactionUnclaimEventImpl(player, faction, world, chunkPosition, eventCause);
+        final FactionClaimEvent.Unclaim event = new FactionUnclaimEventImpl(player, faction, world, chunkPosition, eventCause);
         return Sponge.getEventManager().post(event);
     }
 
@@ -141,7 +140,20 @@ public final class EventRunner
             .build();
 
         final Cause eventCause = Cause.of(eventContext, player, enteredFaction, leftFaction);
-        final FactionAreaEnterEventImpl event = new FactionAreaEnterEventImpl(moveEntityEvent, player, enteredFaction, leftFaction, eventCause);
+        final FactionAreaEnterEvent event = new FactionAreaEnterEventImpl(moveEntityEvent, player, enteredFaction, leftFaction, eventCause);
         return Sponge.getEventManager().post(event);
 	}
+
+    public static boolean runFactionDisbandEvent(final Player player, final Faction playerFaction)
+    {
+        final EventContext eventContext = EventContext.builder()
+                .add(EventContextKeys.OWNER, player)
+                .add(EventContextKeys.PLAYER, player)
+                .add(EventContextKeys.CREATOR, player)
+                .build();
+
+        final Cause cause = Cause.of(eventContext, player, playerFaction);
+        final FactionDisbandEvent event = new FactionAreaEnterEventImp(player, playerFaction, cause);
+        return Sponge.getEventManager().post(event);
+    }
 }
