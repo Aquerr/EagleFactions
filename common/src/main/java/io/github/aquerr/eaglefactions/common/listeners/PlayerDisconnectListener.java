@@ -31,6 +31,8 @@ public class PlayerDisconnectListener extends AbstractListener
             super.getPlugin().getPVPLogger().removePlayer(player);
         }
 
+        EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.remove(player.getUniqueId());
+
         final Optional<Faction> optionalFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         optionalFaction.ifPresent(faction -> getPlugin().getFactionLogic().setLastOnline(faction, Instant.now()));
 
