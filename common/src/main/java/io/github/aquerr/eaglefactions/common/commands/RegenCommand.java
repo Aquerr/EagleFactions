@@ -33,7 +33,7 @@ public class RegenCommand extends AbstractCommand
 
         if (factionToRegen.isSafeZone() || factionToRegen.isWarZone())
         {
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This faction cannot be disbanded!"));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_CANNOT_BE_DISBANDED));
         }
 
         /*
