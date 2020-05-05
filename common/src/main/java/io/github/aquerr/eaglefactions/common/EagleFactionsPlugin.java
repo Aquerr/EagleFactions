@@ -14,10 +14,24 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
+import io.github.aquerr.eaglefactions.common.commands.access.AccessCommand;
+import io.github.aquerr.eaglefactions.common.commands.access.AccessFactionPlayer;
+import io.github.aquerr.eaglefactions.common.commands.access.AccessPlayerCommand;
 import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.OwnFactionPlayerArgument;
+import io.github.aquerr.eaglefactions.common.commands.backup.BackupCommand;
+import io.github.aquerr.eaglefactions.common.commands.backup.RestoreBackupCommand;
+import io.github.aquerr.eaglefactions.common.commands.claiming.*;
+import io.github.aquerr.eaglefactions.common.commands.general.*;
+import io.github.aquerr.eaglefactions.common.commands.rank.DemoteCommand;
+import io.github.aquerr.eaglefactions.common.commands.rank.PromoteCommand;
+import io.github.aquerr.eaglefactions.common.commands.rank.SetLeaderCommand;
+import io.github.aquerr.eaglefactions.common.commands.relation.AllyCommand;
+import io.github.aquerr.eaglefactions.common.commands.relation.EnemyCommand;
+import io.github.aquerr.eaglefactions.common.commands.relation.TruceCommand;
+import io.github.aquerr.eaglefactions.common.commands.admin.*;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
@@ -591,6 +605,32 @@ public class EagleFactionsPlugin implements EagleFactions
                 .permission(PluginPermissions.REGEN_COMMAND)
                 .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
                 .executor(new RegenCommand(this))
+                .build());
+
+        //Access Player Command
+        final CommandSpec accessPlayerCommand = CommandSpec.builder()
+                .description(Text.of("Manages player access for current claim."))
+                .permission(PluginPermissions.ACCESS_PLAYER_COMMAND)
+                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))),
+                        GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
+                .executor(new AccessPlayerCommand(this))
+                .build();
+
+        //Access Faction Command
+        final CommandSpec accessFactionCommand = CommandSpec.builder()
+                .description(Text.of("Manages faction access for current claim."))
+                .permission(PluginPermissions.ACCESS_FACTION_COMMAND)
+                .arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
+                .executor(new AccessFactionPlayer(this))
+                .build();
+
+        //Access Command
+        SUBCOMMANDS.put(Collections.singletonList("access"), CommandSpec.builder()
+                .description(Text.of("Manages internal faction access for current claim."))
+                .permission(PluginPermissions.ACCESS_COMMAND)
+                .executor(new AccessCommand(this))
+                .child(accessPlayerCommand, "player")
+                .child(accessFactionCommand, "faction")
                 .build());
 
         //Build all commands

@@ -502,6 +502,57 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
+    public boolean addClaimOwner(final Faction faction, final Claim claim, final UUID owner)
+    {
+        final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
+        updatedClaims.remove(claim);
+
+        final List<UUID> claimOwners = new ArrayList<>(claim.getOwners());
+        claimOwners.add(owner);
+
+        final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
+        updatedClaims.add(updatedClaim);
+
+        final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+
+        this.storageManager.saveFaction(updatedFaction);
+        return true;
+    }
+
+    @Override
+    public boolean removeClaimOwner(final Faction faction, final Claim claim, final UUID owner)
+    {
+        final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
+        updatedClaims.remove(claim);
+
+        final List<UUID> claimOwners = new ArrayList<>(claim.getOwners());
+        claimOwners.remove(owner);
+
+        final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
+        updatedClaims.add(updatedClaim);
+
+        final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+
+        this.storageManager.saveFaction(updatedFaction);
+        return true;
+    }
+
+    @Override
+    public boolean setClaimAccessibleByFaction(Faction faction, Claim claim, boolean isAccessibleByFaction)
+    {
+        final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
+        updatedClaims.remove(claim);
+
+        final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claim.getOwners(), isAccessibleByFaction);
+        updatedClaims.add(updatedClaim);
+
+        final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+
+        this.storageManager.saveFaction(updatedFaction);
+        return true;
+    }
+
+    @Override
     public void setHome(Faction faction, @Nullable FactionHome home)
     {
         if (home != null && home.getBlockPosition() != null && home.getWorldUUID() != null)

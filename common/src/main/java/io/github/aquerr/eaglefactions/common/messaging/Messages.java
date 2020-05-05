@@ -39,7 +39,7 @@ public class Messages
     public static String THEIR_POWER_IS_TO_HIGH;
     public static String YOU_ARE_IN_THE_SAME_ALLIANCE;
     public static String YOU_CANT_ATTACK_YOURSELF;
-    public static String THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE;
+    public static String THIS_PLACE_DOES_NOT_BELONG_TO_ANYONE;
     public static String CLAIM_DESTROYED;
     public static String ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY;
     public static String STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_DESTROY_IT;
@@ -70,6 +70,7 @@ public class Messages
     public static String AUTO_CLAIM_HAS_BEEN_TURNED_OFF;
     public static String YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD;
     public static String YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN;
+    public static String THIS_PLACE_DOES_NOT_BELONG_TO_YOUR_FACTION;
 
     //Coords
     public static String TEAM_COORDS;
