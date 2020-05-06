@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.commands.general;
+package io.github.aquerr.eaglefactions.common.commands.management;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;

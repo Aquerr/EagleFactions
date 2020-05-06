@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.commands.general;
+package io.github.aquerr.eaglefactions.common.commands.management;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;

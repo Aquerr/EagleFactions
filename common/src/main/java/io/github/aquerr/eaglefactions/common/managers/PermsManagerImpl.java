@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
 import com.google.inject.Singleton;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
@@ -17,21 +18,21 @@ public class PermsManagerImpl implements PermsManager
     }
 
     @Override
-    public boolean canBreakBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction)
+    public boolean canBreakBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final Claim claim)
     {
-        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.DESTROY);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.DESTROY, claim);
     }
 
     @Override
-    public boolean canPlaceBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction)
+    public boolean canPlaceBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final Claim claim)
     {
-        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.PLACE);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.PLACE, claim);
     }
 
     @Override
-    public boolean canInteract(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction)
+    public boolean canInteract(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final Claim claim)
     {
-        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.USE);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.USE, claim);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class PermsManagerImpl implements PermsManager
         return playerFaction.getPerms().get(memberType).get(flagTypes);
     }
 
-    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermType flagType)
+    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermType flagType, final Claim claim)
     {
         if (playerFaction.getName().equals(chunkFaction.getName()))
         {
@@ -69,15 +70,25 @@ public class PermsManagerImpl implements PermsManager
             //Leaders has permission for everything.
             if (memberType == FactionMemberType.LEADER)
                 return true;
-            return chunkFaction.getPerms().get(memberType).get(flagType);
+            final boolean hasPerm = chunkFaction.getPerms().get(memberType).get(flagType);
+            if (hasPerm) //If player has perms specified in /f perms, then we need to check for internal claiming
+            {
+                final boolean isAccessibleByFaction = claim.isAccessibleByFaction();
+                if (isAccessibleByFaction)
+                    return true;
+                else return claim.hasAccess(playerUUID);
+            }
+            else return false;
         }
         else if (playerFaction.getAlliances().contains(chunkFaction.getName()))
         {
-            return chunkFaction.getPerms().get(FactionMemberType.ALLY).get(flagType);
+            final boolean hasPerms = chunkFaction.getPerms().get(FactionMemberType.ALLY).get(flagType);
+            return hasPerms && claim.isAccessibleByFaction(); //If factio has access then allies have it as well.
         }
         else if (playerFaction.getTruces().contains(chunkFaction.getName()))
         {
-            return chunkFaction.getPerms().get(FactionMemberType.TRUCE).get(flagType);
+            final boolean hasPerms = chunkFaction.getPerms().get(FactionMemberType.TRUCE).get(flagType);
+            return hasPerms && claim.isAccessibleByFaction(); //If factio has access then allies have it as well.
         }
         return false;
     }

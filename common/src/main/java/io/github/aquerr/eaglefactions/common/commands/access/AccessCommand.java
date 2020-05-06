@@ -62,14 +62,15 @@ public class AccessCommand extends AbstractCommand
 
     private CommandResult showAccess(final Player player, final Claim claim)
     {
-        final Text claimLocation = Text.of("Location: " + claim.getChunkPosition());
-        final Text text = Text.of("Accessible by faction: " + claim.isAccessibleByFaction());
-        final Text text1 = Text.of("Owners: " + claim.getOwners());
+        final Text claimLocation = Text.of(TextColors.AQUA, "Location: ", TextColors.RESET, claim.getChunkPosition());
+        final Text text = Text.of(TextColors.AQUA, "Accessible by faction: ", TextColors.RESET, claim.isAccessibleByFaction());
+        final Text text1 = Text.of(TextColors.AQUA, "Owners: ", TextColors.RESET, claim.getOwners());
         final List<Text> contents = new ArrayList<>();
         contents.add(claimLocation);
         contents.add(text);
         contents.add(text1);
-        PaginationList.builder().contents(contents).header(Text.of("Claim Access")).build();
+        final PaginationList paginationList = PaginationList.builder().contents(contents).padding(Text.of("=")).title(Text.of(TextColors.GREEN, "Claim Access")).build();
+        paginationList.sendTo(player);
         return CommandResult.success();
     }
 }

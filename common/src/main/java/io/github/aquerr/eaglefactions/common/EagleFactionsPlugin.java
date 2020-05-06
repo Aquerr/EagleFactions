@@ -1,12 +1,10 @@
 package io.github.aquerr.eaglefactions.common;
 
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
-import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
-import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
-import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
-import io.github.aquerr.eaglefactions.api.entities.Invite;
+import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
@@ -14,6 +12,7 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
+import io.github.aquerr.eaglefactions.common.commands.management.*;
 import io.github.aquerr.eaglefactions.common.commands.access.AccessCommand;
 import io.github.aquerr.eaglefactions.common.commands.access.AccessFactionPlayer;
 import io.github.aquerr.eaglefactions.common.commands.access.AccessPlayerCommand;
@@ -52,7 +51,10 @@ import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.common.storage.StorageManagerImpl;
+import io.github.aquerr.eaglefactions.common.storage.serializers.ClaimSetTypeSerializer;
+import io.github.aquerr.eaglefactions.common.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.common.version.VersionChecker;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetId;
@@ -142,6 +144,8 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         eagleFactions = this;
 
+        registerTypeSerializers();
+
         Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
 
         setupConfigs();
@@ -176,6 +180,12 @@ public class EagleFactionsPlugin implements EagleFactions
                 Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
             }
         });
+    }
+
+    private void registerTypeSerializers()
+    {
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Claim.class), new ClaimTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){},  new ClaimSetTypeSerializer());
     }
 
     private void registerAPI()
@@ -629,8 +639,8 @@ public class EagleFactionsPlugin implements EagleFactions
                 .description(Text.of("Manages internal faction access for current claim."))
                 .permission(PluginPermissions.ACCESS_COMMAND)
                 .executor(new AccessCommand(this))
-                .child(accessPlayerCommand, "player")
-                .child(accessFactionCommand, "faction")
+                .child(accessPlayerCommand, "player", "p")
+                .child(accessFactionCommand, "faction", "f")
                 .build());
 
         //Build all commands

@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
@@ -9,6 +10,7 @@ import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.util.InventorySerializer;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -673,7 +675,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
         {
             String worldUUID = resultSet.getString("WorldUUID");
             String chunkPosition = resultSet.getString("ChunkPosition");
-            Claim claim = Claim.valueOf(worldUUID + "|" + chunkPosition);
+            Claim claim = new Claim(UUID.randomUUID(), Vector3i.ZERO);
+//            Claim claim = new Claim(UUID.fromString(worldUUID), chunkPosition);
             claims.add(claim);
         }
         resultSet.close();

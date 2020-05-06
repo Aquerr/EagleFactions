@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.common.storage.serializers.EFTypeSerializers;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -113,7 +114,7 @@ public class ConfigurateHelper
         final Set<UUID> recruits = configNode.getNode("recruits").getValue(new TypeToken<Set<UUID>>(){}, new HashSet<>());
         final Set<String> alliances = new HashSet<>(configNode.getNode("alliances").getList(TypeToken.of(String.class), new ArrayList<>()));
         final Set<String> enemies = new HashSet<>(configNode.getNode("enemies").getList(TypeToken.of(String.class), new ArrayList<>()));
-        final Set<Claim> claims = configNode.getNode("claims").getList(TypeToken.of(String.class), new ArrayList<>()).stream().map(Claim::valueOf).collect(Collectors.toSet());
+        final Set<Claim> claims = configNode.getNode("claims").getValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, Collections.EMPTY_SET);
         final Instant lastOnline = configNode.getNode("last_online").getValue() != null ? Instant.parse(configNode.getNode("last_online").getString()) : Instant.now();
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.getNode("perms"));
         List<FactionChest.SlotItem> slotItems = configNode.getNode("chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});

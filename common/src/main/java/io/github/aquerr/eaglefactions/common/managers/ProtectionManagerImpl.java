@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionType;
@@ -159,7 +160,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final Faction playerFaction = optionalPlayerFaction.get();
-        if (this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction))
+        if (this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.getUniqueId(), location.getChunkPosition()).get()))
             return true;
         else
         {
@@ -249,7 +250,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             return false;
 
         Faction playerFaction = optionalPlayerFaction.get();
-        return this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction);
+        return this.permsManager.canInteract(user.getUniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.getUniqueId(), location.getChunkPosition()).get());
     }
 
     @Override
@@ -324,7 +325,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.FACTION))
                 return true;
 
-            return optionalPlayerFaction.filter(faction -> this.permsManager.canBreakBlock(user.getUniqueId(), faction, optionalChunkFaction.get())).isPresent();
+            final Faction chunkFaction = optionalChunkFaction.get();
+            final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(world.getUniqueId(), location.getChunkPosition());
+
+            return optionalPlayerFaction.filter(faction -> this.permsManager.canBreakBlock(user.getUniqueId(), faction, optionalChunkFaction.get(), optionalClaim.get())).isPresent();
         }
         else return !this.protectionConfig.shouldProtectWildernessFromPlayers();
     }
@@ -436,7 +440,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.FACTION))
                 return true;
 
-            return optionalPlayerFaction.filter(faction -> this.permsManager.canPlaceBlock(user.getUniqueId(), faction, optionalChunkFaction.get())).isPresent();
+            final Faction chunkFaction = optionalChunkFaction.get();
+            return optionalPlayerFaction.filter(faction -> this.permsManager.canPlaceBlock(user.getUniqueId(), faction, chunkFaction, chunkFaction.getClaimAt(world.getUniqueId(), location.getChunkPosition()).get())).isPresent();
         }
         else return !this.protectionConfig.shouldProtectWildernessFromPlayers();
     }
@@ -452,6 +457,8 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private boolean canExplode(final Location<World> location, final User user)
     {
+        final World world = location.getExtent();
+
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
@@ -465,7 +472,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(location.getExtent().getName()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()))
             return true;
 
         boolean shouldProtectWarZoneFromPlayers = this.protectionConfig.shouldProtectWarzoneFromPlayers();
@@ -476,17 +483,17 @@ public class ProtectionManagerImpl implements ProtectionManager
             return true;
 
         //Check world
-        if (this.protectionConfig.getSafeZoneWorldNames().contains(location.getExtent().getName()))
+        if (this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
         {
             return false;
         }
-        else if (this.protectionConfig.getWarZoneWorldNames().contains(location.getExtent().getName()))
+        else if (this.protectionConfig.getWarZoneWorldNames().contains(world.getName()))
         {
             return !shouldProtectWarZoneFromPlayers;
         }
 
         //If no faction
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition());
         if (!optionalChunkFaction.isPresent())
         {
             return !this.protectionConfig.shouldProtectWildernessFromPlayers();
@@ -509,7 +516,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             final Faction playerFaction = optionalPlayerFaction.get();
             if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
             {
-                return this.permsManager.canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction);
+                return this.permsManager.canPlaceBlock(user.getUniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.getUniqueId(), location.getChunkPosition()).get());
             }
         }
 
@@ -622,7 +629,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (!optionalAttackerPlayerFaction.isPresent())
                 return false;
             final Faction attackerFaction = optionalAttackerPlayerFaction.get();
-            return this.permsManager.canBreakBlock(player.getUniqueId(), attackerFaction, chunkFaction);
+            return this.permsManager.canBreakBlock(player.getUniqueId(), attackerFaction, chunkFaction, chunkFaction.getClaimAt(entityLocation.getExtent().getUniqueId(), entityLocation.getChunkPosition()).get());
         }
 
         return true;
