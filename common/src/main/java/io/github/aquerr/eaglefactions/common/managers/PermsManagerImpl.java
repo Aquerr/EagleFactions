@@ -73,6 +73,9 @@ public class PermsManagerImpl implements PermsManager
             final boolean hasPerm = chunkFaction.getPerms().get(memberType).get(flagType);
             if (hasPerm) //If player has perms specified in /f perms, then we need to check for internal claiming
             {
+                if (memberType == FactionMemberType.OFFICER) //Officers are like vice-leaders. They should have access to internal claims.
+                    return true;
+
                 final boolean isAccessibleByFaction = claim.isAccessibleByFaction();
                 if (isAccessibleByFaction)
                     return true;

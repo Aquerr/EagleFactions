@@ -18,9 +18,9 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-public class AccessPlayerCommand extends AbstractCommand
+public class AccessFactionCommand extends AbstractCommand
 {
-    public AccessPlayerCommand(EagleFactionsPlugin plugin)
+    public AccessFactionCommand(EagleFactionsPlugin plugin)
     {
         super(plugin);
     }
@@ -28,7 +28,7 @@ public class AccessPlayerCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        final FactionPlayer factionPlayer = context.requireOne(Text.of("player"));
+        final boolean hasAccess = context.requireOne(Text.of("value"));
 
         if(!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -56,17 +56,11 @@ public class AccessPlayerCommand extends AbstractCommand
         final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         final Claim claim = optionalClaim.get();
 
-        if (claim.hasAccess(factionPlayer.getUniqueId()))
-        {
-            super.getPlugin().getFactionLogic().removeClaimOwner(chunkFaction, claim, factionPlayer.getUniqueId());
-            source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(factionPlayer.getName() + " has been removed from the claim " + claim.getChunkPosition())));
-        }
-        else
-        {
-            super.getPlugin().getFactionLogic().addClaimOwner(chunkFaction, claim, factionPlayer.getUniqueId());
-            source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(factionPlayer.getName() + " has been added to the claim " + claim.getChunkPosition())));
-        }
+        super.getPlugin().getFactionLogic().setClaimAccessibleByFaction(chunkFaction, claim, hasAccess);
 
+        if (hasAccess)
+            source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Faction has access to the claim: " + claim.getChunkPosition())));
+        else source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Faction has not access to the claim: " + claim.getChunkPosition())));
         return CommandResult.success();
     }
 }

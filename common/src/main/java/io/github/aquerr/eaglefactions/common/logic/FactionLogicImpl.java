@@ -538,7 +538,7 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public boolean setClaimAccessibleByFaction(Faction faction, Claim claim, boolean isAccessibleByFaction)
+    public void setClaimAccessibleByFaction(Faction faction, Claim claim, boolean isAccessibleByFaction)
     {
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
@@ -549,7 +549,6 @@ public class FactionLogicImpl implements FactionLogic
         final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
 
         this.storageManager.saveFaction(updatedFaction);
-        return true;
     }
 
     @Override

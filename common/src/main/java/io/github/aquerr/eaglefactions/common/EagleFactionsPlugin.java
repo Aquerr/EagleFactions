@@ -14,7 +14,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.common.commands.management.*;
 import io.github.aquerr.eaglefactions.common.commands.access.AccessCommand;
-import io.github.aquerr.eaglefactions.common.commands.access.AccessFactionPlayer;
+import io.github.aquerr.eaglefactions.common.commands.access.AccessFactionCommand;
 import io.github.aquerr.eaglefactions.common.commands.access.AccessPlayerCommand;
 import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
@@ -631,7 +631,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .description(Text.of("Manages faction access for current claim."))
                 .permission(PluginPermissions.ACCESS_FACTION_COMMAND)
                 .arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
-                .executor(new AccessFactionPlayer(this))
+                .executor(new AccessFactionCommand(this))
                 .build();
 
         //Access Command
