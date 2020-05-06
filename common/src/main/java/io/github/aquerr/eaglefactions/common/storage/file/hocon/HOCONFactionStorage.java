@@ -13,6 +13,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.TypeTokens;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -56,20 +57,22 @@ public class HOCONFactionStorage implements FactionStorage
                 load();
             }
         }
-        catch(IOException exception)
+        catch(IOException | ObjectMappingException exception)
         {
             exception.printStackTrace();
         }
     }
 
-    private void preCreate()
+    private void preCreate() throws ObjectMappingException
     {
         load();
         this.rootNode.getNode("factions").setComment("This file stores all data about factions");
 
+        this.rootNode.getNode("factions", "WarZone", "tag").setValue(TypeTokens.TEXT_TOKEN, Text.of("WZ"));
         this.rootNode.getNode("factions", "WarZone", "claims").setValue(new ArrayList<>());
         this.rootNode.getNode("factions", "WarZone", "members").setValue(new ArrayList<>());
 
+        this.rootNode.getNode("factions", "SafeZone", "tag").setValue(TypeTokens.TEXT_TOKEN, Text.of("SZ"));
         this.rootNode.getNode("factions", "SafeZone", "claims").setValue(new ArrayList<>());
         this.rootNode.getNode("factions", "SafeZone", "members").setValue(new ArrayList<>());
 

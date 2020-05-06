@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands.general;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
@@ -13,17 +14,23 @@ import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsConsumerTask;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsRunnableTask;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleOptions;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextFormat;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -166,8 +173,9 @@ public class HomeCommand extends AbstractCommand
 
         player.sendMessage(ChatTypes.ACTION_BAR, Text.of(Messages.STAND_STILL_FOR + " ", TextColors.GOLD, this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, TextColors.RESET, "!"));
 
-        final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-        taskBuilder.interval(1, TimeUnit.SECONDS).delay(2, TimeUnit.SECONDS).execute(new Consumer<Task>()
+        final EagleFactionsScheduler eagleFactionsScheduler = EagleFactionsScheduler.getInstance();
+        eagleFactionsScheduler.scheduleWithDelayedInterval(new HomeParticles(player), 0, TimeUnit.SECONDS, 40, TimeUnit.MILLISECONDS);
+        eagleFactionsScheduler.scheduleWithDelayedInterval(new EagleFactionsConsumerTask<Task>()
         {
             int seconds = factionsConfig.getHomeDelayTime();
 
@@ -192,7 +200,7 @@ public class HomeCommand extends AbstractCommand
                     seconds--;
                 }
             }
-        }).submit(super.getPlugin());
+        }, 2, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
     }
 
     private void teleport(final Player player, final FactionHome factionHome)
@@ -210,7 +218,8 @@ public class HomeCommand extends AbstractCommand
 
     private void startHomeCooldown(UUID playerUUID)
     {
-        EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, this.factionsConfig.getHomeCooldown());
+                EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, 1);
+//        EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, this.factionsConfig.getHomeCooldown());
 
         final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
@@ -228,5 +237,50 @@ public class HomeCommand extends AbstractCommand
                 EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.replace(playerUUID, seconds, seconds - 1);
             }
         }).submit(super.getPlugin());
+    }
+
+    public static class HomeParticles implements EagleFactionsConsumerTask<Task>
+    {
+        private final Player player;
+        private final World world;
+        private final Location<World> location;
+
+        private final double r = 0.6;
+        private final double angleIncrement = 2;
+        private double angle = 0;
+
+        private final Vector3i lastBlockPosition;
+
+//        private int seconds = factionsConfig.getHomeDelayTime();
+
+        public HomeParticles(final Player player)
+        {
+            this.player = player;
+            this.world = player.getWorld();
+            this.location = player.getLocation();
+            this.lastBlockPosition = player.getLocation().getBlockPosition();
+        }
+
+        @Override
+        public void accept(Task task)
+        {
+            double x = this.location.getX() + r * Math.cos(angle);
+            double z = this.location.getZ() + r * Math.sin(angle);
+
+            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.PORTAL).quantity(5).offset(Vector3d.from(0, 0.5, 0)).build(), Vector3d.from(x, location.getY() + 0.5, z));
+
+            if (angle + angleIncrement > 360)
+            {
+                angle = (angle + angleIncrement) - 360;
+            }
+            else
+            {
+                angle += angleIncrement;
+            }
+
+            //TODO: This code runs forever until player changes location. We should count delay seconds here as well maybe?
+            if (!this.lastBlockPosition.equals(this.player.getLocation().getBlockPosition()))
+                task.cancel();
+        }
     }
 }
