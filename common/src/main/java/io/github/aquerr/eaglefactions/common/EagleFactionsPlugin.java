@@ -621,8 +621,7 @@ public class EagleFactionsPlugin implements EagleFactions
         final CommandSpec accessPlayerCommand = CommandSpec.builder()
                 .description(Text.of("Manages player access for current claim."))
                 .permission(PluginPermissions.ACCESS_PLAYER_COMMAND)
-                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))),
-                        GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
+                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
                 .executor(new AccessPlayerCommand(this))
                 .build();
 
@@ -630,7 +629,6 @@ public class EagleFactionsPlugin implements EagleFactions
         final CommandSpec accessFactionCommand = CommandSpec.builder()
                 .description(Text.of("Manages faction access for current claim."))
                 .permission(PluginPermissions.ACCESS_FACTION_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("value"))))
                 .executor(new AccessFactionCommand(this))
                 .build();
 

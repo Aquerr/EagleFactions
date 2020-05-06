@@ -28,8 +28,6 @@ public class AccessFactionCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        final boolean hasAccess = context.requireOne(Text.of("value"));
-
         if(!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
@@ -55,12 +53,13 @@ public class AccessFactionCommand extends AbstractCommand
         // Get claim at player's location
         final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         final Claim claim = optionalClaim.get();
+        final boolean currentAccess = claim.isAccessibleByFaction();
 
-        super.getPlugin().getFactionLogic().setClaimAccessibleByFaction(chunkFaction, claim, hasAccess);
+        super.getPlugin().getFactionLogic().setClaimAccessibleByFaction(chunkFaction, claim, !currentAccess);
 
-        if (hasAccess)
-            source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Faction has access to the claim: " + claim.getChunkPosition())));
-        else source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Faction has not access to the claim: " + claim.getChunkPosition())));
+        if (!currentAccess)
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Faction access added for claim: ", TextColors.GOLD, claim.getChunkPosition()));
+        else source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Faction access removed for claim: ", TextColors.GOLD, claim.getChunkPosition()));
         return CommandResult.success();
     }
 }

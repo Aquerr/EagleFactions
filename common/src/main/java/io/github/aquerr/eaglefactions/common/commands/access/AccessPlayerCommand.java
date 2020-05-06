@@ -59,12 +59,12 @@ public class AccessPlayerCommand extends AbstractCommand
         if (claim.hasAccess(factionPlayer.getUniqueId()))
         {
             super.getPlugin().getFactionLogic().removeClaimOwner(chunkFaction, claim, factionPlayer.getUniqueId());
-            source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(factionPlayer.getName() + " has been removed from the claim " + claim.getChunkPosition())));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, factionPlayer.getName(), TextColors.GREEN, " has been removed from the claim ", TextColors.GOLD, claim.getChunkPosition()));
         }
         else
         {
             super.getPlugin().getFactionLogic().addClaimOwner(chunkFaction, claim, factionPlayer.getUniqueId());
-            source.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(factionPlayer.getName() + " has been added to the claim " + claim.getChunkPosition())));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, factionPlayer.getName(), TextColors.GREEN, " has been added to the claim ", TextColors.GOLD, claim.getChunkPosition()));
         }
 
         return CommandResult.success();

@@ -36,7 +36,7 @@ public class ConfigurateHelper
             configNode.getNode(faction.getName(), "truces").setValue(faction.getTruces());
             configNode.getNode(faction.getName(), "alliances").setValue(faction.getAlliances());
             configNode.getNode(faction.getName(), "enemies").setValue(faction.getEnemies());
-            configNode.getNode(faction.getName(), "claims").setValue(faction.getClaims().stream().map(Claim::toString).collect(Collectors.toList()));
+            configNode.getNode(faction.getName(), "claims").setValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, faction.getClaims());
             configNode.getNode(faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode(faction.getName(), "perms").setValue(faction.getPerms());
             configNode.getNode(faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());

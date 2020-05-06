@@ -51,7 +51,11 @@ public class ClaimTypeSerializer implements TypeSerializer<Claim>
         if (obj == null)
             return;
 
-        value.getNode("accessibleByFaction").setValue(obj.isAccessibleByFaction());
-        value.getNode("owners").setValue(obj.getOwners());
+        value.getNode(obj.getWorldUUID() + "|" + obj.getChunkPosition(), "accessibleByFaction").setValue(obj.isAccessibleByFaction());
+        value.getNode(obj.getWorldUUID() + "|" + obj.getChunkPosition(), "owners").setValue(obj.getOwners());
+//        value.getNode("worldUUID").setValue(obj.getWorldUUID());
+//        value.getNode("chunkPosition").setValue(obj.getChunkPosition());
+//        value.getNode("accessibleByFaction").setValue(obj.isAccessibleByFaction());
+//        value.getNode("owners").setValue(obj.getOwners());
     }
 }
