@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.storage.FactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
@@ -40,6 +41,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String SELECT_OFFICERS_WHERE_FACTIONNAME = "SELECT OfficerUUID FROM FactionOfficers WHERE FactionName=?";
     private static final String SELECT_MEMBERS_WHERE_FACTIONNAME = "SELECT MemberUUID FROM FactionMembers WHERE FactionName=?";
     private static final String SELECT_CLAIMS_WHERE_FACTIONNAME = "SELECT * FROM Claims WHERE FactionName=?";
+    private static final String SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK = "SELECT * FROM ClaimOwners WHERE WorldUUID=? AND ChunkPosition=?";
     private static final String SELECT_CHEST_WHERE_FACTIONNAME = "SELECT ChestItems FROM FactionChests WHERE FactionName=?";
 
     private static final String SELECT_OFFICER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM OfficerPerms WHERE FactionName=?";
@@ -64,7 +66,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
 //    private static final String MERGE_FACTION = "MERGE INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Alliances, Enemies, Description, Motd) KEY (Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String INSERT_CLAIM = "INSERT INTO Claims (FactionName, WorldUUID, ChunkPosition) VALUES (?, ?, ?)";
+    private static final String INSERT_CLAIM = "INSERT INTO Claims (FactionName, WorldUUID, ChunkPosition, IsAccessibleByFaction) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_CLAIM_OWNER = "INSERT INTO ClaimOwners (WorldUUID, ChunkPosition, PlayerUUID) VALUES (?, ?, ?)";
 
 //    private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName, WorldUUID, ChunkPosition) VALUES (?, ?, ?)";
     private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
@@ -103,7 +106,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
         this.plugin = plugin;
         this.sqlProvider = sqlProvider;
 
-        if(this.sqlProvider == null) {
+        if(this.sqlProvider == null)
+        {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));
             Sponge.getServer().shutdown();
         }
@@ -264,7 +268,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             }
             String enemies = stringBuilder.toString();
 
-            if(truces.endsWith(","))
+            if (truces.endsWith(","))
                 truces = truces.substring(0, truces.length() - 1);
             if (alliances.endsWith(","))
                 alliances = alliances.substring(0, alliances.length() - 1);
@@ -297,7 +301,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             preparedStatement.setString(10, faction.getDescription());
             preparedStatement.setString(11, faction.getMessageOfTheDay());
             preparedStatement.setString(12, faction.isPublic() ? "1" : "0");
-            if(exists)
+            if (exists)
                 preparedStatement.setString(13, faction.getName()); //Where part
 
             preparedStatement.execute();
@@ -308,52 +312,73 @@ public abstract class AbstractFactionStorage implements FactionStorage
             deleteFactionRecruits(connection, faction.getName());
             deleteFactionClaims(connection, faction.getName());
 
-            //TODO: Convert to batch
-            for (final UUID officer : faction.getOfficers())
+            if (!faction.getOfficers().isEmpty())
             {
-                if (faction.getName().equalsIgnoreCase("anticonstitutionnellement"))
-                {
-                    String test = "";
-                }
-                else if(officer.toString().equalsIgnoreCase("anticonstitutionnellement"))
-                {
-                    String test = "";
-                }
-
                 preparedStatement = connection.prepareStatement(INSERT_OFFICERS);
-                preparedStatement.setString(1, officer.toString());
-                preparedStatement.setString(2, faction.getName());
+                for (final UUID officer : faction.getOfficers())
+                {
+                    preparedStatement.setString(1, officer.toString());
+                    preparedStatement.setString(2, faction.getName());
+                    preparedStatement.addBatch();
+                }
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 
-            //TODO: Convert to batch
-            for (UUID member : faction.getMembers())
+            if (!faction.getMembers().isEmpty())
             {
                 preparedStatement = connection.prepareStatement(INSERT_MEMBERS);
-                preparedStatement.setString(1, member.toString());
-                preparedStatement.setString(2, faction.getName());
+                for (UUID member : faction.getMembers())
+                {
+                    preparedStatement.setString(1, member.toString());
+                    preparedStatement.setString(2, faction.getName());
+                    preparedStatement.addBatch();
+                }
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 
-            //TODO: Convert to batch
-            for (final UUID recruit : faction.getRecruits())
+            if (!faction.getRecruits().isEmpty())
             {
                 preparedStatement = connection.prepareStatement(INSERT_RECRUITS);
-                preparedStatement.setString(1, recruit.toString());
-                preparedStatement.setString(2, faction.getName());
+                for (final UUID recruit : faction.getRecruits())
+                {
+                    preparedStatement.setString(1, recruit.toString());
+                    preparedStatement.setString(2, faction.getName());
+                    preparedStatement.addBatch();
+                }
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
 
-            //TODO: Convert to batch
-            for (final Claim claim : faction.getClaims())
+            if (!faction.getClaims().isEmpty())
             {
                 preparedStatement = connection.prepareStatement(INSERT_CLAIM);
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, claim.getWorldUUID().toString());
-                preparedStatement.setString(3, claim.getChunkPosition().toString());
+                for (final Claim claim : faction.getClaims())
+                {
+                    preparedStatement.setString(1, faction.getName());
+                    preparedStatement.setString(2, claim.getWorldUUID().toString());
+                    preparedStatement.setString(3, claim.getChunkPosition().toString());
+                    preparedStatement.setBoolean(4, claim.isAccessibleByFaction());
+
+                    // Insert owner into the claim
+
+                    if (!claim.getOwners().isEmpty())
+                    {
+                        final PreparedStatement ownerPreparedStatement = connection.prepareStatement(INSERT_CLAIM_OWNER);
+                        for (final UUID owner : claim.getOwners())
+                        {
+                            ownerPreparedStatement.setString(1, claim.getWorldUUID().toString());
+                            ownerPreparedStatement.setString(2, claim.getChunkPosition().toString());
+                            ownerPreparedStatement.setString(3, owner.toString());
+                            ownerPreparedStatement.addBatch();
+                        }
+                        ownerPreparedStatement.executeUpdate();
+                        ownerPreparedStatement.close();
+                    }
+
+                    preparedStatement.addBatch();
+                }
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
@@ -674,9 +699,24 @@ public abstract class AbstractFactionStorage implements FactionStorage
         while (resultSet.next())
         {
             String worldUUID = resultSet.getString("WorldUUID");
-            String chunkPosition = resultSet.getString("ChunkPosition");
-            Claim claim = new Claim(UUID.randomUUID(), Vector3i.ZERO);
-//            Claim claim = new Claim(UUID.fromString(worldUUID), chunkPosition);
+            String chunkPositionAsString = resultSet.getString("ChunkPosition");
+            final boolean isAccessibleByFaction = resultSet.getBoolean("IsAccessibleByFaction");
+            final Vector3i chunkPosition = ClaimTypeSerializer.deserializeVector3i(chunkPositionAsString);
+            final Set<UUID> owners = new HashSet<>();
+
+            final PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK);
+            preparedStatement1.setString(1, worldUUID);
+            preparedStatement1.setString(2, chunkPositionAsString);
+            final ResultSet ownersResultSet = preparedStatement1.executeQuery();
+            while (ownersResultSet.next())
+            {
+                final String playerUniqueIdAsString = ownersResultSet.getString("PlayerUUID");
+                owners.add(UUID.fromString(playerUniqueIdAsString));
+            }
+            ownersResultSet.close();
+            preparedStatement1.close();
+
+            Claim claim = new Claim(UUID.fromString(worldUUID), chunkPosition, owners, isAccessibleByFaction);
             claims.add(claim);
         }
         resultSet.close();

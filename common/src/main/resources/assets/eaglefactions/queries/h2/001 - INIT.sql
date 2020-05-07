@@ -131,9 +131,10 @@ CREATE TABLE Claims (
    FactionName   VARCHAR(200)                  NOT NULL,
    WorldUUID     VARCHAR(36)                            NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
+   PRIMARY KEY (WorldUUID, ChunkPosition),
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON Claims (Id);
+CREATE UNIQUE INDEX ON Claims (FactionName);
 
 -- Create FactionsChest Table
 CREATE TABLE FactionChests (

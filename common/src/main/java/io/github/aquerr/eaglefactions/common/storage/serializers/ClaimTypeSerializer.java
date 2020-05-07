@@ -46,4 +46,15 @@ public class ClaimTypeSerializer implements TypeSerializer<Claim>
         value.getNode("accessibleByFaction").setValue(obj.isAccessibleByFaction());
         value.getNode("owners").setValue(EFTypeSerializers.UUID_LIST_TYPE_TOKEN, new ArrayList<>(obj.getOwners()));
     }
+
+    public static Vector3i deserializeVector3i(String vectorAsString)
+    {
+        Objects.requireNonNull(vectorAsString);
+
+        String[] vectors = vectorAsString.replace("(", "").replace(")", "").replace(" ", "").split(",");
+        int x = Integer.parseInt(vectors[0]);
+        int y = Integer.parseInt(vectors[1]);
+        int z = Integer.parseInt(vectors[2]);
+        return Vector3i.from(x, y, z);
+    }
 }

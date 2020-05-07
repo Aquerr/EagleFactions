@@ -175,7 +175,7 @@ public class HomeCommand extends AbstractCommand
         player.sendMessage(ChatTypes.ACTION_BAR, Text.of(Messages.STAND_STILL_FOR + " ", TextColors.GOLD, this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, TextColors.RESET, "!"));
 
         final EagleFactionsScheduler eagleFactionsScheduler = EagleFactionsScheduler.getInstance();
-        eagleFactionsScheduler.scheduleWithDelayedInterval(new ParticlesUtil.HomeParticles(player), 0, TimeUnit.SECONDS, 40, TimeUnit.MILLISECONDS);
+        eagleFactionsScheduler.scheduleWithDelayedInterval(new ParticlesUtil.HomeParticles(player), 0, TimeUnit.SECONDS, 50, TimeUnit.MILLISECONDS);
         eagleFactionsScheduler.scheduleWithDelayedInterval(new EagleFactionsConsumerTask<Task>()
         {
             int seconds = factionsConfig.getHomeDelayTime();

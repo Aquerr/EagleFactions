@@ -174,7 +174,8 @@ CREATE TABLE `Claims` (
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE
+    ON UPDATE CASCADE,
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create FactionsChest Table

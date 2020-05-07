@@ -162,6 +162,7 @@ CREATE TABLE `Claims` (
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `Claims` (`FactionName`);
 
 -- Create FactionsChest Table
 CREATE TABLE `FactionChests` (

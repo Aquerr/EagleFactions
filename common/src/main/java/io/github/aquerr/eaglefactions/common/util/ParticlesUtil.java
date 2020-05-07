@@ -98,7 +98,10 @@ public final class ParticlesUtil
 		private final Location<World> location;
 
 		private final double r = 0.6;
-		private final double angleIncrement = 2;
+//		private final double angleIncrement = 2;
+		private final double numberOfParticles = 28;
+
+		private final double angleIncrement = (2 / numberOfParticles) * Math.PI;
 		private double angle = 0;
 
 		private final Vector3i lastBlockPosition;
@@ -116,8 +119,12 @@ public final class ParticlesUtil
 		@Override
 		public void accept(Task task)
 		{
-			double x = this.location.getX() + r * Math.cos(Math.toDegrees(angle));
-			double z = this.location.getZ() + r * Math.sin(Math.toDegrees(angle));
+//			double x = this.location.getX() + r * Math.cos(Math.toDegrees(angle));
+//			double z = this.location.getZ() + r * Math.sin(Math.toDegrees(angle));
+
+			double x = this.location.getX() + r * Math.cos(angle);
+			double z = this.location.getZ() + r * Math.sin(angle);
+
 
 			world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.END_ROD).quantity(5).offset(Vector3d.from(0, 0.5, 0)).build(), Vector3d.from(x, location.getY() + 0.5, z));
 
