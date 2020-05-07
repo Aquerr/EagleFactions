@@ -50,6 +50,7 @@ public class ClaimsListCommand extends AbstractCommand
             if (source instanceof ConsoleSource)
             {
                 showClaimsList(source, faction);
+                return CommandResult.success();
             }
             else if (source instanceof Player)
             {
