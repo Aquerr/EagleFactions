@@ -6,10 +6,9 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.api.util.TypeTokens;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ClaimTypeSerializer implements TypeSerializer<Claim>
 {
@@ -18,24 +17,15 @@ public class ClaimTypeSerializer implements TypeSerializer<Claim>
     {
         Vector3i chunkPosition = Vector3i.ZERO;
         UUID worldUniqueId = new UUID(0, 0);
-        List<UUID> owners;
+        Set<UUID> owners;
         boolean isAccessibleByFaction;
 
         try
         {
-            final Object object = value.getKey();
-            if (object instanceof String)
-            {
-                String[] worldUUIDAndChunkPosition = ((String) object).split("\\|");
-                worldUniqueId = UUID.fromString(worldUUIDAndChunkPosition[0]);
-                String[] vectors = worldUUIDAndChunkPosition[1].replace("(", "").replace(")", "").replace(" ", "").split(",");
-                int x = Integer.parseInt(vectors[0]);
-                int y = Integer.parseInt(vectors[1]);
-                int z = Integer.parseInt(vectors[2]);
-                chunkPosition = Vector3i.from(x, y, z);
-            }
+            worldUniqueId = value.getNode("worldUUID").getValue(TypeTokens.UUID_TOKEN, new UUID(0, 0));
+            chunkPosition = value.getNode("chunkPosition").getValue(TypeTokens.VECTOR_3I_TOKEN, Vector3i.ZERO);
             isAccessibleByFaction = value.getNode("accessibleByFaction").getBoolean(true);
-            owners = new ArrayList<>(value.getNode("owners").getList(TypeToken.of(UUID.class)));
+            owners = new HashSet<>(value.getNode("owners").getList(TypeTokens.UUID_TOKEN, Collections.EMPTY_LIST));
         }
         catch (Exception e)
         {
@@ -51,11 +41,9 @@ public class ClaimTypeSerializer implements TypeSerializer<Claim>
         if (obj == null)
             return;
 
-        value.getNode(obj.getWorldUUID() + "|" + obj.getChunkPosition(), "accessibleByFaction").setValue(obj.isAccessibleByFaction());
-        value.getNode(obj.getWorldUUID() + "|" + obj.getChunkPosition(), "owners").setValue(obj.getOwners());
-//        value.getNode("worldUUID").setValue(obj.getWorldUUID());
-//        value.getNode("chunkPosition").setValue(obj.getChunkPosition());
-//        value.getNode("accessibleByFaction").setValue(obj.isAccessibleByFaction());
-//        value.getNode("owners").setValue(obj.getOwners());
+        value.getNode("worldUUID").setValue(TypeTokens.UUID_TOKEN, obj.getWorldUUID());
+        value.getNode("chunkPosition").setValue(TypeTokens.VECTOR_3I_TOKEN, obj.getChunkPosition());
+        value.getNode("accessibleByFaction").setValue(obj.isAccessibleByFaction());
+        value.getNode("owners").setValue(EFTypeSerializers.UUID_LIST_TYPE_TOKEN, new ArrayList<>(obj.getOwners()));
     }
 }

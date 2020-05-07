@@ -109,11 +109,11 @@ public class ConfigurateHelper
         final String messageOfTheDay = configNode.getNode("motd").getString();
         final UUID leader = configNode.getNode("leader").getValue(TypeToken.of(UUID.class), new UUID(0,0));
         final FactionHome home = FactionHome.from(String.valueOf(configNode.getNode("home").getValue("")));
-        final Set<UUID> officers = configNode.getNode("officers").getValue(new TypeToken<Set<UUID>>(){}, new HashSet<>());
-        final Set<UUID> members = configNode.getNode("members").getValue(new TypeToken<Set<UUID>>(){}, new HashSet<>());
-        final Set<UUID> recruits = configNode.getNode("recruits").getValue(new TypeToken<Set<UUID>>(){}, new HashSet<>());
-        final Set<String> alliances = new HashSet<>(configNode.getNode("alliances").getList(TypeToken.of(String.class), new ArrayList<>()));
-        final Set<String> enemies = new HashSet<>(configNode.getNode("enemies").getList(TypeToken.of(String.class), new ArrayList<>()));
+        final Set<UUID> officers = configNode.getNode("officers").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);
+        final Set<UUID> members = configNode.getNode("members").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);
+        final Set<UUID> recruits = configNode.getNode("recruits").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);
+        final Set<String> alliances = new HashSet<>(configNode.getNode("alliances").getList(TypeToken.of(String.class), Collections.EMPTY_LIST));
+        final Set<String> enemies = new HashSet<>(configNode.getNode("enemies").getList(TypeToken.of(String.class), Collections.EMPTY_LIST));
         final Set<Claim> claims = configNode.getNode("claims").getValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, Collections.EMPTY_SET);
         final Instant lastOnline = configNode.getNode("last_online").getValue() != null ? Instant.parse(configNode.getNode("last_online").getString()) : Instant.now();
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.getNode("perms"));
@@ -254,7 +254,7 @@ public class ConfigurateHelper
     public static ConfigurationOptions getDefaultOptions()
     {
         final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults();
-        return configurationOptions.setAcceptedTypes(ImmutableSet.of(Map.class, List.class, Double.class, Float.class, Long.class, Integer.class, Boolean.class, String.class,
+        return configurationOptions.setAcceptedTypes(ImmutableSet.of(Map.class, Set.class, List.class, Double.class, Float.class, Long.class, Integer.class, Boolean.class, String.class,
                 Short.class, Byte.class, Number.class));
     }
 }

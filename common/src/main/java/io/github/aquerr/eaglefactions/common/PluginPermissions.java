@@ -31,6 +31,7 @@ public final class PluginPermissions
     public static final String VERSION_COMMAND = "eaglefactions.player.version";
 
     //Claiming
+    public static final String CLAIMS_LIST_COMMAND = "eaglefactions.player.claims";
     public static final String CLAIM_COMMAND = "eaglefactions.player.claim";
     public static final String RADIUS_CLAIM_COMMAND = "eaglefactions.player.radiusclaim";
     public static final String AUTO_CLAIM_COMMAND = "eaglefactions.player.autoclaim";

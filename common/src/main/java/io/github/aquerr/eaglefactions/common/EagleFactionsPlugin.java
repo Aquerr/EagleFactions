@@ -383,6 +383,14 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new DemoteCommand(this))
                 .build());
 
+        //Claims command.
+        SUBCOMMANDS.put(Arrays.asList("claims", "listclaims"), CommandSpec.builder()
+                .description(Text.of("Shows a list of faction's claims."))
+                .permission(PluginPermissions.CLAIMS_LIST_COMMAND)
+                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .executor(new ClaimsListCommand(this))
+                .build());
+
         //Claim command.
         SUBCOMMANDS.put(Collections.singletonList("claim"), CommandSpec.builder()
                 .description(Text.of("Claim a land for your faction"))

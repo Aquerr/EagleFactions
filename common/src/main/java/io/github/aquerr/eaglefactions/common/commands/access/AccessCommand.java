@@ -18,6 +18,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class AccessCommand extends AbstractCommand
 {
@@ -55,16 +56,19 @@ public class AccessCommand extends AbstractCommand
         // Get claim at player's location
         final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         final Claim claim = optionalClaim.get();
-        showAccess(player, claim);
-
-        return CommandResult.success();
+        return showAccess(player, claim);
     }
 
     private CommandResult showAccess(final Player player, final Claim claim)
     {
-        final Text claimLocation = Text.of(TextColors.AQUA, "Location: ", TextColors.RESET, claim.getChunkPosition());
-        final Text text = Text.of(TextColors.AQUA, "Accessible by faction: ", TextColors.RESET, claim.isAccessibleByFaction());
-        final Text text1 = Text.of(TextColors.AQUA, "Owners: ", TextColors.RESET, claim.getOwners());
+        final Text claimLocation = Text.of(TextColors.AQUA, "Location: ", TextColors.GOLD, claim.getChunkPosition());
+        final Text text = Text.of(TextColors.AQUA, "Accessible by faction: ", TextColors.GOLD, claim.isAccessibleByFaction());
+        final List<String> ownersNames = claim.getOwners().stream()
+                .map(owner -> super.getPlugin().getPlayerManager().getFactionPlayer(owner))
+                .filter(Optional::isPresent)
+                .map(factionPlayer -> factionPlayer.get().getName())
+                .collect(Collectors.toList());
+        final Text text1 = Text.of(TextColors.AQUA, "Owners: ", TextColors.GOLD, String.join(", ", ownersNames));
         final List<Text> contents = new ArrayList<>();
         contents.add(claimLocation);
         contents.add(text);

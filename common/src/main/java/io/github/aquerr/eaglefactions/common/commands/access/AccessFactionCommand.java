@@ -2,16 +2,15 @@ package io.github.aquerr.eaglefactions.common.commands.access;
 
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -58,8 +57,15 @@ public class AccessFactionCommand extends AbstractCommand
         super.getPlugin().getFactionLogic().setClaimAccessibleByFaction(chunkFaction, claim, !currentAccess);
 
         if (!currentAccess)
+        {
+            ParticlesUtil.spawnAddAccessParticles(claim);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Faction access added for claim: ", TextColors.GOLD, claim.getChunkPosition()));
-        else source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Faction access removed for claim: ", TextColors.GOLD, claim.getChunkPosition()));
+        }
+        else
+        {
+            ParticlesUtil.spawnRemoveAccessParticles(claim);
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Faction access removed for claim: ", TextColors.GOLD, claim.getChunkPosition()));
+        }
         return CommandResult.success();
     }
 }

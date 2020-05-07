@@ -507,7 +507,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
 
-        final List<UUID> claimOwners = new ArrayList<>(claim.getOwners());
+        final Set<UUID> claimOwners = new HashSet<>(claim.getOwners());
         claimOwners.add(owner);
 
         final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
@@ -525,7 +525,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
 
-        final List<UUID> claimOwners = new ArrayList<>(claim.getOwners());
+        final Set<UUID> claimOwners = new HashSet<>(claim.getOwners());
         claimOwners.remove(owner);
 
         final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());

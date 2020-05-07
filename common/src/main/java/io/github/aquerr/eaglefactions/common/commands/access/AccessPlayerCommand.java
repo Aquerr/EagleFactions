@@ -7,11 +7,11 @@ import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -56,14 +56,16 @@ public class AccessPlayerCommand extends AbstractCommand
         final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         final Claim claim = optionalClaim.get();
 
-        if (claim.hasAccess(factionPlayer.getUniqueId()))
+        if (claim.getOwners().contains(factionPlayer.getUniqueId()))
         {
             super.getPlugin().getFactionLogic().removeClaimOwner(chunkFaction, claim, factionPlayer.getUniqueId());
+            ParticlesUtil.spawnRemoveAccessParticles(claim);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, factionPlayer.getName(), TextColors.GREEN, " has been removed from the claim ", TextColors.GOLD, claim.getChunkPosition()));
         }
         else
         {
             super.getPlugin().getFactionLogic().addClaimOwner(chunkFaction, claim, factionPlayer.getUniqueId());
+            ParticlesUtil.spawnAddAccessParticles(claim);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, factionPlayer.getName(), TextColors.GREEN, " has been added to the claim ", TextColors.GOLD, claim.getChunkPosition()));
         }
 

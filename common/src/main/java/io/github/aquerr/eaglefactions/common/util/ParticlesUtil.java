@@ -3,11 +3,15 @@ package io.github.aquerr.eaglefactions.common.util;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsConsumerTask;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
@@ -17,6 +21,30 @@ public final class ParticlesUtil
 	private ParticlesUtil()
 	{
 
+	}
+
+	public static void spawnAddAccessParticles(final Claim claim)
+	{
+		final Optional<World> optionalWorld = Sponge.getServer().getWorld(claim.getWorldUUID());
+		if(!optionalWorld.isPresent())
+			return;
+
+		final World world = optionalWorld.get();
+		final Vector3d position = getChunkCenter(world, claim.getChunkPosition());
+		world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.FIREWORKS_SPARK).option(ParticleOptions.VELOCITY, new Vector3d(0, 0.15, 0)).quantity(400).offset(new Vector3d(8, 2, 8)).build(), position);
+		world.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, position, 5, 10);
+	}
+
+	public static void spawnRemoveAccessParticles(final Claim claim)
+	{
+		final Optional<World> optionalWorld = Sponge.getServer().getWorld(claim.getWorldUUID());
+		if(!optionalWorld.isPresent())
+			return;
+
+		final World world = optionalWorld.get();
+		final Vector3d position = getChunkCenter(world, claim.getChunkPosition());
+		world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.LARGE_SMOKE).option(ParticleOptions.VELOCITY, new Vector3d(0, 0.15, 0)).quantity(400).offset(new Vector3d(8, 1, 8)).build(), position);
+		world.playSound(SoundTypes.ITEM_FIRECHARGE_USE, position, 5, -10);
 	}
 
 	public static void spawnClaimParticles(final Claim claim)
@@ -61,5 +89,50 @@ public final class ParticlesUtil
 		final double z = (chunkPosition.getZ() << 4) + 8;
 		final double y = world.getHighestYAt((int)x, (int)z);
 		return new Vector3d(x, y, z);
+	}
+
+	public static class HomeParticles implements EagleFactionsConsumerTask<Task>
+	{
+		private final Player player;
+		private final World world;
+		private final Location<World> location;
+
+		private final double r = 0.6;
+		private final double angleIncrement = 2;
+		private double angle = 0;
+
+		private final Vector3i lastBlockPosition;
+
+//        private int seconds = factionsConfig.getHomeDelayTime();
+
+		public HomeParticles(final Player player)
+		{
+			this.player = player;
+			this.world = player.getWorld();
+			this.location = player.getLocation();
+			this.lastBlockPosition = player.getLocation().getBlockPosition();
+		}
+
+		@Override
+		public void accept(Task task)
+		{
+			double x = this.location.getX() + r * Math.cos(Math.toDegrees(angle));
+			double z = this.location.getZ() + r * Math.sin(Math.toDegrees(angle));
+
+			world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.END_ROD).quantity(5).offset(Vector3d.from(0, 0.5, 0)).build(), Vector3d.from(x, location.getY() + 0.5, z));
+
+			if (angle + angleIncrement > 360)
+			{
+				angle = (angle + angleIncrement) - 360;
+			}
+			else
+			{
+				angle += angleIncrement;
+			}
+
+			//TODO: This code runs forever until player changes location. We should count delay seconds here as well maybe?
+			if (!this.lastBlockPosition.equals(this.player.getLocation().getBlockPosition()))
+				task.cancel();
+		}
 	}
 }
