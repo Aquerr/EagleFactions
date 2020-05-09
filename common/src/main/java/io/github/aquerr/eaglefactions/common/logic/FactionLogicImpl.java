@@ -28,6 +28,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
+import java.awt.image.CropImageFilter;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -238,7 +239,16 @@ public class FactionLogicImpl implements FactionLogic
             officers.remove(playerUUID);
         }
 
-        final Faction updatedFaction = faction.toBuilder().setRecruits(recruits).setMembers(members).setOfficers(officers).build();
+        //Remove player from claim owners
+        final Set<Claim> updatedClaims = new HashSet<>();
+        for (final Claim claim : faction.getClaims()) {
+            final Set<UUID> owners = new HashSet<>(claim.getOwners());
+            owners.remove(playerUUID);
+            final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), owners, claim.isAccessibleByFaction());
+            updatedClaims.add(updatedClaim);
+        }
+
+        final Faction updatedFaction = faction.toBuilder().setRecruits(recruits).setMembers(members).setOfficers(officers).setClaims(updatedClaims).build();
         storageManager.saveFaction(updatedFaction);
 
         //Save player...
@@ -649,10 +659,21 @@ public class FactionLogicImpl implements FactionLogic
         {
             officers.remove(playerUUID);
         }
+
+        //Remove player from claim owners
+        final Set<Claim> updatedClaims = new HashSet<>();
+        for (final Claim claim : faction.getClaims()) {
+            final Set<UUID> owners = new HashSet<>(claim.getOwners());
+            owners.remove(playerUUID);
+            final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), owners, claim.isAccessibleByFaction());
+            updatedClaims.add(updatedClaim);
+        }
+
         final Faction updatedFaction = faction.toBuilder()
                 .setOfficers(officers)
                 .setMembers(members)
                 .setRecruits(recruits)
+                .setClaims(updatedClaims)
                 .build();
         this.storageManager.saveFaction(updatedFaction);
 
