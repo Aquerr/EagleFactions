@@ -16,17 +16,16 @@ import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbFactionS
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbPlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLPlayerStorage;
-import io.github.aquerr.eaglefactions.common.storage.util.DeleteFactionTask;
-import io.github.aquerr.eaglefactions.common.storage.util.IStorageTask;
-import io.github.aquerr.eaglefactions.common.storage.util.SavePlayerTask;
-import io.github.aquerr.eaglefactions.common.storage.util.UpdateFactionTask;
+import io.github.aquerr.eaglefactions.common.storage.task.DeleteFactionTask;
+import io.github.aquerr.eaglefactions.common.storage.task.IStorageTask;
+import io.github.aquerr.eaglefactions.common.storage.task.SavePlayerTask;
+import io.github.aquerr.eaglefactions.common.storage.task.UpdateFactionTask;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;

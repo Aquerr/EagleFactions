@@ -171,7 +171,7 @@ public class InfoCommand extends AbstractCommand
             return Text.of(TextColors.GREEN, Messages.NOW);
 
         final Date date = Date.from(faction.getLastOnline());
-        final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final String formattedDate = formatter.format(date);
         return Text.of(TextColors.RED, formattedDate);
     }

@@ -12,6 +12,7 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.TypeTokens;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,29 +27,30 @@ public class ConfigurateHelper
     {
         try
         {
-            configNode.getNode(faction.getName(), "tag").setValue(TypeToken.of(Text.class), faction.getTag());
-            configNode.getNode(faction.getName(), "leader").setValue(faction.getLeader().toString());
-            configNode.getNode(faction.getName(), "description").setValue(faction.getDescription());
-            configNode.getNode(faction.getName(), "motd").setValue(faction.getMessageOfTheDay());
-            configNode.getNode(faction.getName(), "officers").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getOfficers()));
-            configNode.getNode(faction.getName(), "members").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getMembers()));
-            configNode.getNode(faction.getName(), "recruits").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getRecruits()));
-            configNode.getNode(faction.getName(), "truces").setValue(faction.getTruces());
-            configNode.getNode(faction.getName(), "alliances").setValue(faction.getAlliances());
-            configNode.getNode(faction.getName(), "enemies").setValue(faction.getEnemies());
-            configNode.getNode(faction.getName(), "claims").setValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, faction.getClaims());
-            configNode.getNode(faction.getName(), "last_online").setValue(faction.getLastOnline().toString());
-            configNode.getNode(faction.getName(), "perms").setValue(faction.getPerms());
-            configNode.getNode(faction.getName(), "chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
-            configNode.getNode(faction.getName(), "isPublic").setValue(faction.isPublic());
+            configNode.getNode("name").setValue(faction.getName());
+            configNode.getNode("tag").setValue(TypeToken.of(Text.class), faction.getTag());
+            configNode.getNode("leader").setValue(faction.getLeader().toString());
+            configNode.getNode("description").setValue(faction.getDescription());
+            configNode.getNode("motd").setValue(faction.getMessageOfTheDay());
+            configNode.getNode("officers").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getOfficers()));
+            configNode.getNode("members").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getMembers()));
+            configNode.getNode("recruits").setValue(new TypeToken<ArrayList<UUID>>() {}, new ArrayList<>(faction.getRecruits()));
+            configNode.getNode("truces").setValue(faction.getTruces());
+            configNode.getNode("alliances").setValue(faction.getAlliances());
+            configNode.getNode("enemies").setValue(faction.getEnemies());
+            configNode.getNode("claims").setValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, faction.getClaims());
+            configNode.getNode("last_online").setValue(faction.getLastOnline().toString());
+            configNode.getNode("perms").setValue(faction.getPerms());
+            configNode.getNode("chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+            configNode.getNode("isPublic").setValue(faction.isPublic());
 
             if(faction.getHome() == null)
             {
-                configNode.getNode(faction.getName(), "home").setValue(faction.getHome());
+                configNode.getNode("home").setValue(faction.getHome());
             }
             else
             {
-                configNode.getNode(faction.getName(), "home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
+                configNode.getNode("home").setValue(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
             }
             return true;
         }
@@ -82,31 +84,46 @@ public class ConfigurateHelper
     {
         final List<Faction> factions = new ArrayList<>();
 
-        try
+        final Set<Object> keySet = configNode.getChildrenMap().keySet();
+        for(final Object object : keySet)
         {
-            final Set<Object> keySet = configNode.getChildrenMap().keySet();
-            for(Object object : keySet)
+            if(object instanceof String)
             {
-                if(object instanceof String)
+                try
                 {
                     final Faction faction = getFactionFromNode(configNode.getNode(object));
                     factions.add(faction);
                 }
+                catch (final Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
-        }
-        catch (ObjectMappingException e)
-        {
-            e.printStackTrace();
         }
         return factions;
     }
 
     public static Faction getFactionFromNode(final ConfigurationNode configNode) throws ObjectMappingException
     {
-        final String factionName = String.valueOf(configNode.getKey());
+        String factionName;
+        factionName = configNode.getNode("name").getString();
+
+        // Backwards compatibility
+        //TODO: Remove in future release
+        if (configNode.getKey() != null)
+            factionName = (String) configNode.getKey();
+
         final Text tag = configNode.getNode("tag").getValue(TypeToken.of(Text.class));
         final String description = configNode.getNode("description").getString();
         final String messageOfTheDay = configNode.getNode("motd").getString();
+
+        //Backwards compatibility. We need to have a proper uuid stored in leader field.
+        //TODO: Remove in future release
+        final Object leaderValue = configNode.getNode("leader").getValue();
+        if (leaderValue == null || (leaderValue instanceof String && ((String) leaderValue).trim().equals("")))
+            configNode.getNode("leader").setValue(TypeTokens.UUID_TOKEN, new UUID(0, 0));
+        //
+
         final UUID leader = configNode.getNode("leader").getValue(TypeToken.of(UUID.class), new UUID(0,0));
         final FactionHome home = FactionHome.from(String.valueOf(configNode.getNode("home").getValue("")));
         final Set<UUID> officers = configNode.getNode("officers").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);

@@ -1,11 +1,13 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
-import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
+import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.storage.FactionStorage;
-import io.github.aquerr.eaglefactions.common.storage.serializers.EFTypeSerializers;
+import io.github.aquerr.eaglefactions.common.storage.serializers.ClaimTypeSerializer;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -13,116 +15,237 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.TypeTokens;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class HOCONFactionStorage implements FactionStorage
 {
-    private Path filePath;
-    private ConfigurationLoader<CommentedConfigurationNode> configLoader;
-    private CommentedConfigurationNode rootNode;
+    private final Path configDir;
+    private final Path factionsDir;
 
-    private boolean needToSave = false;
+    // Faction name --> Configuration Loader
+    //TODO: Maybe we should also store ConfigurationNodes here?
+    private final Map<String, ConfigurationLoader<? extends ConfigurationNode>> factionLoaders;
 
-    public HOCONFactionStorage(Path configDir)
+    public HOCONFactionStorage(final Path configDir)
+    {
+        this.configDir = configDir;
+        this.factionsDir = configDir.resolve("factions");
+        this.factionLoaders = new HashMap<>();
+
+        if (Files.notExists(this.factionsDir))
+        {
+            try
+            {
+                Files.createDirectory(this.factionsDir);
+                preCreate();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        // Backwards compatibility with 0.14.x
+        // Convert old file format to the new one.
+        // This code will be removed in future releases.
+        if (Files.exists(this.configDir.resolve("data")) && Files.exists(this.configDir.resolve("data").resolve("factions.conf")))
+        {
+            migrateOldFactionsDataToNewFormat();
+        }
+
+        loadFactionsConfigurationLoaders();
+    }
+
+    private void loadFactionsConfigurationLoaders()
     {
         try
         {
-            Path dataPath = configDir.resolve("data");
-
-            if(!Files.exists(dataPath))
+            final Stream<Path> pathsStream = Files.list(this.factionsDir);
+            pathsStream.forEach(path ->
             {
-                Files.createDirectory(dataPath);
-            }
-
-            filePath = dataPath.resolve("factions.conf");
-
-            if(!Files.exists(filePath))
-            {
-                Files.createFile(filePath);
-
-                configLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(filePath).build();
-                preCreate();
-            }
-            else
-            {
-                configLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(filePath).build();
-                load();
-            }
+                final String factionFileName = path.getFileName().toString().toLowerCase();
+                final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(this.factionsDir.resolve(path)).build();
+                factionLoaders.put(factionFileName, configurationLoader);
+            });
         }
-        catch(IOException | ObjectMappingException exception)
+        catch (final IOException e)
         {
-            exception.printStackTrace();
+            e.printStackTrace();
         }
     }
 
-    private void preCreate() throws ObjectMappingException
+    private void migrateOldFactionsDataToNewFormat()
     {
-        load();
-        this.rootNode.getNode("factions").setComment("This file stores all data about factions");
+        final Path oldFactionsFile = this.configDir.resolve("data").resolve("factions.conf");
+        final ConfigurationLoader<CommentedConfigurationNode> configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurationOptions.defaults()).setPath(oldFactionsFile).build();
+        try
+        {
+            final ConfigurationNode configNode = configurationLoader.load();
+            final List<Faction> factions = ConfigurateHelper.getFactionsFromNode(configNode.getNode("factions"));
+            final List<Faction> correctedFactions = new ArrayList<>();
 
-        this.rootNode.getNode("factions", "WarZone", "tag").setValue(TypeTokens.TEXT_TOKEN, Text.of("WZ"));
-        this.rootNode.getNode("factions", "WarZone", "claims").setValue(new ArrayList<>());
-        this.rootNode.getNode("factions", "WarZone", "members").setValue(new ArrayList<>());
+            //Claims were stored differently before so we need to load them properly
+            for (final Faction faction : factions)
+            {
+                final Set<Claim> updatedClaims = new HashSet<>();
+                final Object claims = configNode.getNode("factions", faction.getName(), "claims").getValue();
+                if (claims != null)
+                {
+                    final List<String> claimsAsStrings = (List<String>)claims;
+                    for (final String claimAsString : claimsAsStrings)
+                    {
+                        final String[] worldAndChunk = claimAsString.split("\\|");
+                        final String world = worldAndChunk[0];
+                        final String chunk = worldAndChunk[1];
+                        final UUID worldUUID = UUID.fromString(world);
+                        final Vector3i chunkPosition = ClaimTypeSerializer.deserializeVector3i(chunk);
+                        final Claim claim = new Claim(worldUUID, chunkPosition);
+                        updatedClaims.add(claim);
+                    }
+                }
+                final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+                correctedFactions.add(updatedFaction);
+            }
 
-        this.rootNode.getNode("factions", "SafeZone", "tag").setValue(TypeTokens.TEXT_TOKEN, Text.of("SZ"));
-        this.rootNode.getNode("factions", "SafeZone", "claims").setValue(new ArrayList<>());
-        this.rootNode.getNode("factions", "SafeZone", "members").setValue(new ArrayList<>());
+            //Generate new factions files.
+            for (final Faction faction : correctedFactions)
+            {
+                final Path factionFilePath = this.configDir.resolve("factions").resolve(faction.getName().toLowerCase() + ".conf");
 
-        saveChanges();
+                //Create faction file only if it not exists. We don't want to override the existing data.
+                if (Files.notExists(factionFilePath))
+                {
+                    Files.createFile(factionFilePath);
+                    final HoconConfigurationLoader hoconConfigurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(factionFilePath).build();
+                    final ConfigurationNode node = hoconConfigurationLoader.load();
+                    ConfigurateHelper.putFactionInNode(node, faction);
+                    hoconConfigurationLoader.save(node);
+                }
+            }
+        }
+        catch (final IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
-    public boolean saveFaction(Faction faction)
+    private void preCreate()
     {
-        final boolean didSucceed = ConfigurateHelper.putFactionInNode(rootNode.getNode("factions"), faction);
+        if (!this.factionLoaders.containsKey("warzone.conf"))
+        {
+            final Faction warzone = FactionImpl.builder("WarZone", Text.of("WZ"), new UUID(0, 0)).build();
+            saveFaction(warzone);
+        }
+        if (!this.factionLoaders.containsKey("safezone.conf"))
+        {
+            final Faction safezone = FactionImpl.builder("SafeZone", Text.of("SZ"), new UUID(0, 0)).build();
+            saveFaction(safezone);
+        }
+    }
 
-        if (didSucceed)
-            return saveChanges();
+    @Override
+    public boolean saveFaction(final Faction faction)
+    {
+        ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(faction.getName().toLowerCase() + ".conf");
+        try
+        {
+            if (configurationLoader == null)
+            {
+                final Path factionFilePath = this.factionsDir.resolve(faction.getName().toLowerCase() + ".conf");
+                Files.createFile(factionFilePath);
+                configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(factionFilePath).build();
+                this.factionLoaders.put(factionFilePath.getFileName().toString(), configurationLoader);
+            }
+
+            final ConfigurationNode configurationNode = configurationLoader.load();
+            final boolean didSucceed = ConfigurateHelper.putFactionInNode(configurationNode, faction);
+            if (didSucceed)
+            {
+                configurationLoader.save(configurationNode);
+                return true;
+            }
+            else return false;
+        }
+        catch (final IOException e)
+        {
+            e.printStackTrace();
+        }
         return false;
     }
 
     @Override
-    public boolean deleteFaction(String factionName)
+    public boolean deleteFaction(final String factionName)
     {
+        final Path filePath = this.factionsDir.resolve(factionName.toLowerCase() + ".conf");
         try
         {
-            rootNode.getNode("factions").removeChild(factionName);
-            return saveChanges();
+            Files.deleteIfExists(filePath);
         }
-        catch(Exception exception)
+        catch (final IOException e)
         {
-            exception.printStackTrace();
+            e.printStackTrace();
         }
 
-        return saveChanges();
+        this.factionLoaders.remove(factionName.toLowerCase() + ".conf");
+        return true;
     }
 
     @Override
     public void deleteFactions()
     {
-        this.rootNode.getNode("factions").setValue(null);
-        saveChanges();
+        this.factionLoaders.clear();
+        try
+        {
+            Files.list(this.factionsDir).forEach(path ->
+            {
+                try
+                {
+                    Files.delete(path);
+                }
+                catch (final IOException e)
+                {
+                    e.printStackTrace();
+                }
+            });
+        }
+        catch (final IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public @Nullable
-    Faction getFaction(String factionName)
+    public @Nullable Faction getFaction(final String factionName)
     {
-        if(rootNode.getNode("factions", factionName).getValue() == null)
+        ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(factionName.toLowerCase() + ".conf");
+        if (configurationLoader == null)
+        {
+            final Path filePath = this.factionsDir.resolve(factionName.toLowerCase() + ".conf");
+
+            // Check if file exists, if not then return null
+            if (Files.notExists(filePath))
+                return null;
+
+            // Create configuration loader
+            configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(this.factionsDir.resolve(filePath)).build();
+        }
+
+        if (configurationLoader == null)
             return null;
 
         try
         {
-            return ConfigurateHelper.getFactionFromNode(this.rootNode.getNode("factions", factionName));
+            final ConfigurationNode configurationNode = configurationLoader.load();
+            return ConfigurateHelper.getFactionFromNode(configurationNode);
         }
-        catch (ObjectMappingException e)
+        catch (IOException | ObjectMappingException e)
         {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not deserialize faction object from file! faction name = " + factionName));
             e.printStackTrace();
@@ -130,375 +253,30 @@ public class HOCONFactionStorage implements FactionStorage
         return null;
     }
 
-//    private Faction getFactionFromFile(String factionName)
-//    {
-//        final Text tag = getFactionTag(factionName);
-//        final String description = getFactionDescription(factionName);
-//        final String messageOfTheDay = getFactionMessageOfTheDay(factionName);
-//        final UUID leader = getFactionLeader(factionName);
-//        final FactionHome home = getFactionHome(factionName);
-//        final Set<UUID> officers = getFactionOfficers(factionName);
-//        final Set<UUID> members = getFactionMembers(factionName);
-//        final Set<UUID> recruits = getFactionRecruits(factionName);
-//        final Set<String> alliances = getFactionAlliances(factionName);
-//        final Set<String> enemies = getFactionEnemies(factionName);
-//        final Set<Claim> claims = getFactionClaims(factionName);
-//        final Instant lastOnline = getLastOnline(factionName);
-//        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = ConfigurateHelper.getFactionPermsFromNode(rootNode.getNode("factions", factionName, "perms"));
-//        final FactionChest chest = getFactionChest(factionName);
-//        final boolean isPublic = getFactionIsPublic(factionName);
-//
-//        final Faction faction = FactionImpl.builder(factionName, tag, leader)
-//                .setDescription(description)
-//                .setMessageOfTheDay(messageOfTheDay)
-//                .setHome(home)
-//                .setOfficers(officers)
-//                .setMembers(members)
-//                .setRecruits(recruits)
-//                .setAlliances(alliances)
-//                .setEnemies(enemies)
-//                .setClaims(claims)
-//                .setLastOnline(lastOnline)
-//                .setPerms(perms)
-//                .setChest(chest)
-//                .setIsPublic(isPublic)
-//                .build();
-//
-//        if(needToSave)
-//        {
-//            saveChanges();
-//        }
-//
-//        return faction;
-//    }
-
-//    private FactionChest getFactionChest(String factionName)
-//    {
-//        List<FactionChest.SlotItem> slotItems = null;
-//        try
-//        {
-//            slotItems = rootNode.getNode("factions", factionName, "chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
-//        }
-//        catch (ObjectMappingException e)
-//        {
-//            e.printStackTrace();
-//            return new FactionChestImpl(factionName);
-//        }
-//        if(slotItems != null)
-//        {
-//            return new FactionChestImpl(factionName, slotItems);
-//        }
-//        else
-//        {
-//            rootNode.getNode("factions", factionName, "chest").setValue(new ArrayList<FactionChest.SlotItem>());
-//            needToSave = true;
-//            return new FactionChestImpl(factionName);
-//        }
-//    }
-//
-//    private Instant getLastOnline(String factionName)
-//    {
-//        Object lastOnline = rootNode.getNode("factions", factionName, "last_online").getValue();
-//
-//        if(lastOnline != null)
-//        {
-//            return Instant.parse(lastOnline.toString());
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "last_online"}).setValue(Instant.now().toString());
-//            needToSave = true;
-//            return Instant.now();
-//        }
-//    }
-//
-//    private Set<Claim> getFactionClaims(String factionName)
-//    {
-//        try
-//        {
-//            final Set<Claim> claims = rootNode.getNode("factions", factionName, "claims").getValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN);
-//            if (claims != null)
-//            {
-//                return claims;
-//            }
-//            else
-//            {
-//                rootNode.getNode("factions", factionName, "claims").setValue(new HashSet<>());
-//                needToSave = true;
-//                return Collections.EMPTY_SET;
-//            }
-//        }
-//        catch (ObjectMappingException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        return Collections.EMPTY_SET;
-//    }
-//
-//    private Set<String> getFactionEnemies(String factionName)
-//    {
-//        Object enemiesObject = rootNode.getNode(new Object[]{"factions", factionName, "enemies"}).getValue();
-//
-//        if(enemiesObject != null)
-//        {
-//            return new HashSet<>((List<String>) enemiesObject);
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "enemies"}).setValue(new HashSet<>());
-//            needToSave = true;
-//            return new HashSet<>();
-//        }
-//    }
-//
-//    private Set<String> getFactionAlliances(String factionName)
-//    {
-//        Object alliancesObject = rootNode.getNode(new Object[]{"factions", factionName, "alliances"}).getValue();
-//
-//        if(alliancesObject != null)
-//        {
-//            return new HashSet<>((List<String>) alliancesObject);
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "alliances"}).setValue(new HashSet<>());
-//            needToSave = true;
-//            return new HashSet<>();
-//        }
-//    }
-//
-//    private Set<UUID> getFactionMembers(String factionName)
-//    {
-//        Set<UUID> membersObject = rootNode.getNode(new Object[]{"factions", factionName, "members"}).getValue(objectToUUIDListTransformer);
-//
-//        if(membersObject != null)
-//        {
-//            return membersObject;
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "members"}).setValue(new HashSet<>());
-//            needToSave = true;
-//            return new HashSet<>();
-//        }
-//    }
-//
-//    private Set<UUID> getFactionRecruits(String factionName)
-//    {
-//        Set<UUID> recruitsObject = rootNode.getNode(new Object[]{"factions", factionName, "recruits"}).getValue(objectToUUIDListTransformer);
-//
-//        if(recruitsObject != null)
-//        {
-//            return recruitsObject;
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "recruits"}).setValue(new HashSet<>());
-//            needToSave = true;
-//            return new HashSet<>();
-//        }
-//    }
-//
-//    private FactionHome getFactionHome(String factionName)
-//    {
-//        Object homeObject = rootNode.getNode(new Object[]{"factions", factionName, "home"}).getValue();
-//
-//        if(homeObject != null)
-//        {
-//            if(String.valueOf(homeObject).equals(""))
-//            {
-//                return null;
-//            }
-//            else
-//            {
-//                return FactionHome.from(String.valueOf(homeObject));
-//            }
-//
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "home"}).setValue("");
-//            needToSave = true;
-//            return null;
-//        }
-//    }
-//
-//    private Set<UUID> getFactionOfficers(String factionName)
-//    {
-//        Set<UUID> officersObject = rootNode.getNode(new Object[]{"factions", factionName, "officers"}).getValue(objectToUUIDListTransformer);
-//
-//        if(officersObject != null)
-//        {
-//            return officersObject;
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "officers"}).setValue(new HashSet<>());
-//            needToSave = true;
-//            return new HashSet<>();
-//        }
-//    }
-//
-//    @Nullable
-//    private UUID getFactionLeader(String factionName)
-//    {
-//        Object leaderObject = rootNode.getNode(new Object[]{"factions", factionName, "leader"}).getValue();
-//
-//        if(leaderObject != null && !leaderObject.equals(""))
-//        {
-//            return UUID.fromString(String.valueOf(leaderObject));
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "leader"}).setValue("");
-//            needToSave = true;
-//            return new UUID(0,0);
-//        }
-//    }
-//
-//    private Text getFactionTag(String factionName)
-//    {
-//        Object tagObject = null;
-//        try
-//        {
-//            tagObject = rootNode.getNode(new Object[]{"factions", factionName, "tag"}).getValue(TypeToken.of(Text.class));
-//        }
-//        catch(ObjectMappingException e)
-//        {
-//            e.printStackTrace();
-//        }
-//
-//        if(tagObject != null)
-//        {
-//            return (Text) tagObject;
-//        }
-//        else
-//        {
-//            try
-//            {
-//                rootNode.getNode(new Object[]{"factions", factionName, "tag"}).setValue(TypeToken.of(Text.class), Text.of(""));
-//            }
-//            catch(ObjectMappingException e)
-//            {
-//                e.printStackTrace();
-//            }
-//            needToSave = true;
-//            return Text.of("");
-//        }
-//    }
-//
-//    private String getFactionDescription(final String factionName)
-//    {
-//        final Object leaderObject = rootNode.getNode(new Object[]{"factions", factionName, "description"}).getValue();
-//
-//        if(leaderObject != null)
-//        {
-//            return (String)leaderObject;
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "description"}).setValue("");
-//            needToSave = true;
-//            return "";
-//        }
-//    }
-//
-//    private String getFactionMessageOfTheDay(final String factionName)
-//    {
-//        final Object leaderObject = rootNode.getNode(new Object[]{"factions", factionName, "motd"}).getValue();
-//
-//        if(leaderObject != null)
-//        {
-//            return (String)leaderObject;
-//        }
-//        else
-//        {
-//            rootNode.getNode(new Object[]{"factions", factionName, "motd"}).setValue("");
-//            needToSave = true;
-//            return "";
-//        }
-//    }
-//
-//    private boolean getFactionIsPublic(String factionName)
-//    {
-//        final Object isPublicObject = rootNode.getNode("factions", factionName, "isPublic").getValue();
-//        if(isPublicObject != null)
-//            return (boolean)isPublicObject;
-//        else
-//        {
-//            rootNode.getNode("factions", factionName, "isPublic").setValue(false);
-//            needToSave = true;
-//            return false;
-//        }
-//    }
-
     @Override
     public Set<Faction> getFactions()
     {
-        return new HashSet<>(ConfigurateHelper.getFactionsFromNode(this.rootNode.getNode("factions")));
-
-//        final Set<Faction> factions = new HashSet<>();
-//        final Set<Object> keySet = this.rootNode.getNode("factions").getChildrenMap().keySet();
-//
-//        for(Object object : keySet)
-//        {
-//            if(object instanceof String)
-//            {
-//                ConfigurateHelper.getFactionFromNode();
-//                Faction faction = getFactionFromFile(String.valueOf(object));
-//                factions.add(faction);
-//            }
-//        }
-//
-//        return factions;
+        try
+        {
+            return Files.list(this.factionsDir)
+                    .filter(Files::isRegularFile)
+                    .map(path -> {
+                        final String factionName = path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf("."));
+                        return getFaction(factionName);
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return Collections.EMPTY_SET;
     }
 
     @Override
     public void load()
     {
-        try
-        {
-            rootNode = configLoader.load();
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
+        loadFactionsConfigurationLoaders();
     }
-
-    private boolean saveChanges()
-    {
-        try
-        {
-            configLoader.save(rootNode);
-            return true;
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-//    private Function<Object, Set<UUID>> objectToUUIDListTransformer = (Function<Object, Set<UUID>>) object ->
-//    {
-//        if(object instanceof List)
-//        {
-//            Set<UUID> uuidSet = new HashSet<>();
-//            List<String> list = (List<String>)object;
-//
-//            for(String stringUUID : list)
-//            {
-//                String[] components = stringUUID.split("-");
-//                if(components.length == 5)
-//                {
-//                    uuidSet.add(UUID.fromString(stringUUID));
-//                }
-//            }
-//
-//            return uuidSet;
-//        }
-//        return null;
-//    };
 }

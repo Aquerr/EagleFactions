@@ -10,8 +10,7 @@ import io.github.aquerr.eaglefactions.common.storage.serializers.ClaimTypeSerial
 import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
-import io.github.aquerr.eaglefactions.common.storage.util.InventorySerializer;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import io.github.aquerr.eaglefactions.common.storage.serializers.InventorySerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;

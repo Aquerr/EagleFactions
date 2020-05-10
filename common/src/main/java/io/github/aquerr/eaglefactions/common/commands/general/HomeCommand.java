@@ -219,8 +219,7 @@ public class HomeCommand extends AbstractCommand
 
     private void startHomeCooldown(UUID playerUUID)
     {
-                EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, 1);
-//        EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, this.factionsConfig.getHomeCooldown());
+        EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, this.factionsConfig.getHomeCooldown());
 
         final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
