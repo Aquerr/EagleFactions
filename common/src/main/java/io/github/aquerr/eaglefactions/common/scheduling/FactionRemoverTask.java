@@ -57,7 +57,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             {
                 if (shouldNotifyWhenRemoved)
                 {
-                    Sponge.getServer().getBroadcastChannel().send(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, factionEntry.getKey())))));
+                    Sponge.getServer().getBroadcastChannel().send(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, TextColors.RED, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, factionEntry.getKey())))));
                 }
 
                 if (shouldRegenerateWhenRemoved)

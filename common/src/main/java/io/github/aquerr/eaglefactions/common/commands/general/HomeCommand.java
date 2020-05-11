@@ -197,7 +197,7 @@ public class HomeCommand extends AbstractCommand
                 }
                 else
                 {
-                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, MessageLoader.parseMessage(Messages.TELEPORTING_TO_FACTION_HOME, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, seconds)))));
+                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, MessageLoader.parseMessage(Messages.TELEPORTING_TO_FACTION_HOME, TextColors.AQUA, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, seconds)))));
                     seconds--;
                 }
             }

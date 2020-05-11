@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands.rank;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
@@ -55,7 +56,7 @@ public class SetLeaderCommand extends AbstractCommand
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
 
             super.getPlugin().getFactionLogic().setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_SET_PLAYER_AS_YOUR_NEW_LEADER, Collections.singletonMap(Placeholders.PLAYER, Text.of(TextColors.GOLD, newLeaderPlayer.getName())))));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_SET_PLAYER_AS_YOUR_NEW_LEADER, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, newLeaderPlayer.getName())))));
             return CommandResult.success();
         }
         else if (playerFaction.getLeader().equals(player.getUniqueId()))
@@ -64,7 +65,7 @@ public class SetLeaderCommand extends AbstractCommand
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
 
             super.getPlugin().getFactionLogic().setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_SET_PLAYER_AS_YOUR_NEW_LEADER, Collections.singletonMap(Placeholders.PLAYER, Text.of(TextColors.GOLD, newLeaderPlayer.getName())))));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_SET_PLAYER_AS_YOUR_NEW_LEADER, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, newLeaderPlayer.getName())))));
         }
         return CommandResult.success();
     }

@@ -14,6 +14,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -154,47 +155,49 @@ public class MessageLoader
         }
     }
 
-    public static String parseMessage(String message, Object supplier)
-    {
-        String result = message;
-        if (supplier instanceof Faction)
-        {
-            Faction faction = (Faction) supplier;
-            result = result.replace(Placeholders.FACTION_NAME.getPlaceholder(), faction.getName());
-        }
-        else if (supplier instanceof User)
-        {
-            User user = (User) supplier;
-            result = result.replace(Placeholders.PLAYER_NAME.getPlaceholder(), user.getName());
-            result = result.replace(Placeholders.POWER.getPlaceholder(), String.valueOf(EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(user.getUniqueId())));
-        }
-        else if (supplier instanceof String)
-        {
-            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
-            {
-                result = result.replace(placeholder.getPlaceholder(), (String) supplier);
-            }
-        }
-        else if (supplier instanceof Integer)
-        {
-            result = result.replace(Placeholders.NUMBER.getPlaceholder(), String.valueOf(supplier));
-        }
-        return result;
-    }
+//    public static String parseMessage(String message, Object supplier)
+//    {
+//        String result = message;
+//        if (supplier instanceof Faction)
+//        {
+//            Faction faction = (Faction) supplier;
+//            result = result.replace(Placeholders.FACTION_NAME.getPlaceholder(), faction.getName());
+//        }
+//        else if (supplier instanceof User)
+//        {
+//            User user = (User) supplier;
+//            result = result.replace(Placeholders.PLAYER_NAME.getPlaceholder(), user.getName());
+//            result = result.replace(Placeholders.POWER.getPlaceholder(), String.valueOf(EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(user.getUniqueId())));
+//        }
+//        else if (supplier instanceof String)
+//        {
+//            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
+//            {
+//                result = result.replace(placeholder.getPlaceholder(), (String) supplier);
+//            }
+//        }
+//        else if (supplier instanceof Integer)
+//        {
+//            result = result.replace(Placeholders.NUMBER.getPlaceholder(), String.valueOf(supplier));
+//        }
+//        return result;
+//    }
 
-    public static Text parseMessage(final String message, final Map<Placeholder, Text> supplierMap)
+    public static Text parseMessage(final String message, final TextColor messageBaseColor, final Map<Placeholder, Text> placeholdersMap)
     {
         final Text.Builder resultText = Text.builder();
         final String[] splitMessage = message.split(" ");
         for (final String word : splitMessage)
         {
             boolean didFill = false;
-            for (final Map.Entry<Placeholder, Text> mapEntry : supplierMap.entrySet())
+            for (final Map.Entry<Placeholder, Text> mapEntry : placeholdersMap.entrySet())
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {
-                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), TextSerializers.FORMATTING_CODE.serialize(mapEntry.getValue()));
-                    resultText.append(TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder + " "));
+                    final String placeholderReplacement = TextSerializers.FORMATTING_CODE.serialize(mapEntry.getValue().toBuilder().append(Text.of(messageBaseColor)).build());
+                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), placeholderReplacement);
+                    final Text formattedText = TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder + " ");
+                    resultText.append(formattedText);
                     didFill = true;
 
 //                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlainSingle());
@@ -207,7 +210,7 @@ public class MessageLoader
             if (didFill)
                 continue;
 
-            resultText.append(Text.of(TextColors.RESET, word + " "));
+            resultText.append(Text.of(messageBaseColor, word + " "));
         }
         return resultText.build();
     }

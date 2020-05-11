@@ -68,7 +68,7 @@ public class AllyCommand extends AbstractCommand
 			{
 				//Remove ally
 				super.getPlugin().getFactionLogic().removeAlly(playerFaction.getName(), selectedFaction.getName());
-				player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_DISBANDED_YOUR_ALLIANCE_WITH_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, selectedFaction.getName())))));
+				player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DISBANDED_YOUR_ALLIANCE_WITH_FACTION, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, selectedFaction.getName())))));
 			}
 			else
 			{
@@ -92,7 +92,7 @@ public class AllyCommand extends AbstractCommand
         {
             //Remove ally
             super.getPlugin().getFactionLogic().removeAlly(playerFaction.getName(), selectedFaction.getName());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX,TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_DISBANDED_YOUR_ALLIANCE_WITH_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, selectedFaction.getName())))));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DISBANDED_YOUR_ALLIANCE_WITH_FACTION, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, selectedFaction.getName())))));
         }
         else
         {
@@ -114,11 +114,11 @@ public class AllyCommand extends AbstractCommand
     private void acceptInvite(final Player player, final Faction playerFaction, final Faction senderFaction)
 	{
 		super.getPlugin().getFactionLogic().addAlly(playerFaction.getName(), senderFaction.getName());
-		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName())))));
+		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM_FACTION, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName())))));
 
 		final Optional<Player> optionalSenderFactionLeader = super.getPlugin().getPlayerManager().getPlayer(senderFaction.getLeader());
-		optionalSenderFactionLeader.ifPresent(x-> optionalSenderFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_INVITE_TO_THE_ALLIANCE, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
-		senderFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_INVITE_TO_THE_ALLIANCE, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
+		optionalSenderFactionLeader.ifPresent(x-> optionalSenderFactionLeader.get().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_INVITE_TO_THE_ALLIANCE, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
+		senderFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_INVITE_TO_THE_ALLIANCE, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
 	}
 
 	private void sendInvite(final Player player, final Faction playerFaction, final Faction targetFaction) throws CommandException
@@ -134,7 +134,7 @@ public class AllyCommand extends AbstractCommand
 		optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(getInviteGetMessage(playerFaction)));
 		targetFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> getInviteGetMessage(playerFaction)));
 
-		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_HAVE_INVITED_FACTION_TO_THE_ALLIANCE, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, targetFaction.getName())))));
+		player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_HAVE_INVITED_FACTION_TO_THE_ALLIANCE, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, targetFaction.getName())))));
 
 		final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 		taskBuilder.execute(() -> EagleFactionsPlugin.ALLY_INVITE_LIST.remove(invite)).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(super.getPlugin());
@@ -147,7 +147,7 @@ public class AllyCommand extends AbstractCommand
 				.onClick(TextActions.runCommand("/f ally " + senderFaction.getName()))
 				.onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f ally " + senderFaction.getName()))).build();
 
-		return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
+		return Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE_TO_THE_ALLIANCE, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
                 "\n", Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
                 "\n", clickHereText, Messages.TO_ACCEPT_INVITATION_OR_TYPE, " ", TextColors.GOLD, "/f ally ", senderFaction.getName());
 	}

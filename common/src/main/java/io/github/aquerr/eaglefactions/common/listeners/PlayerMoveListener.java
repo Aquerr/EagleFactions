@@ -117,7 +117,7 @@ public class PlayerMoveListener extends AbstractListener
                 if(optionalNewChunkFaction.isPresent())
                 {
                     information = Text.builder()
-                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
+                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
                             .build();
                     //TODO: Further consideration needed for code below... Long description does not look so good
 //                    if(optionalNewChunkFaction.get().getDescription().equals(""))
@@ -140,7 +140,7 @@ public class PlayerMoveListener extends AbstractListener
                 else
                 {
                     information = Text.builder()
-                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
+                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
                             .build();
                 }
 

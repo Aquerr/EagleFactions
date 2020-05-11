@@ -189,7 +189,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private void registerTypeSerializers()
     {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Claim.class), new ClaimTypeSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){},  new ClaimSetTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){}, new ClaimSetTypeSerializer());
     }
 
     private void registerAPI()

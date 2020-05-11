@@ -56,7 +56,7 @@ public class PlayerJoinListener extends AbstractListener
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
             if(optionalPlayerFaction.isPresent() && !optionalPlayerFaction.get().getMessageOfTheDay().equals(""))
             {
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_MESSAGE_OF_THE_DAY, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, optionalPlayerFaction.get().getName()))), Text.of(optionalPlayerFaction.get().getMessageOfTheDay())));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_MESSAGE_OF_THE_DAY, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, optionalPlayerFaction.get().getName()))), Text.of(optionalPlayerFaction.get().getMessageOfTheDay())));
             }
         });
     }

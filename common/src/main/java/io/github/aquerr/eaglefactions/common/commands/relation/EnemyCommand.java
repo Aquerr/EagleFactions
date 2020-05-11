@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands.relation;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -64,7 +65,7 @@ public class EnemyCommand extends AbstractCommand
             else
             {
                 super.getPlugin().getFactionLogic().removeEnemy(playerFaction.getName(), enemyFaction.getName());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_REMOVED_WAR_STATE_WITH_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_REMOVED_WAR_STATE_WITH_FACTION, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
             }
             return CommandResult.success();
         }
@@ -78,13 +79,13 @@ public class EnemyCommand extends AbstractCommand
         if(!playerFaction.getEnemies().contains(enemyFaction.getName()))
         {
             super.getPlugin().getFactionLogic().addEnemy(playerFaction.getName(), enemyFaction.getName());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_FACTION_IS_NOW_ENEMIES_WITH_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_FACTION_IS_NOW_ENEMIES_WITH_FACTION, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
 
             //Send message to enemy leader.
-            super.getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.FACTION_HAS_HAS_DECLARED_YOU_A_WAR, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
+            super.getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader()).ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_HAS_DECLARED_YOU_A_WAR, TextColors.RED, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
 
             //Send message to enemy officers.
-            enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> y.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.FACTION_HAS_HAS_DECLARED_YOU_A_WAR, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName())))))));
+            enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y-> y.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_HAS_DECLARED_YOU_A_WAR, TextColors.RED, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName())))))));
             return CommandResult.success();
         }
         else
@@ -93,11 +94,11 @@ public class EnemyCommand extends AbstractCommand
             if(EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.contains(checkRemove))
             {
                 super.getPlugin().getFactionLogic().removeEnemy(enemyFaction.getName(), playerFaction.getName());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_HAVE_ACCEPTED_ARMISTICE_REQUEST_FROM_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_HAVE_ACCEPTED_ARMISTICE_REQUEST_FROM_FACTION, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
 
                 final Optional<Player> enemyFactionLeader = super.getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader());
-                enemyFactionLeader.ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_ARMISTICE_REQUEST, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
-                enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y->y.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_ARMISTICE_REQUEST, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName())))))));
+                enemyFactionLeader.ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_ARMISTICE_REQUEST, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName()))))));
+                enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y->y.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_ACCEPTED_YOUR_ARMISTICE_REQUEST, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerFaction.getName())))))));
 
                 EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.remove(checkRemove);
             }
@@ -115,7 +116,7 @@ public class EnemyCommand extends AbstractCommand
                 final Optional<Player> enemyFactionLeader = super.getPlugin().getPlayerManager().getPlayer(enemyFaction.getLeader());
                 enemyFactionLeader.ifPresent(x->x.sendMessage(getArmisticeRequestMessage(playerFaction)));
                 enemyFaction.getOfficers().forEach(x-> super.getPlugin().getPlayerManager().getPlayer(x).ifPresent(y->y.sendMessage(getArmisticeRequestMessage(playerFaction))));
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.WHITE, MessageLoader.parseMessage(Messages.YOU_REQUESTED_ARMISTICE_WITH_FACTION, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
+                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_REQUESTED_ARMISTICE_WITH_FACTION, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, enemyFaction.getName())))));
 
                 final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
                 taskBuilder.execute(() -> EagleFactionsPlugin.ARMISTICE_REQUEST_LIST.remove(armisticeRequest)).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Enemy").submit(super.getPlugin());
@@ -133,7 +134,7 @@ public class EnemyCommand extends AbstractCommand
                 .onClick(TextActions.runCommand("/f enemy " + senderFaction.getName()))
                 .onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f enemy " + senderFaction.getName()))).build();
 
-        return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_ARMISTICE_REQUEST, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName(),
+        return Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_ARMISTICE_REQUEST, TextColors.YELLOW, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName(),
                 "\n", Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
                 "\n", clickHereText, " ", Messages.TO_ACCEPT_IT_OR_TYPE, " ", TextColors.GOLD, "/f enemy " + senderFaction.getName()))));
     }

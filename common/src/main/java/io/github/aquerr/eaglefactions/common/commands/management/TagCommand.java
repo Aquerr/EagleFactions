@@ -58,7 +58,7 @@ public class TagCommand extends AbstractCommand
 
         //Change tag function
         super.getPlugin().getFactionLogic().changeTag(optionalPlayerFaction.get(), newFactionTag);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_TAG_HAS_BEEN_SUCCESSFULLY_CHANGED_TO, Collections.singletonMap(Placeholders.FACTION_TAG, Text.of(TextColors.GOLD, newFactionTag)))));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_TAG_HAS_BEEN_SUCCESSFULLY_CHANGED_TO, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_TAG, Text.of(TextColors.GOLD, newFactionTag)))));
         return CommandResult.success();
     }
 }

@@ -59,7 +59,7 @@ public class KickCommand extends AbstractCommand
         if(!isCancelled)
         {
             super.getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_KICKED_PLAYER_FROM_THE_FACTION, Collections.singletonMap(Placeholders.PLAYER, Text.of(TextColors.GOLD, selectedPlayer.getName())))));
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_KICKED_PLAYER_FROM_THE_FACTION, TextColors.GREEN, Collections.singletonMap(Placeholders.PLAYER, Text.of(TextColors.GOLD, selectedPlayer.getName())))));
 
             if(super.getPlugin().getPlayerManager().isPlayerOnline(selectedPlayer.getUniqueId()))
             {

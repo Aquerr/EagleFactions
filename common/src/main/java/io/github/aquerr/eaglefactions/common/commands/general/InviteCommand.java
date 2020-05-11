@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands.general;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -92,7 +93,7 @@ public class InviteCommand extends AbstractCommand
                 .onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f join " + senderFaction.getName())))
                 .build();
 
-        return Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
+        return Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_INVITE, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
                 Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
                 "\n", clickHereText, TextColors.GREEN, " ", Messages.TO_ACCEPT_INVITATION_OR_TYPE, " ", TextColors.GOLD, "/f join " + senderFaction.getName());
     }

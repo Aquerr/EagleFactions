@@ -39,7 +39,7 @@ public class PlayerDeathListener extends AbstractListener
     public void onPlayerDeath(final DestructEntityEvent.Death event, final @Getter("getTargetEntity") Player player)
     {
         CompletableFuture.runAsync(() -> super.getPlugin().getPowerManager().decreasePower(player.getUniqueId()))
-                .thenRun(() -> player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getPowerDecrement()))), "\n",
+                .thenRun(() -> player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getPowerDecrement()))), "\n",
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
 
         final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());

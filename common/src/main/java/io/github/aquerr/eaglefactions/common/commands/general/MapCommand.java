@@ -275,7 +275,7 @@ public class MapCommand extends AbstractCommand
             player.sendMessage(Text.of(TextColors.RED, Messages.ENEMIES + ": " + String.join(",", enemyFactions)));
         }
 
-        player.sendMessage(Text.of(MessageLoader.parseMessage(Messages.CURRENTLY_STANDING_AT_CLAIM_WHICH_IS_CLAIMED_BY, ImmutableMap.of(Placeholders.CLAIM, Text.of(TextColors.GOLD, playerPosition.toString()), Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerPositionClaim)))));
+        player.sendMessage(Text.of(MessageLoader.parseMessage(Messages.CURRENTLY_STANDING_AT_CLAIM_WHICH_IS_CLAIMED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.CLAIM, Text.of(TextColors.GOLD, playerPosition.toString()), Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, playerPositionClaim)))));
     }
 
 
@@ -328,7 +328,7 @@ public class MapCommand extends AbstractCommand
             {
                 if(isFactionAttacked)
                 {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " " + MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))))));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " " + MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN, TextColors.RED, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))))));
                     return;
                 }
 

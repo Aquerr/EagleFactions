@@ -328,14 +328,14 @@ public class EntityDamageListener extends AbstractListener
     private void sendPenaltyMessageAndDecreasePower(final Player player)
     {
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader
-                        .parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, ImmutableMap.of(Placeholders.NUMBER, this.powerConfig.getPenalty())) + "\n",
+                        .parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getPenalty()))) + "\n",
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().penalty(player.getUniqueId());
     }
 
     private void sendKillAwardMessageAndIncreasePower(final Player player)
     {
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY, ImmutableMap.of(Placeholders.NUMBER, this.powerConfig.getKillAward())) + "\n",
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getKillAward()))) + "\n",
                 TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
         super.getPlugin().getPowerManager().addPower(player.getUniqueId(), true);
     }
