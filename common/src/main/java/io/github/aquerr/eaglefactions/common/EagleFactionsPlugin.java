@@ -8,6 +8,8 @@ import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -32,6 +34,7 @@ import io.github.aquerr.eaglefactions.common.commands.relation.EnemyCommand;
 import io.github.aquerr.eaglefactions.common.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.common.commands.admin.*;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
@@ -61,6 +64,7 @@ import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -107,7 +111,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private Configuration configuration;
     private PVPLogger pvpLogger;
     private PlayerManagerImpl playerManager;
-    private PermsManagerImpl flagManager;
+    private PermsManagerImpl permsManager;
     private ProtectionManager protectionManager;
     private PowerManagerImpl powerManager;
     private AttackLogic attackLogic;
@@ -194,6 +198,11 @@ public class EagleFactionsPlugin implements EagleFactions
         //But we are still registering these managers just in case someone will try to access not through EagleFactions interface.
         Sponge.getServiceManager().setProvider(this, FactionLogic.class, this.factionLogic);
         Sponge.getServiceManager().setProvider(this, PowerManager.class, this.powerManager);
+        Sponge.getServiceManager().setProvider(this, PlayerManager.class, this.playerManager);
+        Sponge.getServiceManager().setProvider(this, ProtectionManager.class, this.protectionManager);
+        Sponge.getServiceManager().setProvider(this, PermsManager.class, this.permsManager);
+        Sponge.getServiceManager().setProvider(this, PVPLogger.class, this.pvpLogger);
+        Sponge.getServiceManager().setProvider(this, AttackLogic.class, this.attackLogic);
     }
 
     @Listener
@@ -696,7 +705,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public PermsManagerImpl getPermsManager()
     {
-        return flagManager;
+        return this.permsManager;
     }
 
     public PlayerManagerImpl getPlayerManager()
@@ -756,10 +765,10 @@ public class EagleFactionsPlugin implements EagleFactions
         storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
         powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig(), this.configDir);
-        flagManager = new PermsManagerImpl();
+        permsManager = new PermsManagerImpl();
         factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
         attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
-        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.flagManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
+        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
     }
 
     private void startFactionsRemover()
