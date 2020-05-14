@@ -134,7 +134,7 @@ public class BlockBreakListener extends AbstractListener
                     if(location.getBlockType() == BlockTypes.AIR)
                         continue;
 
-                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true))
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                     {
                         event.setCancelled(true);
                         return;
@@ -170,7 +170,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(user != null && (pistonExtend || pistonRetract))
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user, true))
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                     {
                         event.setCancelled(true);
                         return;
@@ -196,12 +196,12 @@ public class BlockBreakListener extends AbstractListener
                 if(!isLiquidSource && location.getBlock().getType() == BlockTypes.AIR)
                     continue;
 
-                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true))
+                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
+                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -214,7 +214,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user, true))
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                     {
                         event.setCancelled(true);
                     }
@@ -237,7 +237,7 @@ public class BlockBreakListener extends AbstractListener
                     continue;
 
                 //TODO: This runs even when player right clicks the block.
-                if(!super.getPlugin().getProtectionManager().canBreak(location, user, true))
+                if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -313,12 +313,12 @@ public class BlockBreakListener extends AbstractListener
                 continue;
             }
 
-            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true))
+            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
             {
                 event.setCancelled(true);
                 return;
             }
-            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
+            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location).hasAccess())
             {
                 event.setCancelled(true);
                 return;
@@ -462,7 +462,7 @@ public class BlockBreakListener extends AbstractListener
             //Check if projectile fired by user collided with ItemFrame.
             if(entity instanceof ItemFrame && isProjectileSource && user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), user, true))
+                if(!super.getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -591,7 +591,7 @@ public class BlockBreakListener extends AbstractListener
         {
             if(entity instanceof Living)
             {
-                if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity, true))
+                if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity, true).hasAccess())
                 {
                     return false;
                 }

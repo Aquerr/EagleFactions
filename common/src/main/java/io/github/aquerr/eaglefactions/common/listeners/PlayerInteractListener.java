@@ -2,12 +2,16 @@ package io.github.aquerr.eaglefactions.common.listeners;
 
 import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -15,7 +19,10 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -48,8 +55,8 @@ public class PlayerInteractListener extends AbstractListener
             location = hitEntity.getLocation();
         }
 
-        boolean canUseItem = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
-        if (!canUseItem)
+        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
+        if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
             return;
@@ -67,7 +74,7 @@ public class PlayerInteractListener extends AbstractListener
 
         final Vector3d blockPosition = optionalInteractionPoint.orElseGet(() -> targetEntity.getLocation().getPosition());
         final Location<World> location = new Location<>(targetEntity.getWorld(), blockPosition);
-        boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true);
+        boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true).hasAccess();
         if(!canInteractWithEntity)
         {
             event.setCancelled(true);
@@ -88,11 +95,22 @@ public class PlayerInteractListener extends AbstractListener
 
         final Location<World> blockLocation = optionalLocation.get();
 
-        boolean canInteractWithBlock = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player, true);
-        if (!canInteractWithBlock)
+        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player, true);
+        if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
             return;
         }
+        else if (protectionResult.hasAccess() && protectionResult.isEagleFeather())
+        {
+            removeEagleFeather(player);
+        }
+    }
+
+    private void removeEagleFeather(final Player player)
+    {
+        final ItemStack feather = player.getItemInHand(HandTypes.MAIN_HAND).get();
+        feather.setQuantity(feather.getQuantity() - 1);
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!"));
     }
 }

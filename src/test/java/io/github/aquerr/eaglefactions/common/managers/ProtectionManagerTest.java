@@ -126,7 +126,7 @@ public class ProtectionManagerTest
 		when(playerManager.hasAdminMode(player)).thenReturn(true);
 
 		//then
-		final boolean result = protectionManager.canHitEntity(entity, player, false);
+		final boolean result = protectionManager.canHitEntity(entity, player, false).hasAccess();
 		assertTrue(result);
 	}
 }

@@ -74,7 +74,7 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 			{
 				final Direction direction = directionIterator.next();
 				final Location<World> blockLocation = sourceLocation.getBlockRelative(direction);
-				if(!super.getPlugin().getProtectionManager().canNotifyBlock(sourceLocation, blockLocation))
+				if(!super.getPlugin().getProtectionManager().canNotifyBlock(sourceLocation, blockLocation).hasAccess())
 				{
 					directionIterator.remove();
 				}
@@ -91,7 +91,7 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 			sourceLocation = player.getLocation();
 		}
 
-		if(!super.getPlugin().getProtectionManager().canInteractWithBlock(sourceLocation, user, false))
+		if(!super.getPlugin().getProtectionManager().canInteractWithBlock(sourceLocation, user, false).hasAccess())
 		{
 			event.setCancelled(true);
 			return;
@@ -104,7 +104,7 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 		{
 			final Direction direction = directionIterator.next();
 			final Location<World> blockLocation = finalSourceLocation.getBlockRelative(direction);
-			if(!super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, finalUser, false))
+			if(!super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, finalUser, false).hasAccess())
 			{
 				directionIterator.remove();
 			}

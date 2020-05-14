@@ -96,7 +96,7 @@ public class EntityDamageListener extends AbstractListener
         if(user == null)
             return;
 
-        if(!super.getPlugin().getProtectionManager().canInteractWithBlock(targetEntity.getLocation(), user, true))
+        if(!super.getPlugin().getProtectionManager().canInteractWithBlock(targetEntity.getLocation(), user, true).hasAccess())
         {
             event.setCancelled(true);
         }
@@ -207,7 +207,7 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean shouldBlockDamageFromPlayer(final Player attackedPlayer, final Player sourcePlayer, boolean willCauseDeath)
     {
-        final boolean canAttack = this.protectionManager.canHitEntity(attackedPlayer, sourcePlayer, false);
+        final boolean canAttack = this.protectionManager.canHitEntity(attackedPlayer, sourcePlayer, false).hasAccess();
         if (!canAttack)
             return true;
 

@@ -55,7 +55,7 @@ public class BlockPlaceListener extends AbstractListener
 
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true))
+                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true).hasAccess())
                     event.setCancelled(true);
             }
         }
@@ -88,7 +88,7 @@ public class BlockPlaceListener extends AbstractListener
                 final Optional<Location<World>> sourceLocation = ((BlockSnapshot) source).getLocation();
                 if (!sourceNotifyLocation.isPresent() || !sourceLocation.isPresent())
                     return;
-                if (!super.getPlugin().getProtectionManager().canNotifyBlock(sourceNotifyLocation.get(), sourceLocation.get()))
+                if (!super.getPlugin().getProtectionManager().canNotifyBlock(sourceNotifyLocation.get(), sourceLocation.get()).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
