@@ -17,6 +17,7 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -55,7 +56,7 @@ public class PlayerInteractListener extends AbstractListener
             location = hitEntity.getLocation();
         }
 
-        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
+        final ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
         if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
@@ -95,15 +96,16 @@ public class PlayerInteractListener extends AbstractListener
 
         final Location<World> blockLocation = optionalLocation.get();
 
-        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player, true);
+        final ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player, true);
         if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
             return;
         }
-        else if (protectionResult.hasAccess() && protectionResult.isEagleFeather())
+        else
         {
-            removeEagleFeather(player);
+            if(event instanceof InteractBlockEvent.Secondary && protectionResult.isEagleFeather())
+                removeEagleFeather(player);
         }
     }
 
@@ -111,6 +113,6 @@ public class PlayerInteractListener extends AbstractListener
     {
         final ItemStack feather = player.getItemInHand(HandTypes.MAIN_HAND).get();
         feather.setQuantity(feather.getQuantity() - 1);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!"));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You used Eagle's Feather!"));
     }
 }
