@@ -34,6 +34,12 @@ dependencies {
 }
 
 shadowJar {
+    if(System.getenv("JENKINS_HOME")) {
+        version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        println("File name => " + archivesBaseName)
+    } else {
+        version = version + "-SNAPSHOT"
+    }
     archiveClassifier = ''
 }
 
