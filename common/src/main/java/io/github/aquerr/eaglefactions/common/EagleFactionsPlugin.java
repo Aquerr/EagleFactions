@@ -14,10 +14,8 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
+import io.github.aquerr.eaglefactions.common.commands.access.*;
 import io.github.aquerr.eaglefactions.common.commands.management.*;
-import io.github.aquerr.eaglefactions.common.commands.access.AccessCommand;
-import io.github.aquerr.eaglefactions.common.commands.access.AccessFactionCommand;
-import io.github.aquerr.eaglefactions.common.commands.access.AccessPlayerCommand;
 import io.github.aquerr.eaglefactions.common.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionArgument;
 import io.github.aquerr.eaglefactions.common.commands.args.FactionPlayerArgument;
@@ -65,7 +63,6 @@ import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -650,6 +647,21 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new AccessFactionCommand(this))
                 .build();
 
+        //Access OwnedBy Command
+        final CommandSpec accessOwnedByCommand = CommandSpec.builder()
+                .description(Text.of("Shows which claims are owned by the given player"))
+                .permission(PluginPermissions.ACCESS_OWNED_BY_COMMAND)
+                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
+                .executor(new OwnedByCommand(this))
+                .build();
+
+        //Access AccessibleByFaction Command
+        final CommandSpec accessibleByFactionCommand = CommandSpec.builder()
+                .description(Text.of("Shows which claims are accessible by faction"))
+                .permission(PluginPermissions.ACCESS_NOT_ACCESSIBLE_BY_FACTION_COMMAND)
+                .executor(new NotAccessibleByFactionCommand(this))
+                .build();
+
         //Access Command
         SUBCOMMANDS.put(Collections.singletonList("access"), CommandSpec.builder()
                 .description(Text.of("Manages internal faction access for current claim."))
@@ -657,6 +669,8 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new AccessCommand(this))
                 .child(accessPlayerCommand, "player", "p")
                 .child(accessFactionCommand, "faction", "f")
+                .child(accessOwnedByCommand, "ownedBy")
+                .child(accessibleByFactionCommand, "notAccessibleByFaction")
                 .build());
 
         //Build all commands
@@ -746,7 +760,7 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Override
-    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final  boolean diedInWarZone)
+    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
     {
         return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, factionRole, diedInWarZone);
     }

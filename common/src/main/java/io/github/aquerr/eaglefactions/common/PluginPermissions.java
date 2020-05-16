@@ -52,6 +52,8 @@ public final class PluginPermissions
     public static final String ACCESS_COMMAND = "eaglefactions.player.access";
     public static final String ACCESS_PLAYER_COMMAND = "eaglefactions.player.access.player";
     public static final String ACCESS_FACTION_COMMAND = "eaglefactions.player.access.faction";
+    public static final String ACCESS_OWNED_BY_COMMAND = "eaglefactions.player.access.ownedby";
+    public static final String ACCESS_NOT_ACCESSIBLE_BY_FACTION_COMMAND = "eaglefactions.player.access.notaccessiblebyfaction";
 
     //Map
     public static final String MAP_COMMAND = "eaglefactions.player.map";
