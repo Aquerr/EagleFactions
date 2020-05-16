@@ -13,6 +13,13 @@ targetCompatibility = 1.8
 //}
 
 blossom {
+    if(System.getenv("JENKINS_HOME")) {
+        project.version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        println("File name => " + archivesBaseName)
+    } else {
+        project.version = version + "-SNAPSHOT"
+    }
+
     replaceTokenIn('src/main/java/io/github/aquerr/eaglefactions/common/PluginInfo.java')
     replaceToken('%VERSION%', project.version)
 }

@@ -35,6 +35,7 @@ import io.github.aquerr.eaglefactions.common.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.common.commands.admin.*;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
@@ -736,6 +737,18 @@ public class EagleFactionsPlugin implements EagleFactions
     public StorageManager getStorageManager()
     {
         return this.storageManager;
+    }
+
+    @Override
+    public Faction.Builder getBuilderForFaction(String name, Text tag, UUID leader)
+    {
+        return new FactionImpl.BuilderImpl(name, tag, leader);
+    }
+
+    @Override
+    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final  boolean diedInWarZone)
+    {
+        return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, factionRole, diedInWarZone);
     }
 
     public InputStream getResourceAsStream(String fileName)

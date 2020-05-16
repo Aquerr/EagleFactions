@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.*;
@@ -34,6 +35,9 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Created by Aquerr on 2017-07-12.
  */
@@ -42,8 +46,6 @@ public class FactionLogicImpl implements FactionLogic
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
-
-    private final UUID DUMMY_UUID = new UUID(0, 0);
 
     public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig)
     {
@@ -55,6 +57,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public Optional<Faction> getFactionByPlayerUUID(UUID playerUUID)
     {
+        checkNotNull(playerUUID);
+
         final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
         if (!optionalFactionPlayer.isPresent())
             return Optional.empty();
@@ -67,33 +71,14 @@ public class FactionLogicImpl implements FactionLogic
         if (faction == null)
             return Optional.empty();
         else return Optional.of(faction);
-
-//        for(Faction faction : getFactions().values())
-//        {
-//            if(faction.getLeader() != null && faction.getLeader().equals(playerUUID))
-//            {
-//                return Optional.of(faction);
-//            }
-//            else if(faction.getOfficers().contains(playerUUID))
-//            {
-//                return Optional.of(faction);
-//            }
-//            else if(faction.getMembers().contains(playerUUID))
-//            {
-//                return Optional.of(faction);
-//            }
-//            else if(faction.getRecruits().contains(playerUUID))
-//            {
-//                return Optional.of(faction);
-//            }
-//        }
-//
-//        return Optional.empty();
     }
 
     @Override
-    public Optional<Faction> getFactionByChunk(UUID worldUUID, Vector3i chunk)
+    public Optional<Faction> getFactionByChunk(final UUID worldUUID, final Vector3i chunk)
     {
+        checkNotNull(worldUUID);
+        checkNotNull(chunk);
+
         Claim claim = new Claim(worldUUID, chunk);
         for(Faction faction : getFactions().values())
         {
@@ -109,15 +94,18 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public @Nullable Faction getFactionByName(String factionName)
     {
+        checkNotNull(factionName);
         return storageManager.getFaction(factionName);
     }
 
     @Override
-    public List<Player> getOnlinePlayers(Faction faction)
+    public List<Player> getOnlinePlayers(final Faction faction)
     {
+        checkNotNull(faction);
+
         final List<Player> factionPlayers = new ArrayList<>();
         final UUID factionLeader = faction.getLeader();
-        if(!faction.getLeader().equals(DUMMY_UUID) && this.playerManager.isPlayerOnline(factionLeader))
+        if(!faction.getLeader().equals(new UUID(0, 0)) && this.playerManager.isPlayerOnline(factionLeader))
         {
             factionPlayers.add(playerManager.getPlayer(factionLeader).get());
         }
@@ -162,15 +150,17 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void addFaction(Faction faction)
+    public void addFaction(final Faction faction)
     {
+        checkNotNull(faction);
         storageManager.saveFaction(faction);
     }
 
     @Override
-    public boolean disbandFaction(String factionName)
+    public boolean disbandFaction(final String factionName)
     {
-        Objects.requireNonNull(factionName);
+        checkNotNull(factionName);
+
         final Faction factionToDisband = this.storageManager.getFaction(factionName);
 
         //Update players...
@@ -201,10 +191,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void joinFaction(UUID playerUUID, String factionName)
+    public void joinFaction(final UUID playerUUID, final String factionName)
     {
-        if(playerUUID == null || factionName.equals(""))
-            throw new IllegalArgumentException("playerUUID can't be null and/or factionName can't be empty.");
+        checkNotNull(playerUUID);
+        checkNotNull(factionName);
 
         Faction faction = getFactionByName(factionName);
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
@@ -219,8 +209,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void leaveFaction(UUID playerUUID, String factionName)
+    public void leaveFaction(final UUID playerUUID, final String factionName)
     {
+        checkNotNull(playerUUID);
+        checkNotNull(factionName);
+
         final Faction faction = getFactionByName(factionName);
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
@@ -258,10 +251,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void addTruce(String playerFactionName, String invitedFactionName)
+    public void addTruce(final String playerFactionName, final String invitedFactionName)
     {
-        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
-            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(Strings.isNullOrEmpty(invitedFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
@@ -280,10 +273,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void removeTruce(String playerFactionName, String removedFactionName)
+    public void removeTruce(final String playerFactionName, final String removedFactionName)
     {
-        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(removedFactionName))
-            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(Strings.isNullOrEmpty(removedFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
@@ -302,8 +295,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void addAlly(String playerFactionName, String invitedFactionName)
+    public void addAlly(final String playerFactionName, final String invitedFactionName)
     {
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(Strings.isNullOrEmpty(invitedFactionName));
+
         if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
 
@@ -324,10 +320,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void removeAlly(String playerFactionName, String removedFactionName)
+    public void removeAlly(final String playerFactionName, final String removedFactionName)
     {
-        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(removedFactionName))
-            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(Strings.isNullOrEmpty(removedFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
@@ -346,10 +342,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void addEnemy(String playerFactionName, String enemyFactionName)
+    public void addEnemy(final String playerFactionName, final String enemyFactionName)
     {
-        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(enemyFactionName))
-            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(Strings.isNullOrEmpty(enemyFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -368,10 +364,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void removeEnemy(String playerFactionName, String enemyFactionName)
+    public void removeEnemy(final String playerFactionName, final String enemyFactionName)
     {
-        if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(enemyFactionName))
-            throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(Strings.isNullOrEmpty(enemyFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -390,8 +386,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setLeader(UUID newLeaderUUID, String playerFactionName)
+    public void setLeader(final UUID newLeaderUUID, final String playerFactionName)
     {
+        checkNotNull(newLeaderUUID);
+        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+
         final Faction faction = getFactionByName(playerFactionName);
         if (faction == null)
             return;
@@ -400,7 +399,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<UUID> members = new HashSet<>(faction.getMembers());
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
 
-        if(!faction.getLeader().equals(DUMMY_UUID))
+        if(!faction.getLeader().equals(new UUID(0, 0)))
         {
             officers.add(faction.getLeader());
         }
@@ -437,6 +436,9 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addClaims(final Faction faction, final List<Claim> claims)
     {
+        checkNotNull(faction);
+        checkNotNull(claims);
+
         final Set<Claim> factionClaims = new HashSet<>(faction.getClaims());
 
         for(final Claim claim : claims)
@@ -452,6 +454,9 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addClaim(final Faction faction, final Claim claim)
     {
+        checkNotNull(faction);
+        checkNotNull(claim);
+
         final Set<Claim> claims = new HashSet<>(faction.getClaims());
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
@@ -463,6 +468,9 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeClaim(final Faction faction, final Claim claim)
     {
+        checkNotNull(faction);
+        checkNotNull(claim);
+
         removeClaimInternal(faction, claim);
 		ParticlesUtil.spawnUnclaimParticles(claim);
     }
@@ -470,13 +478,19 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void destroyClaim(final Faction faction, final Claim claim)
     {
+        checkNotNull(faction);
+        checkNotNull(claim);
+
         removeClaimInternal(faction, claim);
         ParticlesUtil.spawnDestroyClaimParticles(claim);
     }
 
     @Override
-    public boolean isClaimed(UUID worldUUID, Vector3i chunk)
+    public boolean isClaimed(final UUID worldUUID, final Vector3i chunk)
     {
+        checkNotNull(worldUUID);
+        checkNotNull(chunk);
+
         for(Claim claim : getAllClaims())
         {
             if (claim.getWorldUUID().equals(worldUUID) && claim.getChunkPosition().equals(chunk))
@@ -486,18 +500,21 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public boolean isClaimConnected(Faction faction, Claim claimToCheck)
+    public boolean isClaimConnected(final Faction faction, final Claim claimToCheck)
     {
+        checkNotNull(faction);
+        checkNotNull(claimToCheck);
+
         if (faction.getClaims().size() == 0)
             return true;
 
-        for(Claim claim : faction.getClaims())
+        for(final Claim claim : faction.getClaims())
         {
             if(!claimToCheck.getWorldUUID().equals(claim.getWorldUUID()))
                 continue;
 
-            Vector3i chunkToCheck = claimToCheck.getChunkPosition();
-            Vector3i claimChunk = claim.getChunkPosition();
+            final Vector3i chunkToCheck = claimToCheck.getChunkPosition();
+            final Vector3i claimChunk = claim.getChunkPosition();
 
             if((claimChunk.getX() == chunkToCheck.getX()) && ((claimChunk.getZ() + 1 == chunkToCheck.getZ()) || (claimChunk.getZ() - 1 == chunkToCheck.getZ())))
             {
@@ -514,6 +531,10 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public boolean addClaimOwner(final Faction faction, final Claim claim, final UUID owner)
     {
+        checkNotNull(faction);
+        checkNotNull(claim);
+        checkNotNull(owner);
+
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
 
@@ -532,6 +553,10 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public boolean removeClaimOwner(final Faction faction, final Claim claim, final UUID owner)
     {
+        checkNotNull(faction);
+        checkNotNull(claim);
+        checkNotNull(owner);
+
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
 
@@ -548,8 +573,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setClaimAccessibleByFaction(Faction faction, Claim claim, boolean isAccessibleByFaction)
+    public void setClaimAccessibleByFaction(final Faction faction, final Claim claim, final boolean isAccessibleByFaction)
     {
+        checkNotNull(faction);
+        checkNotNull(claim);
+
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
 
@@ -564,6 +592,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void setHome(Faction faction, @Nullable FactionHome home)
     {
+        checkNotNull(faction);
+
         if (home != null && home.getBlockPosition() != null && home.getWorldUUID() != null)
         {
             faction = faction.toBuilder().setHome(home).build();
@@ -579,10 +609,10 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public List<String> getFactionsTags()
     {
-        List<Faction> factionsList = new ArrayList<>(getFactions().values());
-        List<String> factionsTags = new ArrayList<>();
+        final List<Faction> factionsList = new ArrayList<>(getFactions().values());
+        final List<String> factionsTags = new ArrayList<>();
 
-        for(Faction faction : factionsList)
+        for(final Faction faction : factionsList)
         {
             factionsTags.add(faction.getTag().toPlain());
         }
@@ -591,8 +621,10 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public boolean hasOnlinePlayers(Faction faction)
+    public boolean hasOnlinePlayers(final Faction faction)
     {
+        checkNotNull(faction);
+
         if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
         {
             if(playerManager.isPlayerOnline(faction.getLeader()))
@@ -601,7 +633,7 @@ public class FactionLogicImpl implements FactionLogic
             }
         }
 
-        for(UUID playerUUID : faction.getOfficers())
+        for(final UUID playerUUID : faction.getOfficers())
         {
             if(playerManager.isPlayerOnline(playerUUID))
             {
@@ -609,7 +641,7 @@ public class FactionLogicImpl implements FactionLogic
             }
         }
 
-        for(UUID playerUUID : faction.getMembers())
+        for(final UUID playerUUID : faction.getMembers())
         {
             if(playerManager.isPlayerOnline(playerUUID))
             {
@@ -617,7 +649,7 @@ public class FactionLogicImpl implements FactionLogic
             }
         }
 
-        for(UUID playerUUID : faction.getRecruits())
+        for(final UUID playerUUID : faction.getRecruits())
         {
             if(playerManager.isPlayerOnline(playerUUID))
             {
@@ -629,9 +661,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void removeAllClaims(Faction faction)
+    public void removeAllClaims(final Faction faction)
     {
-        for (Claim claim: faction.getClaims())
+        checkNotNull(faction);
+
+        for (final Claim claim: faction.getClaims())
         {
             FactionsCache.removeClaim(claim);
         }
@@ -640,8 +674,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void kickPlayer(UUID playerUUID, String factionName)
+    public void kickPlayer(final UUID playerUUID, final String factionName)
     {
+        checkNotNull(playerUUID);
+        checkArgument(Strings.isNullOrEmpty(factionName));
+
         final Faction faction = getFactionByName(factionName);
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
@@ -684,8 +721,13 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void startClaiming(Player player, Faction faction, UUID worldUUID, Vector3i chunkPosition)
+    public void startClaiming(final Player player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
     {
+        checkNotNull(player);
+        checkNotNull(faction);
+        checkNotNull(worldUUID);
+        checkNotNull(chunkPosition);
+
         if(this.factionsConfig.shouldDelayClaim())
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_CLAIM_IT, TextColors.GREEN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.factionsConfig.getClaimDelay())))));
@@ -710,19 +752,24 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public boolean addClaimByItems(Player player, Faction faction, UUID worldUUID, Vector3i chunkPosition)
+    public boolean addClaimByItems(final Player player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
     {
-        Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToClaim();
-        PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
-        int allRequiredItems = requiredItems.size();
+        checkNotNull(player);
+        checkNotNull(faction);
+        checkNotNull(worldUUID);
+        checkNotNull(chunkPosition);
+
+        final Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToClaim();
+        final PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        final int allRequiredItems = requiredItems.size();
         int foundItems = 0;
 
-        for(String requiredItem : requiredItems.keySet())
+        for(final String requiredItem : requiredItems.keySet())
         {
-            String[] idAndVariant = requiredItem.split(":");
+            final String[] idAndVariant = requiredItem.split(":");
 
-            String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-            Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
             if(itemType.isPresent())
             {
@@ -734,8 +781,8 @@ public class FactionLogicImpl implements FactionLogic
                 {
                     if(itemType.get().getBlock().isPresent())
                     {
-                        int variant = Integer.parseInt(idAndVariant[2]);
-                        BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                        final int variant = Integer.parseInt(idAndVariant[2]);
+                        final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
                         itemStack = ItemStack.builder().fromBlockState(blockState).build();
                     }
                 }
@@ -753,12 +800,12 @@ public class FactionLogicImpl implements FactionLogic
 
         if(allRequiredItems == foundItems)
         {
-            for(String requiredItem : requiredItems.keySet())
+            for(final String requiredItem : requiredItems.keySet())
             {
-                String[] idAndVariant = requiredItem.split(":");
-                String itemId = idAndVariant[0] + ":" + idAndVariant[1];
+                final String[] idAndVariant = requiredItem.split(":");
+                final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
 
-                Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+                final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
 
                 if(itemType.isPresent())
                 {
@@ -770,8 +817,8 @@ public class FactionLogicImpl implements FactionLogic
                     {
                         if(itemType.get().getBlock().isPresent())
                         {
-                            int variant = Integer.parseInt(idAndVariant[2]);
-                            BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                            final int variant = Integer.parseInt(idAndVariant[2]);
+                            final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
                             itemStack = ItemStack.builder().fromBlockState(blockState).build();
                         }
                     }
@@ -790,8 +837,13 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void toggleFlag(Faction faction, FactionMemberType factionMemberType, FactionPermType factionPermType, Boolean flagValue)
+    public void togglePerm(final Faction faction, final FactionMemberType factionMemberType, final FactionPermType factionPermType, final Boolean flagValue)
     {
+        checkNotNull(faction);
+        checkNotNull(factionMemberType);
+        checkNotNull(factionPermType);
+        checkNotNull(flagValue);
+
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = new HashMap<>(faction.getPerms());
         perms.get(factionMemberType).replace(factionPermType, flagValue);
 
@@ -800,16 +852,22 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void changeTagColor(Faction faction, TextColor textColor)
+    public void changeTagColor(final Faction faction, final TextColor textColor)
     {
-        Text text = Text.of(textColor, faction.getTag().toPlainSingle());
+        checkNotNull(faction);
+        checkNotNull(textColor);
+
+        final Text text = Text.of(textColor, faction.getTag().toPlainSingle());
         final Faction updatedFaction = faction.toBuilder().setTag(text).build();
         storageManager.saveFaction(updatedFaction);
     }
 
     @Override
-    public FactionMemberType promotePlayer(Faction faction, UUID playerToPromote)
+    public FactionMemberType promotePlayer(final Faction faction, final UUID playerToPromote)
     {
+        checkNotNull(faction);
+        checkNotNull(playerToPromote);
+
         FactionMemberType promotedTo = FactionMemberType.RECRUIT;
 
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
@@ -841,8 +899,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public FactionMemberType demotePlayer(Faction faction, UUID playerToDemote)
+    public FactionMemberType demotePlayer(final Faction faction, final UUID playerToDemote)
     {
+        checkNotNull(faction);
+        checkNotNull(playerToDemote);
+
         FactionMemberType demotedTo = FactionMemberType.RECRUIT;
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
@@ -875,6 +936,9 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void setLastOnline(final Faction faction, final Instant instantTime)
     {
+        checkNotNull(faction);
+        checkNotNull(instantTime);
+
         final Faction updatedFaction = faction.toBuilder().setLastOnline(instantTime).build();
         this.storageManager.saveFaction(updatedFaction);
     }
@@ -882,6 +946,9 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void renameFaction(final Faction faction, final String newFactionName)
     {
+        checkNotNull(faction);
+        checkArgument(Strings.isNullOrEmpty(newFactionName));
+
         this.storageManager.deleteFaction(faction.getName());
         Faction updatedFaction = faction.toBuilder().setName(newFactionName).build();
         this.storageManager.saveFaction(updatedFaction);
@@ -901,20 +968,29 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void changeTag(final Faction faction, final String newTag)
     {
-        Faction updatedFaction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
+        checkNotNull(faction);
+        checkArgument(Strings.isNullOrEmpty(newTag));
+
+        final Faction updatedFaction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
     @Override
     public void setChest(final Faction faction, final FactionChest inventory)
     {
-        Faction updatedFaction = faction.toBuilder().setChest(inventory).build();
+        checkNotNull(faction);
+        checkNotNull(inventory);
+
+        final Faction updatedFaction = faction.toBuilder().setChest(inventory).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
     @Override
     public void setDescription(final Faction faction, final String description)
     {
+        checkNotNull(faction);
+        checkArgument(Strings.isNullOrEmpty(description));
+
         final Faction updatedFaction = faction.toBuilder().setDescription(description).build();
         this.storageManager.saveFaction(updatedFaction);
     }
@@ -922,6 +998,9 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void setMessageOfTheDay(final Faction faction, final String motd)
     {
+        checkNotNull(faction);
+        checkArgument(Strings.isNullOrEmpty(motd));
+
         final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
         this.storageManager.saveFaction(updatedFaction);
     }
@@ -929,6 +1008,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void setIsPublic(final Faction faction, final boolean isPublic)
     {
+        checkNotNull(faction);
+
         final Faction updatedFaction = faction.toBuilder().setIsPublic(isPublic).build();
         this.storageManager.saveFaction(updatedFaction);
     }

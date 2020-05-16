@@ -89,7 +89,7 @@ public class PermsCommand extends AbstractCommand
     {
         return commandSource ->
         {
-            getPlugin().getFactionLogic().toggleFlag(faction, factionMemberType, factionPermType, flagValue);
+            getPlugin().getFactionLogic().togglePerm(faction, factionMemberType, factionPermType, flagValue);
             showPerms((Player)commandSource, faction);
         };
     }
