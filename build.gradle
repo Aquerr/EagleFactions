@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'org.spongepowered.plugin' version '0.9.0'
+    id "net.kyori.blossom" version "1.1.0"
 }
 
 allprojects {
@@ -33,13 +34,19 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:3.3.0'
 }
 
-shadowJar {
+blossom {
     if(System.getenv("JENKINS_HOME")) {
-        version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        rootProject.version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
         println("File name => " + archivesBaseName)
     } else {
-        version = version + "-SNAPSHOT"
+        rootProject.version = version + "-SNAPSHOT"
     }
+
+    replaceTokenIn('common/src/main/java/io/github/aquerr/eaglefactions/common/PluginInfo.java')
+    replaceToken('%VERSION%', project.version)
+}
+
+shadowJar {
     archiveClassifier = ''
 }
 
