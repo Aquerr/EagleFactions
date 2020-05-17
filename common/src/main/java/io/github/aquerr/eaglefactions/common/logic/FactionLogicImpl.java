@@ -29,7 +29,6 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
-import java.awt.image.CropImageFilter;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -253,8 +252,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addTruce(final String playerFactionName, final String invitedFactionName)
     {
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
-        checkArgument(Strings.isNullOrEmpty(invitedFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(invitedFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
@@ -275,8 +274,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeTruce(final String playerFactionName, final String removedFactionName)
     {
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
-        checkArgument(Strings.isNullOrEmpty(removedFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(removedFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
@@ -297,8 +296,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addAlly(final String playerFactionName, final String invitedFactionName)
     {
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
-        checkArgument(Strings.isNullOrEmpty(invitedFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(invitedFactionName));
 
         if(Strings.isNullOrEmpty(playerFactionName) || Strings.isNullOrEmpty(invitedFactionName))
             throw new IllegalArgumentException("playerFactionName and invitedFactionName must contain a value.");
@@ -322,8 +321,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeAlly(final String playerFactionName, final String removedFactionName)
     {
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
-        checkArgument(Strings.isNullOrEmpty(removedFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(removedFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
@@ -344,8 +343,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void addEnemy(final String playerFactionName, final String enemyFactionName)
     {
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
-        checkArgument(Strings.isNullOrEmpty(enemyFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(enemyFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -366,8 +365,8 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public void removeEnemy(final String playerFactionName, final String enemyFactionName)
     {
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
-        checkArgument(Strings.isNullOrEmpty(enemyFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(enemyFactionName));
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
@@ -389,7 +388,7 @@ public class FactionLogicImpl implements FactionLogic
     public void setLeader(final UUID newLeaderUUID, final String playerFactionName)
     {
         checkNotNull(newLeaderUUID);
-        checkArgument(Strings.isNullOrEmpty(playerFactionName));
+        checkArgument(!Strings.isNullOrEmpty(playerFactionName));
 
         final Faction faction = getFactionByName(playerFactionName);
         if (faction == null)
@@ -677,7 +676,7 @@ public class FactionLogicImpl implements FactionLogic
     public void kickPlayer(final UUID playerUUID, final String factionName)
     {
         checkNotNull(playerUUID);
-        checkArgument(Strings.isNullOrEmpty(factionName));
+        checkArgument(!Strings.isNullOrEmpty(factionName));
 
         final Faction faction = getFactionByName(factionName);
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
@@ -947,7 +946,7 @@ public class FactionLogicImpl implements FactionLogic
     public void renameFaction(final Faction faction, final String newFactionName)
     {
         checkNotNull(faction);
-        checkArgument(Strings.isNullOrEmpty(newFactionName));
+        checkArgument(!Strings.isNullOrEmpty(newFactionName));
 
         this.storageManager.deleteFaction(faction.getName());
         Faction updatedFaction = faction.toBuilder().setName(newFactionName).build();
@@ -969,7 +968,7 @@ public class FactionLogicImpl implements FactionLogic
     public void changeTag(final Faction faction, final String newTag)
     {
         checkNotNull(faction);
-        checkArgument(Strings.isNullOrEmpty(newTag));
+        checkArgument(!Strings.isNullOrEmpty(newTag));
 
         final Faction updatedFaction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
         this.storageManager.saveFaction(updatedFaction);
@@ -989,7 +988,7 @@ public class FactionLogicImpl implements FactionLogic
     public void setDescription(final Faction faction, final String description)
     {
         checkNotNull(faction);
-        checkArgument(Strings.isNullOrEmpty(description));
+        checkArgument(!Strings.isNullOrEmpty(description));
 
         final Faction updatedFaction = faction.toBuilder().setDescription(description).build();
         this.storageManager.saveFaction(updatedFaction);
@@ -999,7 +998,7 @@ public class FactionLogicImpl implements FactionLogic
     public void setMessageOfTheDay(final Faction faction, final String motd)
     {
         checkNotNull(faction);
-        checkArgument(Strings.isNullOrEmpty(motd));
+        checkArgument(!Strings.isNullOrEmpty(motd));
 
         final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
         this.storageManager.saveFaction(updatedFaction);
