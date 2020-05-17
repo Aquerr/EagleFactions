@@ -117,11 +117,13 @@ public class ChatMessageListener extends AbstractListener
                 }
         }
 
-        factionPrefix.append(getFactionPrefix(playerFaction));
+        final Text fPrefix = getFactionPrefix(playerFaction);
+        if (fPrefix != null)
+            factionPrefix.append(getFactionPrefix(playerFaction));
 
-        final Text prefix = getRankPrefix(chatType, playerFaction, player);
-        if (prefix != null)
-            rankPrefix.append(prefix);
+        final Text rPrefix = getRankPrefix(chatType, playerFaction, player);
+        if (rPrefix != null)
+            rankPrefix.append(rPrefix);
 
         if (this.chatConfig.isFactionPrefixFirstInChat())
         {
@@ -186,7 +188,10 @@ public class ChatMessageListener extends AbstractListener
                     .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                     .build();
         }
-        return playerFaction.getTag();
+        else
+        {
+            return null;
+        }
     }
 
     private Text getAllianceChatPrefix()
