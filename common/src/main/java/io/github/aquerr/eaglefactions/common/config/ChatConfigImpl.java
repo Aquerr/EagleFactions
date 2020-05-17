@@ -51,10 +51,9 @@ public class ChatConfigImpl implements ChatConfig
 		final Set<FactionMemberType> globalRanks = new HashSet<>();
 		final Set<FactionMemberType> allianceRanks = new HashSet<>();
 		final Set<FactionMemberType> factionRanks = new HashSet<>();
-		final List<String> defaultVisibility = Arrays.asList(FactionMemberType.LEADER.name(), FactionMemberType.OFFICER.name(), FactionMemberType.MEMBER.name(), FactionMemberType.RECRUIT.name());
-		globalRanks.addAll(this.configuration.getListOfStrings(defaultVisibility, "visible-ranks", "global-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		allianceRanks.addAll(this.configuration.getListOfStrings(defaultVisibility, "visible-ranks", "alliance-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		factionRanks.addAll(this.configuration.getListOfStrings(defaultVisibility, "visible-ranks", "faction-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
+		globalRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "global-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
+		allianceRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "alliance-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
+		factionRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "faction-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
 		this.visibleRanks.put(ChatEnum.GLOBAL, globalRanks);
 		this.visibleRanks.put(ChatEnum.ALLIANCE, allianceRanks);
 		this.visibleRanks.put(ChatEnum.FACTION, factionRanks);
