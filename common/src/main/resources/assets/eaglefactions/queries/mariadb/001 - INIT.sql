@@ -160,7 +160,8 @@ CREATE TABLE `Claims` (
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
       ON DELETE CASCADE
-      ON UPDATE CASCADE
+      ON UPDATE CASCADE,
+  PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `Claims` (`FactionName`);
 

@@ -70,22 +70,23 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
 //    private static final String MERGE_CLAIM = "MERGE INTO Claims (FactionName, WorldUUID, ChunkPosition) KEY (FactionName, WorldUUID, ChunkPosition) VALUES (?, ?, ?)";
     private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
+//    private static final String DELETE_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK_POSITION = "DELETE FROM ClaimOwners WHERE WorldUUID=? AND ChunkPosition=?";
 
-    private static final String MERGE_CHEST = "MERGE INTO FactionChests (FactionName, ChestItems) KEY (FactionName) VALUES (?, ?)";
-    private static final String MERGE_OFFICERS = "MERGE INTO FactionOfficers (OfficerUUID, FactionName) KEY (OfficerUUID) VALUES (?, ?)";
-    private static final String MERGE_MEMBERS = "MERGE INTO FactionMembers (MemberUUID, FactionName) KEY (MemberUUID) VALUES (?, ?)";
-    private static final String MERGE_RECRUITS = "MERGE INTO FactionRecruits (RecruitUUID, FactionName) KEY (RecruitUUID) VALUES (?, ?)";
+//    private static final String MERGE_CHEST = "MERGE INTO FactionChests (FactionName, ChestItems) KEY (FactionName) VALUES (?, ?)";
+//    private static final String MERGE_OFFICERS = "MERGE INTO FactionOfficers (OfficerUUID, FactionName) KEY (OfficerUUID) VALUES (?, ?)";
+//    private static final String MERGE_MEMBERS = "MERGE INTO FactionMembers (MemberUUID, FactionName) KEY (MemberUUID) VALUES (?, ?)";
+//    private static final String MERGE_RECRUITS = "MERGE INTO FactionRecruits (RecruitUUID, FactionName) KEY (RecruitUUID) VALUES (?, ?)";
 
     private static final String INSERT_CHEST = "INSERT INTO FactionChests (FactionName, ChestItems) VALUES (?, ?)";
     private static final String INSERT_OFFICERS = "INSERT INTO FactionOfficers (OfficerUUID, FactionName) VALUES (?, ?)";
     private static final String INSERT_MEMBERS = "INSERT INTO FactionMembers (MemberUUID, FactionName) VALUES (?, ?)";
     private static final String INSERT_RECRUITS = "INSERT INTO FactionRecruits (RecruitUUID, FactionName) VALUES (?, ?)";
 
-    private static final String MERGE_LEADER_PERMS = "MERGE INTO LeaderPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_OFFICER_PERMS = "MERGE INTO OfficerPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_MEMBER_PERMS = "MERGE INTO MemberPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_RECRUIT_PERMS = "MERGE INTO RecruitPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String MERGE_ALLY_PERMS = "MERGE INTO AllyPerms (FactionName, Use, Place, Destroy) KEY (FactionName) VALUES (?, ?, ?, ?)";
+//    private static final String MERGE_LEADER_PERMS = "MERGE INTO LeaderPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+//    private static final String MERGE_OFFICER_PERMS = "MERGE INTO OfficerPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+//    private static final String MERGE_MEMBER_PERMS = "MERGE INTO MemberPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+//    private static final String MERGE_RECRUIT_PERMS = "MERGE INTO RecruitPerms (FactionName, Use, Place, Destroy, Claim, Attack, Invite) KEY (FactionName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+//    private static final String MERGE_ALLY_PERMS = "MERGE INTO AllyPerms (FactionName, Use, Place, Destroy) KEY (FactionName) VALUES (?, ?, ?, ?)";
 
     private static final String INSERT_OFFICER_PERMS = "INSERT INTO OfficerPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_MEMBER_PERMS = "INSERT INTO MemberPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -360,8 +361,15 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     preparedStatement.setString(3, claim.getChunkPosition().toString());
                     preparedStatement.setBoolean(4, claim.isAccessibleByFaction());
 
-                    // Insert owner into the claim
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
 
+                //Can't do it in above loop as it it violate the foreign key constraint.
+                // Insert owner into the claim
+                for (final Claim claim : faction.getClaims())
+                {
                     if (!claim.getOwners().isEmpty())
                     {
                         final PreparedStatement ownerPreparedStatement = connection.prepareStatement(INSERT_CLAIM_OWNER);
@@ -375,11 +383,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                         ownerPreparedStatement.executeUpdate();
                         ownerPreparedStatement.close();
                     }
-
-                    preparedStatement.addBatch();
                 }
-                preparedStatement.executeUpdate();
-                preparedStatement.close();
             }
 
             List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory());
@@ -502,6 +506,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         return didSucceed;
     }
 
+    //Removal of claim owners is handled by database through foreign keys constraints.
     private boolean deleteFactionClaims(final Connection connection, final String name) throws SQLException
     {
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
