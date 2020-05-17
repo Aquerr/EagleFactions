@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.chat.AllianceMessageChannelImpl;
@@ -118,10 +119,9 @@ public class ChatMessageListener extends AbstractListener
 
         factionPrefix.append(getFactionPrefix(playerFaction));
 
-        if(this.chatConfig.shouldDisplayRank())
-        {
-            rankPrefix.append(getRankPrefix(playerFaction, player));
-        }
+        final Text prefix = getRankPrefix(chatType, playerFaction, player);
+        if (prefix != null)
+            rankPrefix.append(prefix);
 
         if (this.chatConfig.isFactionPrefixFirstInChat())
         {
@@ -203,28 +203,40 @@ public class ChatMessageListener extends AbstractListener
                 .build();
     }
 
-    private Text getRankPrefix(final Faction faction, final Player player)
+    private Text getRankPrefix(final ChatEnum chatType, final Faction faction, final Player player)
     {
         if(faction.getLeader().equals(player.getUniqueId()))
         {
+            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.LEADER))
+                return null;
+
             return Text.builder()
                     .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.LEADER_PREFIX)))
                     .build();
         }
         else if(faction.getOfficers().contains(player.getUniqueId()))
         {
+            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.OFFICER))
+                return null;
+
             return Text.builder()
                     .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.OFFICER_PREFIX)))
                     .build();
         }
         else if (faction.getMembers().contains(player.getUniqueId()))
         {
+            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.MEMBER))
+                return null;
+
             return Text.builder()
                     .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.MEMBER_PREFIX)))
                     .build();
         }
         else
         {
+            if(!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.RECRUIT))
+                return null;
+
             return Text.builder()
                     .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.RECRUIT_PREFIX)))
                     .build();
