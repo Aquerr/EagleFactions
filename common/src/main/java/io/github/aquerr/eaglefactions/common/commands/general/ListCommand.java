@@ -37,11 +37,11 @@ public class ListCommand extends AbstractCommand
             List<Text> helpList = new ArrayList<>();
 
             Text tagPrefix = getPlugin().getConfiguration().getChatConfig().getFactionStartPrefix();
-            Text tagSufix = getPlugin().getConfiguration().getChatConfig().getFactionEndPrefix();
+            Text tagSuffix = getPlugin().getConfiguration().getChatConfig().getFactionEndPrefix();
 
             for(final Faction faction : factionsList)
             {
-                Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSufix, Text.of(" ")).build();
+                Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSuffix, Text.of(" ")).build();
 
                 Text factionHelp = Text.builder()
                         .append(Text.builder()

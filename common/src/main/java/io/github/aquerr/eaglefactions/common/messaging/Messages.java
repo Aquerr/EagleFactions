@@ -50,6 +50,14 @@ public class Messages
     public static String ALLIANCE_CHAT;
     public static String FACTION_CHAT;
 
+    public static String ALLIANCE_CHAT_PREFIX;
+    public static String FACTION_CHAT_PREFIX;
+
+    public static String LEADER_PREFIX;
+    public static String OFFICER_PREFIX;
+    public static String MEMBER_PREFIX;
+    public static String RECRUIT_PREFIX;
+
     //Chest
     public static String FACTION_CHESTS_ARE_DISABLED;
 //    public static TextTemplate YOU_OPENED_FACTION_CHEST;
