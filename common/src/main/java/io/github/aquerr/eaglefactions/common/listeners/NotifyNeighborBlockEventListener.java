@@ -27,9 +27,8 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
-	public void onNeighbourNotify(final NotifyNeighborBlockEvent event)
+	public void onNeighborNotify(final NotifyNeighborBlockEvent event)
 	{
-		//Test
 		final Cause cause = event.getCause();
 		final EventContext context = event.getContext();
 		final TileEntity tileEntity = event.getCause().first(TileEntity.class).orElse(null);
@@ -60,7 +59,28 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 		}
 
 		if(user == null)
+		{
+			if (sourceLocation == null)
+				return;
+
+			//TODO: Create new method in protection manager called "canNotifyBlock"
+//			if (!super.getPlugin().getProtectionManager().canNotify(sourceLocation))
+//			{
+//				event.setCancelled(true);
+//				return;
+//			}
+			final Iterator<Direction> directionIterator = event.getNeighbors().keySet().iterator();
+			while(directionIterator.hasNext())
+			{
+				final Direction direction = directionIterator.next();
+				final Location<World> blockLocation = sourceLocation.getBlockRelative(direction);
+				if(!super.getPlugin().getProtectionManager().canNotifyBlock(sourceLocation, blockLocation).hasAccess())
+				{
+					directionIterator.remove();
+				}
+			}
 			return;
+		}
 
 		if(sourceLocation == null)
 		{
@@ -71,7 +91,7 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 			sourceLocation = player.getLocation();
 		}
 
-		if(!super.getPlugin().getProtectionManager().canInteractWithBlock(sourceLocation, user, false))
+		if(!super.getPlugin().getProtectionManager().canInteractWithBlock(sourceLocation, user, false).hasAccess())
 		{
 			event.setCancelled(true);
 			return;
@@ -84,7 +104,7 @@ public class NotifyNeighborBlockEventListener extends AbstractListener
 		{
 			final Direction direction = directionIterator.next();
 			final Location<World> blockLocation = finalSourceLocation.getBlockRelative(direction);
-			if(!super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, finalUser, false))
+			if(!super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, finalUser, false).hasAccess())
 			{
 				directionIterator.remove();
 			}

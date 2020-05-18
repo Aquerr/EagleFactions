@@ -45,9 +45,13 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	private Set<String> warZoneWorldNames = new HashSet<>();
 
 	//Whitelisted items and blocks
-	private Set<String> whitelistedItems = new HashSet<>();
-	private Set<String> whitelistedPlaceDestroyBlocks = new HashSet<>();
-	private Set<String> whitelistedInteractBlocks = new HashSet<>();
+//	private Set<String> whitelistedItems = new HashSet<>();
+//	private Set<String> whitelistedPlaceDestroyBlocks = new HashSet<>();
+//	private Set<String> whitelistedInteractBlocks = new HashSet<>();
+
+	private WhiteList safeZoneWhiteLists = null;
+	private WhiteList warZoneWhiteLists = null;
+	private WhiteList factionWhiteLists = null;
 
 	public ProtectionConfigImpl(final Configuration configuration)
 	{
@@ -103,9 +107,20 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		}
 
 		//Whitelisted items and blocks
-		this.whitelistedItems = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "items-whitelist");
-		this.whitelistedPlaceDestroyBlocks = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "place-destroy-whitelist");
-		this.whitelistedInteractBlocks = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "interact-whitelist");
+		final Set<String> factionItemsWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "normal-faction", "items-whitelist");
+		final Set<String> factionPlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "normal-faction", "place-destroy-whitelist");
+		final Set<String> factionInteractWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "normal-faction", "interact-whitelist");
+		this.factionWhiteLists = new WhiteListsImpl(factionItemsWhiteList, factionInteractWhiteList, factionPlaceDestroyWhiteList);
+
+		final Set<String> safeZoneItemsWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "safe-zone", "items-whitelist");
+		final Set<String> safeZonePlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "safe-zone", "place-destroy-whitelist");
+		final Set<String> safeZoneInteractWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "safe-zone", "interact-whitelist");
+		this.safeZoneWhiteLists = new WhiteListsImpl(safeZoneItemsWhiteList, safeZoneInteractWhiteList, safeZonePlaceDestroyWhiteList);
+
+		final Set<String> warZoneItemsWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "war-zone", "items-whitelist");
+		final Set<String> warZonePlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "war-zone", "place-destroy-whitelist");
+		final Set<String> warZoneInteractWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "war-zone", "interact-whitelist");
+		this.warZoneWhiteLists = new WhiteListsImpl(warZoneItemsWhiteList, warZoneInteractWhiteList, warZonePlaceDestroyWhiteList);
 	}
 
 	@Override
@@ -131,23 +146,23 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	{
 		return this.warZoneWorldNames;
 	}
-
+	
 	@Override
-	public Set<String> getWhiteListedItems()
+	public WhiteList getFactionWhitelists()
 	{
-		return this.whitelistedItems;
+		return this.factionWhiteLists;
 	}
 
 	@Override
-	public Set<String> getWhiteListedPlaceDestroyBlocks()
+	public WhiteList getSafeZoneWhitelists()
 	{
-		return this.whitelistedPlaceDestroyBlocks;
+		return this.safeZoneWhiteLists;
 	}
 
 	@Override
-	public Set<String> getWhiteListedInteractBlocks()
+	public WhiteList getWarZoneWhitelists()
 	{
-		return this.whitelistedInteractBlocks;
+		return this.warZoneWhiteLists;
 	}
 
 	@Override
@@ -251,6 +266,38 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	public static final class WhiteListsImpl implements WhiteList
+	{
+		private Set<String> whitelistedItems;
+		private Set<String> whitelistedPlaceDestroyBlocks;
+		private Set<String> whitelistedInteractBlocks;
+
+		private WhiteListsImpl(final Set<String> whitelistedItems, final Set<String> whitelistedInteractBlocks, final Set<String> whitelistedPlaceDestroyBlocks)
+		{
+			this.whitelistedInteractBlocks = whitelistedInteractBlocks;
+			this.whitelistedItems = whitelistedItems;
+			this.whitelistedPlaceDestroyBlocks = whitelistedPlaceDestroyBlocks;
+		}
+
+		@Override
+		public Set<String> getWhiteListedItems()
+		{
+			return this.whitelistedItems;
+		}
+
+		@Override
+		public Set<String> getWhiteListedPlaceDestroyBlocks()
+		{
+			return this.whitelistedPlaceDestroyBlocks;
+		}
+
+		@Override
+		public Set<String> getWhiteListedInteractBlocks()
+		{
+			return this.whitelistedInteractBlocks;
 		}
 	}
 }

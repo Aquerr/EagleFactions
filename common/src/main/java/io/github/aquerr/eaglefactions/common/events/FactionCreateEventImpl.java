@@ -36,8 +36,9 @@ public class FactionCreateEventImpl extends FactionAbstractEvent implements Fact
     }
 
     /**
-     * To implement...
+     * Not yet implemented...
      */
+    //TODO: To implement...
     @Override
     public boolean isCreatedByItems()
     {

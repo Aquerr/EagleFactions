@@ -68,7 +68,7 @@ public class EntitySpawnListener extends AbstractListener
                 {
                     User user = eventContext.get(EventContextKeys.OWNER).get();
                     Entity miningLaser = (Entity)rootCause;
-                    if(!super.getPlugin().getProtectionManager().canExplode(miningLaser.getLocation(), user, false))
+                    if(!super.getPlugin().getProtectionManager().canExplode(miningLaser.getLocation(), user, false).hasAccess())
                     {
                         event.setCancelled(true);
                         continue;
@@ -82,7 +82,7 @@ public class EntitySpawnListener extends AbstractListener
             {
                 final User user = eventContext.get(EventContextKeys.OWNER).get();
                 final ItemStackSnapshot itemStackSnapshot = eventContext.get(EventContextKeys.USED_ITEM).get();
-                if (!super.getPlugin().getProtectionManager().canUseItem(entity.getLocation(), user, itemStackSnapshot, true))
+                if (!super.getPlugin().getProtectionManager().canUseItem(entity.getLocation(), user, itemStackSnapshot, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -93,7 +93,7 @@ public class EntitySpawnListener extends AbstractListener
                 final User user = eventContext.get(EventContextKeys.OWNER).get();
                 //Entity spawned from a command or something similar... (can be a hammer that is being used with right-click on a machine block)
                 //Let's treat is as a place event for now...
-                if(!super.getPlugin().getProtectionManager().canPlace(entity.getLocation(), user, false))
+                if(!super.getPlugin().getProtectionManager().canPlace(entity.getLocation(), user, false).hasAccess())
                 {
                     event.setCancelled(true);
                     return;

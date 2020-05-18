@@ -1,0 +1,3 @@
+files:
+  - source: english.conf
+    translation: '%language%.conf'

@@ -30,7 +30,7 @@ CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 -- Create Members Table
 CREATE TABLE FactionMembers (
     MemberUUID  VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    FactionName VARCHAR(200) NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
@@ -38,7 +38,7 @@ CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
 -- Create Officers Table
 CREATE TABLE FactionOfficers (
     OfficerUUID VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName VARCHAR(200)    UNIQUE  NOT NULL,
+    FactionName VARCHAR(200) NOT NULL,
     FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
@@ -65,19 +65,6 @@ CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
 --   `TrucesIds`  VARCHAR(200)        UNIQUE      NOT NULL,
 --);
 --CREATE UNIQUE INDEX ON FactionTruces (FactionName);
-
--- Create LeaderPerms Table
-CREATE TABLE LeaderPerms (
-   FactionName   VARCHAR(200)     UNIQUE       NOT NULL,
-   Use         BOOLEAN                         NOT NULL,
-   Place       BOOLEAN                         NOT NULL,
-   Destroy     BOOLEAN                         NOT NULL,
-   Claim       BOOLEAN                         NOT NULL,
-   Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
-);
-CREATE UNIQUE INDEX ON LeaderPerms (FactionName);
 
 -- Create OfficerPerms Table
 CREATE TABLE OfficerPerms (
@@ -144,9 +131,10 @@ CREATE TABLE Claims (
    FactionName   VARCHAR(200)                  NOT NULL,
    WorldUUID     VARCHAR(36)                            NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
+   PRIMARY KEY (WorldUUID, ChunkPosition),
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON Claims (Id);
+CREATE UNIQUE INDEX ON Claims (FactionName);
 
 -- Create FactionsChest Table
 CREATE TABLE FactionChests (
@@ -160,6 +148,7 @@ CREATE UNIQUE INDEX ON FactionChests (FactionName);
 CREATE TABLE Players (
     PlayerUUID VARCHAR(36) PRIMARY KEY NOT NULL,
     Name    VARCHAR(200)    NOT NULL,
+    Faction VARCHAR(200)    NULL,
     Power   REAL NOT NULL,
     MaxPower    REAL NOT NULL,
     DeathInWarzone BOOLEAN NOT NULL

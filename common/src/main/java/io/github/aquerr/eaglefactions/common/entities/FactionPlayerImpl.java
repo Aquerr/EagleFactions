@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -10,7 +9,6 @@ import org.spongepowered.api.service.user.UserStorageService;
 import java.util.Optional;
 import java.util.UUID;
 
-//TODO: Totally new class. Not really used in Eagle Factions yet. But it will be, in the future.
 public class FactionPlayerImpl implements FactionPlayer
 {
     private final UUID uniqueId;
@@ -19,19 +17,26 @@ public class FactionPlayerImpl implements FactionPlayer
     private String factionName;
     private FactionMemberType factionRole;
 
-//    private float power;
-//    private float maxpower;
+    private boolean diedInWarZone;
 
-    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final FactionMemberType factionRole)
+    private float power;
+    private float maxpower;
+
+    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
     {
         this.name = playerName;
         this.uniqueId = uniqueId;
 
         this.factionName = factionName;
-        this.factionRole = factionRole;
 
-//        this.power = power;
-//        this.maxpower = maxpower;
+        if (factionRole == null)
+            this.factionRole = FactionMemberType.NONE;
+        else this.factionRole = factionRole;
+
+        this.diedInWarZone = diedInWarZone;
+
+        this.power = power;
+        this.maxpower = maxpower;
     }
 
     @Override
@@ -60,16 +65,9 @@ public class FactionPlayerImpl implements FactionPlayer
     }
 
     @Override
-    public Optional<FactionMemberType> getFactionRole()
+    public FactionMemberType getFactionRole()
     {
-        if (this.factionRole == null)
-        {
-            return Optional.empty();
-        }
-        else
-        {
-            return Optional.of(this.factionRole);
-        }
+        return this.factionRole;
     }
 
     @Override
@@ -82,13 +80,13 @@ public class FactionPlayerImpl implements FactionPlayer
     @Override
     public float getPower()
     {
-        return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(this.uniqueId);
+        return this.power;
     }
 
     @Override
     public float getMaxPower()
     {
-        return EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerMaxPower(this.uniqueId);
+        return this.maxpower;
     }
 
     @Override
@@ -96,5 +94,11 @@ public class FactionPlayerImpl implements FactionPlayer
     {
         final Optional<UserStorageService> userStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
         return userStorageService.flatMap(storageService -> storageService.get(this.uniqueId));
+    }
+
+    @Override
+    public boolean diedInWarZone()
+    {
+        return this.diedInWarZone;
     }
 }

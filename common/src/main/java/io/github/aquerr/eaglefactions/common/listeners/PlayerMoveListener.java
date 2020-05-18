@@ -53,6 +53,8 @@ public class PlayerMoveListener extends AbstractListener
         final Vector3i oldChunk = lastLocation.getChunkPosition();
         final Vector3i newChunk = newLocation.getChunkPosition();
 
+        //TODO: Add checks for safezone, warzone and unclaimable worlds.
+
         final Optional<Faction> optionalOldChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), oldChunk);
         final Optional<Faction> optionalNewChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), newChunk);
         String oldChunkFactionName = "Wilderness";
@@ -92,7 +94,7 @@ public class PlayerMoveListener extends AbstractListener
             {
                 if (!super.getPlugin().getPlayerManager().hasAdminMode(player) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
                 {
-                    if (super.getPlugin().getPlayerManager().lastDeathAtWarZone(player.getUniqueId()))
+                    if (super.getPlugin().getPlayerManager().getFactionPlayer(player.getUniqueId()).get().diedInWarZone())
                     {
                         super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), false);
                     }
@@ -115,7 +117,7 @@ public class PlayerMoveListener extends AbstractListener
                 if(optionalNewChunkFaction.isPresent())
                 {
                     information = Text.builder()
-                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
+                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
                             .build();
                     //TODO: Further consideration needed for code below... Long description does not look so good
 //                    if(optionalNewChunkFaction.get().getDescription().equals(""))
@@ -138,7 +140,7 @@ public class PlayerMoveListener extends AbstractListener
                 else
                 {
                     information = Text.builder()
-                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
+                            .append(Text.of(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newChunkFactionName)))))
                             .build();
                 }
 

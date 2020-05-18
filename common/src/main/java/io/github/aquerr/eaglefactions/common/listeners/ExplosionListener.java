@@ -58,7 +58,7 @@ public class ExplosionListener extends AbstractListener
         final Location<World> location = event.getExplosion().getLocation();
         if (user == null)
         {
-            if(!super.getPlugin().getProtectionManager().canExplode(location))
+            if(!super.getPlugin().getProtectionManager().canExplode(location).hasAccess())
             {
                 event.setCancelled(true);
                 return;
@@ -66,7 +66,7 @@ public class ExplosionListener extends AbstractListener
         }
         else
         {
-            if (!super.getPlugin().getProtectionManager().canExplode(location, user, false))
+            if (!super.getPlugin().getProtectionManager().canExplode(location, user, false).hasAccess())
             {
                 event.setCancelled(true);
                 return;
@@ -108,12 +108,12 @@ public class ExplosionListener extends AbstractListener
             final Location<World> entityLocation = entity.getLocation();
             if(user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canExplode(entityLocation, user, false))
+                if(!super.getPlugin().getProtectionManager().canExplode(entityLocation, user, false).hasAccess())
                 {
                     event.getEntities().remove(entity);
                 }
             }
-            else if(!super.getPlugin().getProtectionManager().canExplode(entityLocation))
+            else if(!super.getPlugin().getProtectionManager().canExplode(entityLocation).hasAccess())
             {
                 event.getEntities().remove(entity);
             }
@@ -123,12 +123,12 @@ public class ExplosionListener extends AbstractListener
         {
             if(user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canExplode(location, user, false))
+                if(!super.getPlugin().getProtectionManager().canExplode(location, user, false).hasAccess())
                 {
                     event.getAffectedLocations().remove(location);
                 }
             }
-            else if(!super.getPlugin().getProtectionManager().canExplode(location))
+            else if(!super.getPlugin().getProtectionManager().canExplode(location).hasAccess())
             {
                 event.getAffectedLocations().remove(location);
             }
@@ -172,7 +172,7 @@ public class ExplosionListener extends AbstractListener
 
             if (user != null)
             {
-                if (!super.getPlugin().getProtectionManager().canExplode(location, user, false))
+                if (!super.getPlugin().getProtectionManager().canExplode(location, user, false).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -180,7 +180,7 @@ public class ExplosionListener extends AbstractListener
             }
             else
             {
-                if (!super.getPlugin().getProtectionManager().canExplode(location))
+                if (!super.getPlugin().getProtectionManager().canExplode(location).hasAccess())
                 {
                     event.setCancelled(true);
                     return;

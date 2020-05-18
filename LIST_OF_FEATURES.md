@@ -70,3 +70,8 @@ That means, messages from other players will not be visible if you switched to f
 ## Placeholders
 
 - If you install PlaceholdersAPI on your server, you will be able to use plenty of placeholders from Eagle Factions. Check out the wiki to see which placeholders are available.
+
+## Dynmap
+
+- Support for Dynmap can be toggled in settings file.
+- It shows faction's territories in the dynamic map.

@@ -6,23 +6,30 @@ plugins {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-    jcenter()
-    maven { url 'https://repo.spongepowered.org/maven' }
-}
+//repositories {
+//    mavenCentral()
+//    jcenter()
+//    maven { url 'https://repo.spongepowered.org/maven' }
+//}
 
 blossom {
-    replaceTokenIn('src/main/java/io/github/aquerr/eaglefactions/common/PluginInfo.java')
-    replaceToken('%VERSION%', project.version)
+    if(System.getenv("JENKINS_HOME")) {
+        rootProject.version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        println("File name => " + archivesBaseName)
+    } else {
+        rootProject.version = version + "-SNAPSHOT"
+    }
+    replaceTokenIn('common/src/main/java/io/github/aquerr/eaglefactions/common/PluginInfo.java')
+    replaceToken('%VERSION%', rootProject.version)
 }
 
 dependencies {
     compileOnly project(':EagleFactionsAPI')
-    compileOnly 'org.spongepowered:spongeapi:7.1.0'
+    compileOnly 'org.spongepowered:spongeapi:7.2.0'
     compileOnly 'com.github.rojo8399:PlaceholderAPI:4.5.1'
-    compileOnly group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.5.2'
-    compileOnly group: 'com.h2database', name: 'h2', version: '1.4.196'
+    compileOnly 'org.mariadb.jdbc:mariadb-java-client:2.6.0'
+    compileOnly 'com.h2database:h2:1.4.196'
     compileOnly 'com.github.webbukkit:DynmapCoreAPI:v2.5'
+//    implementation 'org.bstats:bstats-sponge:1.5'
     annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
 }

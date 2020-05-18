@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.integrations.placeholderapi;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import me.rojo8399.placeholderapi.*;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
@@ -239,12 +240,14 @@ public class EFPlaceholderService
 
     private float getPlayerPower(final User player)
     {
-        return this.plugin.getPlayerManager().getPlayerPower(player.getUniqueId());
+        final Optional<FactionPlayer> optionalFactionPlayer = this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId());
+        return optionalFactionPlayer.map(FactionPlayer::getPower).orElse(0f);
     }
 
     private float getPlayerMaxPower(final User player)
     {
-        return this.plugin.getPlayerManager().getPlayerMaxPower(player.getUniqueId());
+        final Optional<FactionPlayer> optionalFactionPlayer = this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId());
+        return optionalFactionPlayer.map(FactionPlayer::getMaxPower).orElse(0f);
     }
 
     private String getPlayerLastOnline(final User player)

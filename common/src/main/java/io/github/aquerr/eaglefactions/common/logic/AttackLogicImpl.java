@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;

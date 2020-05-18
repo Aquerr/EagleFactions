@@ -1,6 +1,3 @@
 rootProject.name = 'EagleFactions'
 include 'EagleFactionsAPI'
-include 'sponge-api6'
-include 'sponge-api7'
-include 'sponge-api5'
 include 'common'

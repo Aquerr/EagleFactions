@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.common.messaging;
 
 import com.google.inject.Singleton;
-import org.spongepowered.api.text.TextTemplate;
 
 @Singleton
 //@ConfigSerializable
@@ -40,7 +39,7 @@ public class Messages
     public static String THEIR_POWER_IS_TO_HIGH;
     public static String YOU_ARE_IN_THE_SAME_ALLIANCE;
     public static String YOU_CANT_ATTACK_YOURSELF;
-    public static String THIS_PLACE_DOES_NOT_BELOG_TO_ANYONE;
+    public static String THIS_PLACE_DOES_NOT_BELONG_TO_ANYONE;
     public static String CLAIM_DESTROYED;
     public static String ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY;
     public static String STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_DESTROY_IT;
@@ -50,6 +49,14 @@ public class Messages
     public static String GLOBAL_CHAT;
     public static String ALLIANCE_CHAT;
     public static String FACTION_CHAT;
+
+    public static String ALLIANCE_CHAT_PREFIX;
+    public static String FACTION_CHAT_PREFIX;
+
+    public static String LEADER_PREFIX;
+    public static String OFFICER_PREFIX;
+    public static String MEMBER_PREFIX;
+    public static String RECRUIT_PREFIX;
 
     //Chest
     public static String FACTION_CHESTS_ARE_DISABLED;
@@ -71,6 +78,7 @@ public class Messages
     public static String AUTO_CLAIM_HAS_BEEN_TURNED_OFF;
     public static String YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD;
     public static String YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN;
+    public static String THIS_PLACE_DOES_NOT_BELONG_TO_YOUR_FACTION;
 
     //Coords
     public static String TEAM_COORDS;
@@ -95,9 +103,13 @@ public class Messages
     public static String YOU_ARE_ALREADY_IN_A_FACTION;
     public static String YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION;
 
-    //Disbanding
+    //Disbanding (and Regenerating)
     public static String FACTION_HAS_BEEN_DISBANDED;
     public static String SOMETHING_WENT_WRONG;
+    public static String FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME;
+    public static String REGEN_WARNING_CONFIRMATION_REQUIRED;
+    public static String FACTION_HAS_BEEN_REGENERATED;
+    public static String THIS_FACTION_CANNOT_BE_DISBANDED;
 
     //Perms
     public static String SET_TO;
@@ -188,6 +200,10 @@ public class Messages
     public static String YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS;
     public static String PLAYERS_MAXPOWER_HAS_BEEN_CHANGED;
 
+    //Description
+    public static String DESCRIPTION_IS_TOO_LONG;
+    public static String FACTION_DESCRIPTION_HAS_BEEN_UPDATED;
+
     //Motd
     public static String FACTION_MESSAGE_OF_THE_DAY_HAS_BEEN_UPDATED;
 
@@ -200,6 +216,7 @@ public class Messages
     //Player
     public static String PLAYER_INFO;
     public static String LAST_PLAYED;
+    public static String PLAYER_STATUS;
 
     //Reload
     public static String CONFIG_HAS_BEEN_RELOADED;
@@ -247,6 +264,10 @@ public class Messages
     //Home
     public static String FACTION_HOME_HAS_BEEN_SET;
     public static String FACTION_HOME_MUST_BE_PLACED_INSIDE_FACTION_TERRITORY;
+    public static String TELEPORTING_TO_FACTION_HOME;
+    public static String MISSING_OR_CORRUPTED_HOME;
+    public static String THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET;
+    public static String YOU_CANT_TELEPORT_TO_THIS_FACTION_HOME_ALLIANCE_NEEDED;
 
     //SetLeader
     public static String YOU_SET_PLAYER_AS_YOUR_NEW_LEADER;

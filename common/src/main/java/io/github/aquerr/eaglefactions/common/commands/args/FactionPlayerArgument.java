@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands.args;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -10,9 +11,11 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class FactionPlayerArgument extends CommandElement
@@ -42,25 +45,35 @@ public class FactionPlayerArgument extends CommandElement
                     return player;
             }
 
-            throw new ArgumentParseException(Text.of("Argument is not a valid player!"), argument, argument.length());
+            throw args.createError(Text.of("Argument is not a valid player!"));
         }
         else
         {
-            throw new ArgumentParseException(Text.of("Argument is not a valid player!"), "", 0);
+            throw args.createError(Text.of("Argument is not a valid player!"));
         }
     }
 
     @Override
     public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
     {
-        List<String> list = new ArrayList<>(this.plugin.getPlayerManager().getServerPlayerNames());
+        final Map<UUID, FactionPlayer> factionPlayerMap = FactionsCache.getPlayersMap();
 
+        final List<FactionPlayer> list = new ArrayList<>(factionPlayerMap.values());
         if (args.hasNext())
         {
             String charSequence = args.nextIfPresent().get();
-            return list.stream().filter(x->x.contains(charSequence)).collect(Collectors.toList());
+            final List<String> resultList = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++)
+            {
+                final FactionPlayer factionPlayer = list.get(i);
+                final String factionPlayerName = factionPlayer.getName();
+                if (factionPlayerName.toLowerCase().startsWith(charSequence.toLowerCase()))
+                {
+                    resultList.add(factionPlayerName);
+                }
+            }
+            return resultList;
         }
-
-        return list;
+        return list.stream().map(FactionPlayer::getName).collect(Collectors.toList());
     }
 }

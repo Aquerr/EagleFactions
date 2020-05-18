@@ -15,7 +15,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.hanging.ItemFrame;
-import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -24,15 +23,11 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.TargetEntityEvent;
-import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -44,7 +39,6 @@ import org.spongepowered.api.world.explosion.Explosion;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,7 +71,8 @@ public class BlockBreakListener extends AbstractListener
         final TileEntity tileEntity = event.getCause().first(TileEntity.class).orElse(null);
         final boolean pistonExtend = event.getContext().containsKey(EventContextKeys.PISTON_EXTEND);
         final boolean pistonRetract = event.getContext().containsKey(EventContextKeys.PISTON_RETRACT);
-        final boolean isLiquidSource = event.getContext().containsKey(EventContextKeys.LIQUID_FLOW);
+        final boolean isLiquidSource = event.getContext().containsKey(EventContextKeys.LIQUID_FLOW)
+                || (locatableBlock != null && (locatableBlock.getBlockState().getType() == BlockTypes.FLOWING_WATER || locatableBlock.getBlockState().getType() == BlockTypes.FLOWING_LAVA));
         final boolean isFireSource = !isLiquidSource && event.getContext().containsKey(EventContextKeys.FIRE_SPREAD);
         final boolean isLeafDecay = event.getContext().containsKey(EventContextKeys.LEAVES_DECAY);
         final boolean isForgePlayerBreak = event.getContext().containsKey(EventContextKeys.PLAYER_BREAK);
@@ -139,7 +134,7 @@ public class BlockBreakListener extends AbstractListener
                     if(location.getBlockType() == BlockTypes.AIR)
                         continue;
 
-                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true))
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                     {
                         event.setCancelled(true);
                         return;
@@ -164,11 +159,18 @@ public class BlockBreakListener extends AbstractListener
                     user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
                 }
             }
+
+            if (user == null)
+            {
+                user = event.getContext().get(EventContextKeys.OWNER)
+                        .orElse(event.getContext().get(EventContextKeys.NOTIFIER).orElse(null));
+            }
+
             for(Location<World> location : sourceLocations)
             {
                 if(user != null && (pistonExtend || pistonRetract))
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user, true))
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                     {
                         event.setCancelled(true);
                         return;
@@ -185,21 +187,21 @@ public class BlockBreakListener extends AbstractListener
                     }
                 }
 
-                if(isLiquidSource)
-                    continue;
+//                if(isLiquidSource)
+//                    continue;
 
                 if(isLeafDecay)
                     continue;
 
-                if(location.getBlock().getType() == BlockTypes.AIR)
+                if(!isLiquidSource && location.getBlock().getType() == BlockTypes.AIR)
                     continue;
 
-                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true))
+                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
+                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -212,7 +214,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canInteractWithBlock(location, user, true))
+                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                     {
                         event.setCancelled(true);
                     }
@@ -235,7 +237,7 @@ public class BlockBreakListener extends AbstractListener
                     continue;
 
                 //TODO: This runs even when player right clicks the block.
-                if(!super.getPlugin().getProtectionManager().canBreak(location, user, true))
+                if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -249,7 +251,7 @@ public class BlockBreakListener extends AbstractListener
     {
         //SpawnType in break event? Should be located in Pre or global event in my opinion.
         //Custom Spawn Type = Can be a piston moving block or possibly any other "magically" spawned block.
-            final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
+        final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
 
         if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
             return;
@@ -304,18 +306,19 @@ public class BlockBreakListener extends AbstractListener
         for(Transaction<BlockSnapshot> transaction : event.getTransactions())
         {
             final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
-
-            if(location == null || transaction.getOriginal().getState().getType() == BlockTypes.AIR)
+            if(location == null || transaction.getOriginal().getState().getType() == BlockTypes.AIR
+                    || transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_WATER
+                    || transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_LAVA)
             {
                 continue;
             }
 
-            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true))
+            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
             {
                 event.setCancelled(true);
                 return;
             }
-            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location))
+            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location).hasAccess())
             {
                 event.setCancelled(true);
                 return;
@@ -459,7 +462,7 @@ public class BlockBreakListener extends AbstractListener
             //Check if projectile fired by user collided with ItemFrame.
             if(entity instanceof ItemFrame && isProjectileSource && user != null)
             {
-                if(!super.getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), user, true))
+                if(!super.getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -588,7 +591,7 @@ public class BlockBreakListener extends AbstractListener
         {
             if(entity instanceof Living)
             {
-                if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity, true))
+                if(entity instanceof User && !getPlugin().getProtectionManager().canInteractWithBlock(entity.getLocation(), (User)entity, true).hasAccess())
                 {
                     return false;
                 }

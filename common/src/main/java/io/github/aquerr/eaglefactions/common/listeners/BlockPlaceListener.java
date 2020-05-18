@@ -12,7 +12,11 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public class BlockPlaceListener extends AbstractListener
 {
@@ -28,7 +32,6 @@ public class BlockPlaceListener extends AbstractListener
     public void onBlockPlace(ChangeBlockEvent.Place event)
     {
         final Object source = event.getSource();
-//        final EventContext eventContext = event.getContext();
         if(source instanceof Piston)
             return;
 
@@ -52,7 +55,7 @@ public class BlockPlaceListener extends AbstractListener
 
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {
-                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true))
+                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true).hasAccess())
                     event.setCancelled(true);
             }
         }
@@ -74,6 +77,28 @@ public class BlockPlaceListener extends AbstractListener
 //                    user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
 //                }
 //            }
+
+            final Optional<BlockSnapshot> optionalNeighborNotifySource = event.getContext().get(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE);
+            if (optionalNeighborNotifySource.isPresent())
+            {
+                final BlockSnapshot blockSnapshot = optionalNeighborNotifySource.get();
+                if(!(source instanceof BlockSnapshot))
+                    return;
+                final Optional<Location<World>> sourceNotifyLocation = blockSnapshot.getLocation();
+                final Optional<Location<World>> sourceLocation = ((BlockSnapshot) source).getLocation();
+                if (!sourceNotifyLocation.isPresent() || !sourceLocation.isPresent())
+                    return;
+                if (!super.getPlugin().getProtectionManager().canNotifyBlock(sourceNotifyLocation.get(), sourceLocation.get()).hasAccess())
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+//                if (!super.getPlugin().getProtectionManager().canBreak(blockSnapshot.getLocation().get()))
+//                {
+//                    event.setCancelled(true);
+//                    return;
+//                }
+            }
 
             for (Transaction<BlockSnapshot> transaction : event.getTransactions())
             {

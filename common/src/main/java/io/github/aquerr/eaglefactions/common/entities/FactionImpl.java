@@ -178,7 +178,7 @@ public class FactionImpl implements Faction
             optionalFaction = this.truces.stream().map(factionLogic::getFactionByName).filter(Objects::nonNull).filter(y->y.containsPlayer(playerUUID)).findAny();
             if(optionalFaction.isPresent()) return FactionMemberType.TRUCE;
         }
-        return null;
+        return FactionMemberType.NONE;
     }
 
     @Override
@@ -238,6 +238,19 @@ public class FactionImpl implements Faction
     public int compareTo(final Faction object)
     {
         return this.name.compareTo(object.getName());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FactionImpl faction = (FactionImpl) o;
+        return Objects.equals(name, faction.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 
     //Builder

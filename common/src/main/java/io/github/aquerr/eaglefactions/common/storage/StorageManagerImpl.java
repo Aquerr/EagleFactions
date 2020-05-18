@@ -5,34 +5,46 @@ import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
-import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2FactionStorage;
-import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2PlayerStorage;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.storage.file.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.file.hocon.HOCONPlayerStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2FactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2PlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbPlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLPlayerStorage;
-import io.github.aquerr.eaglefactions.common.storage.utils.DeleteFactionTask;
-import io.github.aquerr.eaglefactions.common.storage.utils.IStorageTask;
-import io.github.aquerr.eaglefactions.common.storage.utils.UpdateFactionTask;
+import io.github.aquerr.eaglefactions.common.storage.task.DeleteFactionTask;
+import io.github.aquerr.eaglefactions.common.storage.task.IStorageTask;
+import io.github.aquerr.eaglefactions.common.storage.task.SavePlayerTask;
+import io.github.aquerr.eaglefactions.common.storage.task.UpdateFactionTask;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class StorageManagerImpl implements StorageManager
 {
-    private final IFactionStorage factionsStorage;
-    private final IPlayerStorage playerStorage;
+    private final FactionStorage factionsStorage;
+    private final PlayerStorage playerStorage;
+    private final BackupStorage backupStorage;
+    private final Path configDir;
 
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor(); //Only one thread.
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
+        this.configDir = configDir;
         switch(storageConfig.getStorageType().toLowerCase())
         {
             case "hocon":
@@ -62,26 +74,29 @@ public class StorageManagerImpl implements StorageManager
                 plugin.printInfo("Initialized default HOCON storage.");
                 break;
         }
+        this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Filling cache with data..."));
         prepareFactionsCache();
+        preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }
 
     private void queueStorageTask(IStorageTask task)
     {
-        this.executorService.execute(task);
+        this.executorService.submit(task);
     }
 
     @Override
-    public void addOrUpdateFaction(final Faction faction)
+    public void saveFaction(final Faction faction)
     {
-        FactionsCache.addOrUpdateFactionCache(faction);
-        queueStorageTask(new UpdateFactionTask(faction, () -> this.factionsStorage.addOrUpdateFaction(faction)));
+        queueStorageTask(new UpdateFactionTask(faction, () -> this.factionsStorage.saveFaction(faction)));
+        FactionsCache.saveFaction(faction);
     }
 
     @Override
     public boolean deleteFaction(final String factionName)
     {
-        FactionsCache.removeFactionCache(factionName);
         queueStorageTask(new DeleteFactionTask(factionName, () -> this.factionsStorage.deleteFaction(factionName)));
+        FactionsCache.removeFaction(factionName);
         return true;
     }
 
@@ -90,7 +105,7 @@ public class StorageManagerImpl implements StorageManager
     {
         try
         {
-            Faction factionCache = FactionsCache.getFactionCache(factionName);
+            Faction factionCache = FactionsCache.getFaction(factionName);
             if(factionCache != null)
                 return factionCache;
 
@@ -98,7 +113,7 @@ public class StorageManagerImpl implements StorageManager
             if (faction == null)
                 return null;
 
-            FactionsCache.addOrUpdateFactionCache(faction);
+            FactionsCache.saveFaction(faction);
 
             return faction;
         }
@@ -116,73 +131,109 @@ public class StorageManagerImpl implements StorageManager
         final Set<Faction> factionSet = this.factionsStorage.getFactions();
         for (final Faction faction : factionSet)
         {
-            FactionsCache.addOrUpdateFactionCache(faction);
+            FactionsCache.saveFaction(faction);
+        }
+    }
+
+    private void preparePlayerCache()
+    {
+        final Collection<FactionPlayer> players = this.playerStorage.getServerPlayers();
+        final Collection<Faction> factions = FactionsCache.getFactionsMap().values();
+        for (final FactionPlayer player : players)
+        {
+            FactionPlayer playerToSave = player;
+
+            //Only for backwards compatibility
+            if (!player.getFactionName().isPresent())
+            {
+                for (final Faction faction : factions)
+                {
+                    if (faction.containsPlayer(player.getUniqueId()))
+                    {
+                        playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction.getName(), player.getPower(), player.getMaxPower(), player.getFactionRole(), player.diedInWarZone());
+                    }
+                }
+                //Try to get correct faction for the player...
+            }
+            FactionsCache.savePlayer(playerToSave);
         }
     }
 
     @Override
     public void reloadStorage()
     {
-        FactionsCache.clearCache();
+        FactionsCache.clear();
         this.factionsStorage.load();
         prepareFactionsCache();
+
+        //Must be run after factions.
+        preparePlayerCache();
+    }
+
+//    @Override
+//    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
+//    {
+//        return FactionsCache.getPlayer(playerUUID) != null;
+//    }
+
+    @Override
+    public boolean savePlayer(final FactionPlayer factionPlayer)
+    {
+        queueStorageTask(new SavePlayerTask(factionPlayer, () -> this.playerStorage.savePlayer(factionPlayer)));
+        FactionsCache.savePlayer(factionPlayer);
+        return true;
     }
 
     @Override
-    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
+    @Nullable
+    public FactionPlayer getPlayer(final UUID playerUUID)
     {
-        return this.playerStorage.checkIfPlayerExists(playerUUID, playerName);
+        try
+        {
+            FactionPlayer cachedPlayer = FactionsCache.getPlayer(playerUUID);
+            if(cachedPlayer != null)
+                return cachedPlayer;
+
+            FactionPlayer player = this.playerStorage.getPlayer(playerUUID);
+            if (player == null)
+                return null;
+
+            FactionsCache.savePlayer(player);
+
+            return player;
+        }
+        catch(Exception exception)
+        {
+            exception.printStackTrace();
+        }
+
+        //If it was not possible to get a faction then return null.
+        return null;
     }
 
-    @Override
-    public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float maxpower)
-    {
-        return CompletableFuture.supplyAsync(() -> playerStorage.addPlayer(playerUUID, playerName, startingPower, maxpower)).isDone();
-        //return this.playerStorage.addPlayer(playerUUID, playerName, startingPower, globalMaxPower);
-    }
-
-    @Override
-    public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
-    {
-        return CompletableFuture.supplyAsync(() -> this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone)).isDone();
-        //return this.playerStorage.setDeathInWarzone(playerUUID, didDieInWarZone);
-    }
-
-    @Override
-    public boolean getLastDeathInWarzone(final UUID playerUUID)
-    {
-        return this.playerStorage.getLastDeathInWarzone(playerUUID);
-    }
-
-    @Override
-    public float getPlayerPower(final UUID playerUUID)
-    {
-        return this.playerStorage.getPlayerPower(playerUUID);
-    }
-
-    @Override
-    public boolean setPlayerPower(final UUID playerUUID, final float power)
-    {
-        return CompletableFuture.supplyAsync(() -> this.playerStorage.setPlayerPower(playerUUID, power)).isDone();
-    }
-
-    @Override
-    public float getPlayerMaxPower(final UUID playerUUID)
-    {
-        return this.playerStorage.getPlayerMaxPower(playerUUID);
-    }
-
-    @Override
-    public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
-    {
-        return CompletableFuture.supplyAsync(()-> this.playerStorage.setPlayerMaxPower(playerUUID, maxpower)).isDone();
-    }
+//    @Override
+//    public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
+//    {
+//        FactionPlayer factionPlayer = getPlayer(playerUUID);
+//        if (factionPlayer == null)
+//            return false;
+//
+//        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getLastKnownPlayerPower(), factionPlayer.getLastKnownPlayerMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+//        queueStorageTask(new SavePlayerTask(updatedPlayer, () -> this.playerStorage.savePlayer(updatedPlayer)));
+//        return true;
+//    }
 
     @Override
     public Set<String> getServerPlayerNames()
     {
         return this.playerStorage.getServerPlayerNames();
     }
+
+//    @Override
+//    public Map<UUID, FactionPlayer> getFactionPlayers()
+//    {
+//        return FactionsCache.getPlayersMap();
+//    }
 
     @Override
     public Set<FactionPlayer> getServerPlayers()
@@ -191,14 +242,28 @@ public class StorageManagerImpl implements StorageManager
     }
 
     @Override
-    public String getPlayerName(final UUID playerUUID)
+    public boolean createBackup()
     {
-        return this.playerStorage.getPlayerName(playerUUID);
+        return this.backupStorage.createBackup();
     }
 
     @Override
-    public boolean updatePlayerName(final UUID playerUUID, final String playerName)
+    public boolean restoreBackup(final String backupName)
     {
-        return CompletableFuture.supplyAsync(()->this.playerStorage.updatePlayerName(playerUUID, playerName)).isDone();
+        try
+        {
+            return this.backupStorage.restoreBackup(backupName);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<String> listBackups()
+    {
+        return this.backupStorage.listBackups();
     }
 }

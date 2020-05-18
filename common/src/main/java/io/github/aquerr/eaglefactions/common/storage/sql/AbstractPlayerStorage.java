@@ -1,36 +1,40 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.storage.IPlayerStorage;
+import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.sql.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public abstract class AbstractPlayerStorage implements IPlayerStorage
+public abstract class AbstractPlayerStorage implements PlayerStorage
 {
-    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
-    private static final String MERGE_PLAYER = "MERGE INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) KEY (PlayerUUID) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Faction, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Faction = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
+//    private static final String MERGE_PLAYER = "MERGE INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) KEY (PlayerUUID) VALUES (?, ?, ?, ?, ?)";
 
-    private static final String SELECT_PLAYER_WHERE_PLAYERUUID = "SELECT Name FROM Players WHERE PlayerUUID=? LIMIT 1";
+//    private static final String SELECT_PLAYER_WHERE_PLAYERUUID = "SELECT Name FROM Players WHERE PlayerUUID=? LIMIT 1";
     private static final String SELECT_PLAYERS = "SELECT * FROM Players";
     private static final String SELECT_PLAYER_NAMES = "SELECT Name FROM Players";
-    private static final String SELECT_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "SELECT DeathInWarzone FROM Players WHERE PlayerUUID=? LIMIT 1";
-    private static final String SELECT_PLAYER_WHERE_PLAYERUUID_AND_PLAYERNAME = "SELECT * FROM Players WHERE PlayerUUID=? AND Name=? LIMIT 1";
-    private static final String SELECT_POWER_WHERE_PLAYERUUID = "SELECT Power FROM Players WHERE PlayerUUID=? LIMIT 1";
-    private static final String SELECT_MAXPOWER_WHERE_PLAYERUUID = "SELECT MaxPower FROM Players WHERE PlayerUUID=? LIMIT 1";
+    private static final String SELECT_PLAYER_WHERE_UUID = "SELECT * FROM Players WHERE PlayerUUID=? LIMIT 1";
+//    private static final String SELECT_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "SELECT DeathInWarzone FROM Players WHERE PlayerUUID=? LIMIT 1";
+//    private static final String SELECT_PLAYER_WHERE_PLAYERUUID_AND_PLAYERNAME = "SELECT * FROM Players WHERE PlayerUUID=? AND Name=? LIMIT 1";
+//    private static final String SELECT_POWER_WHERE_PLAYERUUID = "SELECT Power FROM Players WHERE PlayerUUID=? LIMIT 1";
+//    private static final String SELECT_MAXPOWER_WHERE_PLAYERUUID = "SELECT MaxPower FROM Players WHERE PlayerUUID=? LIMIT 1";
 
-    private static final String UPDATE_POWER_WHERE_PLAYERUUID = "UPDATE Players SET Power=? WHERE PlayerUUID=?";
-    private static final String UPDATE_MAXPOWER_WHERE_PLAYERUUID = "UPDATE Players SET MaxPower=? WHERE PlayerUUID=?";
-    private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
-    private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
+//    private static final String UPDATE_POWER_WHERE_PLAYERUUID = "UPDATE Players SET Power=? WHERE PlayerUUID=?";
+//    private static final String UPDATE_MAXPOWER_WHERE_PLAYERUUID = "UPDATE Players SET MaxPower=? WHERE PlayerUUID=?";
+//    private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
+//    private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
+
+    private static final String DELETE_PLAYERS = "DELETE FROM Players";
 
     private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
@@ -46,84 +50,61 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
+    public FactionPlayer getPlayer(final UUID playerUUID)
     {
+        FactionPlayer factionPlayer = null;
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_WHERE_PLAYERUUID_AND_PLAYERNAME);
+            final PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_WHERE_UUID);
             statement.setString(1, playerUUID.toString());
-            statement.setString(2, playerName);
             final ResultSet resultSet = statement.executeQuery();
-            final boolean exists = resultSet.next();
+            if (resultSet.first())
+            {
+                final String name = resultSet.getString("Name");
+                final String factionName = resultSet.getString("Faction");
+                final float power = resultSet.getFloat("Power");
+                final float maxpower = resultSet.getFloat("MaxPower");
+                final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
+                factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, null, deathInWarzone);
+            }
             resultSet.close();
             statement.close();
-            return exists;
+            return factionPlayer;
         }
         catch (final SQLException e)
         {
             e.printStackTrace();
+            return null;
         }
-        return false;
     }
 
     @Override
-    public boolean addPlayer(final UUID playerUUID, final String playerName, final float startingPower, final float maxPower)
+    public boolean savePlayer(final FactionPlayer player)
     {
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER);
-            statement.setString(1, playerUUID.toString());
-            statement.setString(2, playerName);
-            statement.setFloat(3, startingPower);
-            statement.setFloat(4, maxPower);
-            statement.setBoolean(5, false);
+            //Add or update?
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PLAYER_WHERE_UUID);
+            preparedStatement.setString(1, player.getUniqueId().toString());
+            final ResultSet factionSelect = preparedStatement.executeQuery();
+            final boolean exists = factionSelect.next();
+            preparedStatement.close();
+
+            String queryToUse = exists ? UPDATE_PLAYER : INSERT_PLAYER;
+
+            final PreparedStatement statement = connection.prepareStatement(queryToUse);
+            statement.setString(1, player.getUniqueId().toString());
+            statement.setString(2, player.getName());
+            statement.setString(3, player.getFactionName().orElse(null));
+            statement.setFloat(4, player.getPower());
+            statement.setFloat(5, player.getMaxPower());
+            statement.setBoolean(6, player.diedInWarZone());
+            if(exists)
+                statement.setString(7, player.getUniqueId().toString()); //Where part
             final boolean didSucceed = statement.execute();
             statement.close();
             return didSucceed;
         }
-        catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID);
-            preparedStatement.setBoolean(1, didDieInWarZone);
-            preparedStatement.setString(2, playerUUID.toString());
-            final boolean didSucceed = preparedStatement.execute();
-            preparedStatement.close();
-            return didSucceed;
-        }
-        catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean getLastDeathInWarzone(final UUID playerUUID)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final PreparedStatement preparedStatement = connection.prepareStatement(SELECT_DEATH_IN_WARZONE_WHERE_PLAYERUUID);
-            preparedStatement.setString(1, playerUUID.toString());
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            boolean lastDeathInWarzone = false;
-            if (resultSet.next())
-            {
-                lastDeathInWarzone = resultSet.getBoolean("DeathInWarzone");
-            }
-            resultSet.close();
-            preparedStatement.close();
-            return lastDeathInWarzone;
-        }
         catch (SQLException e)
         {
             e.printStackTrace();
@@ -132,85 +113,27 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public float getPlayerPower(final UUID playerUUID)
+    public boolean savePlayers(final List<FactionPlayer> players)
     {
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement preparedStatement = connection.prepareStatement(SELECT_POWER_WHERE_PLAYERUUID);
-            preparedStatement.setString(1, playerUUID.toString());
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            float power = 0;
-            if (resultSet.next())
+            final PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER);
+            for (final FactionPlayer player : players)
             {
-                power = resultSet.getFloat("Power");
+                statement.setString(1, player.getUniqueId().toString());
+                statement.setString(2, player.getName());
+                statement.setString(3, player.getFactionName().orElse(null));
+                statement.setFloat(4, player.getPower());
+                statement.setFloat(5, player.getMaxPower());
+                statement.setBoolean(6, player.diedInWarZone());
+                statement.addBatch();
             }
-            resultSet.close();
-            preparedStatement.close();
-            return power;
+            final int[] results = statement.executeBatch();
+
+            statement.close();
+            return results.length > 0;
         }
         catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    @Override
-    public boolean setPlayerPower(final UUID playerUUID, final float power)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_POWER_WHERE_PLAYERUUID);
-            preparedStatement.setFloat(1, power);
-            preparedStatement.setString(2, playerUUID.toString());
-            final boolean didSucceed = preparedStatement.execute();
-            preparedStatement.close();
-            return didSucceed;
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public float getPlayerMaxPower(final UUID playerUUID)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MAXPOWER_WHERE_PLAYERUUID);
-            preparedStatement.setString(1, playerUUID.toString());
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            float power = 0;
-            if (resultSet.next())
-            {
-                power = resultSet.getFloat("MaxPower");
-            }
-            resultSet.close();
-            preparedStatement.close();
-            return power;
-        }
-        catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    @Override
-    public boolean setPlayerMaxPower(final UUID playerUUID, final float maxpower)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_MAXPOWER_WHERE_PLAYERUUID);
-            preparedStatement.setFloat(1, maxpower);
-            preparedStatement.setString(2, playerUUID.toString());
-            final boolean didSucceed = preparedStatement.execute();
-            preparedStatement.close();
-            return didSucceed;
-        }
-        catch (SQLException e)
         {
             e.printStackTrace();
         }
@@ -250,9 +173,13 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYERS);
             while (resultSet.next())
             {
-                final UUID playerUUID = resultSet.getObject("PlayerUUID", UUID.class);
+                final UUID playerUUID = UUID.fromString(resultSet.getString("PlayerUUID"));
                 final String name = resultSet.getString("Name");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, null, null);
+                final String factionName = resultSet.getString("Faction");
+                final float power = resultSet.getFloat("Power");
+                final float maxpower = resultSet.getFloat("MaxPower");
+                final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
+                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, null, deathInWarzone);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();
@@ -266,45 +193,17 @@ public abstract class AbstractPlayerStorage implements IPlayerStorage
     }
 
     @Override
-    public String getPlayerName(final UUID playerUUID)
+    public void deletePlayers()
     {
         try(final Connection connection = this.sqlProvider.getConnection())
         {
-            final PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PLAYER_WHERE_PLAYERUUID);
-            preparedStatement.setString(1, playerUUID.toString());
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            String playerName = "";
-            while (resultSet.next())
-            {
-                playerName = resultSet.getString("Name");
-            }
-            resultSet.close();
-            preparedStatement.close();
-            return playerName;
+            final Statement statement = connection.createStatement();
+            statement.execute(DELETE_PLAYERS);
+            statement.close();
         }
-        catch (final SQLException e)
+        catch (SQLException e)
         {
             e.printStackTrace();
         }
-        return "";
-    }
-
-    @Override
-    public boolean updatePlayerName(final UUID playerUUID, final String playerName)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PLAYERNAME_WHERE_PLAYERUUID);
-            preparedStatement.setString(1, playerName);
-            preparedStatement.setString(2, playerUUID.toString());
-            final boolean didSucceed = preparedStatement.execute();
-            preparedStatement.close();
-            return didSucceed;
-        }
-        catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
     }
 }

@@ -78,22 +78,6 @@ CREATE UNIQUE INDEX `OfficerUUID_UNIQUE` ON `FactionOfficers` (`OfficerUUID`);
 -- );
 -- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
 
--- Create LeaderPerms Table
-CREATE TABLE `LeaderPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  `Claim` TINYINT(1) NOT NULL,
-  `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
-) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `LeaderPerms` (`FactionName`);
-
 -- Create OfficerPerms Table
 CREATE TABLE `OfficerPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
@@ -176,8 +160,10 @@ CREATE TABLE `Claims` (
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
       ON DELETE CASCADE
-      ON UPDATE CASCADE
+      ON UPDATE CASCADE,
+  PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 ) DEFAULT CHARSET = utf8mb4;
+CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `Claims` (`FactionName`);
 
 -- Create FactionsChest Table
 CREATE TABLE `FactionChests` (
@@ -194,6 +180,7 @@ CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `FactionChests` (`FactionName`);
 CREATE TABLE `Players` (
   `PlayerUUID` VARCHAR(36) NOT NULL,
   `Name` VARCHAR(200) NOT NULL,
+  `Faction` VARCHAR(200) NULL,
   `Power` FLOAT NOT NULL,
   `MaxPower` FLOAT NOT NULL,
   `DeathInWarzone` TINYINT(1) NOT NULL,

@@ -6,7 +6,9 @@ import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
-import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -129,7 +131,7 @@ public class FactionChestImpl implements FactionChest
         for(SlotItem slotItem : items)
         {
             if(slotItem.getRow() == row && slotItem.getColumn() == column)
-                itemStack = ItemStack.builder().fromContainer(slotItem.getItem().toContainer()).build();
+                itemStack = slotItem.getItem().copy();
         }
 
         return itemStack;

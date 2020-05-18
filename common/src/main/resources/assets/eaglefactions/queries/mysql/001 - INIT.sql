@@ -19,15 +19,15 @@ CREATE TABLE `Factions` (
   `Alliances` VARCHAR(255) NOT NULL,
   `Enemies` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`, `Name`),
-  UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) VISIBLE
+  UNIQUE INDEX `Name_UNIQUE` (`Name` ASC)
 );
 
 -- Create Recruits Table
 CREATE TABLE `FactionRecruits` (
   `RecruitUUID` VARCHAR(36) NOT NULL,
   `FactionName` VARCHAR(200) NOT NULL,
-  UNIQUE INDEX `RecruitUUID_UNIQUE` (`RecruitUUID` ASC) VISIBLE,
-  INDEX `FactionName_idx` (`FactionName` ASC) VISIBLE,
+  UNIQUE INDEX `RecruitUUID_UNIQUE` (`RecruitUUID` ASC) ,
+  INDEX `FactionName_idx` (`FactionName` ASC) ,
   CONSTRAINT `Faction_Recruit`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
@@ -39,8 +39,8 @@ CREATE TABLE `FactionRecruits` (
 CREATE TABLE `FactionMembers` (
   `MemberUUID` VARCHAR(36) NOT NULL,
   `FactionName` VARCHAR(200) NOT NULL,
-  UNIQUE INDEX `MemberUUID_UNIQUE` (`MemberUUID` ASC) VISIBLE,
-  INDEX `FactionName_idx` (`FactionName` ASC) VISIBLE,
+  UNIQUE INDEX `MemberUUID_UNIQUE` (`MemberUUID` ASC) ,
+  INDEX `FactionName_idx` (`FactionName` ASC) ,
   CONSTRAINT `Faction_Member`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
@@ -53,8 +53,8 @@ CREATE TABLE `FactionMembers` (
 CREATE TABLE `FactionOfficers` (
   `OfficerUUID` VARCHAR(36) NOT NULL,
   `FactionName` VARCHAR(200) NOT NULL,
-  UNIQUE INDEX `OfficerUUID_UNIQUE` (`OfficerUUID` ASC) VISIBLE,
-  INDEX `FactionName_idx` (`FactionName` ASC) VISIBLE,
+  UNIQUE INDEX `OfficerUUID_UNIQUE` (`OfficerUUID` ASC) ,
+  INDEX `FactionName_idx` (`FactionName` ASC) ,
   CONSTRAINT `Faction_Officer`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
@@ -84,23 +84,6 @@ CREATE TABLE `FactionOfficers` (
 --   `TrucesIds`  VARCHAR(200)        UNIQUE      NOT NULL,
 -- );
 -- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
-
--- Create LeaderPerms Table
-CREATE TABLE `LeaderPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  `Claim` TINYINT(1) NOT NULL,
-  `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_LeaderPerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-);
 
 -- Create OfficerPerms Table
 CREATE TABLE `OfficerPerms` (
@@ -186,12 +169,13 @@ CREATE TABLE `Claims` (
   `FactionName` VARCHAR(200) NOT NULL,
   `WorldUUID` VARCHAR(36) NOT NULL,
   `ChunkPosition` VARCHAR(200) NOT NULL,
-  INDEX `FactionName_idx` (`FactionName` ASC) VISIBLE,
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
   CONSTRAINT `Faction_Claim`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE
+    ON UPDATE CASCADE,
+  PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 );
 
 -- Create FactionsChest Table
@@ -210,11 +194,12 @@ CREATE TABLE `FactionChests` (
 CREATE TABLE `Players` (
   `PlayerUUID` VARCHAR(36) NOT NULL,
   `Name` VARCHAR(200) NOT NULL,
+  `Faction` VARCHAR(200) NULL,
   `Power` FLOAT NOT NULL,
   `MaxPower` FLOAT NOT NULL,
   `DeathInWarzone` TINYINT(1) NOT NULL,
   PRIMARY KEY (`PlayerUUID`),
-  UNIQUE INDEX `PlayerUUID_UNIQUE` (`PlayerUUID` ASC) VISIBLE
+  UNIQUE INDEX `PlayerUUID_UNIQUE` (`PlayerUUID` ASC)
 );
 
 -- Set database version to 1

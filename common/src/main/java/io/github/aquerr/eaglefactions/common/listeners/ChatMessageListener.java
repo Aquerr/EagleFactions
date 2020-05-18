@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.chat.AllianceMessageChannelImpl;
@@ -21,9 +22,8 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.channel.MutableMessageChannel;
-import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.text.transform.SimpleTextTemplateApplier;
 import org.spongepowered.api.util.Tristate;
 
@@ -60,7 +60,7 @@ public class ChatMessageListener extends AbstractListener
             if(!this.chatConfig.getNonFactionPlayerPrefix().toPlain().equals(""))
             {
                 //TODO: Try to use placeholder instead of having "start" and "end" prefix.
-                messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(Text.of(this.chatConfig.getFactionStartPrefix(), this.chatConfig.getNonFactionPlayerPrefix(), this.chatConfig.getFactionEndPrefix()))));
+                messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(this.chatConfig.getNonFactionPlayerPrefix())));
             }
             return;
         }
@@ -117,12 +117,13 @@ public class ChatMessageListener extends AbstractListener
                 }
         }
 
-        factionPrefix.append(getFactionPrefix(playerFaction));
+        final Text fPrefix = getFactionPrefix(playerFaction);
+        if (fPrefix != null)
+            factionPrefix.append(getFactionPrefix(playerFaction));
 
-        if(this.chatConfig.shouldDisplayRank())
-        {
-            rankPrefix.append(getRankPrefix(playerFaction, player));
-        }
+        final Text rPrefix = getRankPrefix(chatType, playerFaction, player);
+        if (rPrefix != null)
+            rankPrefix.append(rPrefix);
 
         if (this.chatConfig.isFactionPrefixFirstInChat())
         {
@@ -187,47 +188,62 @@ public class ChatMessageListener extends AbstractListener
                     .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
                     .build();
         }
-        return playerFaction.getTag();
+        else
+        {
+            return null;
+        }
     }
 
     private Text getAllianceChatPrefix()
     {
         return Text.builder()
-                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.BLUE, Messages.ALLIANCE_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
+                .append(TextSerializers.FORMATTING_CODE.deserialize(Messages.ALLIANCE_CHAT_PREFIX))
                 .build();
     }
 
     private Text getFactionChatPrefix()
     {
         return Text.builder()
-                .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, Messages.FACTION_CHAT, TextColors.RESET), this.chatConfig.getFactionEndPrefix())
+                .append(TextSerializers.FORMATTING_CODE.deserialize(Messages.FACTION_CHAT_PREFIX))
                 .build();
     }
 
-    private Text getRankPrefix(final Faction faction, final Player player)
+    private Text getRankPrefix(final ChatEnum chatType, final Faction faction, final Player player)
     {
         if(faction.getLeader().equals(player.getUniqueId()))
         {
+            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.LEADER))
+                return null;
+
             return Text.builder()
-                    .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.LEADER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.LEADER_PREFIX)))
                     .build();
         }
         else if(faction.getOfficers().contains(player.getUniqueId()))
         {
+            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.OFFICER))
+                return null;
+
             return Text.builder()
-                    .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.OFFICER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.OFFICER_PREFIX)))
                     .build();
         }
         else if (faction.getMembers().contains(player.getUniqueId()))
         {
+            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.MEMBER))
+                return null;
+
             return Text.builder()
-                    .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.MEMBER, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.MEMBER_PREFIX)))
                     .build();
         }
         else
         {
+            if(!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.RECRUIT))
+                return null;
+
             return Text.builder()
-                    .append(Text.of(this.chatConfig.getFactionStartPrefix(), TextColors.GOLD, Messages.RECRUIT, TextColors.RESET, this.chatConfig.getFactionEndPrefix()))
+                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.RECRUIT_PREFIX)))
                     .build();
         }
     }
