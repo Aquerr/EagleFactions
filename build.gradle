@@ -7,7 +7,7 @@ plugins {
 allprojects {
     description = 'A factions plugin that will make managing your battle-server easier. :)'
     group = "io.github.aquerr"
-    version = "0.15.0"
+    version = "0.15.1"
 
     project.tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
