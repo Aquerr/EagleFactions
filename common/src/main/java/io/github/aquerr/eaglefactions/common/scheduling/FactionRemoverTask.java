@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -49,6 +50,10 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
 
             final Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
             if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
+                continue;
+
+            final boolean isCancelled = EventRunner.runFactionDisbandEvent(null, factionEntry.getValue());
+            if (isCancelled)
                 continue;
 
             boolean didSucceed = this.factionLogic.disbandFaction(factionEntry.getValue().getName());
