@@ -97,22 +97,7 @@ public class CreateCommand extends AbstractCommand
         }
         else
         {
-            final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
-
-            //Testing with events
-            final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
-            if (isCancelled)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
-            //Testing with events
-
-            super.getPlugin().getFactionLogic().addFaction(faction);
-
-            //Update player cache...
-            final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
-            final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
-            super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
-
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+            runCreationEventAndCreateFaction(factionName, factionTag, player);
             return CommandResult.success();
         }
     }
@@ -186,14 +171,25 @@ public class CreateCommand extends AbstractCommand
             inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
         }
 
+        runCreationEventAndCreateFaction(factionName, factionTag, player);
+        return CommandResult.success();
+    }
+
+    private void runCreationEventAndCreateFaction(final String factionName, final String factionTag, final Player player)
+    {
         final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
         final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
         if (isCancelled)
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something prevented faction from creating..."));
+            return;
 
         super.getPlugin().getFactionLogic().addFaction(faction);
+
+        //Update player cache...
+        final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
+
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
-        return CommandResult.success();
     }
 }
