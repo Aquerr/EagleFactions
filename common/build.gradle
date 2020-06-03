@@ -31,5 +31,5 @@ dependencies {
     compileOnly 'com.h2database:h2:1.4.196'
     compileOnly 'com.github.webbukkit:DynmapCoreAPI:v2.5'
 //    implementation 'org.bstats:bstats-sponge:1.5'
-    annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
+    annotationProcessor 'org.spongepowered:spongeapi:7.2.0'
 }

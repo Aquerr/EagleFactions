@@ -221,11 +221,7 @@ public class EagleFactionsPlugin implements EagleFactions
             printInfo("PlaceholderAPI could not be found. Skipping addition of placeholders.");
         }
 
-        final Optional<PermissionService> permissionService = Sponge.getServiceManager().provide(PermissionService.class);
-        if(permissionService.isPresent())
-        {
-            permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
-        }
+        setDefaultPermissions();
 
         if (configuration.getDynmapConfig().isDynmapIntegrationEnabled())
         {
@@ -240,6 +236,31 @@ public class EagleFactionsPlugin implements EagleFactions
             catch (final ClassNotFoundException error)
             {
                 printInfo("Dynmap could not be found. Dynmap integration will not be available.");
+            }
+        }
+    }
+
+    public void setDefaultPermissions()
+    {
+        final Optional<PermissionService> optionalPermissionService = Sponge.getServiceManager().provide(PermissionService.class);
+        if(optionalPermissionService.isPresent())
+        {
+            final PermissionService permissionService = optionalPermissionService.get();
+            final Map<String, Boolean> permissionContext = permissionService.getDefaults().getSubjectData().getPermissions(SubjectData.GLOBAL_CONTEXT);
+            boolean hasEagleFactionsPermission = false;
+            for (final String permission : permissionContext.keySet())
+            {
+                if (permission.contains("eaglefactions"))
+                {
+                    hasEagleFactionsPermission = true;
+                    break;
+                }
+            }
+
+            //If eaglefactions already exists then don't add default permissions.
+            if (!hasEagleFactionsPermission)
+            {
+                permissionService.getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
             }
         }
     }
