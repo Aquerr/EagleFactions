@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionCreateEvent;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 
@@ -25,23 +26,22 @@ public class FactionCreateEventImpl extends FactionAbstractEvent implements Fact
         return this.cause;
     }
 
+    @Override
     public Faction getFaction()
     {
         return this.faction;
     }
 
+    @Override
     public Player getCreator()
     {
         return this.creator;
     }
 
-    /**
-     * Not yet implemented...
-     */
-    //TODO: To implement...
     @Override
     public boolean isCreatedByItems()
     {
-        return false;
+        //Factions cannot be created differently. All of them are created by items or none of them.
+        return EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getFactionCreationByItems();
     }
 }
