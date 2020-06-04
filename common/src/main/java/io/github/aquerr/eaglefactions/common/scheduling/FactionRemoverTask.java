@@ -52,7 +52,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
                 continue;
 
-            final boolean isCancelled = EventRunner.runFactionDisbandEvent(null, factionEntry.getValue());
+            final boolean isCancelled = EventRunner.runFactionDisbandEvent(null, factionEntry.getValue(), false, true);
             if (isCancelled)
                 continue;
 

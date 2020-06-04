@@ -144,7 +144,7 @@ public final class EventRunner
         return Sponge.getEventManager().post(event);
 	}
 
-    public static boolean runFactionDisbandEvent(final Player player, final Faction playerFaction)
+    public static boolean runFactionDisbandEvent(final Player player, final Faction playerFaction, final boolean forceRemovedByAdmin, final boolean removedDueToInactiviy)
     {
         final EventContext eventContext = EventContext.builder()
                 .add(EventContextKeys.OWNER, player)
@@ -153,7 +153,7 @@ public final class EventRunner
                 .build();
 
         final Cause cause = Cause.of(eventContext, player, playerFaction);
-        final FactionDisbandEvent event = new FactionAreaEnterEventImp(player, playerFaction, cause);
+        final FactionDisbandEvent event = new FactionDisbandEventImpl(player, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
         return Sponge.getEventManager().post(event);
     }
 }
