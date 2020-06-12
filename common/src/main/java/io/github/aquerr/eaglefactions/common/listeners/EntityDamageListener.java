@@ -14,7 +14,6 @@ import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.common.util.ModSupport;
-import javafx.scene.effect.Bloom;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;

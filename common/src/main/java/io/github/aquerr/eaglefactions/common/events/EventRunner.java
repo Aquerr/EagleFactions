@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.*;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
@@ -144,16 +145,40 @@ public final class EventRunner
         return Sponge.getEventManager().post(event);
 	}
 
-    public static boolean runFactionDisbandEvent(final Player player, final Faction playerFaction, final boolean forceRemovedByAdmin, final boolean removedDueToInactiviy)
+    public static boolean runFactionDisbandEvent(final Object source, final Faction playerFaction, final boolean forceRemovedByAdmin, final boolean removedDueToInactiviy)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, player)
-                .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player)
-                .build();
+        // Some special code here... because DisbandEvent can also be fired by FactionsRemover.
+        // TODO: Maybe it can be written better?
 
-        final Cause cause = Cause.of(eventContext, player, playerFaction);
-        final FactionDisbandEvent event = new FactionDisbandEventImpl(player, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
+        EventContext.Builder eventContextBuilder = EventContext.builder();
+        Cause.Builder causeBuilder = Cause.builder();
+        if (source instanceof Player)
+        {
+            final Player player = (Player)source;
+            eventContextBuilder.add(EventContextKeys.OWNER, player)
+                    .add(EventContextKeys.PLAYER, player)
+                    .add(EventContextKeys.CREATOR, player)
+                    .build();
+            causeBuilder.append(player).append(playerFaction);
+        }
+        else
+        {
+            causeBuilder.append(EagleFactionsPlugin.getPlugin()).append(playerFaction);
+        }
+
+        EventContext eventContext = eventContextBuilder.build();
+        Cause cause = causeBuilder.build(eventContext);
+
+        FactionDisbandEvent event;
+
+        if (source instanceof Player)
+        {
+            event = new FactionDisbandEventImpl((Player)source, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
+        }
+        else
+        {
+            event = new FactionDisbandEventImpl(null, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
+        }
         return Sponge.getEventManager().post(event);
     }
 }
