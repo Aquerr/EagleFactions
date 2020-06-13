@@ -66,9 +66,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
+import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -265,8 +263,9 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
+    // Start removing inactive factions when server is fully started.
     @Listener
-    public void onServerPostInitialization(final GamePostInitializationEvent event)
+    public void onGameLoad(final GameStartedServerEvent event)
     {
         startFactionsRemover();
     }
@@ -825,7 +824,7 @@ public class EagleFactionsPlugin implements EagleFactions
         if(this.getConfiguration().getFactionsConfig().getMaxInactiveTime() == 0)
             return;
 
-        EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
     }
 
     public EFPlaceholderService getEfPlaceholderService()

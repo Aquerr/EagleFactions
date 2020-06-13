@@ -150,8 +150,8 @@ public final class EventRunner
         // Some special code here... because DisbandEvent can also be fired by FactionsRemover.
         // TODO: Maybe it can be written better?
 
-        EventContext.Builder eventContextBuilder = EventContext.builder();
-        Cause.Builder causeBuilder = Cause.builder();
+        final EventContext.Builder eventContextBuilder = EventContext.builder();
+        final Cause.Builder causeBuilder = Cause.builder();
         if (source instanceof Player)
         {
             final Player player = (Player)source;
@@ -166,8 +166,8 @@ public final class EventRunner
             causeBuilder.append(EagleFactionsPlugin.getPlugin()).append(playerFaction);
         }
 
-        EventContext eventContext = eventContextBuilder.build();
-        Cause cause = causeBuilder.build(eventContext);
+        final EventContext eventContext = eventContextBuilder.build();
+        final Cause cause = causeBuilder.build(eventContext);
 
         FactionDisbandEvent event;
 
