@@ -19,6 +19,7 @@ import org.spongepowered.api.world.World;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,34 +41,34 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
         final Map<String, Faction> factionsList = new HashMap<>(this.factionLogic.getFactions());
         final boolean shouldNotifyWhenRemoved = this.factionsConfig.shouldNotifyWhenFactionRemoved();
         final boolean shouldRegenerateWhenRemoved = this.factionsConfig.shouldRegenerateChunksWhenFactionRemoved();
-        for(Map.Entry<String, Faction> factionEntry : factionsList.entrySet())
+        for(Faction faction : factionsList.values())
         {
-            if(factionLogic.hasOnlinePlayers(factionEntry.getValue()))
+            if(factionLogic.hasOnlinePlayers(faction))
                 continue;
 
-            if(factionEntry.getValue().isSafeZone() || factionEntry.getValue().isWarZone())
+            if(faction.isSafeZone() || faction.isWarZone())
                 continue;
 
-            final Duration inactiveTime = Duration.between(factionEntry.getValue().getLastOnline(), Instant.now());
+            final Duration inactiveTime = Duration.between(faction.getLastOnline(), Instant.now());
             if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
                 continue;
 
-            final boolean isCancelled = EventRunner.runFactionDisbandEvent(null, factionEntry.getValue(), false, true);
+            final boolean isCancelled = EventRunner.runFactionDisbandEvent(null, faction, false, true);
             if (isCancelled)
                 continue;
 
-            boolean didSucceed = this.factionLogic.disbandFaction(factionEntry.getValue().getName());
+            boolean didSucceed = this.factionLogic.disbandFaction(faction.getName());
 
             if (didSucceed)
             {
                 if (shouldNotifyWhenRemoved)
                 {
-                    Sponge.getServer().getBroadcastChannel().send(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, TextColors.RED, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, factionEntry.getKey())))));
+                    Sponge.getServer().getBroadcastChannel().send(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, TextColors.RED, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
                 }
 
                 if (shouldRegenerateWhenRemoved)
                 {
-                    for (Claim claim : factionEntry.getValue().getClaims())
+                    for (final Claim claim : faction.getClaims())
                     {
                         Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition()));
                     }

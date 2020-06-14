@@ -258,6 +258,9 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
 
+        Preconditions.checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
+        Preconditions.checkNotNull(invitedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), invitedFactionName));
+
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
         final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getTruces());
 
@@ -279,6 +282,9 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
+
+        Preconditions.checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
+        Preconditions.checkNotNull(removedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), removedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
         final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getTruces());
@@ -305,6 +311,9 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
 
+        Preconditions.checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
+        Preconditions.checkNotNull(invitedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), invitedFactionName));
+
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
         final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getAlliances());
 
@@ -326,6 +335,10 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
+
+        Preconditions.checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
+        Preconditions.checkNotNull(removedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), removedFactionName));
+
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
         final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getAlliances());
@@ -349,6 +362,9 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
 
+        Preconditions.checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
+        Preconditions.checkNotNull(enemyFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), enemyFactionName));
+
         final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
         final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
 
@@ -370,6 +386,9 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
+
+        Preconditions.checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
+        Preconditions.checkNotNull(enemyFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), enemyFactionName));
 
         final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
         final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
