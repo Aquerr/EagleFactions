@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.util;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsConsumerTask;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -106,7 +107,7 @@ public final class ParticlesUtil
 
 		private final Vector3i lastBlockPosition;
 
-//        private int seconds = factionsConfig.getHomeDelayTime();
+//        private int homeDelayTime = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getHomeDelayTime();
 
 		public HomeParticles(final Player player)
 		{
@@ -138,7 +139,7 @@ public final class ParticlesUtil
 			}
 
 			//TODO: This code runs forever until player changes location. We should count delay seconds here as well maybe?
-			if (!this.lastBlockPosition.equals(this.player.getLocation().getBlockPosition()))
+			if (!this.lastBlockPosition.equals(this.player.getLocation().getBlockPosition()) || !this.player.isOnline())
 				task.cancel();
 		}
 	}
