@@ -162,6 +162,8 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction factionToDisband = this.storageManager.getFaction(factionName);
 
+        Preconditions.checkNotNull(factionToDisband, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), factionName));
+
         //Update players...
         CompletableFuture.runAsync(() -> {
             final Set<UUID> playerUUIDs = factionToDisband.getPlayers();
@@ -174,7 +176,6 @@ public class FactionLogicImpl implements FactionLogic
             }
         });
 
-        final boolean isDisbanded = this.storageManager.deleteFaction(factionName);
         final List<Faction> otherFactions = new ArrayList<>(getFactions().values());
         for (final Faction otherFaction : otherFactions)
         {
@@ -186,7 +187,7 @@ public class FactionLogicImpl implements FactionLogic
                 removeEnemy(otherFaction.getName(), factionName);
         }
 
-        return isDisbanded;
+        return this.storageManager.deleteFaction(factionName);
     }
 
     @Override
