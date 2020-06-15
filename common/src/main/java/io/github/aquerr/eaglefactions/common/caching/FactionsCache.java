@@ -50,7 +50,7 @@ public class FactionsCache
 
     public static Map<String, Faction> getFactionsMap()
     {
-        return FACTIONS_CACHE;
+        return Collections.unmodifiableMap(FACTIONS_CACHE);
     }
 
     public static void saveFaction(final Faction faction)

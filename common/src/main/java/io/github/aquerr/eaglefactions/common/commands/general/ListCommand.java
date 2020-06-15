@@ -16,10 +16,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class ListCommand extends AbstractCommand
@@ -33,7 +30,7 @@ public class ListCommand extends AbstractCommand
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         CompletableFuture.runAsync(() ->{
-            Set<Faction> factionsList = new HashSet<>(super.getPlugin().getFactionLogic().getFactions().values());
+            Collection<Faction> factionsList = super.getPlugin().getFactionLogic().getFactions().values();
             List<Text> helpList = new ArrayList<>();
 
             Text tagPrefix = getPlugin().getConfiguration().getChatConfig().getFactionStartPrefix();

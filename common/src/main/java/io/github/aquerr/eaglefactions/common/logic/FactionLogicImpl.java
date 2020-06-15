@@ -79,6 +79,8 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(chunk);
 
         Claim claim = new Claim(worldUUID, chunk);
+
+        //TODO: ConcurrentModificationException can happen here if another thread changes the collection.
         for(Faction faction : getFactions().values())
         {
             if(faction.getClaims().contains(claim))
@@ -145,7 +147,7 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public Map<String, Faction> getFactions()
     {
-        return FactionsCache.getFactionsMap();
+        return new HashMap<>(FactionsCache.getFactionsMap());
     }
 
     @Override
@@ -638,7 +640,7 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public List<String> getFactionsTags()
     {
-        final List<Faction> factionsList = new ArrayList<>(getFactions().values());
+        final Collection<Faction> factionsList = getFactions().values();
         final List<String> factionsTags = new ArrayList<>();
 
         for(final Faction faction : factionsList)

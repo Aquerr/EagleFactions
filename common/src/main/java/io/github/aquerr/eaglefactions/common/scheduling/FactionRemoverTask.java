@@ -38,7 +38,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
     public void run()
     {
         final long maxInactiveTimeInSeconds = this.factionsConfig.getMaxInactiveTime();
-        final Map<String, Faction> factionsList = new HashMap<>(this.factionLogic.getFactions());
+        final Map<String, Faction> factionsList = this.factionLogic.getFactions();
         final boolean shouldNotifyWhenRemoved = this.factionsConfig.shouldNotifyWhenFactionRemoved();
         final boolean shouldRegenerateWhenRemoved = this.factionsConfig.shouldRegenerateChunksWhenFactionRemoved();
         for(Faction faction : factionsList.values())

@@ -53,7 +53,7 @@ public class DynmapUpdateTask implements Runnable {
             }
         }
 
-        for (Faction faction : new HashSet<>(EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values())) {
+        for (Faction faction : EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values()) {
             if (faction.getClaims().size() < 1 || drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
 
             if (faction.getHome() != null) { /* Let's draw faction home first */
