@@ -1,24 +1,38 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionType;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
 import io.github.aquerr.eaglefactions.common.config.ProtectionConfigImpl;
+import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,6 +51,16 @@ public class ProtectionManagerTest
 	private PlayerManager playerManager;
 	@Mock
 	private PermsManager permsManager;
+
+//	@BeforeEach
+//	void prepareMocks()
+//	{
+//		chatConfig = mock(ChatConfig.class);
+//		protectionConfig = mock(ProtectionConfig.class);
+//		factionLogic = mock(FactionLogic.class);
+//		playerManager = mock(PlayerManager.class);
+//		permsManager = mock(PermsManager.class);
+//	}
 
 	@InjectMocks
 	private ProtectionManagerImpl protectionManager;
@@ -63,10 +87,6 @@ public class ProtectionManagerTest
 	@Test
 	void bucketShouldNotBeWhitelistedInSafeZone()
 	{
-		final Set<String> items = new HashSet<>();
-		items.add("minecraft:bucket");
-
-
 		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
 		when(protectionConfig.getSafeZoneWhitelists()).thenReturn(whiteList);
 		when(whiteList.getWhiteListedItems()).thenReturn(Collections.emptySet());
@@ -128,5 +148,70 @@ public class ProtectionManagerTest
 		//then
 		final boolean result = protectionManager.canHitEntity(entity, player, false).hasAccess();
 		assertTrue(result);
+	}
+
+	@Test
+	void placingBlocksInWildernessIsForbiddenWhenProtectWildernessIsOn()
+	{
+		//given
+		final Player player = mock(Player.class);
+		final World world = mock(World.class);
+		final Location<World> location = new Location<>(world, 0, 0, 0);
+
+		try
+		{
+			final Field field = location.getClass().getDeclaredField("chunkPosition");
+			if (!field.isAccessible())
+				field.setAccessible(true);
+			field.set(location, Vector3i.from(0, 0, 0));
+		}
+		catch (NoSuchFieldException | IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+
+		//when
+		when(world.getUniqueId()).thenReturn(UUID.randomUUID());
+		when(protectionConfig.shouldProtectWildernessFromPlayers()).thenReturn(true);
+
+		//then
+		final ProtectionResult result = protectionManager.canPlace(location, player, false);
+		assertFalse(result.hasAccess());
+	}
+
+	@Test
+	void placingBlocksInSafeZoneShouldBeBlockedWhenPlayerHasNotPermissions()
+	{
+		//given
+		final Player player = mock(Player.class);
+		final World world = mock(World.class);
+		final Location<World> location = new Location<>(world, 0, 0, 0);
+		final Faction safezoneFaction = FactionImpl.builder("SafeZone", Text.of("SZ"), UUID.randomUUID()).build();
+		final ItemStack itemStack = mock(ItemStack.class);
+		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
+
+		try
+		{
+			final Field field = location.getClass().getDeclaredField("chunkPosition");
+			if (!field.isAccessible())
+				field.setAccessible(true);
+			field.set(location, Vector3i.from(0, 0, 0));
+		}
+		catch (NoSuchFieldException | IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+
+		//when
+		when(protectionConfig.getSafeZoneWhitelists()).thenReturn(whiteList);
+		when(world.getUniqueId()).thenReturn(UUID.randomUUID());
+		when(factionLogic.getFactionByChunk(world.getUniqueId(), location.getChunkPosition())).thenReturn(Optional.of(safezoneFaction));
+		when(itemStack.getType()).thenReturn(mock(ItemType.class));
+		when(itemStack.getType().getId()).thenReturn("minecraft:stone");
+		when(player.getItemInHand(HandTypes.MAIN_HAND)).thenReturn(Optional.of(itemStack));
+
+		//then
+		final ProtectionResult result = protectionManager.canPlace(location, player, false);
+		assertFalse(result.hasAccess());
 	}
 }
