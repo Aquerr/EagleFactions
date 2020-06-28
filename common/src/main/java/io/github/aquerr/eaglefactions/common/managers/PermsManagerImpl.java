@@ -70,6 +70,9 @@ public class PermsManagerImpl implements PermsManager
             //Leaders has permission for everything.
             if (memberType == FactionMemberType.LEADER)
                 return true;
+            if (memberType == FactionMemberType.NONE)
+                return false;
+
             final boolean hasPerm = chunkFaction.getPerms().get(memberType).get(flagType);
             if (hasPerm) //If player has perms specified in /f perms, then we need to check for internal claiming
             {
