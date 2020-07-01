@@ -125,7 +125,6 @@ public class EagleFactionsPlugin implements EagleFactions
     //Integrations
     @Inject
     private Metrics metrics;
-
     private EFPlaceholderService efPlaceholderService;
     private DynmapService dynmapService;
 
@@ -275,6 +274,11 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.configuration.reloadConfiguration();
         this.storageManager.reloadStorage();
+
+        if (this.configuration.getDynmapConfig().isDynmapIntegrationEnabled())
+        {
+            this.dynmapService.reload();
+        }
 
         if(event.getSource() instanceof Player)
         {
@@ -829,6 +833,11 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public EFPlaceholderService getEfPlaceholderService()
     {
-        return efPlaceholderService;
+        return this.efPlaceholderService;
+    }
+
+    public DynmapService getDynmapService()
+    {
+        return this.dynmapService;
     }
 }

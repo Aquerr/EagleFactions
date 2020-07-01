@@ -20,32 +20,34 @@ import java.util.*;
  * @author Iterator
  */
 
-public class DynmapUpdateTask implements Runnable {
-    private ArrayList<Faction> drawnFactions = new ArrayList<>();
-
-    private HashMap<String, Marker> drawnMarkers = new HashMap<>();
-    private HashMap<String, ArrayList<AreaMarker>> drawnAreas = new HashMap<>();
-
+public class DynmapUpdateTask implements Runnable
+{
     @Override
-    public void run() {
-        for (Iterator<Faction> iterator = drawnFactions.iterator(); iterator.hasNext();) {
-            Faction drawmFaction = iterator.next();
+    public void run()
+    {
+        // Check old factions
+        for (Iterator<Faction> iterator = DynmapService.drawnFactions.iterator(); iterator.hasNext();)
+        {
+            Faction drawnFaction = iterator.next();
+            Faction currentFaction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(drawnFaction.getName());
 
-            Faction currentFaction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(drawmFaction.getName());
-
-            if (currentFaction == null || !currentFaction.equals(drawmFaction)) {
+            if (currentFaction == null || !currentFaction.equals(drawnFaction))
+            {
                 /* Remove everything created */
-                if (drawnMarkers.get(drawmFaction.getName()) != null) {
-                    drawnMarkers.get(drawmFaction.getName()).deleteMarker();
-                    drawnMarkers.remove(drawmFaction.getName());
+                if (DynmapService.drawnMarkers.get(drawnFaction.getName()) != null)
+                {
+                    DynmapService.drawnMarkers.get(drawnFaction.getName()).deleteMarker();
+                    DynmapService.drawnMarkers.remove(drawnFaction.getName());
                 }
 
-                if (drawnAreas.get(drawmFaction.getName()) != null) {
-                    for (AreaMarker drawFactionArea : drawnAreas.get(drawmFaction.getName())) {
+                if (DynmapService.drawnAreas.get(drawnFaction.getName()) != null)
+                {
+                    for (AreaMarker drawFactionArea : DynmapService.drawnAreas.get(drawnFaction.getName()))
+                    {
                         drawFactionArea.deleteMarker();
                     }
 
-                    drawnAreas.remove(drawmFaction.getName());
+                    DynmapService.drawnAreas.remove(drawnFaction.getName());
                 }
 
                 /* Mark the faction for update */
@@ -53,15 +55,18 @@ public class DynmapUpdateTask implements Runnable {
             }
         }
 
-        for (Faction faction : EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values()) {
-            if (faction.getClaims().size() < 1 || drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
+        for (Faction faction : EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values())
+        {
+            if (faction.getClaims().size() < 1 || DynmapService.drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
 
-            if (faction.getHome() != null) { /* Let's draw faction home first */
+            if (faction.getHome() != null)
+            { /* Let's draw faction home first */
                 World factionHomeWorld = Sponge.getServer().getWorld(faction.getHome().getWorldUUID()).isPresent()
                         ? Sponge.getServer().getWorld(faction.getHome().getWorldUUID()).get()
                         : null;
 
-                if (factionHomeWorld != null) {
+                if (factionHomeWorld != null)
+                {
                     Vector3i blockPos = faction.getHome().getBlockPosition();
 
                     Marker marker = DynmapService.markerSet.createMarker(null,
@@ -73,7 +78,7 @@ public class DynmapUpdateTask implements Runnable {
                             DynmapService.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig().getDynmapFactionHomeIcon()),
                             false);
 
-                    drawnMarkers.put(faction.getName(), marker);
+                    DynmapService.drawnMarkers.put(faction.getName(), marker);
                 }
             }
 
@@ -86,7 +91,8 @@ public class DynmapUpdateTask implements Runnable {
             /* Now sorting the claims by their worlds */
             Claim[] claims = new Claim[faction.getClaims().size()];
             claims = faction.getClaims().toArray(claims);
-            for (Claim claim : claims) {
+            for (Claim claim : claims)
+            {
                 claimsWorld.computeIfAbsent(claim.getWorldUUID(), k -> new HashSet<>());
 
                 claimsWorld.get(claim.getWorldUUID()).add(claim);
@@ -94,17 +100,20 @@ public class DynmapUpdateTask implements Runnable {
 
             /* Now making TempAreaMarkers */
             HashMap<UUID, ArrayList<TempAreaMarker>> areaMarkers = new HashMap<>();
-            claimsWorld.forEach((k, v) -> {
+            claimsWorld.forEach((k, v) ->
+            {
                 ArrayList<TempAreaMarker> tempMarkers = DynmapUtils.createAreas(v);
 
                 areaMarkers.put(k, tempMarkers);
             });
 
             /* Finally, lets draw areas! */
-            drawnAreas.put(faction.getName(), new ArrayList<>());
+            DynmapService.drawnAreas.put(faction.getName(), new ArrayList<>());
 
-            for (Map.Entry<UUID, ArrayList<TempAreaMarker>> entry : areaMarkers.entrySet()) {
-                for (TempAreaMarker tempMarker : entry.getValue()) {
+            for (Map.Entry<UUID, ArrayList<TempAreaMarker>> entry : areaMarkers.entrySet())
+            {
+                for (TempAreaMarker tempMarker : entry.getValue())
+                {
                     World world = Sponge.getServer().getWorld(entry.getKey()).isPresent() ? Sponge.getServer().getWorld(entry.getKey()).get() : null;
 
                     if (world == null) continue; /* Somehow there's no world for that area */
@@ -125,11 +134,11 @@ public class DynmapUpdateTask implements Runnable {
 
                     areaMarker.setCornerLocations(tempMarker.x, tempMarker.z);
 
-                    drawnAreas.get(faction.getName()).add(areaMarker);
+                    DynmapService.drawnAreas.get(faction.getName()).add(areaMarker);
                 }
             }
 
-            drawnFactions.add(faction);
+            DynmapService.drawnFactions.add(faction);
         }
     }
 }

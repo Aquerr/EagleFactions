@@ -1,12 +1,14 @@
 package io.github.aquerr.eaglefactions.common.integrations.dynmap;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerSet;
+import org.dynmap.markers.*;
 import org.spongepowered.api.scheduler.Task;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,6 +22,14 @@ public class DynmapService
 {
     static MarkerAPI markerapi;
     static MarkerSet markerSet;
+
+    final static ArrayList<Faction> drawnFactions = new ArrayList<>();
+
+    // Faction Name --> Marker
+    final static HashMap<String, Marker> drawnMarkers = new HashMap<>();
+
+    // Faction name --> AreaMarkers
+    final static HashMap<String, ArrayList<AreaMarker>> drawnAreas = new HashMap<>();
 
     private final EagleFactions plugin;
 
@@ -39,8 +49,25 @@ public class DynmapService
                 Task.builder().execute(new DynmapUpdateTask())
                         .interval(10, TimeUnit.SECONDS)
                         .name("EagleFactions Dynmap Update Task")
+                        .async()
                         .submit(plugin);
             }
         });
+    }
+
+    /**
+     * Clears all markers and dynmap-factions cache.
+     */
+    public void reload()
+    {
+        drawnFactions.clear();
+        drawnMarkers.values().forEach(GenericMarker::deleteMarker);
+        drawnMarkers.clear();
+        drawnAreas.values().forEach(x->
+        {
+            x.forEach(GenericMarker::deleteMarker);
+            x.clear();
+        });
+        drawnAreas.clear();
     }
 }
