@@ -17,6 +17,17 @@ public class ModSupport
     }
 
     /**
+     * Checks if the given class comes from AncientWarfare
+     * @param clazz class to check
+     * @param <T> the type of class
+     * @return <tt>true</tt> if class comes from AncientWarfare, <tt>false</tt> if not.
+     */
+    public static <T> boolean isAncientWarfare(final Class<T> clazz)
+    {
+        return clazz.getName().contains("ancientwarfare");
+    }
+
+    /**
      * Gets the attacking entity from the EntityDamageSource. EntityDamageSource must come from TechGuns.
      * @param entityDamageSource the source
      * @return attacking/source entity.
