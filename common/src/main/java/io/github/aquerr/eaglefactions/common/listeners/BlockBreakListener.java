@@ -34,6 +34,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
@@ -126,6 +127,10 @@ public class BlockBreakListener extends AbstractListener
                     }
                 }
             }
+
+            // Helps with Ancient Warfare machines
+            if (user == null)
+                user = event.getContext().get(EventContextKeys.FAKE_PLAYER).orElse(null);
 
             if(user instanceof Player)
             {
