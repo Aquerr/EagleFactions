@@ -27,15 +27,18 @@ public class DynmapConfigImpl implements DynmapConfig
 	@Override
 	public void reload()
 	{
-		this.dynmapIntegrationEnabled = configuration.getBoolean(false, "dynmap", "enabled");
+		this.dynmapIntegrationEnabled = this.configuration.getBoolean(false, "dynmap", "enabled");
 
-		this.dynmapFactionColor = configuration.getInt(0x00FF00, "dynmap", "faction-color");
-		this.dynmapSafezoneColor = configuration.getInt(0x800080, "dynmap", "safezone-color");
-		this.dynmapWarzoneColor = configuration.getInt(0xFF0000, "dynmap", "warzone-color");
-		this.dynmapFactionHomeIcon = configuration.getString("greenflag", "dynmap", "faction-home-marker");
+		if (!this.dynmapIntegrationEnabled)
+			return;
 
-		this.dynmapShowFactionLeader = configuration.getBoolean(true, "dynmap", "show-faction-leader");
-		this.dynmapMemberInfo = configuration.getBoolean(true, "dynmap", "members-info");
+		this.dynmapFactionColor = Integer.decode(this.configuration.getString("#00FF00", "dynmap", "faction-color"));
+		this.dynmapSafezoneColor = Integer.decode(this.configuration.getString("#800080", "dynmap", "safezone-color"));
+		this.dynmapWarzoneColor = Integer.decode(this.configuration.getString("#FF0000", "dynmap", "warzone-color"));
+		this.dynmapFactionHomeIcon = this.configuration.getString("greenflag", "dynmap", "faction-home-marker");
+
+		this.dynmapShowFactionLeader = this.configuration.getBoolean(true, "dynmap", "show-faction-leader");
+		this.dynmapMemberInfo = this.configuration.getBoolean(true, "dynmap", "members-info");
 	}
 
 	@Override

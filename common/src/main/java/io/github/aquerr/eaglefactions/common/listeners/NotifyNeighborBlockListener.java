@@ -19,9 +19,9 @@ import org.spongepowered.api.world.World;
 
 import java.util.Iterator;
 
-public class NotifyNeighborBlockEventListener extends AbstractListener
+public class NotifyNeighborBlockListener extends AbstractListener
 {
-	public NotifyNeighborBlockEventListener(final EagleFactions plugin)
+	public NotifyNeighborBlockListener(final EagleFactions plugin)
 	{
 		super(plugin);
 	}

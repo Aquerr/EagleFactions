@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.util;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsConsumerTask;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -98,15 +99,12 @@ public final class ParticlesUtil
 		private final Location<World> location;
 
 		private final double r = 0.6;
-//		private final double angleIncrement = 2;
 		private final double numberOfParticles = 28;
 
 		private final double angleIncrement = (2 / numberOfParticles) * Math.PI;
 		private double angle = 0;
 
 		private final Vector3i lastBlockPosition;
-
-//        private int seconds = factionsConfig.getHomeDelayTime();
 
 		public HomeParticles(final Player player)
 		{
@@ -119,9 +117,6 @@ public final class ParticlesUtil
 		@Override
 		public void accept(Task task)
 		{
-//			double x = this.location.getX() + r * Math.cos(Math.toDegrees(angle));
-//			double z = this.location.getZ() + r * Math.sin(Math.toDegrees(angle));
-
 			double x = this.location.getX() + r * Math.cos(angle);
 			double z = this.location.getZ() + r * Math.sin(angle);
 
@@ -137,8 +132,7 @@ public final class ParticlesUtil
 				angle += angleIncrement;
 			}
 
-			//TODO: This code runs forever until player changes location. We should count delay seconds here as well maybe?
-			if (!this.lastBlockPosition.equals(this.player.getLocation().getBlockPosition()))
+			if (!this.lastBlockPosition.equals(this.player.getLocation().getBlockPosition()) || !this.player.isOnline())
 				task.cancel();
 		}
 	}

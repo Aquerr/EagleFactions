@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.commands.admin;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
@@ -25,6 +26,11 @@ public class ReloadCommand extends AbstractCommand
         {
             super.getPlugin().getConfiguration().reloadConfiguration();
             super.getPlugin().getStorageManager().reloadStorage();
+
+            if (super.getPlugin().getConfiguration().getDynmapConfig().isDynmapIntegrationEnabled())
+            {
+                EagleFactionsPlugin.getPlugin().getDynmapService().reload();
+            }
 
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CONFIG_HAS_BEEN_RELOADED));
         }

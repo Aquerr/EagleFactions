@@ -66,9 +66,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
+import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -127,7 +125,6 @@ public class EagleFactionsPlugin implements EagleFactions
     //Integrations
     @Inject
     private Metrics metrics;
-
     private EFPlaceholderService efPlaceholderService;
     private DynmapService dynmapService;
 
@@ -221,11 +218,7 @@ public class EagleFactionsPlugin implements EagleFactions
             printInfo("PlaceholderAPI could not be found. Skipping addition of placeholders.");
         }
 
-        final Optional<PermissionService> permissionService = Sponge.getServiceManager().provide(PermissionService.class);
-        if(permissionService.isPresent())
-        {
-            permissionService.get().getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
-        }
+        setDefaultPermissions();
 
         if (configuration.getDynmapConfig().isDynmapIntegrationEnabled())
         {
@@ -244,8 +237,34 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
+    public void setDefaultPermissions()
+    {
+        final Optional<PermissionService> optionalPermissionService = Sponge.getServiceManager().provide(PermissionService.class);
+        if(optionalPermissionService.isPresent())
+        {
+            final PermissionService permissionService = optionalPermissionService.get();
+            final Map<String, Boolean> permissionContext = permissionService.getDefaults().getSubjectData().getPermissions(SubjectData.GLOBAL_CONTEXT);
+            boolean hasEagleFactionsPermission = false;
+            for (final String permission : permissionContext.keySet())
+            {
+                if (permission.contains("eaglefactions"))
+                {
+                    hasEagleFactionsPermission = true;
+                    break;
+                }
+            }
+
+            //If eaglefactions already exists then don't add default permissions.
+            if (!hasEagleFactionsPermission)
+            {
+                permissionService.getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
+            }
+        }
+    }
+
+    // Start removing inactive factions when server is fully started.
     @Listener
-    public void onServerPostInitialization(final GamePostInitializationEvent event)
+    public void onGameLoad(final GameStartedServerEvent event)
     {
         startFactionsRemover();
     }
@@ -255,6 +274,11 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.configuration.reloadConfiguration();
         this.storageManager.reloadStorage();
+
+        if (this.configuration.getDynmapConfig().isDynmapIntegrationEnabled())
+        {
+            this.dynmapService.reload();
+        }
 
         if(event.getSource() instanceof Player)
         {
@@ -700,7 +724,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
         Sponge.getEventManager().registerListeners(this, new ExplosionListener(this));
         Sponge.getEventManager().registerListeners(this, new ModifyBlockListener(this));
-        Sponge.getEventManager().registerListeners(this, new NotifyNeighborBlockEventListener(this));
+        Sponge.getEventManager().registerListeners(this, new NotifyNeighborBlockListener(this));
 
         //EF events
         Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
@@ -804,11 +828,16 @@ public class EagleFactionsPlugin implements EagleFactions
         if(this.getConfiguration().getFactionsConfig().getMaxInactiveTime() == 0)
             return;
 
-        EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
     }
 
     public EFPlaceholderService getEfPlaceholderService()
     {
-        return efPlaceholderService;
+        return this.efPlaceholderService;
+    }
+
+    public DynmapService getDynmapService()
+    {
+        return this.dynmapService;
     }
 }
