@@ -77,7 +77,7 @@ public class Messages
     public static String AUTO_CLAIM_HAS_BEEN_TURNED_ON;
     public static String AUTO_CLAIM_HAS_BEEN_TURNED_OFF;
     public static String YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD;
-    public static String YOU_NEED_TO_WAIT_NUMBER_MINUTES_TO_BE_ABLE_TO_CLAIM_AGAIN;
+    public static String YOU_NEED_TO_WAIT_NUMBER_SECONDS_TO_BE_ABLE_TO_CLAIM_AGAIN;
     public static String THIS_PLACE_DOES_NOT_BELONG_TO_YOUR_FACTION;
 
     //Coords
