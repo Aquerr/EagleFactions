@@ -84,7 +84,6 @@ public class FactionLogicImpl implements FactionLogic
         //noinspection OptionalAssignedToNull
         if (cachedOptional != null) return cachedOptional;
 
-        //TODO: ConcurrentModificationException can happen here if another thread changes the collection.
         for(Faction faction : getFactions().values())
         {
             if(faction.getClaims().contains(claim))

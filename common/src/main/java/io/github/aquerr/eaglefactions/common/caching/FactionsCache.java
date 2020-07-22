@@ -16,7 +16,6 @@ public class FactionsCache
     private static final Map<String, Faction> FACTIONS_CACHE = new HashMap<>();
     private static final Set<Claim> CLAIMS_CACHE = new HashSet<>();
     private static final Map<UUID, FactionPlayer> FACTION_PLAYER_CACHE = new HashMap<>();
-//    private static final Map<String, Set<String>> factionsClaimsCache = new Hashtable<>();
 
     // TODO: Add cache time to configuration?
     private static final Cache<Claim, Optional<Faction>> cachedChunks = CacheBuilder.newBuilder()
