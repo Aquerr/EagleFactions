@@ -160,7 +160,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
                         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream)))
                     {
-                        try(final Statement statement = this.sqlProvider.getConnection().createStatement())
+                        try(final Connection connection = this.sqlProvider.getConnection(); final Statement statement = connection.createStatement())
                         {
                             final StringBuilder stringBuilder = new StringBuilder();
                             String line;

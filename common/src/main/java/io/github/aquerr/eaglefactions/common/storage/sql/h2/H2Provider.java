@@ -3,7 +3,10 @@ package io.github.aquerr.eaglefactions.common.storage.sql.h2;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.sql.SqlService;
 
+import javax.sql.DataSource;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +17,10 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
     private static H2Provider INSTANCE = null;
 
     private final Path databasePath;
+
+    private final SqlService sqlService;
+
+    private final DataSource dataSource;
 
     public static H2Provider getInstance(final EagleFactions eagleFactions)
     {
@@ -37,6 +44,9 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
     {
         super(eagleFactions);
         this.databasePath = eagleFactions.getConfigDir().resolve("data/h2/" + getDatabaseName());
+        this.sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
+        this.dataSource = this.sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + this.databasePath);
+
         //Create database file
         final Connection connection = getConnection();
         connection.close();
@@ -44,7 +54,7 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
 
     public Connection getConnection() throws SQLException
     {
-        return DriverManager.getConnection("jdbc:h2:" + this.databasePath, super.getUsername(), super.getPassword());
+        return this.dataSource.getConnection();
     }
 
     @Override
