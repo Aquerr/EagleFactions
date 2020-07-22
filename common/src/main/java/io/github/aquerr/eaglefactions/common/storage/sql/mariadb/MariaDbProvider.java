@@ -1,17 +1,22 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.mariadb;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 {
 	private static MariaDbProvider INSTANCE = null;
+
+	private DataSource dataSource;
 
 	public static MariaDbProvider getInstance(final EagleFactions eagleFactions)
 	{
@@ -33,7 +38,7 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 
 	public Connection getConnection() throws SQLException
 	{
-		return DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl() + super.getDatabaseName(), super.getUsername(), super.getPassword());
+		return this.dataSource.getConnection();
 	}
 
 	@Override
@@ -45,36 +50,40 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 	private MariaDbProvider(final EagleFactions eagleFactions) throws SQLException
 	{
 		super(eagleFactions);
+		final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
+		this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl());
+
 		if(!databaseExists())
+		{
 			createDatabase();
+			final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
+			hikariDataSource.close();
+			this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName());
+		}
 	}
 
 	private boolean databaseExists() throws SQLException
 	{
-		//Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-		final Connection connection = DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl(), super.getUsername(), super.getPassword());
-		final ResultSet resultSet = connection.getMetaData().getCatalogs();
-
-		while(resultSet.next())
+		try(final Connection connection = this.dataSource.getConnection(); final ResultSet resultSet = connection.getMetaData().getCatalogs())
 		{
-			if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
+			while(resultSet.next())
 			{
-				resultSet.close();
-				connection.close();
-				return true;
+				if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
+				{
+					resultSet.close();
+					connection.close();
+					return true;
+				}
 			}
 		}
-		resultSet.close();
-		connection.close();
 		return false;
 	}
 
 	private void createDatabase() throws SQLException
 	{
-		final Connection connection = DriverManager.getConnection("jdbc:mariadb://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword());
-		final Statement statement = connection.createStatement();
-		statement.execute("CREATE SCHEMA " + super.getDatabaseName() + ";");
-		statement.close();
-		connection.close();
+		try(final Connection connection = this.dataSource.getConnection(); final Statement statement = connection.createStatement())
+		{
+			statement.execute("CREATE SCHEMA " + super.getDatabaseName() + ";");
+		}
 	}
 }

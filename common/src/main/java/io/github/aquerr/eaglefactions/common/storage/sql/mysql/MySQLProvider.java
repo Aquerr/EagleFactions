@@ -1,17 +1,20 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.mysql;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.sql.SqlService;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
 {
     private static MySQLProvider INSTANCE = null;
 
-//    private static final String CONNECTION_OPTIONS = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&&disableMariaDbDriver";
-    private static final String CONNECTION_OPTIONS = "&useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private DataSource dataSource;
 
     public static MySQLProvider getInstance(final EagleFactions eagleFactions)
     {
@@ -22,7 +25,7 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
                 INSTANCE = new MySQLProvider(eagleFactions);
                 return INSTANCE;
             }
-            catch(final IllegalAccessException | InstantiationException | ClassNotFoundException | SQLException e)
+            catch(final SQLException e)
             {
                 e.printStackTrace();
                 return null;
@@ -33,7 +36,7 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
 
     public Connection getConnection() throws SQLException
     {
-        return DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + super.getDatabaseName() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
+        return this.dataSource.getConnection();
     }
 
     @Override
@@ -42,43 +45,44 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
         return "mysql";
     }
 
-    private MySQLProvider(final EagleFactions eagleFactions) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException
+    private MySQLProvider(final EagleFactions eagleFactions) throws SQLException
     {
         super(eagleFactions);
-        //Load MySQL driver
-//        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+
+        final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
+        this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
 
         if(!databaseExists())
+        {
             createDatabase();
+            final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
+            hikariDataSource.close();
+            this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        }
     }
 
     private boolean databaseExists() throws SQLException
     {
-        //Connection connection = DriverManager.getConnection("jdbc:mysql://" + this.username + ":" + this.password + "@" + this.databaseUrl + this.databaseName);
-//        Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
-        final Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl(), super.getUsername(),super.getPassword());
-        final ResultSet resultSet = connection.getMetaData().getCatalogs();
-
-        while(resultSet.next())
+        try(final Connection connection = this.dataSource.getConnection(); final ResultSet resultSet = connection.getMetaData().getCatalogs())
         {
-            if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
+            while(resultSet.next())
             {
-                resultSet.close();
-                connection.close();
-                return true;
+                if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
+                {
+                    resultSet.close();
+                    connection.close();
+                    return true;
+                }
             }
         }
-        resultSet.close();
-        connection.close();
         return false;
     }
 
     private void createDatabase() throws SQLException
     {
-        final Connection connection = DriverManager.getConnection("jdbc:mysql://" + super.getDatabaseUrl() + "?user=" + super.getUsername() + "&password=" + super.getPassword() + CONNECTION_OPTIONS);
-        final Statement statement = connection.createStatement();
-        statement.execute("CREATE SCHEMA " + super.getDatabaseName() + ";");
-        statement.close();
-        connection.close();
+        try(final Connection connection = this.dataSource.getConnection(); final Statement statement = connection.createStatement())
+        {
+            statement.execute("CREATE SCHEMA " + super.getDatabaseName() + ";");
+        }
     }
 }

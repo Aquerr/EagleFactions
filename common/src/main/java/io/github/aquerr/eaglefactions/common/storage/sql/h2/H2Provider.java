@@ -16,10 +16,6 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
 {
     private static H2Provider INSTANCE = null;
 
-    private final Path databasePath;
-
-    private final SqlService sqlService;
-
     private final DataSource dataSource;
 
     public static H2Provider getInstance(final EagleFactions eagleFactions)
@@ -43,9 +39,9 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
     private H2Provider(final EagleFactions eagleFactions) throws SQLException
     {
         super(eagleFactions);
-        this.databasePath = eagleFactions.getConfigDir().resolve("data/h2/" + getDatabaseName());
-        this.sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
-        this.dataSource = this.sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + this.databasePath);
+        final Path databasePath = eagleFactions.getConfigDir().resolve("data/h2/" + getDatabaseName());
+        final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
+        this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
 
         //Create database file
         final Connection connection = getConnection();
