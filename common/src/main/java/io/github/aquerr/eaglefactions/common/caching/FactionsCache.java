@@ -1,11 +1,15 @@
 package io.github.aquerr.eaglefactions.common.caching;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.MapMaker;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class FactionsCache
 {
@@ -14,9 +18,22 @@ public class FactionsCache
     private static final Map<UUID, FactionPlayer> FACTION_PLAYER_CACHE = new HashMap<>();
 //    private static final Map<String, Set<String>> factionsClaimsCache = new Hashtable<>();
 
+    // TODO: Add cache time to configuration?
+    private static final Cache<Claim, Optional<Faction>> cachedChunks = CacheBuilder.newBuilder()
+            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .build();
+
     private FactionsCache()
     {
 
+    }
+
+    public static Optional<Faction> getClaimFaction(Claim claim) {
+        return cachedChunks.getIfPresent(claim);
+    }
+
+    public static void updateClaimFaction(Claim claim, Optional<Faction> faction) {
+        cachedChunks.put(claim, faction);
     }
 
     public static Map<UUID, FactionPlayer> getPlayersMap()
