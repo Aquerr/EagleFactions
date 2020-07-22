@@ -9,6 +9,8 @@ import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.scheduling.AttackClaimTask;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -34,42 +36,8 @@ public class AttackLogicImpl implements AttackLogic
     @Override
     public void attack(final Player player, final Vector3i attackedChunk)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-
-        taskBuilder.interval(1, TimeUnit.SECONDS).execute(new Consumer<Task>()
-        {
-            int seconds = 1;
-
-            @Override
-            public void accept(Task task)
-            {
-                if(attackedChunk.toString().equals(player.getLocation().getChunkPosition().toString()))
-                {
-                    if(seconds == factionsConfig.getAttackTime())
-                    {
-                        //Because it is not possible to attack territory that is not claimed then we can safely get faction here.
-                        Faction chunkFaction = factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk).get();
-
-                        informAboutDestroying(chunkFaction);
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CLAIM_DESTROYED));
-
-                        final Claim claim = new Claim(player.getWorld().getUniqueId(), attackedChunk);
-                        factionLogic.destroyClaim(chunkFaction, claim);
-                        task.cancel();
-                    }
-                    else
-                    {
-                        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, seconds));
-                        seconds++;
-                    }
-                }
-                else
-                {
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MOVED_FROM_THE_CHUNK));
-                    task.cancel();
-                }
-            }
-        }).submit(EagleFactionsPlugin.getPlugin());
+        final AttackClaimTask attackClaimTask = new AttackClaimTask(this.factionsConfig, this.factionLogic, this, player, attackedChunk);
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(attackClaimTask, 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
     }
 
     @Override
@@ -122,7 +90,7 @@ public class AttackLogicImpl implements AttackLogic
     public void informAboutDestroying(final Faction faction)
     {
         final List<Player> playersList = factionLogic.getOnlinePlayers(faction);
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY)));
+        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY)));
     }
 
     @Override
