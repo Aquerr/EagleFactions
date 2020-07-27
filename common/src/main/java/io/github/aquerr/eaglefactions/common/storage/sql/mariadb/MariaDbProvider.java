@@ -56,10 +56,11 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 		if(!databaseExists())
 		{
 			createDatabase();
-			final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
-			hikariDataSource.close();
-			this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName());
 		}
+
+		final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
+		hikariDataSource.close();
+		this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName());
 	}
 
 	private boolean databaseExists() throws SQLException

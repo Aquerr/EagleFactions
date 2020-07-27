@@ -55,10 +55,11 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
         if(!databaseExists())
         {
             createDatabase();
-            final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
-            hikariDataSource.close();
-            this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
         }
+
+        final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
+        hikariDataSource.close();
+        this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
     }
 
     private boolean databaseExists() throws SQLException
