@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.messaging;
 
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -10,8 +11,10 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -110,27 +113,20 @@ public class MessageLoader
 
         for (final Field messageField : messageFields)
         {
-            Object object = configNode.getNode(messageField.getName()).getString("MISSING_MESSAGE");
+            String message = configNode.getNode(messageField.getName()).getString();
 
-            if (object.equals("MISSING_MESSAGE"))
+            if (message == null || message.equals(""))
             {
                 missingNodes = true;
+                try
+                {
+                    configNode.getNode(messageField.getName()).setValue(messageField.get(null));
+                }
+                catch (IllegalAccessException e)
+                {
+                    e.printStackTrace();
+                }
             }
-
-            String message = object.toString();
-
-//            if (messageField.getName().equals("YOU_OPENED_FACTION_CHEST"))
-//            {
-//                try
-//                {
-//                    messageField.set(Messages.class.getClass(), toTextTemplate(message));
-//                }
-//                catch (IllegalAccessException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//                continue;
-//            }
 
             try
             {
