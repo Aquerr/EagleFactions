@@ -1,10 +1,7 @@
 package io.github.aquerr.eaglefactions.common.messaging;
 
-import com.google.inject.Singleton;
-
 public final class Messages
 {
-
     public static String THERE_IS_NO_FACTION_CALLED_FACTION_NAME = "There is no faction called %FACTION_NAME%.";
     public static String SEND_THIS_FACTION_A_PEACE_REQUEST_FIRST_BEFORE_INVITING_THEM_TO_ALLIES = "Send this factions a peace request first before inviting them to allies.";
     public static String YOU_ARE_IN_WAR_WITH_THIS_FACTION = "You are in war with this faction!";
@@ -307,6 +304,61 @@ public final class Messages
     //Debug
     public static String DEBUG_MODE_HAS_BEEN_TURNED_ON = "Debug Mode has been turned on.";
     public static String DEBUG_MODE_HAS_BEEN_TURNED_OFF = "Debug Mode has been turned off.";
+
+    //Commands
+    public static String COMMAND_HELP_DESC = "Shows information about all commands";
+    public static String COMMAND_CREATE_DESC = "Create Faction Command";
+    public static String COMMAND_DISBAND_DESC = "Disband Faction Command";
+    public static String COMMAND_LIST_DESC = "List all factions";
+    public static String COMMAND_INVITE_DESC = "Invites a player to the faction";
+    public static String COMMAND_KICK_DESC = "Kicks a player from the faction";
+    public static String COMMAND_JOIN_DESC = "Join a specific faction";
+    public static String COMMAND_LEAVE_DESC = "Leave a faction";
+    public static String COMMAND_VERSION_DESC = "Shows plugin version";
+    public static String COMMAND_INFO_DESC = "Show info about faction";
+    public static String COMMAND_PLAYER_DESC = "Show info about a player";
+    public static String COMMAND_TRUCE_DESC = "Invite or remove faction from truce";
+    public static String COMMAND_ALLY_DESC = "Invite or remove faction from alliance";
+    public static String COMMAND_ENEMY_DESC = "Declare or remove faction from war";
+    public static String COMMAND_PROMOTE_DESC = "Promotes player to a higher rank";
+    public static String COMMAND_DEMOTE_DESC = "Demotes player to a lower rank";
+    public static String COMMAND_LIST_CLAIMS_DESC = "Shows a list of faction's claims.";
+    public static String COMMAND_CLAIM_DESC = "Claim a land for your faction";
+    public static String COMMAND_SQUARE_CLAIM_DESC = "Claim land in form of square with a given radius";
+    public static String COMMAND_UNCLAIM_DESC = "Unclaim a land captured by your faction.";
+    public static String COMMAND_UNCLAIM_ALL_DESC = "Remove all claims";
+    public static String COMMAND_MAP_DESC = "Turn on/off factions map";
+    public static String COMMAND_SET_HOME_DESC = "Set faction's home";
+    public static String COMMAND_HOME_DESC = "Teleport to faction's home";
+    public static String COMMAND_AUTO_CLAIM_DESC = "Autoclaim Command";
+    public static String COMMAND_AUTO_MAP_DESC = "Automap command";
+    public static String COMMAND_ADMIN_DESC = "Toggles admin mode";
+    public static String COMMAND_COORDS_DESC = "Shows your teammates coords";
+    public static String COMMAND_SET_POWER_DESC = "Set player's power";
+    public static String COMMAND_SET_MAX_POWER_DESC = "Set player's maxpower";
+    public static String COMMAND_ATTACK_DESC = "Destroy a claim";
+    public static String COMMAND_RELOAD_DESC = "Reload config file";
+    public static String COMMAND_CHAT_DESC = "Chat command";
+    public static String COMMAND_TOP_DESC = "Top Command";
+    public static String COMMAND_SET_LEADER_DESC = "Set someone as leader (removes you as a leader if you are one)";
+    public static String COMMAND_PERMS_DESC = "Set perms for members in faction.";
+    public static String COMMAND_TAG_COLOR_DESC = "Change faction's tag color";
+    public static String COMMAND_RENAME_DESC = "Rename faction";
+    public static String COMMAND_TAG_DESC = "Change faction's tag";
+    public static String COMMAND_DESC_DESC = "Set faction's description.";
+    public static String COMMAND_MOTD_DESC = "Set faction's message of the day.";
+    public static String COMMAND_FEATHER_DESC = "Spawns mystical eagle's feather";
+    public static String COMMAND_CHEST_DESC = "Opens faction's chest";
+    public static String COMMAND_PUBLIC_DESC = "Sets faction as public or not";
+    public static String COMMAND_DEBUG_DESC = "Toggles debug mode";
+    public static String COMMAND_CREATE_BACKUP_DESC = "Creates a backup of Eagle Factions data";
+    public static String COMMAND_RESTORE_BACKUP_DESC = "Restores Eagle Factions data from the given backup file";
+    public static String COMMAND_REGEN_DESC = "Disband a faction and then regenerate the faction chunks";
+    public static String COMMAND_ACCESS_PLAYER_DESC = "Manages player access for current claim.";
+    public static String COMMAND_ACCESS_FACTION_DESC = "Manages faction access for current claim.";
+    public static String COMMAND_ACCESS_OWNED_BY_DESC = "Shows which claims are owned by the given player";
+    public static String COMMAND_ACCESS_ACCESSIBLE_BY_FACTION_DESC = "Shows which claims are accessible by faction";
+    public static String COMMAND_ACCESS_DESC = "Manages internal faction access for current claim.";
 
     private Messages()
     {

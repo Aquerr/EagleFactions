@@ -126,6 +126,7 @@ public class MessageLoader
                 {
                     e.printStackTrace();
                 }
+                continue;
             }
 
             try
