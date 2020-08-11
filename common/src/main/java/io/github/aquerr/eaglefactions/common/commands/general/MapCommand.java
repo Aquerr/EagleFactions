@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
@@ -32,10 +33,12 @@ public class MapCommand extends AbstractCommand
 {
     private final ProtectionConfig protectionConfig;
     private final FactionsConfig factionsConfig;
+    private final FactionLogic factionLogic;
 
     public MapCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionLogic = plugin.getFactionLogic();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
     }
@@ -65,7 +68,6 @@ public class MapCommand extends AbstractCommand
 
     private void generateMap(Player player)
     {
-        final Set<Claim> claimsList = super.getPlugin().getFactionLogic().getAllClaims();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
         final boolean showPlayerFactionClaimsOnly = this.factionsConfig.shouldShowOnlyPlayerFactionsClaimsInMap();
 
@@ -110,83 +112,53 @@ public class MapCommand extends AbstractCommand
                     continue;
                 }
 
-                Vector3i chunk = playerPosition.add(column, 0, row);
-                Claim claim = new Claim(world.getUniqueId(), chunk);
+                final Vector3i chunk = playerPosition.add(column, 0, row);
+                final UUID uuid = world.getUniqueId();
 
-                if (claimsList.contains(claim))
+                final Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(uuid, chunk);
+                if (optionalFaction != null && optionalFaction.isPresent())
                 {
-                    Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk);
-
-                    //TODO: This check is unnecessary however code is crashing sometimes without it.
-                    if(optionalChunkFaction.isPresent())
+                    final Faction chunkFaction = optionalFaction.get();
+                    if (optionalPlayerFaction.isPresent())
                     {
-                        if (optionalPlayerFaction.isPresent())
-                        {
-                            Faction playerFaction = optionalPlayerFaction.get();
+                        Faction playerFaction = optionalPlayerFaction.get();
 
-                            if (optionalChunkFaction.get().getName().equals(playerFaction.getName()))
-                            {
-                                textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
+                        if (chunkFaction.getName().equals(playerFaction.getName()))
+                        {
+                            textBuilder.append(factionMark.toBuilder().onClick(TextActions.executeCallback(claimByMap(player, chunk))).build());
 //                            playerFaction = optionalChunkFaction.get();
-                            }
-                            else if (!showPlayerFactionClaimsOnly && playerFaction.getAlliances().contains(optionalChunkFaction.get().getName()))
+                        }
+                        else if (!showPlayerFactionClaimsOnly && playerFaction.getAlliances().contains(chunkFaction.getName()))
+                        {
+                            textBuilder.append(allianceMark);
+                            if (!allianceFactions.contains(chunkFaction.getName()))
                             {
-                                textBuilder.append(allianceMark);
-                                if (!allianceFactions.contains(optionalChunkFaction.get().getName()))
-                                {
-                                    allianceFactions.add(optionalChunkFaction.get().getName());
-                                }
+                                allianceFactions.add(chunkFaction.getName());
                             }
-                            else if(!showPlayerFactionClaimsOnly && playerFaction.getTruces().contains(optionalChunkFaction.get().getName()))
+                        }
+                        else if(!showPlayerFactionClaimsOnly && playerFaction.getTruces().contains(chunkFaction.getName()))
+                        {
+                            textBuilder.append(truceMark);
+                            if(!truceFactions.contains(chunkFaction.getName()))
                             {
-                                textBuilder.append(truceMark);
-                                if(!truceFactions.contains(optionalChunkFaction.get().getName()))
-                                {
-                                    truceFactions.add(optionalChunkFaction.get().getName());
-                                }
+                                truceFactions.add(chunkFaction.getName());
                             }
-                            else if (!showPlayerFactionClaimsOnly && playerFaction.getEnemies().contains(optionalChunkFaction.get().getName()))
+                        }
+                        else if (!showPlayerFactionClaimsOnly && playerFaction.getEnemies().contains(chunkFaction.getName()))
+                        {
+                            textBuilder.append(enemyMark);
+                            if (!enemyFactions.contains(chunkFaction.getName()))
                             {
-                                textBuilder.append(enemyMark);
-                                if (!enemyFactions.contains(optionalChunkFaction.get().getName()))
-                                {
-                                    enemyFactions.add(optionalChunkFaction.get().getName());
-                                }
-                            }
-                            else
-                            {
-                                if (optionalChunkFaction.get().isSafeZone())
-                                {
-                                    textBuilder.append(Text.of(TextColors.AQUA, "+"));
-                                }
-                                else if (optionalChunkFaction.get().isWarZone())
-                                {
-                                    textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
-                                }
-                                else
-                                {
-                                    if(!showPlayerFactionClaimsOnly)
-                                    {
-                                        textBuilder.append(normalFactionMark);
-                                    }
-                                    else
-                                    {
-                                        textBuilder.append(notCapturedMark);
-                                    }
-                                }
-                                if (!showPlayerFactionClaimsOnly && !normalFactions.contains(optionalChunkFaction.get().getName()))
-                                {
-                                    normalFactions.add(optionalChunkFaction.get().getName());
-                                }
+                                enemyFactions.add(chunkFaction.getName());
                             }
                         }
                         else
                         {
-                            if (optionalChunkFaction.get().isSafeZone())
+                            if (chunkFaction.isSafeZone())
                             {
                                 textBuilder.append(Text.of(TextColors.AQUA, "+"));
                             }
-                            else if (optionalChunkFaction.get().isWarZone())
+                            else if (chunkFaction.isWarZone())
                             {
                                 textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
                             }
@@ -201,21 +173,45 @@ public class MapCommand extends AbstractCommand
                                     textBuilder.append(notCapturedMark);
                                 }
                             }
-                            if (!showPlayerFactionClaimsOnly && !normalFactions.contains(optionalChunkFaction.get().getName()))
+                            if (!showPlayerFactionClaimsOnly && !normalFactions.contains(chunkFaction.getName()))
                             {
-                                normalFactions.add(optionalChunkFaction.get().getName());
+                                normalFactions.add(chunkFaction.getName());
                             }
                         }
                     }
                     else
                     {
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something went really wrong..."));
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk exists in claim list but not in the factions' list."));
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk: ", TextColors.GOLD, claim.toString()));
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Player that used map: ", TextColors.GOLD, player.toString()));
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Check if this claim exists in the ", TextColors.GOLD, "factions.conf."));
-                        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "And report this bug to the plugin owner."));
+                        if (chunkFaction.isSafeZone())
+                        {
+                            textBuilder.append(Text.of(TextColors.AQUA, "+"));
+                        }
+                        else if (chunkFaction.isWarZone())
+                        {
+                            textBuilder.append(Text.of(TextColors.DARK_RED, "#"));
+                        }
+                        else
+                        {
+                            if(!showPlayerFactionClaimsOnly)
+                            {
+                                textBuilder.append(normalFactionMark);
+                            }
+                            else
+                            {
+                                textBuilder.append(notCapturedMark);
+                            }
+                        }
+                        if (!showPlayerFactionClaimsOnly && !normalFactions.contains(chunkFaction.getName()))
+                        {
+                            normalFactions.add(chunkFaction.getName());
+                        }
                     }
+
+//                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Something went really wrong..."));
+//                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk exists in claim list but not in the factions' list."));
+//                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Chunk: ", TextColors.GOLD, claim.toString()));
+//                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Player that used map: ", TextColors.GOLD, player.toString()));
+//                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Check if this claim exists in the ", TextColors.GOLD, "factions.conf."));
+//                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "And report this bug to the plugin owner."));
                 }
                 else
                 {

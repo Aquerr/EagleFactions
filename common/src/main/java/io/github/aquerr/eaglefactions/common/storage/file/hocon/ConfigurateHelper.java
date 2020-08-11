@@ -28,7 +28,7 @@ public class ConfigurateHelper
         try
         {
             configNode.getNode("name").setValue(faction.getName());
-            configNode.getNode("tag").setValue(TypeToken.of(Text.class), faction.getTag());
+            configNode.getNode("tag").setValue(TypeTokens.TEXT_TOKEN, faction.getTag());
             configNode.getNode("leader").setValue(faction.getLeader().toString());
             configNode.getNode("description").setValue(faction.getDescription());
             configNode.getNode("motd").setValue(faction.getMessageOfTheDay());
@@ -113,7 +113,7 @@ public class ConfigurateHelper
         if (configNode.getKey() != null)
             factionName = (String) configNode.getKey();
 
-        final Text tag = configNode.getNode("tag").getValue(TypeToken.of(Text.class));
+        final Text tag = configNode.getNode("tag").getValue(TypeTokens.TEXT_TOKEN);
         final String description = configNode.getNode("description").getString();
         final String messageOfTheDay = configNode.getNode("motd").getString();
 

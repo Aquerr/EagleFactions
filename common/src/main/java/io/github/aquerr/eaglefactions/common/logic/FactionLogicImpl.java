@@ -156,6 +156,12 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
+    public Map<Claim, Optional<Faction>> getAllClaims()
+    {
+        return new HashMap<>(FactionsCache.getClaims());
+    }
+
+    @Override
     public void addFaction(final Faction faction)
     {
         checkNotNull(faction);
@@ -172,11 +178,11 @@ public class FactionLogicImpl implements FactionLogic
         Preconditions.checkNotNull(factionToDisband, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), factionName));
 
         // Clear cache
-        CompletableFuture.runAsync(() -> {
-            for (Claim claim : factionToDisband.getClaims()) {
-                FactionsCache.updateClaimFaction(claim, Optional.empty());
-            }
-        });
+//        CompletableFuture.runAsync(() -> {
+//            for (Claim claim : factionToDisband.getClaims()) {
+//                FactionsCache.updateClaimFaction(claim, Optional.empty());
+//            }
+//        });
 
         //Update players...
         CompletableFuture.runAsync(() -> {
@@ -471,12 +477,6 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public Set<Claim> getAllClaims()
-    {
-        return FactionsCache.getClaims();
-    }
-
-    @Override
     public void addClaims(final Faction faction, final List<Claim> claims)
     {
         checkNotNull(faction);
@@ -492,7 +492,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction updatedFaction = faction.toBuilder().setClaims(factionClaims).build();
         this.storageManager.saveFaction(updatedFaction);
-        claims.forEach(claim -> FactionsCache.updateClaimFaction(claim, Optional.of(updatedFaction)));
+//        claims.forEach(claim -> FactionsCache.updateClaimFaction(claim, Optional.of(updatedFaction)));
     }
 
     @Override
@@ -505,7 +505,7 @@ public class FactionLogicImpl implements FactionLogic
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         this.storageManager.saveFaction(updatedFaction);
-        FactionsCache.updateClaimFaction(claim, Optional.of(updatedFaction));
+//        FactionsCache.updateClaimFaction(claim, Optional.of(updatedFaction));
 
 		ParticlesUtil.spawnClaimParticles(claim);
     }
@@ -536,12 +536,8 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(worldUUID);
         checkNotNull(chunk);
 
-        for(Claim claim : getAllClaims())
-        {
-            if (claim.getWorldUUID().equals(worldUUID) && claim.getChunkPosition().equals(chunk))
-                return true;
-        }
-        return false;
+        final Optional<Faction> faction = getFactionByChunk(worldUUID, chunk);
+        return faction.isPresent();
     }
 
     @Override
@@ -713,7 +709,7 @@ public class FactionLogicImpl implements FactionLogic
         for (final Claim claim: faction.getClaims())
         {
             FactionsCache.removeClaim(claim);
-            FactionsCache.updateClaimFaction(claim, Optional.empty());
+//            FactionsCache.updateClaimFaction(claim, Optional.empty());
         }
         final Faction updatedFaction = faction.toBuilder().setClaims(new HashSet<>()).build();
         storageManager.saveFaction(updatedFaction);
@@ -1091,6 +1087,6 @@ public class FactionLogicImpl implements FactionLogic
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         FactionsCache.removeClaim(claim);
         this.storageManager.saveFaction(updatedFaction);
-        FactionsCache.updateClaimFaction(claim, Optional.empty());
+//        FactionsCache.updateClaimFaction(claim, Optional.empty());
     }
 }
