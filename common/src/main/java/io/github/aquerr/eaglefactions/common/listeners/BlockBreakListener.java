@@ -25,6 +25,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -259,6 +260,11 @@ public class BlockBreakListener extends AbstractListener
         final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
 
         if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
+            return;
+
+        // I guess "placement" in "break" event is something weird?
+        final boolean isPlacementSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.PLACEMENT;
+        if (isPlacementSpawnType)
             return;
 
         final Object source = event.getSource();

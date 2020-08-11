@@ -45,6 +45,10 @@ public class PlayerInteractListener extends AbstractListener
         final Vector3d interactionPoint = event.getInteractionPoint().orElse(player.getLocation().getPosition());
         Location<World> location = new Location<>(player.getWorld(), interactionPoint);
 
+        //TODO: To test... don't know how mods will behave with it.
+        if (location.getBlockType() == BlockTypes.AIR)
+            return;
+
         //Handle hitting entities
         boolean hasHitEntity = event.getContext().containsKey(EventContextKeys.ENTITY_HIT);
         if(hasHitEntity)
