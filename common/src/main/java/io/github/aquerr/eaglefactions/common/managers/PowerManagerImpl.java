@@ -194,20 +194,16 @@ public class PowerManagerImpl implements PowerManager
         if (!optionalFactionPlayer.isPresent())
             return;
 
-        float playerPower = optionalFactionPlayer.get().getPower();
+        final float playerPower = optionalFactionPlayer.get().getPower();
+        final float playerMaxPower = optionalFactionPlayer.get().getMaxPower();
 
-        if(playerPower + powerConfig.getPowerIncrement() < getPlayerMaxPower(playerUUID))
+        if (isKillAward)
         {
-            if(isKillAward)
-            {
-                float killAward = powerConfig.getKillAward();
-                setPlayerPower(playerUUID, playerPower + killAward);
-            }
-            else
-            {
-                float newPower = round(playerPower + powerConfig.getPowerIncrement(), 2);
-                setPlayerPower(playerUUID, newPower);
-            }
+            setPlayerPower(playerUUID, round(Math.min(playerPower + this.powerConfig.getKillAward(), playerMaxPower), 2));
+        }
+        else
+        {
+            setPlayerPower(playerUUID, round(Math.min(playerPower + this.powerConfig.getPowerIncrement(), playerMaxPower), 2));
         }
     }
 
