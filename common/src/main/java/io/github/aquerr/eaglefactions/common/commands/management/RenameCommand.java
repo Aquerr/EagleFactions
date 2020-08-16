@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -56,9 +57,12 @@ public class RenameCommand extends AbstractCommand
         if(newFactionName.length() < this.factionsConfig.getMinNameLength())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + Messages.CHARS + ")"));
 
-        super.getPlugin().getFactionLogic().renameFaction(optionalPlayerFaction.get(), newFactionName);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.SUCCESSFULLY_RENAMED_FACTION_TO_FACTION_NAME, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newFactionName)))));
-
+        final boolean isCancelled = EventRunner.runFactionRenameEvent(player, optionalPlayerFaction.get(), newFactionName);
+        if(!isCancelled)
+        {
+            super.getPlugin().getFactionLogic().renameFaction(optionalPlayerFaction.get(), newFactionName);
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.SUCCESSFULLY_RENAMED_FACTION_TO_FACTION_NAME, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newFactionName)))));
+        }
         return CommandResult.success();
     }
 }

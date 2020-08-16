@@ -25,11 +25,7 @@ public final class EventRunner
      */
     public static boolean runFactionLeaveEvent(final Player player, final Faction faction)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, player)
-                .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player)
-                .build();
+        final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
         final FactionLeaveEvent event = new FactionLeaveEventImpl(player, faction, eventCause);
@@ -38,11 +34,7 @@ public final class EventRunner
 
     public static boolean runFactionJoinEvent(final Player player, final Faction faction)
     {
-        final EventContext eventContext = EventContext.builder()
-            .add(EventContextKeys.OWNER, player)
-            .add(EventContextKeys.PLAYER, player)
-            .add(EventContextKeys.CREATOR, player)
-            .build();
+        final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
         final FactionJoinEvent event = new FactionJoinEventImpl(player, faction, eventCause);
@@ -54,11 +46,7 @@ public final class EventRunner
      */
     public static boolean runFactionChestEvent(final Player player, final Faction faction)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, player)
-                .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player)
-                .build();
+        final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
         final FactionChestEvent event = new FactionChestEventImpl(player, faction, eventCause);
@@ -70,11 +58,7 @@ public final class EventRunner
      */
     public static boolean runFactionClaimEvent(final Player player, final Faction faction, final World world, final Vector3i chunkPosition)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, player)
-                .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player)
-                .build();
+        final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
         final FactionClaimEvent event = new FactionClaimEventImpl(player, faction, world, chunkPosition, eventCause);
@@ -86,11 +70,7 @@ public final class EventRunner
      */
     public static boolean runFactionCreateEvent(final Player player, final Faction faction)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, player)
-                .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player)
-                .build();
+        final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
         final FactionCreateEvent event = new FactionCreateEventImpl(player, faction, eventCause);
@@ -102,11 +82,7 @@ public final class EventRunner
      */
     public static boolean runFactionKickEvent(final FactionPlayer kickedPlayer, final Player kickedBy, final Faction faction)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, kickedBy)
-                .add(EventContextKeys.PLAYER, kickedBy)
-                .add(EventContextKeys.CREATOR, kickedBy)
-                .build();
+        final EventContext eventContext = getEventContextForPlayer(kickedBy).build();
 
         final Cause eventCause = Cause.of(eventContext, kickedBy, faction);
         final FactionKickEvent event = new FactionKickEventImpl(kickedPlayer, kickedBy, faction, eventCause);
@@ -118,11 +94,7 @@ public final class EventRunner
      */
     public static boolean runFactionUnclaimEvent(final Player player, final Faction faction, final World world, final Vector3i chunkPosition)
     {
-        final EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.OWNER, player)
-                .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player)
-                .build();
+        final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, faction);
         final FactionClaimEvent.Unclaim event = new FactionUnclaimEventImpl(player, faction, world, chunkPosition, eventCause);
@@ -134,31 +106,33 @@ public final class EventRunner
      */
 	public static boolean runFactionAreaEnterEvent(final MoveEntityEvent moveEntityEvent, final Player player, final Optional<Faction> enteredFaction, final Optional<Faction> leftFaction)
 	{
-	    final EventContext eventContext = EventContext.builder()
-            .add(EventContextKeys.OWNER, player)
-            .add(EventContextKeys.PLAYER, player)
-            .add(EventContextKeys.CREATOR, player)
-            .build();
+	    final EventContext eventContext = getEventContextForPlayer(player).build();
 
         final Cause eventCause = Cause.of(eventContext, player, enteredFaction, leftFaction);
         final FactionAreaEnterEvent event = new FactionAreaEnterEventImpl(moveEntityEvent, player, enteredFaction, leftFaction, eventCause);
         return Sponge.getEventManager().post(event);
 	}
 
+	public static boolean runFactionRenameEvent(final Player player, final Faction faction, final String newName)
+    {
+        final EventContext eventContext = getEventContextForPlayer(player).build();
+
+        final Cause cause = Cause.of(eventContext, player, faction);
+        final FactionRenameEvent event = new FactionRenameEventImpl(player, faction, newName, cause);
+        return Sponge.getEventManager().post(event);
+    }
+
     public static boolean runFactionDisbandEvent(final Object source, final Faction playerFaction, final boolean forceRemovedByAdmin, final boolean removedDueToInactiviy)
     {
         // Some special code here... because DisbandEvent can also be fired by FactionsRemover.
         // TODO: Maybe it can be written better?
 
-        final EventContext.Builder eventContextBuilder = EventContext.builder();
+        EventContext.Builder eventContextBuilder = EventContext.builder();
         final Cause.Builder causeBuilder = Cause.builder();
         if (source instanceof Player)
         {
             final Player player = (Player)source;
-            eventContextBuilder.add(EventContextKeys.OWNER, player)
-                    .add(EventContextKeys.PLAYER, player)
-                    .add(EventContextKeys.CREATOR, player)
-                    .build();
+            eventContextBuilder = getEventContextForPlayer(player);
             causeBuilder.append(player).append(playerFaction);
         }
         else
@@ -180,5 +154,10 @@ public final class EventRunner
             event = new FactionDisbandEventImpl(null, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
         }
         return Sponge.getEventManager().post(event);
+    }
+
+    private static EventContext.Builder getEventContextForPlayer(final Player player)
+    {
+        return EventContext.builder().add(EventContextKeys.OWNER, player).add(EventContextKeys.PLAYER, player).add(EventContextKeys.CREATOR, player);
     }
 }
