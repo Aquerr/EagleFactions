@@ -579,7 +579,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if (user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                     return ProtectionResult.okSafeZone();
-                else return ProtectionResult.okWarZone();
+                else return ProtectionResult.forbiddenSafeZone();
             }
             else
             {
