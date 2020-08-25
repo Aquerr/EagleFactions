@@ -33,7 +33,7 @@ public class FactionPlayerArgument extends CommandElement
     protected FactionPlayer parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
     {
         //Just in case someone new entered the server after start.
-        Set<FactionPlayer> serverPlayers = plugin.getPlayerManager().getServerPlayers();
+        Set<FactionPlayer> serverPlayers = new HashSet<>(FactionsCache.getPlayersMap().values());
 
         if (args.hasNext())
         {
