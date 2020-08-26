@@ -22,7 +22,7 @@ public class FactionAreaEnterEventImpl extends AbstractEvent implements FactionA
 
 	private boolean isCancelled = false;
 
-	public FactionAreaEnterEventImpl(final MoveEntityEvent moveEntityEvent, final Player creator, final Optional<Faction> enteredFaction, final Optional<Faction> leftFaction, final Cause cause)
+	FactionAreaEnterEventImpl(final MoveEntityEvent moveEntityEvent, final Player creator, final Optional<Faction> enteredFaction, final Optional<Faction> leftFaction, final Cause cause)
 	{
 		this.moveEntityEvent = moveEntityEvent;
 		this.creator = creator;

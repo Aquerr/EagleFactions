@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.common.events;
 import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionClaimEvent;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
@@ -14,10 +15,9 @@ public class FactionClaimEventImpl extends FactionUnclaimEventImpl implements Fa
         super(creator, faction, world, chunkPosition, cause);
     }
 
-    //TODO: Implement this method...
     @Override
     public boolean isClaimedByItems()
     {
-        return false;
+        return EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().shouldClaimByItems();
     }
 }

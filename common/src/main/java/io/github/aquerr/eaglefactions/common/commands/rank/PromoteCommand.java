@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -55,47 +56,39 @@ public class PromoteCommand extends AbstractCommand
 
         if(super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer))
         {
-            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
-            {
-                final FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer.getUniqueId());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, promotedTo.name())))));
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
-            }
-            return CommandResult.success();
+            if (promotedPlayer.getUniqueId().equals(playerFaction.getLeader()) || playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            return promotePlayer(sourcePlayer, promotedPlayer, playerFaction);
         }
 
         if(playerFaction.getLeader().equals(sourcePlayer.getUniqueId()))
         {
-            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
-            {
-                final FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer.getUniqueId());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, promotedTo.name())))));
-
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
-            }
+            if (promotedPlayer.getUniqueId().equals(playerFaction.getLeader()) || playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            return promotePlayer(sourcePlayer, promotedPlayer, playerFaction);
         }
         else if(playerFaction.getOfficers().contains(sourcePlayer.getUniqueId()))
         {
-            if(!playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(promotedPlayer.getUniqueId()))
-            {
-                final FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(playerFaction, promotedPlayer.getUniqueId());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, promotedTo.name())))));
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
-            }
+            if (playerFaction.getLeader().equals(promotedPlayer.getUniqueId()) || playerFaction.getOfficers().contains(promotedPlayer.getUniqueId()) || playerFaction.getMembers().contains(promotedPlayer.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            return promotePlayer(sourcePlayer, promotedPlayer, playerFaction);
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
         }
+    }
+
+    private CommandResult promotePlayer(final Player promotedBy, final FactionPlayer promotedPlayer, final Faction faction)
+    {
+        final boolean isCancelled = EventRunner.runFactionPromoteEventPre(promotedBy, promotedPlayer, faction);
+        if (isCancelled)
+            return CommandResult.success();
+
+        final FactionMemberType promotedTo = getPlugin().getFactionLogic().promotePlayer(faction, promotedPlayer.getUniqueId());
+        promotedBy.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, promotedTo.name())))));
+
+        EventRunner.runFactionPromoteEventPost(promotedBy, promotedPlayer, promotedTo, faction);
         return CommandResult.success();
     }
 }

@@ -1,12 +1,14 @@
 package io.github.aquerr.eaglefactions.common.commands.rank;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.internal.cglib.proxy.$Factory;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -55,46 +57,40 @@ public class DemoteCommand extends AbstractCommand
 
         if(super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer))
         {
-            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()))
-            {
-                final FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer.getUniqueId());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-            }
-            return CommandResult.success();
+            if (playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) || playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+
+            return demotePlayer(sourcePlayer, demotedPlayer, playerFaction);
         }
 
         if(playerFaction.getLeader().equals(sourcePlayer.getUniqueId()))
         {
-            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
-            {
-                final FactionMemberType demotedTo = super.getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer.getUniqueId());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-            }
+            if (playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) || playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+            return demotePlayer(sourcePlayer, demotedPlayer, playerFaction);
         }
         else if(playerFaction.getOfficers().contains(sourcePlayer.getUniqueId()))
         {
-            if(!playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) && !playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()) && !playerFaction.getMembers().contains(demotedPlayer.getUniqueId()))
-            {
-                final FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(playerFaction, demotedPlayer.getUniqueId());
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-            }
+            if (playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) || playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()) || playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+            return demotePlayer(sourcePlayer, demotedPlayer, playerFaction);
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
         }
+    }
+
+    private CommandResult demotePlayer(final Player demotedBy, final FactionPlayer demotedPlayer, final Faction faction)
+    {
+        final boolean isCancelled = EventRunner.runFactionDemoteEventPre(demotedBy, demotedPlayer, faction);
+        if (isCancelled)
+            return CommandResult.success();
+
+        final FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(faction, demotedPlayer.getUniqueId());
+        demotedBy.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
+
+        EventRunner.runFactionDemoteEventPost(demotedBy, demotedPlayer, demotedTo, faction);
         return CommandResult.success();
     }
 }

@@ -8,34 +8,9 @@ import org.spongepowered.api.event.cause.Cause;
 
 public class FactionCreateEventImpl extends FactionAbstractEvent implements FactionCreateEvent
 {
-    private final Cause cause;
-    private final Player creator;
-    private final Faction faction;
-
     FactionCreateEventImpl(final Player creator, final Faction faction, final Cause cause)
     {
-        super();
-        this.creator = creator;
-        this.faction = faction;
-        this.cause = cause;
-    }
-
-    @Override
-    public Cause getCause()
-    {
-        return this.cause;
-    }
-
-    @Override
-    public Faction getFaction()
-    {
-        return this.faction;
-    }
-
-    @Override
-    public Player getCreator()
-    {
-        return this.creator;
+        super(creator, faction, cause);
     }
 
     @Override
