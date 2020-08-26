@@ -269,7 +269,7 @@ public class BlockBreakListener extends AbstractListener
         final Object source = event.getSource();
 
         //For ICBM
-        //Missles and grenades should be handled by explosion listener.
+        //Missiles and grenades should be handled by explosion listener.
         if(source instanceof Entity)
         {
             final Entity entity = (Entity)source;

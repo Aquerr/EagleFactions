@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.util.ModSupport;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -58,13 +59,23 @@ public class EntitySpawnListener extends AbstractListener
         {
             Entity entity = entitiesIterator.next();
 
-            //Special case for IC2's Mining Laser's explosive mode
+            //Special case for IC2 and Mekanism
             if(rootCause instanceof Entity)
             {
                 Entity causeEntity = (Entity)rootCause;
-                String entityId = causeEntity.getType().getId();
-                if(entityId.contains("mininglaser")
-                        && eventContext.containsKey(EventContextKeys.OWNER))
+                if (ModSupport.isMekenism(rootCause.getClass()))
+                {
+                    final Entity entity1 = ModSupport.getEntityOwnerFromMekanism(causeEntity);
+                    if (entity1 instanceof User)
+                    {
+                        if (!super.getPlugin().getProtectionManager().canBreak(causeEntity.getLocation(), (User) entity1, false).hasAccess())
+                        {
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+                else if (ModSupport.isIndustrialCraftMiningLaser(entity) && eventContext.containsKey(EventContextKeys.OWNER))
                 {
                     User user = eventContext.get(EventContextKeys.OWNER).get();
                     Entity miningLaser = (Entity)rootCause;

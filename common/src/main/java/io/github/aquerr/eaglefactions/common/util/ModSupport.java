@@ -79,4 +79,14 @@ public class ModSupport
             return (Entity)owner;
         else return null;
     }
+
+    /**
+     * Checks if the given entity is IC2's mining laser.
+     * @param entity the entity
+     * @return <tt>true</tt> if the entity is mining laser, <tt>false</tt> if not.
+     */
+    public static boolean isIndustrialCraftMiningLaser(Entity entity)
+    {
+        return entity.getType().getId().contains("mininglaser");
+    }
 }
