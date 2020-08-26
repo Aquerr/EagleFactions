@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.util.ModSupport;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -25,7 +26,6 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -35,7 +35,6 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
@@ -294,6 +293,15 @@ public class BlockBreakListener extends AbstractListener
         if(user == null)
         {
             user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
+        }
+
+        // Helps with Mekanism flamethrower
+        if (ModSupport.isMekenism(source.getClass()))
+        {
+            final Entity owner = ModSupport.getEntityOwnerFromMekanism((Entity) source);
+            // Just in case someone gave flamethrower to skeleton or something :P
+            if (owner instanceof User)
+                user = (User)owner;
         }
 
         LocatableBlock locatableBlock = null;

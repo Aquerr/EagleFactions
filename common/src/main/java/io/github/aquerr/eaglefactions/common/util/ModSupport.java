@@ -47,4 +47,36 @@ public class ModSupport
             return (Entity)attacker;
         else return null;
     }
+
+    /**
+     * Checks if the given class comes from Mekanism
+     * @param clazz class to check
+     * @param <T> the type of class
+     * @return <tt>true</tt> if class comes from Mekanism, <tt>false</tt> if not.
+     */
+    public static <T> boolean isMekenism(Class<T> clazz)
+    {
+        return clazz.getName().contains("mekanism");
+    }
+
+    /**
+     * Gets the entity owner from the Entity object. Entity must come from Mekanism.
+     * @param entity the entity
+     * @return attacking/source entity.
+     */
+    public static Entity getEntityOwnerFromMekanism(final Entity entity)
+    {
+        Object owner = null;
+        try
+        {
+            owner = entity.getClass().getField("owner").get(entity);
+        }
+        catch (IllegalAccessException | NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        }
+        if (owner instanceof Entity)
+            return (Entity)owner;
+        else return null;
+    }
 }
