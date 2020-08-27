@@ -20,4 +20,20 @@ public class FactionInviteEventImpl extends FactionAbstractEvent implements Fact
     {
         return this.invitedPlayer;
     }
+
+    static class Pre extends FactionInviteEventImpl implements FactionInviteEvent.Pre
+    {
+        Pre(Player creator, Player invitedPlayer, Faction faction, Cause cause)
+        {
+            super(creator, invitedPlayer, faction, cause);
+        }
+    }
+
+    static class Post extends FactionInviteEventImpl implements FactionInviteEvent.Post
+    {
+        Post(Player creator, Player invitedPlayer, Faction faction, Cause cause)
+        {
+            super(creator, invitedPlayer, faction, cause);
+        }
+    }
 }

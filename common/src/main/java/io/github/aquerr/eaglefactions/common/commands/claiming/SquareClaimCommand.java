@@ -96,12 +96,14 @@ public class SquareClaimCommand extends AbstractCommand
                 //Check if admin mode
                 if (super.getPlugin().getPlayerManager().hasAdminMode(player))
                 {
-                    boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
+                    boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
                     if (isCancelled)
                         continue;
 
                     newFactionClaims.add(new Claim(world.getUniqueId(), chunk));
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+
+                    EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
 
@@ -128,19 +130,20 @@ public class SquareClaimCommand extends AbstractCommand
 
                 if (playerFaction.isSafeZone() || playerFaction.isWarZone())
                 {
-                    boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
+                    boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
                     if (isCancelled)
                         continue;
 
                     newFactionClaims.add(new Claim(world.getUniqueId(), chunk));
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+                    EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
 
                 if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.getUniqueId(), chunk)))
                     continue;
 
-                boolean isCancelled = EventRunner.runFactionClaimEvent(player, playerFaction, world, chunk);
+                boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
                 if (isCancelled)
                     continue;
 
@@ -152,6 +155,7 @@ public class SquareClaimCommand extends AbstractCommand
 
                 newFactionClaims.add(new Claim(world.getUniqueId(), chunk));
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+                EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
             }
 
             super.getPlugin().getFactionLogic().addClaims(playerFaction, newFactionClaims);

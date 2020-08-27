@@ -11,4 +11,20 @@ public class FactionChestEventImpl extends FactionAbstractEvent implements Facti
     {
         super(creator, faction, cause);
     }
+
+    static class Pre extends FactionChestEventImpl implements FactionChestEvent.Pre
+    {
+        Pre(Player creator, Faction faction, Cause cause)
+        {
+            super(creator, faction, cause);
+        }
+    }
+
+    static class Post extends FactionChestEventImpl implements FactionChestEvent.Post
+    {
+        Post(Player creator, Faction faction, Cause cause)
+        {
+            super(creator, faction, cause);
+        }
+    }
 }

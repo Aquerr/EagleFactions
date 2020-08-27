@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -66,6 +67,7 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<Task>
             {
                 factionLogic.addClaim(optionalFaction.get(), new Claim(player.getWorld().getUniqueId(), chunkPosition));
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+                EventRunner.runFactionClaimEventPost(player, optionalFaction.get(), player.getWorld(), chunkPosition);
             }
             task.cancel();
         }

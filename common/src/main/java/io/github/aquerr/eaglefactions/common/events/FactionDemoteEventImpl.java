@@ -23,7 +23,7 @@ public class FactionDemoteEventImpl extends FactionAbstractEvent implements Fact
         return this.demotedPlayer;
     }
 
-    public static class Pre extends FactionDemoteEventImpl implements FactionDemoteEvent.Pre
+    static class Pre extends FactionDemoteEventImpl implements FactionDemoteEvent.Pre
     {
         Pre(Faction faction, Player demotedBy, FactionPlayer demotedPlayer, Cause cause)
         {
@@ -31,7 +31,7 @@ public class FactionDemoteEventImpl extends FactionAbstractEvent implements Fact
         }
     }
 
-    public static class Post extends FactionDemoteEventImpl implements FactionDemoteEvent.Post
+    static class Post extends FactionDemoteEventImpl implements FactionDemoteEvent.Post
     {
         private final FactionMemberType demotedToRank;
 

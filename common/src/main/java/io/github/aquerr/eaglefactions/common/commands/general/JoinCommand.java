@@ -81,13 +81,14 @@ public class JoinCommand extends AbstractCommand
 
     private CommandResult joinFactionAndNotify(final Player player, final Faction faction)
     {
-        final boolean isCancelled = EventRunner.runFactionJoinEvent(player, faction);
+        final boolean isCancelled = EventRunner.runFactionJoinEventPre(player, faction);
         if (isCancelled)
             return CommandResult.success();
 
         super.getPlugin().getFactionLogic().joinFaction(player.getUniqueId(), faction.getName());
         EagleFactionsPlugin.INVITE_LIST.remove(new Invite(faction.getName(), player.getUniqueId()));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.SUCCESSFULLY_JOINED_FACTION, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        EventRunner.runFactionJoinEventPost(player, faction);
         return CommandResult.success();
     }
 }

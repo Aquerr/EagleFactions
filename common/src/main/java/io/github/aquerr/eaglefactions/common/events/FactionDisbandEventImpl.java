@@ -28,4 +28,20 @@ public class FactionDisbandEventImpl extends FactionAbstractEvent implements Fac
     {
         return this.forceRemovedByAdmin;
     }
+
+    static class Pre extends FactionDisbandEventImpl implements FactionDisbandEvent.Pre
+    {
+        Pre(Player creator, Faction faction, boolean forceRemovedByAdmin, boolean removedByFactionsRemover, Cause cause)
+        {
+            super(creator, faction, forceRemovedByAdmin, removedByFactionsRemover, cause);
+        }
+    }
+
+    static class Post extends FactionDisbandEventImpl implements FactionDisbandEvent.Post
+    {
+        Post(Player creator, Faction faction, boolean forceRemovedByAdmin, boolean removedByFactionsRemover, Cause cause)
+        {
+            super(creator, faction, forceRemovedByAdmin, removedByFactionsRemover, cause);
+        }
+    }
 }

@@ -20,4 +20,20 @@ public class FactionKickEventImpl extends FactionAbstractEvent implements Factio
     {
         return this.kickedPlayer;
     }
+
+    static class Pre extends FactionKickEventImpl implements FactionKickEvent.Pre
+    {
+        Pre(FactionPlayer kickedPlayer, Player kickedBy, Faction faction, Cause cause)
+        {
+            super(kickedPlayer, kickedBy, faction, cause);
+        }
+    }
+
+    static class Post extends FactionKickEventImpl implements FactionKickEvent.Post
+    {
+        Post(FactionPlayer kickedPlayer, Player kickedBy, Faction faction, Cause cause)
+        {
+            super(kickedPlayer, kickedBy, faction, cause);
+        }
+    }
 }

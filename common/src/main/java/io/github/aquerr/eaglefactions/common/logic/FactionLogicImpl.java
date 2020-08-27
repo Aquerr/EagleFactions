@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -176,13 +177,6 @@ public class FactionLogicImpl implements FactionLogic
         final Faction factionToDisband = this.storageManager.getFaction(factionName);
 
         Preconditions.checkNotNull(factionToDisband, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), factionName));
-
-        // Clear cache
-//        CompletableFuture.runAsync(() -> {
-//            for (Claim claim : factionToDisband.getClaims()) {
-//                FactionsCache.updateClaimFaction(claim, Optional.empty());
-//            }
-//        });
 
         //Update players...
         CompletableFuture.runAsync(() -> {
@@ -792,6 +786,7 @@ public class FactionLogicImpl implements FactionLogic
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
                 addClaim(faction, new Claim(worldUUID, chunkPosition));
             }
+            EventRunner.runFactionClaimEventPost(player, faction, player.getWorld(), chunkPosition);
         }
     }
 

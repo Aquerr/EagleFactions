@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.Invite;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -73,6 +74,10 @@ public class InviteCommand extends AbstractCommand
         if(super.getPlugin().getFactionLogic().getFactionByPlayerUUID(invitedPlayer.getUniqueId()).isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYER_IS_ALREADY_IN_A_FACTION));
 
+        final boolean isCancelled = EventRunner.runFactionInviteEventPre(senderPlayer, invitedPlayer, senderFaction);
+        if (isCancelled)
+            return CommandResult.success();
+
         final Invite invite = new Invite(senderFaction.getName(), invitedPlayer.getUniqueId());
         EagleFactionsPlugin.INVITE_LIST.add(invite);
 
@@ -82,6 +87,7 @@ public class InviteCommand extends AbstractCommand
         final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
         taskBuilder.execute(() -> EagleFactionsPlugin.INVITE_LIST.remove(invite)).delay(2, TimeUnit.MINUTES).name("EagleFaction - Remove Invite").submit(EagleFactionsPlugin.getPlugin());
+        EventRunner.runFactionInviteEventPost(senderPlayer, invitedPlayer, senderFaction);
         return CommandResult.success();
     }
 

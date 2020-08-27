@@ -28,4 +28,20 @@ public class FactionUnclaimEventImpl extends FactionAbstractEvent implements Fac
     {
         return this.chunkPosition;
     }
+
+    static class Pre extends FactionUnclaimEventImpl implements FactionClaimEvent.Unclaim.Pre
+    {
+        Pre(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        {
+            super(creator, faction, world, chunkPosition, cause);
+        }
+    }
+
+    static class Post extends FactionUnclaimEventImpl implements FactionClaimEvent.Unclaim.Post
+    {
+        Post(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        {
+            super(creator, faction, world, chunkPosition, cause);
+        }
+    }
 }

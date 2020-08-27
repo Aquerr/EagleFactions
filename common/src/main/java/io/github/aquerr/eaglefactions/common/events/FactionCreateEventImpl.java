@@ -19,4 +19,20 @@ public class FactionCreateEventImpl extends FactionAbstractEvent implements Fact
         //Factions cannot be created differently. All of them are created by items or none of them.
         return EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getFactionCreationByItems();
     }
+
+    static class Pre extends FactionCreateEventImpl implements FactionCreateEvent.Pre
+    {
+        Pre(Player creator, Faction faction, Cause cause)
+        {
+            super(creator, faction, cause);
+        }
+    }
+
+    static class Post extends FactionCreateEventImpl implements FactionCreateEvent.Post
+    {
+        Post(Player creator, Faction faction, Cause cause)
+        {
+            super(creator, faction, cause);
+        }
+    }
 }

@@ -52,7 +52,7 @@ public class LeaveCommand extends AbstractCommand
 
     private CommandResult leaveFaction(final Player player, final Faction faction, boolean isLeader)
     {
-        final boolean isCancelled = EventRunner.runFactionLeaveEvent(player, faction);
+        final boolean isCancelled = EventRunner.runFactionLeaveEventPre(player, faction);
         if (isCancelled)
             return CommandResult.success();
 
@@ -69,7 +69,7 @@ public class LeaveCommand extends AbstractCommand
 
         EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
         EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
-
+        EventRunner.runFactionLeaveEventPost(player, faction);
         return CommandResult.success();
     }
 }

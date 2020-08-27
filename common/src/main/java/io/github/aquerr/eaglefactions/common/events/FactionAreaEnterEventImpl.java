@@ -84,4 +84,20 @@ public class FactionAreaEnterEventImpl extends AbstractEvent implements FactionA
 	{
 		this.moveEntityEvent.setToTransform(transform);
 	}
+
+	static class Pre extends FactionAreaEnterEventImpl implements FactionAreaEnterEvent.Pre
+	{
+		Pre(MoveEntityEvent moveEntityEvent, Player creator, Optional<Faction> enteredFaction, Optional<Faction> leftFaction, Cause cause)
+		{
+			super(moveEntityEvent, creator, enteredFaction, leftFaction, cause);
+		}
+	}
+
+	static class Post extends FactionAreaEnterEventImpl implements FactionAreaEnterEvent.Post
+	{
+		Post(MoveEntityEvent moveEntityEvent, Player creator, Optional<Faction> enteredFaction, Optional<Faction> leftFaction, Cause cause)
+		{
+			super(moveEntityEvent, creator, enteredFaction, leftFaction, cause);
+		}
+	}
 }

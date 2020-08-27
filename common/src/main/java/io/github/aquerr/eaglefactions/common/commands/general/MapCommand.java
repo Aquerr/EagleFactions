@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -305,6 +306,9 @@ public class MapCommand extends AbstractCommand
             //If claimed then unclaim
             if(super.getPlugin().getFactionLogic().isClaimed(world.getUniqueId(), chunk))
             {
+                if (EventRunner.runFactionUnclaimEventPre(player, playerFaction, world, chunk))
+                    return;
+
                 //Check if faction's home was set in this claim. If yes then remove it.
                 if (playerFaction.getHome() != null)
                 {
@@ -319,6 +323,7 @@ public class MapCommand extends AbstractCommand
                 }
                 super.getPlugin().getFactionLogic().removeClaim(playerFaction, new Claim(world.getUniqueId(), chunk));
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
+                EventRunner.runFactionUnclaimEventPost(player, playerFaction, world, chunk);
             }
             else
             {
@@ -336,6 +341,9 @@ public class MapCommand extends AbstractCommand
 
                 if (playerFaction.isSafeZone() || playerFaction.isWarZone())
                 {
+                    if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
+                        return;
+
                     super.getPlugin().getFactionLogic().addClaim(playerFaction, claim);
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
                 }
@@ -345,6 +353,9 @@ public class MapCommand extends AbstractCommand
                     {
                         if(super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, claim))
                         {
+                            if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
+                                return;
+
                             super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                         }
                         else
@@ -354,6 +365,9 @@ public class MapCommand extends AbstractCommand
                     }
                     else
                     {
+                        if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
+                            return;
+
                         super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.getUniqueId(), chunk);
                     }
                 }

@@ -101,12 +101,14 @@ public class ClaimCommand extends AbstractCommand
         if (safeZoneWorld || warZoneWorld)
             throw new CommandException(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD)));
 
-        boolean isCancelled = EventRunner.runFactionClaimEvent(player, faction, player.getWorld(), chunk);
+        boolean isCancelled = EventRunner.runFactionClaimEventPre(player, faction, player.getWorld(), chunk);
         if (isCancelled)
             return CommandResult.empty();
 
         super.getPlugin().getFactionLogic().addClaim(faction, new Claim(player.getWorld().getUniqueId(), chunk));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunk.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+
+        EventRunner.runFactionClaimEventPost(player, faction, player.getWorld(), chunk);
         return CommandResult.success();
     }
 
@@ -133,7 +135,7 @@ public class ClaimCommand extends AbstractCommand
         if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(faction, new Claim(world.getUniqueId(), chunk)))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.CLAIMS_NEED_TO_BE_CONNECTED));
 
-        boolean isCancelled = EventRunner.runFactionClaimEvent(player, faction, world, chunk);
+        boolean isCancelled = EventRunner.runFactionClaimEventPre(player, faction, world, chunk);
         if (isCancelled)
             return CommandResult.empty();
 

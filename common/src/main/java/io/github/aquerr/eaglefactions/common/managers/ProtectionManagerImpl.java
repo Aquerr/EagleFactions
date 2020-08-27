@@ -77,10 +77,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user instanceof Player)
             {
                 Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Interact With Block:")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "BlockInteract:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + location.getBlockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getName())));
             }
         }
 
@@ -114,7 +114,6 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.okWarZone();
             if (isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
-//                removeEagleFeather(user);
                 return ProtectionResult.okWarZone();
             }
             return ProtectionResult.forbiddenWarZone();
@@ -146,7 +145,6 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.okWarZone();
             if (isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
-//                removeEagleFeather(user);
                 return ProtectionResult.okEagleFeather();
             }
             return ProtectionResult.forbiddenWarZone();
@@ -161,7 +159,6 @@ public class ProtectionManagerImpl implements ProtectionManager
             //Holding Eagle Feather?
             if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
-//                removeEagleFeather(user);
                 return ProtectionResult.okEagleFeather();
             }
             return ProtectionResult.forbidden();
@@ -175,7 +172,6 @@ public class ProtectionManagerImpl implements ProtectionManager
             //Holding Eagle Feather?
             if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
             {
-//                removeEagleFeather(user);
                 return ProtectionResult.okEagleFeather();
             }
             return ProtectionResult.forbidden();
@@ -198,11 +194,11 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user instanceof Player)
             {
                 Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Usage of item:")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Used item: " + usedItem.getType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "ItemUsage:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + location.getBlockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getId())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Used item: ", TextColors.RESET, usedItem.getType().getId())));
             }
         }
 
@@ -291,11 +287,11 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user instanceof Player)
             {
                 Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block break event!")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: " + location.getExtent().getName() + " " + location.getBlockPosition().toString())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: " + user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: " + location.getBlockType().getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block id: " + location.getBlockType().getId())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "BlockBreak:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + location.getBlockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block id: ", TextColors.RESET, location.getBlockType().getId())));
             }
         }
 
@@ -437,11 +433,11 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user instanceof Player)
             {
                 Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block place:")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Item in hand: " + (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() ? user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getName() : ""))));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "BlockPlace:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + location.getBlockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Item in hand: ", TextColors.RESET, (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() ? user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getName() : ""))));
             }
         }
 
@@ -533,10 +529,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user instanceof Player)
             {
                 final Player player = (Player)user;
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Explosion:")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Location: " + location.toString())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("User: " + user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of("Block at location: " + location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Explosion:")));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getName())));
             }
         }
 
@@ -656,6 +652,15 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private ProtectionResult canAttackEntity(final Entity attackedEntity, final Player player)
     {
+        if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(player.getUniqueId()))
+        {
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "EntityAttack:")));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, attackedEntity.getLocation().getExtent().getName() + " " + attackedEntity.getLocation().getBlockPosition().toString())));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Entity at location: ", TextColors.RESET, attackedEntity.getType().getId())));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, player.getName())));
+        }
+
+
         if (this.playerManager.hasAdminMode(player))
             return ProtectionResult.okAdmin();
 
@@ -927,13 +932,6 @@ public class ProtectionManagerImpl implements ProtectionManager
                 && user.getItemInHand(HandTypes.MAIN_HAND).get().getType() == ItemTypes.FEATHER
                 && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).isPresent()
                 && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName());
-    }
-
-    private void removeEagleFeather(final User user)
-    {
-        final ItemStack feather = user.getItemInHand(HandTypes.MAIN_HAND).get();
-        feather.setQuantity(feather.getQuantity() - 1);
-        user.getPlayer().ifPresent(x->x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You have used eagle's feather!")));
     }
 
     private void notifyPlayer(final User user)

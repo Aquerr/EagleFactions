@@ -70,7 +70,7 @@ public class PlayerMoveListener extends AbstractListener
         if (!oldChunkFactionName.equals(newChunkFactionName))
         {
             //Fire FactionAreaEnterEvent
-            final boolean isCancelled = EventRunner.runFactionAreaEnterEvent(event, player, optionalNewChunkFaction, optionalOldChunkFaction);
+            final boolean isCancelled = EventRunner.runFactionAreaEnterEventPre(event, player, optionalNewChunkFaction, optionalOldChunkFaction);
             if(isCancelled)
             {
                 event.setCancelled(true);
@@ -146,6 +146,8 @@ public class PlayerMoveListener extends AbstractListener
 
                 player.sendMessage(ChatTypes.ACTION_BAR, information);
             }
+
+            EventRunner.runFactionAreaEnterEventPost(event, player, optionalNewChunkFaction, optionalOldChunkFaction);
         }
 
         //Is there any better way for doing this? :O

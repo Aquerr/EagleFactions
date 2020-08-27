@@ -20,4 +20,20 @@ public class FactionRenameEventImpl extends FactionAbstractEvent implements Fact
     {
         return this.newName;
     }
+
+    static class Pre extends FactionRenameEventImpl implements FactionRenameEvent.Pre
+    {
+        Pre(Player player, Faction faction, String newName, Cause cause)
+        {
+            super(player, faction, newName, cause);
+        }
+    }
+
+    static class Post extends FactionRenameEventImpl implements FactionRenameEvent.Post
+    {
+        Post(Player player, Faction faction, String newName, Cause cause)
+        {
+            super(player, faction, newName, cause);
+        }
+    }
 }

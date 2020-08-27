@@ -53,7 +53,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             if(inactiveTime.getSeconds() < maxInactiveTimeInSeconds)
                 continue;
 
-            final boolean isCancelled = EventRunner.runFactionDisbandEvent(null, faction, false, true);
+            final boolean isCancelled = EventRunner.runFactionDisbandEventPre(null, faction, false, true);
             if (isCancelled)
                 continue;
 
@@ -73,6 +73,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
                         Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition()));
                     }
                 }
+                EventRunner.runFactionDisbandEventPost(null, faction, false, true);
             }
         }
     }

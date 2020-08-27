@@ -57,11 +57,12 @@ public class RenameCommand extends AbstractCommand
         if(newFactionName.length() < this.factionsConfig.getMinNameLength())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + Messages.CHARS + ")"));
 
-        final boolean isCancelled = EventRunner.runFactionRenameEvent(player, optionalPlayerFaction.get(), newFactionName);
+        final boolean isCancelled = EventRunner.runFactionRenameEventPre(player, optionalPlayerFaction.get(), newFactionName);
         if(!isCancelled)
         {
             super.getPlugin().getFactionLogic().renameFaction(optionalPlayerFaction.get(), newFactionName);
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.SUCCESSFULLY_RENAMED_FACTION_TO_FACTION_NAME, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, newFactionName)))));
+            EventRunner.runFactionRenameEventPost(player, optionalPlayerFaction.get(), newFactionName);
         }
         return CommandResult.success();
     }

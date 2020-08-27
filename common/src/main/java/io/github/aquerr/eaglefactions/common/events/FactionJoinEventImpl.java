@@ -11,4 +11,20 @@ public class FactionJoinEventImpl extends FactionAbstractEvent implements Factio
     {
         super(creator, faction, cause);
     }
+
+    static class Pre extends FactionJoinEventImpl implements FactionJoinEvent.Pre
+    {
+        Pre(Player creator, Faction faction, Cause cause)
+        {
+            super(creator, faction, cause);
+        }
+    }
+
+    static class Post extends FactionJoinEventImpl implements FactionJoinEvent.Post
+    {
+        Post(Player creator, Faction faction, Cause cause)
+        {
+            super(creator, faction, cause);
+        }
+    }
 }

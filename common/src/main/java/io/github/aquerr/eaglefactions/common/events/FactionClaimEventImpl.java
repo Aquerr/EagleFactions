@@ -20,4 +20,20 @@ public class FactionClaimEventImpl extends FactionUnclaimEventImpl implements Fa
     {
         return EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().shouldClaimByItems();
     }
+
+    static class Pre extends FactionClaimEventImpl implements FactionClaimEvent.Claim.Pre
+    {
+        Pre(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        {
+            super(creator, faction, world, chunkPosition, cause);
+        }
+    }
+
+    static class Post extends FactionClaimEventImpl implements FactionClaimEvent.Claim.Post
+    {
+        Post(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        {
+            super(creator, faction, world, chunkPosition, cause);
+        }
+    }
 }

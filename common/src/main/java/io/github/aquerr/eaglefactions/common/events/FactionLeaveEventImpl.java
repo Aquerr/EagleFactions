@@ -11,4 +11,20 @@ public class FactionLeaveEventImpl extends FactionAbstractEvent implements Facti
     {
         super(player, faction, cause);
     }
+
+    static class Pre extends FactionLeaveEventImpl implements FactionLeaveEvent.Pre
+    {
+        Pre(Player player, Faction faction, Cause cause)
+        {
+            super(player, faction, cause);
+        }
+    }
+
+    static class Post extends FactionLeaveEventImpl implements FactionLeaveEvent.Post
+    {
+        Post(Player player, Faction faction, Cause cause)
+        {
+            super(player, faction, cause);
+        }
+    }
 }

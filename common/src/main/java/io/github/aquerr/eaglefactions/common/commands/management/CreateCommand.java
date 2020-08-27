@@ -179,7 +179,7 @@ public class CreateCommand extends AbstractCommand
     {
         final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
 
-        final boolean isCancelled = EventRunner.runFactionCreateEvent(player, faction);
+        final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
         if (isCancelled)
             return;
 
@@ -191,5 +191,6 @@ public class CreateCommand extends AbstractCommand
         super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
 
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        EventRunner.runFactionCreateEventPost(player, faction);
     }
 }

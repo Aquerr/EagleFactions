@@ -39,12 +39,13 @@ public class DisbandCommand extends AbstractCommand
             if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
 
-            final boolean isCancelled = EventRunner.runFactionDisbandEvent(player, faction.get(), true, false);
+            final boolean isCancelled = EventRunner.runFactionDisbandEventPre(player, faction.get(), true, false);
             if(!isCancelled)
             {
                 boolean didSucceed = super.getPlugin().getFactionLogic().disbandFaction(faction.get().getName());
                 if (didSucceed) {
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
+                    EventRunner.runFactionDisbandEventPost(player, faction.get(), true, false);
                 } else {
                     player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.SOMETHING_WENT_WRONG));
                 }
@@ -64,7 +65,7 @@ public class DisbandCommand extends AbstractCommand
         //If player has adminmode
         if(super.getPlugin().getPlayerManager().hasAdminMode(player))
         {
-            final boolean isCancelled = EventRunner.runFactionDisbandEvent(player, playerFaction, true, false);
+            final boolean isCancelled = EventRunner.runFactionDisbandEventPre(player, playerFaction, true, false);
             if(!isCancelled)
                 playerDisband(player, playerFaction);
             return CommandResult.success();
@@ -74,7 +75,7 @@ public class DisbandCommand extends AbstractCommand
         if(!playerFaction.getLeader().equals(player.getUniqueId()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
 
-        final boolean isCancelled = EventRunner.runFactionDisbandEvent(player, playerFaction, false, false);
+        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(player, playerFaction, false, false);
         if(!isCancelled)
             playerDisband(player, playerFaction);
 
@@ -89,6 +90,7 @@ public class DisbandCommand extends AbstractCommand
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
             EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
             EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
+            EventRunner.runFactionDisbandEventPost(player, faction, true, false);
         }
         else
         {

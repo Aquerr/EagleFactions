@@ -11,25 +11,31 @@ public class FactionPromoteEventImpl extends FactionAbstractEvent implements Fac
 {
     private final FactionPlayer promotedPlayer;
 
-    protected FactionPromoteEventImpl(Player creator, FactionPlayer promotedPlayer, Faction faction, Cause cause)
+    FactionPromoteEventImpl(Player creator, FactionPlayer promotedPlayer, Faction faction, Cause cause)
     {
         super(creator, faction, cause);
         this.promotedPlayer = promotedPlayer;
     }
 
-    public static class Pre extends FactionPromoteEventImpl implements FactionPromoteEvent.Pre
+    @Override
+    public FactionPlayer getPromotedPlayer()
     {
-        protected Pre(Player creator, final FactionPlayer promotedPlayer, Faction faction, Cause cause)
+        return this.promotedPlayer;
+    }
+
+    static class Pre extends FactionPromoteEventImpl implements FactionPromoteEvent.Pre
+    {
+        Pre(Player creator, final FactionPlayer promotedPlayer, Faction faction, Cause cause)
         {
             super(creator, promotedPlayer, faction, cause);
         }
     }
 
-    public static class Post extends FactionPromoteEventImpl implements FactionPromoteEvent.Post
+    static class Post extends FactionPromoteEventImpl implements FactionPromoteEvent.Post
     {
         private final FactionMemberType promotedToRank;
 
-        protected Post(Player creator, FactionPlayer promotedPlayer, Faction faction, final FactionMemberType promotedToRank, Cause cause)
+        Post(Player creator, FactionPlayer promotedPlayer, Faction faction, final FactionMemberType promotedToRank, Cause cause)
         {
             super(creator, promotedPlayer, faction, cause);
             this.promotedToRank = promotedToRank;

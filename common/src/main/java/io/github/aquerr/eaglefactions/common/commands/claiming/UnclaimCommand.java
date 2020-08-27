@@ -48,7 +48,7 @@ public class UnclaimCommand extends AbstractCommand
 
             if (optionalChunkFaction.isPresent())
             {
-                final boolean isCancelled = EventRunner.runFactionUnclaimEvent(player, optionalChunkFaction.get(), world, chunk);
+                final boolean isCancelled = EventRunner.runFactionUnclaimEventPre(player, optionalChunkFaction.get(), world, chunk);
                 if (isCancelled)
                     return CommandResult.success();
 
@@ -65,6 +65,7 @@ public class UnclaimCommand extends AbstractCommand
                 super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.getUniqueId(), chunk));
 
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
+                EventRunner.runFactionUnclaimEventPost(player, optionalChunkFaction.get(), world, chunk);
                 return CommandResult.success();
             }
             else
@@ -92,7 +93,7 @@ public class UnclaimCommand extends AbstractCommand
         if (!chunkFaction.getName().equals(playerFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, Messages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
 
-        final boolean isCancelled = EventRunner.runFactionUnclaimEvent(player, chunkFaction, world, chunk);
+        final boolean isCancelled = EventRunner.runFactionUnclaimEventPre(player, chunkFaction, world, chunk);
         if (isCancelled)
             return CommandResult.success();
 
@@ -110,6 +111,7 @@ public class UnclaimCommand extends AbstractCommand
         final Faction faction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), chunk).get();
         super.getPlugin().getFactionLogic().removeClaim(faction, new Claim(world.getUniqueId(), chunk));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.LAND_HAS_BEEN_SUCCESSFULLY_UNCLAIMED));
+        EventRunner.runFactionUnclaimEventPost(player, optionalChunkFaction.get(), world, chunk);
         return CommandResult.success();
     }
 }

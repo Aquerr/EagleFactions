@@ -55,7 +55,7 @@ public class KickCommand extends AbstractCommand
         if(playerFaction.getLeader().equals(selectedPlayer.getUniqueId()) || (playerFaction.getOfficers().contains(player.getUniqueId()) && playerFaction.getOfficers().contains(selectedPlayer.getUniqueId())))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_KICK_THIS_PLAYER));
 
-        final boolean isCancelled = EventRunner.runFactionKickEvent(selectedPlayer, player, playerFaction);
+        final boolean isCancelled = EventRunner.runFactionKickEventPre(selectedPlayer, player, playerFaction);
         if(!isCancelled)
         {
             super.getPlugin().getFactionLogic().kickPlayer(selectedPlayer.getUniqueId(), playerFaction.getName());
@@ -68,7 +68,9 @@ public class KickCommand extends AbstractCommand
 
             EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(selectedPlayer.getUniqueId());
             EagleFactionsPlugin.CHAT_LIST.remove(selectedPlayer.getUniqueId());
+            EventRunner.runFactionKickEventPost(selectedPlayer, player, playerFaction);
         }
+
         return CommandResult.success();
     }
 }
