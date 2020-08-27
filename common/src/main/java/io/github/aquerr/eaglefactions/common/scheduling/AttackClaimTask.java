@@ -1,13 +1,16 @@
 package io.github.aquerr.eaglefactions.common.scheduling;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -40,8 +43,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
     {
         if (this.player.health().get() <= 0)
         {
-            //TODO: Add translation key for the following text.
-            this.player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Attack on claim has been cancelled!"));
+            this.player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ATTACK_ON_CLAIM_HAS_BEEN_CANCELLED));
             task.cancel();
         }
 
@@ -61,7 +63,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
             }
 
             final Faction chunkFaction = optionalChunkFaction.get();
-            this.attackLogic.informAboutDestroying(chunkFaction);
+            this.attackLogic.informAboutDestroying(chunkFaction, player.getLocation());
             this.player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CLAIM_DESTROYED));
 
             final Claim claim = new Claim(player.getWorld().getUniqueId(), attackedChunk);
@@ -70,8 +72,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
         }
         else
         {
-            //TODO: Add translation key for the following text.
-            this.player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, "Claim will be destroyed in [", TextColors.GOLD, seconds, TextColors.AQUA, "] seconds"));
+            this.player.sendMessage(ChatTypes.ACTION_BAR, MessageLoader.parseMessage(Messages.CLAIM_WILL_BE_DESTROYED_IN_SECONDS, TextColors.AQUA, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, seconds))));
             this.seconds++;
         }
     }

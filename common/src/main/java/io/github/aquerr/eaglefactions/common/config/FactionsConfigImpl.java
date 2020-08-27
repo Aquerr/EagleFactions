@@ -15,7 +15,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	//TODO: Maybe move to GeneralConfig class?
 	//TODO: This should be possibly changed to .lang file.
 	private String languageFile = "english.conf";
-	private String language = "en_us";
+//	private String language = "en_us";
 
 	private int maxNameLength = 30;
 	private int minNameLength = 3;
@@ -38,7 +38,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean canHomeBetweenWorlds = false;
 	private boolean canPlaceHomeOutsideFactionClaim = false;
 
-	private boolean _requireConnectedClaims = true;
+	private boolean requireConnectedClaims = true;
 	private boolean shouldDelayClaim = false;
 	private int claimDelay = 10;
 	private boolean claimByItems = false;
@@ -57,6 +57,11 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean notifyWhenFactionRemoved = true;
 	private boolean regenerateChunksWhenFactionRemoved = false;
 	private boolean showOnlyPlayersFactionsClaimsInMap = false;
+
+	private boolean shouldInformAboutAttack = true;
+	private boolean shouldShowAttackedClaim = true;
+	private boolean shouldInformAboutDestroy = true;
+	private boolean shouldShowDestroyedClaim = true;
 
 	public FactionsConfigImpl(final Configuration configuration)
 	{
@@ -89,7 +94,7 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.canHomeBetweenWorlds = this.configuration.getBoolean(false, "home-from-other-worlds");
 		this.canPlaceHomeOutsideFactionClaim = this.configuration.getBoolean(false, "can-place-home-outside-faction-claim");
 
-		this._requireConnectedClaims = this.configuration.getBoolean(true, "connected-claims");
+		this.requireConnectedClaims = this.configuration.getBoolean(true, "connected-claims");
 		this.shouldDelayClaim = this.configuration.getBoolean(false, "delayed-claim", "toggled");
 		this.claimDelay = this.configuration.getInt(10, "delayed-claim", "claiming-time");
 		this.claimByItems = this.configuration.getBoolean(false, "claiming-by-items", "toggled");
@@ -110,6 +115,11 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.notifyWhenFactionRemoved = this.configuration.getBoolean(true, "factions-remover", "notify-when-removed");
 		this.regenerateChunksWhenFactionRemoved = this.configuration.getBoolean(false, "factions-remover", "regenerate-when-removed");
 		this.showOnlyPlayersFactionsClaimsInMap = this.configuration.getBoolean(false, "show-only-player-faction-claims-in-map");
+
+		this.shouldInformAboutAttack = this.configuration.getBoolean(true, "inform-about-attack");
+		this.shouldShowAttackedClaim = this.configuration.getBoolean(true, "show-attacked-claim");
+		this.shouldInformAboutDestroy = this.configuration.getBoolean(true, "inform-about-destroy");
+		this.shouldShowDestroyedClaim = this.configuration.getBoolean(true, "show-destroyed-claim");
 	}
 
 	@Override
@@ -241,7 +251,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	@Override
 	public boolean requireConnectedClaims()
 	{
-		return this._requireConnectedClaims;
+		return this.requireConnectedClaims;
 	}
 
 	@Override
@@ -339,6 +349,31 @@ public class FactionsConfigImpl implements FactionsConfig
 	{
 		return this.canPlaceHomeOutsideFactionClaim;
 	}
+
+	@Override
+	public boolean shouldInformAboutAttack()
+	{
+		return this.shouldInformAboutAttack;
+	}
+
+	@Override
+	public boolean shouldInformAboutDestroy()
+	{
+		return this.shouldInformAboutDestroy;
+	}
+
+	@Override
+	public boolean shouldShowAttackedClaim()
+	{
+		return this.shouldShowAttackedClaim;
+	}
+
+	@Override
+	public boolean shouldShowDestroyedClaim()
+	{
+		return this.shouldShowDestroyedClaim;
+	}
+
 
 	private HashMap<String, Integer> prepareItems(final List<String> itemsToPrepare)
 	{

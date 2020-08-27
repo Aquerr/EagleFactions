@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.logic;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -8,14 +9,19 @@ import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.common.scheduling.AttackClaimTask;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.List;
 import java.util.UUID;
@@ -80,17 +86,37 @@ public class AttackLogicImpl implements AttackLogic
     }
 
     @Override
-    public void informAboutAttack(final Faction faction)
+    public void informAboutAttack(final Faction faction, final Location<World> location)
     {
+        if (!this.factionsConfig.shouldInformAboutAttack())
+            return;
+
         final List<Player> playersList = factionLogic.getOnlinePlayers(faction);
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK)));
+        if (this.factionsConfig.shouldShowAttackedClaim())
+        {
+            playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.CLAIM_AT_COORDS_IS_BEING_ATTACKED_BY_ENEMY, TextColors.RED,  ImmutableMap.of(Placeholders.COORDS, Text.of(TextColors.RED, Text.of(ParticlesUtil.getChunkCenter(location.getExtent(), location.getChunkPosition()))))))));
+        }
+        else
+        {
+            playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK)));
+        }
     }
 
     @Override
-    public void informAboutDestroying(final Faction faction)
+    public void informAboutDestroying(final Faction faction, final Location<World> location)
     {
+        if (!this.factionsConfig.shouldInformAboutDestroy())
+            return;
+
         final List<Player> playersList = factionLogic.getOnlinePlayers(faction);
-        playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY)));
+        if (this.factionsConfig.shouldShowDestroyedClaim())
+        {
+            playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.CLAIM_AT_COORDS_HAS_BEEN_DESTROYED_BY_ENEMY, TextColors.RED, ImmutableMap.of(Placeholders.COORDS, Text.of(ParticlesUtil.getChunkCenter(location.getExtent(), location.getChunkPosition())))))));
+        }
+        else
+        {
+            playersList.forEach(x -> x.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY)));
+        }
     }
 
     @Override

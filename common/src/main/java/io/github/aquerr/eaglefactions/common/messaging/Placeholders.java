@@ -14,6 +14,7 @@ public class Placeholders
     public static final Placeholder PLAYER = new Placeholder("%PLAYER%");
 
     public static final Placeholder CLAIM = new Placeholder("%CLAIM%");
+    public static final Placeholder COORDS = new Placeholder("%COORDS%");
 
     public static final Placeholder MEMBER_TYPE = new Placeholder("%MEMBER_TYPE%");
 

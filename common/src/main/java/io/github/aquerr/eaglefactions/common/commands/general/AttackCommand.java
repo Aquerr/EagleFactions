@@ -83,7 +83,7 @@ public class AttackCommand extends AbstractCommand
         int attackTime = this.factionsConfig.getAttackTime();
         Vector3i attackedClaim = player.getLocation().getChunkPosition();
 
-        super.getPlugin().getAttackLogic().informAboutAttack(attackedFaction);
+        super.getPlugin().getAttackLogic().informAboutAttack(attackedFaction, player.getLocation());
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.ATTACK_ON_THE_CHUNK_HAS_BEEN_STARTED + " ", MessageLoader.parseMessage(Messages.STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_DESTROY_IT, TextColors.GREEN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, attackTime)))));
 
         super.getPlugin().getAttackLogic().blockClaiming(attackedFaction.getName());

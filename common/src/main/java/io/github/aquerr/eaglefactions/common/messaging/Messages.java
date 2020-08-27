@@ -33,6 +33,10 @@ public final class Messages
     public static String CLAIM_DESTROYED = "Claim destroyed!";
     public static String ONE_OF_YOUR_CLAIMS_HAS_BEEN_DESTROYED_BY_AN_ENEMY = "One of your claims has been destroyed by an enemy!";
     public static String STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_DESTROY_IT = "Stay in the chunk for %NUMBER% seconds to destroy it!";
+    public static String CLAIM_AT_COORDS_IS_BEING_ATTACKED_BY_ENEMY = "Your claim at %COORDS% is being attacked by an enemy!";
+    public static String CLAIM_AT_COORDS_HAS_BEEN_DESTROYED_BY_ENEMY = "Your claim at %COORDS% has been destroyed by an enemy!";
+    public static String ATTACK_ON_CLAIM_HAS_BEEN_CANCELLED = "Attack on claim has been cancelled!";
+    public static String CLAIM_WILL_BE_DESTROYED_IN_SECONDS = "Claim will be destroyed in [%NUMBER%] seconds";
 
     //Chat
     public static String CHANGED_CHAT_TO = "Changed chat to: ";
