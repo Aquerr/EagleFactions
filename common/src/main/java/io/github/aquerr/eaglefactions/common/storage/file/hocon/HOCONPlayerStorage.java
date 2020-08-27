@@ -31,7 +31,7 @@ public class HOCONPlayerStorage implements PlayerStorage
 
             if(!Files.exists(playersDirectoryPath))
             {
-                Files.createDirectory(playersDirectoryPath);
+                Files.createDirectories(playersDirectoryPath);
             }
         }
         catch(IOException exception)

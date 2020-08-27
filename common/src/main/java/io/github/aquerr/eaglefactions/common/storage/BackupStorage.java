@@ -215,7 +215,7 @@ public class BackupStorage
         {
             if (directory)
             {
-                Files.createDirectory(path);
+                Files.createDirectories(path);
             }
             else
             {
