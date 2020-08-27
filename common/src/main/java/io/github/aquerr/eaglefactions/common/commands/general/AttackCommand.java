@@ -76,8 +76,9 @@ public class AttackCommand extends AbstractCommand
         final float attackedFactionMaxPower = super.getPlugin().getPowerManager().getFactionMaxPower(attackedFaction);
         final float attackedFactionPower = super.getPlugin().getPowerManager().getFactionPower(attackedFaction);
         final float playerFactionPower = super.getPlugin().getPowerManager().getFactionPower(playerFaction);
+        final float minimalPowerToGetAttacked = attackedFactionMaxPower * neededPowerPercentageToAttack;
 
-        if(attackedFactionMaxPower * neededPowerPercentageToAttack < attackedFactionPower || playerFactionPower < attackedFactionPower)
+        if(attackedFactionPower > minimalPowerToGetAttacked || attackedFactionPower > playerFactionPower)
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION + " " + Messages.THEIR_POWER_IS_TO_HIGH));
 
         int attackTime = this.factionsConfig.getAttackTime();
