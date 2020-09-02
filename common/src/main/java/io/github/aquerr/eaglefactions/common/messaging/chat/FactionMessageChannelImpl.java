@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.messaging.chat;
 
+import com.google.common.base.Preconditions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.chat.FactionMessageChannel;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
@@ -11,6 +12,12 @@ import java.util.List;
 public class FactionMessageChannelImpl extends AbstractMutableMessageChannel implements FactionMessageChannel
 {
 	private final Faction faction;
+
+	public static FactionMessageChannelImpl forFaction(final Faction faction)
+	{
+		Preconditions.checkNotNull(faction);
+		return new FactionMessageChannelImpl(faction);
+	}
 
 	public FactionMessageChannelImpl(final Faction faction)
 	{

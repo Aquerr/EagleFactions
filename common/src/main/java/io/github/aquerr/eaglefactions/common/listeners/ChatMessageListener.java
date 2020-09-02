@@ -43,7 +43,7 @@ public class ChatMessageListener extends AbstractListener
     @IsCancelled(Tristate.FALSE)
     public void onChatMessage(final MessageChannelEvent.Chat event, final @Root Player player)
     {
-        MessageChannel messageChannel = event.getOriginalChannel();
+        MessageChannel messageChannel = event.getChannel().orElse(event.getOriginalChannel());
         final MessageEvent.MessageFormatter messageFormatter = event.getFormatter();
 
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
@@ -59,7 +59,6 @@ public class ChatMessageListener extends AbstractListener
             //Add non-faction prefix tag.
             if(!this.chatConfig.getNonFactionPlayerPrefix().toPlain().equals(""))
             {
-                //TODO: Try to use placeholder instead of having "start" and "end" prefix.
                 messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(this.chatConfig.getNonFactionPlayerPrefix())));
             }
             return;
@@ -89,20 +88,20 @@ public class ChatMessageListener extends AbstractListener
             {
                 message.append(Text.of(TextColors.GREEN, messageFormatter.getBody().format()));
                 chatTypePrefix.append(getFactionChatPrefix());
-                messageChannel = new FactionMessageChannelImpl(playerFaction);
-                final MutableMessageChannel channel = messageChannel.asMutable();
-                channel.addMember(Sponge.getServer().getConsole());
-                getAdminReceivers().forEach(channel::addMember);
+                final FactionMessageChannelImpl factionMessageChannel = FactionMessageChannelImpl.forFaction(playerFaction);
+                factionMessageChannel.addMember(Sponge.getServer().getConsole());
+                getAdminReceivers().forEach(factionMessageChannel::addMember);
+                messageChannel = factionMessageChannel;
                 break;
             }
             case ALLIANCE:
             {
                 message.append(Text.of(TextColors.BLUE, messageFormatter.getBody().format()));
                 chatTypePrefix.append(getAllianceChatPrefix());
-                messageChannel = new AllianceMessageChannelImpl(playerFaction);
-                final MutableMessageChannel channel = messageChannel.asMutable();
-                channel.addMember(Sponge.getServer().getConsole());
-                getAdminReceivers().forEach(channel::addMember);
+                final AllianceMessageChannelImpl allianceMessageChannel = AllianceMessageChannelImpl.forFaction(playerFaction);
+                allianceMessageChannel.addMember(Sponge.getServer().getConsole());
+                getAdminReceivers().forEach(allianceMessageChannel::addMember);
+                messageChannel = allianceMessageChannel;
                 break;
             }
             case GLOBAL:
