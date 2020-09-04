@@ -43,7 +43,7 @@ public class HOCONFactionStorage implements FactionStorage
         {
             try
             {
-                Files.createDirectory(this.factionsDir);
+                Files.createDirectories(this.factionsDir);
                 preCreate();
             }
             catch (IOException e)

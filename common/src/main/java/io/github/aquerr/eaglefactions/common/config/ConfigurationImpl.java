@@ -40,7 +40,7 @@ public class ConfigurationImpl implements Configuration
         {
             try
             {
-                Files.createDirectory(this.configDirectoryPath);
+                Files.createDirectories(this.configDirectoryPath);
             }
             catch (IOException exception)
             {

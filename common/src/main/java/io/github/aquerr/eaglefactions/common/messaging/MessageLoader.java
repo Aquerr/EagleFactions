@@ -56,7 +56,7 @@ public class MessageLoader
         {
             try
             {
-                Files.createDirectory(configDir.resolve("messages"));
+                Files.createDirectories(configDir.resolve("messages"));
             }
             catch (IOException e)
             {
