@@ -18,6 +18,7 @@ import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
@@ -272,26 +273,33 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public ProtectionResult canBreak(final Location<World> location, final User user, final boolean shouldNotify)
+    public ProtectionResult canBreak(final BlockSnapshot blockSnapshot, User user, boolean shouldNotify)
     {
-        final ProtectionResult canBreak = canBreak(location, user);
+        final ProtectionResult canBreak = canBreak(blockSnapshot, user);
         if (shouldNotify && !canBreak.hasAccess())
             notifyPlayer(user);
         return canBreak;
     }
 
-    private ProtectionResult canBreak(final Location<World> location, final User user)
+    private ProtectionResult canBreak(final BlockSnapshot blockSnapshot, final User user)
     {
+        final Location<World> location = blockSnapshot.getLocation().orElse(null);
+        if (location == null)
+        {
+            EagleFactionsPlugin.getPlugin().printInfo("Broken BlockSnapshot does not contain a location. This is not normal.");
+            return ProtectionResult.forbidden();
+        }
+
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
             {
                 Player player = (Player)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "BlockBreak:")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + location.getBlockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + blockSnapshot.getPosition().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block id: ", TextColors.RESET, location.getBlockType().getId())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, blockSnapshot.getState().getType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block id: ", TextColors.RESET, blockSnapshot.getState().getType().getId())));
             }
         }
 
@@ -309,7 +317,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         if (safeZoneWorlds.contains(world.getName()))
         {
-            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.SAFE_ZONE))
+            if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.getState().getType().getId(), FactionType.SAFE_ZONE))
                 return ProtectionResult.okSafeZone();
             if (user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                 return ProtectionResult.okSafeZone();
@@ -317,7 +325,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
         if (warZoneWorlds.contains(world.getName()))
         {
-            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.WAR_ZONE))
+            if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.getState().getType().getId(), FactionType.WAR_ZONE))
                 return ProtectionResult.okWarZone();
             if (user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                 return ProtectionResult.okWarZone();
@@ -332,7 +340,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if(optionalChunkFaction.get().isSafeZone())
                 {
-                    if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.SAFE_ZONE))
+                    if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.getState().getType().getId(), FactionType.SAFE_ZONE))
                         return ProtectionResult.okSafeZone();
                     if (user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                         return ProtectionResult.okSafeZone();
@@ -340,7 +348,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 }
                 else //WarZone
                 {
-                    if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.WAR_ZONE))
+                    if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.getState().getType().getId(), FactionType.WAR_ZONE))
                         return ProtectionResult.okWarZone();
                     if (user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                         return ProtectionResult.okWarZone();
@@ -348,7 +356,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 }
             }
 
-            if (isBlockWhitelistedForPlaceDestroy(location.getBlockType().getId(), FactionType.FACTION))
+            if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.getState().getType().getId(), FactionType.FACTION))
                 return ProtectionResult.ok();
 
             final Faction chunkFaction = optionalChunkFaction.get();
@@ -367,8 +375,15 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public ProtectionResult canBreak(final Location<World> location)
+    public ProtectionResult canBreak(final BlockSnapshot blockSnapshot)
     {
+        final Location<World> location = blockSnapshot.getLocation().orElse(null);
+        if (location == null)
+        {
+            EagleFactionsPlugin.getPlugin().printInfo("Broken BlockSnapshot does not contain a location. This is not normal.");
+            return ProtectionResult.forbidden();
+        }
+
         final World world = location.getExtent();
 
         //Not claimable worlds should be always ignored by protection system.
@@ -418,25 +433,32 @@ public class ProtectionManagerImpl implements ProtectionManager
     }
 
     @Override
-    public ProtectionResult canPlace(final Location<World> location, final User user, final boolean shouldNotify)
+    public ProtectionResult canPlace(BlockSnapshot blockSnapshot, User player, boolean shouldNotify)
     {
-        final ProtectionResult canPlace = canPlace(location, user);
+        final ProtectionResult canPlace = canPlace(blockSnapshot, player);
         if (shouldNotify && !canPlace.hasAccess())
-            notifyPlayer(user);
+            notifyPlayer(player);
         return canPlace;
     }
 
-    private ProtectionResult canPlace(final Location<World> location, final User user)
+    private ProtectionResult canPlace(final BlockSnapshot blockSnapshot, final User user)
     {
+        final Location<World> location = blockSnapshot.getLocation().orElse(null);
+        if (location == null)
+        {
+            EagleFactionsPlugin.getPlugin().printInfo("Placed BlockSnapshot does not contain a location. This is not normal.");
+            return ProtectionResult.forbidden();
+        }
+
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
         {
             if(user instanceof Player)
             {
                 Player player = (Player)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "BlockPlace:")));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + location.getBlockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Location: ", TextColors.RESET, location.getExtent().getName() + " " + blockSnapshot.getPosition().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "User: ", TextColors.RESET, user.getName())));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, location.getBlockType().getName())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Block at location: ", TextColors.RESET, blockSnapshot.getState().getType().getName())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, "Item in hand: ", TextColors.RESET, (user.getItemInHand(HandTypes.MAIN_HAND).isPresent() ? user.getItemInHand(HandTypes.MAIN_HAND).get().getType().getName() : ""))));
             }
         }

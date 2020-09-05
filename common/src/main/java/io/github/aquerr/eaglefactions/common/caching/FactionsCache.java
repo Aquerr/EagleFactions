@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class FactionsCache
 {
+    //TODO: Consider converting factions and players cache into Guava Cache.
     private static final Map<String, Faction> FACTIONS_CACHE = new HashMap<>();
     private static final Map<UUID, FactionPlayer> FACTION_PLAYER_CACHE = new HashMap<>();
 

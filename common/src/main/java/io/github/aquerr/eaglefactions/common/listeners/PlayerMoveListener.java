@@ -12,11 +12,15 @@ import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
+import io.github.aquerr.eaglefactions.common.util.ModSupport;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -39,6 +43,25 @@ public class PlayerMoveListener extends AbstractListener
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.chatConfig = plugin.getConfiguration().getChatConfig();
     }
+
+//    @Listener
+//    public void onFlanEntityMove(final MoveEntityEvent event)
+//    {
+//        final Location<World> lastLocation = event.getFromTransform().getLocation();
+//        final Location<World> newLocation = event.getToTransform().getLocation();
+//
+//        if(lastLocation.getChunkPosition().equals(newLocation.getChunkPosition()))
+//            return;
+//
+//        if (ModSupport.isFlan(event.getTargetEntity()))
+//        {
+//            final Optional<User> optionalPlayer = event.getContext().get(EventContextKeys.OWNER);
+//            if (optionalPlayer.isPresent() && optionalPlayer.get() instanceof Player)
+//            {
+//                onPlayerMove(event, (Player) optionalPlayer.get());
+//            }
+//        }
+//    }
 
     @Listener(order = Order.EARLY)
     public void onPlayerMove(final MoveEntityEvent event, final @Root Player player)

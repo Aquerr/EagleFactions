@@ -11,6 +11,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.LocatableSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -332,7 +333,9 @@ public class BlockBreakListener extends AbstractListener
                 continue;
             }
 
-            if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
+            final BlockSnapshot blockSnapshot = transaction.getOriginal();
+
+            if(user != null && !super.getPlugin().getProtectionManager().canBreak(blockSnapshot, user, true).hasAccess())
             {
                 event.setCancelled(true);
                 return;

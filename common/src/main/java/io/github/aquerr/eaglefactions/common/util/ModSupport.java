@@ -89,4 +89,14 @@ public class ModSupport
     {
         return entity.getType().getId().contains("mininglaser");
     }
+
+    /**
+     * Checks if the given entity is from Flan's Mod. (For example, can be a helicopter)
+     * @param entity the entity
+     * @return <tt>true</tt> if the entity is from Flan's Mod, <tt>false</tt> if not.
+     */
+    public static boolean isFlan(Entity entity)
+    {
+        return entity.getType().getId().contains("Flan") || entity.getType().getId().contains("flan");
+    }
 }

@@ -279,7 +279,7 @@ public final class Messages
     public static String THIS_LAND_BELONGS_TO_SOMEONE_ELSE = "This land belongs to someone else!";
     public static String YOU_DONT_HAVE_ACCESS_TO_DO_THIS = "You don't have access to do this!";
     public static String YOU_CANT_ENTER_THIS_FACTION = "You can't enter this faction!";
-    public static String NONE_OF_THIS_FACTIONS_PLAYERS_ARE_ONLINE = "None of this faction's players are online!";
+    public static String NONE_OF_THIS_FACTIONS_PLAYERS_ARE_ONLINE = "None of its members are online!";
     public static String YOU_CANT_ENTER_SAFEZONE_WHEN_YOU_ARE_IN_WARZONE = "You can't enter SafeZone when you are in WarZone!";
     public static String YOU_HAVE_ENTERED_FACTION = "You have entered faction %FACTION_NAME%.";
     public static String YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT = "You can't use commands while being in a fight!";

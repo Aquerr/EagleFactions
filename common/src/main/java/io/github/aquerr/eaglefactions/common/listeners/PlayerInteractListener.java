@@ -91,7 +91,7 @@ public class PlayerInteractListener extends AbstractListener
     public void onBlockInteract(final InteractBlockEvent event, @Root final Player player)
     {
         //If AIR or NONE then return
-        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR)
+        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR || event.getContext().get(EventContextKeys.PLAYER_PLACE).isPresent())
             return;
 
         final Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
