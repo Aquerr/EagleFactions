@@ -157,6 +157,7 @@ public class ProtectionManagerTest
 		final Player player = mock(Player.class);
 		final World world = mock(World.class);
 		final Location<World> location = new Location<>(world, 0, 0, 0);
+		final BlockSnapshot blockSnapshot = mock(BlockSnapshot.class);
 
 		try
 		{
@@ -173,9 +174,10 @@ public class ProtectionManagerTest
 		//when
 		when(world.getUniqueId()).thenReturn(UUID.randomUUID());
 		when(protectionConfig.shouldProtectWildernessFromPlayers()).thenReturn(true);
+		when(blockSnapshot.getLocation()).thenReturn(Optional.of(location));
 
 		//then
-		final ProtectionResult result = protectionManager.canPlace(location, player, false);
+		final ProtectionResult result = protectionManager.canPlace(blockSnapshot, player, false);
 		assertFalse(result.hasAccess());
 	}
 
@@ -189,6 +191,7 @@ public class ProtectionManagerTest
 		final Faction safezoneFaction = FactionImpl.builder("SafeZone", Text.of("SZ"), UUID.randomUUID()).build();
 		final ItemStack itemStack = mock(ItemStack.class);
 		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
+		final BlockSnapshot blockSnapshot = mock(BlockSnapshot.class);
 
 		try
 		{
@@ -209,9 +212,10 @@ public class ProtectionManagerTest
 		when(itemStack.getType()).thenReturn(mock(ItemType.class));
 		when(itemStack.getType().getId()).thenReturn("minecraft:stone");
 		when(player.getItemInHand(HandTypes.MAIN_HAND)).thenReturn(Optional.of(itemStack));
+		when(blockSnapshot.getLocation()).thenReturn(Optional.of(location));
 
 		//then
-		final ProtectionResult result = protectionManager.canPlace(location, player, false);
+		final ProtectionResult result = protectionManager.canPlace(blockSnapshot, player, false);
 		assertFalse(result.hasAccess());
 	}
 }
