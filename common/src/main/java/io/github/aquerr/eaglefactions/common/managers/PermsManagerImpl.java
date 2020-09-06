@@ -89,12 +89,12 @@ public class PermsManagerImpl implements PermsManager
         else if (playerFaction.getAlliances().contains(chunkFaction.getName()))
         {
             final boolean hasPerms = chunkFaction.getPerms().get(FactionMemberType.ALLY).get(flagType);
-            return hasPerms && claim.isAccessibleByFaction(); //If factio has access then allies have it as well.
+            return hasPerms && claim.isAccessibleByFaction(); //If faction has access then allies have it as well.
         }
         else if (playerFaction.getTruces().contains(chunkFaction.getName()))
         {
-            final boolean hasPerms = chunkFaction.getPerms().get(FactionMemberType.TRUCE).get(flagType);
-            return hasPerms && claim.isAccessibleByFaction(); //If factio has access then allies have it as well.
+            //Truces cannot break, nor place or interact with blocks.
+            return false;
         }
         return false;
     }
