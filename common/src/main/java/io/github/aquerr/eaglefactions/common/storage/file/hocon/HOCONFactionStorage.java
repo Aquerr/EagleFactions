@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.serializers.ClaimTypeSerializer;
+import io.github.aquerr.eaglefactions.common.util.FileUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -20,6 +21,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -153,9 +155,12 @@ public class HOCONFactionStorage implements FactionStorage
     @Override
     public boolean saveFaction(final Faction faction)
     {
-        ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(faction.getName().toLowerCase() + ".conf");
         try
         {
+            FileUtils.createDirectoryIfNotExists(this.factionsDir);
+
+            ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(faction.getName().toLowerCase() + ".conf");
+
             if (configurationLoader == null)
             {
                 final Path factionFilePath = this.factionsDir.resolve(faction.getName().toLowerCase() + ".conf");
@@ -201,6 +206,10 @@ public class HOCONFactionStorage implements FactionStorage
     public void deleteFactions()
     {
         this.factionLoaders.clear();
+
+        if (Files.notExists(this.factionsDir))
+            return;
+
         try
         {
             Files.list(this.factionsDir).forEach(path ->

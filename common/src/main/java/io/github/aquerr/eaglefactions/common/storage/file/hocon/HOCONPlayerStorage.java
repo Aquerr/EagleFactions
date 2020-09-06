@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
+import io.github.aquerr.eaglefactions.common.util.FileUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.Sponge;
@@ -75,11 +76,14 @@ public class HOCONPlayerStorage implements PlayerStorage
     @Override
     public boolean savePlayer(FactionPlayer player)
     {
-        Path playerFile = playersDirectoryPath.resolve(player.getUniqueId().toString() + ".conf");
 
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile).build();
         try
         {
+            FileUtils.createDirectoryIfNotExists(this.playersDirectoryPath);
+
+            Path playerFile = playersDirectoryPath.resolve(player.getUniqueId().toString() + ".conf");
+            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile).build();
+
             ConfigurationNode configurationNode = configurationLoader.load();
             configurationNode.getNode("name").setValue(player.getName());
             configurationNode.getNode("faction").setValue(player.getFactionName().orElse(""));

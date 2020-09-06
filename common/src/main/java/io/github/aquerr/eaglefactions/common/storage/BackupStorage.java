@@ -18,18 +18,18 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static io.github.aquerr.eaglefactions.common.util.FileUtils.*;
+
 public class BackupStorage
 {
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd_hh-mm-ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
 
-    private final Path configPath;
     private final Path backupsPath;
     private final FactionStorage factionStorage;
     private final PlayerStorage playerStorage;
 
     public BackupStorage(final FactionStorage factionStorage, final PlayerStorage playerStorage, final Path configPath)
     {
-        this.configPath = configPath;
         this.backupsPath = configPath.resolve("backups");
         this.factionStorage = factionStorage;
         this.playerStorage = playerStorage;
@@ -39,20 +39,21 @@ public class BackupStorage
     {
         try
         {
-            final Path backupPath = this.backupsPath.resolve("backup-" + DATE_TIME_FORMATTER.format(LocalDateTime.now()));
-            createFileIfNotExists(this.backupsPath, true);
-            createFileIfNotExists(backupPath, true);
+            final Path backupDirPath = this.backupsPath.resolve("backup-" + DATE_TIME_FORMATTER.format(LocalDateTime.now()));
+            createDirectoryIfNotExists(this.backupsPath);
+            createDirectoryIfNotExists(backupDirPath);
 
-            final Path factionsDir = backupPath.resolve("factions");
-            final Path playersDir = backupPath.resolve("players");
-            createFileIfNotExists(factionsDir, false);
-            createFileIfNotExists(playersDir, true);
+            final Path factionsDir = backupDirPath.resolve("factions");
+            final Path playersDir = backupDirPath.resolve("players");
+            createDirectoryIfNotExists(factionsDir);
+            createDirectoryIfNotExists(playersDir);
 
             // Backup factions
             final Set<Faction> factions = factionStorage.getFactions();
             for (final Faction faction : factions)
             {
                 final Path factionFilePath = factionsDir.resolve(faction.getName().toLowerCase() + ".conf");
+//                createFileIfNotExists(factionFilePath, false);
                 final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(factionFilePath).build();
                 final ConfigurationNode configurationNode = configurationLoader.createEmptyNode();
                 ConfigurateHelper.putFactionInNode(configurationNode, faction);
@@ -64,6 +65,7 @@ public class BackupStorage
             for (final FactionPlayer factionPlayer : players)
             {
                 final Path playerFile = playersDir.resolve(factionPlayer.getUniqueId().toString() + ".conf");
+//                createFileIfNotExists(playerFile, false);
                 final HoconConfigurationLoader playerConfigLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
                 final ConfigurationNode playerNode = playerConfigLoader.createEmptyNode();
                 ConfigurateHelper.putPlayerInNode(playerNode, factionPlayer);
@@ -71,10 +73,10 @@ public class BackupStorage
             }
 
             // Now when factions and players are ready, we can move them into a zip file.
-            FileOutputStream fileOutputStream = new FileOutputStream(backupPath.toAbsolutePath().toString() + ".zip");
+            FileOutputStream fileOutputStream = new FileOutputStream(backupDirPath.toAbsolutePath().toString() + ".zip");
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
             ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
-            File file = backupPath.toFile();
+            File file = backupDirPath.toFile();
 
             zipFile(file, file.getName(), zipOutputStream);
             bufferedOutputStream.flush();
@@ -83,7 +85,7 @@ public class BackupStorage
             fileOutputStream.close();
 
             //Delete temp files
-            deleteDirectory(backupPath.toFile());
+            deleteDirectoryRecursive(backupDirPath.toFile());
 
             return true;
         }
@@ -124,7 +126,7 @@ public class BackupStorage
             File newFile = newFile(destDir, zipEntry);
             if (zipEntry.isDirectory())
             {
-                createFileIfNotExists(newFile.toPath(), true);
+                createDirectoryIfNotExists(newFile.toPath());
                 zipEntry = zipInputStream.getNextEntry();
                 continue;
             }
@@ -144,6 +146,7 @@ public class BackupStorage
         // Load data from backup
         final Path backupTempDirectory = destPath.resolve(getFileNameWithoutExtension(backupName));
         final Path factionsDirPath = backupTempDirectory.resolve("factions");
+//        createFileIfNotExists(factionsDirPath, true);
         final File factionsDir = factionsDirPath.toFile();
         final File[] factionsFiles = factionsDir.listFiles();
         final List<Faction> factions = new ArrayList<>();
@@ -167,6 +170,7 @@ public class BackupStorage
 
         final List<FactionPlayer> players = new ArrayList<>();
         final Path playersDirPath = backupTempDirectory.resolve("players");
+//        createFileIfNotExists(playersDirPath, true);
         final File playersDir = playersDirPath.toFile();
         final File[] playerFiles = playersDir.listFiles();
         if (playerFiles != null)
@@ -192,7 +196,7 @@ public class BackupStorage
         this.playerStorage.savePlayers(players);
 
         // Remove temp files
-        deleteDirectory(backupTempDirectory.toFile());
+        deleteDirectoryRecursive(backupTempDirectory.toFile());
         return true;
     }
 
@@ -207,34 +211,6 @@ public class BackupStorage
         }
 
         return destFile;
-    }
-
-    private void createFileIfNotExists(final Path path, final boolean directory) throws IOException
-    {
-        if (Files.notExists(path))
-        {
-            if (directory)
-            {
-                Files.createDirectory(path);
-            }
-            else
-            {
-                Files.createFile(path);
-            }
-        }
-    }
-
-    private boolean deleteDirectory(final File directory)
-    {
-        File[] children = directory.listFiles();
-        if (children != null)
-        {
-            for (final File file : children)
-            {
-                deleteDirectory(file);
-            }
-        }
-        return directory.delete();
     }
 
     private void zipFile(final File file, String fileName, ZipOutputStream zipOutputStream) throws IOException
@@ -272,11 +248,5 @@ public class BackupStorage
         }
         bufferedInputStream.close();
         fileInputStream.close();
-    }
-
-    private String getFileNameWithoutExtension(final String fileName)
-    {
-        final int index = fileName.lastIndexOf(".");
-        return fileName.substring(0, index);
     }
 }
