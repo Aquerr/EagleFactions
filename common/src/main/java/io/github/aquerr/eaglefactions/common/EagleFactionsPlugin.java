@@ -106,10 +106,10 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private Configuration configuration;
     private PVPLogger pvpLogger;
-    private PlayerManagerImpl playerManager;
-    private PermsManagerImpl permsManager;
+    private PlayerManager playerManager;
+    private PermsManager permsManager;
     private ProtectionManager protectionManager;
-    private PowerManagerImpl powerManager;
+    private PowerManager powerManager;
     private AttackLogic attackLogic;
     private FactionLogic factionLogic;
     private StorageManager storageManager;
@@ -352,7 +352,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new LeaveCommand(this))
                 .build());
 
-        //VERSION command
+        //Version command
         SUBCOMMANDS.put(Arrays.asList("v", "version"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_VERSION_DESC))
                 .permission(PluginPermissions.VERSION_COMMAND)
@@ -414,7 +414,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new DemoteCommand(this))
                 .build());
 
-        //Claims command.
+        //Claims command
         SUBCOMMANDS.put(Arrays.asList("claims", "listclaims"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_LIST_CLAIMS_DESC))
                 .permission(PluginPermissions.CLAIMS_LIST_COMMAND)
@@ -422,7 +422,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new ClaimsListCommand(this))
                 .build());
 
-        //Claim command.
+        //Claim command
         SUBCOMMANDS.put(Collections.singletonList("claim"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_CLAIM_DESC))
                 .permission(PluginPermissions.CLAIM_COMMAND)
@@ -430,6 +430,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new ClaimCommand(this))
                 .build());
 
+        //Square Claim command
         SUBCOMMANDS.put(Collections.singletonList("squareclaim"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_SQUARE_CLAIM_DESC))
                 .permission(PluginPermissions.RADIUS_CLAIM_COMMAND)
@@ -437,14 +438,14 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new SquareClaimCommand(this))
                 .build());
 
-        //Unclaim command.
+        //Unclaim command
         SUBCOMMANDS.put(Collections.singletonList("unclaim"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_UNCLAIM_DESC))
                 .permission(PluginPermissions.UNCLAIM_COMMAND)
                 .executor(new UnclaimCommand(this))
                 .build());
 
-        //Add Unclaimall Command
+        //Unclaimall Command
         SUBCOMMANDS.put(Collections.singletonList("unclaimall"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_UNCLAIM_ALL_DESC))
                 .permission(PluginPermissions.UNCLAIM_ALL_COMMAND)
@@ -473,28 +474,21 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new HomeCommand(this))
                 .build());
 
-        //Add autoclaim command.
+        //Autoclaim command.
         SUBCOMMANDS.put(Collections.singletonList("autoclaim"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_AUTO_CLAIM_DESC))
                 .permission(PluginPermissions.AUTO_CLAIM_COMMAND)
                 .executor(new AutoClaimCommand(this))
                 .build());
 
-        //Add automap command
+        //Automap command
         SUBCOMMANDS.put(Collections.singletonList("automap"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_AUTO_MAP_DESC))
                 .permission(PluginPermissions.AUTO_MAP_COMMAND)
                 .executor(new AutoMapCommand(this))
                 .build());
 
-        //Add admin command
-        SUBCOMMANDS.put(Collections.singletonList("admin"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ADMIN_DESC))
-                .permission(PluginPermissions.ADMIN_COMMAND)
-                .executor(new AdminCommand(this))
-                .build());
-
-        //Add Coords Command
+        //Coords Command
         SUBCOMMANDS.put(Collections.singletonList("coords"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_COORDS_DESC))
                 .permission(PluginPermissions.COORDS_COMMAND)
@@ -502,7 +496,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new CoordsCommand(this))
                 .build());
 
-        //Add SetPower Command
+        //SetPower Command
         SUBCOMMANDS.put(Collections.singletonList("setpower"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_SET_POWER_DESC))
                 .permission(PluginPermissions.SET_POWER_COMMAND)
@@ -511,7 +505,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new SetPowerCommand(this))
                 .build());
 
-        //Add MaxPower Command
+        //MaxPower Command
         SUBCOMMANDS.put(Collections.singletonList("maxpower"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_SET_MAX_POWER_DESC))
                 .permission(PluginPermissions.MAX_POWER_COMMAND)
@@ -520,7 +514,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new MaxPowerCommand(this))
                 .build());
 
-        //Add Attack Command
+        //Attack Command
         SUBCOMMANDS.put(Collections.singletonList("attack"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_ATTACK_DESC))
                 .permission(PluginPermissions.ATTACK_COMMAND)
@@ -742,17 +736,17 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.pvpLogger;
     }
 
-    public PermsManagerImpl getPermsManager()
+    public PermsManager getPermsManager()
     {
         return this.permsManager;
     }
 
-    public PlayerManagerImpl getPlayerManager()
+    public PlayerManager getPlayerManager()
     {
         return playerManager;
     }
 
-    public PowerManagerImpl getPowerManager()
+    public PowerManager getPowerManager()
     {
         return powerManager;
     }

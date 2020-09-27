@@ -8,14 +8,17 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
+import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.util.Identifiable;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Aquerr on 2017-08-04.
@@ -28,8 +31,6 @@ public class PlayerManagerImpl implements PlayerManager
     private final PowerConfig powerConfig;
 
     private UserStorageService userStorageService;
-
-    private final Set<UUID> adminModePlayers = new HashSet<>();
 
     public PlayerManagerImpl(final StorageManager storageManager, final FactionLogic factionLogic, final FactionsConfig factionsConfig, final PowerConfig powerConfig)
     {
@@ -96,24 +97,15 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public boolean hasAdminMode(final User player) {
-        return this.adminModePlayers.contains(player.getUniqueId());
-    }
-
-    @Override
-    public boolean activateAdminMode(final User player) {
-        return this.adminModePlayers.add(player.getUniqueId());
-    }
-
-    @Override
-    public boolean deactivateAdminMode(final User player) {
-        return this.adminModePlayers.remove(player.getUniqueId());
+    public boolean hasAdminMode(final User player)
+    {
+        return player.hasPermission(PluginPermissions.ADMIN_MODE);
     }
 
     @Override
     public Set<UUID> getAdminModePlayers()
     {
-        return Collections.unmodifiableSet(this.adminModePlayers);
+        return Sponge.getServer().getOnlinePlayers().stream().filter(this::hasAdminMode).map(Identifiable::getUniqueId).collect(Collectors.toSet());
     }
 
     @Override
