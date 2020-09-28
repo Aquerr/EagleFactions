@@ -51,7 +51,7 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 	{
 		super(eagleFactions);
 		final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
-		this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl());
+		this.dataSource = sqlService.getDataSource("jdbc:mariadb://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl());
 
 		if(!databaseExists())
 		{
@@ -60,7 +60,7 @@ public class MariaDbProvider extends SQLAbstractProvider implements SQLProvider
 
 		final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
 		hikariDataSource.close();
-		this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName());
+		this.dataSource = sqlService.getDataSource("jdbc:mariadb://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName());
 	}
 
 	private boolean databaseExists() throws SQLException
