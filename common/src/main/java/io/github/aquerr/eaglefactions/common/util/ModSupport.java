@@ -50,13 +50,12 @@ public class ModSupport
 
     /**
      * Checks if the given class comes from Mekanism
-     * @param clazz class to check
-     * @param <T> the type of class
+     * @param entity to check
      * @return <tt>true</tt> if class comes from Mekanism, <tt>false</tt> if not.
      */
-    public static <T> boolean isMekenism(Class<T> clazz)
+    public static boolean isMekenism(final Entity entity)
     {
-        return clazz.getName().contains("mekanism");
+        return entity.getClass().getName().contains("mekanism");
     }
 
     /**

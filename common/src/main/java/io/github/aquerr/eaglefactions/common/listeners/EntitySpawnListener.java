@@ -63,7 +63,7 @@ public class EntitySpawnListener extends AbstractListener
             if(rootCause instanceof Entity)
             {
                 Entity causeEntity = (Entity)rootCause;
-                if (ModSupport.isMekenism(rootCause.getClass()))
+                if (ModSupport.isMekenism(causeEntity))
                 {
                     final Entity entity1 = ModSupport.getEntityOwnerFromMekanism(causeEntity);
                     if (entity1 instanceof User)

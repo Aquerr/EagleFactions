@@ -4,14 +4,11 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.util.ModSupport;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.LocatableSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -31,8 +28,6 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -268,19 +263,30 @@ public class BlockBreakListener extends AbstractListener
             return;
 
         final Object source = event.getSource();
+        User user = null;
 
         //For ICBM
         //Missiles and grenades should be handled by explosion listener.
         if(source instanceof Entity)
         {
-            final Entity entity = (Entity)source;
-            final String id = entity.getType().getId();
-            final String name = entity.getType().getName();
-            if(id.startsWith("icbmclassic:missile") || id.startsWith("icbmclassic:grenade") || name.contains("missile") || name.contains("grenade"))
-                return;
+            // Helps with Mekanism flamethrower
+            if (ModSupport.isMekenism((Entity)source))
+            {
+                final Entity owner = ModSupport.getEntityOwnerFromMekanism((Entity) source);
+                // Just in case someone gave flamethrower to skeleton or something :P
+                if (owner instanceof User)
+                    user = (User)owner;
+            }
+            else
+            {
+                final Entity entity = (Entity)source;
+                final String id = entity.getType().getId();
+                final String name = entity.getType().getName();
+                if(id.startsWith("icbmclassic:missile") || id.startsWith("icbmclassic:grenade") || name.contains("missile") || name.contains("grenade"))
+                    return;
+            }
         }
 
-        User user = null;
         if(event.getCause().containsType(Player.class))
         {
             user = event.getCause().first(Player.class).get();
@@ -294,15 +300,6 @@ public class BlockBreakListener extends AbstractListener
         if(user == null)
         {
             user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
-        }
-
-        // Helps with Mekanism flamethrower
-        if (ModSupport.isMekenism(source.getClass()))
-        {
-            final Entity owner = ModSupport.getEntityOwnerFromMekanism((Entity) source);
-            // Just in case someone gave flamethrower to skeleton or something :P
-            if (owner instanceof User)
-                user = (User)owner;
         }
 
         LocatableBlock locatableBlock = null;
