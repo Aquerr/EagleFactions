@@ -25,7 +25,7 @@ public class FactionJoinListener extends AbstractListener
 
 	@Listener(order = Order.POST)
 	@IsCancelled(value = Tristate.FALSE)
-	public void onFactionJoin(final FactionJoinEvent event, @Root final Player player)
+	public void onFactionJoin(final FactionJoinEvent.Post event, @Root final Player player)
 	{
 		//Notify other faction members about someone joining the faction.
 		final Faction faction = event.getFaction();

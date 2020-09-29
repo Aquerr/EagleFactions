@@ -24,7 +24,7 @@ public class FactionKickListener extends AbstractListener
 
     @Listener(order = Order.POST)
     @IsCancelled(value = Tristate.FALSE)
-    public void onPlayerFactionKick(final FactionKickEvent event)
+    public void onPlayerFactionKick(final FactionKickEvent.Post event)
     {
         final Faction faction = event.getFaction();
         final FactionPlayer kickedPlayer = event.getKickedPlayer();

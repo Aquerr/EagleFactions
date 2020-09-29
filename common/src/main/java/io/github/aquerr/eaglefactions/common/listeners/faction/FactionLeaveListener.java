@@ -25,7 +25,7 @@ public class FactionLeaveListener extends AbstractListener
 
     @Listener(order = Order.POST)
     @IsCancelled(value = Tristate.FALSE)
-    public void onFactionLeave(final FactionLeaveEvent event, @Root final Player player)
+    public void onFactionLeave(final FactionLeaveEvent.Post event, @Root final Player player)
     {
         //Notify other faction members about someone leaving the faction
         final Faction faction = event.getFaction();
