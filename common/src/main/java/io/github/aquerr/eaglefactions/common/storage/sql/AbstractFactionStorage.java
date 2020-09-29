@@ -321,7 +321,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     preparedStatement.setString(2, faction.getName());
                     preparedStatement.addBatch();
                 }
-                preparedStatement.executeUpdate();
+                preparedStatement.executeBatch();
                 preparedStatement.close();
             }
 
@@ -334,7 +334,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     preparedStatement.setString(2, faction.getName());
                     preparedStatement.addBatch();
                 }
-                preparedStatement.executeUpdate();
+                preparedStatement.executeBatch();
                 preparedStatement.close();
             }
 
@@ -347,7 +347,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     preparedStatement.setString(2, faction.getName());
                     preparedStatement.addBatch();
                 }
-                preparedStatement.executeUpdate();
+                preparedStatement.executeBatch();
                 preparedStatement.close();
             }
 
@@ -363,10 +363,10 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
                     preparedStatement.addBatch();
                 }
-                preparedStatement.executeUpdate();
+                preparedStatement.executeBatch();
                 preparedStatement.close();
 
-                //Can't do it in above loop as it it violate the foreign key constraint.
+                //Can't do it in above loop as it violates the foreign key constraint.
                 // Insert owner into the claim
                 for (final Claim claim : faction.getClaims())
                 {
@@ -380,7 +380,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                             ownerPreparedStatement.setString(3, owner.toString());
                             ownerPreparedStatement.addBatch();
                         }
-                        ownerPreparedStatement.executeUpdate();
+                        ownerPreparedStatement.executeBatch();
                         ownerPreparedStatement.close();
                     }
                 }

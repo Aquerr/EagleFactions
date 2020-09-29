@@ -163,7 +163,7 @@ CREATE TABLE `Claims` (
       ON UPDATE CASCADE,
   PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `Claims` (`FactionName`);
+CREATE UNIQUE INDEX `Claim_UNIQUE` ON `Claims` (`WorldUUID`, `ChunkPosition`);
 
 -- Create FactionsChest Table
 CREATE TABLE `FactionChests` (

@@ -134,7 +134,7 @@ CREATE TABLE Claims (
    PRIMARY KEY (WorldUUID, ChunkPosition),
    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ON Claims (FactionName);
+CREATE UNIQUE INDEX ON Claims (WorldUUID, ChunkPosition);
 
 -- Create FactionsChest Table
 CREATE TABLE FactionChests (
