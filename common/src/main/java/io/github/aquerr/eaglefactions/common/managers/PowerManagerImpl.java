@@ -9,15 +9,8 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.scheduling.PowerIncrementTask;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -28,21 +21,12 @@ public class PowerManagerImpl implements PowerManager
     private final PlayerManager playerManager;
     private final PowerConfig powerConfig;
 
-    private CommentedConfigurationNode _factionsNode;
     private final UUID dummyUUID = new UUID(0, 0);
 
-    public PowerManagerImpl(final PlayerManager playerManager, final PowerConfig powerConfig, final Path configDir)
+    public PowerManagerImpl(final PlayerManager playerManager, final PowerConfig powerConfig)
     {
         this.playerManager = playerManager;
         this.powerConfig = powerConfig;
-        try
-        {
-            _factionsNode = HoconConfigurationLoader.builder().setPath(Paths.get(configDir.resolve("data") + "/factions.conf")).build().load();
-        }
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
     }
 
     @Override
@@ -66,11 +50,7 @@ public class PowerManagerImpl implements PowerManager
     public float getFactionPower(final Faction faction)
     {
         if(faction.isSafeZone() || faction.isWarZone())
-        {
-            ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.getName(), "power");
-
-            return powerNode.getFloat(9999f);
-        }
+            return 9999.0f;
 
         float factionPower = 0;
         if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
@@ -109,11 +89,7 @@ public class PowerManagerImpl implements PowerManager
     public float getFactionMaxPower(final Faction faction)
     {
         if(faction.isSafeZone() || faction.isWarZone())
-        {
-            ConfigurationNode powerNode = _factionsNode.getNode("factions", faction.getName(), "power");
-
-            return powerNode.getFloat(9999f);
-        }
+            return 9999.0f;
 
         float factionMaxPower = 0;
 

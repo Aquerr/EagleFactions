@@ -809,7 +809,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
-        powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig(), this.configDir);
+        powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
         permsManager = new PermsManagerImpl();
         factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
         attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
