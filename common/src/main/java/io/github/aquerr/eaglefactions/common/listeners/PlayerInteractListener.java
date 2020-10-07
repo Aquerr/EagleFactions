@@ -20,6 +20,7 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -88,29 +89,26 @@ public class PlayerInteractListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onBlockInteract(final InteractBlockEvent event, @Root final Player player)
+    public void onBlockInteract(final InteractBlockEvent.Secondary event, @Root final Player player)
     {
         //If AIR or NONE then return
-        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR || event.getContext().get(EventContextKeys.PLAYER_PLACE).isPresent())
+        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR)
             return;
 
-        final Optional<Location<World>> optionalLocation = event.getTargetBlock().getLocation();
-        if (!optionalLocation.isPresent())
-            return;
-
-        final Location<World> blockLocation = optionalLocation.get();
-
-        final ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, player, true);
-        if (!protectionResult.hasAccess())
-        {
-            event.setCancelled(true);
-            return;
-        }
-        else
-        {
-            if(event instanceof InteractBlockEvent.Secondary && protectionResult.isEagleFeather())
-                removeEagleFeather(player);
-        }
+        event.getTargetBlock().getLocation()
+                .map(location -> super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true))
+                .ifPresent(protectionResult ->
+                {
+                    if (!protectionResult.hasAccess())
+                    {
+                        event.setCancelled(true);
+                    }
+                    else
+                    {
+                        if(protectionResult.isEagleFeather())
+                            removeEagleFeather(player);
+                    }
+                });
     }
 
     private void removeEagleFeather(final Player player)
