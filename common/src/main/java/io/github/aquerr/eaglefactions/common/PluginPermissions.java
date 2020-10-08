@@ -68,6 +68,8 @@ public final class PluginPermissions
     //Admin
     public static final String ADMIN_MODE = "eaglefactions.adminmode";
 
+    public static final String ADMIN_MODE_COMMAND = "eaglefactions.admin.adminmode";
+
     public static final String SET_POWER_COMMAND = "eaglefactions.admin.setpower";
     public static final String MAX_POWER_COMMAND = "eaglefactions.admin.maxpower";
 

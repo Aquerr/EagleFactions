@@ -499,7 +499,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Admin command
         SUBCOMMANDS.put(Collections.singletonList("admin"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_ADMIN_DESC))
-                .permission(PluginPermissions.ADMIN_MODE)
+                .permission(PluginPermissions.ADMIN_MODE_COMMAND)
                 .executor(new AdminCommand(this))
                 .build());
 
