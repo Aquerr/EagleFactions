@@ -32,6 +32,8 @@ public class PlayerManagerImpl implements PlayerManager
 
     private UserStorageService userStorageService;
 
+    private final Set<UUID> adminModePlayers = new HashSet<>();
+
     public PlayerManagerImpl(final StorageManager storageManager, final FactionLogic factionLogic, final FactionsConfig factionsConfig, final PowerConfig powerConfig)
     {
         this.storageManager = storageManager;
@@ -99,7 +101,19 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public boolean hasAdminMode(final User player)
     {
-        return player.hasPermission(PluginPermissions.ADMIN_MODE);
+        return player.hasPermission(PluginPermissions.ADMIN_MODE) || this.adminModePlayers.contains(player.getUniqueId());
+    }
+
+    @Override
+    public boolean activateAdminMode(final User player)
+    {
+        return this.adminModePlayers.add(player.getUniqueId());
+    }
+
+    @Override
+    public boolean deactivateAdminMode(final User player)
+    {
+        return this.adminModePlayers.remove(player.getUniqueId());
     }
 
     @Override
