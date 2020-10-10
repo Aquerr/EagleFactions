@@ -72,6 +72,7 @@ public final class Messages
     public static String YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD = "You cannot claim territories in this world!";
     public static String YOU_NEED_TO_WAIT_NUMBER_SECONDS_TO_BE_ABLE_TO_CLAIM_AGAIN = "You need to wait %NUMBER% seconds to be able to claim again!";
     public static String THIS_PLACE_DOES_NOT_BELONG_TO_YOUR_FACTION = "This place does not belong to your faction!";
+    public static String CANT_RECTANGLE_CLAIM_IF_DELAYED_CLAIMING_IS_ON = "Can't rectangle-claim if delayed claiming is turned on.";
 
     //Coords
     public static String TEAM_COORDS = "Team Coords";

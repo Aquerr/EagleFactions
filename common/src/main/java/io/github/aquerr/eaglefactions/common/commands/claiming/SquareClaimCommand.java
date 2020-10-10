@@ -43,7 +43,7 @@ public class SquareClaimCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final int number = context.requireOne(Text.of("radius"));
+        final int radius = context.requireOne(Text.of("radius"));
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -53,27 +53,33 @@ public class SquareClaimCommand extends AbstractCommand
         if (!optionalPlayerFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
 
-        final Faction playerFaction = optionalPlayerFaction.get();
         final World world = player.getWorld();
-        final Vector3i playerChunk = player.getLocation().getChunkPosition();
         final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player);
 
         //Check if it is a claimable world
         if (!this.protectionConfig.getClaimableWorldNames().contains(world.getName()))
         {
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()) && !isAdmin)
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()) && isAdmin)
             {
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
+                return preformSquareClaim(player, optionalPlayerFaction.get(), radius);
             }
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
         }
 
+        return preformSquareClaim(player, optionalPlayerFaction.get(), radius);
+    }
+
+    private CommandResult preformSquareClaim(final Player player, final Faction playerFaction, final int radius)
+    {
+        final Vector3i playerChunk = player.getLocation().getChunkPosition();
+        final World world = player.getWorld();
+
         CompletableFuture.runAsync(() -> {
             //Radius claim
-            final int startX = playerChunk.getX() - number;
-            final int startZ = playerChunk.getZ() - number;
-            final int endX = playerChunk.getX() + number;
-            final int endZ = playerChunk.getZ() + number;
+            final int startX = playerChunk.getX() - radius;
+            final int startZ = playerChunk.getZ() - radius;
+            final int endX = playerChunk.getX() + radius;
+            final int endZ = playerChunk.getZ() + radius;
 
             final List<Vector3i> chunksToClaim = new ArrayList<>();
             final List<Claim> newFactionClaims = new ArrayList<>();
@@ -117,7 +123,7 @@ public class SquareClaimCommand extends AbstractCommand
                 //Check if faction has enough power to claim territory
                 if (super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
                 {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
+                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
                     break;
                 }
 
@@ -149,7 +155,7 @@ public class SquareClaimCommand extends AbstractCommand
 
                 if(this.factionsConfig.shouldDelayClaim())
                 {
-                    player.sendMessage(Text.of("Can't rectangleclaim if delayed claiming is turned on."));
+                    player.sendMessage(Text.of(Messages.CANT_RECTANGLE_CLAIM_IF_DELAYED_CLAIMING_IS_ON));
                     break;
                 }
 
