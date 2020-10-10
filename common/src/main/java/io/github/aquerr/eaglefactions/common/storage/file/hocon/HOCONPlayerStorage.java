@@ -1,15 +1,10 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.PluginInfo;
-import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
 import io.github.aquerr.eaglefactions.common.util.FileUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,29 +43,7 @@ public class HOCONPlayerStorage implements PlayerStorage
         if (Files.notExists(playerFilePath))
             return null;
 
-        HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFilePath).build();
-        try
-        {
-            ConfigurationNode configurationNode = configurationLoader.load();
-            String playerName = configurationNode.getNode("name").getString("");
-            String factionName = configurationNode.getNode("faction").getString("");
-            String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
-            float power = configurationNode.getNode("power").getFloat(0.0f);
-            float maxpower = configurationNode.getNode("maxpower").getFloat(0.0f);
-            boolean diedInWarZone = configurationNode.getNode("death-in-warzone").getBoolean(false);
-            FactionMemberType factionMemberType = null;
-
-            if(!factionMemberTypeString.equals(""))
-                factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
-
-            return new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, factionMemberType, diedInWarZone);
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-            Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of("Could not get player from the file. Tried to get player for UUID: " + playerUUID)));
-        }
-        return null;
+        return ConfigurateHelper.getPlayerFromFile(playerFilePath.toFile());
     }
 
     @Override
@@ -119,6 +92,9 @@ public class HOCONPlayerStorage implements PlayerStorage
         File playerDir = new File(playersDirectoryPath.toUri());
         File[] playerFiles = playerDir.listFiles();
 
+        if (playerFiles == null)
+            return playerSet;
+
         for(File playerFile : playerFiles)
         {
             HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile.toPath()).build();
@@ -143,42 +119,14 @@ public class HOCONPlayerStorage implements PlayerStorage
         final File playerDir = new File(playersDirectoryPath.toUri());
         final File[] playerFiles = playerDir.listFiles();
 
+        if (playerFiles == null)
+            return playerSet;
+
         for(File playerFile : playerFiles)
         {
-            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile.toPath()).build();
-            try
-            {
-                ConfigurationNode configurationNode = configurationLoader.load();
-                String playerName = configurationNode.getNode("name").getString("");
-                UUID playerUUID;
-                try
-                {
-                    playerUUID = UUID.fromString(playerFile.getName().substring(0, playerFile.getName().indexOf('.')));
-
-                }
-                catch(Exception exception)
-                {
-                    exception.printStackTrace();
-                    Files.delete(playerFile.toPath());
-                    continue;
-                }
-                String factionName = configurationNode.getNode("faction").getString("");
-                String factionMemberTypeString = configurationNode.getNode("faction-member-type").getString("");
-                float power = configurationNode.getNode("power").getFloat(0.0f);
-                float maxpower = configurationNode.getNode("maxpower").getFloat(0.0f);
-                boolean diedInWarZone = configurationNode.getNode("death-in-warzone").getBoolean(false);
-                FactionMemberType factionMemberType = null;
-
-                if(!factionMemberTypeString.equals(""))
-                    factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
-
-                FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, factionMemberType, diedInWarZone);
+            final FactionPlayer factionPlayer = ConfigurateHelper.getPlayerFromFile(playerFile);
+            if (factionPlayer != null)
                 playerSet.add(factionPlayer);
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
         }
 
         return playerSet;

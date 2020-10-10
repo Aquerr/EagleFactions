@@ -150,7 +150,7 @@ public class StorageManagerImpl implements StorageManager
                 {
                     if (faction.containsPlayer(player.getUniqueId()))
                     {
-                        playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction.getName(), player.getPower(), player.getMaxPower(), player.getFactionRole(), player.diedInWarZone());
+                        playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction, player.getPower(), player.getMaxPower(), player.getFactionRole(), player.diedInWarZone());
                     }
                 }
                 //Try to get correct faction for the player...
@@ -210,30 +210,6 @@ public class StorageManagerImpl implements StorageManager
         //If it was not possible to get a faction then return null.
         return null;
     }
-
-//    @Override
-//    public boolean setDeathInWarzone(final UUID playerUUID, final boolean didDieInWarZone)
-//    {
-//        FactionPlayer factionPlayer = getPlayer(playerUUID);
-//        if (factionPlayer == null)
-//            return false;
-//
-//        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getLastKnownPlayerPower(), factionPlayer.getLastKnownPlayerMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
-//        queueStorageTask(new SavePlayerTask(updatedPlayer, () -> this.playerStorage.savePlayer(updatedPlayer)));
-//        return true;
-//    }
-
-    @Override
-    public Set<String> getServerPlayerNames()
-    {
-        return this.playerStorage.getServerPlayerNames();
-    }
-
-//    @Override
-//    public Map<UUID, FactionPlayer> getFactionPlayers()
-//    {
-//        return FactionsCache.getPlayersMap();
-//    }
 
     @Override
     public Set<FactionPlayer> getServerPlayers()

@@ -1,8 +1,10 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
@@ -11,6 +13,8 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.TypeTokens;
 
@@ -19,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ConfigurateHelper
 {
@@ -189,7 +192,14 @@ public class ConfigurateHelper
             if(!factionMemberTypeString.equals(""))
                 factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
-            return new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, factionMemberType, diedInWarZone);
+            if (StringUtils.isNotBlank(factionName))
+            {
+                return new FactionPlayerImpl(playerName, playerUUID, FactionsCache.getFaction(factionName), power, maxpower, factionMemberType, diedInWarZone);
+            }
+            else
+            {
+                return new FactionPlayerImpl(playerName, playerUUID, null, power, maxpower, factionMemberType, diedInWarZone);
+            }
         }
         catch(IOException e)
         {

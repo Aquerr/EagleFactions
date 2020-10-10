@@ -785,9 +785,9 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Override
-    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
+    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final Faction faction, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
     {
-        return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, factionRole, diedInWarZone);
+        return new FactionPlayerImpl(playerName, uniqueId, faction, power, maxpower, factionRole, diedInWarZone);
     }
 
     public InputStream getResourceAsStream(String fileName)

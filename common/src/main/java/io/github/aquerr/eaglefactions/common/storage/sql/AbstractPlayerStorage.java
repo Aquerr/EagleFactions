@@ -1,9 +1,12 @@
 package io.github.aquerr.eaglefactions.common.storage.sql;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.storage.PlayerStorage;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -65,7 +68,16 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
                 final float power = resultSet.getFloat("Power");
                 final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
-                factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, null, deathInWarzone);
+
+                if (StringUtils.isBlank(factionName))
+                {
+                    factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
+                }
+                else
+                {
+                    final Faction faction = FactionsCache.getFaction(factionName);
+                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction.getPlayerMemberType(playerUUID), deathInWarzone);
+                }
             }
             resultSet.close();
             statement.close();
@@ -179,7 +191,18 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
                 final float power = resultSet.getFloat("Power");
                 final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
-                final FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, null, deathInWarzone);
+
+                FactionPlayer factionPlayer;
+                if (StringUtils.isBlank(factionName))
+                {
+                    factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
+                }
+                else
+                {
+                    final Faction faction = FactionsCache.getFaction(factionName);
+                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction.getPlayerMemberType(playerUUID), deathInWarzone);
+                }
+
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();

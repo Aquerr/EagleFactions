@@ -246,9 +246,6 @@ public class HOCONFactionStorage implements FactionStorage
             configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(this.factionsDir.resolve(filePath)).build();
         }
 
-        if (configurationLoader == null)
-            return null;
-
         try
         {
             final ConfigurationNode configurationNode = configurationLoader.load();

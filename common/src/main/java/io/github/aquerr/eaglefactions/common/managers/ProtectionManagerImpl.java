@@ -18,6 +18,7 @@ import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.PluginPermissions;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
@@ -873,7 +874,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean isItemWhitelisted(final String itemId, final FactionType factionType)
     {
-        if (Strings.isNullOrEmpty(itemId) || Objects.isNull(factionType))
+        if (StringUtils.isBlank(itemId) || Objects.isNull(factionType))
             throw new IllegalArgumentException("Item id and faction type must be provided");
 
         switch (factionType)
@@ -892,7 +893,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean isBlockWhitelistedForInteraction(final String blockId, final FactionType factionType)
     {
-        if (Strings.isNullOrEmpty(blockId) || Objects.isNull(factionType))
+        if (StringUtils.isBlank(blockId) || Objects.isNull(factionType))
             throw new IllegalArgumentException("Item id and faction type must be provided");
 
         switch (factionType)
@@ -911,7 +912,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     @Override
     public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId, final FactionType factionType)
     {
-        if (Strings.isNullOrEmpty(blockOrItemId) || Objects.isNull(factionType))
+        if (StringUtils.isBlank(blockOrItemId) || Objects.isNull(factionType))
             throw new IllegalArgumentException("Item id and faction type must be provided");
 
         switch (factionType)

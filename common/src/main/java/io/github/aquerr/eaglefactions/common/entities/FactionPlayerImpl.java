@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.entities;
 
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import org.spongepowered.api.Sponge;
@@ -14,7 +15,7 @@ public class FactionPlayerImpl implements FactionPlayer
     private final UUID uniqueId;
     private final String name;
 
-    private String factionName;
+    private Faction faction;
     private FactionMemberType factionRole;
 
     private boolean diedInWarZone;
@@ -22,12 +23,12 @@ public class FactionPlayerImpl implements FactionPlayer
     private float power;
     private float maxpower;
 
-    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
+    public FactionPlayerImpl(final String playerName, final UUID uniqueId, final Faction faction, final float power, final float maxpower, final FactionMemberType factionRole, final boolean diedInWarZone)
     {
         this.name = playerName;
         this.uniqueId = uniqueId;
 
-        this.factionName = factionName;
+        this.faction = faction;
 
         if (factionRole == null)
             this.factionRole = FactionMemberType.NONE;
@@ -52,16 +53,9 @@ public class FactionPlayerImpl implements FactionPlayer
     }
 
     @Override
-    public Optional<String> getFactionName()
+    public Optional<Faction> getFaction()
     {
-        if (this.factionName == null || this.factionName.equals(""))
-        {
-            return Optional.empty();
-        }
-        else
-        {
-            return Optional.of(this.factionName);
-        }
+        return Optional.ofNullable(this.faction);
     }
 
     @Override

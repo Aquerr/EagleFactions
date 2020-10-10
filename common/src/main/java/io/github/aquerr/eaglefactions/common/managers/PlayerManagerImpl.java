@@ -61,30 +61,19 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public Optional<FactionPlayer> getFactionPlayer(final UUID playerUUID)
     {
-        final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
-        if (factionPlayer == null)
-            return Optional.empty();
-        else return Optional.of(factionPlayer);
+        return Optional.ofNullable(this.storageManager.getPlayer(playerUUID));
     }
 
     @Override
     public Optional<Player> getPlayer(final UUID playerUUID)
     {
-        final Optional<User> oUser = getUser(playerUUID);
-        return oUser.flatMap(User::getPlayer);
+        return getUser(playerUUID).flatMap(User::getPlayer);
     }
 
     @Override
     public boolean isPlayerOnline(final UUID playerUUID)
     {
-        Optional<User> oUser = getUser(playerUUID);
-        return oUser.map(User::isOnline).orElse(false);
-    }
-
-    @Override
-    public Set<String> getServerPlayerNames()
-    {
-        return storageManager.getServerPlayerNames();
+        return getUser(playerUUID).map(User::isOnline).orElse(false);
     }
 
     @Override
@@ -126,7 +115,7 @@ public class PlayerManagerImpl implements PlayerManager
     public void setDeathInWarZone(UUID playerUUID, boolean didDie)
     {
         final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), didDie);
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFaction().orElse(null), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), didDie);
         this.storageManager.savePlayer(updatedPlayer);
     }
 }
