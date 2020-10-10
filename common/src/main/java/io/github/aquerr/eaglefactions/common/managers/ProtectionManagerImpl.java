@@ -879,11 +879,11 @@ public class ProtectionManagerImpl implements ProtectionManager
         switch (factionType)
         {
             case FACTION:
-                return isWhiteListed(this.protectionConfig.getFactionWhitelists().getWhiteListedItems(), itemId);
+                return this.protectionConfig.getFactionWhitelists().isItemWhiteListed(itemId);
             case WAR_ZONE:
-                return isWhiteListed(this.protectionConfig.getWarZoneWhitelists().getWhiteListedItems(), itemId);
+                return this.protectionConfig.getWarZoneWhitelists().isItemWhiteListed(itemId);
             case SAFE_ZONE:
-                return isWhiteListed(this.protectionConfig.getSafeZoneWhitelists().getWhiteListedItems(), itemId);
+                return this.protectionConfig.getSafeZoneWhitelists().isItemWhiteListed(itemId);
             default:
                 return false;
         }
@@ -898,11 +898,11 @@ public class ProtectionManagerImpl implements ProtectionManager
         switch (factionType)
         {
             case FACTION:
-                return isWhiteListed(this.protectionConfig.getFactionWhitelists().getWhiteListedInteractBlocks(), blockId);
+                return this.protectionConfig.getFactionWhitelists().isBlockWhiteListedForInteraction(blockId);
             case WAR_ZONE:
-                return isWhiteListed(this.protectionConfig.getWarZoneWhitelists().getWhiteListedInteractBlocks(), blockId);
+                return this.protectionConfig.getWarZoneWhitelists().isBlockWhiteListedForInteraction(blockId);
             case SAFE_ZONE:
-                return isWhiteListed(this.protectionConfig.getSafeZoneWhitelists().getWhiteListedInteractBlocks(), blockId);
+                return this.protectionConfig.getSafeZoneWhitelists().isBlockWhiteListedForInteraction(blockId);
             default:
                 return false;
         }
@@ -917,35 +917,14 @@ public class ProtectionManagerImpl implements ProtectionManager
         switch (factionType)
         {
             case FACTION:
-                return isWhiteListed(this.protectionConfig.getFactionWhitelists().getWhiteListedPlaceDestroyBlocks(), blockOrItemId);
+                return this.protectionConfig.getFactionWhitelists().isBlockWhitelistedForPlaceDestroy(blockOrItemId);
             case WAR_ZONE:
-                return isWhiteListed(this.protectionConfig.getWarZoneWhitelists().getWhiteListedPlaceDestroyBlocks(), blockOrItemId);
+                return this.protectionConfig.getWarZoneWhitelists().isBlockWhitelistedForPlaceDestroy(blockOrItemId);
             case SAFE_ZONE:
-                return isWhiteListed(this.protectionConfig.getSafeZoneWhitelists().getWhiteListedPlaceDestroyBlocks(), blockOrItemId);
+                return this.protectionConfig.getSafeZoneWhitelists().isBlockWhitelistedForPlaceDestroy(blockOrItemId);
             default:
                 return false;
         }
-    }
-
-    private boolean isWhiteListed(final Collection<String> collection, final String itemId)
-    {
-        for(final String whiteListedItemId : collection)
-        {
-            if(whiteListedItemId.equals(itemId))
-                return true;
-
-            try
-            {
-                final Pattern pattern = Pattern.compile(whiteListedItemId);
-                if(pattern.matcher(itemId).matches())
-                    return true;
-            }
-            catch(final PatternSyntaxException exception)
-            {
-                //I guess it must be empty...
-            }
-        }
-        return false;
     }
 
     private boolean isHoldingEagleFeather(final User user)

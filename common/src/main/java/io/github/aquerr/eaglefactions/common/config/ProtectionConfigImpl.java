@@ -11,12 +11,13 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class ProtectionConfigImpl implements ProtectionConfig
 {
@@ -298,6 +299,45 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		public Set<String> getWhiteListedInteractBlocks()
 		{
 			return this.whitelistedInteractBlocks;
+		}
+
+		@Override
+		public boolean isItemWhiteListed(String itemId)
+		{
+			return isWhiteListed(this.getWhiteListedItems(), itemId);
+		}
+
+		@Override
+		public boolean isBlockWhitelistedForPlaceDestroy(String blockId)
+		{
+			return isWhiteListed(this.getWhiteListedPlaceDestroyBlocks(), blockId);
+		}
+
+		@Override
+		public boolean isBlockWhiteListedForInteraction(String blockId)
+		{
+			return isWhiteListed(this.getWhiteListedInteractBlocks(), blockId);
+		}
+
+		private boolean isWhiteListed(final Collection<String> collection, final String id)
+		{
+			for(final String whiteListedIdPattern : collection)
+			{
+				if(whiteListedIdPattern.equals(id))
+					return true;
+
+				try
+				{
+					final Pattern pattern = Pattern.compile(whiteListedIdPattern);
+					if(pattern.matcher(id).matches())
+						return true;
+				}
+				catch(final PatternSyntaxException exception)
+				{
+					Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "The syntax of your pattern is wrong. Id = " + whiteListedIdPattern));
+				}
+			}
+			return false;
 		}
 	}
 }
