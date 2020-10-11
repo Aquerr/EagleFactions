@@ -45,11 +45,6 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	private Set<String> safeZoneWorldNames = new HashSet<>();
 	private Set<String> warZoneWorldNames = new HashSet<>();
 
-	//Whitelisted items and blocks
-//	private Set<String> whitelistedItems = new HashSet<>();
-//	private Set<String> whitelistedPlaceDestroyBlocks = new HashSet<>();
-//	private Set<String> whitelistedInteractBlocks = new HashSet<>();
-
 	private WhiteList safeZoneWhiteLists = null;
 	private WhiteList warZoneWhiteLists = null;
 	private WhiteList factionWhiteLists = null;
@@ -276,7 +271,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		private Set<String> whitelistedPlaceDestroyBlocks;
 		private Set<String> whitelistedInteractBlocks;
 
-		private WhiteListsImpl(final Set<String> whitelistedItems, final Set<String> whitelistedInteractBlocks, final Set<String> whitelistedPlaceDestroyBlocks)
+		protected WhiteListsImpl(final Set<String> whitelistedItems, final Set<String> whitelistedInteractBlocks, final Set<String> whitelistedPlaceDestroyBlocks)
 		{
 			this.whitelistedInteractBlocks = whitelistedInteractBlocks;
 			this.whitelistedItems = whitelistedItems;

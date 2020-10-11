@@ -69,13 +69,11 @@ public class ProtectionManagerTest
 	void bucketShouldBeWhitelistedInSafeZone()
 	{
 		//given
-		final Set<String> items = new HashSet<>();
-		items.add("minecraft:bucket");
 		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
+		when(whiteList.isItemWhiteListed("minecraft:bucket")).thenReturn(true);
 		when(protectionConfig.getSafeZoneWhitelists()).thenReturn(whiteList);
-		when(whiteList.getWhiteListedItems()).thenReturn(items);
-		//when
 
+		//when
 		final boolean result = protectionManager.isItemWhitelisted("minecraft:bucket", FactionType.SAFE_ZONE);
 
 		//then
@@ -89,7 +87,6 @@ public class ProtectionManagerTest
 	{
 		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
 		when(protectionConfig.getSafeZoneWhitelists()).thenReturn(whiteList);
-		when(whiteList.getWhiteListedItems()).thenReturn(Collections.emptySet());
 
 		//then
 
@@ -103,17 +100,14 @@ public class ProtectionManagerTest
 	void stoneShouldBeWhiteListedForPlaceAndDestroyInWarZone()
 	{
 		//given
-		final Set<String> items = new HashSet<>();
-		items.add("minecraft:stone");
-		//when
 		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
+		when(whiteList.isBlockWhitelistedForPlaceDestroy("minecraft:stone")).thenReturn(true);
 		when(protectionConfig.getWarZoneWhitelists()).thenReturn(whiteList);
-		when(whiteList.getWhiteListedPlaceDestroyBlocks()).thenReturn(items);
 
-		//then
-
+		//when
 		final boolean result = protectionManager.isBlockWhitelistedForPlaceDestroy("minecraft:stone", FactionType.WAR_ZONE);
 
+		//then
 		verify(protectionConfig).getWarZoneWhitelists();
 		assertTrue(result);
 	}
@@ -122,15 +116,13 @@ public class ProtectionManagerTest
 	void stoneShouldNotBeWhiteListedForPlaceAndDestroyInWarZone()
 	{
 		//given
-		//when
 		ProtectionConfig.WhiteList whiteList = Mockito.mock(ProtectionConfig.WhiteList.class);
 		when(protectionConfig.getWarZoneWhitelists()).thenReturn(whiteList);
-		when(whiteList.getWhiteListedPlaceDestroyBlocks()).thenReturn(Collections.emptySet());
 
-		//then
-
+		//when
 		final boolean result = protectionManager.isBlockWhitelistedForPlaceDestroy("minecraft:stone", FactionType.WAR_ZONE);
 
+		//then
 		verify(protectionConfig).getWarZoneWhitelists();
 		assertFalse(result);
 	}
