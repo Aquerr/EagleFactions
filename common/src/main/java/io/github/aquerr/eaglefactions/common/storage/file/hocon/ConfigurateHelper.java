@@ -189,7 +189,7 @@ public class ConfigurateHelper
             boolean diedInWarZone = playerNode.getNode("death-in-warzone").getBoolean(false);
             FactionMemberType factionMemberType = null;
 
-            if(!factionMemberTypeString.equals(""))
+            if(StringUtils.isNotBlank( factionMemberTypeString))
                 factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
 
             if (StringUtils.isNotBlank(factionName))

@@ -76,7 +76,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
                 else
                 {
                     final Faction faction = FactionsCache.getFaction(factionName);
-                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction.getPlayerMemberType(playerUUID), deathInWarzone);
+                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction != null ? faction.getPlayerMemberType(playerUUID) : null, deathInWarzone);
                 }
             }
             resultSet.close();
@@ -200,7 +200,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
                 else
                 {
                     final Faction faction = FactionsCache.getFaction(factionName);
-                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction.getPlayerMemberType(playerUUID), deathInWarzone);
+                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction != null ? faction.getPlayerMemberType(playerUUID) : null, deathInWarzone);
                 }
 
                 factionPlayers.add(factionPlayer);
