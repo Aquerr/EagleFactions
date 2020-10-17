@@ -27,6 +27,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
     private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
+    private final EagleFactionsScheduler scheduler = EagleFactionsScheduler.getInstance();
 
     public FactionRemoverTask(final EagleFactions plugin)
     {
@@ -70,7 +71,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
                 {
                     for (final Claim claim : faction.getClaims())
                     {
-                        Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition()));
+                        scheduler.scheduleWithDelay(() -> Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition())), 0);
                     }
                 }
                 EventRunner.runFactionDisbandEventPost(null, faction, false, true);
