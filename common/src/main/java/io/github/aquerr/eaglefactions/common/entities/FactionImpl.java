@@ -171,7 +171,11 @@ public class FactionImpl implements Faction
         else
         {
             final FactionLogic factionLogic = EagleFactionsPlugin.getPlugin().getFactionLogic();
-            Optional<Faction> optionalFaction = this.alliances.stream().map(factionLogic::getFactionByName).filter(Objects::nonNull).filter(y->y.containsPlayer(playerUUID)).findAny();
+            Optional<Faction> optionalFaction = this.alliances.stream()
+                    .map(factionLogic::getFactionByName)
+                    .filter(Objects::nonNull)
+                    .filter(y->y.containsPlayer(playerUUID))
+                    .findAny();
             if(optionalFaction.isPresent())
                 return FactionMemberType.ALLY;
 
