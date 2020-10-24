@@ -150,7 +150,7 @@ public class StorageManagerImpl implements StorageManager
                 {
                     if (faction.containsPlayer(player.getUniqueId()))
                     {
-                        playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction, player.getPower(), player.getMaxPower(), player.getFactionRole(), player.diedInWarZone());
+                        playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction.getName(), player.getPower(), player.getMaxPower(), player.diedInWarZone());
                     }
                 }
                 //Try to get correct faction for the player...

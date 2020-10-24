@@ -145,7 +145,7 @@ public class PowerManagerImpl implements PowerManager
         if (!optionalFactionPlayer.isPresent())
             return false;
         final FactionPlayer factionPlayer = optionalFactionPlayer.get();
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFaction().orElse(null), round(power, 2), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), round(power, 2), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         return this.playerManager.savePlayer(updatedPlayer);
     }
 
@@ -159,7 +159,7 @@ public class PowerManagerImpl implements PowerManager
         if (!optionalFactionPlayer.isPresent())
             return false;
         final FactionPlayer factionPlayer = optionalFactionPlayer.get();
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFaction().orElse(null), factionPlayer.getPower(), maxpower, factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getPower(), maxpower, factionPlayer.diedInWarZone());
         return this.playerManager.savePlayer(updatedPlayer);
     }
 

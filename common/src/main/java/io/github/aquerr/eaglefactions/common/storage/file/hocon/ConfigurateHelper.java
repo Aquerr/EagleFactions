@@ -183,23 +183,13 @@ public class ConfigurateHelper
                 return null;
             }
             String factionName = playerNode.getNode("faction").getString("");
+            //TODO: What about factionMemeberType???
             String factionMemberTypeString = playerNode.getNode("faction-member-type").getString("");
             float power = playerNode.getNode("power").getFloat(0.0f);
             float maxpower = playerNode.getNode("maxpower").getFloat(0.0f);
             boolean diedInWarZone = playerNode.getNode("death-in-warzone").getBoolean(false);
-            FactionMemberType factionMemberType = null;
 
-            if(StringUtils.isNotBlank( factionMemberTypeString))
-                factionMemberType = FactionMemberType.valueOf(factionMemberTypeString);
-
-            if (StringUtils.isNotBlank(factionName))
-            {
-                return new FactionPlayerImpl(playerName, playerUUID, FactionsCache.getFaction(factionName), power, maxpower, factionMemberType, diedInWarZone);
-            }
-            else
-            {
-                return new FactionPlayerImpl(playerName, playerUUID, null, power, maxpower, factionMemberType, diedInWarZone);
-            }
+            return new FactionPlayerImpl(playerName, playerUUID, factionName, power, maxpower, diedInWarZone);
         }
         catch(IOException e)
         {

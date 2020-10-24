@@ -69,15 +69,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
                 final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
 
-                if (StringUtils.isBlank(factionName))
-                {
-                    factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
-                }
-                else
-                {
-                    final Faction faction = FactionsCache.getFaction(factionName);
-                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction != null ? faction.getPlayerMemberType(playerUUID) : null, deathInWarzone);
-                }
+                factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, deathInWarzone);
             }
             resultSet.close();
             statement.close();
@@ -192,17 +184,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
                 final float maxpower = resultSet.getFloat("MaxPower");
                 final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
 
-                FactionPlayer factionPlayer;
-                if (StringUtils.isBlank(factionName))
-                {
-                    factionPlayer = new FactionPlayerImpl(name, playerUUID, null, power, maxpower, null, deathInWarzone);
-                }
-                else
-                {
-                    final Faction faction = FactionsCache.getFaction(factionName);
-                    factionPlayer = new FactionPlayerImpl(name, playerUUID, faction, power, maxpower, faction != null ? faction.getPlayerMemberType(playerUUID) : null, deathInWarzone);
-                }
-
+                FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, deathInWarzone);
                 factionPlayers.add(factionPlayer);
             }
             resultSet.close();

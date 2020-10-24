@@ -48,7 +48,7 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public boolean addPlayer(final UUID playerUUID, final String playerName)
     {
-        final FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, null, this.powerConfig.getStartingPower(), this.powerConfig.getGlobalMaxPower(), null, false);
+        final FactionPlayer factionPlayer = new FactionPlayerImpl(playerName, playerUUID, null, this.powerConfig.getStartingPower(), this.powerConfig.getGlobalMaxPower(), false);
         return storageManager.savePlayer(factionPlayer);
     }
 
@@ -115,7 +115,7 @@ public class PlayerManagerImpl implements PlayerManager
     public void setDeathInWarZone(UUID playerUUID, boolean didDie)
     {
         final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFaction().orElse(null), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), didDie);
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionPlayer.getFactionName().orElse(null), factionPlayer.getPower(), factionPlayer.getMaxPower(), didDie);
         this.storageManager.savePlayer(updatedPlayer);
     }
 }

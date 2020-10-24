@@ -179,7 +179,7 @@ public class FactionLogicImpl implements FactionLogic
             {
                 //Faction Player should always exists so we do not need to check if it is present.
                 final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID).get();
-                final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+                final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
                 this.storageManager.savePlayer(updatedPlayer);
             }
         });
@@ -219,7 +219,7 @@ public class FactionLogicImpl implements FactionLogic
 
         //Save player...
         final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID).get();
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
     }
 
@@ -264,7 +264,7 @@ public class FactionLogicImpl implements FactionLogic
 
         //Save player...
         final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID).get();
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
     }
 
@@ -748,7 +748,7 @@ public class FactionLogicImpl implements FactionLogic
 
         //Update player...
         final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
     }
 
@@ -925,7 +925,7 @@ public class FactionLogicImpl implements FactionLogic
 
         //Update player
         final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerToPromote);
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction, factionPlayer.getPower(), factionPlayer.getMaxPower(), promotedTo, factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction.getName(), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
 
         return promotedTo;
@@ -960,7 +960,7 @@ public class FactionLogicImpl implements FactionLogic
 
         //Update player
         final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerToDemote);
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction, factionPlayer.getPower(), factionPlayer.getMaxPower(), demotedTo, factionPlayer.diedInWarZone());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction.getName(), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
 
         return demotedTo;
@@ -1014,7 +1014,7 @@ public class FactionLogicImpl implements FactionLogic
            for (final UUID playerUUID : playerUUIDs)
            {
                final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
-               final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.getFactionRole(), factionPlayer.diedInWarZone());
+               final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction.getName(), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
                this.storageManager.savePlayer(updatedPlayer);
            }
         });
