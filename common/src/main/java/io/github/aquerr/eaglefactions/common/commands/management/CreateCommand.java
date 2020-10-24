@@ -29,12 +29,16 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * Created by Aquerr on 2017-07-12.
  */
 public class CreateCommand extends AbstractCommand
 {
+    private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9]*$");
+
     private final FactionsConfig factionsConfig;
 
     public CreateCommand(final EagleFactions plugin)
@@ -46,35 +50,24 @@ public class CreateCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        final Optional<String> optionalFactionName = context.getOne("name");
-        final Optional<String> optionalFactionTag = context.getOne("tag");
-
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        //TODO: To test...
-        if (!optionalFactionName.isPresent() || !optionalFactionTag.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.WRONG_COMMAND_ARGUMENTS), true);
-
-        final Player player = (Player) source;
-        final String factionName = optionalFactionName.get();
-        final String factionTag = optionalFactionTag.get();
-
-        if(!factionName.matches("^[A-Za-z][A-Za-z0-9]*$") || !factionTag.matches("^[A-Za-z][A-Za-z0-9]*$")){
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Faction name and tag must be alphanumeric!"));
+        if (source instanceof Player)
+        {
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId());
+            if (optionalPlayerFaction.isPresent())
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
         }
 
-        if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_USE_THIS_FACTION_NAME));
+        final String factionName = context.requireOne("name");
+        final String factionTag = context.requireOne("tag");
 
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-        if (optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
-
+        if(!ALPHANUMERIC_PATTERN.matcher(factionName).matches() || !ALPHANUMERIC_PATTERN.matcher(factionTag).matches())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_NAME_AND_TAG_MUST_BE_ALPHANUMERIC));
 
         if (getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
+
+        if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_USE_THIS_FACTION_NAME));
 
         //Check tag length
         if (factionTag.length() > this.factionsConfig.getMaxTagLength())
@@ -91,15 +84,15 @@ public class CreateCommand extends AbstractCommand
         else if (factionName.length() < this.factionsConfig.getMinNameLength())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + Messages.CHARS + ")"));
 
-        if (this.factionsConfig.getFactionCreationByItems())
+        if(source instanceof Player)
         {
-            return createByItems(factionName, factionTag, player);
+            if (this.factionsConfig.getFactionCreationByItems())
+            {
+                return createByItems(factionName, factionTag, (Player) source);
+            }
         }
-        else
-        {
-            runCreationEventAndCreateFaction(factionName, factionTag, player);
-            return CommandResult.success();
-        }
+        runCreationEventAndCreateFaction(factionName, factionTag, source);
+        return CommandResult.success();
     }
 
     private CommandResult createByItems(String factionName, String factionTag, Player player) throws CommandException
@@ -175,22 +168,29 @@ public class CreateCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void runCreationEventAndCreateFaction(final String factionName, final String factionTag, final Player player)
+    private void runCreationEventAndCreateFaction(final String factionName, final String factionTag, final CommandSource source)
     {
-        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
+        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), new UUID(0,0)).build();
 
-        final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
-        if (isCancelled)
-            return;
+        if (source instanceof Player)
+        {
+            final boolean isCancelled = EventRunner.runFactionCreateEventPre((Player) source, faction);
+            if (isCancelled)
+                return;
+
+            //Update player cache...
+            final Player player = (Player)source;
+            final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
+            final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
+            super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
+        }
 
         super.getPlugin().getFactionLogic().addFaction(faction);
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
 
-        //Update player cache...
-        final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
-        super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
-
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
-        EventRunner.runFactionCreateEventPost(player, faction);
+        if (source instanceof Player)
+        {
+            EventRunner.runFactionCreateEventPost((Player) source, faction);
+        }
     }
 }

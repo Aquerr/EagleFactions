@@ -83,6 +83,7 @@ public final class Messages
     public static String RECRUIT = "Recruit";
 
     //Creation
+    public static String FACTION_NAME_AND_TAG_MUST_BE_ALPHANUMERIC = "Faction name and tag must be alphanumeric!";
     public static String YOU_CANT_USE_THIS_FACTION_NAME = "You can't use this faction name!";
     public static String PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN = "Provided faction tag is already taken!";
     public static String PROVIDED_FACTION_TAG_IS_TOO_LONG = "Provided faction tag is too long!";
