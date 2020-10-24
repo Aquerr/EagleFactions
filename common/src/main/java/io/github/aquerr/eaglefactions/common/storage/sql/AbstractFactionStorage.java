@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.serializers.InventorySerializer;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -31,6 +32,7 @@ import java.nio.file.*;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class AbstractFactionStorage implements FactionStorage
@@ -539,9 +541,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     factionHome = FactionHome.from(factionHomeAsString);
                 final String lastOnlineString = factionsResultSet.getString("LastOnline");
                 final Instant lastOnline = Instant.parse(lastOnlineString);
-                final Set<String> truces = new HashSet<>(Arrays.asList(factionsResultSet.getString("Truces").split(",")));
-                final Set<String> alliances = new HashSet<>(Arrays.asList(factionsResultSet.getString("Alliances").split(",")));
-                final Set<String> enemies = new HashSet<>(Arrays.asList(factionsResultSet.getString("Enemies").split(",")));
+                final Set<String> truces = Arrays.stream(factionsResultSet.getString("Truces").split(",")).filter(StringUtils::isNoneBlank).collect(Collectors.toSet());
+                final Set<String> alliances = Arrays.stream(factionsResultSet.getString("Alliances").split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+                final Set<String> enemies = Arrays.stream(factionsResultSet.getString("Enemies").split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
 
                 final Set<UUID> officers = getFactionOfficers(connection, factionName);
                 final Set<UUID> recruits = getFactionRecruits(connection, factionName);
