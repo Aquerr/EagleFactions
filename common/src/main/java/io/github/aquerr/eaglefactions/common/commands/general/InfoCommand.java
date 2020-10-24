@@ -22,9 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Created by Aquerr on 2017-08-03.
- */
 public class InfoCommand extends AbstractCommand
 {
     public InfoCommand(final EagleFactions plugin)
@@ -38,46 +35,50 @@ public class InfoCommand extends AbstractCommand
         final Optional<Faction> faction = context.getOne("faction");
         if (faction.isPresent())
         {
-            if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
-            {
-                //Check permissions
-                if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.get().getName())))
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
-                }
-                else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.get().getName())))
-                {
-                    source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
-                }
-                else
-                {
-                    showFactionInfo(source, faction.get());
-                }
-            }
-            else
-            {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND));
-            }
+            otherInfo(source, faction.get());
         }
-        else if(source instanceof Player && super.getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).isPresent())
+        else
+        {
+            if (!(source instanceof Player))
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+
+            final Faction playerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId())
+                    .orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
+
+            selfInfo((Player)source, playerFaction);
+        }
+        return CommandResult.success();
+    }
+
+    private void selfInfo(final Player player, final Faction faction) throws CommandException
+    {
+        if (!player.hasPermission(PluginPermissions.INFO_COMMAND) && !player.hasPermission(PluginPermissions.INFO_COMMAND_SELF))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
+        showFactionInfo(player, faction);
+    }
+    
+    private void otherInfo(final CommandSource source, final Faction faction)
+    {
+        if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
         {
             //Check permissions
-            if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF))
+            if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
             {
-                showFactionInfo(source, super.getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get());
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
+            }
+            else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).getUniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId()).get().getName().equals(faction.getName())))
+            {
+                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS));
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION));
+                showFactionInfo(source, faction);
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, Messages.USAGE + " /f info <faction name>"));
+            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND));
         }
-
-        return CommandResult.success();
     }
 
     private void showFactionInfo(final CommandSource source, final Faction faction)

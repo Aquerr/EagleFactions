@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.common.commands.args;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -34,10 +35,9 @@ public class FactionArgument extends CommandElement
 			throw args.createError(Text.of("Argument is not a valid faction!"));
 
 		final String factionName = args.next();
-		final Faction faction = this.plugin.getFactionLogic().getFactionByName(factionName);
-		if(faction == null)
+		if (StringUtils.isBlank(factionName))
 			throw args.createError(Text.of("Argument is not a valid faction!"));
-		return faction;
+		return this.plugin.getFactionLogic().getFactionByName(factionName);
 	}
 
 	@Override

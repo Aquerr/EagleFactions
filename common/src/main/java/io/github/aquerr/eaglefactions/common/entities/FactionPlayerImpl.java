@@ -29,7 +29,9 @@ public class FactionPlayerImpl implements FactionPlayer
         this.name = playerName;
         this.uniqueId = uniqueId;
 
-        this.factionName = factionName;
+        if (StringUtils.isBlank(factionName))
+            this.factionName = null;
+        else this.factionName = factionName;
 
         this.diedInWarZone = diedInWarZone;
 

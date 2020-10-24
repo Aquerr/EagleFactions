@@ -170,7 +170,11 @@ public class CreateCommand extends AbstractCommand
 
     private void runCreationEventAndCreateFaction(final String factionName, final String factionTag, final CommandSource source)
     {
-        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), new UUID(0,0)).build();
+        UUID leaderUUID = new UUID(0, 0);
+        if (source instanceof Player)
+            leaderUUID = ((Player)source).getUniqueId();
+
+        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), leaderUUID).build();
 
         if (source instanceof Player)
         {
