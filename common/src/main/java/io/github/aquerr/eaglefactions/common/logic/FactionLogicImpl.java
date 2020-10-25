@@ -12,11 +12,13 @@ import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
+import io.github.aquerr.eaglefactions.common.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.common.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.common.util.ItemUtil;
 import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -480,7 +482,6 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction updatedFaction = faction.toBuilder().setClaims(factionClaims).build();
         this.storageManager.saveFaction(updatedFaction);
-//        claims.forEach(claim -> FactionsCache.updateClaimFaction(claim, Optional.of(updatedFaction)));
     }
 
     @Override
@@ -493,7 +494,6 @@ public class FactionLogicImpl implements FactionLogic
         claims.add(claim);
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         this.storageManager.saveFaction(updatedFaction);
-//        FactionsCache.updateClaimFaction(claim, Optional.of(updatedFaction));
 
 		ParticlesUtil.spawnClaimParticles(claim);
     }
@@ -792,78 +792,13 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(worldUUID);
         checkNotNull(chunkPosition);
 
-        final Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToClaim();
-        final PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
-        final int allRequiredItems = requiredItems.size();
-        int foundItems = 0;
-
-        for(final String requiredItem : requiredItems.keySet())
+        try
         {
-            final String[] idAndVariant = requiredItem.split(":");
-
-            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-            if(itemType.isPresent())
-            {
-                ItemStack itemStack = ItemStack.builder()
-                        .itemType(itemType.get()).build();
-                itemStack.setQuantity(requiredItems.get(requiredItem));
-
-                if(idAndVariant.length == 3)
-                {
-                    if(itemType.get().getBlock().isPresent())
-                    {
-                        final int variant = Integer.parseInt(idAndVariant[2]);
-                        final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
-                        itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                    }
-                }
-
-                if(inventory.contains(itemStack))
-                {
-                    foundItems += 1;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        if(allRequiredItems == foundItems)
-        {
-            for(final String requiredItem : requiredItems.keySet())
-            {
-                final String[] idAndVariant = requiredItem.split(":");
-                final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-
-                final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-                if(itemType.isPresent())
-                {
-                    ItemStack itemStack = ItemStack.builder()
-                            .itemType(itemType.get()).build();
-                    itemStack.setQuantity(requiredItems.get(requiredItem));
-
-                    if(idAndVariant.length == 3)
-                    {
-                        if(itemType.get().getBlock().isPresent())
-                        {
-                            final int variant = Integer.parseInt(idAndVariant[2]);
-                            final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
-                            itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                        }
-                    }
-
-                    inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
-                }
-            }
-
+            ItemUtil.pollItemsNeededForClaimFromPlayer(player);
             addClaim(faction, new Claim(worldUUID, chunkPosition));
             return true;
         }
-        else
+        catch (RequiredItemsNotFoundException e)
         {
             return false;
         }

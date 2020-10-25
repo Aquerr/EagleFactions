@@ -9,25 +9,20 @@ import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.common.events.EventRunner;
+import io.github.aquerr.eaglefactions.common.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
+import io.github.aquerr.eaglefactions.common.util.ItemUtil;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -88,113 +83,56 @@ public class CreateCommand extends AbstractCommand
         {
             if (this.factionsConfig.getFactionCreationByItems())
             {
-                return createByItems(factionName, factionTag, (Player) source);
+                return createAsPlayerByItems(factionName, factionTag, (Player) source);
             }
+            createAsPlayer(factionName, factionTag, (Player)source);
         }
-        runCreationEventAndCreateFaction(factionName, factionTag, source);
+        else
+        {
+            createAsConsole(factionName, factionTag, source);
+        }
         return CommandResult.success();
     }
 
-    private CommandResult createByItems(String factionName, String factionTag, Player player) throws CommandException
+    private CommandResult createAsPlayerByItems(String factionName, String factionTag, Player player) throws CommandException
     {
-        final Map<String, Integer> requiredItems = this.factionsConfig.getRequiredItemsToCreateFaction();
-        final Inventory inventory = player.getInventory();
-        final int allRequiredItems = requiredItems.size();
-        int foundItems = 0;
-
-        for (String requiredItem : requiredItems.keySet())
+        try
         {
-            final String[] idAndVariant = requiredItem.split(":");
-            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-            if (!itemType.isPresent())
-                continue;
-
-            ItemStack itemStack = ItemStack.builder()
-                    .itemType(itemType.get()).build();
-            itemStack.setQuantity(requiredItems.get(requiredItem));
-
-            if (idAndVariant.length == 3)
-            {
-                if (itemType.get().getBlock().isPresent())
-                {
-                    final int variant = Integer.parseInt(idAndVariant[2]);
-                    final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
-                    itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                }
-            }
-
-            if (!inventory.contains(itemStack))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
-
-            if (inventory.contains(itemStack))
-            {
-                foundItems += 1;
-            }
+            ItemUtil.pollItemsNeededForCreationFromPlayer(player);
+        }
+        catch (RequiredItemsNotFoundException e)
+        {
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION), e);
         }
 
-        if (allRequiredItems != foundItems)
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION));
-
-        for (final String requiredItem : requiredItems.keySet())
-        {
-            final String[] idAndVariant = requiredItem.split(":");
-            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-
-            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
-
-            if (!itemType.isPresent())
-                continue;
-
-            ItemStack itemStack = ItemStack.builder()
-                    .itemType(itemType.get()).build();
-            itemStack.setQuantity(requiredItems.get(requiredItem));
-
-            if (idAndVariant.length == 3)
-            {
-                if (itemType.get().getBlock().isPresent())
-                {
-                    final int variant = Integer.parseInt(idAndVariant[2]);
-                    final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
-                    itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                }
-            }
-
-            inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemType.get())).poll(itemStack.getQuantity());
-        }
-
-        runCreationEventAndCreateFaction(factionName, factionTag, player);
+        createAsPlayer(factionName, factionTag, player);
         return CommandResult.success();
     }
 
-    private void runCreationEventAndCreateFaction(final String factionName, final String factionTag, final CommandSource source)
+    private void createAsPlayer(final String factionName, final String factionTag, final Player player)
     {
-        UUID leaderUUID = new UUID(0, 0);
-        if (source instanceof Player)
-            leaderUUID = ((Player)source).getUniqueId();
+        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
+        final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
+        if (isCancelled)
+            return;
 
-        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), leaderUUID).build();
-
-        if (source instanceof Player)
-        {
-            final boolean isCancelled = EventRunner.runFactionCreateEventPre((Player) source, faction);
-            if (isCancelled)
-                return;
-
-            //Update player cache...
-            final Player player = (Player)source;
-            final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
-            final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
-            super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
-        }
+        //Update player cache...
+        final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
+        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
+        super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
 
         super.getPlugin().getFactionLogic().addFaction(faction);
-        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        EventRunner.runFactionCreateEventPost(player, faction);
+    }
 
-        if (source instanceof Player)
-        {
-            EventRunner.runFactionCreateEventPost((Player) source, faction);
-        }
+    /**
+     * CommandSource can actually be one of the following: console, command block, RCON client or proxy.
+     */
+    private void createAsConsole(final String factionName, final String factionTag, final CommandSource commandSource)
+    {
+        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), new UUID(0, 0)).build();
+        super.getPlugin().getFactionLogic().addFaction(faction);
+        commandSource.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
     }
 }
