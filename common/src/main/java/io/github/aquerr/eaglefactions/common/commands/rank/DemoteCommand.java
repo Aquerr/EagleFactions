@@ -21,6 +21,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Created by Aquerr on 2018-06-24.
@@ -38,7 +39,7 @@ public class DemoteCommand extends AbstractCommand
         final FactionPlayer demotedPlayer = context.requireOne("player");
 
         if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+            return demoteByConsole(source, demotedPlayer);
 
         final Player sourcePlayer = (Player)source;
         final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
@@ -79,6 +80,24 @@ public class DemoteCommand extends AbstractCommand
         {
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
         }
+    }
+
+    private CommandResult demoteByConsole(final CommandSource source, final FactionPlayer demotedPlayer) throws CommandException
+    {
+        final Faction faction = demotedPlayer.getFaction().orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This player is not in a faction.")));
+        if (demotedPlayer.getUniqueId().equals(faction.getLeader()))
+        {
+            super.getPlugin().getFactionLogic().setLeader(new UUID(0, 0), faction.getName());
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, Messages.OFFICER)))));
+            return CommandResult.success();
+        }
+
+        if (faction.getRecruits().contains(demotedPlayer.getUniqueId()))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+
+        final FactionMemberType demotedTo = super.getPlugin().getFactionLogic().demotePlayer(faction, demotedPlayer.getUniqueId());
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
+        return CommandResult.success();
     }
 
     private CommandResult demotePlayer(final Player demotedBy, final FactionPlayer demotedPlayer, final Faction faction)
