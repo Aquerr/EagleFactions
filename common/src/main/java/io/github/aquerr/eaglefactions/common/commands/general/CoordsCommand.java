@@ -72,7 +72,7 @@ public class CoordsCommand extends AbstractCommand
             {
                 final Vector3d blockPosition = ParticlesUtil.getChunkCenter(player.getWorld(), claim.getChunkPosition());
                 final Text textBuilder = Text.builder()
-                        .append(Text.of(Messages.FACTION + ": " + blockPosition))
+                        .append(Text.of(TextColors.AQUA, Messages.FACTION, TextColors.GOLD, ": " + blockPosition))
                         .build();
 
                 teamCoords.add(textBuilder);
@@ -83,7 +83,7 @@ public class CoordsCommand extends AbstractCommand
         {
             final Optional<World> optionalHomeWorld = Sponge.getServer().getWorld(faction.getHome().getWorldUUID());
             final Text textBuilder = Text.builder()
-                    .append(Text.of( Messages.FACTIONS_HOME + ": " + (optionalHomeWorld.map(World::getName).orElse("Unknown World")) + '|' + faction.getHome().getBlockPosition().toString()))
+                    .append(Text.of(TextColors.AQUA, Messages.FACTIONS_HOME, TextColors.GOLD, ": " + (optionalHomeWorld.map(World::getName).orElse("Unknown World")) + '|' + faction.getHome().getBlockPosition().toString()))
                     .build();
 
             teamCoords.add(textBuilder);
@@ -93,7 +93,7 @@ public class CoordsCommand extends AbstractCommand
         if(leader.isPresent())
         {
             final Text textBuilder = Text.builder()
-                    .append(Text.of(Messages.LEADER + ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
+                    .append(Text.of(TextColors.AQUA, Messages.LEADER, TextColors.GOLD, ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
                     .build();
 
             teamCoords.add(textBuilder);
@@ -105,7 +105,7 @@ public class CoordsCommand extends AbstractCommand
             if(officer.isPresent())
             {
                 Text textBuilder = Text.builder()
-                        .append(Text.of(Messages.OFFICER + ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
+                        .append(Text.of(TextColors.AQUA, Messages.OFFICER, TextColors.GOLD, ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
                         .build();
 
                 teamCoords.add(textBuilder);
@@ -118,7 +118,7 @@ public class CoordsCommand extends AbstractCommand
             if(member.isPresent())
             {
                 Text textBuilder = Text.builder()
-                        .append(Text.of(Messages.MEMBER + ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
+                        .append(Text.of(TextColors.AQUA, Messages.MEMBER, TextColors.GOLD, ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
                         .build();
 
                 teamCoords.add(textBuilder);
@@ -131,7 +131,7 @@ public class CoordsCommand extends AbstractCommand
             if(recruit.isPresent())
             {
                 Text textBuilder = Text.builder()
-                        .append(Text.of(Messages.RECRUIT + ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
+                        .append(Text.of(TextColors.AQUA, Messages.RECRUIT, TextColors.GOLD, ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
                         .build();
 
                 teamCoords.add(textBuilder);
