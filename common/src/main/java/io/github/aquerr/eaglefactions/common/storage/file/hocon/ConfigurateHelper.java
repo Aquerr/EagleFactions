@@ -1,10 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage.file.hocon;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.*;
-import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
@@ -14,7 +12,6 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.TypeTokens;
 
@@ -23,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConfigurateHelper
 {
@@ -132,8 +130,9 @@ public class ConfigurateHelper
         final Set<UUID> officers = configNode.getNode("officers").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);
         final Set<UUID> members = configNode.getNode("members").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);
         final Set<UUID> recruits = configNode.getNode("recruits").getValue(EFTypeSerializers.UUID_SET_TYPE_TOKEN, Collections.EMPTY_SET);
-        final Set<String> alliances = new HashSet<>(configNode.getNode("alliances").getList(TypeToken.of(String.class), Collections.EMPTY_LIST));
-        final Set<String> enemies = new HashSet<>(configNode.getNode("enemies").getList(TypeToken.of(String.class), Collections.EMPTY_LIST));
+        final Set<String> alliances = new HashSet<>(configNode.getNode("alliances").getList(TypeToken.of(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        final Set<String> enemies = new HashSet<>(configNode.getNode("enemies").getList(TypeToken.of(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        final Set<String> truces = new HashSet<>(configNode.getNode("truces").getList(TypeToken.of(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         final Set<Claim> claims = configNode.getNode("claims").getValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, Collections.EMPTY_SET);
         final Instant lastOnline = configNode.getNode("last_online").getValue() != null ? Instant.parse(configNode.getNode("last_online").getString()) : Instant.now();
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.getNode("perms"));
@@ -155,6 +154,7 @@ public class ConfigurateHelper
                 .setRecruits(recruits)
                 .setAlliances(alliances)
                 .setEnemies(enemies)
+                .setTruces(truces)
                 .setClaims(claims)
                 .setLastOnline(lastOnline)
                 .setPerms(perms)
