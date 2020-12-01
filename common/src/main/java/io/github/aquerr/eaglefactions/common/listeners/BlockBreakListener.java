@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.util.ModSupport;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -452,6 +453,10 @@ public class BlockBreakListener extends AbstractListener
             return;
         else
         {
+            //Special case for pixelmon... we should consider adding a
+            if (StringUtils.containsIgnoreCase(event.getCause().root().getClass().getName(), "Pokeball"))
+                return;
+
             event.setCancelled(true);
             return;
         }

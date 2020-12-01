@@ -27,7 +27,7 @@ public class ReloadCommand extends AbstractCommand
             super.getPlugin().getConfiguration().reloadConfiguration();
             super.getPlugin().getStorageManager().reloadStorage();
 
-            if (super.getPlugin().getConfiguration().getDynmapConfig().isDynmapIntegrationEnabled())
+            if (super.getPlugin().getConfiguration().getDynmapConfig().isDynmapIntegrationEnabled() && EagleFactionsPlugin.getPlugin().getDynmapService() != null)
             {
                 EagleFactionsPlugin.getPlugin().getDynmapService().reload();
             }
