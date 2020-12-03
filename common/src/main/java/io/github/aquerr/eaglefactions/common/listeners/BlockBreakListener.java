@@ -444,6 +444,10 @@ public class BlockBreakListener extends AbstractListener
         Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(!optionalPlayerFaction.isPresent())
         {
+            //Special case for pixelmon... we should consider adding a
+            if (StringUtils.containsIgnoreCase(event.getCause().root().getClass().getName(), "Pokeball"))
+                return;
+
             event.setCancelled(true);
             return;
         }
