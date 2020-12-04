@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Piston;
+import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.player.Player;
@@ -31,6 +32,9 @@ public class BlockPlaceListener extends AbstractListener
     @Listener(order = Order.EARLY)
     public void onBlockPlace(ChangeBlockEvent.Place event)
     {
+        if (event.getCause().containsType(CommandBlockSource.class))
+            return;
+
         final Object source = event.getSource();
         if(source instanceof Piston)
             return;

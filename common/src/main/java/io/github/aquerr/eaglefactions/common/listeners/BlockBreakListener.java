@@ -10,6 +10,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -55,6 +56,9 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockPre(final ChangeBlockEvent.Pre event)
     {
+        if (event.getCause().containsType(CommandBlockSource.class))
+            return;
+
         User user = null;
         if(event.getCause().containsType(Player.class))
         {
@@ -251,6 +255,9 @@ public class BlockBreakListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockBreak(final ChangeBlockEvent.Break event)
     {
+        if (event.getCause().containsType(CommandBlockSource.class))
+            return;
+
         //SpawnType in break event? Should be located in Pre or global event in my opinion.
         //Custom Spawn Type = Can be a piston moving block or possibly any other "magically" spawned block.
         final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
@@ -444,7 +451,7 @@ public class BlockBreakListener extends AbstractListener
         Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
         if(!optionalPlayerFaction.isPresent())
         {
-            //Special case for pixelmon... we should consider adding a
+            //Special case for pixelmon... we should consider adding a configurable list in the config file.
             if (StringUtils.containsIgnoreCase(event.getCause().root().getClass().getName(), "Pokeball"))
                 return;
 
@@ -457,7 +464,7 @@ public class BlockBreakListener extends AbstractListener
             return;
         else
         {
-            //Special case for pixelmon... we should consider adding a
+            //Special case for pixelmon... we should consider adding a configurable list in the config file.
             if (StringUtils.containsIgnoreCase(event.getCause().root().getClass().getName(), "Pokeball"))
                 return;
 
