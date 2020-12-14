@@ -99,6 +99,7 @@ public class PVPLoggerImpl implements PVPLogger
         return false;
     }
 
+    //TODO: Go through this code and try to improve it.
     @Override
     public synchronized void addOrUpdatePlayer(final Player player)
     {
@@ -115,12 +116,7 @@ public class PVPLoggerImpl implements PVPLogger
         if (shouldDisplayInScoreboard)
         {
             final Scoreboard scoreboard = Scoreboard.builder().build();
-            final Objective objective = Objective.builder()
-                    .name(PVPLOGGER_OBJECTIVE_NAME + "-" + getNewTaskId(1))
-                    .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
-                    .criterion(Criteria.DUMMY)
-                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
-                    .build();
+            final Objective objective = createPVPLoggerObjective();
             scoreboard.addObjective(objective);
             scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
             player.setScoreboard(scoreboard);
@@ -149,7 +145,14 @@ public class PVPLoggerImpl implements PVPLogger
                 if(shouldDisplayInScoreboard)
                 {
                     Scoreboard scoreboard = player.getScoreboard();
-                    final Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
+                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
+                    if (!optionalObjective.isPresent())
+                    {
+                        Objective objective = createPVPLoggerObjective();
+                        scoreboard.addObjective(objective);
+                        scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+                        optionalObjective = Optional.of(objective);
+                    }
                     Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
                     pvpTimer.setScore(seconds - 1);
                 }
@@ -196,5 +199,15 @@ public class PVPLoggerImpl implements PVPLogger
         }
 
         return preferredId;
+    }
+
+    private Objective createPVPLoggerObjective()
+    {
+        return Objective.builder()
+                .name(PVPLOGGER_OBJECTIVE_NAME + "-" + getNewTaskId(1))
+                .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
+                .criterion(Criteria.DUMMY)
+                .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
+                .build();
     }
 }
