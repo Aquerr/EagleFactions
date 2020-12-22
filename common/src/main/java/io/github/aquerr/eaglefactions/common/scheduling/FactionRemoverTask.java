@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.common.scheduling;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -15,12 +14,9 @@ import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 public class FactionRemoverTask implements EagleFactionsRunnableTask
@@ -33,6 +29,12 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
     {
         this.factionLogic = plugin.getFactionLogic();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+    }
+
+    @Override
+    public String getName()
+    {
+        return "eaglefactions-factions-remover-task";
     }
 
     @Override
@@ -71,7 +73,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
                 {
                     for (final Claim claim : faction.getClaims())
                     {
-                        scheduler.scheduleWithDelay(() -> Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition())), 0);
+                        scheduler.scheduleWithDelay(new WorldRegenTask(claim), 0);
                     }
                 }
                 EventRunner.runFactionDisbandEventPost(null, faction, false, true);

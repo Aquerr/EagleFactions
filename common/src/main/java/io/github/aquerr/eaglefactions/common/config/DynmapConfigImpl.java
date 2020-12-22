@@ -27,7 +27,7 @@ public class DynmapConfigImpl implements DynmapConfig
 	@Override
 	public void reload()
 	{
-		this.dynmapIntegrationEnabled = this.configuration.getBoolean(false, "dynmap", "enabled");
+		this.dynmapIntegrationEnabled = this.configuration.getBoolean(true, "dynmap", "enabled");
 
 		if (!this.dynmapIntegrationEnabled)
 			return;

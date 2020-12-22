@@ -2,10 +2,14 @@ package io.github.aquerr.eaglefactions.common.integrations.dynmap;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
 import org.dynmap.markers.*;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +37,8 @@ public class DynmapService
 
     private final EagleFactions plugin;
 
+    private Task dynmapUpdateTask;
+
     public DynmapService(final EagleFactions plugin)
     {
         this.plugin = plugin;
@@ -44,13 +50,15 @@ public class DynmapService
             @Override
             public void apiEnabled(DynmapCommonAPI api) {
                 markerapi = api.getMarkerAPI();
-                markerSet = DynmapService.markerapi.createMarkerSet("purpleflag", "EagleFactions", DynmapService.markerapi.getMarkerIcons(), false);
+                markerSet = createOrGetMarkerSet();
 
-                Task.builder().execute(new DynmapUpdateTask())
-                        .interval(10, TimeUnit.SECONDS)
-                        .name("EagleFactions Dynmap Update Task")
-                        .async()
-                        .submit(plugin);
+                if (markerSet == null)
+                {
+                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not create MarkerSet in Dynmap. Restarting the server may help."));
+                    return;
+                }
+
+                restartDynmapUpdateTask();
             }
         });
     }
@@ -69,5 +77,25 @@ public class DynmapService
             x.clear();
         });
         drawnAreas.clear();
+        markerSet.deleteMarkerSet();
+        markerSet = createOrGetMarkerSet();
+        restartDynmapUpdateTask();
+    }
+
+    private MarkerSet createOrGetMarkerSet()
+    {
+        MarkerSet markerSet = markerapi.getMarkerSet("purpleflag");
+        if (markerSet == null)
+            markerSet = markerapi.createMarkerSet("purpleflag", "EagleFactions", markerapi.getMarkerIcons(), false);
+        return markerSet;
+    }
+
+    private void restartDynmapUpdateTask()
+    {
+        if (this.dynmapUpdateTask != null)
+        {
+            this.dynmapUpdateTask.cancel();
+        }
+        this.dynmapUpdateTask = EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new DynmapUpdateTask(), 0, TimeUnit.SECONDS, 10, TimeUnit.SECONDS);
     }
 }

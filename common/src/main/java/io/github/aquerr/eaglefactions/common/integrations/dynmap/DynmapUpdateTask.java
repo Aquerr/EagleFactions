@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.util.DynmapUtils;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.util.TempAreaMarker;
+import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsRunnableTask;
 import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.Marker;
 import org.spongepowered.api.Sponge;
@@ -20,8 +21,14 @@ import java.util.*;
  * @author Iterator
  */
 
-public class DynmapUpdateTask implements Runnable
+public class DynmapUpdateTask implements EagleFactionsRunnableTask
 {
+    @Override
+    public String getName()
+    {
+        return "eaglefactions-dynmap-update-task";
+    }
+
     @Override
     public void run()
     {
