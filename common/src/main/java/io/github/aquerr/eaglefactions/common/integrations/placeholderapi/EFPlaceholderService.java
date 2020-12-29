@@ -3,12 +3,19 @@ package io.github.aquerr.eaglefactions.common.integrations.placeholderapi;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import me.rojo8399.placeholderapi.*;
+import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -149,89 +156,90 @@ public class EFPlaceholderService
 
     private String getFactionName(final User user)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-        if(optionalFaction.isPresent())
-        {
-            return optionalFaction.get().getName();
-        }
-        else return "";
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId())
+                .map(Faction::getName)
+                .orElse("");
     }
 
     private Text getFactionTag(final User user)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId());
-        if(optionalFaction.isPresent())
-        {
-            return optionalFaction.get().getTag();
-        }
-        else return Text.of("");
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId())
+                .map(Faction::getTag)
+                .orElse(Text.EMPTY);
     }
 
     private float getFactionPower(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(faction -> this.plugin.getPowerManager().getFactionPower(faction)).orElse(0F);
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(this.plugin.getPowerManager()::getFactionPower)
+                .orElse(0F);
     }
 
     private float getFactionMaxPower(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(faction -> this.plugin.getPowerManager().getFactionMaxPower(faction)).orElse(0F);
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(this.plugin.getPowerManager()::getFactionMaxPower)
+                .orElse(0F);
     }
 
     private Instant getFactionLastOnline(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        if(optionalFaction.isPresent())
-        {
-//            final Date date = Date.from(optionalFaction.get().getLastOnline());
-//            final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-//            return formatter.format(date);
-            return optionalFaction.get().getLastOnline();
-        }
-        return Instant.now();
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getLastOnline)
+                .orElse(Instant.now());
     }
 
     private int getFactionClaimCount(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(x->x.getClaims().size()).orElse(0);
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getClaims)
+                .map(Set::size)
+                .orElse(0);
     }
 
     private int getFactionOfficerCount(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(x->x.getOfficers().size()).orElse(0);
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getOfficers)
+                .map(Set::size)
+                .orElse(0);
     }
 
     private int getFactionMemberCount(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(x->x.getMembers().size()).orElse(0);
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getMembers)
+                .map(Set::size)
+                .orElse(0);
     }
 
     private int getFactionRecruitCount(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(x->x.getRecruits().size()).orElse(0);
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getRecruits)
+                .map(Set::size)
+                .orElse(0);
     }
 
     private Set<String> getFactionAlliances(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(Faction::getAlliances).orElse(new HashSet<>());
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getAlliances)
+                .orElse(Collections.emptySet());
     }
 
     private Set<String> getFactionEnemies(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(Faction::getEnemies).orElse(new HashSet<>());
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getEnemies)
+                .orElse(Collections.emptySet());
     }
 
     private Set<String> getFactionTruce(final User player)
     {
-        final Optional<Faction> optionalFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalFaction.map(Faction::getTruces).orElse(new HashSet<>());
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                .map(Faction::getTruces)
+                .orElse(Collections.emptySet());
     }
 
     //
@@ -240,20 +248,25 @@ public class EFPlaceholderService
 
     private float getPlayerPower(final User player)
     {
-        final Optional<FactionPlayer> optionalFactionPlayer = this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId());
-        return optionalFactionPlayer.map(FactionPlayer::getPower).orElse(0f);
+        return this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId())
+                .map(FactionPlayer::getPower)
+                .orElse(0F);
     }
 
     private float getPlayerMaxPower(final User player)
     {
-        final Optional<FactionPlayer> optionalFactionPlayer = this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId());
-        return optionalFactionPlayer.map(FactionPlayer::getMaxPower).orElse(0f);
+        return this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId())
+                .map(FactionPlayer::getMaxPower)
+                .orElse(0F);
     }
 
     private String getPlayerLastOnline(final User player)
     {
-        //TODO
-//        this.plugin.getPlayerManager().get
-        return "";
+        return player.get(JoinData.class)
+                .map(JoinData::lastPlayed)
+                .map(Value::get)
+                .map(instant -> LocalDateTime.ofInstant(instant, ZoneId.systemDefault()))
+                .map(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")::format)
+                .orElse("");
     }
 }
