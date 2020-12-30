@@ -84,7 +84,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION, authors = PluginInfo.AUTHOR,
-        dependencies = {@Dependency(id = "placeholderapi", optional = true)})
+        dependencies = {@Dependency(id = "placeholderapi", optional = true)}, url = PluginInfo.URL)
 public class EagleFactionsPlugin implements EagleFactions
 {
     //TODO: Convert these fields to instance fields.

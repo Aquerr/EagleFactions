@@ -16,6 +16,7 @@ public final class PluginInfo
     public static final Text PLUGIN_PREFIX = Text.of(TextColors.AQUA, "[EF] ");
     public static final Text ERROR_PREFIX = Text.of(TextColors.DARK_RED, "[EF] ");
     public static final String AUTHOR = "Aquerr";
+    public static final String URL = "https://github.com/Aquerr/EagleFactions";
 
     private PluginInfo()
     {

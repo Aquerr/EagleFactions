@@ -28,7 +28,7 @@ public class VersionCommand extends AbstractCommand
         {
             source.sendMessage(Text.of(
                     TextActions.showText(Text.of(TextColors.BLUE, "Click to view Github")),
-                    TextActions.openUrl(new URL("https://github.com/Aquerr/EagleFactions")),
+                    TextActions.openUrl(new URL(PluginInfo.URL)),
                     PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, PluginInfo.NAME, TextColors.WHITE, " - ", TextColors.GOLD, Messages.VERSION + " ", PluginInfo.VERSION, TextColors.WHITE, " made by ", TextColors.GOLD, PluginInfo.AUTHOR));
         }
         catch(final MalformedURLException e)
