@@ -979,7 +979,7 @@ public class FactionLogicImpl implements FactionLogic
     public void setDescription(final Faction faction, final String description)
     {
         checkNotNull(faction);
-        Validate.notBlank(description);
+        checkNotNull(description);
 
         final Faction updatedFaction = faction.toBuilder().setDescription(description).build();
         this.storageManager.saveFaction(updatedFaction);
@@ -989,7 +989,7 @@ public class FactionLogicImpl implements FactionLogic
     public void setMessageOfTheDay(final Faction faction, final String motd)
     {
         checkNotNull(faction);
-        Validate.notBlank(motd);
+        checkNotNull(motd);
 
         final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
         this.storageManager.saveFaction(updatedFaction);

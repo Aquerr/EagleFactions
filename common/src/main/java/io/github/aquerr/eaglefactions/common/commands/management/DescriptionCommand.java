@@ -25,14 +25,7 @@ public class DescriptionCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        final Optional<String> optionalDescription = context.<String>getOne("description");
-
-        if (!optionalDescription.isPresent())
-        {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.WRONG_COMMAND_ARGUMENTS));
-            source.sendMessage(Text.of(TextColors.RED, Messages.USAGE + " /f desc <description>"));
-            return CommandResult.success();
-        }
+        final String description = context.requireOne("description");
 
         if (!(source instanceof Player))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
@@ -44,19 +37,11 @@ public class DescriptionCommand extends AbstractCommand
 
         //Check if player is leader
         if (!optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()) && !optionalPlayerFaction.get().getOfficers().contains(player.getUniqueId()))
-        {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
-            return CommandResult.success();
-        }
-
-        final String description = optionalDescription.get();
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
 
         //Check description length
         if(description.length() > 255)
-        {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.DESCRIPTION_IS_TOO_LONG + " (" + Messages.MAX + " " + 255 + " " + Messages.CHARS + ")"));
-            return CommandResult.success();
-        }
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.DESCRIPTION_IS_TOO_LONG + " (" + Messages.MAX + " " + 255 + " " + Messages.CHARS + ")"));
 
         super.getPlugin().getFactionLogic().setDescription(optionalPlayerFaction.get(), description);
         player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GREEN, Messages.FACTION_DESCRIPTION_HAS_BEEN_UPDATED)));
