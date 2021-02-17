@@ -36,9 +36,9 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
         for (Iterator<Faction> iterator = DynmapService.drawnFactions.iterator(); iterator.hasNext();)
         {
             Faction drawnFaction = iterator.next();
-            Faction currentFaction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(drawnFaction.getName());
+            Faction faction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(drawnFaction.getName());
 
-            if (currentFaction == null || !currentFaction.equals(drawnFaction))
+            if (faction == null || hasNewClaims(drawnFaction, faction) || hasNewHome(drawnFaction, faction))
             {
                 /* Remove everything created */
                 if (DynmapService.drawnMarkers.get(drawnFaction.getName()) != null)
@@ -147,5 +147,15 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
             DynmapService.drawnFactions.add(faction);
         }
+    }
+
+    private boolean hasNewClaims(final Faction drawnFaction, final Faction faction)
+    {
+        return drawnFaction.getClaims().hashCode() != faction.getClaims().hashCode();
+    }
+
+    private boolean hasNewHome(final Faction drawnFaction, final Faction faction)
+    {
+        return !Objects.equals(drawnFaction.getHome(), faction.getHome());
     }
 }
