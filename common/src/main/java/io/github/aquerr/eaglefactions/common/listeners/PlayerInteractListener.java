@@ -11,16 +11,14 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.action.InteractEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -96,19 +94,25 @@ public class PlayerInteractListener extends AbstractListener
             return;
 
         event.getTargetBlock().getLocation()
-                .map(location -> super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true))
-                .ifPresent(protectionResult ->
-                {
-                    if (!protectionResult.hasAccess())
-                    {
-                        event.setCancelled(true);
-                    }
-                    else
-                    {
-                        if(protectionResult.isEagleFeather())
-                            removeEagleFeather(player);
-                    }
-                });
+                .ifPresent(location -> checkInteraction(event, location, player, true));
+    }
+
+    private void checkInteraction(InteractEvent interactEvent, Location<World> location, Player player, boolean shouldNotify) {
+        ProtectionResult protectionResult;
+        if (interactEvent.getContext().containsKey(EventContextKeys.USED_ITEM))
+            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, interactEvent.getContext().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
+        else
+            protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, shouldNotify);
+
+        if (!protectionResult.hasAccess())
+        {
+            interactEvent.setCancelled(true);
+        }
+        else
+        {
+            if (protectionResult.isEagleFeather())
+                removeEagleFeather(player);
+        }
     }
 
     private void removeEagleFeather(final Player player)
