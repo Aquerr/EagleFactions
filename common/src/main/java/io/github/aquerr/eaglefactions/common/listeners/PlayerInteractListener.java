@@ -6,6 +6,8 @@ import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -19,6 +21,7 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -105,10 +108,14 @@ public class PlayerInteractListener extends AbstractListener
                 .filter(this::isItemStackNotAirAndNotEmpty)
                 .orElse(null);
         ProtectionResult protectionResult;
-        if (usedItem != null && isSpawnEgg(usedItem))
+        if (usedItem != null && !location.getTileEntity().isPresent())
+        {
             protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
+        }
         else
+        {
             protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, shouldNotify);
+        }
 
         if (!protectionResult.hasAccess())
         {
@@ -131,10 +138,5 @@ public class PlayerInteractListener extends AbstractListener
     private boolean isItemStackNotAirAndNotEmpty(ItemStackSnapshot itemStackSnapshot)
     {
         return ItemTypes.AIR != itemStackSnapshot.getType() && !itemStackSnapshot.isEmpty();
-    }
-
-    private boolean isSpawnEgg(ItemStackSnapshot itemStackSnapshot)
-    {
-        return ItemTypes.SPAWN_EGG == itemStackSnapshot.getType();
     }
 }
