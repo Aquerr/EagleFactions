@@ -41,8 +41,9 @@ public class PlayerInteractListener extends AbstractListener
         if (event.getItemStack() == ItemStackSnapshot.NONE)
             return;
 
-        final Vector3d interactionPoint = event.getInteractionPoint().orElse(player.getLocation().getPosition());
-        Location<World> location = new Location<>(player.getWorld(), interactionPoint);
+        Location<World> location = event.getInteractionPoint()
+                .map(interactionPoint -> new Location<>(player.getWorld(), interactionPoint))
+                .orElse(player.getLocation());
 
         //TODO: To test... don't know how mods will behave with it.
         if (location.getBlockType() == BlockTypes.AIR)
@@ -78,6 +79,7 @@ public class PlayerInteractListener extends AbstractListener
 
         final Vector3d blockPosition = optionalInteractionPoint.orElseGet(() -> targetEntity.getLocation().getPosition());
         final Location<World> location = new Location<>(targetEntity.getWorld(), blockPosition);
+        //TODO: canInteractWithBlock should be probably changed to canHitEntity
         boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true).hasAccess();
         if(!canInteractWithEntity)
         {
