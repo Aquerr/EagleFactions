@@ -23,6 +23,7 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
@@ -168,7 +169,7 @@ class PlayerInteractListenerTest
     }
 
     @Test
-    void onblockInteractInvokesCanUseItemWhenContextContainsUsedItemKey()
+    void onBlockInteractInvokesCanUseItemWhenUsedItemIsSpawnEgg()
     {
         Location<World> location = new Location<>(world, 1, 1, 1);
         when(blockState.getType()).thenReturn(GRASS_BLOCK_TYPE);
@@ -176,6 +177,7 @@ class PlayerInteractListenerTest
         when(blockSnapshot.getLocation()).thenReturn(Optional.of(location));
         when(interactBlockEvent.getTargetBlock()).thenReturn(blockSnapshot);
         ItemStackSnapshot itemStackSnapshot = Mockito.mock(ItemStackSnapshot.class);
+        when(itemStackSnapshot.getType()).thenReturn(ItemTypes.SPAWN_EGG);
         EventContext eventContext = EventContext.builder().add(EventContextKeys.USED_ITEM, itemStackSnapshot).build();
         when(interactBlockEvent.getContext()).thenReturn(eventContext);
         when(protectionManager.canUseItem(location, player, itemStackSnapshot, true)).thenReturn(ProtectionResult.ok());
@@ -187,7 +189,7 @@ class PlayerInteractListenerTest
     }
 
     @Test
-    void onblockInteractInvokesCanInteractWithBlockWhenContextDoesNotContainItemUsedKey()
+    void onBlockInteractInvokesCanInteractWithBlockWhenContextDoesNotContainItemUsedKey()
     {
         Location<World> location = new Location<>(world, 1, 1, 1);
         when(blockState.getType()).thenReturn(GRASS_BLOCK_TYPE);

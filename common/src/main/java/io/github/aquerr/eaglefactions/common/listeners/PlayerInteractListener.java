@@ -13,12 +13,12 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.action.InteractEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -99,16 +99,20 @@ public class PlayerInteractListener extends AbstractListener
                 .ifPresent(location -> checkInteraction(event, location, player, true));
     }
 
-    private void checkInteraction(InteractEvent interactEvent, Location<World> location, Player player, boolean shouldNotify) {
+    private void checkInteraction(InteractBlockEvent.Secondary interactBlockEvent, Location<World> location, Player player, boolean shouldNotify)
+    {
+        ItemStackSnapshot usedItem = interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM)
+                .filter(this::isItemStackNotAirAndNotEmpty)
+                .orElse(null);
         ProtectionResult protectionResult;
-        if (interactEvent.getContext().containsKey(EventContextKeys.USED_ITEM))
-            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, interactEvent.getContext().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
+        if (usedItem != null && isSpawnEgg(usedItem))
+            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
         else
             protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, shouldNotify);
 
         if (!protectionResult.hasAccess())
         {
-            interactEvent.setCancelled(true);
+            interactBlockEvent.setCancelled(true);
         }
         else
         {
@@ -122,5 +126,15 @@ public class PlayerInteractListener extends AbstractListener
         final ItemStack feather = player.getItemInHand(HandTypes.MAIN_HAND).get();
         feather.setQuantity(feather.getQuantity() - 1);
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You used Eagle's Feather!"));
+    }
+
+    private boolean isItemStackNotAirAndNotEmpty(ItemStackSnapshot itemStackSnapshot)
+    {
+        return ItemTypes.AIR != itemStackSnapshot.getType() && !itemStackSnapshot.isEmpty();
+    }
+
+    private boolean isSpawnEgg(ItemStackSnapshot itemStackSnapshot)
+    {
+        return ItemTypes.SPAWN_EGG == itemStackSnapshot.getType();
     }
 }
