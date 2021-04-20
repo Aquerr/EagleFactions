@@ -61,9 +61,17 @@ public class DynmapUtils {
     }
 
     public static int getAreaColor(final Faction faction) {
-        DynmapConfig dynmapConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig();
 
-        int areaColor = dynmapConfig.getDynmapFactionColor();
+        int areaColor;
+
+        if(EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig().canColorTags())
+        {
+            areaColor = faction.getTag().getColor().getColor().getRgb();
+        }
+        else
+        {
+            areaColor = dynmapConfig.getDynmapFactionColor();
+        }
 
         if (faction.isSafeZone()) {
             areaColor = dynmapConfig.getDynmapSafezoneColor();
@@ -74,14 +82,10 @@ public class DynmapUtils {
         return areaColor;
     }
 
-    //TODO: Because Dynmap-Factions does not have a license, we should count it as it does not permit others to use their code.
-    //TODO: We should rewrite the code below so that it works as intended but with different strategy.
-    //TODO: If it turns out that the code must be the same as theirs then... well... it is not our fault I guess. ;D
 
     /**
      * WARNING: all code below is taken from Dynmap-Factions
      * https://github.com/webbukkit/Dynmap-Factions/
-     *
      */
 
     private static void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
