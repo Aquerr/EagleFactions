@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.common.managers;
 
-import com.google.common.base.Strings;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -29,23 +28,20 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.BlockCarrier;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 @Singleton
 public class ProtectionManagerImpl implements ProtectionManager
 {
+    private static final String ITEM_IT_AND_FACTION_TYPE_MUST_BE_PROVIDED = "Item id and faction type must be provided";
     private final FactionLogic factionLogic;
     private final PermsManager permsManager;
     private final PlayerManager playerManager;
@@ -803,6 +799,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             }
             else
             {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.FACTION))
+                    return ProtectionResult.ok();
                 if(!this.protectionConfig.shouldProtectClaimFromMobGrief()) //Notified Regular faction
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
@@ -818,16 +816,16 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final Faction targetFaction = notifiedFaction.get();
 
-        //Reference check if factions are equal.
+        //Check if factions are equal.
         if(targetFaction.equals(sourceFaction))
             return ProtectionResult.ok();
 
         if (sourceFaction.isSafeZone())
         {
-            if(targetFaction.isSafeZone())
-                return ProtectionResult.okSafeZone();
-            else if(targetFaction.isWarZone())
+            if(targetFaction.isWarZone())
             {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.WAR_ZONE))
+                    return ProtectionResult.okWarZone();
                 if (!this.protectionConfig.shouldProtectWarZoneFromMobGrief())
                     return ProtectionResult.okWarZone();
                 else return ProtectionResult.forbiddenWarZone();
@@ -841,12 +839,16 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
         else if (sourceFaction.isWarZone())
         {
-            if(targetFaction.isWarZone())
-                return ProtectionResult.okWarZone();
-            else if(targetFaction.isSafeZone())
+             if(targetFaction.isSafeZone())
+            {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.SAFE_ZONE))
+                    return ProtectionResult.okSafeZone();
                 return ProtectionResult.forbiddenSafeZone();
+            }
             else
             {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.FACTION))
+                    return ProtectionResult.ok();
                 if (!this.protectionConfig.shouldProtectClaimFromMobGrief())
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
@@ -855,15 +857,23 @@ public class ProtectionManagerImpl implements ProtectionManager
         else
         {
             if(targetFaction.isSafeZone())
+            {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.SAFE_ZONE))
+                    return ProtectionResult.okSafeZone();
                 return ProtectionResult.forbiddenSafeZone();
+            }
             else if(targetFaction.isWarZone())
             {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.WAR_ZONE))
+                    return ProtectionResult.okWarZone();
                 if(!this.protectionConfig.shouldProtectWarZoneFromMobGrief())
                     return ProtectionResult.okWarZone();
                 else return ProtectionResult.forbiddenWarZone();
             }
             else
             {
+                if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.getBlock().getId(), FactionType.FACTION))
+                    return ProtectionResult.ok();
                 if (!this.protectionConfig.shouldProtectClaimFromMobGrief())
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
@@ -875,7 +885,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean isItemWhitelisted(final String itemId, final FactionType factionType)
     {
         if (StringUtils.isBlank(itemId) || Objects.isNull(factionType))
-            throw new IllegalArgumentException("Item id and faction type must be provided");
+            throw new IllegalArgumentException(ITEM_IT_AND_FACTION_TYPE_MUST_BE_PROVIDED);
 
         switch (factionType)
         {
@@ -894,7 +904,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean isBlockWhitelistedForInteraction(final String blockId, final FactionType factionType)
     {
         if (StringUtils.isBlank(blockId) || Objects.isNull(factionType))
-            throw new IllegalArgumentException("Item id and faction type must be provided");
+            throw new IllegalArgumentException(ITEM_IT_AND_FACTION_TYPE_MUST_BE_PROVIDED);
 
         switch (factionType)
         {
@@ -913,7 +923,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean isBlockWhitelistedForPlaceDestroy(final String blockOrItemId, final FactionType factionType)
     {
         if (StringUtils.isBlank(blockOrItemId) || Objects.isNull(factionType))
-            throw new IllegalArgumentException("Item id and faction type must be provided");
+            throw new IllegalArgumentException(ITEM_IT_AND_FACTION_TYPE_MUST_BE_PROVIDED);
 
         switch (factionType)
         {
@@ -930,10 +940,12 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private boolean isHoldingEagleFeather(final User user)
     {
-        return user.getItemInHand(HandTypes.MAIN_HAND).isPresent()
-                && user.getItemInHand(HandTypes.MAIN_HAND).get().getType() == ItemTypes.FEATHER
-                && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).isPresent()
-                && user.getItemInHand(HandTypes.MAIN_HAND).get().get(Keys.DISPLAY_NAME).get().equals(EagleFeather.getDisplayName());
+        return user.getItemInHand(HandTypes.MAIN_HAND)
+                .filter(itemStack -> ItemTypes.FEATHER == itemStack.getType())
+                .filter(itemStack -> itemStack.get(Keys.DISPLAY_NAME).isPresent())
+                .flatMap(itemStack -> itemStack.get(Keys.DISPLAY_NAME))
+                .map(EagleFeather.getDisplayName()::equals)
+                .orElse(false);
     }
 
     private void notifyPlayer(final User user)

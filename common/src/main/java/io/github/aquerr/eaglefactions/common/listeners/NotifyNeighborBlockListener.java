@@ -63,12 +63,6 @@ public class NotifyNeighborBlockListener extends AbstractListener
 			if (sourceLocation == null)
 				return;
 
-			//TODO: Create new method in protection manager called "canNotifyBlock"
-//			if (!super.getPlugin().getProtectionManager().canNotify(sourceLocation))
-//			{
-//				event.setCancelled(true);
-//				return;
-//			}
 			final Iterator<Direction> directionIterator = event.getNeighbors().keySet().iterator();
 			while(directionIterator.hasNext())
 			{
