@@ -6,8 +6,6 @@ import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -15,13 +13,15 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.action.InteractEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.TargetInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -102,13 +102,36 @@ public class PlayerInteractListener extends AbstractListener
                 .ifPresent(location -> checkInteraction(event, location, player, true));
     }
 
+    @Listener
+    public void onInventoryOpenEvent(final InteractInventoryEvent.Open event, final @Root Player player)
+    {
+        BlockSnapshot blockSnapshot = event.getContext().get(EventContextKeys.BLOCK_HIT).orElse(null);
+        if (blockSnapshot == null)
+            return;
+
+        Location<World> location = blockSnapshot.getLocation().orElse(null);
+        if (location == null)
+            return;
+
+        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true);
+        if (!protectionResult.hasAccess())
+        {
+            event.setCancelled(true);
+        }
+        else
+        {
+            if (protectionResult.isEagleFeather())
+                removeEagleFeather(player);
+        }
+    }
+
     private void checkInteraction(InteractBlockEvent.Secondary interactBlockEvent, Location<World> location, Player player, boolean shouldNotify)
     {
         ItemStackSnapshot usedItem = interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM)
                 .filter(this::isItemStackNotAirAndNotEmpty)
                 .orElse(null);
         ProtectionResult protectionResult;
-        if (usedItem != null && !location.getTileEntity().isPresent())
+        if (usedItem != null)
         {
             protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
         }
@@ -120,11 +143,6 @@ public class PlayerInteractListener extends AbstractListener
         if (!protectionResult.hasAccess())
         {
             interactBlockEvent.setCancelled(true);
-        }
-        else
-        {
-            if (protectionResult.isEagleFeather())
-                removeEagleFeather(player);
         }
     }
 

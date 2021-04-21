@@ -22,6 +22,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -61,6 +62,9 @@ class PlayerInteractListenerTest
 
     @Mock
     private InteractEntityEvent interactEntityEvent;
+
+    @Mock
+    private InteractInventoryEvent.Open interactInventoryOpenEvent;
 
     @Mock
     private Player player;
@@ -169,6 +173,26 @@ class PlayerInteractListenerTest
     }
 
     @Test
+    void openInventoryEventCancelsDoesNotCancelEventWhenProtectionResultIsEagleFeather()
+    {
+        Location<World> location = new Location<>(world, 1, 1, 1);
+        when(blockState.getType()).thenReturn(GRASS_BLOCK_TYPE);
+        when(blockSnapshot.getState()).thenReturn(blockState);
+        when(blockSnapshot.getLocation()).thenReturn(Optional.of(location));
+        EventContext eventContext = EventContext.builder().add(EventContextKeys.BLOCK_HIT, blockSnapshot).build();
+        when(interactInventoryOpenEvent.getContext()).thenReturn(eventContext);
+        when(protectionManager.canInteractWithBlock(location, player, true)).thenReturn(ProtectionResult.okEagleFeather());
+        ItemStack eagleFeather = Mockito.mock(ItemStack.class);
+        when(player.getItemInHand(HandTypes.MAIN_HAND)).thenReturn(Optional.of(eagleFeather));
+
+        playerInteractListener.onInventoryOpenEvent(interactInventoryOpenEvent, player);
+
+        verify(interactInventoryOpenEvent, times(0)).setCancelled(true);
+        verify(protectionManager, times(1)).canInteractWithBlock(any(), any(), anyBoolean());
+        verify(eagleFeather, times(1)).setQuantity(anyInt());
+    }
+
+    @Test
     void onBlockInteractInvokesCanUseItemWhenUsedItemIsSpawnEgg()
     {
         Location<World> location = new Location<>(world, 1, 1, 1);
@@ -225,7 +249,7 @@ class PlayerInteractListenerTest
     }
 
     @Test
-    void onBlockInteractDoesNotCancelEventWhenProtectionResultIsEagleFeatherAndRemovesOneEagleFeather()
+    void onBlockInteractDoesNotCancelEventWhenProtectionResultIsNotForbidden()
     {
         Location<World> location = new Location<>(world, 1, 1, 1);
         when(blockState.getType()).thenReturn(GRASS_BLOCK_TYPE);
@@ -234,14 +258,11 @@ class PlayerInteractListenerTest
         when(interactBlockEvent.getTargetBlock()).thenReturn(blockSnapshot);
         EventContext eventContext = EventContext.empty();
         when(interactBlockEvent.getContext()).thenReturn(eventContext);
-        when(protectionManager.canInteractWithBlock(location, player, true)).thenReturn(ProtectionResult.okEagleFeather());
-        ItemStack eagleFeather = Mockito.mock(ItemStack.class);
-        when(player.getItemInHand(HandTypes.MAIN_HAND)).thenReturn(Optional.of(eagleFeather));
+        when(protectionManager.canInteractWithBlock(location, player, true)).thenReturn(ProtectionResult.ok());
 
         playerInteractListener.onBlockInteract(interactBlockEvent, player);
 
         verify(interactBlockEvent, times(0)).setCancelled(true);
         verify(protectionManager, times(1)).canInteractWithBlock(any(), any(), anyBoolean());
-        verify(eagleFeather, times(1)).setQuantity(anyInt());
     }
 }
