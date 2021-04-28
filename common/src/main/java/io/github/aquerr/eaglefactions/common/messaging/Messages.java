@@ -331,6 +331,7 @@ public final class Messages
     public static String COMMAND_LIST_CLAIMS_DESC = "Shows a list of faction's claims.";
     public static String COMMAND_CLAIM_DESC = "Claim a land for your faction";
     public static String COMMAND_SQUARE_CLAIM_DESC = "Claim land in form of square with a given radius";
+    public static String COMMAND_FILL_CLAIM_DESC = "Claims as many chunks as possible starting from player position";
     public static String COMMAND_UNCLAIM_DESC = "Unclaim a land captured by your faction.";
     public static String COMMAND_UNCLAIM_ALL_DESC = "Remove all claims";
     public static String COMMAND_MAP_DESC = "Turn on/off factions map";

@@ -36,6 +36,7 @@ public final class PluginPermissions
     public static final String CLAIMS_LIST_COMMAND = "eaglefactions.player.claims";
     public static final String CLAIM_COMMAND = "eaglefactions.player.claim";
     public static final String RADIUS_CLAIM_COMMAND = "eaglefactions.player.radiusclaim";
+    public static final String COMMAND_FILL_CLAIM_COMMAND = "eaglefactions.player.fillclaim";
     public static final String AUTO_CLAIM_COMMAND = "eaglefactions.player.autoclaim";
     public static final String UNCLAIM_COMMAND = "eaglefactions.player.unclaim";
     public static final String UNCLAIM_ALL_COMMAND = "eaglefactions.player.unclaimall";

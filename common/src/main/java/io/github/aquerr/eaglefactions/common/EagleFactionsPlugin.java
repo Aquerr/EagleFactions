@@ -438,6 +438,13 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new SquareClaimCommand(this))
                 .build());
 
+        // Fill Command
+        SUBCOMMANDS.put(Collections.singletonList("fillclaim"), CommandSpec.builder()
+                .description(Text.of(Messages.COMMAND_FILL_CLAIM_DESC))
+                .permission(PluginPermissions.COMMAND_FILL_CLAIM_COMMAND)
+                .executor(new FillCommand(this))
+                .build());
+
         //Unclaim command
         SUBCOMMANDS.put(Collections.singletonList("unclaim"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_UNCLAIM_DESC))
