@@ -3,9 +3,7 @@ package io.github.aquerr.eaglefactions.common.commands.args;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -16,10 +14,6 @@ import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class OwnFactionPlayerArgument extends CommandElement
@@ -94,8 +88,8 @@ public class OwnFactionPlayerArgument extends CommandElement
             final List<FactionPlayer> factionPlayers = new LinkedList<>();
             for (final UUID uuid : faction.getPlayers())
             {
-                final Optional<FactionPlayer> factionPlayer = this.plugin.getPlayerManager().getFactionPlayer(uuid);
-                factionPlayers.add(factionPlayer.get());
+                this.plugin.getPlayerManager().getFactionPlayer(uuid)
+                        .ifPresent(factionPlayers::add);
             }
 
             if (args.hasNext())

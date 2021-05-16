@@ -40,6 +40,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class FactionLogicImpl implements FactionLogic
 {
+    private static final UUID DUMMY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
@@ -101,7 +103,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final List<Player> factionPlayers = new ArrayList<>();
         final UUID factionLeader = faction.getLeader();
-        if(!faction.getLeader().equals(new UUID(0, 0)) && this.playerManager.isPlayerOnline(factionLeader))
+        if(!faction.getLeader().equals(DUMMY_UUID) && this.playerManager.isPlayerOnline(factionLeader))
         {
             factionPlayers.add(playerManager.getPlayer(factionLeader).get());
         }
@@ -258,7 +260,7 @@ public class FactionLogicImpl implements FactionLogic
                     if (playerUUID.equals(faction.getLeader()))
                     {
                         final Faction updatedFaction = faction.toBuilder()
-                                .setLeader(new UUID(0, 0))
+                                .setLeader(DUMMY_UUID)
                                 .build();
 
                         storageManager.saveFaction(updatedFaction);
@@ -283,11 +285,11 @@ public class FactionLogicImpl implements FactionLogic
             case LEADER:
             {
                 final UUID leaderUUID = faction.getLeader();
-                if (leaderUUID != new UUID(0, 0))
+                if (leaderUUID != DUMMY_UUID)
                 {
                     officers.add(leaderUUID);
                 }
-                factionBuilder.setLeader(playerUUID);
+                factionBuilder.setLeader(playerUUID).setOfficers(officers);
                 break;
             }
             case OFFICER:
