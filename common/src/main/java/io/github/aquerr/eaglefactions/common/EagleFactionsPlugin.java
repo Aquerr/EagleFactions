@@ -660,12 +660,20 @@ public class EagleFactionsPlugin implements EagleFactions
                 .build());
 
         //MaxPower Command
-        SUBCOMMANDS.put(Collections.singletonList("maxpower"), CommandSpec.builder()
+        SUBCOMMANDS.put(Collections.singletonList("setmaxpower"), CommandSpec.builder()
                 .description(Text.of(Messages.COMMAND_SET_MAX_POWER_DESC))
                 .permission(PluginPermissions.MAX_POWER_COMMAND)
                 .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
                         GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
-                .executor(new MaxPowerCommand(this))
+                .executor(new SetMaxPowerCommand(this))
+                .build());
+
+        // MaxPowerAll Command
+        SUBCOMMANDS.put(Collections.singletonList("setmaxpower_forall"), CommandSpec.builder()
+                .description(Text.of(Messages.COMMAND_SET_MAX_POWER_FOR_ALL_DESC))
+                .permission(PluginPermissions.MAX_POWER_FOR_ALL_COMMAND)
+                .arguments(GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
+                .executor(new SetMaxPowerForAllCommand(this))
                 .build());
 
         //Attack Command

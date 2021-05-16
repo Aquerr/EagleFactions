@@ -12,9 +12,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class MaxPowerCommand extends AbstractCommand
+public class SetMaxPowerCommand extends AbstractCommand
 {
-    public MaxPowerCommand(EagleFactions plugin)
+    public SetMaxPowerCommand(EagleFactions plugin)
     {
         super(plugin);
     }
@@ -25,18 +25,13 @@ public class MaxPowerCommand extends AbstractCommand
         final Player selectedPlayer = context.requireOne(Text.of("player"));
         final double power = context.requireOne(Text.of("power"));
 
-        if (source instanceof Player)
+        if (isPlayer(source))
         {
             final Player player = (Player) source;
             if (!super.getPlugin().getPlayerManager().hasAdminMode(player))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
-            setMaxPower(source, selectedPlayer, (float) power);
         }
-        else
-        {
-            setMaxPower(source, selectedPlayer, (float)power);
-        }
-
+        setMaxPower(source, selectedPlayer, (float) power);
         return CommandResult.success();
     }
 

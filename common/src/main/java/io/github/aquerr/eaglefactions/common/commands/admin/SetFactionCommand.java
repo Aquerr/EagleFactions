@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.common.commands.general;
+package io.github.aquerr.eaglefactions.common.commands.admin;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -31,7 +31,7 @@ public class SetFactionCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "The given rank is not valid!"));
 
         super.getPlugin().getFactionLogic().setFaction(player.getUniqueId(), faction.getName(), factionMemberType);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Player's faction has been changed!"));
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Player's faction has been changed!"));
         return CommandResult.success();
     }
 }
