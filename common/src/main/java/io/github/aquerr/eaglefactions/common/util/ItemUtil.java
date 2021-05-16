@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.common.util;
 
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.exception.RequiredItemsNotFoundException;
+import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;

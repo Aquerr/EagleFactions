@@ -18,6 +18,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
@@ -73,7 +74,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
                 {
                     for (final Claim claim : faction.getClaims())
                     {
-                        scheduler.scheduleWithDelay(new WorldRegenTask(claim), 0);
+                        scheduler.scheduleWithDelay(new WorldRegenTask(claim), 0, TimeUnit.SECONDS);
                     }
                 }
                 EventRunner.runFactionDisbandEventPost(null, faction, false, true);

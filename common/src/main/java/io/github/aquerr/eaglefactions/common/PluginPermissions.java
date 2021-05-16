@@ -69,9 +69,11 @@ public final class PluginPermissions
     public static final String CHEST_COMMAND = "eaglefactions.player.chest";
 
     //Admin
-    public static final String ADMIN_MODE = "eaglefactions.adminmode";
+    public static final String CONSTANT_ADMIN_MODE = "eaglefactions.constant.adminmode";
 
     public static final String ADMIN_MODE_COMMAND = "eaglefactions.admin.adminmode";
+
+    public static final String SET_FACTION_COMMAND = "eaglefactions.admin.setfaction";
 
     public static final String SET_POWER_COMMAND = "eaglefactions.admin.setpower";
     public static final String MAX_POWER_COMMAND = "eaglefactions.admin.maxpower";

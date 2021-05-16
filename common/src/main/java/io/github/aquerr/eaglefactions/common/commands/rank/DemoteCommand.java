@@ -1,14 +1,13 @@
 package io.github.aquerr.eaglefactions.common.commands.rank;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.internal.cglib.proxy.$Factory;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.exception.PlayerNotInFactionException;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
@@ -20,8 +19,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Aquerr on 2018-06-24.
@@ -38,78 +36,113 @@ public class DemoteCommand extends AbstractCommand
     {
         final FactionPlayer demotedPlayer = context.requireOne("player");
 
-        if(!(source instanceof Player))
+        if(!isPlayer(source))
             return demoteByConsole(source, demotedPlayer);
 
-        final Player sourcePlayer = (Player)source;
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
-        final Optional<Faction> optionalDemotedPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(demotedPlayer.getUniqueId());
+        Player sourcePlayer = requirePlayerSource(source);
+        final Faction playerFaction = requirePlayerFaction(sourcePlayer);
+        super.getPlugin().getFactionLogic().getFactionByPlayerUUID(demotedPlayer.getUniqueId())
+                .filter(faction -> faction.getName().equals(playerFaction.getName()))
+                .orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION)));
 
-        if(!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+        return tryDemotePlayer(playerFaction, sourcePlayer, demotedPlayer);
+    }
 
-        final Faction playerFaction = optionalPlayerFaction.get();
+    private CommandResult tryDemotePlayer(final Faction faction, final Player sourcePlayer, final FactionPlayer targetPlayer) throws CommandException
+    {
+        final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer);
+        final FactionMemberType sourcePlayerMemberType = faction.getPlayerMemberType(sourcePlayer.getUniqueId());
+        final FactionMemberType targetPlayerMemberType = targetPlayer.getFactionRole();
 
-        if(!optionalDemotedPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
-
-        if(!optionalDemotedPlayerFaction.get().getName().equals(playerFaction.getName()))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
-
-        if(super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer))
+        if (hasAdminMode)
         {
-            if (playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) || playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
+            if (targetPlayerMemberType == FactionMemberType.RECRUIT)
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
 
-            return demotePlayer(sourcePlayer, demotedPlayer, playerFaction);
+            else if (targetPlayerMemberType == FactionMemberType.LEADER)
+            {
+                super.getPlugin().getRankManager().setLeader(null, faction);
+                sourcePlayer.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, targetPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, Messages.OFFICER)))));
+                return CommandResult.success();
+            }
+
+            return demotePlayer(sourcePlayer, targetPlayer);
         }
 
-        if(playerFaction.getLeader().equals(sourcePlayer.getUniqueId()))
-        {
-            if (playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) || playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-            return demotePlayer(sourcePlayer, demotedPlayer, playerFaction);
-        }
-        else if(playerFaction.getOfficers().contains(sourcePlayer.getUniqueId()))
-        {
-            if (playerFaction.getLeader().equals(demotedPlayer.getUniqueId()) || playerFaction.getOfficers().contains(demotedPlayer.getUniqueId()) || playerFaction.getRecruits().contains(demotedPlayer.getUniqueId()))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
-            return demotePlayer(sourcePlayer, demotedPlayer, playerFaction);
-        }
-        else
-        {
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
-        }
+        List<FactionMemberType> demotableRoles = getDemotableRolesForRole(sourcePlayerMemberType);
+        if (!demotableRoles.contains(targetPlayerMemberType))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
+
+        return demotePlayer(sourcePlayer, targetPlayer);
     }
 
     private CommandResult demoteByConsole(final CommandSource source, final FactionPlayer demotedPlayer) throws CommandException
     {
-        final Faction faction = demotedPlayer.getFaction().orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This player is not in a faction.")));
-        if (demotedPlayer.getUniqueId().equals(faction.getLeader()))
+        final Faction faction = demotedPlayer.getFaction()
+                .orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This player is not in a faction.")));
+
+        FactionMemberType targetPlayerRole = demotedPlayer.getFactionRole();
+
+        if (targetPlayerRole == FactionMemberType.LEADER)
         {
-            super.getPlugin().getFactionLogic().setLeader(new UUID(0, 0), faction.getName());
+            super.getPlugin().getRankManager().setLeader(null, faction);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, Messages.OFFICER)))));
             return CommandResult.success();
         }
 
-        if (faction.getRecruits().contains(demotedPlayer.getUniqueId()))
+        if (targetPlayerRole == FactionMemberType.RECRUIT)
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE));
 
-        final FactionMemberType demotedTo = super.getPlugin().getFactionLogic().demotePlayer(faction, demotedPlayer.getUniqueId());
-        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
+        FactionMemberType oldRank = demotedPlayer.getFactionRole();
+        FactionMemberType demotedTo = null;
+        try
+        {
+            demotedTo = super.getPlugin().getRankManager().demotePlayer(null, demotedPlayer);
+            if (oldRank != demotedTo) {
+                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
+            }
+        }
+        catch (PlayerNotInFactionException ignored)
+        {
+        }
         return CommandResult.success();
     }
 
-    private CommandResult demotePlayer(final Player demotedBy, final FactionPlayer demotedPlayer, final Faction faction)
+    private CommandResult demotePlayer(final Player demotedBy, final FactionPlayer demotedPlayer)
     {
-        final boolean isCancelled = EventRunner.runFactionDemoteEventPre(demotedBy, demotedPlayer, faction);
-        if (isCancelled)
-            return CommandResult.success();
-
-        final FactionMemberType demotedTo = getPlugin().getFactionLogic().demotePlayer(faction, demotedPlayer.getUniqueId());
-        demotedBy.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
-
-        EventRunner.runFactionDemoteEventPost(demotedBy, demotedPlayer, demotedTo, faction);
+        final FactionMemberType demotedTo;
+        try
+        {
+            demotedTo = getPlugin().getRankManager().demotePlayer(demotedBy, demotedPlayer);
+            demotedBy.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, demotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, demotedTo.name())))));
+        }
+        catch (PlayerNotInFactionException ignored)
+        {
+        }
         return CommandResult.success();
+    }
+
+    private List<FactionMemberType> getDemotableRolesForRole(FactionMemberType factionMemberType)
+    {
+        if (factionMemberType != FactionMemberType.LEADER && factionMemberType != FactionMemberType.OFFICER)
+            return Collections.emptyList();
+
+        //In case we want to add more roles in the future (probably, we will)
+        List<FactionMemberType> roles = new ArrayList<>(Arrays.asList(FactionMemberType.values()));
+        roles.remove(FactionMemberType.ALLY);
+        roles.remove(FactionMemberType.TRUCE);
+        roles.remove(FactionMemberType.RECRUIT);
+        roles.remove(FactionMemberType.NONE);
+
+        if (factionMemberType == FactionMemberType.LEADER)
+        {
+            roles.remove(FactionMemberType.LEADER);
+        }
+        else
+        {
+            roles.remove(FactionMemberType.LEADER);
+            roles.remove(FactionMemberType.OFFICER);
+        }
+        return roles;
     }
 }

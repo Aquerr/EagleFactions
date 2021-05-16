@@ -17,6 +17,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.World;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -36,12 +37,9 @@ public class AttackCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        if(!(source instanceof Player))
-            throw new CommandException(Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+        final Player player = requirePlayerSource(source);
 
-        final Player player = (Player)source;
-
-        if(this.factionsConfig.canAttackOnlyAtNight() && player.getWorld().getProperties().getWorldTime() % 24000L < 12000)
+        if(this.factionsConfig.canAttackOnlyAtNight() && isNight(player.getWorld()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CAN_ATTACK_SOMEONES_TERRITORY_ONLY_AT_NIGHT));
 
         return attackChunk(player);
@@ -49,11 +47,7 @@ public class AttackCommand extends AbstractCommand
 
     private CommandResult attackChunk(Player player) throws CommandException
     {
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        if(!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
+        final Faction playerFaction = requirePlayerFaction(player);
         final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
         if(!optionalChunkFaction.isPresent())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLACE_DOES_NOT_BELONG_TO_ANYONE));
@@ -72,13 +66,7 @@ public class AttackCommand extends AbstractCommand
         if(playerFaction.getAlliances().contains(attackedFaction.getName()) || playerFaction.getTruces().contains(attackedFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION + " " + Messages.YOU_ARE_IN_THE_SAME_ALLIANCE));
 
-        final float neededPowerPercentageToAttack = this.powerConfig.getNeededPowerPercentageToAttack();
-        final float attackedFactionMaxPower = super.getPlugin().getPowerManager().getFactionMaxPower(attackedFaction);
-        final float attackedFactionPower = super.getPlugin().getPowerManager().getFactionPower(attackedFaction);
-        final float playerFactionPower = super.getPlugin().getPowerManager().getFactionPower(playerFaction);
-        final float minimalPowerToGetAttacked = attackedFactionMaxPower * neededPowerPercentageToAttack;
-
-        if(attackedFactionPower > minimalPowerToGetAttacked || attackedFactionPower > playerFactionPower)
+        if(!canAttackFactionPowerCheck(playerFaction, attackedFaction))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_ATTACK_THIS_FACTION + " " + Messages.THEIR_POWER_IS_TO_HIGH));
 
         int attackTime = this.factionsConfig.getAttackTime();
@@ -91,5 +79,21 @@ public class AttackCommand extends AbstractCommand
         super.getPlugin().getAttackLogic().attack(player, attackedClaim);
 
         return CommandResult.success();
+    }
+
+    private boolean canAttackFactionPowerCheck(Faction attacker, Faction target)
+    {
+        final float neededPowerPercentageToAttack = this.powerConfig.getNeededPowerPercentageToAttack();
+        final float targetFactionMaxPower = super.getPlugin().getPowerManager().getFactionMaxPower(target);
+        final float vulnerabilityBoundary = targetFactionMaxPower * neededPowerPercentageToAttack;
+        final float targetFactionPower = super.getPlugin().getPowerManager().getFactionPower(target);
+        final float attackerFactionPower = super.getPlugin().getPowerManager().getFactionPower(attacker);
+
+        return targetFactionPower <= vulnerabilityBoundary && attackerFactionPower >= targetFactionPower;
+    }
+
+    private boolean isNight(World world)
+    {
+        return world.getProperties().getWorldTime() % 24000L < 12000;
     }
 }

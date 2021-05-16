@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.common.commands.claiming;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -16,13 +17,9 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 
 public class FillCommand extends AbstractCommand
 {
@@ -64,11 +61,6 @@ public class FillCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private boolean isPlayer(CommandSource source)
-    {
-        return source instanceof Player;
-    }
-
     private boolean canClaimInWorld(World world, boolean isAdmin)
     {
         if (this.protectionConfig.getClaimableWorldNames().contains(world.getName()))
@@ -89,21 +81,23 @@ public class FillCommand extends AbstractCommand
     // Starts where player is standing
     private void fill(final Player player, Faction faction) throws CommandException
     {
-        final Queue<Location<World>> chunks = new LinkedList<>();
-        chunks.add(player.getLocation());
+        final UUID worldUUID = player.getWorld().getUniqueId();
+        final Queue<Vector3i> chunks = new LinkedList<>();
+        chunks.add(player.getLocation().getChunkPosition());
         while (!chunks.isEmpty())
         {
             if (hasReachedClaimLimit(faction))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
 
-            final Location<World> location = chunks.poll();
-            if (!super.getPlugin().getFactionLogic().isClaimed(location.getExtent().getUniqueId(), location.getChunkPosition()))
+            final Vector3i chunkPosition = chunks.poll();
+            if (!super.getPlugin().getFactionLogic().isClaimed(worldUUID, chunkPosition))
             {
-                super.getPlugin().getFactionLogic().startClaiming(player, faction, location.getExtent().getUniqueId(), location.getChunkPosition());
-                chunks.add(location.add(1, 0, 0));
-                chunks.add(location.add(-1, 0, 0));
-                chunks.add(location.add(0, 0, 1));
-                chunks.add(location.add(0, 0, -1));
+                faction = super.getPlugin().getFactionLogic().getFactionByName(faction.getName());
+                super.getPlugin().getFactionLogic().startClaiming(player, faction, worldUUID, chunkPosition);
+                chunks.add(chunkPosition.add(1, 0, 0));
+                chunks.add(chunkPosition.add(-1, 0, 0));
+                chunks.add(chunkPosition.add(0, 0, 1));
+                chunks.add(chunkPosition.add(0, 0, -1));
             }
         }
     }

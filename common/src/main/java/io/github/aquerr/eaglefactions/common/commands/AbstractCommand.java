@@ -1,11 +1,19 @@
 package io.github.aquerr.eaglefactions.common.commands;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.common.PluginInfo;
+import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+
+import java.util.Optional;
 
 public abstract class AbstractCommand implements CommandExecutor
 {
@@ -23,6 +31,24 @@ public abstract class AbstractCommand implements CommandExecutor
 
     @Override
     public abstract CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException;
+
+    protected Faction requirePlayerFaction(Player player) throws CommandException
+    {
+        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        return optionalPlayerFaction.orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
+    }
+
+    protected Player requirePlayerSource(CommandSource commandSource) throws CommandException
+    {
+        if(!isPlayer(commandSource))
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+        return(Player) commandSource;
+    }
+
+    protected boolean isPlayer(CommandSource commandSource)
+    {
+        return commandSource instanceof Player;
+    }
 
 //    @Override
 //    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException

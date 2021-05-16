@@ -2,8 +2,6 @@ package io.github.aquerr.eaglefactions.common.managers;
 
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
-import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
@@ -16,7 +14,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.Identifiable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,7 +87,7 @@ public class PlayerManagerImpl implements PlayerManager
     @Override
     public boolean hasAdminMode(final User player)
     {
-        return player.hasPermission(PluginPermissions.ADMIN_MODE) || this.adminModePlayers.contains(player.getUniqueId());
+        return player.hasPermission(PluginPermissions.CONSTANT_ADMIN_MODE) || this.adminModePlayers.contains(player.getUniqueId());
     }
 
     @Override

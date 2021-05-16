@@ -366,6 +366,8 @@ public final class Messages
     public static String COMMAND_ACCESS_OWNED_BY_DESC = "Shows which claims are owned by the given player";
     public static String COMMAND_ACCESS_ACCESSIBLE_BY_FACTION_DESC = "Shows which claims are accessible by faction";
     public static String COMMAND_ACCESS_DESC = "Manages internal faction access for current claim.";
+    public static String SET_FACTION_COMMAND = "Sets player's faction";
+
 
     private Messages()
     {

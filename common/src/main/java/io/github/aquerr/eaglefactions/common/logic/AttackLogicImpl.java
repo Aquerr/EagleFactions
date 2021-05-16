@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.common.logic;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
-import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
@@ -26,7 +25,6 @@ import org.spongepowered.api.world.World;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class AttackLogicImpl implements AttackLogic
 {
@@ -49,15 +47,9 @@ public class AttackLogicImpl implements AttackLogic
     @Override
     public void blockClaiming(String factionName)
     {
-        if(EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(factionName))
-        {
-            EagleFactionsPlugin.ATTACKED_FACTIONS.replace(factionName, 120);
-        }
-        else
-        {
-            EagleFactionsPlugin.ATTACKED_FACTIONS.put(factionName, 120);
-            runClaimingRestorer(factionName);
-        }
+        //TODO: Make block claiming time configurable...
+        EagleFactionsPlugin.ATTACKED_FACTIONS.put(factionName, 120);
+        runClaimingRestorer(factionName);
     }
 
     @Override

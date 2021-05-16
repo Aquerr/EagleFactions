@@ -8,10 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.api.managers.PermsManager;
-import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.api.managers.PowerManager;
-import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
+import io.github.aquerr.eaglefactions.api.managers.*;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.common.commands.*;
 import io.github.aquerr.eaglefactions.common.commands.access.*;
@@ -34,6 +31,7 @@ import io.github.aquerr.eaglefactions.common.commands.admin.*;
 import io.github.aquerr.eaglefactions.common.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
@@ -44,10 +42,7 @@ import io.github.aquerr.eaglefactions.common.listeners.faction.FactionLeaveListe
 import io.github.aquerr.eaglefactions.common.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.common.logic.PVPLoggerImpl;
-import io.github.aquerr.eaglefactions.common.managers.PermsManagerImpl;
-import io.github.aquerr.eaglefactions.common.managers.PlayerManagerImpl;
-import io.github.aquerr.eaglefactions.common.managers.PowerManagerImpl;
-import io.github.aquerr.eaglefactions.common.managers.ProtectionManagerImpl;
+import io.github.aquerr.eaglefactions.common.managers.*;
 import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
@@ -89,18 +84,16 @@ public class EagleFactionsPlugin implements EagleFactions
 {
     //TODO: Convert these fields to instance fields.
     public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
-    public static final List<Invite> INVITE_LIST = new ArrayList<>();
-    public static final List<AllyRequest> TRUCE_INVITE_LIST = new ArrayList<>();
-    public static final List<AllyRequest> ALLY_INVITE_LIST = new ArrayList<>();
-    public static final List<ArmisticeRequest> ARMISTICE_REQUEST_LIST = new ArrayList<>();
-    public static final List<UUID> AUTO_CLAIM_LIST = new ArrayList<>();
-    public static final List<UUID> AUTO_MAP_LIST = new ArrayList<>();
+    public static final List<FactionInvite> INVITE_LIST = new LinkedList<>();
+    public static final List<AcceptableInvite> RELATION_INVITES = new LinkedList<>();
+    public static final List<UUID> AUTO_CLAIM_LIST = new LinkedList<>();
+    public static final List<UUID> AUTO_MAP_LIST = new LinkedList<>();
     public static final Map<UUID, String> REGEN_CONFIRMATION_MAP = new HashMap<>();
     public static final Map<String, Integer> ATTACKED_FACTIONS = new HashMap<>();
     public static final Map<UUID, Integer> BLOCKED_HOME = new HashMap<>();
     public static final Map<UUID, ChatEnum> CHAT_LIST = new HashMap<>();
     public static final Map<UUID, Integer> HOME_COOLDOWN_PLAYERS = new HashMap<>();
-    public static final List<UUID> DEBUG_MODE_PLAYERS = new ArrayList<>();
+    public static final List<UUID> DEBUG_MODE_PLAYERS = new LinkedList<>();
 
     private static EagleFactionsPlugin eagleFactions;
 
@@ -112,6 +105,8 @@ public class EagleFactionsPlugin implements EagleFactions
     private PowerManager powerManager;
     private AttackLogic attackLogic;
     private FactionLogic factionLogic;
+    private InvitationManager invitationManager;
+    private RankManager rankManager;
     private StorageManager storageManager;
 
     @Inject
@@ -163,6 +158,8 @@ public class EagleFactionsPlugin implements EagleFactions
 
         registerListeners();
 
+        EventRunner.init(Sponge.getEventManager());
+
         //Display some info text in the console.
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
         Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
@@ -179,25 +176,6 @@ public class EagleFactionsPlugin implements EagleFactions
                 Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
             }
         });
-    }
-
-    private void registerTypeSerializers()
-    {
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Claim.class), new ClaimTypeSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){}, new ClaimSetTypeSerializer());
-    }
-
-    private void registerAPI()
-    {
-        //This is not really needed as api consumers can access managers classes through EagleFactions interface instance.
-        //But we are still registering these managers just in case someone will try to access not through EagleFactions interface.
-        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this.factionLogic);
-        Sponge.getServiceManager().setProvider(this, PowerManager.class, this.powerManager);
-        Sponge.getServiceManager().setProvider(this, PlayerManager.class, this.playerManager);
-        Sponge.getServiceManager().setProvider(this, ProtectionManager.class, this.protectionManager);
-        Sponge.getServiceManager().setProvider(this, PermsManager.class, this.permsManager);
-        Sponge.getServiceManager().setProvider(this, PVPLogger.class, this.pvpLogger);
-        Sponge.getServiceManager().setProvider(this, AttackLogic.class, this.attackLogic);
     }
 
     @Listener
@@ -285,6 +263,159 @@ public class EagleFactionsPlugin implements EagleFactions
             Player player = (Player)event.getSource();
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CONFIG_HAS_BEEN_RELOADED));
         }
+    }
+
+    @Override
+    public Configuration getConfiguration()
+    {
+        return this.configuration;
+    }
+
+    @Override
+    public PVPLogger getPVPLogger()
+    {
+        return this.pvpLogger;
+    }
+
+    @Override
+    public PermsManager getPermsManager()
+    {
+        return this.permsManager;
+    }
+
+    @Override
+    public PlayerManager getPlayerManager()
+    {
+        return playerManager;
+    }
+
+    @Override
+    public PowerManager getPowerManager()
+    {
+        return powerManager;
+    }
+
+    @Override
+    public ProtectionManager getProtectionManager()
+    {
+        return protectionManager;
+    }
+
+    @Override
+    public AttackLogic getAttackLogic()
+    {
+        return attackLogic;
+    }
+
+    @Override
+    public FactionLogic getFactionLogic()
+    {
+        return factionLogic;
+    }
+
+    @Override
+    public StorageManager getStorageManager()
+    {
+        return this.storageManager;
+    }
+
+    @Override
+    public InvitationManager getInvitationManager()
+    {
+        return this.invitationManager;
+    }
+
+    @Override
+    public RankManager getRankManager()
+    {
+        return this.rankManager;
+    }
+
+    public EFPlaceholderService getEfPlaceholderService()
+    {
+        return this.efPlaceholderService;
+    }
+
+    public DynmapService getDynmapService()
+    {
+        return this.dynmapService;
+    }
+
+    @Override
+    public Faction.Builder getBuilderForFaction(String name, Text tag, UUID leader)
+    {
+        return new FactionImpl.BuilderImpl(name, tag, leader);
+    }
+
+    @Override
+    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final boolean diedInWarZone)
+    {
+        return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, diedInWarZone);
+    }
+
+    public InputStream getResourceAsStream(String fileName)
+    {
+        return this.getClass().getClassLoader().getResourceAsStream(fileName);
+    }
+
+    public URL getResource(final String fileName)
+    {
+        return this.getClass().getResource(fileName);
+    }
+
+    public void printInfo(final String message)
+    {
+        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
+    }
+
+    private void setupConfigs()
+    {
+        configuration = new ConfigurationImpl(configDir, configAsset);
+        MessageLoader messageLoader = MessageLoader.getInstance(this);
+        pvpLogger = PVPLoggerImpl.getInstance(this);
+    }
+
+    private void setupManagers()
+    {
+        this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
+        this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
+        this.powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
+        this.permsManager = new PermsManagerImpl();
+        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
+        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
+        this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
+        this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager);
+        this.rankManager = new RankManagerImpl(this.factionLogic, this.storageManager);
+    }
+
+    private void startFactionsRemover()
+    {
+        //Do not turn on faction's remover if max inactive time == 0
+        if(this.getConfiguration().getFactionsConfig().getMaxInactiveTime() == 0)
+            return;
+
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
+    }
+
+    private void registerTypeSerializers()
+    {
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Claim.class), new ClaimTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){}, new ClaimSetTypeSerializer());
+    }
+
+    private void registerAPI()
+    {
+        //This is not really needed as api consumers can access managers classes through EagleFactions interface instance.
+        //But we are still registering these managers just in case someone will try to access not through EagleFactions interface.
+        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this.factionLogic);
+        Sponge.getServiceManager().setProvider(this, PowerManager.class, this.powerManager);
+        Sponge.getServiceManager().setProvider(this, PlayerManager.class, this.playerManager);
+        Sponge.getServiceManager().setProvider(this, ProtectionManager.class, this.protectionManager);
+        Sponge.getServiceManager().setProvider(this, PermsManager.class, this.permsManager);
+        Sponge.getServiceManager().setProvider(this, PVPLogger.class, this.pvpLogger);
+        Sponge.getServiceManager().setProvider(this, AttackLogic.class, this.attackLogic);
+        Sponge.getServiceManager().setProvider(this, InvitationManager.class, this.invitationManager);
+        Sponge.getServiceManager().setProvider(this, RankManager.class, this.rankManager);
     }
 
     private void initializeCommands()
@@ -508,6 +639,15 @@ public class EagleFactionsPlugin implements EagleFactions
                 .description(Text.of(Messages.COMMAND_ADMIN_DESC))
                 .permission(PluginPermissions.ADMIN_MODE_COMMAND)
                 .executor(new AdminCommand(this))
+                .build());
+
+        SUBCOMMANDS.put(Collections.singletonList("setfacion"), CommandSpec.builder()
+                .description(Text.of(Messages.SET_FACTION_COMMAND))
+                .permission(PluginPermissions.SET_FACTION_COMMAND)
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
+                        GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))),
+                        GenericArguments.onlyOne(GenericArguments.enumValue(Text.of("rank"), FactionMemberType.class)))
+                .executor(new SetFactionCommand(this))
                 .build());
 
         //SetPower Command
@@ -738,114 +878,5 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionLeaveListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionJoinListener(this));
-    }
-
-    public Configuration getConfiguration()
-    {
-        return this.configuration;
-    }
-
-    public PVPLogger getPVPLogger()
-    {
-        return this.pvpLogger;
-    }
-
-    public PermsManager getPermsManager()
-    {
-        return this.permsManager;
-    }
-
-    public PlayerManager getPlayerManager()
-    {
-        return playerManager;
-    }
-
-    public PowerManager getPowerManager()
-    {
-        return powerManager;
-    }
-
-    public ProtectionManager getProtectionManager()
-    {
-        return protectionManager;
-    }
-
-    public AttackLogic getAttackLogic()
-    {
-        return attackLogic;
-    }
-
-    public FactionLogic getFactionLogic()
-    {
-        return factionLogic;
-    }
-
-    public StorageManager getStorageManager()
-    {
-        return this.storageManager;
-    }
-
-    @Override
-    public Faction.Builder getBuilderForFaction(String name, Text tag, UUID leader)
-    {
-        return new FactionImpl.BuilderImpl(name, tag, leader);
-    }
-
-    @Override
-    public FactionPlayer createNewFactionPlayer(final String playerName, final UUID uniqueId, final String factionName, final float power, final float maxpower, final boolean diedInWarZone)
-    {
-        return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, diedInWarZone);
-    }
-
-    public InputStream getResourceAsStream(String fileName)
-    {
-        return this.getClass().getClassLoader().getResourceAsStream(fileName);
-    }
-
-    public URL getResource(final String fileName)
-    {
-        return this.getClass().getResource(fileName);
-    }
-
-    public void printInfo(final String message)
-    {
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
-    }
-
-    private void setupConfigs()
-    {
-        configuration = new ConfigurationImpl(configDir, configAsset);
-        MessageLoader messageLoader = MessageLoader.getInstance(this);
-        pvpLogger = PVPLoggerImpl.getInstance(this);
-    }
-
-    private void setupManagers()
-    {
-        storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
-        playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
-        powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
-        permsManager = new PermsManagerImpl();
-        factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
-        attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
-        protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
-    }
-
-    private void startFactionsRemover()
-    {
-        //Do not turn on faction's remover if max inactive time == 0
-        if(this.getConfiguration().getFactionsConfig().getMaxInactiveTime() == 0)
-            return;
-
-        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
-    }
-
-    public EFPlaceholderService getEfPlaceholderService()
-    {
-        return this.efPlaceholderService;
-    }
-
-    public DynmapService getDynmapService()
-    {
-        return this.dynmapService;
     }
 }

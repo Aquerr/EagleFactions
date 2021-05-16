@@ -47,8 +47,8 @@ public class OwnFactionPlayerArgument extends CommandElement
             final List<FactionPlayer> factionPlayers = new LinkedList<>();
             for (final UUID uuid : faction.getPlayers())
             {
-                final Optional<FactionPlayer> factionPlayer = this.plugin.getPlayerManager().getFactionPlayer(uuid);
-                factionPlayers.add(factionPlayer.get());
+                this.plugin.getPlayerManager().getFactionPlayer(uuid)
+                        .ifPresent(factionPlayers::add);
             }
 
             if (args.hasNext())

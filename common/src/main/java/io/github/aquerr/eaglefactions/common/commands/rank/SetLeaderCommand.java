@@ -17,9 +17,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Collections;
-import java.util.Optional;
-
 public class SetLeaderCommand extends AbstractCommand
 {
     public SetLeaderCommand(final EagleFactions plugin)
@@ -31,23 +28,11 @@ public class SetLeaderCommand extends AbstractCommand
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
         final FactionPlayer newLeaderPlayer = context.requireOne("player");
+        final Player player = requirePlayerSource(source);
+        final Faction playerFaction = requirePlayerFaction(player);
+        final Faction newLeaderPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(newLeaderPlayer.getUniqueId()).orElse(null);
 
-        if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player) source;
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        final Optional<Faction> optionalNewLeaderPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(newLeaderPlayer.getUniqueId());
-
-        if(!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
-
-        if(!optionalNewLeaderPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
-
-        if(!optionalNewLeaderPlayerFaction.get().getName().equals(playerFaction.getName()))
+        if (newLeaderPlayerFaction == null || !newLeaderPlayerFaction.getName().equals(playerFaction.getName()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION));
 
         if (super.getPlugin().getPlayerManager().hasAdminMode(player))
@@ -55,7 +40,7 @@ public class SetLeaderCommand extends AbstractCommand
             if(playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
 
-            super.getPlugin().getFactionLogic().setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
+            super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_SET_PLAYER_AS_YOUR_NEW_LEADER, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, newLeaderPlayer.getName())))));
             return CommandResult.success();
         }
@@ -64,7 +49,7 @@ public class SetLeaderCommand extends AbstractCommand
             if(playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ALREADY_ARE_THE_LEADER_OF_THIS_FACTION));
 
-            super.getPlugin().getFactionLogic().setLeader(newLeaderPlayer.getUniqueId(), playerFaction.getName());
+            super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);
             source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_SET_PLAYER_AS_YOUR_NEW_LEADER, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, newLeaderPlayer.getName())))));
         }
         return CommandResult.success();

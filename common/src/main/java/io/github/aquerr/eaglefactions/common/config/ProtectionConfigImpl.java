@@ -48,6 +48,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	private WhiteList safeZoneWhiteLists = null;
 	private WhiteList warZoneWhiteLists = null;
 	private WhiteList factionWhiteLists = null;
+	private WhiteList wildernessWhiteLists = null;
 
 	public ProtectionConfigImpl(final Configuration configuration)
 	{
@@ -117,6 +118,11 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		final Set<String> warZonePlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "war-zone", "place-destroy-whitelist");
 		final Set<String> warZoneInteractWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "war-zone", "interact-whitelist");
 		this.warZoneWhiteLists = new WhiteListsImpl(warZoneItemsWhiteList, warZoneInteractWhiteList, warZonePlaceDestroyWhiteList);
+
+		final Set<String> wildernessItemsWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "wilderness", "items-whitelist");
+		final Set<String> wildernessPlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "wilderness", "place-destroy-whitelist");
+		final Set<String> wildernessInteractWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "wilderness", "interact-whitelist");
+		this.wildernessWhiteLists = new WhiteListsImpl(wildernessItemsWhiteList, wildernessInteractWhiteList, wildernessPlaceDestroyWhiteList);
 	}
 
 	@Override
@@ -159,6 +165,12 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public WhiteList getWarZoneWhitelists()
 	{
 		return this.warZoneWhiteLists;
+	}
+
+	@Override
+	public WhiteList getWildernessWhitelists()
+	{
+		return this.wildernessWhiteLists;
 	}
 
 	@Override

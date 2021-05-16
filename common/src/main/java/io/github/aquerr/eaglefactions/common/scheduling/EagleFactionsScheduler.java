@@ -19,25 +19,31 @@ public class EagleFactionsScheduler
 
     public Task scheduleWithDelayAsync(EagleFactionsRunnableTask task, long delay)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
         return taskBuilder.delay(delay, TimeUnit.SECONDS).execute(task).async().submit(EagleFactionsPlugin.getPlugin());
     }
 
     public Task scheduleWithDelayAsync(EagleFactionsConsumerTask<Task> task, long delay)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
         return taskBuilder.delay(delay, TimeUnit.SECONDS).execute(task).async().submit(EagleFactionsPlugin.getPlugin());
     }
 
-    public Task scheduleWithDelay(EagleFactionsRunnableTask task, long delay)
+    public Task scheduleWithDelayAsync(EagleFactionsRunnableTask task, long delay, TimeUnit timeUnit)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-        return taskBuilder.delay(delay, TimeUnit.SECONDS).execute(task).submit(EagleFactionsPlugin.getPlugin());
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
+        return taskBuilder.delay(delay, timeUnit).execute(task).async().submit(EagleFactionsPlugin.getPlugin());
+    }
+
+    public Task scheduleWithDelay(EagleFactionsRunnableTask task, long delay, TimeUnit timeUnit)
+    {
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
+        return taskBuilder.delay(delay, timeUnit).execute(task).submit(EagleFactionsPlugin.getPlugin());
     }
 
     public Task scheduleWithDelayedIntervalAsync(EagleFactionsRunnableTask task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
         return taskBuilder.delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
                 .execute(task).async().submit(EagleFactionsPlugin.getPlugin());
@@ -45,7 +51,7 @@ public class EagleFactionsScheduler
 
     public Task scheduleWithDelayedIntervalAsync(EagleFactionsConsumerTask<Task> task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
         return taskBuilder.delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
                 .execute(task).async().submit(EagleFactionsPlugin.getPlugin());
@@ -53,7 +59,7 @@ public class EagleFactionsScheduler
 
     public Task scheduleWithDelayedInterval(EagleFactionsConsumerTask<Task> task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
         return taskBuilder.delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
                 .execute(task).submit(EagleFactionsPlugin.getPlugin());
@@ -61,7 +67,7 @@ public class EagleFactionsScheduler
 
     public Task scheduleWithDelayedInterval(EagleFactionsRunnableTask task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
+        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
         return taskBuilder.delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
                 .execute(task).submit(EagleFactionsPlugin.getPlugin());

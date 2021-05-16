@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -150,6 +151,9 @@ public class ProtectionManagerTest
 		final World world = mock(World.class);
 		final Location<World> location = new Location<>(world, 0, 0, 0);
 		final BlockSnapshot blockSnapshot = mock(BlockSnapshot.class);
+		final BlockState blockState = mock(BlockState.class);
+		final ProtectionConfig.WhiteList wildernessWhitelist = mock(ProtectionConfig.WhiteList.class);
+		location.setBlock(Mockito.mock(BlockState.class));
 
 		try
 		{
@@ -167,6 +171,9 @@ public class ProtectionManagerTest
 		when(world.getUniqueId()).thenReturn(UUID.randomUUID());
 		when(protectionConfig.shouldProtectWildernessFromPlayers()).thenReturn(true);
 		when(blockSnapshot.getLocation()).thenReturn(Optional.of(location));
+		when(world.getBlock(any(Vector3i.class))).thenReturn(blockState);
+		when(blockState.getId()).thenReturn("id");
+		when(protectionConfig.getWildernessWhitelists()).thenReturn(wildernessWhitelist);
 
 		//then
 		final ProtectionResult result = protectionManager.canPlace(blockSnapshot, player, false);
