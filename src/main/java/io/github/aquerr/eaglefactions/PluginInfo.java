@@ -1,0 +1,25 @@
+package io.github.aquerr.eaglefactions;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+
+/**
+ * Created by Aquerr on 2017-07-10.
+ */
+
+public final class PluginInfo
+{
+    public static final String ID = "eaglefactions";
+    public static final String NAME = "Eagle Factions";
+    public static final String VERSION = "%VERSION%";
+    public static final String DESCRIPTION = "A factions plugin that will make managing your battle-server easier. :)";
+    public static final Component PLUGIN_PREFIX = Component.text("[EF] ", NamedTextColor.AQUA);
+    public static final Component ERROR_PREFIX = Component.text("[EF] ", NamedTextColor.DARK_RED);
+    public static final String AUTHOR = "Aquerr";
+    public static final String URL = "https://github.com/Aquerr/EagleFactions";
+
+    private PluginInfo()
+    {
+
+    }
+}

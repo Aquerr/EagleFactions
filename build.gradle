@@ -1,46 +1,103 @@
+import org.spongepowered.gradle.plugin.config.PluginLoaders
+import org.spongepowered.plugin.metadata.PluginDependency
+import groovy.util.FileNameFinder
+
 plugins {
-    id 'java'
+    id 'java-library'
     id 'idea'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
-    id 'org.spongepowered.plugin' version '0.9.0'
+    id "com.github.johnrengelman.shadow" version "7.0.0"
+    id "org.spongepowered.gradle.plugin" version "1.1.0"
+    id 'net.kyori.blossom' version "1.2.0"
 }
 
 allprojects {
-    description = 'A factions plugin that will make managing your battle-server easier. :)'
+    description = "A factions plugin that will make managing your battle-server easier. :)"
     group = "io.github.aquerr"
     version = "0.16.0"
 
-    project.tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
+    project.tasks.withType(JavaCompile.class) {
+        options.encoding = "UTF-8"
     }
 
     repositories {
         mavenCentral()
         jcenter()
-        maven { url 'https://repo.spongepowered.org/maven' }
-        maven { url 'https://jitpack.io' }
+        maven() {
+            url = "https://repo.spongepowered.org/repository/maven-public/"
+            name = "sponge"
+        }
+        maven() {
+            url = "https://jitpack.io"
+            name = "Jitpack"
+        }
 //        maven { url "https://repo.codemc.org/repository/maven-releases" }
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(16)
+        }
     }
 }
 
 dependencies {
     implementation project(":EagleFactionsAPI")
-    implementation project(":common")
 
-    testImplementation project(':EagleFactionsAPI')
-    testImplementation 'org.spongepowered:spongeapi:7.3.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
-    testImplementation 'org.mockito:mockito-core:3.10.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:3.10.0'
-    testImplementation 'org.assertj:assertj-core:3.19.0'
+//    api "com.github.rojo8399:PlaceholderAPI:4.5.1"
+    api "com.zaxxer:HikariCP:2.6.3"
+    api "org.mariadb.jdbc:mariadb-java-client:2.0.3"
+    api "com.h2database:h2:1.4.196"
+    api "org.xerial:sqlite-jdbc:3.20.0"
+    api "com.github.webbukkit:DynmapCoreAPI:v2.5"
+
+    testImplementation project(":EagleFactionsAPI")
+    testImplementation "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.7.1"
+    testImplementation "org.mockito:mockito-core:3.10.0"
+    testImplementation "org.mockito:mockito-junit-jupiter:3.10.0"
+    testImplementation "org.assertj:assertj-core:3.19.0"
 }
 
 shadowJar {
-    archiveClassifier = ''
+    archiveClassifier = ""
 }
 
 build.finalizedBy shadowJar
 jar.enabled = false
+
+blossom {
+    if(System.getenv("JENKINS_HOME") != null) {
+        rootProject.version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        println("File name => " + archivesBaseName)
+    } else {
+        rootProject.version = version + "-SNAPSHOT"
+    }
+    replaceTokenIn("src/main/java/io/github/aquerr/eaglefactions/PluginInfo.java")
+    replaceToken("%VERSION%", rootProject.version)
+}
+
+sponge {
+    apiVersion("8.0.0")
+    plugin("eaglefactions") {
+        loader(PluginLoaders.JAVA_PLAIN)
+        displayName("Eagle Factions")
+        mainClass("io.github.aquerr.eaglefactions.EagleFactionsPlugin")
+        description("Just testing things...")
+        links {
+            homepage("https://github.com/Aquerr/EagleFactions")
+            source("https://github.com/Aquerr/EagleFactions")
+            issues("https://github.com/Aquerr/EagleFactions/issues")
+        }
+        contributor("Aquerr") {
+            description("Lead Developer")
+        }
+        dependency("spongeapi") {
+            loadOrder(PluginDependency.LoadOrder.AFTER)
+            optional(false)
+        }
+    }
+}
+
 
 test {
     useJUnitPlatform()
