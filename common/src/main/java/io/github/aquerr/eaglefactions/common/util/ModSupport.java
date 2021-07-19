@@ -1,7 +1,10 @@
 package io.github.aquerr.eaglefactions.common.util;
 
+import io.github.aquerr.eaglefactions.common.PluginInfo;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.text.Text;
 
 public class ModSupport
 {
@@ -41,7 +44,7 @@ public class ModSupport
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            e.printStackTrace();
+            Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of("Could not get 'attacker' from techguns entityDamangeSource: " + entityDamageSource.getSource().getType().getId())));
         }
         if (attacker instanceof Entity)
             return (Entity)attacker;
@@ -72,7 +75,7 @@ public class ModSupport
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            e.printStackTrace();
+            Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of("Could not get 'owner' from mekanism entity: " + entity.getType().getId())));
         }
         if (owner instanceof Entity)
             return (Entity)owner;
