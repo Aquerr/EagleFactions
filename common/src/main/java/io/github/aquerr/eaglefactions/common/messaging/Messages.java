@@ -194,7 +194,7 @@ public final class Messages
     //Maxpower
     public static String YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS = "You need to toggle faction admin mode to do this!";
     public static String PLAYERS_MAXPOWER_HAS_BEEN_CHANGED = "Player's maxpower has been changed!";
-    public static String MAXPOWER_HAS_BEEN_CHANGED = "Maxpower for all players has been changed!";
+    public static String MAXPOWER_FOR_ALL_PLAYERS_HAS_BEEN_CHANGED = "Maxpower for all players has been changed!";
 
     //Description
     public static String DESCRIPTION_IS_TOO_LONG = "Description is too long";

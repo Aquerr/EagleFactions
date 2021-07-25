@@ -41,6 +41,6 @@ public class SetMaxPowerForAllCommand extends AbstractCommand
         {
             super.getPlugin().getPowerManager().setPlayerMaxPower(factionPlayer.getUniqueId(), power);
         }
-        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PLAYERS_MAXPOWER_HAS_BEEN_CHANGED));
+        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.MAXPOWER_FOR_ALL_PLAYERS_HAS_BEEN_CHANGED));
     }
 }
