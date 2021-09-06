@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
@@ -22,9 +23,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -102,7 +101,9 @@ public class CreateCommand extends AbstractCommand
         }
         catch (RequiredItemsNotFoundException e)
         {
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION), e);
+            final Map<String, Integer> items = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getRequiredItemsToCreateFaction();
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
+                    Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + buildRequiredItemsMessage(items)), e);
         }
 
         createAsPlayer(factionName, factionTag, player);
@@ -134,5 +135,20 @@ public class CreateCommand extends AbstractCommand
         final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), new UUID(0, 0)).build();
         super.getPlugin().getFactionLogic().addFaction(faction);
         commandSource.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+    }
+
+    private String buildRequiredItemsMessage(final Map<String, Integer> items)
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (final Map.Entry<String, Integer> item : items.entrySet())
+        {
+            stringBuilder
+                    .append(item.getValue())
+                    .append("x ")
+                    .append(item.getKey())
+                    .append(", ");
+        }
+        stringBuilder.replace(stringBuilder.lastIndexOf(","), stringBuilder.length(), "");
+        return stringBuilder.toString();
     }
 }
