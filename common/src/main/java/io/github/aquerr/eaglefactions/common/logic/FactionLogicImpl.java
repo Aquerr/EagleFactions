@@ -855,7 +855,6 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         Validate.notBlank(newFactionName);
 
-        this.storageManager.deleteFaction(faction.getName());
         Faction updatedFaction = faction.toBuilder().setName(newFactionName).build();
         this.storageManager.saveFaction(updatedFaction);
 
@@ -879,10 +878,7 @@ public class FactionLogicImpl implements FactionLogic
                 removeEnemy(enemy, faction.getName());
                 addEnemy(enemy, newFactionName);
             }
-        });
-
-        //Update players...
-        CompletableFuture.runAsync(() -> {
+        }).thenRunAsync(() -> {
            final Set<UUID> playerUUIDs = updatedFaction.getPlayers();
            for (final UUID playerUUID : playerUUIDs)
            {
@@ -890,7 +886,7 @@ public class FactionLogicImpl implements FactionLogic
                final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction.getName(), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
                this.storageManager.savePlayer(updatedPlayer);
            }
-        });
+        }).thenRunAsync(() -> this.storageManager.deleteFaction(faction.getName()));
     }
 
     @Override
