@@ -470,7 +470,7 @@ public class InvitationManagerImpl implements InvitationManager
                 .onClick(TextActions.runCommand("/f enemy " + senderFaction.getName()))
                 .onHover(TextActions.showText(Text.of(TextColors.GOLD, "/f enemy " + senderFaction.getName()))).build();
 
-        return Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_ARMISTICE_REQUEST, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName(),
+        return Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_SENT_YOU_AN_ARMISTICE_REQUEST, TextColors.GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, senderFaction.getName()))),
                 "\n",
                 Messages.YOU_HAVE_TWO_MINUTES_TO_ACCEPT_IT,
                 "\n",
@@ -479,6 +479,6 @@ public class InvitationManagerImpl implements InvitationManager
                 " ",
                 Messages.TO_ACCEPT_IT_OR_TYPE,
                 " ",
-                TextColors.GOLD, "/f enemy " + senderFaction.getName()))));
+                TextColors.GOLD, "/f enemy " + senderFaction.getName());
     }
 }
