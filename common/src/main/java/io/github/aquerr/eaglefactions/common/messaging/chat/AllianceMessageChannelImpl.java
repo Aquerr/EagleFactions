@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.channel.AbstractMutableMessageChannel;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,10 +43,10 @@ public class AllianceMessageChannelImpl extends AbstractMutableMessageChannel im
 	{
 		super();
 		this.factions = Collections.unmodifiableSet(factions);
-		getReceivers();
+		registerReceivers();
 	}
 
-	private void getReceivers()
+	private void registerReceivers()
 	{
 		// Don't really know if Sponge returns a copy of list with currently online players or the real list.
 		// It would be best to create a new list to prevent any concurrent modifications while looping through the list.
@@ -58,11 +59,25 @@ public class AllianceMessageChannelImpl extends AbstractMutableMessageChannel im
 					super.addMember(player);
 			}
 		}
+
+		super.addMember(Sponge.getServer().getConsole());
+		getAdminReceivers().forEach(super::addMember);
 	}
 
 	@Override
 	public Set<Faction> getFactions()
 	{
 		return this.factions;
+	}
+
+	private List<MessageReceiver> getAdminReceivers()
+	{
+		final List<MessageReceiver> admins = new ArrayList<>();
+		for(final UUID adminUUID : EagleFactionsPlugin.getPlugin().getPlayerManager().getAdminModePlayers())
+		{
+			final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
+			optionalAdminPlayer.ifPresent(admins::add);
+		}
+		return admins;
 	}
 }

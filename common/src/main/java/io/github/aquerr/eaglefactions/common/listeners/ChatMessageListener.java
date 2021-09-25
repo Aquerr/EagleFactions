@@ -4,12 +4,10 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.chat.AllianceMessageChannelImpl;
+import io.github.aquerr.eaglefactions.common.messaging.chat.ChatMessageHelper;
 import io.github.aquerr.eaglefactions.common.messaging.chat.FactionMessageChannelImpl;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.IsCancelled;
@@ -18,12 +16,9 @@ import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextTemplate;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.text.transform.SimpleTextTemplateApplier;
 import org.spongepowered.api.util.Tristate;
 
@@ -52,7 +47,7 @@ public class ChatMessageListener extends AbstractListener
             //Suppress message for other people
             if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
             {
-                final MessageChannel suppressedChannel = hideMessageForPlayersInFactionChat(messageChannel);
+                final MessageChannel suppressedChannel = ChatMessageHelper.removeFactionChatPlayersFromChannel(messageChannel);
                 event.setChannel(suppressedChannel);
             }
 
@@ -73,35 +68,27 @@ public class ChatMessageListener extends AbstractListener
         final Text.Builder chatTypePrefix = Text.builder();
         final Text.Builder message = Text.builder();
 
-        ChatEnum chatType = EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId());
+        ChatEnum chatType = Optional.ofNullable(EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()))
+                .orElse(ChatEnum.GLOBAL);
 
         //Message = Prefixes + Player NAME + Text
         //OriginalMessage = Player NAME + Text
         //RawMessage = Text
 
-        if(chatType == null)
-            chatType = ChatEnum.GLOBAL;
+        chatTypePrefix.append(ChatMessageHelper.getChatPrefix(player));
 
         switch(chatType)
         {
             case FACTION:
             {
                 message.append(Text.of(TextColors.GREEN, messageFormatter.getBody().format()));
-                chatTypePrefix.append(getFactionChatPrefix());
-                final FactionMessageChannelImpl factionMessageChannel = FactionMessageChannelImpl.forFaction(playerFaction);
-                factionMessageChannel.addMember(Sponge.getServer().getConsole());
-                getAdminReceivers().forEach(factionMessageChannel::addMember);
-                messageChannel = factionMessageChannel;
+                messageChannel = FactionMessageChannelImpl.forFaction(playerFaction);
                 break;
             }
             case ALLIANCE:
             {
                 message.append(Text.of(TextColors.BLUE, messageFormatter.getBody().format()));
-                chatTypePrefix.append(getAllianceChatPrefix());
-                final AllianceMessageChannelImpl allianceMessageChannel = AllianceMessageChannelImpl.forFaction(playerFaction);
-                allianceMessageChannel.addMember(Sponge.getServer().getConsole());
-                getAdminReceivers().forEach(allianceMessageChannel::addMember);
-                messageChannel = allianceMessageChannel;
+                messageChannel = AllianceMessageChannelImpl.forFaction(playerFaction);
                 break;
             }
             case GLOBAL:
@@ -112,15 +99,15 @@ public class ChatMessageListener extends AbstractListener
                 //Suppress message for other factions if someone is in the faction's chat.
                 if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
                 {
-                    messageChannel = hideMessageForPlayersInFactionChat(messageChannel);
+                    messageChannel = ChatMessageHelper.removeFactionChatPlayersFromChannel(messageChannel);
                 }
         }
 
-        final Text fPrefix = getFactionPrefix(playerFaction);
+        final Text fPrefix = ChatMessageHelper.getFactionPrefix(playerFaction);
         if (fPrefix != null)
-            factionPrefix.append(getFactionPrefix(playerFaction));
+            factionPrefix.append(fPrefix);
 
-        final Text rPrefix = getRankPrefix(chatType, playerFaction, player);
+        final Text rPrefix = ChatMessageHelper.getRankPrefix(chatType, playerFaction, player);
         if (rPrefix != null)
             rankPrefix.append(rPrefix);
 
@@ -136,125 +123,16 @@ public class ChatMessageListener extends AbstractListener
         }
 
         formattedMessage.append(message.build());
-        messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)));
-        messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix)));
+        messageFormatter.getHeader().add(new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)));
+        messageFormatter.getHeader().add(new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix)));
         messageFormatter.setBody(formattedMessage);
+
+
+        // new
+        messageFormatter.getHeader().add(Arrays.asList(new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)),
+                new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix))));
+        messageFormatter.setBody(message.build());
+
         event.setChannel(messageChannel);
-    }
-
-    private MessageChannel hideMessageForPlayersInFactionChat(final MessageChannel messageChannel)
-    {
-        final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
-        final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
-        for(final MessageReceiver messageReceiver : chatMembers)
-        {
-            if(!(messageReceiver instanceof Player))
-                continue;
-
-            final Player receiver = (Player) messageReceiver;
-
-            if(EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()) && EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) != ChatEnum.GLOBAL)
-            {
-                newReceivers.remove(receiver);
-            }
-        }
-        return MessageChannel.fixed(newReceivers);
-    }
-
-    private Text getFactionPrefix(final Faction playerFaction)
-    {
-        //Get faction prefix from Eagle Factions.
-        if(this.chatConfig.getChatPrefixType().equals("tag"))
-        {
-            if(playerFaction.getTag().toPlain().equals(""))
-                return playerFaction.getTag();
-
-            Text factionTag = playerFaction.getTag();
-            if (!this.chatConfig.canColorTags())
-                factionTag = factionTag.toBuilder().color(TextColors.GREEN).build();
-
-            return Text.builder()
-                    .append(this.chatConfig.getFactionStartPrefix(), factionTag, this.chatConfig.getFactionEndPrefix())
-                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
-                    .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
-                    .build();
-        }
-        else if (this.chatConfig.getChatPrefixType().equals("name"))
-        {
-            return Text.builder()
-                    .append(this.chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, playerFaction.getName(), TextColors.RESET), this.chatConfig.getFactionEndPrefix())
-                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
-                    .onClick(TextActions.runCommand("/f info " + playerFaction.getName()))
-                    .build();
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private Text getAllianceChatPrefix()
-    {
-        return Text.builder()
-                .append(TextSerializers.FORMATTING_CODE.deserialize(Messages.ALLIANCE_CHAT_PREFIX))
-                .build();
-    }
-
-    private Text getFactionChatPrefix()
-    {
-        return Text.builder()
-                .append(TextSerializers.FORMATTING_CODE.deserialize(Messages.FACTION_CHAT_PREFIX))
-                .build();
-    }
-
-    private Text getRankPrefix(final ChatEnum chatType, final Faction faction, final Player player)
-    {
-        if(faction.getLeader().equals(player.getUniqueId()))
-        {
-            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.LEADER))
-                return null;
-
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.LEADER_PREFIX)))
-                    .build();
-        }
-        else if(faction.getOfficers().contains(player.getUniqueId()))
-        {
-            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.OFFICER))
-                return null;
-
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.OFFICER_PREFIX)))
-                    .build();
-        }
-        else if (faction.getMembers().contains(player.getUniqueId()))
-        {
-            if (!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.MEMBER))
-                return null;
-
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.MEMBER_PREFIX)))
-                    .build();
-        }
-        else
-        {
-            if(!this.chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.RECRUIT))
-                return null;
-
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.RECRUIT_PREFIX)))
-                    .build();
-        }
-    }
-
-    private List<MessageReceiver> getAdminReceivers()
-    {
-        final List<MessageReceiver> admins = new ArrayList<>();
-        for(final UUID adminUUID : super.getPlugin().getPlayerManager().getAdminModePlayers())
-        {
-            final Optional<Player> optionalAdminPlayer = Sponge.getServer().getPlayer(adminUUID);
-            optionalAdminPlayer.ifPresent(admins::add);
-        }
-        return admins;
     }
 }

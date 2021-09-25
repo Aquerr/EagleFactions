@@ -6,12 +6,6 @@ plugins {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-//repositories {
-//    mavenCentral()
-//    jcenter()
-//    maven { url 'https://repo.spongepowered.org/maven' }
-//}
-
 blossom {
     if(System.getenv("JENKINS_HOME")) {
         rootProject.version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
@@ -31,6 +25,6 @@ dependencies {
     compileOnly 'com.zaxxer:HikariCP:2.6.3'
     compileOnly 'com.h2database:h2:1.4.196'
     compileOnly 'com.github.webbukkit:DynmapCoreAPI:v2.5'
-//    implementation 'org.bstats:bstats-sponge:1.5'
+    compileOnly 'br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1'
     annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
 }

@@ -35,6 +35,7 @@ import io.github.aquerr.eaglefactions.common.events.EventRunner;
 import io.github.aquerr.eaglefactions.common.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.common.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.common.integrations.placeholderapi.EFPlaceholderService;
+import io.github.aquerr.eaglefactions.common.integrations.ultimatechat.UltimateChatService;
 import io.github.aquerr.eaglefactions.common.listeners.*;
 import io.github.aquerr.eaglefactions.common.listeners.faction.FactionJoinListener;
 import io.github.aquerr.eaglefactions.common.listeners.faction.FactionKickListener;
@@ -122,6 +123,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private Metrics metrics;
     private EFPlaceholderService efPlaceholderService;
     private DynmapService dynmapService;
+    private UltimateChatService ultimateChatService;
 
     public static EagleFactionsPlugin getPlugin()
     {
@@ -212,6 +214,12 @@ public class EagleFactionsPlugin implements EagleFactions
             {
                 printInfo("Dynmap could not be found. Dynmap integration will not be available.");
             }
+        }
+
+        if (isUltimateChatLoaded())
+        {
+            this.ultimateChatService = new UltimateChatService(this.configuration.getChatConfig());
+            this.ultimateChatService.registerTags();
         }
     }
 
@@ -874,7 +882,6 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new BlockBreakListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerInteractListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerMoveListener(this));
-        Sponge.getEventManager().registerListeners(this, new ChatMessageListener(this));
         Sponge.getEventManager().registerListeners(this, new EntitySpawnListener(this));
         Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener(this));
         Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
@@ -882,9 +889,23 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new ModifyBlockListener(this));
         Sponge.getEventManager().registerListeners(this, new NotifyNeighborBlockListener(this));
 
+        // Chat
+        if(isUltimateChatLoaded())
+        {
+            Sponge.getEventManager().registerListeners(this, new UltimateChatMessageListener(this));
+        }
+        else // Sponge/Vanilla
+        {
+            Sponge.getEventManager().registerListeners(this, new ChatMessageListener(this));
+        }
+
         //EF events
         Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionLeaveListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionJoinListener(this));
+    }
+
+    private boolean isUltimateChatLoaded() {
+        return Sponge.getPluginManager().isLoaded("ultimatechat");
     }
 }

@@ -19,7 +19,7 @@ allprojects {
         jcenter()
         maven { url 'https://repo.spongepowered.org/maven' }
         maven { url 'https://jitpack.io' }
-//        maven { url "https://repo.codemc.org/repository/maven-releases" }
+        maven { url "https://raw.github.com/FabioZumbi12/UltimateChat/mvn-repo/" }
     }
 }
 
