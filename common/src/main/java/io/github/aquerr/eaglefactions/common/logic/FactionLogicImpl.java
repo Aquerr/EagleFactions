@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
+import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.common.entities.FactionPlayerImpl;
@@ -21,6 +22,7 @@ import io.github.aquerr.eaglefactions.common.util.ItemUtil;
 import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
@@ -198,8 +200,9 @@ public class FactionLogicImpl implements FactionLogic
             {
                 removeEnemy(enemy, factionToDisband.getName());
             }
-        });
-        return this.storageManager.deleteFaction(factionName);
+        })
+        .thenRunAsync(() -> this.storageManager.deleteFaction(factionName));
+        return true;
     }
 
     @Override
@@ -809,6 +812,8 @@ public class FactionLogicImpl implements FactionLogic
         }
         catch (RequiredItemsNotFoundException e)
         {
+            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
+                    Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage()));
             return false;
         }
     }
