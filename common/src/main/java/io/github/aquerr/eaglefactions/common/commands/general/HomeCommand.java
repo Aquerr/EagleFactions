@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.common.commands.general;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
@@ -15,7 +14,6 @@ import io.github.aquerr.eaglefactions.common.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.common.messaging.Messages;
 import io.github.aquerr.eaglefactions.common.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsConsumerTask;
-import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsRunnableTask;
 import io.github.aquerr.eaglefactions.common.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.common.util.ParticlesUtil;
 import org.spongepowered.api.Sponge;
@@ -23,22 +21,17 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleOptions;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class HomeCommand extends AbstractCommand
 {
@@ -62,7 +55,7 @@ public class HomeCommand extends AbstractCommand
 
         if (optionalFaction.isPresent())
         {
-            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
+            if (player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_TELEPORT_TO_OTHERS) || super.getPlugin().getPlayerManager().hasAdminMode(player))
             {
                 final Faction faction = optionalFaction.get();
                 if (faction.getHome() == null)
@@ -166,7 +159,7 @@ public class HomeCommand extends AbstractCommand
 
     private void teleportHome(Player player, Vector3i lastBlockPosition, FactionHome factionHome)
     {
-        if (this.factionsConfig.getHomeDelayTime() == 0 || player.hasPermission(PluginPermissions.HOME_COMMAND_NO_DELAY))
+        if (this.factionsConfig.getHomeDelayTime() == 0 || player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_NO_DELAY))
         {
             teleport(player, factionHome);
             return;

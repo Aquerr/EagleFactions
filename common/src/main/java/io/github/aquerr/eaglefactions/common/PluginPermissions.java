@@ -49,7 +49,8 @@ public final class PluginPermissions
 
     //Home
     public static final String HOME_COMMAND = "eaglefactions.player.home";
-    public static final String HOME_COMMAND_NO_DELAY = "eaglefactions.admin.home.nodelay";
+    public static final String HOME_COMMAND_ADMIN_TELEPORT_TO_OTHERS = "eaglefactions.admin.home.teleport_to_others";
+    public static final String HOME_COMMAND_ADMIN_NO_DELAY = "eaglefactions.admin.home.nodelay";
 
     //Access
     public static final String ACCESS_COMMAND = "eaglefactions.player.access";
