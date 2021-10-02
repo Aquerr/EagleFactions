@@ -84,7 +84,7 @@ public class ItemUtil
         for (final ItemStack itemStack : items)
         {
             if (!inventory.contains(itemStack))
-                throw new RequiredItemsNotFoundException("Could not found required items in player's inventory. Missing item = " + itemStack);
+                throw new RequiredItemsNotFoundException(itemStack, items);
         }
 
         for (final ItemStack itemStack : items)
