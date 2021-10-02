@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
@@ -34,11 +35,13 @@ public class CreateCommand extends AbstractCommand
     private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9]*$");
 
     private final FactionsConfig factionsConfig;
+    private final PlayerManager playerManager;
 
-    public CreateCommand(final EagleFactions plugin)
+    public CreateCommand(EagleFactions plugin)
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.playerManager = plugin.getPlayerManager();
     }
 
     @Override
@@ -46,9 +49,7 @@ public class CreateCommand extends AbstractCommand
     {
         if (isPlayer(source))
         {
-            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).getUniqueId());
-            if (optionalPlayerFaction.isPresent())
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
+            validateNotInFaction((Player) source);
         }
 
         final String factionName = context.requireOne("name");
@@ -93,17 +94,27 @@ public class CreateCommand extends AbstractCommand
         return CommandResult.success();
     }
 
+    private void validateNotInFaction(Player player) throws CommandException
+    {
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if (optionalPlayerFaction.isPresent())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
+    }
+
     private CommandResult createAsPlayerByItems(String factionName, String factionTag, Player player) throws CommandException
     {
-        try
+        if (!this.playerManager.hasAdminMode(player))
         {
-            ItemUtil.pollItemsNeededForCreationFromPlayer(player);
-        }
-        catch (RequiredItemsNotFoundException e)
-        {
-            final Map<String, Integer> items = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getRequiredItemsToCreateFaction();
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
-                    Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + buildRequiredItemsMessage(items)), e);
+            try
+            {
+                ItemUtil.pollItemsNeededForCreationFromPlayer(player);
+            }
+            catch (RequiredItemsNotFoundException e)
+            {
+                final Map<String, Integer> items = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getRequiredItemsToCreateFaction();
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
+                        Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + buildRequiredItemsMessage(items)), e);
+            }
         }
 
         createAsPlayer(factionName, factionTag, player);
