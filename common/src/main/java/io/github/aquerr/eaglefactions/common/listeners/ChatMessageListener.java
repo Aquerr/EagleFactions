@@ -61,7 +61,6 @@ public class ChatMessageListener extends AbstractListener
 
         //Code below is for players that have a faction.
         final Faction playerFaction = optionalPlayerFaction.get();
-        final Text.Builder formattedMessage = Text.builder();
         final Text.Builder factionAndRankPrefix = Text.builder();
         final Text.Builder factionPrefix = Text.builder();
         final Text.Builder rankPrefix = Text.builder();
@@ -122,15 +121,8 @@ public class ChatMessageListener extends AbstractListener
             factionAndRankPrefix.append(factionPrefix.build());
         }
 
-        formattedMessage.append(message.build());
-        messageFormatter.getHeader().add(new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)));
-        messageFormatter.getHeader().add(new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix)));
-        messageFormatter.setBody(formattedMessage);
-
-
-        // new
-        messageFormatter.getHeader().add(Arrays.asList(new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)),
-                new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix))));
+        messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)));
+        messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix)));
         messageFormatter.setBody(message.build());
 
         event.setChannel(messageChannel);
