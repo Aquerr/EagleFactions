@@ -1,11 +1,11 @@
 package io.github.aquerr.eaglefactions.common.commands.management;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.common.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.common.PluginInfo;
 import io.github.aquerr.eaglefactions.common.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.common.entities.FactionImpl;
@@ -34,6 +34,7 @@ public class CreateCommand extends AbstractCommand
 {
     private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9]*$");
 
+    private final ChatConfig chatConfig;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
 
@@ -41,6 +42,7 @@ public class CreateCommand extends AbstractCommand
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.chatConfig = plugin.getConfiguration().getChatConfig();
         this.playerManager = plugin.getPlayerManager();
     }
 
@@ -111,9 +113,8 @@ public class CreateCommand extends AbstractCommand
             }
             catch (RequiredItemsNotFoundException e)
             {
-                final Map<String, Integer> items = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getRequiredItemsToCreateFaction();
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
-                        Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + buildRequiredItemsMessage(items)), e);
+                        Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage()), e);
             }
         }
 
@@ -123,7 +124,7 @@ public class CreateCommand extends AbstractCommand
 
     private void createAsPlayer(final String factionName, final String factionTag, final Player player)
     {
-        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), player.getUniqueId()).build();
+        final Faction faction = FactionImpl.builder(factionName, Text.of(this.chatConfig.getDefaultTagColor(), factionTag), player.getUniqueId()).build();
         final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
         if (isCancelled)
             return;
@@ -143,23 +144,8 @@ public class CreateCommand extends AbstractCommand
      */
     private void createAsConsole(final String factionName, final String factionTag, final CommandSource commandSource)
     {
-        final Faction faction = FactionImpl.builder(factionName, Text.of(TextColors.GREEN, factionTag), new UUID(0, 0)).build();
+        final Faction faction = FactionImpl.builder(factionName, Text.of(this.chatConfig.getDefaultTagColor(), factionTag), new UUID(0, 0)).build();
         super.getPlugin().getFactionLogic().addFaction(faction);
         commandSource.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
-    }
-
-    private String buildRequiredItemsMessage(final Map<String, Integer> items)
-    {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (final Map.Entry<String, Integer> item : items.entrySet())
-        {
-            stringBuilder
-                    .append(item.getValue())
-                    .append("x ")
-                    .append(item.getKey())
-                    .append(", ");
-        }
-        stringBuilder.replace(stringBuilder.lastIndexOf(","), stringBuilder.length(), "");
-        return stringBuilder.toString();
     }
 }

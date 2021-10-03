@@ -33,7 +33,7 @@ public class ChatMessageHelper
 
             Text factionTag = faction.getTag();
             if (!chatConfig.canColorTags())
-                factionTag = factionTag.toBuilder().color(TextColors.GREEN).build();
+                factionTag = factionTag.toBuilder().color(chatConfig.getDefaultTagColor()).build();
 
             return Text.builder()
                     .append(chatConfig.getFactionStartPrefix(), factionTag, chatConfig.getFactionEndPrefix())

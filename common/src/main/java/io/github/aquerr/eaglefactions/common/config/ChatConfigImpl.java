@@ -5,7 +5,10 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.*;
@@ -25,6 +28,7 @@ public class ChatConfigImpl implements ChatConfig
 	private boolean isFactionPrefixFirstInChat = true;
 	private Text nonFactionPlayerPrefix = Text.of("");
 	private boolean showFactionEnterPhrase = true;
+	private TextColor defaultTagColor = TextColors.GREEN;
 
 	private Map<ChatEnum, Set<FactionMemberType>> visibleRanks;
 
@@ -47,32 +51,32 @@ public class ChatConfigImpl implements ChatConfig
 		this.nonFactionPlayerPrefix = TextSerializers.FORMATTING_CODE.deserialize(configuration.getString("", "non-faction-player-prefix"));
 		this.showFactionEnterPhrase = this.configuration.getBoolean(true, "show-faction-enter-phrase");
 
-		this.visibleRanks = new HashMap<>();
-		final Set<FactionMemberType> globalRanks = new HashSet<>();
-		final Set<FactionMemberType> allianceRanks = new HashSet<>();
-		final Set<FactionMemberType> factionRanks = new HashSet<>();
-		globalRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "global-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		allianceRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "alliance-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		factionRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "faction-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		this.visibleRanks.put(ChatEnum.GLOBAL, globalRanks);
-		this.visibleRanks.put(ChatEnum.ALLIANCE, allianceRanks);
-		this.visibleRanks.put(ChatEnum.FACTION, factionRanks);
-		this.visibleRanks = ImmutableMap.copyOf(this.visibleRanks);
+		this.visibleRanks = loadVisibleRanks();
+		this.defaultTagColor = Sponge.getRegistry().getType(TextColor.class, this.configuration.getString(TextColors.GREEN.getId(), "default-tag-color")).orElse(TextColors.GREEN);
 	}
 
+	@Override
 	public Text getFactionStartPrefix()
 	{
 		return this.factionStartPrefix;
 	}
 
+	@Override
 	public Text getFactionEndPrefix()
 	{
 		return this.factionEndPrefix;
 	}
 
+	@Override
 	public boolean canColorTags()
 	{
 		return this.canColorTags;
+	}
+
+	@Override
+	public TextColor getDefaultTagColor()
+	{
+		return this.defaultTagColor;
 	}
 
 	@Override
@@ -81,6 +85,7 @@ public class ChatConfigImpl implements ChatConfig
 		return this.isFactionPrefixFirstInChat;
 	}
 
+	@Override
 	public String getChatPrefixType()
 	{
 		return this.chatPrefixType;
@@ -114,5 +119,21 @@ public class ChatConfigImpl implements ChatConfig
 	public Map<ChatEnum, Set<FactionMemberType>> getVisibleRanks()
 	{
 		return this.visibleRanks;
+	}
+
+	private Map<ChatEnum, Set<FactionMemberType>> loadVisibleRanks()
+	{
+		Map<ChatEnum, Set<FactionMemberType>> visibleRanks = new HashMap<>();
+		final Set<FactionMemberType> globalRanks = new HashSet<>();
+		final Set<FactionMemberType> allianceRanks = new HashSet<>();
+		final Set<FactionMemberType> factionRanks = new HashSet<>();
+		globalRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "global-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
+		allianceRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "alliance-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
+		factionRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "faction-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
+		visibleRanks.put(ChatEnum.GLOBAL, globalRanks);
+		visibleRanks.put(ChatEnum.ALLIANCE, allianceRanks);
+		visibleRanks.put(ChatEnum.FACTION, factionRanks);
+		visibleRanks = ImmutableMap.copyOf(visibleRanks);
+		return visibleRanks;
 	}
 }
