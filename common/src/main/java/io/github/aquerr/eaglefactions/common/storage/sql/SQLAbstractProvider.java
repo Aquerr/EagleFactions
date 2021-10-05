@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public abstract class SQLAbstractProvider
+public abstract class SQLAbstractProvider implements SQLProvider
 {
 	private final EagleFactions plugin;
 
@@ -50,6 +50,4 @@ public abstract class SQLAbstractProvider
 	{
 		return this.password;
 	}
-
-	protected abstract Connection getConnection() throws SQLException;
 }

@@ -16,6 +16,8 @@ import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbFactionS
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbPlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLFactionStorage;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLPlayerStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.sqlite.SqliteFactionStorage;
+import io.github.aquerr.eaglefactions.common.storage.sql.sqlite.SqlitePlayerStorage;
 import io.github.aquerr.eaglefactions.common.storage.task.DeleteFactionTask;
 import io.github.aquerr.eaglefactions.common.storage.task.IStorageTask;
 import io.github.aquerr.eaglefactions.common.storage.task.SavePlayerTask;
@@ -66,6 +68,11 @@ public class StorageManagerImpl implements StorageManager
                 factionsStorage = new MariaDbFactionStorage(plugin);
                 playerStorage = new MariaDbPlayerStorage(plugin);
                 plugin.printInfo("MariaDB storage has been initialized!");
+                break;
+            case "sqlite":
+                factionsStorage = new SqliteFactionStorage(plugin);
+                playerStorage = new SqlitePlayerStorage(plugin);
+                plugin.printInfo("Sqlite storage has been initialized!");
                 break;
             default: //HOCON
                 plugin.printInfo("Couldn't find provided storage type.");

@@ -61,7 +61,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             final PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_WHERE_UUID);
             statement.setString(1, playerUUID.toString());
             final ResultSet resultSet = statement.executeQuery();
-            if (resultSet.first())
+            if (resultSet.next())
             {
                 final String name = resultSet.getString("Name");
                 final String factionName = resultSet.getString("Faction");

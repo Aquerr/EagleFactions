@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.common.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.common.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.common.storage.serializers.InventorySerializer;
+import io.github.aquerr.eaglefactions.common.storage.sql.sqlite.SqliteProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
@@ -210,7 +211,11 @@ public abstract class AbstractFactionStorage implements FactionStorage
         try(final Connection connection = this.sqlProvider.getConnection())
         {
             PreparedStatement preparedStatement = null;
-            if(this.sqlProvider instanceof H2Provider)
+            if(this.sqlProvider instanceof SqliteProvider)
+            {
+                preparedStatement = connection.prepareStatement("SELECT * FROM sqlite_master WHERE type='table' AND name='Version'");
+            }
+            else if(this.sqlProvider instanceof H2Provider)
             {
                 preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VERSION'");
             }
@@ -230,10 +235,10 @@ public abstract class AbstractFactionStorage implements FactionStorage
             if(versionTableExists)
             {
                 final Statement statement = connection.createStatement();
-                final ResultSet resultSet1 = statement.executeQuery("SELECT Version FROM Version");
-                if(resultSet1.last())
+                final ResultSet resultSet1 = statement.executeQuery("SELECT MAX(Version) FROM Version");
+                if(resultSet1.next())
                 {
-                    return resultSet1.getInt("Version");
+                    return resultSet1.getInt(1);
                 }
                 statement.close();
             }
@@ -526,7 +531,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
             statement.setString(1, factionName);
             ResultSet factionsResultSet = statement.executeQuery();
-            if (factionsResultSet.first())
+            if (factionsResultSet.next())
             {
                 final String tag = factionsResultSet.getString("Tag");
                 final String tagColor = factionsResultSet.getString("TagColor");
@@ -736,7 +741,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CHEST_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
-        if (resultSet.first())
+        if (resultSet.next())
         {
             byte[] factionChestItems = resultSet.getBytes("ChestItems");
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(factionChestItems);
@@ -770,7 +775,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         boolean officerCLAIM = true;
         boolean officerATTACK = true;
         boolean officerINVITE = true;
-        if (officerResult.first())
+        if (officerResult.next())
         {
             officerUSE = officerResult.getBoolean("Use");
             officerPLACE = officerResult.getBoolean("Place");
@@ -792,7 +797,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         boolean memberCLAIM = false;
         boolean memberATTACK = false;
         boolean memberINVITE = true;
-        if (memberResult.first())
+        if (memberResult.next())
         {
             memberUSE = memberResult.getBoolean("Use");
             memberPLACE = memberResult.getBoolean("Place");
@@ -814,7 +819,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         boolean recruitCLAIM = false;
         boolean recruitATTACK = false;
         boolean recruitINVITE = false;
-        if (recruitResult.first())
+        if (recruitResult.next())
         {
             recruitUSE = recruitResult.getBoolean("Use");
             recruitPLACE = recruitResult.getBoolean("Place");
@@ -833,7 +838,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         boolean truceUSE = true;
         boolean trucePLACE = false;
         boolean truceDESTROY = false;
-        if (truceResult.first())
+        if (truceResult.next())
         {
             truceUSE = truceResult.getBoolean("Use");
             trucePLACE = truceResult.getBoolean("Place");
@@ -849,7 +854,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         boolean allyUSE = true;
         boolean allyPLACE = true;
         boolean allyDESTROY = true;
-        if (allyResult.first())
+        if (allyResult.next())
         {
             allyUSE = allyResult.getBoolean("Use");
             allyPLACE = allyResult.getBoolean("Place");

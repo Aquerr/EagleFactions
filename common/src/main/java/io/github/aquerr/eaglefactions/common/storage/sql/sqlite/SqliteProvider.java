@@ -1,8 +1,7 @@
-package io.github.aquerr.eaglefactions.common.storage.sql.h2;
+package io.github.aquerr.eaglefactions.common.storage.sql.sqlite;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
-import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.sql.SqlService;
 
@@ -11,22 +10,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class H2Provider extends SQLAbstractProvider implements SQLProvider
+public class SqliteProvider extends SQLAbstractProvider
 {
-    private static H2Provider INSTANCE = null;
+    private static SqliteProvider INSTANCE = null;
 
     private final DataSource dataSource;
 
-    public static H2Provider getInstance(final EagleFactions eagleFactions)
+    public static SqliteProvider getInstance(final EagleFactions eagleFactions)
     {
         if (INSTANCE == null)
         {
             try
             {
-                INSTANCE = new H2Provider(eagleFactions);
+                INSTANCE = new SqliteProvider(eagleFactions);
                 return INSTANCE;
             }
             catch(final SQLException e)
@@ -38,10 +36,10 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
         else return INSTANCE;
     }
 
-    private H2Provider(final EagleFactions eagleFactions) throws SQLException
+    private SqliteProvider(final EagleFactions eagleFactions) throws SQLException
     {
         super(eagleFactions);
-        final Path databaseDir = eagleFactions.getConfigDir().resolve("data/h2");
+        final Path databaseDir = eagleFactions.getConfigDir().resolve("data/sqlite");
         try
         {
             Files.createDirectories(databaseDir);
@@ -51,11 +49,9 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
             exception.printStackTrace();
             throw new RuntimeException(exception);
         }
-        final Path databasePath = databaseDir.resolve(getDatabaseName());
+        final Path databasePath = databaseDir.resolve(getDatabaseName() + ".db");
         final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
-        this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
-
-        //Create database file
+        this.dataSource = sqlService.getDataSource("jdbc:sqlite://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
         final Connection connection = getConnection();
         connection.close();
     }
@@ -68,6 +64,6 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
     @Override
     public String getProviderName()
     {
-        return "h2";
+        return "sqlite";
     }
 }
