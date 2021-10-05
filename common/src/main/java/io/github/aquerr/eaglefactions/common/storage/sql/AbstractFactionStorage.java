@@ -112,7 +112,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         if(this.sqlProvider == null)
         {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));
-            Sponge.getServer().shutdown();
+            throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         try
         {
@@ -161,28 +161,27 @@ public abstract class AbstractFactionStorage implements FactionStorage
                         continue;
 
                     try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
-                        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream)))
+                        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                        final Connection connection = this.sqlProvider.getConnection();
+                        final Statement statement = connection.createStatement())
                     {
-                        try(final Connection connection = this.sqlProvider.getConnection(); final Statement statement = connection.createStatement())
+                        final StringBuilder stringBuilder = new StringBuilder();
+                        String line;
+
+                        while((line = bufferedReader.readLine()) != null)
                         {
-                            final StringBuilder stringBuilder = new StringBuilder();
-                            String line;
+                            if(line.startsWith("--"))
+                                continue;
 
-                            while((line = bufferedReader.readLine()) != null)
+                            stringBuilder.append(line);
+
+                            if(line.endsWith(";"))
                             {
-                                if(line.startsWith("--"))
-                                    continue;
-
-                                stringBuilder.append(line);
-
-                                if(line.endsWith(";"))
-                                {
-                                    statement.addBatch(stringBuilder.toString().trim());
-                                    stringBuilder.setLength(0);
-                                }
+                                statement.addBatch(stringBuilder.toString().trim());
+                                stringBuilder.setLength(0);
                             }
-                            statement.executeBatch();
                         }
+                        statement.executeBatch();
                     }
                     catch(Exception exception)
                     {
@@ -194,15 +193,14 @@ public abstract class AbstractFactionStorage implements FactionStorage
             {
                 System.out.println("There may be a problem with database script files...");
                 System.out.println("Searched for them in: " + this.sqlProvider.getStorageType().getName());
-                Sponge.getServer().shutdown();
+                throw new IllegalStateException("There may be a problem with database script files...");
             }
             if (databaseVersionNumber == 0)
                 precreate();
         }
         catch(SQLException | IOException | URISyntaxException e)
         {
-            e.printStackTrace();
-            Sponge.getServer().shutdown();
+            throw new IllegalStateException(e);
         }
     }
 

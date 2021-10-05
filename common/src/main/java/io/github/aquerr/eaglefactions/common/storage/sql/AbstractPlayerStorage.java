@@ -44,9 +44,10 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
 
     protected AbstractPlayerStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
     {
-        if(sqlProvider == null) {
+        if(sqlProvider == null)
+        {
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));
-            Sponge.getServer().shutdown();
+            throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         this.plugin = plugin;
         this.sqlProvider = sqlProvider;
