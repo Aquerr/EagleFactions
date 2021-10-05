@@ -27,32 +27,42 @@ public class ChatMessageHelper
         //Get faction prefix from Eagle Factions.
         if(chatConfig.getChatPrefixType().equals("tag"))
         {
-            //TODO: Remove this.. as all factions are required to have a tag.
-            if(faction.getTag().toPlain().equals(""))
-                return faction.getTag();
-
-            Text factionTag = faction.getTag();
-            if (!chatConfig.canColorTags())
-                factionTag = factionTag.toBuilder().color(chatConfig.getDefaultTagColor()).build();
-
-            return Text.builder()
-                    .append(chatConfig.getFactionStartPrefix(), factionTag, chatConfig.getFactionEndPrefix())
-                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
-                    .onClick(TextActions.runCommand("/f info " + faction.getName()))
-                    .build();
+            return getChatTagPrefix(faction);
         }
         else if (chatConfig.getChatPrefixType().equals("name"))
         {
-            return Text.builder()
-                    .append(chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, faction.getName(), TextColors.RESET), chatConfig.getFactionEndPrefix())
-                    .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
-                    .onClick(TextActions.runCommand("/f info " + faction.getName()))
-                    .build();
+            return getChatFactionNamePrefix(faction);
         }
         else
         {
-            return null;
+            return Text.EMPTY;
         }
+    }
+
+    public static Text getChatTagPrefix(Faction faction)
+    {
+        final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
+
+        Text factionTag = faction.getTag();
+        if (!chatConfig.canColorTags())
+            factionTag = factionTag.toBuilder().color(chatConfig.getDefaultTagColor()).build();
+
+        return Text.builder()
+                .append(chatConfig.getFactionStartPrefix(), factionTag, chatConfig.getFactionEndPrefix())
+                .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
+                .onClick(TextActions.runCommand("/f info " + faction.getName()))
+                .build();
+    }
+
+    public static Text getChatFactionNamePrefix(Faction faction)
+    {
+        final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
+
+        return Text.builder()
+                .append(chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, faction.getName(), TextColors.RESET), chatConfig.getFactionEndPrefix())
+                .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
+                .onClick(TextActions.runCommand("/f info " + faction.getName()))
+                .build();
     }
 
     public static Text getChatPrefix(Player player)

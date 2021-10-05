@@ -17,7 +17,6 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.transform.SimpleTextTemplateApplier;
 import org.spongepowered.api.util.Tristate;
@@ -103,8 +102,7 @@ public class ChatMessageListener extends AbstractListener
         }
 
         final Text fPrefix = ChatMessageHelper.getFactionPrefix(playerFaction);
-        if (fPrefix != null)
-            factionPrefix.append(fPrefix);
+        factionPrefix.append(fPrefix);
 
         final Text rPrefix = ChatMessageHelper.getRankPrefix(chatType, playerFaction, player);
         if (rPrefix != null)

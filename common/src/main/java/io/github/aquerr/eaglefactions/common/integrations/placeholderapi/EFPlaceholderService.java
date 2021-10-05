@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
+import io.github.aquerr.eaglefactions.common.messaging.chat.ChatMessageHelper;
 import me.rojo8399.placeholderapi.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -56,8 +57,8 @@ public class EFPlaceholderService
                     try
                     {
                         return ((ExpansionBuilder) builder)
-                                .tokens("name", "tag", "power", "maxpower", "last_online", "claims_count", "alliances",
-                                        "enemies", "truce", "officers_count", "members_count", "recruits_count")
+                                .tokens("name", "tag", "tag_with_brackets", "power", "maxpower", "last_online", "claims_count",
+                                        "alliances", "enemies", "truce", "officers_count", "members_count", "recruits_count")
                                 .description("Player's faction's placeholders.")
                                 .url("https://github.com/Aquerr/EagleFactions")
                                 .author("Aquerr (Nerdi)")
@@ -112,6 +113,8 @@ public class EFPlaceholderService
                 return getFactionName(player);
             case "tag":
                 return getFactionTag(player);
+            case "tag_with_brackets":
+                return getFactionTagWithBrackets(player);
             case "power":
                 return getFactionPower(player);
             case "maxpower":
@@ -134,6 +137,13 @@ public class EFPlaceholderService
                 return getFactionTruce(player);
         }
         return "";
+    }
+
+    private Text getFactionTagWithBrackets(User player)
+    {
+        return this.plugin.getConfiguration().getChatConfig().getFactionStartPrefix()
+                .concat(getFactionTag(player))
+                .concat(this.plugin.getConfiguration().getChatConfig().getFactionEndPrefix());
     }
 
     @Placeholder(id = "factionplayer")

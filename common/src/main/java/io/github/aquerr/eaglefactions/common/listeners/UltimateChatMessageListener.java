@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class UltimateChatMessageListener extends AbstractListener
+public class  UltimateChatMessageListener extends AbstractListener
 {
     private final ChatConfig chatConfig;
 
