@@ -28,10 +28,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -47,29 +44,36 @@ public class StorageManagerImpl implements StorageManager
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
         this.configDir = configDir;
-        switch(storageConfig.getStorageType().toLowerCase())
+        Optional<StorageType> storageType = StorageType.findByName(storageConfig.getStorageType().toLowerCase());
+        if (!storageType.isPresent())
         {
-            case "hocon":
+            throw new RuntimeException(String.format("Storage type '%s' has not been recognized!", storageConfig.getStorageType()));
+        }
+
+        storageConfig.getStorageType().toLowerCase();
+        switch(storageType.get())
+        {
+            case HOCON:
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
                 plugin.printInfo("HOCON storage has been initialized!");
                 break;
-            case "h2":
+            case H2:
                 factionsStorage = new H2FactionStorage(plugin);
                 playerStorage = new H2PlayerStorage(plugin);
                 plugin.printInfo("H2 storage has been initialized!");
                 break;
-            case "mysql":
+            case MYSQL:
                 factionsStorage = new MySQLFactionStorage(plugin);
                 playerStorage = new MySQLPlayerStorage(plugin);
                 plugin.printInfo("MySQL storage has been initialized!");
                 break;
-            case "mariadb":
+            case MARIADB:
                 factionsStorage = new MariaDbFactionStorage(plugin);
                 playerStorage = new MariaDbPlayerStorage(plugin);
                 plugin.printInfo("MariaDB storage has been initialized!");
                 break;
-            case "sqlite":
+            case SQLITE:
                 factionsStorage = new SqliteFactionStorage(plugin);
                 playerStorage = new SqlitePlayerStorage(plugin);
                 plugin.printInfo("Sqlite storage has been initialized!");

@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.h2;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.common.storage.StorageType;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
-import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.sql.SqlService;
 
@@ -11,10 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class H2Provider extends SQLAbstractProvider implements SQLProvider
+public class H2Provider extends SQLAbstractProvider
 {
     private static H2Provider INSTANCE = null;
 
@@ -66,8 +65,8 @@ public class H2Provider extends SQLAbstractProvider implements SQLProvider
     }
 
     @Override
-    public String getProviderName()
+    public StorageType getStorageType()
     {
-        return "h2";
+        return StorageType.H2;
     }
 }

@@ -2,15 +2,18 @@ package io.github.aquerr.eaglefactions.common.storage.sql.mysql;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.common.storage.StorageType;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
-import io.github.aquerr.eaglefactions.common.storage.sql.SQLProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.sql.SqlService;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
+public class MySQLProvider extends SQLAbstractProvider
 {
     private static MySQLProvider INSTANCE = null;
 
@@ -40,9 +43,9 @@ public class MySQLProvider extends SQLAbstractProvider implements SQLProvider
     }
 
     @Override
-    public String getProviderName()
+    public StorageType getStorageType()
     {
-        return "mysql";
+        return StorageType.MYSQL;
     }
 
     private MySQLProvider(final EagleFactions eagleFactions) throws SQLException

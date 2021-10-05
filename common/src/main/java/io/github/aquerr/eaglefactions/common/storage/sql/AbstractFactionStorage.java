@@ -120,7 +120,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             //Get all .sql files
             final List<Path> filePaths = new ArrayList<>();
-            final URL url = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getProviderName());
+            final URL url = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
             if (url != null)
             {
                 final URI uri = url.toURI();
@@ -128,7 +128,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 if (uri.getScheme().equals("jar"))
                 {
                     final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                    myPath = fileSystem.getPath("/assets/eaglefactions/queries/" + this.sqlProvider.getProviderName());
+                    myPath = fileSystem.getPath("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
                 }
                 else
                 {
@@ -193,7 +193,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             else
             {
                 System.out.println("There may be a problem with database script files...");
-                System.out.println("Searched for them in: " + this.sqlProvider.getProviderName());
+                System.out.println("Searched for them in: " + this.sqlProvider.getStorageType().getName());
                 Sponge.getServer().shutdown();
             }
             if (databaseVersionNumber == 0)

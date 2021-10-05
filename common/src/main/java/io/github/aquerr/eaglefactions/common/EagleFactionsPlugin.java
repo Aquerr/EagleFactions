@@ -110,6 +110,8 @@ public class EagleFactionsPlugin implements EagleFactions
     private RankManager rankManager;
     private StorageManager storageManager;
 
+    private boolean isDisabled = false;
+
     @Inject
     @AssetId("Settings.conf")
     private Asset configAsset;
@@ -138,51 +140,61 @@ public class EagleFactionsPlugin implements EagleFactions
     @Listener
     public void onServerInitialization(final GameInitializationEvent event)
     {
-        eagleFactions = this;
-
-        registerTypeSerializers();
-
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
-
-        setupConfigs();
-
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded."));
-
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
-        setupManagers();
-        registerAPI();
-
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded."));
-
-        initializeCommands();
-
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded."));
-
-        registerListeners();
-
-        EventRunner.init(Sponge.getEventManager());
-
-        //Display some info text in the console.
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Thank you for choosing this plugin!"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Current version: " + PluginInfo.VERSION));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
-        Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
-
-        CompletableFuture.runAsync(() ->
+        try
         {
-            if(!VersionChecker.isLatest(PluginInfo.VERSION))
+            eagleFactions = this;
+
+            registerTypeSerializers();
+
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
+
+            setupConfigs();
+
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded."));
+
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
+            setupManagers();
+            registerAPI();
+
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded."));
+
+            initializeCommands();
+
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded."));
+
+            registerListeners();
+
+            EventRunner.init(Sponge.getEventManager());
+
+            //Display some info text in the console.
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Thank you for choosing this plugin!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Current version: " + PluginInfo.VERSION));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+
+            CompletableFuture.runAsync(() ->
             {
-                Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
-                Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
-            }
-        });
+                if(!VersionChecker.isLatest(PluginInfo.VERSION))
+                {
+                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
+                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+                }
+            });        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+            disablePlugin();
+        }
     }
 
     @Listener
     public void onGameStarting(final GameStartingServerEvent event)
     {
+        if (isDisabled)
+            return;
+
         try
         {
             Class placeholderInterface = Class.forName("me.rojo8399.placeholderapi.PlaceholderService");
@@ -252,12 +264,18 @@ public class EagleFactionsPlugin implements EagleFactions
     @Listener
     public void onGameLoad(final GameStartedServerEvent event)
     {
+        if (isDisabled)
+            return;
+
         startFactionsRemover();
     }
 
     @Listener
     public void onReload(final GameReloadEvent event)
     {
+        if (isDisabled)
+            return;
+
         this.configuration.reloadConfiguration();
         this.storageManager.reloadStorage();
 
@@ -903,6 +921,14 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionLeaveListener(this));
         Sponge.getEventManager().registerListeners(this, new FactionJoinListener(this));
+    }
+
+    private void disablePlugin()
+    {
+        this.isDisabled = true;
+        Sponge.getEventManager().unregisterPluginListeners(this);
+        Sponge.getCommandManager().getOwnedBy(this).forEach(Sponge.getCommandManager()::removeMapping);
+        Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "EagleFactions has been disabled!")));
     }
 
     private boolean isUltimateChatLoaded() {

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.common.storage.sql.sqlite;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.common.storage.StorageType;
 import io.github.aquerr.eaglefactions.common.storage.sql.SQLAbstractProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.sql.SqlService;
@@ -62,8 +63,8 @@ public class SqliteProvider extends SQLAbstractProvider
     }
 
     @Override
-    public String getProviderName()
+    public StorageType getStorageType()
     {
-        return "sqlite";
+        return StorageType.SQLITE;
     }
 }
