@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SqliteProvider extends SQLAbstractProvider
 {
@@ -59,7 +60,11 @@ public class SqliteProvider extends SQLAbstractProvider
 
     public Connection getConnection() throws SQLException
     {
-        return this.dataSource.getConnection();
+        Connection connection = this.dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        statement.execute("PRAGMA foreign_keys = ON;");
+        statement.close();
+        return connection;
     }
 
     @Override

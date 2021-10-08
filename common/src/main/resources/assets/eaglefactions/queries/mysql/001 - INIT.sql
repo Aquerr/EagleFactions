@@ -8,17 +8,13 @@ CREATE TABLE `Version` (
 
 -- Create Factions Table
 CREATE TABLE `Factions` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(200) NOT NULL,
   `Tag` VARCHAR(200) NOT NULL,
   `TagColor` VARCHAR(40) NULL,
   `Leader` VARCHAR(36) NOT NULL,
   `Home` VARCHAR(200) NULL,
   `LastOnline` VARCHAR(200) NOT NULL,
-  `Truces` VARCHAR(200) NOT NULL,
-  `Alliances` VARCHAR(255) NOT NULL,
-  `Enemies` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id`, `Name`),
+  PRIMARY KEY (`Name`),
   UNIQUE INDEX `Name_UNIQUE` (`Name` ASC)
 );
 
@@ -63,27 +59,28 @@ CREATE TABLE `FactionOfficers` (
 );
 
 -- Create FactionAlliances Table
--- CREATE TABLE FactionAlliances (
---   FactionName  VARCHAR(200)      UNIQUE        NOT NULL,
---   AlliancesIds VARCHAR(200)                    NOT NULL,
---   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
--- );
--- CREATE UNIQUE INDEX FactionAlliances_FactionName ON FactionAlliances (FactionName);
---
+CREATE TABLE FactionAlliances (
+  `FactionName_1` VARCHAR(200) NOT NULL,
+  `FactionName_2` VARCHAR(200) NOT NULL,
+  CONSTRAINT `FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
+  CONSTRAINT `FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+);
+
 -- Create FactionEnemies Table
--- CREATE TABLE FactionEnemies (
---   FactionName VARCHAR(200)        UNIQUE      NOT NULL,
---   EnemiesIds  VARCHAR(200)                    NOT NULL,
---   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
--- );
--- CREATE UNIQUE INDEX FactionEnemies_FactionName ON FactionEnemies (FactionName);
+CREATE TABLE FactionEnemies (
+  `FactionName_1` VARCHAR(200) NOT NULL,
+  `FactionName_2` VARCHAR(200) NOT NULL,
+  CONSTRAINT `FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
+  CONSTRAINT `FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+);
 
 -- Create FactionTruces Table
--- CREATE TABLE `FactionTruces` (
---   `FactionName`   VARCHAR(200)                             NOT NULL,
---   `TrucesIds`  VARCHAR(200)        UNIQUE      NOT NULL,
--- );
--- CREATE UNIQUE INDEX FactionTruces_FactionName ON FactionTruces (FactionName);
+CREATE TABLE FactionTruces (
+  `FactionName_1` VARCHAR(200) NOT NULL,
+  `FactionName_2` VARCHAR(200) NOT NULL,
+  CONSTRAINT `FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
+  CONSTRAINT `FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+);
 
 -- Create OfficerPerms Table
 CREATE TABLE `OfficerPerms` (

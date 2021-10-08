@@ -667,7 +667,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .executor(new AdminCommand(this))
                 .build());
 
-        SUBCOMMANDS.put(Collections.singletonList("setfacion"), CommandSpec.builder()
+        SUBCOMMANDS.put(Collections.singletonList("setfaction"), CommandSpec.builder()
                 .description(Text.of(Messages.SET_FACTION_COMMAND))
                 .permission(PluginPermissions.SET_FACTION_COMMAND)
                 .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
