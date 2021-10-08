@@ -3,6 +3,7 @@ plugins {
     id 'idea'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'org.spongepowered.plugin' version '0.9.0'
+    id "net.kyori.blossom" version "1.1.0"
 }
 
 allprojects {
@@ -25,7 +26,15 @@ allprojects {
 
 dependencies {
     implementation project(":EagleFactionsAPI")
-    implementation project(":common")
+    compileOnly 'org.spongepowered:spongeapi:7.3.0'
+    compileOnly 'com.github.rojo8399:PlaceholderAPI:4.5.1'
+    compileOnly 'org.mariadb.jdbc:mariadb-java-client:2.6.0'
+    compileOnly 'com.zaxxer:HikariCP:2.6.3'
+    compileOnly 'com.h2database:h2:1.4.196'
+    compileOnly 'org.xerial:sqlite-jdbc:3.20.0'
+    compileOnly 'com.github.webbukkit:DynmapCoreAPI:v2.5'
+    compileOnly 'br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1'
+    annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
 
     testImplementation project(':EagleFactionsAPI')
     testImplementation 'org.spongepowered:spongeapi:7.3.0'
@@ -44,6 +53,17 @@ jar.enabled = false
 
 test {
     useJUnitPlatform()
+}
+
+blossom {
+    if(System.getenv("JENKINS_HOME")) {
+        rootProject.version = version + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+        println("File name => " + archivesBaseName)
+    } else {
+        rootProject.version = version + "-SNAPSHOT"
+    }
+    replaceTokenIn('src/main/java/io/github/aquerr/eaglefactions/PluginInfo.java')
+    replaceToken('%VERSION%', rootProject.version)
 }
 
 tasks.create("publishBuildOnDiscord") {
