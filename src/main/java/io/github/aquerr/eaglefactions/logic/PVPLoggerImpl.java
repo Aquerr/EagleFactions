@@ -19,6 +19,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class PVPLoggerImpl implements PVPLogger
@@ -49,8 +50,8 @@ public class PVPLoggerImpl implements PVPLogger
 
         if (isActive)
         {
-            attackedPlayers = new HashMap<>();
-            playersIdTaskMap = new HashMap<>();
+            attackedPlayers = new ConcurrentHashMap<>();
+            playersIdTaskMap = new ConcurrentHashMap<>();
             blockTime = pvpLoggerConfig.getPVPLoggerBlockTime();
             blockedCommandsDuringFight = pvpLoggerConfig.getBlockedCommandsDuringFight();
             shouldDisplayInScoreboard = pvpLoggerConfig.shouldDisplayPvpLoggerInScoreboard();
@@ -106,10 +107,12 @@ public class PVPLoggerImpl implements PVPLogger
         if(!isActive())
             return;
 
+        final UUID playerUUID = player.getUniqueId();
+
         //Update player's time if player is already blocked.
-        if (attackedPlayers.containsKey(player.getUniqueId()) && playersIdTaskMap.containsKey(player.getUniqueId()))
+        if (attackedPlayers.containsKey(playerUUID) && playersIdTaskMap.containsKey(playerUUID))
         {
-            attackedPlayers.replace(player.getUniqueId(), getBlockTime());
+            attackedPlayers.replace(playerUUID, getBlockTime());
             return;
         }
 
@@ -122,16 +125,16 @@ public class PVPLoggerImpl implements PVPLogger
             player.setScoreboard(scoreboard);
         }
 
-        attackedPlayers.put(player.getUniqueId(), getBlockTime());
-        playersIdTaskMap.put(player.getUniqueId(), getNewTaskId(1));
+        attackedPlayers.put(playerUUID, getBlockTime());
+        playersIdTaskMap.put(playerUUID, getNewTaskId(1));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!"));
 
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
         taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
         {
-            if (attackedPlayers.containsKey(player.getUniqueId()))
+            if (attackedPlayers.containsKey(playerUUID))
             {
-                int seconds = attackedPlayers.get(player.getUniqueId());
+                int seconds = attackedPlayers.get(playerUUID);
 
                 if (seconds <= 0)
                 {
@@ -141,20 +144,25 @@ public class PVPLoggerImpl implements PVPLogger
                     return;
                 }
 
-                attackedPlayers.replace(player.getUniqueId(), seconds - 1);
+                attackedPlayers.replace(playerUUID, seconds - 1);
+
                 if(shouldDisplayInScoreboard)
                 {
-                    Scoreboard scoreboard = player.getScoreboard();
-                    Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(player.getUniqueId()));
-                    if (!optionalObjective.isPresent())
+                    final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(playerUUID);
+                    if (optionalPlayer.isPresent())
                     {
-                        Objective objective = createPVPLoggerObjective();
-                        scoreboard.addObjective(objective);
-                        scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
-                        optionalObjective = Optional.of(objective);
+                        Scoreboard scoreboard = player.getScoreboard();
+                        Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(playerUUID));
+                        if (!optionalObjective.isPresent())
+                        {
+                            Objective objective = createPVPLoggerObjective();
+                            scoreboard.addObjective(objective);
+                            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+                            optionalObjective = Optional.of(objective);
+                        }
+                        Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
+                        pvpTimer.setScore(seconds - 1);
                     }
-                    Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
-                    pvpTimer.setScore(seconds - 1);
                 }
             }
             else
