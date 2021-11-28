@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,8 @@ public class FactionArgument extends CommandElement
 		final String factionName = args.next();
 		if (StringUtils.isBlank(factionName))
 			throw args.createError(Text.of("Argument is not a valid faction!"));
-		return this.plugin.getFactionLogic().getFactionByName(factionName);
+		return Optional.ofNullable(this.plugin.getFactionLogic().getFactionByName(factionName))
+				.orElseThrow(() -> args.createError(Text.of("Argument is not a valid faction!")));
 	}
 
 	@Override
