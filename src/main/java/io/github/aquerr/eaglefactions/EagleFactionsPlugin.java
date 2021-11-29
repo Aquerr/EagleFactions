@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.AcceptableInvite;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionInvite;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
@@ -123,6 +124,8 @@ import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
+import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
+import io.github.aquerr.eaglefactions.storage.serializers.SlotItemTypeSerializer;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.Sponge;
@@ -509,6 +512,8 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Claim.class), new ClaimTypeSerializer());
         TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){}, new ClaimSetTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(FactionChest.SlotItem.class), new SlotItemTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<List<FactionChest.SlotItem>>(){}, new SlotItemListTypeSerializer());
     }
 
     private void registerAPI()

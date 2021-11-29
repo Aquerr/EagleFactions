@@ -42,7 +42,7 @@ public class ConfigurateHelper
             configNode.getNode("claims").setValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, faction.getClaims());
             configNode.getNode("last_online").setValue(faction.getLastOnline().toString());
             configNode.getNode("perms").setValue(faction.getPerms());
-            configNode.getNode("chest").setValue(new TypeToken<List<FactionChest.SlotItem>>(){}, faction.getChest().getItems());
+            configNode.getNode("chest").setValue(EFTypeSerializers.LIST_SLOT_ITEM_TYPE_TOKEN, faction.getChest().getItems());
             configNode.getNode("isPublic").setValue(faction.isPublic());
 
             if(faction.getHome() == null)
@@ -136,7 +136,7 @@ public class ConfigurateHelper
         final Set<Claim> claims = configNode.getNode("claims").getValue(EFTypeSerializers.CLAIM_SET_TYPE_TOKEN, Collections.EMPTY_SET);
         final Instant lastOnline = configNode.getNode("last_online").getValue() != null ? Instant.parse(configNode.getNode("last_online").getString()) : Instant.now();
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.getNode("perms"));
-        List<FactionChest.SlotItem> slotItems = configNode.getNode("chest").getValue(new TypeToken<List<FactionChest.SlotItem>>() {});
+        final List<FactionChest.SlotItem> slotItems = configNode.getNode("chest").getValue(EFTypeSerializers.LIST_SLOT_ITEM_TYPE_TOKEN);
 
         FactionChest chest;
         if (slotItems == null)

@@ -3,8 +3,6 @@ package io.github.aquerr.eaglefactions.entities;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -137,14 +135,10 @@ public class FactionChestImpl implements FactionChest
         return itemStack;
     }
 
-    @ConfigSerializable
     public static final class SlotItemImpl implements FactionChest.SlotItem
     {
-        @Setting
         private int column;
-        @Setting
         private int row;
-        @Setting
         private ItemStack item;
 
         public SlotItemImpl()
