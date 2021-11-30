@@ -16,6 +16,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class DisbandCommand extends AbstractCommand
 {
@@ -27,45 +28,71 @@ public class DisbandCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
     {
-        if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player) source;
         final Optional<Faction> optionalFaction = context.getOne("faction");
-        final Faction faction = optionalFaction.orElse(super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
-                        .orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND))));
 
+        if (source instanceof Player)
+        {
+            final Player player = (Player) source;
+            Faction faction = optionalFaction.orElseGet(() -> super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+                    .orElse(null));
+            if (faction == null)
+                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+            playerDisband(player, faction);
+        }
+        else
+        {
+            final Faction faction = context.requireOne("faction");
+            consoleDisband(source, faction);
+        }
+
+        return CommandResult.success();
+    }
+
+    private void consoleDisband(CommandSource source, Faction faction) throws CommandException
+    {
+        //Even admins should not be able to disband SafeZone nor WarZone
+        if(faction.isSafeZone() || faction.isWarZone())
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_CANNOT_BE_DISBANDED));
+        sendDisbandEventAndDisband(source, faction, false);
+    }
+
+    private void playerDisband(final Player player, final Faction faction) throws CommandException
+    {
         //Even admins should not be able to disband SafeZone nor WarZone
         if(faction.isSafeZone() || faction.isWarZone())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_CANNOT_BE_DISBANDED));
 
         if (player.getUniqueId().equals(faction.getLeader()))
         {
-            runDisbandEventAndDisband(player, faction, false);
+            sendDisbandEventAndDisband(player, faction, false);
         }
         else
         {
             final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
             if (!hasAdminMode)
                 throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
-            runDisbandEventAndDisband(player, faction, true);
+            sendDisbandEventAndDisband(player, faction, true);
         }
-        return CommandResult.success();
     }
 
-    private void runDisbandEventAndDisband(final Player player, final Faction faction, final boolean forceRemovedByAdmin)
+    private void sendDisbandEventAndDisband(final CommandSource source, final Faction faction, final boolean forceRemovedByAdmin)
     {
-        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(player, faction, forceRemovedByAdmin, false);
+        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(source, faction, forceRemovedByAdmin, false);
         if(!isCancelled)
-            playerDisband(player, faction, forceRemovedByAdmin);
+        {
+            super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
+            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
+            clearAutoClaimAndChatForFactionMembers(faction);
+            EventRunner.runFactionDisbandEventPost(source, faction, forceRemovedByAdmin, false);
+        }
     }
 
-    private void playerDisband(final Player player, final Faction faction, final boolean forceRemovedByAdmin)
+    private void clearAutoClaimAndChatForFactionMembers(Faction faction)
     {
-        super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
-        EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
-        EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
-        EventRunner.runFactionDisbandEventPost(player, faction, forceRemovedByAdmin, false);
+        for (final UUID memberUUID : faction.getMembers())
+        {
+            EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(memberUUID);
+            EagleFactionsPlugin.CHAT_LIST.remove(memberUUID);
+        }
     }
 }

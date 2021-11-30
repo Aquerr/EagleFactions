@@ -48,6 +48,10 @@ shadowJar {
     archiveClassifier = ''
 }
 
+shadowJar.configure {
+    dependsOn test
+}
+
 build.finalizedBy shadowJar
 jar.enabled = false
 
