@@ -286,7 +286,7 @@ public class FactionLogicImpl implements FactionLogic
             case LEADER:
             {
                 final UUID leaderUUID = faction.getLeader();
-                if (leaderUUID != DUMMY_UUID)
+                if (!DUMMY_UUID.equals(leaderUUID))
                 {
                     officers.add(leaderUUID);
                 }
