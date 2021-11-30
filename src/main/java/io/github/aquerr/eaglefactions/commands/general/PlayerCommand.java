@@ -8,6 +8,7 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -72,12 +73,10 @@ public class PlayerCommand extends AbstractCommand
         final Optional<User> optionalUser = factionPlayer.getUser();
         if (optionalUser.isPresent())
         {
-            final Optional<JoinData> joinData = optionalUser.get().get(JoinData.class);
-            if (joinData.isPresent())
+            final Optional<Instant> optionalLastPlayedInstant = optionalUser.get().get(Keys.LAST_DATE_PLAYED);
+            if (optionalLastPlayedInstant.isPresent())
             {
-                final JoinData data = joinData.get();
-                final Instant instant = data.lastPlayed().get();
-                lastPlayed = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                lastPlayed = LocalDateTime.ofInstant(optionalLastPlayedInstant.get(), ZoneId.systemDefault());
             }
         }
 
