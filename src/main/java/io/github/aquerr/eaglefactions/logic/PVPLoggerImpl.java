@@ -29,14 +29,14 @@ public class PVPLoggerImpl implements PVPLogger
     private static PVPLogger INSTANCE = null;
 
     private final PVPLoggerConfig pvpLoggerConfig;
-    private Map<UUID, Integer> attackedPlayers;
-    private Map<UUID, Integer> playersIdTaskMap;
-    private boolean isActive;
+    private Map<UUID, PVPLoggerObjective> playerPVPLoggerObjectives;
+
+    private final boolean isActive;
     private int blockTime;
-    private boolean shouldDisplayInScoreboard;
+    protected boolean shouldDisplayInScoreboard;
     private Set<String> blockedCommandsDuringFight;
 
-    private final String PVPLOGGER_OBJECTIVE_NAME = "PVPLogger";
+    private static final String PVPLOGGER_OBJECTIVE_NAME = "PVPLogger-";
 
     public static PVPLogger getInstance(final EagleFactions plugin)
     {
@@ -47,16 +47,15 @@ public class PVPLoggerImpl implements PVPLogger
 
     private PVPLoggerImpl(final EagleFactions plugin)
     {
-        pvpLoggerConfig = plugin.getConfiguration().getPvpLoggerConfig();
-        isActive = pvpLoggerConfig.isPVPLoggerActive();
+        this.pvpLoggerConfig = plugin.getConfiguration().getPvpLoggerConfig();
+        this.isActive = pvpLoggerConfig.isPVPLoggerActive();
 
-        if (isActive)
+        if (this.isActive)
         {
-            attackedPlayers = new ConcurrentHashMap<>();
-            playersIdTaskMap = new ConcurrentHashMap<>();
-            blockTime = pvpLoggerConfig.getPVPLoggerBlockTime();
-            blockedCommandsDuringFight = pvpLoggerConfig.getBlockedCommandsDuringFight();
-            shouldDisplayInScoreboard = pvpLoggerConfig.shouldDisplayPvpLoggerInScoreboard();
+            this.playerPVPLoggerObjectives = new ConcurrentHashMap<>();
+            this.blockTime = pvpLoggerConfig.getPVPLoggerBlockTime();
+            this.blockedCommandsDuringFight = pvpLoggerConfig.getBlockedCommandsDuringFight();
+            this.shouldDisplayInScoreboard = pvpLoggerConfig.shouldDisplayPvpLoggerInScoreboard();
         }
     }
 
@@ -112,33 +111,36 @@ public class PVPLoggerImpl implements PVPLogger
         final UUID playerUUID = player.getUniqueId();
 
         //Update player's time if player is already blocked.
-        if (attackedPlayers.containsKey(playerUUID) && playersIdTaskMap.containsKey(playerUUID))
+        if (playerPVPLoggerObjectives.containsKey(playerUUID) && playerPVPLoggerObjectives.containsKey(playerUUID))
         {
-            attackedPlayers.replace(playerUUID, getBlockTime());
+            playerPVPLoggerObjectives.get(playerUUID).setSeconds(getBlockTime());
             return;
         }
 
-        final int objectiveId = getNewTaskId(1);
-        attackedPlayers.put(playerUUID, getBlockTime());
-        playersIdTaskMap.put(playerUUID, objectiveId);
+
+        final int objectiveId = getNextFreeId(1);
+        PVPLoggerObjective pvpLoggerObjective = new PVPLoggerObjective(objectiveId, getBlockTime());
 
         if (shouldDisplayInScoreboard)
         {
-            final Scoreboard scoreboard = Scoreboard.builder().build();
+            final Scoreboard scoreboard = Optional.ofNullable(player.getScoreboard()).orElse(Scoreboard.builder().build());
             final Objective objective = createPVPLoggerObjective(objectiveId);
             scoreboard.addObjective(objective);
             scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
             player.setScoreboard(scoreboard);
+            pvpLoggerObjective.setObjective(objective);
         }
+
+        this.playerPVPLoggerObjectives.put(playerUUID, pvpLoggerObjective);
 
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!"));
 
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(task ->
                 {
-                    if (attackedPlayers.containsKey(playerUUID))
+                    if (this.playerPVPLoggerObjectives.containsKey(playerUUID))
                     {
-                        int seconds = attackedPlayers.get(playerUUID);
-                        if (seconds <= 0)
+                        PVPLoggerObjective loggerObjective = this.playerPVPLoggerObjectives.get(playerUUID);
+                        if (loggerObjective.getSeconds() <= 0)
                         {
                             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY));
                             removePlayer(player);
@@ -146,16 +148,12 @@ public class PVPLoggerImpl implements PVPLogger
                             return;
                         }
 
-                        attackedPlayers.replace(playerUUID, seconds - 1);
+                        loggerObjective.setSeconds(loggerObjective.getSeconds() - 1);
 
                         if(shouldDisplayInScoreboard)
                         {
                             final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(playerUUID);
-                            if (optionalPlayer.isPresent())
-                            {
-                                Scoreboard scoreboard = player.getScoreboard();
-                                createOrUpdatePVPLoggerObjective(scoreboard, playerUUID, seconds);
-                            }
+                            optionalPlayer.ifPresent(value -> createOrUpdatePVPLoggerObjective(value, loggerObjective));
                         }
                     }
                     else
@@ -165,27 +163,35 @@ public class PVPLoggerImpl implements PVPLogger
                 }, 0, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
     }
 
-    private void createOrUpdatePVPLoggerObjective(Scoreboard scoreboard, UUID playerUUID, int seconds)
+    private int getNextFreeId(int preferredId)
     {
-        Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(playerUUID));
-        if (!optionalObjective.isPresent())
+        for (final PVPLoggerObjective pvpLoggerObjective : this.playerPVPLoggerObjectives.values())
         {
-            final int objectiveId = getNewTaskId(1);
-            Objective objective = createPVPLoggerObjective(objectiveId);
-            scoreboard.addObjective(objective);
-            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
-            optionalObjective = Optional.of(objective);
+            if (pvpLoggerObjective.getId() == preferredId)
+                return getNextFreeId(preferredId + 1);
         }
-        Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
-        pvpTimer.setScore(seconds - 1);
+        return preferredId;
+    }
+
+    private void createOrUpdatePVPLoggerObjective(Player player, PVPLoggerObjective pvpLoggerObjective)
+    {
+        Objective objective = pvpLoggerObjective.getObjective();
+        if (objective == null)
+        {
+            final int objectiveId = getNextFreeId(1);
+            objective = createPVPLoggerObjective(objectiveId);
+            player.getScoreboard().addObjective(objective);
+            player.getScoreboard().updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+        }
+        Score pvpTimerScore = objective.getOrCreateScore(Text.of("Time:"));
+        pvpTimerScore.setScore(pvpLoggerObjective.getSeconds());
     }
 
     @Override
     public synchronized boolean isPlayerBlocked(final Player player)
     {
-        return attackedPlayers.containsKey(player.getUniqueId());
+        return this.playerPVPLoggerObjectives.containsKey(player.getUniqueId());
     }
-
 
     @Override
     public synchronized void removePlayer(final Player player)
@@ -195,35 +201,64 @@ public class PVPLoggerImpl implements PVPLogger
 
         //Remove PVPLoggerImpl objective
         Scoreboard scoreboard = player.getScoreboard();
-        Optional<Objective> pvploggerObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + this.playersIdTaskMap.get(player.getUniqueId()));
-        pvploggerObjective.ifPresent(scoreboard::removeObjective);
-        attackedPlayers.remove(player.getUniqueId());
-        playersIdTaskMap.remove(player.getUniqueId());
+        PVPLoggerObjective pvpLoggerObjective = this.playerPVPLoggerObjectives.get(player.getUniqueId());
+        scoreboard.removeObjective(pvpLoggerObjective.getObjective());
+        this.playerPVPLoggerObjectives.remove(player.getUniqueId());
     }
 
     @Override
     public synchronized int getPlayerBlockTime(final Player player)
     {
-        return attackedPlayers.getOrDefault(player.getUniqueId(), 0);
-    }
-
-    private int getNewTaskId(int preferredId)
-    {
-        if(this.playersIdTaskMap.containsValue(preferredId))
-        {
-            return getNewTaskId(preferredId + 1);
-        }
-
-        return preferredId;
+        return Optional.ofNullable(this.playerPVPLoggerObjectives.get(player.getUniqueId()))
+                .map(PVPLoggerObjective::getSeconds)
+                .orElse(0);
     }
 
     private Objective createPVPLoggerObjective(int objectiveId)
     {
         return Objective.builder()
-                .name(PVPLOGGER_OBJECTIVE_NAME + "-" + objectiveId)
+                .name(PVPLOGGER_OBJECTIVE_NAME + objectiveId)
                 .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
                 .criterion(Criteria.DUMMY)
                 .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
                 .build();
+    }
+
+    private static class PVPLoggerObjective
+    {
+        private final int id;
+        private int seconds;
+        private Objective objective;
+
+        PVPLoggerObjective(int id, int startSeconds)
+        {
+            this.id = id;
+            this.seconds = startSeconds;
+        }
+
+        public Objective getObjective()
+        {
+            return objective;
+        }
+
+        public void setObjective(Objective objective)
+        {
+            this.objective = objective;
+        }
+
+        public int getId()
+        {
+            return id;
+        }
+
+        public int getSeconds()
+        {
+            return seconds;
+        }
+
+        public void setSeconds(int seconds)
+        {
+            this.seconds = seconds;
+        }
     }
 }
