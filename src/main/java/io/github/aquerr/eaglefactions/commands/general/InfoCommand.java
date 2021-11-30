@@ -22,9 +22,11 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class InfoCommand extends AbstractCommand
@@ -96,62 +98,44 @@ public class InfoCommand extends AbstractCommand
             final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(faction.getLeader());
             if (optionalFactionPlayer.isPresent())
             {
-                leaderNameText = buildClickablePlayerNickname(TextColors.GOLD, optionalFactionPlayer.get());
+                leaderNameText = buildClickablePlayerNickname(optionalFactionPlayer.get());
             }
         }
 
         Text recruitList = Text.EMPTY;
         if(!faction.getRecruits().isEmpty())
         {
-        	recruitList = faction.getRecruits().stream()
-                    .map(recruit -> getPlugin().getPlayerManager().getFactionPlayer(recruit))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(factionPlayer -> buildClickablePlayerNickname(TextColors.GREEN, factionPlayer))
-                    .reduce(recruitList, (text, text2) -> text.concat(text2).concat(Text.of(", ")));
-            recruitList = recruitList.toBuilder().removeLastChild().build();
+            recruitList = buildPlayerList(faction.getRecruits());
         }
 
         Text membersList = Text.EMPTY;
         if(!faction.getMembers().isEmpty())
         {
-        	membersList = faction.getMembers().stream()
-        			.map(member -> getPlugin().getPlayerManager().getFactionPlayer(member))
-        			.filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(factionPlayer -> buildClickablePlayerNickname(TextColors.GREEN, factionPlayer))
-                    .reduce(membersList, (text, text2) -> text.concat(text2).concat(Text.of(", ")));
-            membersList = membersList.toBuilder().removeLastChild().build();
+        	membersList = buildPlayerList(faction.getMembers());
         }
 
         Text officersList = Text.EMPTY;
         if(!faction.getOfficers().isEmpty())
         {
-        	officersList = faction.getOfficers().stream()
-        			.map(officer -> getPlugin().getPlayerManager().getFactionPlayer(officer))
-        			.filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(factionPlayer -> buildClickablePlayerNickname(TextColors.GOLD, factionPlayer))
-                    .reduce(officersList, ((text, text2) -> text.concat(text2).concat(Text.of(", "))));
-            officersList = officersList.toBuilder().removeLastChild().build();
+        	officersList = buildPlayerList(faction.getOfficers());
         }
 
-        String trucesList = "";
+        Text trucesList = Text.EMPTY;
         if(!faction.getTruces().isEmpty())
         {
-            trucesList = String.join(", ", faction.getTruces());
+            trucesList = buildRelationList(faction.getTruces());
         }
 
-        String alliancesList = "";
+        Text alliancesList = Text.EMPTY;
         if(!faction.getAlliances().isEmpty())
         {
-        	alliancesList = String.join(", ", faction.getAlliances());
+        	alliancesList = buildRelationList(faction.getAlliances());
         }
 
-        String enemiesList = "";
+        Text enemiesList = Text.EMPTY;
         if(!faction.getEnemies().isEmpty())
         {
-        	enemiesList = String.join(", ", faction.getEnemies());
+        	enemiesList = buildRelationList(faction.getEnemies());
         }
 
         Text info = Text.builder()
@@ -163,9 +147,9 @@ public class InfoCommand extends AbstractCommand
                 .append(Text.of(TextColors.AQUA, Messages.PUBLIC + ": ", TextColors.GOLD, faction.isPublic() + "\n"))
                 .append(Text.of(TextColors.AQUA, Messages.LEADER + ": ", TextColors.GOLD, leaderNameText, Text.of("\n")))
                 .append(Text.of(TextColors.AQUA, Messages.OFFICERS + ": ", TextColors.GOLD, officersList, Text.of("\n")))
-                .append(Text.of(TextColors.AQUA, Messages.TRUCES + ": ", TextColors.GOLD, trucesList + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": ", TextColors.BLUE, alliancesList + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.ENEMIES + ": ", TextColors.RED, enemiesList + "\n"))
+                .append(Text.of(TextColors.AQUA, Messages.TRUCES + ": ", TextColors.GOLD, trucesList, Text.of("\n")))
+                .append(Text.of(TextColors.AQUA, Messages.ALLIANCES + ": ", TextColors.BLUE, alliancesList, Text.of("\n")))
+                .append(Text.of(TextColors.AQUA, Messages.ENEMIES + ": ", TextColors.RED, enemiesList, Text.of("\n")))
                 .append(Text.of(TextColors.AQUA, Messages.MEMBERS + ": ", TextColors.GREEN, membersList, Text.of("\n")))
                 .append(Text.of(TextColors.AQUA, Messages.RECRUITS + ": ", TextColors.GREEN, recruitList, Text.of("\n")))
                 .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction) + "\n"))
@@ -190,10 +174,40 @@ public class InfoCommand extends AbstractCommand
         return Text.of(TextColors.RED, formattedDate);
     }
 
-    private Text buildClickablePlayerNickname(TextColor textColor, FactionPlayer factionPlayer)
+    private Text buildPlayerList(Collection<UUID> playerUUIDs)
+    {
+        Text playerList = Text.EMPTY;
+        playerList = playerUUIDs.stream()
+                .map(recruit -> getPlugin().getPlayerManager().getFactionPlayer(recruit))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::buildClickablePlayerNickname)
+                .reduce(playerList, (text, text2) -> text.concat(text2).concat(Text.of(", ")));
+        playerList = playerList.toBuilder().removeLastChild().build();
+        return playerList;
+    }
+
+    private Text buildRelationList(Set<String> relations)
+    {
+        Text relationList = Text.EMPTY;
+        relationList = relations.stream()
+                .map(this::buildClickableFactionName)
+                .reduce(relationList, ((text, text2) -> text.concat(text2).concat(Text.of(", "))));
+        relationList = relationList.toBuilder().removeLastChild().build();
+        return relationList;
+    }
+
+    private Text buildClickableFactionName(String factionName)
+    {
+        return Text.builder(factionName)
+                .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction")))
+                .onClick(TextActions.runCommand("/f info " + factionName))
+                .build();
+    }
+
+    private Text buildClickablePlayerNickname(FactionPlayer factionPlayer)
     {
         return Text.builder(factionPlayer.getName())
-                .color(textColor)
                 .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the player")))
                 .onClick(TextActions.runCommand("/f player " + factionPlayer.getName()))
                 .build();
