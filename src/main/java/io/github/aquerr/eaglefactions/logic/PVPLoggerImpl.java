@@ -1,14 +1,13 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
@@ -18,7 +17,10 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -116,60 +118,66 @@ public class PVPLoggerImpl implements PVPLogger
             return;
         }
 
+        final int objectiveId = getNewTaskId(1);
+        attackedPlayers.put(playerUUID, getBlockTime());
+        playersIdTaskMap.put(playerUUID, objectiveId);
+
         if (shouldDisplayInScoreboard)
         {
             final Scoreboard scoreboard = Scoreboard.builder().build();
-            final Objective objective = createPVPLoggerObjective();
+            final Objective objective = createPVPLoggerObjective(objectiveId);
             scoreboard.addObjective(objective);
             scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
             player.setScoreboard(scoreboard);
         }
 
-        attackedPlayers.put(playerUUID, getBlockTime());
-        playersIdTaskMap.put(playerUUID, getNewTaskId(1));
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!"));
 
-        Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-        taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
-        {
-            if (attackedPlayers.containsKey(playerUUID))
-            {
-                int seconds = attackedPlayers.get(playerUUID);
-
-                if (seconds <= 0)
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(task ->
                 {
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY));
-                    removePlayer(player);
-                    task.cancel();
-                    return;
-                }
-
-                attackedPlayers.replace(playerUUID, seconds - 1);
-
-                if(shouldDisplayInScoreboard)
-                {
-                    final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(playerUUID);
-                    if (optionalPlayer.isPresent())
+                    if (attackedPlayers.containsKey(playerUUID))
                     {
-                        Scoreboard scoreboard = player.getScoreboard();
-                        Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(playerUUID));
-                        if (!optionalObjective.isPresent())
+                        int seconds = attackedPlayers.get(playerUUID);
+                        if (seconds <= 0)
                         {
-                            Objective objective = createPVPLoggerObjective();
-                            scoreboard.addObjective(objective);
-                            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
-                            optionalObjective = Optional.of(objective);
+                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY));
+                            removePlayer(player);
+                            task.cancel();
+                            return;
                         }
-                        Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
-                        pvpTimer.setScore(seconds - 1);
+
+                        attackedPlayers.replace(playerUUID, seconds - 1);
+
+                        if(shouldDisplayInScoreboard)
+                        {
+                            final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(playerUUID);
+                            if (optionalPlayer.isPresent())
+                            {
+                                Scoreboard scoreboard = player.getScoreboard();
+                                createOrUpdatePVPLoggerObjective(scoreboard, playerUUID, seconds);
+                            }
+                        }
                     }
-                }
-            }
-            else
-            {
-                task.cancel();
-            }
-        }).async().submit(EagleFactionsPlugin.getPlugin());
+                    else
+                    {
+                        task.cancel();
+                    }
+                }, 0, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
+    }
+
+    private void createOrUpdatePVPLoggerObjective(Scoreboard scoreboard, UUID playerUUID, int seconds)
+    {
+        Optional<Objective> optionalObjective = scoreboard.getObjective(PVPLOGGER_OBJECTIVE_NAME + "-" + playersIdTaskMap.get(playerUUID));
+        if (!optionalObjective.isPresent())
+        {
+            final int objectiveId = getNewTaskId(1);
+            Objective objective = createPVPLoggerObjective(objectiveId);
+            scoreboard.addObjective(objective);
+            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+            optionalObjective = Optional.of(objective);
+        }
+        Score pvpTimer = optionalObjective.get().getOrCreateScore(Text.of("Time:"));
+        pvpTimer.setScore(seconds - 1);
     }
 
     @Override
@@ -199,7 +207,7 @@ public class PVPLoggerImpl implements PVPLogger
         return attackedPlayers.getOrDefault(player.getUniqueId(), 0);
     }
 
-    private Integer getNewTaskId(int preferredId)
+    private int getNewTaskId(int preferredId)
     {
         if(this.playersIdTaskMap.containsValue(preferredId))
         {
@@ -209,10 +217,10 @@ public class PVPLoggerImpl implements PVPLogger
         return preferredId;
     }
 
-    private Objective createPVPLoggerObjective()
+    private Objective createPVPLoggerObjective(int objectiveId)
     {
         return Objective.builder()
-                .name(PVPLOGGER_OBJECTIVE_NAME + "-" + getNewTaskId(1))
+                .name(PVPLOGGER_OBJECTIVE_NAME + "-" + objectiveId)
                 .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
                 .criterion(Criteria.DUMMY)
                 .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
