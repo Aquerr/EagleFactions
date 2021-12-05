@@ -62,6 +62,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean shouldShowAttackedClaim = true;
 	private boolean shouldInformAboutDestroy = true;
 	private boolean shouldShowDestroyedClaim = true;
+	private boolean shouldShowAttackInBossBar = true;
 
 	public FactionsConfigImpl(final Configuration configuration)
 	{
@@ -120,6 +121,7 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.shouldShowAttackedClaim = this.configuration.getBoolean(true, "show-attacked-claim");
 		this.shouldInformAboutDestroy = this.configuration.getBoolean(true, "inform-about-destroy");
 		this.shouldShowDestroyedClaim = this.configuration.getBoolean(true, "show-destroyed-claim");
+		this.shouldShowAttackInBossBar = this.configuration.getBoolean(true, "show-attack-in-bossbar");
 	}
 
 	@Override
@@ -374,6 +376,11 @@ public class FactionsConfigImpl implements FactionsConfig
 		return this.shouldShowDestroyedClaim;
 	}
 
+	@Override
+	public boolean shouldShowAttackInBossBar()
+	{
+		return this.shouldShowAttackInBossBar;
+	}
 
 	private HashMap<String, Integer> prepareItems(final List<String> itemsToPrepare)
 	{

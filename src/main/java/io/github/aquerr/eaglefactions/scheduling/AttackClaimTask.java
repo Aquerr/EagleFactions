@@ -11,6 +11,9 @@ import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
+import org.spongepowered.api.boss.BossBarColors;
+import org.spongepowered.api.boss.BossBarOverlays;
+import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -28,6 +31,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
     private final AttackLogic attackLogic;
     private final Vector3i attackedChunk;
     private final Player player;
+    private ServerBossBar attackTimeBossBar;
 
     public AttackClaimTask(final FactionsConfig factionsConfig, final FactionLogic factionLogic, final AttackLogic attackLogic, final Player player, final Vector3i attackedChunk)
     {
@@ -43,14 +47,12 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
     {
         if (this.player.health().get() <= 0)
         {
-            this.player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ATTACK_ON_CLAIM_HAS_BEEN_CANCELLED));
-            task.cancel();
+            cancelTask(player, task, Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ATTACK_ON_CLAIM_HAS_BEEN_CANCELLED));
         }
 
         if (!this.attackedChunk.equals(this.player.getLocation().getChunkPosition()))
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MOVED_FROM_THE_CHUNK));
-            task.cancel();
+            cancelTask(player, task, Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MOVED_FROM_THE_CHUNK));
         }
 
         if(this.seconds >= this.factionsConfig.getAttackTime())
@@ -58,22 +60,65 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
             final Optional<Faction> optionalChunkFaction = factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), attackedChunk);
             if (!optionalChunkFaction.isPresent())
             {
-                task.cancel();
+                cancelTask(player, task, Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Chunk is already unclaimed!"));
                 return;
             }
 
             final Faction chunkFaction = optionalChunkFaction.get();
             this.attackLogic.informAboutDestroying(chunkFaction, player.getLocation());
-            this.player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CLAIM_DESTROYED));
 
             final Claim claim = new Claim(player.getWorld().getUniqueId(), attackedChunk);
             factionLogic.destroyClaim(chunkFaction, claim);
-            task.cancel();
+            cancelTask(player, task, Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CLAIM_DESTROYED));
+        }
+        else
+        {
+            showRemainingAttackSeconds(player, this.factionsConfig.getAttackTime(), seconds);
+            this.seconds++;
+        }
+    }
+
+    private void showRemainingAttackSeconds(Player player, int requiredSeconds, int seconds)
+    {
+        if (this.factionsConfig.shouldShowAttackInBossBar())
+        {
+            if(this.attackTimeBossBar == null)
+            {
+                this.attackTimeBossBar = ServerBossBar.builder()
+                        .name(Text.of("Chunk attack"))
+                        .color(BossBarColors.RED)
+                        .overlay(BossBarOverlays.NOTCHED_20)
+                        .percent(calculatePercentage(requiredSeconds, seconds))
+                        .playEndBossMusic(false)
+                        .visible(true)
+                        .build();
+                this.attackTimeBossBar.addPlayer(player);
+            }
+            else
+            {
+                this.attackTimeBossBar.setPercent(calculatePercentage(requiredSeconds, seconds));
+            }
         }
         else
         {
             this.player.sendMessage(ChatTypes.ACTION_BAR, MessageLoader.parseMessage(Messages.CLAIM_WILL_BE_DESTROYED_IN_SECONDS, TextColors.AQUA, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, seconds))));
-            this.seconds++;
         }
+    }
+
+    private float calculatePercentage(int maxValue, int value)
+    {
+        return (float)value / maxValue;
+    }
+
+    private void cancelTask(Player player, Task task, Text reasonMessage)
+    {
+        if (this.factionsConfig.shouldShowAttackInBossBar())
+        {
+            this.attackTimeBossBar.removePlayer(player);
+            this.attackTimeBossBar.setVisible(false);
+        }
+
+        this.player.sendMessage(reasonMessage);
+        task.cancel();
     }
 }
