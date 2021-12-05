@@ -89,7 +89,7 @@ public class DisbandCommand extends AbstractCommand
 
     private void clearAutoClaimAndChatForFactionMembers(Faction faction)
     {
-        for (final UUID memberUUID : faction.getMembers())
+        for (final UUID memberUUID : faction.getPlayers())
         {
             EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(memberUUID);
             EagleFactionsPlugin.CHAT_LIST.remove(memberUUID);
