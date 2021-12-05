@@ -53,6 +53,12 @@ public class PermsManagerImpl implements PermsManager
         return checkPermission(playerUUID, playerFaction, FactionPermType.INVITE);
     }
 
+    @Override
+    public boolean canUseChest(final UUID playerUUID, final Faction playerFaction)
+    {
+        return checkPermission(playerUUID, playerFaction, FactionPermType.CHEST);
+    }
+
     private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final FactionPermType flagTypes)
     {
         final FactionMemberType memberType = playerFaction.getPlayerMemberType(playerUUID);

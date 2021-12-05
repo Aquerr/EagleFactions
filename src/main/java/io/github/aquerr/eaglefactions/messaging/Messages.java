@@ -55,6 +55,7 @@ public final class Messages
     //Chest
     public static String FACTION_CHESTS_ARE_DISABLED = "Factions' chests are disabled on this server!";
     public static String YOU_OPENED_FACTION_CHEST = "You opened %FACTION_NAME% faction chest.";
+    public static String PLAYERS_WITH_YOUR_RANK_CANT_OPEN_FACTION_CHEST = "Players with your rank can't open faction's chest.";
 
     //Claiming
     public static String LAND = "Land";

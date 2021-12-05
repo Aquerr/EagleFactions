@@ -30,6 +30,7 @@ public class SendCommandListener extends AbstractListener
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_USE_COMMAND_WHILE_BEING_IN_A_FIGHT));
             player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, MessageLoader.parseMessage(Messages.TIME_LEFT_NUMBER_SECONDS, TextColors.RED, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.YELLOW, super.getPlugin().getPVPLogger().getPlayerBlockTime(player))))));
             event.setCancelled(true);
+            return;
         }
     }
 }

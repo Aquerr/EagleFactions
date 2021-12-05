@@ -1,4 +1,4 @@
-ALTER TABLE Claims ADD IsAccessibleByFaction INTEGER NOT NULL DEFAULT TRUE;
+ALTER TABLE Claims ADD IsAccessibleByFaction INTEGER NOT NULL DEFAULT 1;
 
 CREATE TABLE ClaimOwners (
    WorldUUID     TEXT   NOT NULL,

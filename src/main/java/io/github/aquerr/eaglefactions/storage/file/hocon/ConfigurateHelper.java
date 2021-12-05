@@ -211,16 +211,18 @@ public class ConfigurateHelper
         boolean officerPLACE = factionNode.getNode("OFFICER", "PLACE").getBoolean(true);
         boolean officerDESTROY = factionNode.getNode("OFFICER", "DESTROY").getBoolean(true);
         boolean officerCLAIM = factionNode.getNode("OFFICER", "CLAIM").getBoolean(true);
-        boolean officerATTACK = factionNode.getNode("LEADER", "ATTACK").getBoolean(true);
+        boolean officerATTACK = factionNode.getNode("OFFICER", "ATTACK").getBoolean(true);
         boolean officerINVITE = factionNode.getNode("OFFICER", "INVITE").getBoolean(true);
+        boolean officerCHEST = factionNode.getNode("OFFICER", "CHEST").getBoolean(true);
 
         //Get member perms
         boolean memberUSE = factionNode.getNode("MEMBER", "USE").getBoolean(true);
         boolean memberPLACE = factionNode.getNode("MEMBER", "PLACE").getBoolean(true);
         boolean memberDESTROY = factionNode.getNode("MEMBER", "DESTROY").getBoolean(true);
         boolean memberCLAIM = factionNode.getNode("MEMBER", "CLAIM").getBoolean(false);
-        boolean memberATTACK = factionNode.getNode("LEADER", "ATTACK").getBoolean(false);
+        boolean memberATTACK = factionNode.getNode("MEMBER", "ATTACK").getBoolean(false);
         boolean memberINVITE = factionNode.getNode("MEMBER", "INVITE").getBoolean(true);
+        boolean memberCHEST = factionNode.getNode("MEMBER", "CHEST").getBoolean(true);
 
         //Get recruit perms
         boolean recruitUSE = factionNode.getNode("RECRUIT", "USE").getBoolean(true);
@@ -229,6 +231,7 @@ public class ConfigurateHelper
         boolean recruitCLAIM = factionNode.getNode("RECRUIT", "CLAIM").getBoolean(false);
         boolean recruitATTACK = factionNode.getNode("RECRUIT", "ATTACK").getBoolean(false);
         boolean recruitINVITE = factionNode.getNode("RECRUIT", "INVITE").getBoolean(false);
+        boolean recruitCHEST = factionNode.getNode("RECRUIT", "CHEST").getBoolean(false);
 
         //Get ally perms
         boolean allyUSE = factionNode.getNode("ALLY", "USE").getBoolean(true);
@@ -241,6 +244,7 @@ public class ConfigurateHelper
         officerMap.put(FactionPermType.CLAIM, officerCLAIM);
         officerMap.put(FactionPermType.ATTACK, officerATTACK);
         officerMap.put(FactionPermType.INVITE, officerINVITE);
+        officerMap.put(FactionPermType.CHEST, officerCHEST);
 
         membersMap.put(FactionPermType.USE, memberUSE);
         membersMap.put(FactionPermType.PLACE, memberPLACE);
@@ -248,6 +252,7 @@ public class ConfigurateHelper
         membersMap.put(FactionPermType.CLAIM, memberCLAIM);
         membersMap.put(FactionPermType.ATTACK, memberATTACK);
         membersMap.put(FactionPermType.INVITE, memberINVITE);
+        membersMap.put(FactionPermType.CHEST, memberCHEST);
 
         recruitMap.put(FactionPermType.USE, recruitUSE);
         recruitMap.put(FactionPermType.PLACE, recruitPLACE);
@@ -255,6 +260,7 @@ public class ConfigurateHelper
         recruitMap.put(FactionPermType.CLAIM, recruitCLAIM);
         recruitMap.put(FactionPermType.ATTACK, recruitATTACK);
         recruitMap.put(FactionPermType.INVITE, recruitINVITE);
+        recruitMap.put(FactionPermType.CHEST, recruitCHEST);
 
         allyMap.put(FactionPermType.USE, allyUSE);
         allyMap.put(FactionPermType.PLACE, allyPLACE);

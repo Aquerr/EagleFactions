@@ -34,45 +34,55 @@ public class ChestCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.getOne("faction");
-
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
         if (!this.factionsConfig.canUseFactionChest())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_CHESTS_ARE_DISABLED));
 
-        final Player player = (Player) source;
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
+        Player player = requirePlayerSource(source);
+        final Optional<Faction> optionalFaction = context.getOne("faction");
         if(optionalFaction.isPresent())
         {
-            if(optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(optionalFaction.get().getName()))
-            {
-                final boolean isCancelled = EventRunner.runFactionChestEventPre(player, optionalPlayerFaction.get());
-                if (isCancelled)
-                    return CommandResult.success();
-                openFactionChest(player, optionalPlayerFaction.get());
-                EventRunner.runFactionChestEventPost(player, optionalPlayerFaction.get());
-                return CommandResult.success();
-            }
-
-            if(!super.getPlugin().getPlayerManager().hasAdminMode(player))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
-
-            final Faction faction = optionalFaction.get();
-            final boolean isCancelled = EventRunner.runFactionChestEventPre(player, faction);
-            if (isCancelled)
-                return CommandResult.success();
-            openFactionChest(player, faction);
-            EventRunner.runFactionChestEventPost(player, faction);
-            return CommandResult.success();
+            return openOther(player, optionalFaction.get());
         }
 
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+        final Faction playerFaction = requirePlayerFaction(player);
+        return openSelf(player, playerFaction);
+    }
 
-        final Faction faction = optionalPlayerFaction.get();
+    private CommandResult openSelf(Player player, Faction faction) throws CommandException
+    {
+        if (isAdmin(player))
+        {
+            return open(player, faction);
+        }
+
+        if (!super.getPlugin().getPermsManager().canUseChest(player.getUniqueId(), faction))
+        {
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_OPEN_FACTION_CHEST));
+        }
+
+        return open(player, faction);
+    }
+
+    private CommandResult openOther(Player player, Faction faction) throws CommandException
+    {
+        if (isAdmin(player))
+        {
+            return open(player, faction);
+        }
+
+        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName()))
+        {
+            return openSelf(player, faction);
+        }
+        else
+        {
+            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
+        }
+    }
+
+    private CommandResult open(Player player, Faction faction)
+    {
         final boolean isCancelled = EventRunner.runFactionChestEventPre(player, faction);
         if (isCancelled)
             return CommandResult.success();
@@ -88,5 +98,10 @@ public class ChestCommand extends AbstractCommand
         {
             player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, MessageLoader.parseMessage(Messages.YOU_OPENED_FACTION_CHEST, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
         }
+    }
+
+    private boolean isAdmin(Player player)
+    {
+        return super.getPlugin().getPlayerManager().hasAdminMode(player);
     }
 }
