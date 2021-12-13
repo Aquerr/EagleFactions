@@ -50,6 +50,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	private WhiteList factionWhiteLists = null;
 	private WhiteList wildernessWhiteLists = null;
 
+	private List<String> blockedCommandsInOtherFactionsTerritory = new ArrayList<>();
+
 	public ProtectionConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
@@ -123,6 +125,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		final Set<String> wildernessPlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "wilderness", "place-destroy-whitelist");
 		final Set<String> wildernessInteractWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "wilderness", "interact-whitelist");
 		this.wildernessWhiteLists = new WhiteListsImpl(wildernessItemsWhiteList, wildernessInteractWhiteList, wildernessPlaceDestroyWhiteList);
+
+		this.blockedCommandsInOtherFactionsTerritory = this.configuration.getListOfStrings(new ArrayList<>(), "blocked-commands-in-other-faction-territory");
 	}
 
 	@Override
@@ -275,6 +279,12 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		{
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<String> getBlockedCommandsInOtherFactionsTerritory()
+	{
+		return this.blockedCommandsInOtherFactionsTerritory;
 	}
 
 	public static final class WhiteListsImpl implements WhiteList
