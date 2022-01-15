@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
@@ -12,7 +13,9 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TypeTokens;
 
 import java.io.File;
@@ -57,6 +60,7 @@ public class ConfigurateHelper
         }
         catch(final Exception exception)
         {
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Error while putting faction '" + faction.getName() + "' in node."));
             exception.printStackTrace();
             return false;
         }
@@ -76,6 +80,7 @@ public class ConfigurateHelper
         }
         catch (Exception exception)
         {
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Error while putting player'" + factionPlayer.getName() + "' in node."));
             exception.printStackTrace();
             return false;
         }
@@ -97,6 +102,7 @@ public class ConfigurateHelper
                 }
                 catch (final Exception e)
                 {
+                    Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Error while getting faction'" + object + "' from node."));
                     e.printStackTrace();
                 }
             }
@@ -193,6 +199,7 @@ public class ConfigurateHelper
         }
         catch(IOException e)
         {
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Error while opening the file " + file.getName()));
             e.printStackTrace();
             return null;
         }
