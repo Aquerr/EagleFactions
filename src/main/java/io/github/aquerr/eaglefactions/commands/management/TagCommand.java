@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.validator.AlphaNumericFactionNameTagValidator;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
@@ -17,11 +18,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Collections;
-import java.util.Optional;
 
 public class TagCommand extends AbstractCommand
 {
     private final FactionsConfig factionsConfig;
+    private final AlphaNumericFactionNameTagValidator alphaNumericFactionNameTagValidator = AlphaNumericFactionNameTagValidator.getInstance();
 
     public TagCommand(final EagleFactions plugin)
     {
@@ -34,16 +35,13 @@ public class TagCommand extends AbstractCommand
     {
         final String newFactionTag = context.requireOne("tag");
 
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+        alphaNumericFactionNameTagValidator.validateTag(newFactionTag);
 
-        final Player player = (Player) source;
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+        final Player player = requirePlayerSource(source);
+        final Faction faction = requirePlayerFaction(player);
 
         //Check if player is leader
-        if (!optionalPlayerFaction.get().getLeader().equals(player.getUniqueId()))
+        if (!faction.getLeader().equals(player.getUniqueId()))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS));
 
         //Check if faction with such tag already exists
@@ -57,7 +55,7 @@ public class TagCommand extends AbstractCommand
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinTagLength() + " " + Messages.CHARS + ")"));
 
         //Change tag function
-        super.getPlugin().getFactionLogic().changeTag(optionalPlayerFaction.get(), newFactionTag);
+        super.getPlugin().getFactionLogic().changeTag(faction, newFactionTag);
         player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_TAG_HAS_BEEN_SUCCESSFULLY_CHANGED_TO, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_TAG, Text.of(TextColors.GOLD, newFactionTag)))));
         return CommandResult.success();
     }

@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.validator.AlphaNumericFactionNameTagValidator;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -39,6 +40,7 @@ public class CreateCommand extends AbstractCommand
     private final ChatConfig chatConfig;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
+    private final AlphaNumericFactionNameTagValidator alphaNumericFactionNameTagValidator = AlphaNumericFactionNameTagValidator.getInstance();
 
     public CreateCommand(EagleFactions plugin)
     {
@@ -59,8 +61,7 @@ public class CreateCommand extends AbstractCommand
         final String factionName = context.requireOne("name");
         final String factionTag = context.requireOne("tag");
 
-        if(!ALPHANUMERIC_PATTERN.matcher(factionName).matches() || !ALPHANUMERIC_PATTERN.matcher(factionTag).matches())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_NAME_AND_TAG_MUST_BE_ALPHANUMERIC));
+        alphaNumericFactionNameTagValidator.validate(factionName, factionTag);
 
         if (getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));

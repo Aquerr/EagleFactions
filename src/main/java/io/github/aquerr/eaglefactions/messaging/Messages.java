@@ -98,6 +98,8 @@ public final class Messages
     public static String FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS = "Faction with the same name already exists!";
     public static String YOU_ARE_ALREADY_IN_A_FACTION = "You are already in a faction.";
     public static String YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION = "You don't have enough resources to create a faction!";
+    public static String FACTION_TAG_MUST_BE_ALPHANUMERIC = "Faction tag must be alphanumeric!";
+    public static String FACTION_NAME_MUST_BE_ALPHANUMERIC = "Faction name must be alphanumeric!";
 
     //Disbanding (and Regenerating)
     public static String FACTION_HAS_BEEN_DISBANDED = "Faction has been disbanded!";
