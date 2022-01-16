@@ -71,7 +71,6 @@ public class ConfigurateHelper
         try
         {
             configNode.getNode("faction").setValue(factionPlayer.getFactionName().orElse(""));
-            configNode.getNode("faction-member-type").setValue(factionPlayer.getFactionRole().toString());
             configNode.getNode("name").setValue(factionPlayer.getName());
             configNode.getNode("power").setValue(factionPlayer.getPower());
             configNode.getNode("maxpower").setValue(factionPlayer.getMaxPower());
@@ -189,8 +188,6 @@ public class ConfigurateHelper
                 return null;
             }
             String factionName = playerNode.getNode("faction").getString("");
-            //TODO: What about factionMemeberType???
-            String factionMemberTypeString = playerNode.getNode("faction-member-type").getString("");
             float power = playerNode.getNode("power").getFloat(0.0f);
             float maxpower = playerNode.getNode("maxpower").getFloat(0.0f);
             boolean diedInWarZone = playerNode.getNode("death-in-warzone").getBoolean(false);

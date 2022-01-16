@@ -1,10 +1,14 @@
 package io.github.aquerr.eaglefactions.storage.file.hocon;
 
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.storage.PlayerStorage;
 import io.github.aquerr.eaglefactions.util.FileUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,25 +53,19 @@ public class HOCONPlayerStorage implements PlayerStorage
     @Override
     public boolean savePlayer(FactionPlayer player)
     {
-
         try
         {
             FileUtils.createDirectoryIfNotExists(this.playersDirectoryPath);
-
             Path playerFile = playersDirectoryPath.resolve(player.getUniqueId().toString() + ".conf");
             HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile).build();
-
             ConfigurationNode configurationNode = configurationLoader.load();
-            configurationNode.getNode("name").setValue(player.getName());
-            configurationNode.getNode("faction").setValue(player.getFactionName().orElse(""));
-            configurationNode.getNode("power").setValue(player.getPower());
-            configurationNode.getNode("maxpower").setValue(player.getMaxPower());
-            configurationNode.getNode("death-in-warzone").setValue(false);
+            ConfigurateHelper.putPlayerInNode(configurationNode, player);
             configurationLoader.save(configurationNode);
             return true;
         }
         catch(IOException e)
         {
+            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Error while putting player'" + player.getName() + "' in node."));
             e.printStackTrace();
         }
 
