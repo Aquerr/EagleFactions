@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.listeners;
+package io.github.aquerr.eaglefactions.integrations.ultimatechat.listener;
 
 import br.net.fabiozumbi12.UltimateChat.Sponge.API.SendChannelMessageEvent;
 import br.net.fabiozumbi12.UltimateChat.Sponge.UCChannel;
@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.integrations.ultimatechat.UltimateChatService;
+import io.github.aquerr.eaglefactions.listeners.AbstractListener;
 import io.github.aquerr.eaglefactions.messaging.chat.ChatMessageHelper;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Tamer;
@@ -55,17 +56,20 @@ public class  UltimateChatMessageListener extends AbstractListener
             event.addTag("{" + UltimateChatService.FACTION_NAME_TAG + "}", optionalPlayerFaction.get().getName());
             event.addTag("{" + UltimateChatService.FACTION_RANK_TAG + "}", TextSerializers.FORMATTING_CODE.serialize(Optional.ofNullable(ChatMessageHelper.getRankPrefix(chatType, optionalPlayerFaction.get(), player)).orElse(Text.EMPTY)));
             event.addTag("{" + UltimateChatService.FACTION_TAG_TAG + "}", TextSerializers.FORMATTING_CODE.serialize(optionalPlayerFaction.get().getTag()));
+            event.addTag("{" + UltimateChatService.FACTION_TAG_WITH_PREFIX_SUFFIX + "}", TextSerializers.FORMATTING_CODE.serialize(this.chatConfig.getFactionStartPrefix())
+                    + TextSerializers.FORMATTING_CODE.serialize(optionalPlayerFaction.get().getTag())
+                    + TextSerializers.FORMATTING_CODE.serialize(this.chatConfig.getFactionEndPrefix()));
 
             //TODO: Send message in correct UltimateChat channel (general, alliance, faction)
 
             if (chatType == ChatEnum.ALLIANCE)
             {
-                UCChannel chatChannel = UltimateChatService.createAllianceChannel(optionalPlayerFaction.get());
+                UCChannel chatChannel = UltimateChatService.getAllianceChannel(optionalPlayerFaction.get());
                 event.setChannel(chatChannel.getName());
             }
             else if (chatType == ChatEnum.FACTION)
             {
-                UCChannel chatChannel = UltimateChatService.createFactionChannel(optionalPlayerFaction.get());
+                UCChannel chatChannel = UltimateChatService.getFactionChannel(optionalPlayerFaction.get());
                 event.setChannel(chatChannel.getName());
             }
         }

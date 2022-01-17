@@ -104,7 +104,7 @@ import io.github.aquerr.eaglefactions.listeners.PlayerInteractListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerJoinListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerMoveListener;
 import io.github.aquerr.eaglefactions.listeners.SendCommandListener;
-import io.github.aquerr.eaglefactions.listeners.UltimateChatMessageListener;
+import io.github.aquerr.eaglefactions.integrations.ultimatechat.listener.UltimateChatMessageListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionJoinListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionKickListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionLeaveListener;

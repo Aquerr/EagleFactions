@@ -48,11 +48,13 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
         if (this.player.health().get() <= 0)
         {
             cancelTask(player, task, Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ATTACK_ON_CLAIM_HAS_BEEN_CANCELLED));
+            return;
         }
 
         if (!this.attackedChunk.equals(this.player.getLocation().getChunkPosition()))
         {
             cancelTask(player, task, Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MOVED_FROM_THE_CHUNK));
+            return;
         }
 
         if(this.seconds >= this.factionsConfig.getAttackTime())
@@ -116,6 +118,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<Task>
         {
             this.attackTimeBossBar.removePlayer(player);
             this.attackTimeBossBar.setVisible(false);
+            this.attackTimeBossBar = null;
         }
 
         this.player.sendMessage(reasonMessage);
