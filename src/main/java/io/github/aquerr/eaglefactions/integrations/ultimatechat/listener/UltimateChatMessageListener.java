@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.events.FactionDisbandEvent;
 import io.github.aquerr.eaglefactions.integrations.ultimatechat.UltimateChatService;
 import io.github.aquerr.eaglefactions.listeners.AbstractListener;
 import io.github.aquerr.eaglefactions.messaging.chat.ChatMessageHelper;
@@ -104,6 +105,17 @@ public class  UltimateChatMessageListener extends AbstractListener
                 event.addTag(UltimateChatService.FACTION_TAG_TAG, TextSerializers.FORMATTING_CODE.serialize(this.chatConfig.getNonFactionPlayerPrefix()));
             }
         }
+    }
+    
+    @Listener
+    @IsCancelled(value = Tristate.FALSE)
+    public void onFactionDisband(FactionDisbandEvent.Post factionDisbandEvent)
+    {
+        // Delete alliance and faction channels for disbanded faction.
+        Optional.ofNullable(UChat.get().getAPI().getChannel(factionDisbandEvent.getFaction().getName() + "-alliance"))
+                .ifPresent(UChat.get().getConfig()::delChannel);
+        Optional.ofNullable(UChat.get().getAPI().getChannel(factionDisbandEvent.getFaction().getName() + "-faction"))
+                .ifPresent(UChat.get().getConfig()::delChannel);
     }
 
     private boolean filterPlayerWithFactionChat(Player player)
