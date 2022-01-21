@@ -27,7 +27,7 @@ allprojects {
 
 dependencies {
     implementation project(":EagleFactionsAPI")
-    compileOnly 'org.spongepowered:spongeapi:7.3.0'
+    compileOnly 'org.spongepowered:spongeapi:7.4.0'
     compileOnly 'com.github.rojo8399:PlaceholderAPI:4.5.1'
     compileOnly 'org.mariadb.jdbc:mariadb-java-client:2.6.0'
     compileOnly 'com.zaxxer:HikariCP:2.6.3'
@@ -35,7 +35,7 @@ dependencies {
     compileOnly 'org.xerial:sqlite-jdbc:3.20.0'
     compileOnly 'com.github.webbukkit:DynmapCoreAPI:v2.5'
     compileOnly 'br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1'
-    annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
+    annotationProcessor 'org.spongepowered:spongeapi:7.4.0'
 
     testImplementation project(':EagleFactionsAPI')
     testImplementation 'org.spongepowered:spongeapi:7.3.0'
