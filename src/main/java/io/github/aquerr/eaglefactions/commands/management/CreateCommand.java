@@ -17,26 +17,28 @@ import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Pattern;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 /**
  * Created by Aquerr on 2017-07-12.
  */
 public class CreateCommand extends AbstractCommand
 {
-    private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9]*$");
-
     private final ChatConfig chatConfig;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
@@ -51,64 +53,64 @@ public class CreateCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        if (isPlayer(source))
+        if (isServerPlayer(context.cause().audience()))
         {
-            validateNotInFaction((Player) source);
+            validateNotInFaction((Player) context.cause().audience());
         }
 
-        final String factionName = context.requireOne("name");
-        final String factionTag = context.requireOne("tag");
+        final String factionName = context.requireOne(Parameter.string().key("name").build());
+        final String factionTag = context.requireOne(Parameter.string().key("tag").build());
 
         alphaNumericFactionNameTagValidator.validate(factionName, factionTag);
 
         if (getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN, RED)));
 
         if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_USE_THIS_FACTION_NAME));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_USE_THIS_FACTION_NAME, RED)));
 
         //Check tag length
         if (factionTag.length() > this.factionsConfig.getMaxTagLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + Messages.MAX + " " + this.factionsConfig.getMaxTagLength() + " " + Messages.CHARS + ")"));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PROVIDED_FACTION_TAG_IS_TOO_LONG + " (" + Messages.MAX + " " + this.factionsConfig.getMaxTagLength() + " " + Messages.CHARS + ")", RED)));
         else if (factionTag.length() < this.factionsConfig.getMinTagLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinTagLength() + " " + Messages.CHARS + ")"));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PROVIDED_FACTION_TAG_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinTagLength() + " " + Messages.CHARS + ")", RED)));
 
         if (getPlugin().getFactionLogic().getFactionsNames().contains(factionName.toLowerCase()))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.FACTION_WITH_THE_SAME_NAME_ALREADY_EXISTS, RED)));
 
         //Check name length
         if (factionName.length() > this.factionsConfig.getMaxNameLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + Messages.MAX + " " + this.factionsConfig.getMaxNameLength() + " " + Messages.CHARS + ")"));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PROVIDED_FACTION_NAME_IS_TOO_LONG + " (" + Messages.MAX + " " + this.factionsConfig.getMaxNameLength() + " " + Messages.CHARS + ")", RED)));
         else if (factionName.length() < this.factionsConfig.getMinNameLength())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + Messages.CHARS + ")"));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PROVIDED_FACTION_NAME_IS_TOO_SHORT + " (" + Messages.MIN + " " + this.factionsConfig.getMinNameLength() + " " + Messages.CHARS + ")", RED)));
 
-        if(source instanceof Player)
+        if(isServerPlayer(context.cause().audience()))
         {
             if (this.factionsConfig.getFactionCreationByItems())
             {
-                return createAsPlayerByItems(factionName, factionTag, (Player) source);
+                return createAsPlayerByItems(factionName, factionTag, (ServerPlayer) context.cause().audience());
             }
-            createAsPlayer(factionName, factionTag, (Player)source);
+            createAsPlayer(factionName, factionTag, (ServerPlayer)context.cause().audience());
         }
         else
         {
-            createAsConsole(factionName, factionTag, source);
+            createAsConsole(factionName, factionTag, context.cause().audience());
         }
         return CommandResult.success();
     }
 
     private void validateNotInFaction(Player player) throws CommandException
     {
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
         if (optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_ARE_ALREADY_IN_A_FACTION, RED)));
     }
 
-    private CommandResult createAsPlayerByItems(String factionName, String factionTag, Player player) throws CommandException
+    private CommandResult createAsPlayerByItems(String factionName, String factionTag, ServerPlayer player) throws CommandException
     {
-        if (!this.playerManager.hasAdminMode(player))
+        if (!this.playerManager.hasAdminMode(player.user()))
         {
             try
             {
@@ -116,8 +118,7 @@ public class CreateCommand extends AbstractCommand
             }
             catch (RequiredItemsNotFoundException e)
             {
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
-                        Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage()), e);
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage(), RED)), e);
             }
         }
 
@@ -127,28 +128,28 @@ public class CreateCommand extends AbstractCommand
 
     private void createAsPlayer(final String factionName, final String factionTag, final Player player)
     {
-        final Faction faction = FactionImpl.builder(factionName, Text.of(this.chatConfig.getDefaultTagColor(), factionTag), player.getUniqueId()).build();
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), player.uniqueId()).build();
         final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
         if (isCancelled)
             return;
 
         //Update player cache...
-        final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.getUniqueId());
+        final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.uniqueId());
         final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
 
         super.getPlugin().getFactionLogic().addFaction(faction);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, text(faction.getName(), GOLD)))));
         EventRunner.runFactionCreateEventPost(player, faction);
     }
 
     /**
      * CommandSource can actually be one of the following: console, command block, RCON client or proxy.
      */
-    private void createAsConsole(final String factionName, final String factionTag, final CommandSource commandSource)
+    private void createAsConsole(final String factionName, final String factionTag, final Audience audience)
     {
-        final Faction faction = FactionImpl.builder(factionName, Text.of(this.chatConfig.getDefaultTagColor(), factionTag), new UUID(0, 0)).build();
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), new UUID(0, 0)).build();
         super.getPlugin().getFactionLogic().addFaction(faction);
-        commandSource.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        audience.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_CREATED, GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, text(faction.getName(), GOLD)))));
     }
 }

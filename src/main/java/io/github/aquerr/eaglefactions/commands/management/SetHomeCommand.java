@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -8,16 +7,17 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Optional;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class SetHomeCommand extends AbstractCommand
 {
@@ -30,53 +30,45 @@ public class SetHomeCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+        final ServerPlayer player = requirePlayerSource(context);
+        final Faction playerFaction = requirePlayerFaction(player);
+        final ServerWorld world = player.world();
+        final FactionHome newHome = new FactionHome(world.uniqueId(), player.serverLocation().blockPosition());
 
-        final Player player = (Player)source;
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
-        final World world = player.getWorld();
-        final FactionHome newHome = new FactionHome(world.getUniqueId(), new Vector3i(player.getLocation().getBlockPosition()));
-
-        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
             super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HOME_HAS_BEEN_SET));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.FACTION_HOME_HAS_BEEN_SET, GREEN)));
             return CommandResult.success();
         }
 
-        if(playerFaction.getLeader().equals(player.getUniqueId()) || playerFaction.getOfficers().contains(player.getUniqueId()))
+        if(playerFaction.getLeader().equals(player.uniqueId()) || playerFaction.getOfficers().contains(player.uniqueId()))
         {
-            final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), player.getLocation().getChunkPosition());
+            final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), player.serverLocation().chunkPosition());
             if (!chunkFaction.isPresent() && this.factionsConfig.canPlaceHomeOutsideFactionClaim())
             {
                 super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HOME_HAS_BEEN_SET));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.FACTION_HOME_HAS_BEEN_SET, GREEN)));
             }
             else if (!chunkFaction.isPresent() && !this.factionsConfig.canPlaceHomeOutsideFactionClaim())
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_HOME_MUST_BE_PLACED_INSIDE_FACTION_TERRITORY));
+                player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.FACTION_HOME_MUST_BE_PLACED_INSIDE_FACTION_TERRITORY, RED)));
             }
             else if(chunkFaction.isPresent() && chunkFaction.get().getName().equals(playerFaction.getName()))
             {
                 super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
-                source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HOME_HAS_BEEN_SET));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.FACTION_HOME_HAS_BEEN_SET, GREEN)));
             }
             else
             {
-                source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE));
+                player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.THIS_LAND_BELONGS_TO_SOMEONE_ELSE, RED)));
             }
         }
         else
         {
-            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
         }
 
         return CommandResult.success();

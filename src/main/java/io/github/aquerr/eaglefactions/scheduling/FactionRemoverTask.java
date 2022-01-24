@@ -12,13 +12,15 @@ import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
@@ -30,12 +32,6 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
     {
         this.factionLogic = plugin.getFactionLogic();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
-    }
-
-    @Override
-    public String getName()
-    {
-        return "eaglefactions-factions-remover-task";
     }
 
     @Override
@@ -67,7 +63,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             {
                 if (shouldNotifyWhenRemoved)
                 {
-                    Sponge.getServer().getBroadcastChannel().send(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, TextColors.RED, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+                    Sponge.server().broadcastAudience().sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, RED, ImmutableMap.of(Placeholders.FACTION_NAME, text(faction.getName(), GOLD)))));
                 }
 
                 if (shouldRegenerateWhenRemoved)

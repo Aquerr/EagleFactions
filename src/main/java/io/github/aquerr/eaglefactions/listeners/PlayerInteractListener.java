@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.flowpowered.math.vector.Vector3d;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.HandTypes;
@@ -11,23 +11,24 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
-import java.util.Optional;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_PURPLE;
 
 public class PlayerInteractListener extends AbstractListener
 {
@@ -37,31 +38,34 @@ public class PlayerInteractListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onItemUse(final InteractItemEvent event, @Root final Player player)
+    public void onItemUse(final InteractItemEvent.Secondary event, @Root final ServerPlayer player)
     {
-        if (event.getItemStack() == ItemStackSnapshot.NONE)
+        if (event.itemStack() == ItemStackSnapshot.empty())
             return;
 
-        Location<World> location = event.getInteractionPoint()
-                .map(interactionPoint -> new Location<>(player.getWorld(), interactionPoint))
-                .orElse(player.getLocation());
+        ServerLocation location = player.serverLocation();
+
+        //TODO: Probably to delete
+//        Location<World> location = event.getInteractionPoint()
+//                .map(interactionPoint -> new Location<>(player.getWorld(), interactionPoint))
+//                .orElse(player.getLocation());
 
         //TODO: To test... don't know how mods will behave with it.
-        if (location.getBlockType() == BlockTypes.AIR)
-            return;
+//        if (location.getBlockType() == BlockTypes.AIR)
+//            return;
 
         //Handle hitting entities
-        boolean hasHitEntity = event.getContext().containsKey(EventContextKeys.ENTITY_HIT);
-        if(hasHitEntity)
-        {
-            final Entity hitEntity = event.getContext().get(EventContextKeys.ENTITY_HIT).get();
-            if (hitEntity instanceof Living && !(hitEntity instanceof ArmorStand))
-                return;
+//        boolean hasHitEntity = event.getContext().containsKey(EventContextKeys.ENTITY_HIT);
+//        if(hasHitEntity)
+//        {
+//            final Entity hitEntity = event.getContext().get(EventContextKeys.ENTITY_HIT).get();
+//            if (hitEntity instanceof Living && !(hitEntity instanceof ArmorStand))
+//                return;
+//
+//            location = hitEntity.getLocation();
+//        }
 
-            location = hitEntity.getLocation();
-        }
-
-        final ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, event.getItemStack(), true);
+        final ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player.user(), event.itemStack(), true);
         if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
@@ -70,18 +74,14 @@ public class PlayerInteractListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onEntityInteract(final InteractEntityEvent event, @Root final Player player)
+    public void onEntityInteract(final InteractEntityEvent event, @Root final ServerPlayer player)
     {
-        final Entity targetEntity = event.getTargetEntity();
-        final Optional<Vector3d> optionalInteractionPoint = event.getInteractionPoint();
+        final Entity targetEntity = event.entity();
 
         if((targetEntity instanceof Living) && !(targetEntity instanceof ArmorStand))
             return;
 
-        final Vector3d blockPosition = optionalInteractionPoint.orElseGet(() -> targetEntity.getLocation().getPosition());
-        final Location<World> location = new Location<>(targetEntity.getWorld(), blockPosition);
-        //TODO: canInteractWithBlock should be probably changed to canHitEntity
-        boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true).hasAccess();
+        boolean canInteractWithEntity = super.getPlugin().getProtectionManager().canHitEntity(targetEntity, player, true).hasAccess();
         if(!canInteractWithEntity)
         {
             event.setCancelled(true);
@@ -90,28 +90,39 @@ public class PlayerInteractListener extends AbstractListener
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onBlockInteract(final InteractBlockEvent.Secondary event, @Root final Player player)
+    public void onBlockInteract(final InteractBlockEvent.Secondary event, @Root final ServerPlayer player)
     {
         //If AIR or NONE then return
-        if (event.getTargetBlock() == BlockSnapshot.NONE || event.getTargetBlock().getState().getType() == BlockTypes.AIR)
+        if (event.block() == BlockSnapshot.empty() || event.block().state().type() == BlockTypes.AIR)
             return;
 
-        event.getTargetBlock().getLocation()
+        event.block().location()
+                .ifPresent(location -> checkInteraction(event, location, player, true));
+    }
+
+    @Listener(order = Order.FIRST, beforeModifications = true)
+    public void onBlockInteract(final InteractBlockEvent.Primary event, @Root final ServerPlayer player)
+    {
+        //If AIR or NONE then return
+        if (event.block() == BlockSnapshot.empty() || event.block().state().type() == BlockTypes.AIR)
+            return;
+
+        event.block().location()
                 .ifPresent(location -> checkInteraction(event, location, player, true));
     }
 
     @Listener
-    public void onInventoryOpenEvent(final InteractInventoryEvent.Open event, final @Root Player player)
+    public void onInventoryOpenEvent(final InteractContainerEvent.Open event, final @Root ServerPlayer player)
     {
-        BlockSnapshot blockSnapshot = event.getContext().get(EventContextKeys.BLOCK_HIT).orElse(null);
+        BlockSnapshot blockSnapshot = event.context().get(EventContextKeys.BLOCK_HIT).orElse(null);
         if (blockSnapshot == null)
             return;
 
-        Location<World> location = blockSnapshot.getLocation().orElse(null);
+        ServerLocation location = blockSnapshot.location().orElse(null);
         if (location == null)
             return;
 
-        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, true);
+        ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player.user(), true);
         if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
@@ -123,36 +134,36 @@ public class PlayerInteractListener extends AbstractListener
         }
     }
 
-    private void checkInteraction(InteractBlockEvent.Secondary interactBlockEvent, Location<World> location, Player player, boolean shouldNotify)
+    private void checkInteraction(InteractBlockEvent interactBlockEvent, ServerLocation location, ServerPlayer player, boolean shouldNotify)
     {
-        ItemStackSnapshot usedItem = interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM)
+        ItemStackSnapshot usedItem = interactBlockEvent.context().get(EventContextKeys.USED_ITEM)
                 .filter(this::isItemStackNotAirAndNotEmpty)
                 .orElse(null);
         ProtectionResult protectionResult;
         if (usedItem != null)
         {
-            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player, interactBlockEvent.getContext().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
+            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player.user(), interactBlockEvent.context().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
         }
         else
         {
-            protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player, shouldNotify);
+            protectionResult = super.getPlugin().getProtectionManager().canInteractWithBlock(location, player.user(), shouldNotify);
         }
 
         if (!protectionResult.hasAccess())
         {
-            interactBlockEvent.setCancelled(true);
+            ((Cancellable)interactBlockEvent).setCancelled(true);
         }
     }
 
     private void removeEagleFeather(final Player player)
     {
-        final ItemStack feather = player.getItemInHand(HandTypes.MAIN_HAND).get();
-        feather.setQuantity(feather.getQuantity() - 1);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.DARK_PURPLE, "You used Eagle's Feather!"));
+        final ItemStack feather = player.itemInHand(HandTypes.MAIN_HAND);
+        feather.setQuantity(feather.quantity() - 1);
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text("You used Eagle's Feather!", DARK_PURPLE)));
     }
 
     private boolean isItemStackNotAirAndNotEmpty(ItemStackSnapshot itemStackSnapshot)
     {
-        return ItemTypes.AIR != itemStackSnapshot.getType() && !itemStackSnapshot.isEmpty();
+        return ItemTypes.AIR != itemStackSnapshot.type() && !itemStackSnapshot.isEmpty();
     }
 }

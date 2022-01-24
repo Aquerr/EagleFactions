@@ -6,15 +6,14 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.Optional;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class AutoClaimCommand extends AbstractCommand
 {
@@ -24,30 +23,23 @@ public class AutoClaimCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+        final ServerPlayer player = requirePlayerSource(context);
+        final Faction faction = requirePlayerFaction(player);
 
-        final Player player = (Player) source;
-        final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        if (!faction.getLeader().equals(player.uniqueId()) && !faction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
 
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
-        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
-
-        if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.getUniqueId()))
+        if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.uniqueId()))
         {
-            EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.AUTO_CLAIM_HAS_BEEN_TURNED_OFF));
+            EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.uniqueId());
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.AUTO_CLAIM_HAS_BEEN_TURNED_OFF, GREEN)));
         }
         else
         {
-            EagleFactionsPlugin.AUTO_CLAIM_LIST.add(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.AUTO_CLAIM_HAS_BEEN_TURNED_ON));
+            EagleFactionsPlugin.AUTO_CLAIM_LIST.add(player.uniqueId());
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.AUTO_CLAIM_HAS_BEEN_TURNED_ON, GREEN)));
         }
 
         return CommandResult.success();

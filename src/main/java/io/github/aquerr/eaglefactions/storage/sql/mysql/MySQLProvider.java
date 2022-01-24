@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -52,8 +52,8 @@ public class MySQLProvider extends SQLAbstractProvider
     {
         super(eagleFactions);
 
-        final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
-        this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        final SqlManager sqlManager = Sponge.sqlManager();
+        this.dataSource = sqlManager.dataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
 
         if(!databaseExists())
         {
@@ -62,7 +62,7 @@ public class MySQLProvider extends SQLAbstractProvider
 
         final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
         hikariDataSource.close();
-        this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        this.dataSource = sqlManager.dataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
     }
 
     private boolean databaseExists() throws SQLException

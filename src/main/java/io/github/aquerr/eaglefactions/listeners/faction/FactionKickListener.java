@@ -6,11 +6,12 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.FactionKickEvent;
 import io.github.aquerr.eaglefactions.listeners.AbstractListener;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
@@ -29,16 +30,16 @@ public class FactionKickListener extends AbstractListener
         final Faction faction = event.getFaction();
         final FactionPlayer kickedPlayer = event.getKickedPlayer();
 
-        final List<Player> onlineFactionPlayers = super.getPlugin().getFactionLogic().getOnlinePlayers(faction);
+        final List<ServerPlayer> onlineFactionPlayers = super.getPlugin().getFactionLogic().getOnlinePlayers(faction);
         for(final Player player : onlineFactionPlayers)
         {
             if (player.equals(event.getCreator()))
                 continue;
 
-            if(player.getName().equals(kickedPlayer.getName()))
+            if(player.name().equals(kickedPlayer.getName()))
                 continue;
 
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, "Player " + kickedPlayer.getName() + " has been kicked from the faction."));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text("Player " + kickedPlayer.getName() + " has been kicked from the faction.")));
         }
     }
 }

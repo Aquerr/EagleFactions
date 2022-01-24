@@ -4,8 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +13,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Date;
+
+import static net.kyori.adventure.identity.Identity.nil;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 /**
  * Created by Aquerr on 2018-02-21.
@@ -83,7 +85,7 @@ public class VersionChecker
         }
         catch (IOException e)
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Couldn't lookup if there is a new version of Eagle Factions available. Reason: " + e.getMessage()));
+            Sponge.server().sendMessage(nil(), text("Couldn't lookup if there is a new version of Eagle Factions available. Reason: " + e.getMessage(), RED));
         }
 
         return null;

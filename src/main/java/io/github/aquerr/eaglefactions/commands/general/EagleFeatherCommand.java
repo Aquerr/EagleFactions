@@ -1,17 +1,12 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class EagleFeatherCommand extends AbstractCommand
 {
@@ -21,16 +16,10 @@ public class EagleFeatherCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext args) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        if(!(source instanceof Player))
-        {
-            source.sendMessage (Text.of (PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-            return CommandResult.success();
-        }
-
-        Player player = (Player)source;
-        player.getInventory().offer(EagleFeather.getEagleFeatherItem());
+        ServerPlayer player = requirePlayerSource(context);
+        player.inventory().offer(EagleFeather.getEagleFeatherItem());
 
         return CommandResult.success();
     }

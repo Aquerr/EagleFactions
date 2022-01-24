@@ -5,13 +5,17 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import org.spongepowered.api.command.CommandException;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class SetFactionCommand extends AbstractCommand
 {
@@ -21,17 +25,17 @@ public class SetFactionCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        Player player = context.requireOne(Text.of("player"));
-        Faction faction = context.requireOne(Text.of("faction"));
-        FactionMemberType factionMemberType = context.requireOne(Text.of("rank"));
+        Player player = context.requireOne(CommonParameters.PLAYER);
+        Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
+        FactionMemberType factionMemberType = context.requireOne(Parameter.enumValue(FactionMemberType.class).key("rank").build());
 
         if (factionMemberType == FactionMemberType.ALLY || factionMemberType == FactionMemberType.NONE || factionMemberType == FactionMemberType.TRUCE)
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "The given rank is not valid!"));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text("The given rank is not valid!", RED)));
 
-        super.getPlugin().getFactionLogic().setFaction(player.getUniqueId(), faction.getName(), factionMemberType);
-        source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, "Player's faction has been changed!"));
+        super.getPlugin().getFactionLogic().setFaction(player.uniqueId(), faction.getName(), factionMemberType);
+        context.cause().audience().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Player's faction has been changed!", GREEN)));
         return CommandResult.success();
     }
 }

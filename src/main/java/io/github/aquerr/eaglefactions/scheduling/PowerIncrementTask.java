@@ -4,12 +4,12 @@ import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
-import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class PowerIncrementTask implements EagleFactionsConsumerTask<Task>
+public class PowerIncrementTask implements EagleFactionsConsumerTask<ScheduledTask>
 {
     private final PlayerManager playerManager;
     private final PowerManager powerManager;
@@ -26,7 +26,7 @@ public class PowerIncrementTask implements EagleFactionsConsumerTask<Task>
     }
 
     @Override
-    public void accept(final Task task)
+    public void accept(final ScheduledTask task)
     {
         if (!this.playerManager.isPlayerOnline(playerUUID))
             task.cancel();

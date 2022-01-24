@@ -4,13 +4,13 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 
 public class AdminCommand extends AbstractCommand
 {
@@ -20,21 +20,18 @@ public class AdminCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player)source;
-        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
+        final ServerPlayer player = requirePlayerSource(context);
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
-            super.getPlugin().getPlayerManager().deactivateAdminMode(player);
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, Messages.ADMIN_MODE_HAS_BEEN_TURNED_OFF));
+            super.getPlugin().getPlayerManager().deactivateAdminMode(player.user());
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.ADMIN_MODE_HAS_BEEN_TURNED_OFF, GOLD)));
         }
         else
         {
-            super.getPlugin().getPlayerManager().activateAdminMode(player);
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GOLD, Messages.ADMIN_MODE_HAS_BEEN_TURNED_ON));
+            super.getPlugin().getPlayerManager().activateAdminMode(player.user());
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.ADMIN_MODE_HAS_BEEN_TURNED_ON, GOLD)));
         }
         return CommandResult.success();
     }

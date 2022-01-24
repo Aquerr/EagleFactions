@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.storage;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -22,28 +21,31 @@ import io.github.aquerr.eaglefactions.storage.task.DeleteFactionTask;
 import io.github.aquerr.eaglefactions.storage.task.IStorageTask;
 import io.github.aquerr.eaglefactions.storage.task.SavePlayerTask;
 import io.github.aquerr.eaglefactions.storage.task.UpdateFactionTask;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class StorageManagerImpl implements StorageManager
 {
+    private static final Logger LOGGER = LogManager.getLogger(StorageManagerImpl.class);
+
     private final FactionStorage factionsStorage;
     private final PlayerStorage playerStorage;
     private final BackupStorage backupStorage;
-    private final Path configDir;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor(); //Only one thread.
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
-        this.configDir = configDir;
         Optional<StorageType> storageType = StorageType.findByName(storageConfig.getStorageType().toLowerCase());
         if (!storageType.isPresent())
         {
@@ -86,7 +88,7 @@ public class StorageManagerImpl implements StorageManager
                 break;
         }
         this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Filling cache with data..."));
+        LOGGER.info("Filling cache with data...");
         prepareFactionsCache();
         preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }

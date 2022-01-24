@@ -1,131 +1,131 @@
 package io.github.aquerr.eaglefactions.commands.args;
 
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.exception.ArgumentParseException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class OwnFactionPlayerArgument extends CommandElement
+public class OwnFactionPlayerArgument
 {
-    private final EagleFactions plugin;
-
-    public OwnFactionPlayerArgument(final EagleFactions plugin, final @Nullable Text key)
+    private OwnFactionPlayerArgument()
     {
-        super(key);
-        this.plugin = plugin;
+
     }
 
-    @Nullable
-    @Override
-    protected FactionPlayer parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
+    public static class ValueParser implements org.spongepowered.api.command.parameter.managed.ValueParser<FactionPlayer>
     {
-        if (source instanceof Player)
+        private final FactionLogic factionLogic;
+        private final PlayerManager playerManager;
+
+        public ValueParser(FactionLogic factionLogic, PlayerManager playerManager)
         {
-            final UUID playerUUID = ((Player) source).getUniqueId();
-            final Optional<Faction> optionalFaction = plugin.getFactionLogic().getFactionByPlayerUUID(playerUUID);
-            if (!optionalFaction.isPresent())
-                throw args.createError(Text.of(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+            this.factionLogic = factionLogic;
+            this.playerManager = playerManager;
+        }
 
-            final Faction faction = optionalFaction.get();
-            final List<FactionPlayer> factionPlayers = new LinkedList<>();
-            for (final UUID uuid : faction.getPlayers())
+        @Override
+        public Optional<? extends FactionPlayer> parseValue(Parameter.Key<? super FactionPlayer> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException
+        {
+            ServerPlayer serverPlayer = context.cause().first(ServerPlayer.class).orElse(null);
+            if (serverPlayer != null)
             {
-                this.plugin.getPlayerManager().getFactionPlayer(uuid)
-                        .ifPresent(factionPlayers::add);
-            }
+                UUID playerUUID = serverPlayer.uniqueId();
+                final Faction faction = this.factionLogic.getFactionByPlayerUUID(playerUUID)
+                        .orElseThrow(() -> reader.createException(Component.text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
 
-            if (args.hasNext())
-            {
-                String argument = args.next();
-
-                for(FactionPlayer player : factionPlayers)
+                final List<FactionPlayer> factionPlayers = new LinkedList<>();
+                for (final UUID uuid : faction.getPlayers())
                 {
-                    if(player.getName().equals(argument))
-                        return player;
+                    this.playerManager.getFactionPlayer(uuid)
+                            .ifPresent(factionPlayers::add);
                 }
 
-                throw args.createError(Text.of("Argument is not a valid player!"));
+                if (reader.canRead())
+                {
+                    String argument = reader.parseUnquotedString();
+                    for (FactionPlayer player : factionPlayers)
+                    {
+                        if (player.getName().equals(argument))
+                            return Optional.of(player);
+                    }
+                }
+                throw reader.createException(Component.text("Argument is not a valid player!"));
             }
             else
             {
-                throw args.createError(Text.of("Argument is not a valid player!"));
+                final String argument = reader.parseUnquotedString();
+                final Set<FactionPlayer> players = this.playerManager.getServerPlayers();
+                for (final FactionPlayer factionPlayer : players)
+                {
+                    if (argument.equals(factionPlayer.getName()))
+                        return Optional.of(factionPlayer);
+                }
+                throw reader.createException(Component.text("Argument is not a valid player!"));
             }
-        }
-        else
-        {
-            final String argument = args.nextIfPresent().orElseThrow(() -> args.createError(Text.of("Argument is not a valid player!")));
-            final Set<FactionPlayer> players = this.plugin.getPlayerManager().getServerPlayers();
-            for (final FactionPlayer factionPlayer : players)
-            {
-                if (argument.equals(factionPlayer.getName()))
-                    return factionPlayer;
-            }
-            throw args.createError(Text.of("Argument is not a valid player!"));
         }
     }
 
-    @Override
-    public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
+    public static class Completer implements ValueCompleter
     {
-        if (src instanceof Player)
-        {
-            final UUID playerUUID = ((Player) src).getUniqueId();
-            final Optional<Faction> optionalFaction = plugin.getFactionLogic().getFactionByPlayerUUID(playerUUID);
-            if (!optionalFaction.isPresent())
-                return Collections.EMPTY_LIST;
-            final Faction faction = optionalFaction.get();
-            final List<FactionPlayer> factionPlayers = new LinkedList<>();
-            for (final UUID uuid : faction.getPlayers())
-            {
-                this.plugin.getPlayerManager().getFactionPlayer(uuid)
-                        .ifPresent(factionPlayers::add);
-            }
+        private final FactionLogic factionLogic;
+        private final PlayerManager playerManager;
 
-            if (args.hasNext())
+        public Completer(FactionLogic factionLogic, PlayerManager playerManager)
+        {
+            this.factionLogic = factionLogic;
+            this.playerManager = playerManager;
+        }
+
+        @Override
+        public List<CommandCompletion> complete(CommandContext context, String currentInput)
+        {
+            final ServerPlayer serverPlayer = context.cause().first(ServerPlayer.class).orElse(null);
+            if (serverPlayer != null)
             {
-                String charSequence = args.nextIfPresent().get();
-                final List<String> resultList = new ArrayList<>();
-                for (int i = 0; i < factionPlayers.size(); i++)
+                final UUID playerUUID = serverPlayer.uniqueId();
+                final Optional<Faction> optionalFaction = factionLogic.getFactionByPlayerUUID(playerUUID);
+                if (!optionalFaction.isPresent())
+                    return Collections.emptyList();
+                final Faction faction = optionalFaction.get();
+                final List<FactionPlayer> factionPlayers = new LinkedList<>();
+                for (final UUID uuid : faction.getPlayers())
                 {
-                    final FactionPlayer factionPlayer = factionPlayers.get(i);
+                    this.playerManager.getFactionPlayer(uuid)
+                            .ifPresent(factionPlayers::add);
+                }
+
+                final List<CommandCompletion> resultList = new LinkedList<>();
+                for (final FactionPlayer factionPlayer : factionPlayers)
+                {
                     final String factionPlayerName = factionPlayer.getName();
-                    if (factionPlayerName.toLowerCase().startsWith(charSequence.toLowerCase()))
+                    if (factionPlayerName.toLowerCase().startsWith(currentInput.toLowerCase()))
                     {
-                        resultList.add(factionPlayerName);
+                        resultList.add(CommandCompletion.of(factionPlayerName));
                     }
                 }
                 return resultList;
             }
-            return factionPlayers.stream().map(FactionPlayer::getName).collect(Collectors.toList());
-        }
-        else
-        {
-            final Set<FactionPlayer> factionPlayers = this.plugin.getPlayerManager().getServerPlayers();
-            if (args.hasNext())
-            {
-                String argument = args.nextIfPresent().get();
-                final List<String> resultList = new ArrayList<>();
-                for (final FactionPlayer factionPlayer : factionPlayers)
-                {
-                    if (factionPlayer.getName().toLowerCase().startsWith(argument.toLowerCase()))
-                        resultList.add(factionPlayer.getName());
-                }
-                return resultList;
-            }
             else
             {
-                return factionPlayers.stream().map(FactionPlayer::getName).collect(Collectors.toList());
+                final Set<FactionPlayer> factionPlayers = this.playerManager.getServerPlayers();
+                final List<CommandCompletion> resultList = new LinkedList<>();
+                for (final FactionPlayer factionPlayer : factionPlayers)
+                {
+                    if (factionPlayer.getName().toLowerCase().startsWith(currentInput.toLowerCase()))
+                        resultList.add(CommandCompletion.of(factionPlayer.getName()));
+                }
+                return resultList;
             }
         }
     }

@@ -8,14 +8,15 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionInvite;
 import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class JoinCommand extends AbstractCommand
 {
@@ -30,19 +31,16 @@ public class JoinCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Faction faction = context.requireOne("faction");
+        final Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
 
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player)source;
-        if (super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId()).isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_ARE_ALREADY_IN_A_FACTION));
+        final ServerPlayer player = requirePlayerSource(context);
+        if (super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId()).isPresent())
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_ARE_ALREADY_IN_A_FACTION, RED)));
 
         //If player has admin mode then force join.
-        if(super.getPlugin().getPlayerManager().hasAdminMode(player))
+        if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
             invitationManager.joinAndNotify(player, faction);
             return CommandResult.success();
@@ -50,14 +48,14 @@ public class JoinCommand extends AbstractCommand
 
         //TODO: Should public factions bypass this restriction?
         if(hasReachedPlayerLimit(faction))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_JOIN_THIS_FACTION_BECAUSE_IT_REACHED_ITS_PLAYER_LIMIT, RED)));
 
         if(!faction.isPublic())
         {
             FactionInvite factionInvite = EagleFactionsPlugin.INVITE_LIST.stream()
-                    .filter(invite -> invite.getInvitedPlayerUniqueId().equals(player.getUniqueId()) && invite.getSenderFaction().equals(faction.getName()))
+                    .filter(invite -> invite.getInvitedPlayerUniqueId().equals(player.uniqueId()) && invite.getSenderFaction().equals(faction.getName()))
                     .findFirst()
-                    .orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_HAVENT_BEEN_INVITED_TO_THIS_FACTION)));
+                    .orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_HAVENT_BEEN_INVITED_TO_THIS_FACTION, RED))));
 
             factionInvite.accept();
             return CommandResult.success();

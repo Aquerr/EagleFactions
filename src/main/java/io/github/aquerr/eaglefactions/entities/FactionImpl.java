@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
-import org.spongepowered.api.text.Text;
+import net.kyori.adventure.text.TextComponent;
 
 import java.time.Instant;
 import java.util.*;
@@ -16,7 +16,7 @@ import java.util.*;
 public class FactionImpl implements Faction
 {
     private final String name;
-    private final Text tag;
+    private final TextComponent tag;
     private final String description;
     private final String messageOfTheDay;
     private final Set<UUID> recruits;
@@ -62,7 +62,7 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public Text getTag()
+    public TextComponent getTag()
     {
         return this.tag;
     }
@@ -233,7 +233,7 @@ public class FactionImpl implements Faction
         return factionBuilder;
     }
 
-    public static Faction.Builder builder(final String name, final Text tag, final UUID leader)
+    public static Faction.Builder builder(final String name, final TextComponent tag, final UUID leader)
     {
         return new BuilderImpl(name, tag, leader);
     }
@@ -245,23 +245,25 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FactionImpl faction = (FactionImpl) o;
-        return Objects.equals(name, faction.name);
+        return isPublic == faction.isPublic && name.equals(faction.name) && tag.equals(faction.tag) && description.equals(faction.description) && messageOfTheDay.equals(faction.messageOfTheDay) && recruits.equals(faction.recruits) && members.equals(faction.members) && truces.equals(faction.truces) && alliances.equals(faction.alliances) && enemies.equals(faction.enemies) && leader.equals(faction.leader) && officers.equals(faction.officers) && claims.equals(faction.claims) && Objects.equals(home, faction.home) && lastOnline.equals(faction.lastOnline) && perms.equals(faction.perms) && chest.equals(faction.chest);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(name);
+    public int hashCode()
+    {
+        return Objects.hash(name, tag, description, messageOfTheDay, recruits, members, truces, alliances, enemies, leader, officers, claims, home, lastOnline, isPublic, perms, chest);
     }
 
     //Builder
     public static final class BuilderImpl implements Faction.Builder
     {
         private String name;
-        private Text tag;
+        private TextComponent tag;
         private String description;
         private String messageOfTheDay;
         private UUID leader;
@@ -293,7 +295,7 @@ public class FactionImpl implements Faction
             this.isPublic = false;
         }
 
-        public BuilderImpl(final String name, final Text tag, final UUID leader)
+        public BuilderImpl(final String name, final TextComponent tag, final UUID leader)
         {
             this();
             this.name = name;
@@ -308,7 +310,7 @@ public class FactionImpl implements Faction
             return this;
         }
 
-        public Builder setTag(final Text tag)
+        public Builder setTag(final TextComponent tag)
         {
             this.tag = tag;
             return this;

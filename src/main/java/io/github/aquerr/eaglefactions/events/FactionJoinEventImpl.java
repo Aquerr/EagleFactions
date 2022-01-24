@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.events;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionJoinEvent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 
 public class FactionJoinEventImpl extends FactionAbstractEvent implements FactionJoinEvent
 {

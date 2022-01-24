@@ -7,15 +7,14 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.Optional;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class UnclaimAllCommand extends AbstractCommand
 {
@@ -28,23 +27,15 @@ public class UnclaimAllCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
+        final ServerPlayer player = requirePlayerSource(context);
+        final Faction playerFaction = requirePlayerFaction(player);
+        if (!playerFaction.getLeader().equals(player.uniqueId()) && !playerFaction.getOfficers().contains(player.uniqueId())
+                && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
 
-        final Player player = (Player)source;
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-
-        //Check if player is in the faction.
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
-        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
-
-        final boolean isCancelled = EventRunner.runFactionUnclaimEventPre(player, playerFaction, player.getWorld(), null);
+        final boolean isCancelled = EventRunner.runFactionUnclaimEventPre(player, playerFaction, player.world(), null);
         if (isCancelled)
             return CommandResult.success();
 
@@ -53,10 +44,10 @@ public class UnclaimAllCommand extends AbstractCommand
             super.getPlugin().getFactionLogic().setHome(playerFaction, null);
         }
 
-        final Faction faction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId()).get();
+        final Faction faction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId()).get();
         super.getPlugin().getFactionLogic().removeAllClaims(faction);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.SUCCESSFULLY_REMOVED_ALL_CLAIMS));
-        EventRunner.runFactionUnclaimEventPost(player, playerFaction, player.getWorld(), null);
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.SUCCESSFULLY_REMOVED_ALL_CLAIMS, GREEN)));
+        EventRunner.runFactionUnclaimEventPost(player, playerFaction, player.world(), null);
         return CommandResult.success();
     }
 

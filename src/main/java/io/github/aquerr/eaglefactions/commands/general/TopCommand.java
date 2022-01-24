@@ -4,19 +4,20 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
 public class TopCommand extends AbstractCommand
 {
@@ -26,14 +27,13 @@ public class TopCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
         CompletableFuture.runAsync(() -> {
             final List<Faction> factionsList = new ArrayList<>(getPlugin().getFactionLogic().getFactions().values());
-            final List<Text> helpList = new ArrayList<>();
-            int index = 0;
-            final Text tagPrefix = getPlugin().getConfiguration().getChatConfig().getFactionStartPrefix();
-            final Text tagSuffix = getPlugin().getConfiguration().getChatConfig().getFactionEndPrefix();
+            final List<Component> helpList = new LinkedList<>();
+            final Component tagPrefix = getPlugin().getConfiguration().getChatConfig().getFactionStartPrefix();
+            final Component tagSuffix = getPlugin().getConfiguration().getChatConfig().getFactionEndPrefix();
 
             factionsList.sort((o1, o2) -> {
                 final float firstFactionPower = super.getPlugin().getPowerManager().getFactionPower(o1);
@@ -42,28 +42,26 @@ public class TopCommand extends AbstractCommand
             });
 
             //This should show only top 10 factions on the server.
-
+            int factionCount = 0;
             for(final Faction faction : factionsList)
             {
                 if(faction.isSafeZone() || faction.isWarZone()) continue;
-                if(index == 11) break;
+                if(factionCount == 11) break;
 
-                index++;
-
-                final Text tag = Text.builder().append(tagPrefix).append(faction.getTag()).append(tagSuffix, Text.of(" ")).build();
-
-                final Text factionHelp = Text.builder()
-                        .append(Text.builder()
-                                .append(Text.of(TextColors.AQUA, "- ")).append(tag).append(Text.of(faction.getName(), " (", getPlugin().getPowerManager().getFactionPower(faction), "/", getPlugin().getPowerManager().getFactionMaxPower(faction), ")"))
-                                .build())
-                        .build();
-
+                final Component tag = tagPrefix.append(faction.getTag())
+                        .append(tagSuffix.append(Component.space()));
+                final Component factionHelp = text("- ", AQUA)
+                        .append(tag)
+                        .append(text(faction.getName() + " (" + super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + getPlugin().getPowerManager().getFactionMaxPower(faction) + ")"));
                 helpList.add(factionHelp);
+                factionCount++;
             }
 
-            final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-            final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.FACTIONS_LIST)).padding(Text.of("-")).contents(helpList);
-            paginationBuilder.sendTo(source);
+            final PaginationList.Builder paginationBuilder = PaginationList.builder()
+                    .title(text(Messages.FACTIONS_LIST, GREEN))
+                    .padding(text("-"))
+                    .contents(helpList);
+            paginationBuilder.sendTo(context.cause().audience());
         });
         return CommandResult.success();
     }

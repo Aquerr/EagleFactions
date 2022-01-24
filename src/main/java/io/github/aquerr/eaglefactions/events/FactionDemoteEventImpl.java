@@ -5,7 +5,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.FactionDemoteEvent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 
 public class FactionDemoteEventImpl extends FactionAbstractEvent implements FactionDemoteEvent
 {

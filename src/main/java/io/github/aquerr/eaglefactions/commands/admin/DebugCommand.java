@@ -5,13 +5,13 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
 public class DebugCommand extends AbstractCommand
 {
@@ -21,21 +21,18 @@ public class DebugCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player)source;
-        if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(player.getUniqueId()))
+        final ServerPlayer player = requirePlayerSource(context);
+        if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(player.uniqueId()))
         {
-            EagleFactionsPlugin.DEBUG_MODE_PLAYERS.remove(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.DEBUG_MODE_HAS_BEEN_TURNED_OFF));
+            EagleFactionsPlugin.DEBUG_MODE_PLAYERS.remove(player.uniqueId());
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.DEBUG_MODE_HAS_BEEN_TURNED_OFF, GREEN)));
         }
         else
         {
-            EagleFactionsPlugin.DEBUG_MODE_PLAYERS.add(player.getUniqueId());
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.DEBUG_MODE_HAS_BEEN_TURNED_ON));
+            EagleFactionsPlugin.DEBUG_MODE_PLAYERS.add(player.uniqueId());
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.DEBUG_MODE_HAS_BEEN_TURNED_ON, GREEN)));
         }
         return CommandResult.success();
     }

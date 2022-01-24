@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -51,8 +51,8 @@ public class H2Provider extends SQLAbstractProvider
             throw new RuntimeException(exception);
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName());
-        final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
-        this.dataSource = sqlService.getDataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
+        final SqlManager sqlManager = Sponge.sqlManager();
+        this.dataSource = sqlManager.dataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
 
         //Create database file
         final Connection connection = getConnection();

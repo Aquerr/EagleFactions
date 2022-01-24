@@ -4,13 +4,12 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,9 @@ public class ItemUtil
         {
             final String[] idAndVariant = requiredItem.split(":");
             final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-            final Optional<ItemType> itemType = Sponge.getRegistry().getType(ItemType.class, itemId);
+            //TODO: To fix
+            final Optional<ItemType> itemType = Optional.empty();
+//            final Optional<ItemType> itemType = Sponge.server().reg(ItemType.class, itemId);
 
             if (!itemType.isPresent())
             {
@@ -63,10 +64,10 @@ public class ItemUtil
 
             if (idAndVariant.length == 3)
             {
-                if (itemType.get().getBlock().isPresent())
+                if (itemType.get().block().isPresent())
                 {
                     final int variant = Integer.parseInt(idAndVariant[2]);
-                    final BlockState blockState = (BlockState) itemType.get().getBlock().get().getAllBlockStates().toArray()[variant];
+                    final BlockState blockState = (BlockState) itemType.get().block().get().validStates().toArray()[variant];
                     itemStack = ItemStack.builder().fromBlockState(blockState).build();
                 }
             }
@@ -78,7 +79,7 @@ public class ItemUtil
 
     public static void pollItemsFromPlayer(final Player player, final List<ItemStack> items) throws RequiredItemsNotFoundException
     {
-        final PlayerInventory inventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        final PlayerInventory inventory = (PlayerInventory) player.inventory().query(QueryTypes.INVENTORY_TYPE, PlayerInventory.class);
 
         //Run check loop before... so that player either loses all items or none at all.
         for (final ItemStack itemStack : items)
@@ -89,7 +90,7 @@ public class ItemUtil
 
         for (final ItemStack itemStack : items)
         {
-            inventory.query(QueryOperationTypes.ITEM_TYPE.of(itemStack.getType())).poll(itemStack.getQuantity());
+            inventory.query(QueryTypes.ITEM_TYPE, itemStack.type()).poll(itemStack.quantity());
         }
     }
 }

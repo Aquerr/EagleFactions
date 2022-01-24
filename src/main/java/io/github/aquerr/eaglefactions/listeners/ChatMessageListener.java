@@ -5,23 +5,25 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.messaging.chat.AllianceMessageChannelImpl;
+import io.github.aquerr.eaglefactions.messaging.chat.AllianceAudienceImpl;
 import io.github.aquerr.eaglefactions.messaging.chat.ChatMessageHelper;
-import io.github.aquerr.eaglefactions.messaging.chat.FactionMessageChannelImpl;
-import org.spongepowered.api.entity.living.player.Player;
+import io.github.aquerr.eaglefactions.messaging.chat.FactionAudienceImpl;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.message.MessageChannelEvent;
-import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextTemplate;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.transform.SimpleTextTemplateApplier;
+import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.util.Tristate;
 
-import java.util.*;
+import java.util.Optional;
+
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
 public class ChatMessageListener extends AbstractListener
 {
@@ -35,38 +37,39 @@ public class ChatMessageListener extends AbstractListener
 
     @Listener
     @IsCancelled(Tristate.FALSE)
-    public void onChatMessage(final MessageChannelEvent.Chat event, final @Root Player player)
+    public void onChatMessage(final PlayerChatEvent event, final @Root ServerPlayer player)
     {
-        MessageChannel messageChannel = event.getChannel().orElse(event.getOriginalChannel());
-        final MessageEvent.MessageFormatter messageFormatter = event.getFormatter();
+        Audience audience = event.audience().orElse(event.originalAudience());
+        final PlayerChatFormatter playerChatFormatter = event.chatFormatter().orElse(event.originalChatFormatter());
+        Component message = event.message();
 
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
         if(!optionalPlayerFaction.isPresent())
         {
             //Suppress message for other people
             if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
             {
-                final MessageChannel suppressedChannel = ChatMessageHelper.removeFactionChatPlayersFromChannel(messageChannel);
-                event.setChannel(suppressedChannel);
+                final Audience suppressedAudience = ChatMessageHelper.removeFactionChatPlayersFromAudience(audience);
+                event.setAudience(suppressedAudience);
             }
 
             //Add non-faction prefix tag.
-            if(!this.chatConfig.getNonFactionPlayerPrefix().toPlain().equals(""))
+            if(!PlainTextComponentSerializer.plainText().serialize(this.chatConfig.getNonFactionPlayerPrefix()).equals(""))
             {
-                messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(this.chatConfig.getNonFactionPlayerPrefix())));
+                event.setMessage(this.chatConfig.getNonFactionPlayerPrefix().append(message));
             }
             return;
         }
 
         //Code below is for players that have a faction.
         final Faction playerFaction = optionalPlayerFaction.get();
-        final Text.Builder factionAndRankPrefix = Text.builder();
-        final Text.Builder factionPrefix = Text.builder();
-        final Text.Builder rankPrefix = Text.builder();
-        final Text.Builder chatTypePrefix = Text.builder();
-        final Text.Builder message = Text.builder();
+        final TextComponent.Builder factionAndRankPrefix = Component.text();
+        final TextComponent.Builder factionPrefix = Component.text();
+        final TextComponent.Builder rankPrefix = Component.text();
+        final TextComponent.Builder chatTypePrefix = Component.text();
+        final TextComponent.Builder finalMessage = Component.text();
 
-        ChatEnum chatType = Optional.ofNullable(EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()))
+        ChatEnum chatType = Optional.ofNullable(EagleFactionsPlugin.CHAT_LIST.get(player.uniqueId()))
                 .orElse(ChatEnum.GLOBAL);
 
         //Message = Prefixes + Player NAME + Text
@@ -79,32 +82,32 @@ public class ChatMessageListener extends AbstractListener
         {
             case FACTION:
             {
-                message.append(Text.of(TextColors.GREEN, messageFormatter.getBody().format()));
-                messageChannel = FactionMessageChannelImpl.forFaction(playerFaction);
+                finalMessage.append(message.color(GREEN));
+                audience = FactionAudienceImpl.forFaction(playerFaction);
                 break;
             }
             case ALLIANCE:
             {
-                message.append(Text.of(TextColors.BLUE, messageFormatter.getBody().format()));
-                messageChannel = AllianceMessageChannelImpl.forFaction(playerFaction);
+                finalMessage.append(message.color(BLUE));
+                audience = AllianceAudienceImpl.forFaction(playerFaction);
                 break;
             }
             case GLOBAL:
             default:
                 //If player is chatting in global chat then directly get raw message from event.
-                message.append(messageFormatter.getBody().format());
+                finalMessage.append(message);
 
                 //Suppress message for other factions if someone is in the faction's chat.
                 if(this.chatConfig.shouldSuppressOtherFactionsMessagesWhileInTeamChat())
                 {
-                    messageChannel = ChatMessageHelper.removeFactionChatPlayersFromChannel(messageChannel);
+                    audience = ChatMessageHelper.removeFactionChatPlayersFromAudience(audience);
                 }
         }
 
-        final Text fPrefix = ChatMessageHelper.getFactionPrefix(playerFaction);
+        final TextComponent fPrefix = ChatMessageHelper.getFactionPrefix(playerFaction);
         factionPrefix.append(fPrefix);
 
-        final Text rPrefix = ChatMessageHelper.getRankPrefix(chatType, playerFaction, player);
+        final TextComponent rPrefix = ChatMessageHelper.getRankPrefix(chatType, playerFaction, player);
         if (rPrefix != null)
             rankPrefix.append(rPrefix);
 
@@ -119,10 +122,7 @@ public class ChatMessageListener extends AbstractListener
             factionAndRankPrefix.append(factionPrefix.build());
         }
 
-        messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(factionAndRankPrefix)));
-        messageFormatter.getHeader().insert(0, new SimpleTextTemplateApplier(TextTemplate.of(chatTypePrefix)));
-        messageFormatter.setBody(message.build());
-
-        event.setChannel(messageChannel);
+        event.setAudience(audience);
+        event.setMessage(factionAndRankPrefix.append(chatTypePrefix).append(finalMessage).build());
     }
 }

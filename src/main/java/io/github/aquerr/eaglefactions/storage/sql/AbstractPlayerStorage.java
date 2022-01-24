@@ -4,15 +4,17 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.storage.PlayerStorage;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.sql.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public abstract class AbstractPlayerStorage implements PlayerStorage
 {
@@ -43,7 +45,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     {
         if(sqlProvider == null)
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));
+            Sponge.server().sendMessage(Identity.nil(), Component.text("Could not establish connection to the database. Aborting...", RED));
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         this.plugin = plugin;

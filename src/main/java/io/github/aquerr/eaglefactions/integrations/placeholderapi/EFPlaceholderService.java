@@ -4,10 +4,9 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import me.rojo8399.placeholderapi.*;
-import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
-import org.spongepowered.api.data.value.mutable.Value;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -135,11 +134,11 @@ public class EFPlaceholderService
         return "";
     }
 
-    private Text getFactionTagWithBrackets(User player)
+    private Component getFactionTagWithBrackets(User player)
     {
         return this.plugin.getConfiguration().getChatConfig().getFactionStartPrefix()
-                .concat(getFactionTag(player))
-                .concat(this.plugin.getConfiguration().getChatConfig().getFactionEndPrefix());
+                .append(getFactionTag(player))
+                .append(this.plugin.getConfiguration().getChatConfig().getFactionEndPrefix());
     }
 
     @Placeholder(id = "factionplayer")
@@ -162,42 +161,42 @@ public class EFPlaceholderService
 
     private String getFactionName(final User user)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(user.uniqueId())
                 .map(Faction::getName)
                 .orElse("");
     }
 
-    private Text getFactionTag(final User user)
+    private Component getFactionTag(final User user)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(user.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(user.uniqueId())
                 .map(Faction::getTag)
-                .orElse(Text.EMPTY);
+                .orElse(Component.empty());
     }
 
     private float getFactionPower(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(this.plugin.getPowerManager()::getFactionPower)
                 .orElse(0F);
     }
 
     private float getFactionMaxPower(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(this.plugin.getPowerManager()::getFactionMaxPower)
                 .orElse(0F);
     }
 
     private Instant getFactionLastOnline(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getLastOnline)
                 .orElse(Instant.now());
     }
 
     private int getFactionClaimCount(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getClaims)
                 .map(Set::size)
                 .orElse(0);
@@ -205,7 +204,7 @@ public class EFPlaceholderService
 
     private int getFactionOfficerCount(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getOfficers)
                 .map(Set::size)
                 .orElse(0);
@@ -213,7 +212,7 @@ public class EFPlaceholderService
 
     private int getFactionMemberCount(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getMembers)
                 .map(Set::size)
                 .orElse(0);
@@ -221,7 +220,7 @@ public class EFPlaceholderService
 
     private int getFactionRecruitCount(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getRecruits)
                 .map(Set::size)
                 .orElse(0);
@@ -229,21 +228,21 @@ public class EFPlaceholderService
 
     private Set<String> getFactionAlliances(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getAlliances)
                 .orElse(Collections.emptySet());
     }
 
     private Set<String> getFactionEnemies(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getEnemies)
                 .orElse(Collections.emptySet());
     }
 
     private Set<String> getFactionTruce(final User player)
     {
-        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
+        return this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getTruces)
                 .orElse(Collections.emptySet());
     }
@@ -254,23 +253,21 @@ public class EFPlaceholderService
 
     private float getPlayerPower(final User player)
     {
-        return this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId())
+        return this.plugin.getPlayerManager().getFactionPlayer(player.uniqueId())
                 .map(FactionPlayer::getPower)
                 .orElse(0F);
     }
 
     private float getPlayerMaxPower(final User player)
     {
-        return this.plugin.getPlayerManager().getFactionPlayer(player.getUniqueId())
+        return this.plugin.getPlayerManager().getFactionPlayer(player.uniqueId())
                 .map(FactionPlayer::getMaxPower)
                 .orElse(0F);
     }
 
     private String getPlayerLastOnline(final User player)
     {
-        return player.get(JoinData.class)
-                .map(JoinData::lastPlayed)
-                .map(Value::get)
+        return player.get(Keys.LAST_DATE_JOINED)
                 .map(instant -> LocalDateTime.ofInstant(instant, ZoneId.systemDefault()))
                 .map(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")::format)
                 .orElse("");

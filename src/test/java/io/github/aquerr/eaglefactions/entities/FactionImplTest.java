@@ -2,14 +2,15 @@ package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
+import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.UUID;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FactionImplTest
@@ -19,7 +20,7 @@ class FactionImplTest
     @BeforeEach
     void prepareFactionObject()
     {
-        faction = FactionImpl.builder("Test", Text.of(TextColors.BLUE, "TE"), UUID.randomUUID())
+        faction = FactionImpl.builder("Test", text("TE", BLUE), UUID.randomUUID())
                 .build();
     }
 
@@ -32,7 +33,7 @@ class FactionImplTest
     @Test
     void builderShouldSetFactionTag()
     {
-        Assertions.assertEquals(Text.of(TextColors.BLUE, "TE"), faction.getTag());
+        Assertions.assertEquals(text("TE", BLUE), faction.getTag());
     }
 
     @Test

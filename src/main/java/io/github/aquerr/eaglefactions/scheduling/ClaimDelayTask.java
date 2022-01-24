@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -9,26 +8,27 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.scheduler.ScheduledTask;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 
-public class ClaimDelayTask implements EagleFactionsConsumerTask<Task>
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
+public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
 {
     private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic = EagleFactionsPlugin.getPlugin().getFactionLogic();
-    private final Player player;
+    private final ServerPlayer player;
     private final Vector3i chunkPosition;
     private final int claimDelay;
     private final boolean shouldClaimByItems;
 
     private int currentWaitSeconds = 0;
 
-    public ClaimDelayTask(Player player, Vector3i chunkPosition)
+    public ClaimDelayTask(ServerPlayer player, Vector3i chunkPosition)
     {
         this.player = player;
         this.chunkPosition = chunkPosition;
@@ -38,42 +38,42 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<Task>
     }
 
     @Override
-    public void accept(Task task)
+    public void accept(ScheduledTask task)
     {
-        if(!chunkPosition.equals(player.getLocation().getChunkPosition()))
+        if(!chunkPosition.equals(player.location().chunkPosition()))
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MOVED_FROM_THE_CHUNK));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MOVED_FROM_THE_CHUNK, RED)));
             task.cancel();
         }
 
         if(currentWaitSeconds >= claimDelay)
         {
-            final Optional<Faction> optionalFaction = this.factionLogic.getFactionByPlayerUUID(player.getUniqueId());
+            final Optional<Faction> optionalFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
             if(!optionalFaction.isPresent())
             {
-                player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND, RED)));
                 task.cancel();
             }
 
             if(shouldClaimByItems)
             {
-                boolean didSucceed = this.factionLogic.addClaimByItems(player, optionalFaction.get(), player.getWorld().getUniqueId(), chunkPosition);
+                boolean didSucceed = this.factionLogic.addClaimByItems(player, optionalFaction.get(), player.world().uniqueId(), chunkPosition);
                 if(didSucceed)
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
                 else
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY, RED)));
             }
             else
             {
-                factionLogic.addClaim(optionalFaction.get(), new Claim(player.getWorld().getUniqueId(), chunkPosition));
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
-                EventRunner.runFactionClaimEventPost(player, optionalFaction.get(), player.getWorld(), chunkPosition);
+                factionLogic.addClaim(optionalFaction.get(), new Claim(player.world().uniqueId(), chunkPosition));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
+                EventRunner.runFactionClaimEventPost(player, optionalFaction.get(), player.world(), chunkPosition);
             }
             task.cancel();
         }
         else
         {
-            player.sendMessage(ChatTypes.ACTION_BAR, Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RESET, currentWaitSeconds));
+            player.sendActionBar(PluginInfo.PLUGIN_PREFIX.append(text(currentWaitSeconds, WHITE)));
             currentWaitSeconds++;
         }
     }

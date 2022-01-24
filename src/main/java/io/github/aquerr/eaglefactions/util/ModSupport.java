@@ -1,10 +1,12 @@
 package io.github.aquerr.eaglefactions.util;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
+import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.text.Text;
+
+import static net.kyori.adventure.text.Component.text;
 
 public class ModSupport
 {
@@ -44,7 +46,7 @@ public class ModSupport
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of("Could not get 'attacker' from techguns entityDamangeSource: " + entityDamageSource.getSource().getType().getId())));
+            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text("Could not get 'attacker' from techguns entityDamangeSource: " + entityDamageSource.source().type().toString())));
         }
         if (attacker instanceof Entity)
             return (Entity)attacker;
@@ -75,7 +77,7 @@ public class ModSupport
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of("Could not get 'owner' from mekanism entity: " + entity.getType().getId())));
+            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text("Could not get 'owner' from mekanism entity: " + entity.type().toString())));
         }
         if (owner instanceof Entity)
             return (Entity)owner;
@@ -89,7 +91,7 @@ public class ModSupport
      */
     public static boolean isIndustrialCraftMiningLaser(Entity entity)
     {
-        return entity.getType().getId().contains("mininglaser");
+        return entity.type().toString().contains("mininglaser");
     }
 
     /**
@@ -99,6 +101,6 @@ public class ModSupport
      */
     public static boolean isFlan(Entity entity)
     {
-        return entity.getType().getId().contains("Flan") || entity.getType().getId().contains("flan");
+        return entity.type().toString().contains("Flan") || entity.type().toString().contains("flan");
     }
 }

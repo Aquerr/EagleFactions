@@ -1,11 +1,11 @@
 package io.github.aquerr.eaglefactions.events;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionClaimEvent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.world.World;
+import org.spongepowered.math.vector.Vector3i;
 
 public class FactionUnclaimEventImpl extends FactionAbstractEvent implements FactionClaimEvent.Unclaim
 {

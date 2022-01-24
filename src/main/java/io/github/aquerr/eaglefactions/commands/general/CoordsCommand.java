@@ -1,27 +1,34 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.*;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class CoordsCommand extends AbstractCommand
 {
@@ -31,38 +38,38 @@ public class CoordsCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.getOne(Text.of("faction"));
-        if (!(source instanceof Player))
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        if (!(context.cause().audience() instanceof ServerPlayer))
         {
             if(!optionalFaction.isPresent())
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "You must specify faction name!"));
-            return showCoordsList(source, getTeamCoordsList(null, optionalFaction.get()));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text("You must specify faction name!", RED)));
+            return showCoordsList(context.cause().audience(), getTeamCoordsList(null, optionalFaction.get()));
         }
         else
         {
-            final Player player = (Player)source;
-            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final ServerPlayer player = (ServerPlayer) context.cause().audience();
+            final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
             if(optionalFaction.isPresent())
             {
                 final Faction faction = optionalFaction.get();
-                if(super.getPlugin().getPlayerManager().hasAdminMode(player) || (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName())))
+                if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()) || (optionalPlayerFaction.isPresent() && optionalPlayerFaction.get().getName().equals(faction.getName())))
                     return showCoordsList(player, getTeamCoordsList(player, faction));
-                else throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS));
+                else throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS, RED)));
             }
 
             if(!optionalPlayerFaction.isPresent())
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND, RED)));
 
             final Faction playerFaction = optionalPlayerFaction.get();
             return showCoordsList(player, getTeamCoordsList(player, playerFaction));
         }
     }
 
-    private List<Text> getTeamCoordsList(final Player player, final Faction faction)
+    private List<Component> getTeamCoordsList(final ServerPlayer player, final Faction faction)
     {
-        final List<Text> teamCoords = new ArrayList<>();
+        final List<Component> teamCoords = new LinkedList<>();
 
         //Get nearest claim if player is not null
         if (player != null)
@@ -70,80 +77,63 @@ public class CoordsCommand extends AbstractCommand
             final Claim claim = getNearestClaim(player, faction);
             if (claim != null)
             {
-                final Vector3d blockPosition = ParticlesUtil.getChunkCenter(player.getWorld(), claim.getChunkPosition());
-                final Text textBuilder = Text.builder()
-                        .append(Text.of(TextColors.AQUA, Messages.FACTION, TextColors.GOLD, ": " + blockPosition))
-                        .build();
-
-                teamCoords.add(textBuilder);
+                final Vector3d blockPosition = ParticlesUtil.getChunkCenter(player.world(), claim.getChunkPosition());
+                final TextComponent textComponent = Component.text(Messages.FACTION, NamedTextColor.AQUA)
+                        .append(Component.text(": " + blockPosition, NamedTextColor.GOLD));
+                teamCoords.add(textComponent);
             }
         }
 
         if(faction.getHome() != null)
         {
-            final Optional<World> optionalHomeWorld = Sponge.getServer().getWorld(faction.getHome().getWorldUUID());
-            final Text textBuilder = Text.builder()
-                    .append(Text.of(TextColors.AQUA, Messages.FACTIONS_HOME, TextColors.GOLD, ": " + (optionalHomeWorld.map(World::getName).orElse("Unknown World")) + '|' + faction.getHome().getBlockPosition().toString()))
-                    .build();
-
-            teamCoords.add(textBuilder);
+            final Optional<ServerWorld> optionalHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().getWorldUUID());
+            final TextComponent textComponent = Component.text(Messages.FACTIONS_HOME, NamedTextColor.AQUA).append(Component.text(": " + ((TextComponent)optionalHomeWorld.map(world -> world.properties().displayName().orElse(Component.text("Unknown World"))).get()).content() + "|" + faction.getHome().getBlockPosition().toString()));
+            teamCoords.add(textComponent);
         }
 
-        final Optional<Player> leader = getPlugin().getPlayerManager().getPlayer(faction.getLeader());
+        final Optional<ServerPlayer> leader = getPlugin().getPlayerManager().getPlayer(faction.getLeader());
         if(leader.isPresent())
         {
-            final Text textBuilder = Text.builder()
-                    .append(Text.of(TextColors.AQUA, Messages.LEADER, TextColors.GOLD, ": " + leader.get().getName() + " " + leader.get().getLocation().getBlockPosition().toString()))
-                    .build();
-
-            teamCoords.add(textBuilder);
+            final TextComponent textComponent = Component.text(Messages.LEADER, NamedTextColor.AQUA).append(Component.text(": " + leader.get().name() + " " + leader.get().serverLocation().blockPosition().toString(), NamedTextColor.GOLD));
+            teamCoords.add(textComponent);
         }
 
         for (final UUID officerUUID: faction.getOfficers())
         {
-            final Optional<Player> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
+            final Optional<ServerPlayer> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
             if(officer.isPresent())
             {
-                Text textBuilder = Text.builder()
-                        .append(Text.of(TextColors.AQUA, Messages.OFFICER, TextColors.GOLD, ": " + officer.get().getName() + " " + officer.get().getLocation().getBlockPosition().toString()))
-                        .build();
-
-                teamCoords.add(textBuilder);
+                final TextComponent textComponent = Component.text(Messages.OFFICER, NamedTextColor.AQUA).append(Component.text(": " + officer.get().name() + " " + officer.get().serverLocation().blockPosition().toString(), NamedTextColor.GOLD));
+                teamCoords.add(textComponent);
             }
         }
 
         for (final UUID memberUUID: faction.getMembers())
         {
-            final Optional<Player> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
+            final Optional<ServerPlayer> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
             if(member.isPresent())
             {
-                Text textBuilder = Text.builder()
-                        .append(Text.of(TextColors.AQUA, Messages.MEMBER, TextColors.GOLD, ": " + member.get().getName() + " " + member.get().getLocation().getBlockPosition().toString()))
-                        .build();
-
-                teamCoords.add(textBuilder);
+                TextComponent textComponent = Component.text(Messages.MEMBER, NamedTextColor.AQUA).append(Component.text(": " + member.get().name() + " " + member.get().serverLocation().blockPosition().toString(), NamedTextColor.GOLD));
+                teamCoords.add(textComponent);
             }
         }
 
         for (final UUID recruitUUID: faction.getRecruits())
         {
-            final Optional<Player> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
+            final Optional<ServerPlayer> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
             if(recruit.isPresent())
             {
-                Text textBuilder = Text.builder()
-                        .append(Text.of(TextColors.AQUA, Messages.RECRUIT, TextColors.GOLD, ": " + recruit.get().getName() + " " + recruit.get().getLocation().getBlockPosition().toString()))
-                        .build();
-
-                teamCoords.add(textBuilder);
+                TextComponent textComponent = Component.text(Messages.RECRUIT, NamedTextColor.AQUA).append(Component.text(": " + recruit.get().name() + " " + recruit.get().serverLocation().blockPosition().toString(), NamedTextColor.GOLD));
+                teamCoords.add(textComponent);
             }
         }
         return teamCoords;
     }
 
-    private Claim getNearestClaim(final Player player, final Faction faction)
+    private Claim getNearestClaim(final ServerPlayer player, final Faction faction)
     {
-        final UUID worldUUID = player.getWorld().getUniqueId();
-        final Vector3i chunkPosition = player.getLocation().getChunkPosition();
+        final UUID worldUUID = player.world().uniqueId();
+        final Vector3i chunkPosition = player.serverLocation().chunkPosition();
         final Set<Claim> claims = faction.getClaims();
         if (claims.isEmpty())
             return null;
@@ -167,11 +157,13 @@ public class CoordsCommand extends AbstractCommand
         return nearestClaim;
     }
 
-    private CommandResult showCoordsList(final CommandSource commandSource, final List<Text> teamCoords) throws CommandException
+    private CommandResult showCoordsList(final Audience audience, final List<Component> teamCoords) throws CommandException
     {
-        final PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
-        final PaginationList.Builder paginationBuilder = paginationService.builder().title(Text.of(TextColors.GREEN, Messages.TEAM_COORDS)).contents(teamCoords);
-        paginationBuilder.sendTo(commandSource);
+        final PaginationService paginationService = Sponge.serviceProvider().paginationService();
+        final PaginationList.Builder paginationBuilder = paginationService.builder()
+                .title(text(Messages.TEAM_COORDS, GREEN))
+                .contents(teamCoords);
+        paginationBuilder.sendTo(audience);
         return CommandResult.success();
     }
 }

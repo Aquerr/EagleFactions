@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionCreateEvent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 
 public class FactionCreateEventImpl extends FactionAbstractEvent implements FactionCreateEvent
 {

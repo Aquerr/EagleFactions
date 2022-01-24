@@ -13,12 +13,6 @@ public class RemoveRelationRequestTask implements EagleFactionsRunnableTask
     }
 
     @Override
-    public String getName()
-    {
-        return "EagleFactions Remove Relation Invite Task";
-    }
-
-    @Override
     public void run()
     {
         EagleFactionsPlugin.RELATION_INVITES.remove(this.acceptableInvite);

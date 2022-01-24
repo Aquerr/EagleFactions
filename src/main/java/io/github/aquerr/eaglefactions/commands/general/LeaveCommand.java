@@ -9,15 +9,16 @@ import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Collections;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class LeaveCommand extends AbstractCommand
 {
@@ -27,15 +28,15 @@ public class LeaveCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Player player = requirePlayerSource(source);
+        final ServerPlayer player = requirePlayerSource(context);
         final Faction faction = requirePlayerFaction(player);
-        if (faction.getLeader().equals(player.getUniqueId()))
+        if (faction.getLeader().equals(player.uniqueId()))
         {
-            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
                 return leaveFaction(player, faction, true);
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_LEAVE_YOUR_FACTION_BECAUSE_YOU_ARE_ITS_LEADER + " " + Messages.DISBAND_YOUR_FACTION_OR_SET_SOMEONE_AS_LEADER));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_LEAVE_YOUR_FACTION_BECAUSE_YOU_ARE_ITS_LEADER + " " + Messages.DISBAND_YOUR_FACTION_OR_SET_SOMEONE_AS_LEADER, RED)));
         }
         return leaveFaction(player, faction, false);
     }
@@ -52,13 +53,13 @@ public class LeaveCommand extends AbstractCommand
         }
         else
         {
-            super.getPlugin().getFactionLogic().leaveFaction(player.getUniqueId(), faction.getName());
+            super.getPlugin().getFactionLogic().leaveFaction(player.uniqueId(), faction.getName());
         }
 
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_LEFT_FACTION, TextColors.GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, faction.getName())))));
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_LEFT_FACTION, GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, text(faction.getName(), GOLD)))));
 
-        EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.getUniqueId());
-        EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
+        EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.uniqueId());
+        EagleFactionsPlugin.CHAT_LIST.remove(player.uniqueId());
         EventRunner.runFactionLeaveEventPost(player, faction);
         return CommandResult.success();
     }

@@ -1,6 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.sql;
 
-import com.flowpowered.math.vector.Vector3i;
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
@@ -12,53 +12,34 @@ import io.github.aquerr.eaglefactions.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteProvider;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.math.vector.Vector3i;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.nio.file.*;
+import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public abstract class AbstractFactionStorage implements FactionStorage
 {
@@ -128,7 +109,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
         if(this.sqlProvider == null)
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not establish connection to the database. Aborting..."));
+            Sponge.server().sendMessage(Identity.nil(), Component.text("Could not establish connection to the database. Aborting...", RED));
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         try
@@ -292,8 +273,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(queryToUse);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setString(2, faction.getTag().toPlain());
-            preparedStatement.setString(3, faction.getTag().getColor().getId());
+            preparedStatement.setString(2, faction.getTag().toString());
+            preparedStatement.setString(3, faction.getTag().color().asHexString());
             preparedStatement.setString(4, faction.getLeader().toString());
             if (faction.getHome() != null)
                 preparedStatement.setString(5, faction.getHome().toString());
@@ -396,7 +377,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
-            DataFormats.NBT.writeTo(byteArrayStream, dataContainer);
+            DataFormats.NBT.get().writeTo(byteArrayStream, dataContainer);
 //            String hocon = DataFormats.HOCON.write(test);
             byteArrayStream.flush();
             byte[] chestBytes = byteArrayStream.toByteArray();
@@ -685,7 +666,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             {
                 final String tag = factionsResultSet.getString("Tag");
                 final String tagColor = factionsResultSet.getString("TagColor");
-                final TextColor textColor = Sponge.getRegistry().getType(TextColor.class, tagColor).orElse(TextColors.RESET);
+                final TextColor textColor = TextColor.fromHexString(tagColor);
                 final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
                 final String factionHomeAsString = factionsResultSet.getString("Home");
                 final String description = factionsResultSet.getString("Description");
@@ -705,7 +686,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 final FactionChest factionChest = getFactionChest(connection, factionName);
                 final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
 
-                final Faction faction = FactionImpl.builder(factionName, Text.of(textColor, tag), leaderUUID)
+                final Faction faction = FactionImpl.builder(factionName, Component.text(tag, textColor), leaderUUID)
                         .setHome(factionHome)
                         .setTruces(truces)
                         .setAlliances(alliances)
@@ -962,9 +943,13 @@ public abstract class AbstractFactionStorage implements FactionStorage
         {
             byte[] factionChestItems = resultSet.getBytes("ChestItems");
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(factionChestItems);
-            DataContainer dataContainer = DataFormats.NBT.readFrom(byteArrayInputStream);
+            DataContainer dataContainer = DataFormats.NBT.get().readFrom(byteArrayInputStream);
             byteArrayInputStream.close();
-            Inventory inventory = Inventory.builder().of(InventoryArchetypes.CHEST).build(this.plugin);
+            Inventory inventory = ViewableInventory.builder()
+                    .type(ContainerTypes.GENERIC_9X3)
+                    .completeStructure()
+                    .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
+                    .build();
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
             factionChest = new FactionChestImpl(factionName, inventory);
         }

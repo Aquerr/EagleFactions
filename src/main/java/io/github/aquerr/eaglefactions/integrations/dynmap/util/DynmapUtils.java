@@ -4,10 +4,15 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.user.UserManager;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Util class for the Dynmap Integration. Contains some various functions just
@@ -22,9 +27,12 @@ public class DynmapUtils {
 
     private static DynmapConfig dynmapConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig();
 
-    public static String getFactionInfoWindow(final Faction faction) {
+    private static PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
+
+    public static String getFactionInfoWindow(final Faction faction) throws ExecutionException, InterruptedException
+    {
         // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
-        Optional<UserStorageService> userStorage = Sponge.getServiceManager().provide(UserStorageService.class);
+        UserManager userStorage = Sponge.server().userManager();
 
         StringBuilder description = new StringBuilder();
 
@@ -35,16 +43,17 @@ public class DynmapUtils {
                 .append("<span style=\"font-weight: bold; font-size: 150%;\">%name%</span></br>\n".replace("%name%", factionName))
                 .append("<span style=\"font-style: italic; font-size: 110%;\">%description%</span></br>\n".replace("%description%", factionDesc.length() > 0 ? factionDesc : "No description"));
 
-        if (faction.getTag().toPlain().length() > 0) {
-            description.append("<span style=\"font-weight: bold;\">Tag:</span> %tag%</br>\n".replace("%tag%", faction.getTag().toPlain()))
+
+        if (plainTextComponentSerializer.serialize(faction.getTag()).length() > 0) {
+            description.append("<span style=\"font-weight: bold;\">Tag:</span> %tag%</br>\n".replace("%tag%", plainTextComponentSerializer.serialize(faction.getTag())))
                     .append("</br>\n");
         }
 
-        if (dynmapConfig.showDynmapFactionLeader() && userStorage.isPresent()) {
-            if (userStorage.get().get(faction.getLeader()).isPresent()) {
+        if (dynmapConfig.showDynmapFactionLeader()) {
+            if (userStorage.load(faction.getLeader()).get().isPresent()) {
                 description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
                         .replace("%leader%",
-                                userStorage.get().get(faction.getLeader()).get().getName()));
+                                userStorage.load(faction.getLeader()).get().get().name()));
             }
         }
 
@@ -66,7 +75,7 @@ public class DynmapUtils {
 
         if(EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig().canColorTags())
         {
-            areaColor = faction.getTag().getColor().getColor().getRgb();
+            areaColor = Integer.parseInt(faction.getTag().color().asHexString());
         }
         else
         {
@@ -119,7 +128,7 @@ public class DynmapUtils {
         LinkedList<Claim> allChunks = new LinkedList<Claim>();
         for (Claim chunk : chunks)
         {
-            allChunkFlags.setFlag(chunk.getChunkPosition().getX(), chunk.getChunkPosition().getZ(), true); // Set flag for chunk
+            allChunkFlags.setFlag(chunk.getChunkPosition().x(), chunk.getChunkPosition().z(), true); // Set flag for chunk
             allChunks.addLast(chunk);
         }
 
@@ -134,8 +143,8 @@ public class DynmapUtils {
             int minimumZ = Integer.MAX_VALUE;
             for (Claim chunk : allChunks)
             {
-                int chunkX = chunk.getChunkPosition().getX();
-                int chunkZ = chunk.getChunkPosition().getZ();
+                int chunkX = chunk.getChunkPosition().x();
+                int chunkZ = chunk.getChunkPosition().z();
 
                 // If we need to start shape, and this block is not part of one yet
                 if (ourChunkFlags == null && allChunkFlags.getFlag(chunkX, chunkZ))

@@ -6,21 +6,20 @@ import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
 public class ChatMessageHelper
 {
-    public static Text getFactionPrefix(Faction faction)
+    public static TextComponent getFactionPrefix(Faction faction)
     {
         final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
 
@@ -35,41 +34,41 @@ public class ChatMessageHelper
         }
         else
         {
-            return Text.EMPTY;
+            return Component.empty();
         }
     }
 
-    public static Text getChatTagPrefix(Faction faction)
+    public static TextComponent getChatTagPrefix(Faction faction)
     {
         final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
 
-        Text factionTag = faction.getTag();
+        TextComponent factionTag = faction.getTag();
         if (!chatConfig.canColorTags())
             factionTag = factionTag.toBuilder().color(chatConfig.getDefaultTagColor()).build();
 
-        return Text.builder()
+        return Component.text()
                 .append(chatConfig.getFactionStartPrefix(), factionTag, chatConfig.getFactionEndPrefix())
-                .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
-                .onClick(TextActions.runCommand("/f info " + faction.getName()))
+                .hoverEvent(HoverEvent.showText(Component.text("Click to view information about the faction!", BLUE)))
+                .clickEvent(ClickEvent.runCommand("/f info " + faction.getName()))
                 .build();
     }
 
-    public static Text getChatFactionNamePrefix(Faction faction)
+    public static TextComponent getChatFactionNamePrefix(Faction faction)
     {
         final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
 
-        return Text.builder()
-                .append(chatConfig.getFactionStartPrefix(), Text.of(TextColors.GREEN, faction.getName(), TextColors.RESET), chatConfig.getFactionEndPrefix())
-                .onHover(TextActions.showText(Text.of(TextColors.BLUE, "Click to view information about the faction!")))
-                .onClick(TextActions.runCommand("/f info " + faction.getName()))
+        return Component.text()
+                .append(chatConfig.getFactionStartPrefix(), Component.text(faction.getName(), GREEN), chatConfig.getFactionEndPrefix())
+                .hoverEvent(HoverEvent.showText(Component.text("Click to view information about the faction!", BLUE)))
+                .clickEvent(ClickEvent.runCommand("/f info " + faction.getName()))
                 .build();
     }
 
-    public static Text getChatPrefix(Player player)
+    public static TextComponent getChatPrefix(ServerPlayer player)
     {
-        final Text.Builder chatTypePrefix = Text.builder();
+        final TextComponent.Builder chatTypePrefix = Component.text();
 
-        ChatEnum chatType = EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId());
+        ChatEnum chatType = EagleFactionsPlugin.CHAT_LIST.get(player.uniqueId());
         if(chatType == null)
             chatType = ChatEnum.GLOBAL;
 
@@ -90,49 +89,49 @@ public class ChatMessageHelper
         return chatTypePrefix.build();
     }
 
-    private static Text getAllianceChatPrefix()
+    private static TextComponent getAllianceChatPrefix()
     {
-        return Text.builder()
-                .append(TextSerializers.FORMATTING_CODE.deserialize(Messages.ALLIANCE_CHAT_PREFIX))
+        return Component.text()
+                .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.ALLIANCE_CHAT_PREFIX))
                 .build();
     }
 
-    private static Text getFactionChatPrefix()
+    private static TextComponent getFactionChatPrefix()
     {
-        return Text.builder()
-                .append(TextSerializers.FORMATTING_CODE.deserialize(Messages.FACTION_CHAT_PREFIX))
+        return Component.text()
+                .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.FACTION_CHAT_PREFIX))
                 .build();
     }
 
-    public static Text getRankPrefix(final ChatEnum chatType, final Faction faction, final Player player)
+    public static TextComponent getRankPrefix(final ChatEnum chatType, final Faction faction, final ServerPlayer player)
     {
         final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
 
-        if(faction.getLeader().equals(player.getUniqueId()))
+        if(faction.getLeader().equals(player.uniqueId()))
         {
             if (!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.LEADER))
                 return null;
 
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.LEADER_PREFIX)))
+            return Component.text()
+                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.LEADER_PREFIX))
                     .build();
         }
-        else if(faction.getOfficers().contains(player.getUniqueId()))
+        else if(faction.getOfficers().contains(player.uniqueId()))
         {
             if (!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.OFFICER))
                 return null;
 
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.OFFICER_PREFIX)))
+            return Component.text()
+                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.OFFICER_PREFIX))
                     .build();
         }
-        else if (faction.getMembers().contains(player.getUniqueId()))
+        else if (faction.getMembers().contains(player.uniqueId()))
         {
             if (!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.MEMBER))
                 return null;
 
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.MEMBER_PREFIX)))
+            return Component.text()
+                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.MEMBER_PREFIX))
                     .build();
         }
         else
@@ -140,29 +139,27 @@ public class ChatMessageHelper
             if(!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.RECRUIT))
                 return null;
 
-            return Text.builder()
-                    .append(Text.of(TextSerializers.FORMATTING_CODE.deserialize(Messages.RECRUIT_PREFIX)))
+            return Component.text()
+                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.RECRUIT_PREFIX))
                     .build();
         }
     }
 
-    public static MessageChannel removeFactionChatPlayersFromChannel(final MessageChannel messageChannel)
+    public static Audience removeFactionChatPlayersFromAudience(final Audience audience)
     {
-        final Collection<MessageReceiver> chatMembers = messageChannel.getMembers();
-        final Set<MessageReceiver> newReceivers = new HashSet<>(chatMembers);
-        for(final MessageReceiver messageReceiver : chatMembers)
+        return audience.filterAudience(audience1 ->
         {
-            if(!(messageReceiver instanceof Player))
-                continue;
+            if (!(audience1 instanceof ServerPlayer))
+                return true;
 
-            final Player receiver = (Player) messageReceiver;
-
-            if(EagleFactionsPlugin.CHAT_LIST.containsKey(receiver.getUniqueId()) && EagleFactionsPlugin.CHAT_LIST.get(receiver.getUniqueId()) != ChatEnum.GLOBAL)
+            ServerPlayer serverPlayer = (ServerPlayer) audience1;
+            if (EagleFactionsPlugin.CHAT_LIST.containsKey(serverPlayer.uniqueId())
+                && EagleFactionsPlugin.CHAT_LIST.get(serverPlayer.uniqueId()) != ChatEnum.GLOBAL)
             {
-                newReceivers.remove(receiver);
+                return false;
             }
-        }
-        return MessageChannel.fixed(newReceivers);
+            return true;
+        });
     }
 
 

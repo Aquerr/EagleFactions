@@ -6,25 +6,29 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class OwnedByCommand extends AbstractCommand
 {
@@ -34,24 +38,16 @@ public class OwnedByCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext args) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final FactionPlayer factionPlayer = args.requireOne(Text.of("player"));
+        final FactionPlayer factionPlayer = context.requireOne(EagleFactionsCommandParameters.factionPlayer());
 
-        if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player)source;
-
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
-
-        final Faction playerFaction = optionalPlayerFaction.get();
+        final ServerPlayer player = requirePlayerSource(context);
+        final Faction playerFaction = requirePlayerFaction(player);
 
         // Access can be run only by leader and officers
-        if (!playerFaction.getLeader().equals(player.getUniqueId()) && !playerFaction.getOfficers().contains(player.getUniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS));
+        if (!playerFaction.getLeader().equals(player.uniqueId()) && !playerFaction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
 
         // Get claim at player's location
         return showOwnedBy(player, factionPlayer, playerFaction);
@@ -59,7 +55,7 @@ public class OwnedByCommand extends AbstractCommand
 
     private CommandResult showOwnedBy(final Player sourcePlayer, final FactionPlayer targetPlayer, final Faction faction)
     {
-        final List<Text> resultList = new ArrayList<>();
+        final List<Component> resultList = new ArrayList<>();
         final Set<Claim> claims = faction.getClaims();
 
         for (final Claim claim : claims)
@@ -67,27 +63,32 @@ public class OwnedByCommand extends AbstractCommand
             if (!claim.getOwners().contains(targetPlayer.getUniqueId()))
                 continue;
 
-            final Text.Builder claimHoverInfo = Text.builder();
-            claimHoverInfo.append(Text.of(TextColors.GOLD, "Accessible by faction: ", TextColors.RESET, claim.isAccessibleByFaction(), "\n"));
+            final TextComponent.Builder claimHoverInfo = Component.text();
+            claimHoverInfo.append(text("Accessible by faction: ", GOLD)).append(text(claim.isAccessibleByFaction(), WHITE)).append(Component.newline());
             final List<String> ownersNames = claim.getOwners().stream()
                     .map(owner -> super.getPlugin().getPlayerManager().getFactionPlayer(owner))
                     .filter(Optional::isPresent)
                     .map(factionPlayer -> factionPlayer.get().getName())
                     .collect(Collectors.toList());
-            claimHoverInfo.append(Text.of(TextColors.GOLD, "Owners: ", TextColors.RESET, String.join(", ", ownersNames)));
+            claimHoverInfo.append(text("Owners: ", GOLD)).append(text(String.join(", ", ownersNames), WHITE));
 
-            final Text.Builder textBuilder = Text.builder();
-            final Optional<World> world = Sponge.getServer().getWorld(claim.getWorldUUID());
+            final TextComponent.Builder textBuilder = Component.text();
+            final Optional<ServerWorld> world = WorldUtil.getWorldByUUID(claim.getWorldUUID());
             String worldName = "";
             if (world.isPresent())
-                worldName = world.get().getName();
-            textBuilder.append(Text.of("- ", TextColors.YELLOW, "World: " , TextColors.GREEN, worldName, TextColors.RESET, " | ", TextColors.YELLOW, "Chunk: ", TextColors.GREEN, claim.getChunkPosition()))
-                    .onHover(TextActions.showText(claimHoverInfo.build()));
+                worldName = WorldUtil.getPlainWorldName(world.get());
+            textBuilder.append(text("- ")).append(text("World: ", YELLOW)).append(text(worldName, GREEN)).append(text(" | ", WHITE)).append(text("Chunk: ", YELLOW)).append(text(claim.getChunkPosition().toString(), GREEN))
+                    .hoverEvent(HoverEvent.showText(claimHoverInfo.build()));
             resultList.add(textBuilder.build());
             spawnParticlesInClaim(claim);
         }
 
-        final PaginationList paginationList = PaginationList.builder().padding(Text.of("=")).title(Text.of(TextColors.YELLOW, "Claims List")).contents(resultList).linesPerPage(10).build();
+        final PaginationList paginationList = PaginationList.builder()
+                .padding(text("="))
+                .title(text("Claims List", YELLOW))
+                .contents(resultList)
+                .linesPerPage(10)
+                .build();
         paginationList.sendTo(sourcePlayer);
         return CommandResult.success();
     }

@@ -7,13 +7,13 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
 
 import java.util.UUID;
 
@@ -72,7 +72,7 @@ class InvitationManagerImplTest
 
     private Faction prepareFaction()
     {
-        return FactionImpl.builder(FACTION_NAME, Text.of(""), LEADER_UUID)
+        return FactionImpl.builder(FACTION_NAME, Component.text(""), LEADER_UUID)
                 .build();
     }
 }
