@@ -37,9 +37,8 @@ import io.github.aquerr.eaglefactions.commands.admin.SetMaxPowerCommand;
 import io.github.aquerr.eaglefactions.commands.admin.SetMaxPowerForAllCommand;
 import io.github.aquerr.eaglefactions.commands.admin.SetPowerCommand;
 import io.github.aquerr.eaglefactions.commands.args.BackupNameArgument;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.commands.args.FactionArgument;
-import io.github.aquerr.eaglefactions.commands.args.FactionPlayerArgument;
-import io.github.aquerr.eaglefactions.commands.args.OwnFactionPlayerArgument;
 import io.github.aquerr.eaglefactions.commands.backup.BackupCommand;
 import io.github.aquerr.eaglefactions.commands.backup.RestoreBackupCommand;
 import io.github.aquerr.eaglefactions.commands.claiming.AutoClaimCommand;
@@ -86,10 +85,8 @@ import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.integrations.bstats.Metrics;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.integrations.placeholderapi.EFPlaceholderService;
-import io.github.aquerr.eaglefactions.integrations.ultimatechat.UltimateChatService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
 import io.github.aquerr.eaglefactions.listeners.ChatMessageListener;
@@ -104,7 +101,6 @@ import io.github.aquerr.eaglefactions.listeners.PlayerInteractListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerJoinListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerMoveListener;
 import io.github.aquerr.eaglefactions.listeners.SendCommandListener;
-import io.github.aquerr.eaglefactions.integrations.ultimatechat.listener.UltimateChatMessageListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionJoinListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionKickListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionLeaveListener;
@@ -125,30 +121,34 @@ import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
-import io.github.aquerr.eaglefactions.storage.serializers.SlotItemTypeSerializer;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.TextComponent;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.asset.AssetId;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.parameter.CommonParameters;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
-import org.spongepowered.api.plugin.Dependency;
-import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.resource.Resource;
+import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
@@ -164,12 +164,22 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION, authors = PluginInfo.AUTHOR,
-        dependencies = {@Dependency(id = "placeholderapi", optional = true)}, url = PluginInfo.URL)
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
+import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
+import static net.kyori.adventure.text.format.NamedTextColor.YELLOW;
+
+
+@Plugin(PluginInfo.ID)
+//@Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION, authors = PluginInfo.AUTHOR,
+//        dependencies = {@Dependency(id = "placeholderapi", optional = true)}, url = PluginInfo.URL)
 public class EagleFactionsPlugin implements EagleFactions
 {
     //TODO: Convert these fields to instance fields.
-    public static final Map<List<String>, CommandSpec> SUBCOMMANDS = new HashMap<>();
+    public static final Map<List<String>, Command.Parameterized> SUBCOMMANDS = new HashMap<>();
     public static final List<FactionInvite> INVITE_LIST = new LinkedList<>();
     public static final List<AcceptableInvite> RELATION_INVITES = new LinkedList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new LinkedList<>();
@@ -197,24 +207,31 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private boolean isDisabled = false;
 
-    @Inject
-    @AssetId("Settings.conf")
-    private Asset configAsset;
+    private final PluginContainer pluginContainer;
+    private final Path configDir;
 
-    @Inject
-    @ConfigDir(sharedRoot = false)
-    private Path configDir;
+//    @Inject
+//    @AssetId("Settings.conf")
+//    private Asset configAsset;
 
     //Integrations
-    @Inject
-    private Metrics metrics;
+//    @Inject
+//    private Metrics metrics;
     private EFPlaceholderService efPlaceholderService;
     private DynmapService dynmapService;
-    private UltimateChatService ultimateChatService;
+//    private UltimateChatService ultimateChatService;
 
     public static EagleFactionsPlugin getPlugin()
     {
         return eagleFactions;
+    }
+
+    @Inject
+    public EagleFactionsPlugin(final PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) final Path configDir)
+    {
+        eagleFactions = this;
+        this.pluginContainer = pluginContainer;
+        this.configDir = configDir;
     }
 
     public Path getConfigDir()
@@ -223,48 +240,43 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onServerInitialization(final GameInitializationEvent event)
+    public void onServerInitialization(final ConstructPluginEvent event)
     {
         try
         {
-            eagleFactions = this;
-
-            registerTypeSerializers();
-
-            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Preparing wings..."));
+            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Preparing wings...", AQUA)));
 
             setupConfigs();
 
-            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Configs loaded."));
+            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Configs loaded.", AQUA)));
 
-            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Loading managers and cache..."));
+            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Loading managers and cache...", AQUA)));
             setupManagers();
-            registerAPI();
 
-            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Managers loaded."));
+            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Managers loaded.", AQUA)));
 
-            initializeCommands();
-
-            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Commands loaded."));
 
             registerListeners();
 
-            EventRunner.init(Sponge.getEventManager());
+            EventRunner.init(Sponge.eventManager());
 
             //Display some info text in the console.
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.AQUA, "Eagle Factions", TextColors.WHITE, " is ready to use!"));
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Thank you for choosing this plugin!"));
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Current version: " + PluginInfo.VERSION));
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
-            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+            Sponge.server().sendMessage(text("==========================================", GREEN));
+            Sponge.server().sendMessage(text("Eagle Factions", AQUA).append(text(" is ready to use!", WHITE)));
+            Sponge.server().sendMessage(text("Thank you for choosing this plugin!", WHITE));
+            Sponge.server().sendMessage(text("Current version: " + PluginInfo.VERSION, WHITE));
+            Sponge.server().sendMessage(text("Have a great time with Eagle Factions! :D", WHITE));
+            Sponge.server().sendMessage(text("==========================================", GREEN));
 
             CompletableFuture.runAsync(() ->
             {
                 if(!VersionChecker.isLatest(PluginInfo.VERSION))
                 {
-                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
-                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+                    Sponge.server().sendMessage(Component.join(JoinConfiguration.noSeparators(),
+                            text("Hey! A new version of ", GOLD),
+                            text(PluginInfo.NAME, AQUA),
+                            text(" is available online!", GOLD)));
+                    Sponge.server().sendMessage(text("==========================================", GREEN));
                 }
             });        }
         catch (Exception exception)
@@ -272,28 +284,35 @@ public class EagleFactionsPlugin implements EagleFactions
             exception.printStackTrace();
             disablePlugin();
         }
+
+        initializeIntegrations();
     }
 
     @Listener
-    public void onGameStarting(final GameStartingServerEvent event)
+    public void onFactoryRegister(RegisterFactoryEvent event)
+    {
+        registerAPI(event);
+    }
+
+    private void initializeIntegrations()
     {
         if (isDisabled)
             return;
 
-        try
-        {
-            Class placeholderInterface = Class.forName("me.rojo8399.placeholderapi.PlaceholderService");
-            Optional placeholderService1 = Sponge.getServiceManager().provide(placeholderInterface);
-            placeholderService1.ifPresent(placeholderService -> {
-                printInfo("Found PlaceholderAPI! Registering placeholders...");
-                efPlaceholderService = EFPlaceholderService.getInstance(this, placeholderService);
-                printInfo("Registered Eagle Factions' placeholders.");
-            });
-        }
-        catch(final NoClassDefFoundError | ClassNotFoundException error)
-        {
-            printInfo("PlaceholderAPI could not be found. Skipping addition of placeholders.");
-        }
+//        try
+//        {
+//            Class placeholderInterface = Class.forName("me.rojo8399.placeholderapi.PlaceholderService");
+//            Optional<PlaceholderAPIPlugin> placeholderService1 = Sponge.game().factoryProvider().provide(placeholderInterface);
+//            placeholderService1.ifPresent(placeholderService -> {
+//                printInfo("Found PlaceholderAPI! Registering placeholders...");
+//                efPlaceholderService = EFPlaceholderService.getInstance(this, placeholderService);
+//                printInfo("Registered Eagle Factions' placeholders.");
+//            });
+//        }
+//        catch(final NoClassDefFoundError | ClassNotFoundException error)
+//        {
+//            printInfo("PlaceholderAPI could not be found. Skipping addition of placeholders.");
+//        }
 
         setDefaultPermissions();
 
@@ -315,18 +334,26 @@ public class EagleFactionsPlugin implements EagleFactions
 
         if (isUltimateChatLoaded())
         {
-            this.ultimateChatService = new UltimateChatService(this.configuration.getChatConfig());
-            this.ultimateChatService.registerTags();
+//            this.ultimateChatService = new UltimateChatService(this.configuration.getChatConfig());
+//            this.ultimateChatService.registerTags();
         }
     }
 
-    public void setDefaultPermissions()
+    @Listener
+    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event)
     {
-        final Optional<PermissionService> optionalPermissionService = Sponge.getServiceManager().provide(PermissionService.class);
+        //Register commands...
+        initializeCommands(event);
+        Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Commands loaded.", AQUA)));
+    }
+
+    private void setDefaultPermissions()
+    {
+        final Optional<PermissionService> optionalPermissionService = Sponge.serviceProvider().provide(PermissionService.class);
         if(optionalPermissionService.isPresent())
         {
             final PermissionService permissionService = optionalPermissionService.get();
-            final Map<String, Boolean> permissionContext = permissionService.getDefaults().getSubjectData().getPermissions(SubjectData.GLOBAL_CONTEXT);
+            final Map<String, Boolean> permissionContext = permissionService.defaults().subjectData().permissions(SubjectData.GLOBAL_CONTEXT);
             boolean hasEagleFactionsPermission = false;
             for (final String permission : permissionContext.keySet())
             {
@@ -340,14 +367,14 @@ public class EagleFactionsPlugin implements EagleFactions
             //If eaglefactions already exists then don't add default permissions.
             if (!hasEagleFactionsPermission)
             {
-                permissionService.getDefaults().getSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
+                permissionService.defaults().subjectData().setPermission(SubjectData.GLOBAL_CONTEXT, "eaglefactions.player", Tristate.TRUE);
             }
         }
     }
 
     // Start removing inactive factions when server is fully started.
     @Listener
-    public void onGameLoad(final GameStartedServerEvent event)
+    public void onGameLoad(final StartedEngineEvent<Server> event)
     {
         if (isDisabled)
             return;
@@ -356,7 +383,7 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onReload(final GameReloadEvent event)
+    public void onReload(final RefreshGameEvent event)
     {
         if (isDisabled)
             return;
@@ -369,10 +396,10 @@ public class EagleFactionsPlugin implements EagleFactions
             this.dynmapService.reload();
         }
 
-        if(event.getSource() instanceof Player)
+        if(event.source() instanceof Player)
         {
-            Player player = (Player)event.getSource();
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CONFIG_HAS_BEEN_RELOADED));
+            Player player = (Player)event.source();
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.CONFIG_HAS_BEEN_RELOADED)));
         }
     }
 
@@ -453,7 +480,7 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Override
-    public Faction.Builder getBuilderForFaction(String name, Text tag, UUID leader)
+    public Faction.Builder getBuilderForFaction(String name, TextComponent tag, UUID leader)
     {
         return new FactionImpl.BuilderImpl(name, tag, leader);
     }
@@ -476,13 +503,23 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public void printInfo(final String message)
     {
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.YELLOW, message));
+        Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(message, YELLOW)));
     }
 
     private void setupConfigs()
     {
-        configuration = new ConfigurationImpl(configDir, configAsset);
-        MessageLoader messageLoader = MessageLoader.getInstance(this);
+        Resource resource = null;
+        try
+        {
+            resource = Sponge.server().resourceManager().load(ResourcePath.of(this.pluginContainer, "Settings.conf"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        configuration = new ConfigurationImpl(configDir, resource);
+        MessageLoader.init(eagleFactions, pluginContainer);
+        MessageLoader messageLoader = MessageLoader.getInstance();
         pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
@@ -508,517 +545,528 @@ public class EagleFactionsPlugin implements EagleFactions
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
     }
 
-    private void registerTypeSerializers()
-    {
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Claim.class), new ClaimTypeSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<Claim>>(){}, new ClaimSetTypeSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(FactionChest.SlotItem.class), new SlotItemTypeSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<List<FactionChest.SlotItem>>(){}, new SlotItemListTypeSerializer());
-    }
-
-    private void registerAPI()
+    private void registerAPI(RegisterFactoryEvent event)
     {
         //This is not really needed as api consumers can access managers classes through EagleFactions interface instance.
         //But we are still registering these managers just in case someone will try to access not through EagleFactions interface.
-        Sponge.getServiceManager().setProvider(this, FactionLogic.class, this.factionLogic);
-        Sponge.getServiceManager().setProvider(this, PowerManager.class, this.powerManager);
-        Sponge.getServiceManager().setProvider(this, PlayerManager.class, this.playerManager);
-        Sponge.getServiceManager().setProvider(this, ProtectionManager.class, this.protectionManager);
-        Sponge.getServiceManager().setProvider(this, PermsManager.class, this.permsManager);
-        Sponge.getServiceManager().setProvider(this, PVPLogger.class, this.pvpLogger);
-        Sponge.getServiceManager().setProvider(this, AttackLogic.class, this.attackLogic);
-        Sponge.getServiceManager().setProvider(this, InvitationManager.class, this.invitationManager);
-        Sponge.getServiceManager().setProvider(this, RankManager.class, this.rankManager);
+        event.register(FactionLogic.class, this.factionLogic);
+        event.register(PowerManager.class, this.powerManager);
+        event.register(PlayerManager.class, this.playerManager);
+        event.register(ProtectionManager.class, this.protectionManager);
+        event.register(PermsManager.class, this.permsManager);
+        event.register(PVPLogger.class, this.pvpLogger);
+        event.register(AttackLogic.class, this.attackLogic);
+        event.register(InvitationManager.class, this.invitationManager);
+        event.register(RankManager.class, this.rankManager);
     }
 
-    private void initializeCommands()
+    private void initializeCommands(RegisterCommandEvent<Command.Parameterized> event)
     {
+        EagleFactionsCommandParameters.init(this.factionLogic);
+
         //Help command should display all possible commands in plugin.
-        SUBCOMMANDS.put(Collections.singletonList("help"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_HELP_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("help"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_HELP_DESC))
                 .permission(PluginPermissions.HELP_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.integer(Text.of("page"))))
+                .addParameter(Parameter.integerNumber().optional().key("page").build())
                 .executor(new HelpCommand(this))
                 .build());
 
         //Create faction command.
-        SUBCOMMANDS.put(Arrays.asList("c", "create"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_CREATE_DESC))
+        SUBCOMMANDS.put(Arrays.asList("c", "create"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_CREATE_DESC))
                 .permission(PluginPermissions.CREATE_COMMAND)
-                .arguments(GenericArguments.string(Text.of("tag")),
-                        GenericArguments.string(Text.of("name")))
+                .addParameters(Parameter.string().key("tag").build(),
+                        Parameter.string().key("name").build())
                 .executor(new CreateCommand(this))
                 .build());
 
         //Disband faction command.
-        SUBCOMMANDS.put(Collections.singletonList("disband"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_DISBAND_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("disband"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_DISBAND_DESC))
                 .permission(PluginPermissions.DISBAND_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new DisbandCommand(this))
                 .build());
 
         //List all factions.
-        SUBCOMMANDS.put(Collections.singletonList("list"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_LIST_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("list"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_LIST_DESC))
                 .permission(PluginPermissions.LIST_COMMAND)
                 .executor(new ListCommand(this))
                 .build());
 
         //Invite a player to the faction.
-        SUBCOMMANDS.put(Collections.singletonList("invite"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_INVITE_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("invite"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_INVITE_DESC))
                 .permission(PluginPermissions.INVITE_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+                .addParameter(Parameter.player().key("player").build())
                 .executor(new InviteCommand(this))
                 .build());
 
         //Kick a player from the faction.
-        SUBCOMMANDS.put(Collections.singletonList("kick"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_KICK_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("kick"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_KICK_DESC))
                 .permission(PluginPermissions.KICK_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
+                .addParameter(Parameter.player().key("player").build())
                 .executor(new KickCommand(this))
                 .build());
 
         //Join faction command
-        SUBCOMMANDS.put(Arrays.asList("j", "join"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_JOIN_DESC))
+        SUBCOMMANDS.put(Arrays.asList("j", "join"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_JOIN_DESC))
                 .permission(PluginPermissions.JOIN_COMMAND)
-                .arguments(new FactionArgument(this, Text.of("faction")))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new JoinCommand(this))
                 .build());
 
         //Leave faction command
-        SUBCOMMANDS.put(Collections.singletonList("leave"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_LEAVE_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("leave"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_LEAVE_DESC))
                 .permission(PluginPermissions.LEAVE_COMMAND)
                 .executor(new LeaveCommand(this))
                 .build());
 
         //Version command
-        SUBCOMMANDS.put(Arrays.asList("v", "version"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_VERSION_DESC))
+        SUBCOMMANDS.put(Arrays.asList("v", "version"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_VERSION_DESC))
                 .permission(PluginPermissions.VERSION_COMMAND)
                 .executor(new VersionCommand(this))
                 .build());
 
         //Info command. Shows info about a faction.
-        SUBCOMMANDS.put(Arrays.asList("i", "info"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_INFO_DESC))
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+        SUBCOMMANDS.put(Arrays.asList("i", "info"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_INFO_DESC))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new InfoCommand(this))
                 .build());
 
         //Player command. Shows info about a player. (its factions etc.)
-        SUBCOMMANDS.put(Arrays.asList("p", "player"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_PLAYER_DESC))
+        SUBCOMMANDS.put(Arrays.asList("p", "player"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_PLAYER_DESC))
                 .permission(PluginPermissions.PLAYER_COMMAND)
-                .arguments(GenericArguments.optional(new FactionPlayerArgument(this, Text.of("player"))))
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .executor(new PlayerCommand(this))
                 .build());
 
         //Truce command
-        SUBCOMMANDS.put(Collections.singletonList("truce"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_TRUCE_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("truce"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_TRUCE_DESC))
                 .permission(PluginPermissions.TRUCE_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new TruceCommand(this))
                 .build());
 
         //Ally command
-        SUBCOMMANDS.put(Collections.singletonList("ally"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ALLY_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("ally"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ALLY_DESC))
                 .permission(PluginPermissions.ALLY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new AllyCommand(this))
                 .build());
 
         //Enemy command
-        SUBCOMMANDS.put(Collections.singletonList("enemy"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ENEMY_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("enemy"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ENEMY_DESC))
                 .permission(PluginPermissions.ENEMY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new EnemyCommand(this))
                 .build());
 
         //Promote command
-        SUBCOMMANDS.put(Collections.singletonList("promote"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_PROMOTE_DESC))
-                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
+        SUBCOMMANDS.put(Collections.singletonList("promote"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_PROMOTE_DESC))
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .permission(PluginPermissions.PROMOTE_COMMAND)
                 .executor(new PromoteCommand(this))
                 .build());
 
         //Demote command
-        SUBCOMMANDS.put(Collections.singletonList("demote"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_DEMOTE_DESC))
-                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
+        SUBCOMMANDS.put(Collections.singletonList("demote"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_DEMOTE_DESC))
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .permission(PluginPermissions.DEMOTE_COMMAND)
                 .executor(new DemoteCommand(this))
                 .build());
 
         //Claims command
-        SUBCOMMANDS.put(Arrays.asList("claims", "listclaims"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_LIST_CLAIMS_DESC))
+        SUBCOMMANDS.put(Arrays.asList("claims", "listclaims"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_LIST_CLAIMS_DESC))
                 .permission(PluginPermissions.CLAIMS_LIST_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new ClaimsListCommand(this))
                 .build());
 
         //Claim command
-        SUBCOMMANDS.put(Collections.singletonList("claim"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_CLAIM_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("claim"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_CLAIM_DESC))
                 .permission(PluginPermissions.CLAIM_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new ClaimCommand(this))
                 .build());
 
         //Square Claim command
-        SUBCOMMANDS.put(Collections.singletonList("squareclaim"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_SQUARE_CLAIM_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("squareclaim"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_SQUARE_CLAIM_DESC))
                 .permission(PluginPermissions.RADIUS_CLAIM_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("radius"))))
+                .addParameter(Parameter.integerNumber().key("radius").build())
                 .executor(new SquareClaimCommand(this))
                 .build());
 
         // Fill Command
-        SUBCOMMANDS.put(Collections.singletonList("fillclaim"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_FILL_CLAIM_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("fillclaim"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_FILL_CLAIM_DESC))
                 .permission(PluginPermissions.COMMAND_FILL_CLAIM_COMMAND)
                 .executor(new FillCommand(this))
                 .build());
 
         //Unclaim command
-        SUBCOMMANDS.put(Collections.singletonList("unclaim"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_UNCLAIM_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("unclaim"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_UNCLAIM_DESC))
                 .permission(PluginPermissions.UNCLAIM_COMMAND)
                 .executor(new UnclaimCommand(this))
                 .build());
 
         //Unclaimall Command
-        SUBCOMMANDS.put(Collections.singletonList("unclaimall"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_UNCLAIM_ALL_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("unclaimall"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_UNCLAIM_ALL_DESC))
                 .permission(PluginPermissions.UNCLAIM_ALL_COMMAND)
                 .executor(new UnclaimAllCommand(this))
                 .build());
 
         //Map command
-        SUBCOMMANDS.put(Collections.singletonList("map"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_MAP_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("map"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_MAP_DESC))
                 .permission(PluginPermissions.MAP_COMMAND)
                 .executor(new MapCommand(this))
                 .build());
 
         //Sethome command
-        SUBCOMMANDS.put(Collections.singletonList("sethome"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_SET_HOME_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("sethome"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_SET_HOME_DESC))
                 .permission(PluginPermissions.SET_HOME_COMMAND)
                 .executor(new SetHomeCommand(this))
                 .build());
 
         //Home command
-        SUBCOMMANDS.put(Collections.singletonList("home"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_HOME_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("home"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_HOME_DESC))
                 .permission(PluginPermissions.HOME_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(Parameter.builder(Faction.class)
+                        .key("faction")
+                        .addParser(new FactionArgument.ValueParser(this.factionLogic))
+                        .completer(new FactionArgument.Completer(this.factionLogic))
+                        .optional()
+                        .build())
                 .executor(new HomeCommand(this))
                 .build());
 
         //Autoclaim command.
-        SUBCOMMANDS.put(Collections.singletonList("autoclaim"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_AUTO_CLAIM_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("autoclaim"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_AUTO_CLAIM_DESC))
                 .permission(PluginPermissions.AUTO_CLAIM_COMMAND)
                 .executor(new AutoClaimCommand(this))
                 .build());
 
         //Automap command
-        SUBCOMMANDS.put(Collections.singletonList("automap"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_AUTO_MAP_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("automap"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_AUTO_MAP_DESC))
                 .permission(PluginPermissions.AUTO_MAP_COMMAND)
                 .executor(new AutoMapCommand(this))
                 .build());
 
         //Coords Command
-        SUBCOMMANDS.put(Collections.singletonList("coords"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_COORDS_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("coords"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_COORDS_DESC))
                 .permission(PluginPermissions.COORDS_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new CoordsCommand(this))
                 .build());
 
         //Admin command
-        SUBCOMMANDS.put(Collections.singletonList("admin"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ADMIN_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("admin"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ADMIN_DESC))
                 .permission(PluginPermissions.ADMIN_MODE_COMMAND)
                 .executor(new AdminCommand(this))
                 .build());
 
-        SUBCOMMANDS.put(Collections.singletonList("setfaction"), CommandSpec.builder()
-                .description(Text.of(Messages.SET_FACTION_COMMAND))
+        //SetFaction Command
+        SUBCOMMANDS.put(Collections.singletonList("setfacion"), Command.builder()
+                .shortDescription(Component.text(Messages.SET_FACTION_COMMAND))
                 .permission(PluginPermissions.SET_FACTION_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
-                        GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))),
-                        GenericArguments.onlyOne(GenericArguments.enumValue(Text.of("rank"), FactionMemberType.class)))
+                .addParameters(CommonParameters.PLAYER,
+                        EagleFactionsCommandParameters.faction(),
+                        Parameter.enumValue(FactionMemberType.class).key("rank").build())
                 .executor(new SetFactionCommand(this))
                 .build());
 
         //SetPower Command
-        SUBCOMMANDS.put(Collections.singletonList("setpower"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_SET_POWER_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("setpower"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_SET_POWER_DESC))
                 .permission(PluginPermissions.SET_POWER_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
-                        GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
+                .addParameters(Parameter.player().key("player").build(),
+                        Parameter.doubleNumber().key("power").build())
                 .executor(new SetPowerCommand(this))
                 .build());
 
         //MaxPower Command
-        SUBCOMMANDS.put(Collections.singletonList("setmaxpower"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_SET_MAX_POWER_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("setmaxpower"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_SET_MAX_POWER_DESC))
                 .permission(PluginPermissions.MAX_POWER_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))),
-                        GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
+                .addParameters(Parameter.player().key("player").build(),
+                        Parameter.doubleNumber().key("power").build())
                 .executor(new SetMaxPowerCommand(this))
                 .build());
 
         // MaxPowerAll Command
-        SUBCOMMANDS.put(Collections.singletonList("setmaxpower_forall"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_SET_MAX_POWER_FOR_ALL_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("setmaxpower_forall"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_SET_MAX_POWER_FOR_ALL_DESC))
                 .permission(PluginPermissions.MAX_POWER_FOR_ALL_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("power"))))
+                .addParameter(Parameter.doubleNumber()
+                        .key("power")
+                        .build())
                 .executor(new SetMaxPowerForAllCommand(this))
                 .build());
 
         //Attack Command
-        SUBCOMMANDS.put(Collections.singletonList("attack"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ATTACK_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("attack"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ATTACK_DESC))
                 .permission(PluginPermissions.ATTACK_COMMAND)
                 .executor(new AttackCommand(this))
                 .build());
 
         //Reload Command
-        SUBCOMMANDS.put(Collections.singletonList("reload"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_RELOAD_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("reload"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_RELOAD_DESC))
                 .permission(PluginPermissions.RELOAD_COMMAND)
                 .executor(new ReloadCommand(this))
                 .build());
 
         //Chat Command
-        SUBCOMMANDS.put(Collections.singletonList("chat"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_CHAT_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("chat"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_CHAT_DESC))
                 .permission(PluginPermissions.CHAT_COMMAND)
-                .arguments(GenericArguments.optional(GenericArguments.enumValue(Text.of("chat"), ChatEnum.class)))
+                .addParameter(Parameter.enumValue(ChatEnum.class)
+                        .key("chat")
+                        .optional()
+                        .build())
                 .executor(new ChatCommand(this))
                 .build());
 
         //Top Command
-        SUBCOMMANDS.put(Collections.singletonList("top"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_TOP_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("top"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_TOP_DESC))
                 .permission(PluginPermissions.TOP_COMMAND)
                 .executor(new TopCommand(this))
                 .build());
 
         //Setleader Command
-        SUBCOMMANDS.put(Collections.singletonList("setleader"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_SET_LEADER_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("setleader"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_SET_LEADER_DESC))
                 .permission(PluginPermissions.SET_LEADER_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionPlayerArgument(this, Text.of("player"))))
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .executor(new SetLeaderCommand(this))
                 .build());
 
         //Perms Command
-        SUBCOMMANDS.put(Collections.singletonList("perms"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_PERMS_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("perms"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_PERMS_DESC))
                 .permission(PluginPermissions.PERMS_COMMAND)
                 .executor(new PermsCommand(this))
                 .build());
 
         //TagColor Command
-        SUBCOMMANDS.put(Collections.singletonList("tagcolor"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_TAG_COLOR_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("tagcolor"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_TAG_COLOR_DESC))
                 .permission(PluginPermissions.TAG_COLOR_COMMAND)
-                .arguments(GenericArguments.catalogedElement(Text.of("color"), TextColor.class))
+                .addParameter(Parameter.color().key("color").build())
                 .executor(new TagColorCommand(this))
                 .build());
 
         //Rename Command
-        SUBCOMMANDS.put(Collections.singletonList("rename"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_RENAME_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("rename"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_RENAME_DESC))
                 .permission(PluginPermissions.RENAME_COMMAND)
-                .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))))
+                .addParameter(Parameter.string().key("name").build())
                 .executor(new RenameCommand(this))
                 .build());
 
         //Tag Command
-        SUBCOMMANDS.put(Collections.singletonList("tag"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_TAG_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("tag"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_TAG_DESC))
                 .permission(PluginPermissions.TAG_COMMAND)
-                .arguments(GenericArguments.string(Text.of("tag")))
+                .addParameter(Parameter.string().key("tag").build())
                 .executor(new TagCommand(this))
                 .build());
 
         //Description Command
-        SUBCOMMANDS.put(Arrays.asList("desc", "description"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_DESC_DESC))
+        SUBCOMMANDS.put(Arrays.asList("desc", "description"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_DESC_DESC))
                 .permission(PluginPermissions.DESCRIPTION_COMMAND)
-                .arguments(GenericArguments.remainingJoinedStrings(Text.of("description")))
+                .addParameter(Parameter.remainingJoinedStrings().key("description").build())
                 .executor(new DescriptionCommand(this))
                 .build());
+
         //Motd Command
-        SUBCOMMANDS.put(Collections.singletonList("motd"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_MOTD_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("motd"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_MOTD_DESC))
                 .permission(PluginPermissions.MOTD_COMMAND)
-                .arguments(GenericArguments.remainingJoinedStrings(Text.of("motd")))
+                .addParameter(Parameter.remainingJoinedStrings().key("motd").build())
                 .executor(new MotdCommand(this))
                 .build());
 
         //EagleFeather Command
-        SUBCOMMANDS.put(Collections.singletonList("feather"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_FEATHER_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("feather"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_FEATHER_DESC))
                 .permission(PluginPermissions.FEATHER_COMMAND)
                 .executor(new EagleFeatherCommand(this))
                 .build());
 
         //Chest Command
-        SUBCOMMANDS.put(Collections.singletonList("chest"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_CHEST_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("chest"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_CHEST_DESC))
                 .permission(PluginPermissions.CHEST_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new ChestCommand(this))
                 .build());
 
         //Public Command
-        SUBCOMMANDS.put(Collections.singletonList("public"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_PUBLIC_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("public"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_PUBLIC_DESC))
                 .permission(PluginPermissions.PUBLIC_COMMAND)
-                .arguments(GenericArguments.optional(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new PublicCommand(this))
                 .build());
 
         //Debug Command
-        SUBCOMMANDS.put(Collections.singletonList("debug"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_DEBUG_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("debug"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_DEBUG_DESC))
                 .permission(PluginPermissions.DEBUG_COMMAND)
                 .executor(new DebugCommand(this))
                 .build());
 
         //Backup Command
-        SUBCOMMANDS.put(Collections.singletonList("createbackup"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_CREATE_BACKUP_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("createbackup"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_CREATE_BACKUP_DESC))
                 .permission(PluginPermissions.BACKUP_COMMAND)
                 .executor(new BackupCommand(this))
                 .build());
 
         //Restore Backup Command
-        SUBCOMMANDS.put(Collections.singletonList("restorebackup"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_RESTORE_BACKUP_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("restorebackup"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_RESTORE_BACKUP_DESC))
                 .permission(PluginPermissions.RESTORE_BACKUP_COMMAND)
-                .arguments(GenericArguments.onlyOne(new BackupNameArgument(this, Text.of("filename"))))
+                .addParameter(Parameter.string()
+                        .key("filename")
+                        .addParser(new BackupNameArgument.ValueParser(this.storageManager))
+                        .completer(new BackupNameArgument.Completer(this.storageManager))
+                        .build())
                 .executor(new RestoreBackupCommand(this))
                 .build());
 
         //Regen Command
-        SUBCOMMANDS.put(Collections.singletonList("regen"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_REGEN_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("regen"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_REGEN_DESC))
                 .permission(PluginPermissions.REGEN_COMMAND)
-                .arguments(GenericArguments.onlyOne(new FactionArgument(this, Text.of("faction"))))
+                .addParameter(EagleFactionsCommandParameters.faction())
                 .executor(new RegenCommand(this))
                 .build());
 
         //Access Player Command
-        final CommandSpec accessPlayerCommand = CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ACCESS_PLAYER_DESC))
+        final Command.Parameterized accessPlayerCommand = Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ACCESS_PLAYER_DESC))
                 .permission(PluginPermissions.ACCESS_PLAYER_COMMAND)
-                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .executor(new AccessPlayerCommand(this))
                 .build();
 
         //Access Faction Command
-        final CommandSpec accessFactionCommand = CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ACCESS_FACTION_DESC))
+        final Command.Parameterized accessFactionCommand = Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ACCESS_FACTION_DESC))
                 .permission(PluginPermissions.ACCESS_FACTION_COMMAND)
                 .executor(new AccessFactionCommand(this))
                 .build();
 
         //Access OwnedBy Command
-        final CommandSpec accessOwnedByCommand = CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ACCESS_OWNED_BY_DESC))
+        final Command.Parameterized accessOwnedByCommand = Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ACCESS_OWNED_BY_DESC))
                 .permission(PluginPermissions.ACCESS_OWNED_BY_COMMAND)
-                .arguments(GenericArguments.onlyOne(new OwnFactionPlayerArgument(this, Text.of("player"))))
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .executor(new OwnedByCommand(this))
                 .build();
 
         //Access AccessibleByFaction Command
-        final CommandSpec accessibleByFactionCommand = CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ACCESS_ACCESSIBLE_BY_FACTION_DESC))
+        final Command.Parameterized accessibleByFactionCommand = Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ACCESS_ACCESSIBLE_BY_FACTION_DESC))
                 .permission(PluginPermissions.ACCESS_NOT_ACCESSIBLE_BY_FACTION_COMMAND)
                 .executor(new NotAccessibleByFactionCommand(this))
                 .build();
 
         //Access Command
-        SUBCOMMANDS.put(Collections.singletonList("access"), CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_ACCESS_DESC))
+        SUBCOMMANDS.put(Collections.singletonList("access"), Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_ACCESS_DESC))
                 .permission(PluginPermissions.ACCESS_COMMAND)
                 .executor(new AccessCommand(this))
-                .child(accessPlayerCommand, "player", "p")
-                .child(accessFactionCommand, "faction", "f")
-                .child(accessOwnedByCommand, "ownedBy")
-                .child(accessibleByFactionCommand, "notAccessibleByFaction")
+                .addChild(accessPlayerCommand, "player", "p")
+                .addChild(accessFactionCommand, "faction", "f")
+                .addChild(accessOwnedByCommand, "ownedBy")
+                .addChild(accessibleByFactionCommand, "notAccessibleByFaction")
                 .build());
 
         //Build all commands
-        CommandSpec commandEagleFactions = CommandSpec.builder()
-                .description(Text.of(Messages.COMMAND_HELP_DESC))
+        Command.Parameterized commandEagleFactions = Command.builder()
+                .shortDescription(Component.text(Messages.COMMAND_HELP_DESC))
                 .executor(new HelpCommand(this))
-                .children(SUBCOMMANDS)
+                .addChildren(SUBCOMMANDS)
                 .build();
 
         //Register commands
-        Sponge.getCommandManager().register(this, commandEagleFactions, "factions", "faction", "f");
+        event.register(this.pluginContainer, commandEagleFactions, "factions", "faction", "f");
     }
 
     private void registerListeners()
     {
         //Sponge events
-        Sponge.getEventManager().registerListeners(this, new EntityDamageListener(this));
-        Sponge.getEventManager().registerListeners(this, new PlayerJoinListener(this));
-        Sponge.getEventManager().registerListeners(this, new PlayerDeathListener(this));
-        Sponge.getEventManager().registerListeners(this, new BlockPlaceListener(this));
-        Sponge.getEventManager().registerListeners(this, new BlockBreakListener(this));
-        Sponge.getEventManager().registerListeners(this, new PlayerInteractListener(this));
-        Sponge.getEventManager().registerListeners(this, new PlayerMoveListener(this));
-        Sponge.getEventManager().registerListeners(this, new EntitySpawnListener(this));
-        Sponge.getEventManager().registerListeners(this, new PlayerDisconnectListener(this));
-        Sponge.getEventManager().registerListeners(this, new SendCommandListener(this));
-        Sponge.getEventManager().registerListeners(this, new ExplosionListener(this));
-        Sponge.getEventManager().registerListeners(this, new ModifyBlockListener(this));
-        Sponge.getEventManager().registerListeners(this, new NotifyNeighborBlockListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new EntityDamageListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerJoinListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerDeathListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new BlockPlaceListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new BlockBreakListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerInteractListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerMoveListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new EntitySpawnListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerDisconnectListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new SendCommandListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new ExplosionListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new ModifyBlockListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new NotifyNeighborBlockListener(this));
 
         // Chat
         if(isUltimateChatLoaded())
         {
-            Sponge.getEventManager().registerListeners(this, new UltimateChatMessageListener(this));
+//            Sponge.eventManager().registerListeners(this.pluginContainer, new UltimateChatMessageListener(this));
         }
         else // Sponge/Vanilla
         {
-            Sponge.getEventManager().registerListeners(this, new ChatMessageListener(this));
+            Sponge.eventManager().registerListeners(this.pluginContainer, new ChatMessageListener(this));
         }
 
         //EF events
-        Sponge.getEventManager().registerListeners(this, new FactionKickListener(this));
-        Sponge.getEventManager().registerListeners(this, new FactionLeaveListener(this));
-        Sponge.getEventManager().registerListeners(this, new FactionJoinListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionKickListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionLeaveListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionJoinListener(this));
     }
 
     private void disablePlugin()
     {
         this.isDisabled = true;
-        Sponge.getEventManager().unregisterPluginListeners(this);
-        Sponge.getCommandManager().getOwnedBy(this).forEach(Sponge.getCommandManager()::removeMapping);
-        Sponge.getServer().getConsole().sendMessage(PluginInfo.ERROR_PREFIX.concat(Text.of(TextColors.RED, "EagleFactions has been disabled!")));
+        Sponge.eventManager().unregisterListeners(this);
+//        Sponge.server().commandManager().registrar(Command.Parameterized.class).get()
+//        Sponge.server().commandManager().getOwnedBy(this).forEach(Sponge.getCommandManager()::removeMapping);
+        Sponge.server().sendMessage(PluginInfo.ERROR_PREFIX.append(text("EagleFactions has been disabled!", RED)));
     }
 
     private boolean isUltimateChatLoaded() {
-        return Sponge.getPluginManager().isLoaded("ultimatechat");
+        return Sponge.pluginManager().plugin("ultimatechat").isPresent();
     }
 }

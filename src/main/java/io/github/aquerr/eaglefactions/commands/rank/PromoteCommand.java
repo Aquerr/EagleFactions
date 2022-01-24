@@ -8,18 +8,23 @@ import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.exception.PlayerNotInFactionException;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Created by Aquerr on 2018-06-24.
@@ -32,26 +37,26 @@ public class PromoteCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final FactionPlayer promotedPlayer = context.requireOne("player");
+        final FactionPlayer promotedPlayer = context.requireOne(EagleFactionsCommandParameters.factionPlayer());
 
-        if(!isPlayer(source))
-            return promoteByConsole(source, promotedPlayer);
+        if(!isServerPlayer(context.cause().audience()))
+            return promoteByConsole(context.cause().audience(), promotedPlayer);
 
-        final Player sourcePlayer = requirePlayerSource(source);
+        final ServerPlayer sourcePlayer = requirePlayerSource(context);
         final Faction playerFaction = requirePlayerFaction(sourcePlayer);
         promotedPlayer.getFaction()
                 .filter(faction -> faction.getName().equals(playerFaction.getName()))
-                .orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION)));
+                .orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION, RED))));
 
         return tryPromotePlayer(playerFaction, sourcePlayer, promotedPlayer);
     }
 
-    private CommandResult tryPromotePlayer(final Faction faction, final Player sourcePlayer, final FactionPlayer targetPlayer) throws CommandException
+    private CommandResult tryPromotePlayer(final Faction faction, final ServerPlayer sourcePlayer, final FactionPlayer targetPlayer) throws CommandException
     {
-        final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer);
-        final FactionMemberType sourcePlayerMemberType = faction.getPlayerMemberType(sourcePlayer.getUniqueId());
+        final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer.user());
+        final FactionMemberType sourcePlayerMemberType = faction.getPlayerMemberType(sourcePlayer.uniqueId());
         final FactionMemberType targetPlayerMemberType = targetPlayer.getFactionRole();
 
         if (hasAdminMode)
@@ -59,42 +64,42 @@ public class PromoteCommand extends AbstractCommand
             if (targetPlayerMemberType == FactionMemberType.OFFICER)
             {
                 super.getPlugin().getRankManager().setLeader(targetPlayer, faction);
-                sourcePlayer.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, targetPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, Messages.LEADER)))));
+                sourcePlayer.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(targetPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(Messages.LEADER, GOLD)))));
                 return CommandResult.success();
             }
 
             if (targetPlayerMemberType == FactionMemberType.LEADER)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE, RED)));
 
             return promotePlayer(sourcePlayer,targetPlayer);
         }
 
         List<FactionMemberType> promotableRoles = getPromotableRolesForRole(sourcePlayerMemberType);
         if (!promotableRoles.contains(targetPlayerMemberType))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE, RED)));
 
         return promotePlayer(sourcePlayer, targetPlayer);
     }
 
-    private CommandResult promoteByConsole(final CommandSource source, final FactionPlayer promotedPlayer) throws CommandException
+    private CommandResult promoteByConsole(final Audience context, final FactionPlayer promotedPlayer) throws CommandException
     {
-        final Faction faction = promotedPlayer.getFaction().orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "This player is not in a faction.")));
+        final Faction faction = promotedPlayer.getFaction().orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(text("This player is not in a faction.", RED))));
         FactionMemberType targetPlayerRole = promotedPlayer.getFactionRole();
         if (targetPlayerRole == FactionMemberType.OFFICER)
         {
             super.getPlugin().getRankManager().setLeader(promotedPlayer, faction);
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, Messages.LEADER)))));
+            context.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(promotedPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(Messages.LEADER, GOLD)))));
             return CommandResult.success();
         }
 
         if (targetPlayerRole == FactionMemberType.LEADER)
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_PROMOTE_THIS_PLAYER_MORE, RED)));
 
         final FactionMemberType promotedTo;
         try
         {
             promotedTo = super.getPlugin().getRankManager().promotePlayer(null, promotedPlayer);
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, promotedTo.name())))));
+            context.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(promotedPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(promotedTo.name(), GOLD)))));
         }
         catch (PlayerNotInFactionException ignored)
         {
@@ -102,13 +107,13 @@ public class PromoteCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private CommandResult promotePlayer(final Player promotedBy, final FactionPlayer promotedPlayer)
+    private CommandResult promotePlayer(final ServerPlayer promotedBy, final FactionPlayer promotedPlayer)
     {
         final FactionMemberType promotedTo;
         try
         {
             promotedTo = getPlugin().getRankManager().promotePlayer(promotedBy, promotedPlayer);
-            promotedBy.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, TextColors.GREEN, ImmutableMap.of(Placeholders.PLAYER, Text.of(TextColors.GOLD, promotedPlayer.getName()), Placeholders.MEMBER_TYPE, Text.of(TextColors.GOLD, promotedTo.name())))));
+            promotedBy.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_PROMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(promotedPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(promotedTo.name(), GOLD)))));
         }
         catch (PlayerNotInFactionException ignored)
         {

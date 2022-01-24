@@ -3,17 +3,16 @@ package io.github.aquerr.eaglefactions.entities;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class FactionChestImpl implements FactionChest
 {
@@ -61,19 +60,24 @@ public class FactionChestImpl implements FactionChest
 
     private Inventory buildInventory(final List<SlotItem> slotItems)
     {
+        FactionChest factionChest = this;
+
         //Create inventory
         final Inventory inventory = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .property(InventoryTitle.of(Text.of(TextColors.BLUE, Text.of("Faction's chest"))))
-                .listener(InteractInventoryEvent.Close.class, (x) ->
-                {
-                    final Faction faction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(factionName);
-                    if(faction != null)
-                    {
-                        EagleFactionsPlugin.getPlugin().getFactionLogic().setChest(faction, this);
-                    }
-                })
-                .build(EagleFactionsPlugin.getPlugin());
+                .slots(27)
+                .completeStructure()
+                .build();
+        final ViewableInventory viewableInventory = inventory.asViewable().get();
+        final InventoryMenu inventoryMenu = viewableInventory.asMenu();
+        inventoryMenu.setTitle(Component.text("Faction's chest", NamedTextColor.BLUE));
+        inventoryMenu.registerClose((cause, container) ->
+        {
+            final Faction faction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByName(factionName);
+            if(faction != null)
+            {
+                EagleFactionsPlugin.getPlugin().getFactionLogic().setChest(faction, factionChest);
+            }
+        });
 
         //Fill it with items
         int column = 1;
@@ -99,15 +103,15 @@ public class FactionChestImpl implements FactionChest
     private List<SlotItem> toSlotItems(final Inventory inventory)
     {
         final List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
-        final Iterable<Inventory> slots = inventory.slots();
+        final List<Slot> slots = inventory.slots();
         int column = 1;
         int row = 1;
         for(Inventory slot : slots)
         {
-            Optional<ItemStack> optionalItemStack = slot.peek();
-            if(optionalItemStack.isPresent())
+            ItemStack itemStack = slot.peek();
+            if(itemStack != ItemStack.empty())
             {
-                slotItemList.add(new FactionChestImpl.SlotItemImpl(column, row, optionalItemStack.get()));
+                slotItemList.add(new FactionChestImpl.SlotItemImpl(column, row, itemStack));
             }
 
             column++;

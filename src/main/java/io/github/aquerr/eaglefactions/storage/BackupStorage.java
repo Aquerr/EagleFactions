@@ -4,9 +4,9 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.storage.file.hocon.ConfigurateHelper;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -56,8 +56,11 @@ public class BackupStorage
             {
                 final Path factionFilePath = factionsDir.resolve(faction.getName().toLowerCase() + ".conf");
 //                createFileIfNotExists(factionFilePath, false);
-                final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(factionFilePath).build();
-                final ConfigurationNode configurationNode = configurationLoader.createEmptyNode();
+                final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder()
+                        .defaultOptions(ConfigurateHelper.getDefaultOptions())
+                        .path(factionFilePath)
+                        .build();
+                final ConfigurationNode configurationNode = configurationLoader.createNode();
                 ConfigurateHelper.putFactionInNode(configurationNode, faction);
                 configurationLoader.save(configurationNode);
             }
@@ -68,8 +71,10 @@ public class BackupStorage
             {
                 final Path playerFile = playersDir.resolve(factionPlayer.getUniqueId().toString() + ".conf");
 //                createFileIfNotExists(playerFile, false);
-                final HoconConfigurationLoader playerConfigLoader = HoconConfigurationLoader.builder().setPath(playerFile).build();
-                final ConfigurationNode playerNode = playerConfigLoader.createEmptyNode();
+                final HoconConfigurationLoader playerConfigLoader = HoconConfigurationLoader.builder()
+                        .path(playerFile)
+                        .build();
+                final ConfigurationNode playerNode = playerConfigLoader.createNode();
                 ConfigurateHelper.putPlayerInNode(playerNode, factionPlayer);
                 playerConfigLoader.save(playerNode);
             }
@@ -156,14 +161,17 @@ public class BackupStorage
         {
             for (final File file : factionsFiles)
             {
-                final HoconConfigurationLoader hoconConfigurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setFile(file).build();
+                final HoconConfigurationLoader hoconConfigurationLoader = HoconConfigurationLoader.builder()
+                        .defaultOptions(ConfigurateHelper.getDefaultOptions())
+                        .file(file)
+                        .build();
                 final ConfigurationNode configurationNode = hoconConfigurationLoader.load();
                 try
                 {
                     final Faction faction = ConfigurateHelper.getFactionFromNode(configurationNode);
                     factions.add(faction);
                 }
-                catch (final ObjectMappingException e)
+                catch (final SerializationException e)
                 {
                     e.printStackTrace();
                 }

@@ -5,18 +5,21 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.Optional;
 import java.util.UUID;
+
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class DisbandCommand extends AbstractCommand
 {
@@ -26,64 +29,59 @@ public class DisbandCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.getOne("faction");
-
-        if (source instanceof Player)
+        if (context.cause().audience() instanceof ServerPlayer)
         {
-            final Player player = (Player) source;
-            Faction faction = optionalFaction.orElseGet(() -> super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId())
-                    .orElse(null));
-            if (faction == null)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+            final ServerPlayer player = (ServerPlayer) context.cause().audience();
+            Faction faction = requirePlayerFaction(player);
             playerDisband(player, faction);
         }
         else
         {
-            final Faction faction = context.requireOne("faction");
-            consoleDisband(source, faction);
+            final Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
+            consoleDisband(context, faction);
         }
 
         return CommandResult.success();
     }
 
-    private void consoleDisband(CommandSource source, Faction faction) throws CommandException
+    private void consoleDisband(CommandContext context, Faction faction) throws CommandException
     {
         //Even admins should not be able to disband SafeZone nor WarZone
         if(faction.isSafeZone() || faction.isWarZone())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_CANNOT_BE_DISBANDED));
-        sendDisbandEventAndDisband(source, faction, false);
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.THIS_FACTION_CANNOT_BE_DISBANDED, RED)));
+        sendDisbandEventAndDisband(context.cause().audience(), faction, false);
     }
 
-    private void playerDisband(final Player player, final Faction faction) throws CommandException
+    private void playerDisband(final ServerPlayer player, final Faction faction) throws CommandException
     {
         //Even admins should not be able to disband SafeZone nor WarZone
         if(faction.isSafeZone() || faction.isWarZone())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_CANNOT_BE_DISBANDED));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.THIS_FACTION_CANNOT_BE_DISBANDED, RED)));
 
-        if (player.getUniqueId().equals(faction.getLeader()))
+        if (player.uniqueId().equals(faction.getLeader()))
         {
             sendDisbandEventAndDisband(player, faction, false);
         }
         else
         {
-            final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player);
+            final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
             if (!hasAdminMode)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS, RED)));
             sendDisbandEventAndDisband(player, faction, true);
         }
     }
 
-    private void sendDisbandEventAndDisband(final CommandSource source, final Faction faction, final boolean forceRemovedByAdmin)
+    private void sendDisbandEventAndDisband(final Audience audience, final Faction faction, final boolean forceRemovedByAdmin)
     {
-        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(source, faction, forceRemovedByAdmin, false);
+        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(audience, faction, forceRemovedByAdmin, false);
         if(!isCancelled)
         {
             super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.FACTION_HAS_BEEN_DISBANDED));
+            audience.sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.FACTION_HAS_BEEN_DISBANDED, GREEN)));
             clearAutoClaimAndChatForFactionMembers(faction);
-            EventRunner.runFactionDisbandEventPost(source, faction, forceRemovedByAdmin, false);
+            EventRunner.runFactionDisbandEventPost(audience, faction, forceRemovedByAdmin, false);
         }
     }
 

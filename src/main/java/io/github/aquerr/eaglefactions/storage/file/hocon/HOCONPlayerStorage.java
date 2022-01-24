@@ -4,11 +4,11 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.storage.PlayerStorage;
 import io.github.aquerr.eaglefactions.util.FileUtils;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class HOCONPlayerStorage implements PlayerStorage
 {
@@ -57,7 +59,7 @@ public class HOCONPlayerStorage implements PlayerStorage
         {
             FileUtils.createDirectoryIfNotExists(this.playersDirectoryPath);
             Path playerFile = playersDirectoryPath.resolve(player.getUniqueId().toString() + ".conf");
-            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile).build();
+            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().defaultOptions(ConfigurateHelper.getDefaultOptions()).path(playerFile).build();
             ConfigurationNode configurationNode = configurationLoader.load();
             ConfigurateHelper.putPlayerInNode(configurationNode, player);
             configurationLoader.save(configurationNode);
@@ -65,7 +67,7 @@ public class HOCONPlayerStorage implements PlayerStorage
         }
         catch(IOException e)
         {
-            Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, "Error while putting player'" + player.getName() + "' in node."));
+            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text("Error while putting player'" + player.getName() + "' in node.", RED)));
             e.printStackTrace();
         }
 
@@ -95,11 +97,11 @@ public class HOCONPlayerStorage implements PlayerStorage
 
         for(File playerFile : playerFiles)
         {
-            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().setDefaultOptions(ConfigurateHelper.getDefaultOptions()).setPath(playerFile.toPath()).build();
+            HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder().defaultOptions(ConfigurateHelper.getDefaultOptions()).path(playerFile.toPath()).build();
             try
             {
                 ConfigurationNode configurationNode = configurationLoader.load();
-                playerSet.add(configurationNode.getNode("name").getString(""));
+                playerSet.add(configurationNode.node("name").getString(""));
             }
             catch(IOException e)
             {

@@ -22,15 +22,17 @@ import io.github.aquerr.eaglefactions.storage.task.DeleteFactionTask;
 import io.github.aquerr.eaglefactions.storage.task.IStorageTask;
 import io.github.aquerr.eaglefactions.storage.task.SavePlayerTask;
 import io.github.aquerr.eaglefactions.storage.task.UpdateFactionTask;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
 
 public class StorageManagerImpl implements StorageManager
 {
@@ -86,7 +88,7 @@ public class StorageManagerImpl implements StorageManager
                 break;
         }
         this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
-        Sponge.getServer().getConsole().sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.AQUA, "Filling cache with data..."));
+        Sponge.server().sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(Component.text("Filling cache with data...", AQUA)));
         prepareFactionsCache();
         preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }

@@ -4,18 +4,17 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.Piston;
-import org.spongepowered.api.command.source.CommandBlockSource;
+import org.spongepowered.api.block.entity.CommandBlock;
+import org.spongepowered.api.block.entity.Piston;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.FallingBlock;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 
@@ -30,43 +29,41 @@ public class BlockPlaceListener extends AbstractListener
     }
 
     @Listener(order = Order.EARLY)
-    public void onBlockPlace(ChangeBlockEvent.Place event)
+    public void onBlockPlace(ChangeBlockEvent.All event)
     {
-        if (event.getCause().containsType(CommandBlockSource.class))
+        if (event.cause().containsType(CommandBlock.class))
             return;
 
-        final Object source = event.getSource();
+        final Object source = event.source();
         if(source instanceof Piston)
             return;
 
         User user = null;
-        if(event.getCause().containsType(Player.class))
+        if(event.cause().containsType(ServerPlayer.class))
         {
-            user = event.getCause().first(Player.class).get();
+            user = event.cause().first(ServerPlayer.class).get().user();
         }
-        else if(event.getCause().containsType(User.class))
+        else if(event.cause().containsType(User.class))
         {
-            user = event.getCause().first(User.class).get();
+            user = event.cause().first(User.class).get();
         }
 
-        if(user instanceof Player)
+        if(user != null)
         {
-            final Player player = (Player) user;
-
             //Requested for sand/tnt cannons by Turner
             if(source instanceof FallingBlock && this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims())
                 return;
 
-            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+            for (Transaction<BlockSnapshot> transaction : event.transactions())
             {
-                if(!super.getPlugin().getProtectionManager().canPlace(transaction.getFinal().getLocation().get(), player, true).hasAccess())
+                if(!super.getPlugin().getProtectionManager().canPlace(transaction.finalReplacement().location().get(), user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     break;
                 }
             }
         }
-        else if(user == null)
+        else
         {
 //            final boolean pistonExtend = event.getContext().containsKey(EventContextKeys.PISTON_EXTEND);
 //            final boolean pistonRetract = event.getContext().containsKey(EventContextKeys.PISTON_RETRACT);
@@ -85,14 +82,14 @@ public class BlockPlaceListener extends AbstractListener
 //                }
 //            }
 
-            final Optional<BlockSnapshot> optionalNeighborNotifySource = event.getContext().get(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE);
+            final Optional<BlockSnapshot> optionalNeighborNotifySource = event.context().get(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE);
             if (optionalNeighborNotifySource.isPresent())
             {
                 final BlockSnapshot blockSnapshot = optionalNeighborNotifySource.get();
                 if(!(source instanceof BlockSnapshot))
                     return;
-                final Optional<Location<World>> sourceNotifyLocation = blockSnapshot.getLocation();
-                final Optional<Location<World>> sourceLocation = ((BlockSnapshot) source).getLocation();
+                final Optional<ServerLocation> sourceNotifyLocation = blockSnapshot.location();
+                final Optional<ServerLocation> sourceLocation = ((BlockSnapshot) source).location();
                 if (!sourceNotifyLocation.isPresent() || !sourceLocation.isPresent())
                     return;
                 if (!super.getPlugin().getProtectionManager().canNotifyBlock(sourceNotifyLocation.get(), sourceLocation.get()).hasAccess())
@@ -107,10 +104,10 @@ public class BlockPlaceListener extends AbstractListener
 //                }
             }
 
-            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
+            for (Transaction<BlockSnapshot> transaction : event.transactions())
             {
                 //Block fire from thunder
-                if(transaction.getFinal().getState().getType() == BlockTypes.FIRE && super.getPlugin().getFactionLogic().getFactionByChunk(transaction.getFinal().getWorldUniqueId(), transaction.getFinal().getLocation().get().getChunkPosition()).isPresent())
+                if(transaction.finalReplacement().state().type() == BlockTypes.FIRE && super.getPlugin().getFactionLogic().getFactionByChunk(transaction.finalReplacement().location().get().world().uniqueId(), transaction.finalReplacement().location().get().chunkPosition()).isPresent())
                 {
                     event.setCancelled(true);
                     return;

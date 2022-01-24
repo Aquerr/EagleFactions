@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -52,8 +52,8 @@ public class SqliteProvider extends SQLAbstractProvider
             throw new RuntimeException(exception);
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName() + ".db");
-        final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
-        this.dataSource = sqlService.getDataSource("jdbc:sqlite://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
+        final SqlManager sqlManager = Sponge.sqlManager();
+        this.dataSource = sqlManager.dataSource("jdbc:sqlite://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
         final Connection connection = getConnection();
         connection.close();
     }

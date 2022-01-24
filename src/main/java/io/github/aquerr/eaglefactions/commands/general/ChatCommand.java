@@ -6,15 +6,16 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Optional;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 
 public class ChatCommand extends AbstractCommand
 {
@@ -24,17 +25,12 @@ public class ChatCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        final Optional<ChatEnum> optionalChatType = context.<ChatEnum>getOne("chat");
+        final Optional<ChatEnum> optionalChatType = context.one(Parameter.enumValue(ChatEnum.class).key("chat").build());
 
-        if(!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        Player player = (Player) source;
-
-        if(!super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId()).isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+        ServerPlayer player = requirePlayerSource(context);
+        requirePlayerFaction(player);
 
         if(optionalChatType.isPresent())
         {
@@ -43,9 +39,9 @@ public class ChatCommand extends AbstractCommand
         else
         {
             //If player is in alliance chat or faction chat.
-            if(EagleFactionsPlugin.CHAT_LIST.containsKey(player.getUniqueId()))
+            if(EagleFactionsPlugin.CHAT_LIST.containsKey(player.uniqueId()))
             {
-                if(EagleFactionsPlugin.CHAT_LIST.get(player.getUniqueId()).equals(ChatEnum.ALLIANCE))
+                if(EagleFactionsPlugin.CHAT_LIST.get(player.uniqueId()).equals(ChatEnum.ALLIANCE))
                 {
                     setChatChannel(player, ChatEnum.FACTION);
                 }
@@ -62,20 +58,20 @@ public class ChatCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void setChatChannel(final Player player, final ChatEnum chatType) {
+    private void setChatChannel(final ServerPlayer player, final ChatEnum chatType) {
         switch(chatType)
         {
             case GLOBAL:
-                EagleFactionsPlugin.CHAT_LIST.remove(player.getUniqueId());
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO, TextColors.GOLD, Messages.GLOBAL_CHAT));
+                EagleFactionsPlugin.CHAT_LIST.remove(player.uniqueId());
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.CHANGED_CHAT_TO)).append(text(Messages.GLOBAL_CHAT, GOLD)));
                 break;
             case ALLIANCE:
-                EagleFactionsPlugin.CHAT_LIST.put(player.getUniqueId(), chatType);
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO, TextColors.GOLD, Messages.ALLIANCE_CHAT));
+                EagleFactionsPlugin.CHAT_LIST.put(player.uniqueId(), chatType);
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.CHANGED_CHAT_TO)).append(text(Messages.ALLIANCE_CHAT, GOLD)));
                 break;
             case FACTION:
-                EagleFactionsPlugin.CHAT_LIST.put(player.getUniqueId(), chatType);
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.CHANGED_CHAT_TO, TextColors.GOLD, Messages.FACTION_CHAT));
+                EagleFactionsPlugin.CHAT_LIST.put(player.uniqueId(), chatType);
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.CHANGED_CHAT_TO)).append(text(Messages.FACTION_CHAT, GOLD)));
                 break;
         }
     }

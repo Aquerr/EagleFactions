@@ -1,18 +1,19 @@
 package io.github.aquerr.eaglefactions.integrations.dynmap;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.integrations.dynmap.util.DynmapUtils;
 import io.github.aquerr.eaglefactions.integrations.dynmap.util.TempAreaMarker;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsRunnableTask;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.Marker;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Dynmap Integration update task. It draws the faction areas by scanning all factions.
@@ -23,12 +24,6 @@ import java.util.*;
 
 public class DynmapUpdateTask implements EagleFactionsRunnableTask
 {
-    @Override
-    public String getName()
-    {
-        return "eaglefactions-dynmap-update-task";
-    }
-
     @Override
     public void run()
     {
@@ -68,9 +63,8 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
             if (faction.getHome() != null)
             { /* Let's draw faction home first */
-                World factionHomeWorld = Sponge.getServer().getWorld(faction.getHome().getWorldUUID()).isPresent()
-                        ? Sponge.getServer().getWorld(faction.getHome().getWorldUUID()).get()
-                        : null;
+                ServerWorld factionHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().getWorldUUID())
+                        .orElse(null);
 
                 if (factionHomeWorld != null)
                 {
@@ -78,10 +72,10 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
                     Marker marker = DynmapService.markerSet.createMarker(null,
                             faction.getName() + " Home",
-                            factionHomeWorld.getName(),
-                            blockPos.getX(),
-                            blockPos.getY(),
-                            blockPos.getZ(),
+                            factionHomeWorld.key().asString(),
+                            blockPos.x(),
+                            blockPos.y(),
+                            blockPos.z(),
                             DynmapService.markerapi.getMarkerIcon(EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig().getDynmapFactionHomeIcon()),
                             false);
 
@@ -121,19 +115,27 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
             {
                 for (TempAreaMarker tempMarker : entry.getValue())
                 {
-                    World world = Sponge.getServer().getWorld(entry.getKey()).isPresent() ? Sponge.getServer().getWorld(entry.getKey()).get() : null;
+                    ServerWorld world = WorldUtil.getWorldByUUID(entry.getKey())
+                            .orElse(null);
 
                     if (world == null) continue; /* Somehow there's no world for that area */
 
                     AreaMarker areaMarker = DynmapService.markerSet.createAreaMarker(null,
                             faction.getName(),
                             false,
-                            world.getName(),
+                            world.key().asString(),
                             new double[1000],
                             new double[1000],
                             false);
 
-                    areaMarker.setDescription(DynmapUtils.getFactionInfoWindow(faction));
+                    try
+                    {
+                        areaMarker.setDescription(DynmapUtils.getFactionInfoWindow(faction));
+                    }
+                    catch (ExecutionException | InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
 
                     int areaColor = DynmapUtils.getAreaColor(faction);
                     areaMarker.setLineStyle(3, 0.8, areaColor);

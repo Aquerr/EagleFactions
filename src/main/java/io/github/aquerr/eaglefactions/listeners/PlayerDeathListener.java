@@ -10,16 +10,19 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import org.spongepowered.api.entity.living.player.Player;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 
 public class PlayerDeathListener extends AbstractListener
 {
@@ -36,24 +39,25 @@ public class PlayerDeathListener extends AbstractListener
     }
 
     @Listener(order = Order.POST)
-    public void onPlayerDeath(final DestructEntityEvent.Death event, final @Getter("getTargetEntity") Player player)
+    public void onPlayerDeath(final DestructEntityEvent.Death event, final @Getter("entity") ServerPlayer player)
     {
-        CompletableFuture.runAsync(() -> super.getPlugin().getPowerManager().decreasePower(player.getUniqueId()))
-                .thenRun(() -> player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getPowerDecrement()))), "\n",
-                TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId()))));
+        CompletableFuture.runAsync(() -> super.getPlugin().getPowerManager().decreasePower(player.uniqueId()))
+                .thenRun(() -> player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, NamedTextColor.WHITE, ImmutableMap.of(Placeholders.NUMBER, Component.text(this.powerConfig.getPowerDecrement(), GOLD)))
+                                .append(Component.newline())
+                                .append(Component.text(Messages.CURRENT_POWER + " " + super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId()), GRAY)))));
 
-        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-        if (this.protectionConfig.getWarZoneWorldNames().contains(player.getWorld().getName()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isWarZone()))
+        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        if (this.protectionConfig.getWarZoneWorldNames().contains(player.world().key().asString()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isWarZone()))
         {
-            super.getPlugin().getPlayerManager().setDeathInWarZone(player.getUniqueId(), true);
+            super.getPlugin().getPlayerManager().setDeathInWarZone(player.uniqueId(), true);
         }
 
         if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction())
         {
-            final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
             if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().getName().equals(optionalPlayerFaction.get().getName()))
             {
-                super.getPlugin().getAttackLogic().blockHome(player.getUniqueId());
+                super.getPlugin().getAttackLogic().blockHome(player.uniqueId());
             }
         }
 

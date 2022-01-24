@@ -1,9 +1,8 @@
 package io.github.aquerr.eaglefactions.storage.serializers;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.DataView.SafetyMode;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -18,16 +17,16 @@ public class InventorySerializer {
         List<DataView> slots = new LinkedList<>();
 
         int i = 0;
-        Optional<ItemStack> stack;
+        ItemStack stack;
 
         for (Inventory inv : inventory.slots()) {
             stack = inv.peek();
 
-            if (stack.isPresent()) {
-                container = DataContainer.createNew(SafetyMode.ALL_DATA_CLONED);
+            if (stack != ItemStack.empty()) {
+                container = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
 
                 container.set(SLOT, i);
-                container.set(STACK, serializeItemStack(stack.get()));
+                container.set(STACK, serializeItemStack(stack));
 
                 slots.add(container);
             }
@@ -56,7 +55,7 @@ public class InventorySerializer {
         for (Inventory slot : inventory.slots()) {
             if (stacks.containsKey(i)) {
                 try {
-                    slot.set(stacks.get(i));
+                    slot.offer(stacks.get(i));
                 } catch (NoSuchElementException e) {
                     slot.clear();
 

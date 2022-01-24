@@ -1,18 +1,18 @@
 package io.github.aquerr.eaglefactions.events;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.*;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 
@@ -337,6 +337,9 @@ public final class EventRunner
 
     private static EventContext.Builder getEventContextForPlayer(final Player player)
     {
-        return EventContext.builder().add(EventContextKeys.OWNER, player).add(EventContextKeys.PLAYER, player).add(EventContextKeys.CREATOR, player);
+        return EventContext.builder()
+                .add(EventContextKeys.AUDIENCE, player)
+                .add(EventContextKeys.PLAYER, player)
+                .add(EventContextKeys.CREATOR, player.uniqueId());
     }
 }

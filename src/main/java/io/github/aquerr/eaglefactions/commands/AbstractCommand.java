@@ -4,16 +4,18 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Optional;
+
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public abstract class AbstractCommand implements CommandExecutor
 {
@@ -30,24 +32,24 @@ public abstract class AbstractCommand implements CommandExecutor
     }
 
     @Override
-    public abstract CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException;
+    public abstract CommandResult execute(final CommandContext context) throws CommandException;
 
     protected Faction requirePlayerFaction(Player player) throws CommandException
     {
-        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
-        return optionalPlayerFaction.orElseThrow(() -> new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
+        final Optional<Faction> optionalPlayerFaction = this.plugin.getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
+        return optionalPlayerFaction.orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND, RED))));
     }
 
-    protected Player requirePlayerSource(CommandSource commandSource) throws CommandException
+    protected ServerPlayer requirePlayerSource(CommandContext context) throws CommandException
     {
-        if(!isPlayer(commandSource))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-        return(Player) commandSource;
+        if(!isServerPlayer(context.cause().audience()))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND, RED)));
+        return(ServerPlayer) context.cause().audience();
     }
 
-    protected boolean isPlayer(CommandSource commandSource)
+    protected boolean isServerPlayer(Audience audience)
     {
-        return commandSource instanceof Player;
+        return audience instanceof ServerPlayer;
     }
 
 //    @Override

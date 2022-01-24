@@ -1,55 +1,70 @@
 package io.github.aquerr.eaglefactions.commands.args;
 
-import io.github.aquerr.eaglefactions.api.EagleFactions;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.text.Text;
+import io.github.aquerr.eaglefactions.api.storage.StorageManager;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.exception.ArgumentParseException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class BackupNameArgument extends CommandElement
+public class BackupNameArgument
 {
-    private EagleFactions plugin;
-
-    public BackupNameArgument(final EagleFactions plugin, @Nullable Text key)
+    private BackupNameArgument()
     {
-        super(key);
-        this.plugin = plugin;
+
     }
 
-    @Nullable
-    @Override
-    protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
+    public static class ValueParser implements org.spongepowered.api.command.parameter.managed.ValueParser<String>
     {
-        if(!args.hasNext())
-           throw args.createError(Text.of("Argument is not a valid backup name!"));
+        private final StorageManager storageManager;
 
-        final String backupName = args.next();
-        if (!this.plugin.getStorageManager().listBackups().contains(backupName))
-            throw args.createError(Text.of("Argument is not a valid backup name!"));
-        return backupName;
-    }
-
-    @Override
-    public List<String> complete(CommandSource src, CommandArgs args, CommandContext context)
-    {
-        final List<String> backups = plugin.getStorageManager().listBackups();
-        final List<String> list = new ArrayList<>(backups);
-        Collections.sort(list);
-
-        if (args.hasNext())
+        public ValueParser(StorageManager storageManager)
         {
-            String charSequence = args.nextIfPresent().get().toLowerCase();
-            return list.stream().filter(x->x.toLowerCase().contains(charSequence)).collect(Collectors.toList());
+            this.storageManager = storageManager;
         }
 
-        return list;
+        @Override
+        public Optional<? extends String> parseValue(Parameter.Key<? super String> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException
+        {
+            if(!reader.canRead())
+                throw reader.createException(Component.text("Argument is not a valid backup name!"));
+
+            final String backupName = reader.parseUnquotedString();
+            if (!this.storageManager.listBackups().contains(backupName))
+                throw reader.createException(Component.text("Argument is not a valid backup name!"));
+            return Optional.of(backupName);
+        }
+    }
+
+    public static class Completer implements ValueCompleter
+    {
+        private final StorageManager storageManager;
+
+        public Completer(StorageManager storageManager)
+        {
+            this.storageManager = storageManager;
+        }
+
+        @Override
+        public List<CommandCompletion> complete(CommandContext context, String currentInput)
+        {
+            final List<String> backups = this.storageManager.listBackups();
+            final List<String> list = new ArrayList<>(backups);
+            Collections.sort(list);
+
+            String charSequence = currentInput.toLowerCase();
+            return list.stream()
+                    .filter(x->x.toLowerCase().contains(charSequence))
+                    .map(CommandCompletion::of)
+                    .collect(Collectors.toList());
+        }
     }
 }

@@ -4,20 +4,21 @@ import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class ProtectionConfigImpl implements ProtectionConfig
 {
@@ -351,7 +352,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 				}
 				catch(final PatternSyntaxException exception)
 				{
-					Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "The syntax of your pattern is wrong. Id = " + whiteListedIdPattern));
+					Sponge.server().sendMessage(Identity.nil(), Component.text("The syntax of your pattern is wrong. Id = " + whiteListedIdPattern, RED));
 				}
 			}
 			return false;

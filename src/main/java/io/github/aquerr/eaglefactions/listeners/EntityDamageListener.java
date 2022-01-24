@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
@@ -14,6 +13,8 @@ import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.util.ModSupport;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
@@ -21,11 +22,8 @@ import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.*;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -34,15 +32,16 @@ import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDama
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
+
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class EntityDamageListener extends AbstractListener
 {
@@ -71,8 +70,8 @@ public class EntityDamageListener extends AbstractListener
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onEntityDamage(final DamageEntityEvent event)
     {
-        final Entity targetEntity = event.getTargetEntity();
-        final Cause cause = event.getCause();
+        final Entity targetEntity = event.entity();
+        final Cause cause = event.cause();
 
         //Handle damaging player in separate method.
         if(targetEntity instanceof Player)
@@ -87,42 +86,42 @@ public class EntityDamageListener extends AbstractListener
         if(cause.root() instanceof IndirectEntityDamageSource)
         {
             IndirectEntityDamageSource indirectEntityDamageSource = (IndirectEntityDamageSource) cause.root();
-            final Entity sourceEntity = indirectEntityDamageSource.getIndirectSource();
-            if(sourceEntity instanceof Player)
-                user = (Player) sourceEntity;
+            final Entity sourceEntity = indirectEntityDamageSource.indirectSource();
+            if(sourceEntity instanceof ServerPlayer)
+                user = ((ServerPlayer) sourceEntity).user();
         }
 
         if(user == null)
             return;
 
-        if(!super.getPlugin().getProtectionManager().canInteractWithBlock(targetEntity.getLocation(), user, true).hasAccess())
+        if(!super.getPlugin().getProtectionManager().canInteractWithBlock(targetEntity.serverLocation(), user, true).hasAccess())
         {
             event.setCancelled(true);
         }
     }
 
     @Listener(order = Order.EARLY, beforeModifications = true)
-    public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "getTargetEntity") Player attackedPlayer)
+    public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "entity") ServerPlayer attackedPlayer)
     {
-        if(!(event.getCause().root() instanceof DamageSource))
+        if(!(event.cause().root() instanceof DamageSource))
             return;
 
-        final World world = attackedPlayer.getWorld();
-        final Location<World> location = attackedPlayer.getLocation();
+        final ServerWorld world = attackedPlayer.world();
+        final ServerLocation location = attackedPlayer.serverLocation();
 
         //If it is safezone, protect the player from everything.
         if (isSafeZone(location))
         {
             event.setBaseDamage(0);
             event.setCancelled(true);
-            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
+            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
             return;
         }
 
         //At this point we know that damage has NOT been dealt inside Safe Zone.
 
         final boolean willCauseDeath = event.willCauseDeath();
-        final Object rootCause = event.getCause().root();
+        final Object rootCause = event.cause().root();
 
         //Percentage damage reduction operator
         final DoubleUnaryOperator doubleUnaryOperator = operand ->
@@ -135,21 +134,21 @@ public class EntityDamageListener extends AbstractListener
         if(rootCause instanceof IndirectEntityDamageSource)
         {
             final IndirectEntityDamageSource indirectEntityDamageSource = (IndirectEntityDamageSource)rootCause;
-            final Entity indirectSource = indirectEntityDamageSource.getIndirectSource();
+            final Entity indirectSource = indirectEntityDamageSource.indirectSource();
 
             //If player attacked the player
-            if(indirectSource instanceof Player)
+            if(indirectSource instanceof ServerPlayer)
             {
-                final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, (Player) indirectSource, willCauseDeath);
+                final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, (ServerPlayer) indirectSource, willCauseDeath);
                 if(shouldBlockDamage)
                 {
                     event.setBaseDamage(0);
                     event.setCancelled(true);
-                    if(!(indirectEntityDamageSource.getSource() instanceof Player))
+                    if(!(indirectEntityDamageSource.source() instanceof ServerPlayer))
                     {
-                        indirectEntityDamageSource.getSource().remove();
+                        indirectEntityDamageSource.source().remove();
                     }
-                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
+                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
                 }
                 else
                 {
@@ -165,7 +164,7 @@ public class EntityDamageListener extends AbstractListener
         {
             //Handle damage from other entities
             final EntityDamageSource entityDamageSource = (EntityDamageSource) rootCause;
-            Entity entitySource = entityDamageSource.getSource();
+            Entity entitySource = entityDamageSource.source();
 
             //TechGuns
             if (ModSupport.isTechGuns(entityDamageSource.getClass()))
@@ -175,15 +174,15 @@ public class EntityDamageListener extends AbstractListener
                     entitySource = entity;
             }
 
-            if(entitySource instanceof Player)
+            if(entitySource instanceof ServerPlayer)
             {
-                final Player player = (Player) entitySource;
+                final ServerPlayer player = (ServerPlayer) entitySource;
                 final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
                 if(shouldBlockDamage)
                 {
                     event.setBaseDamage(0);
                     event.setCancelled(true);
-                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.getPosition());
+                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
                 }
                 else
                 {
@@ -204,7 +203,7 @@ public class EntityDamageListener extends AbstractListener
         }
     }
 
-    private boolean shouldBlockDamageFromPlayer(final Player attackedPlayer, final Player sourcePlayer, boolean willCauseDeath)
+    private boolean shouldBlockDamageFromPlayer(final ServerPlayer attackedPlayer, final ServerPlayer sourcePlayer, boolean willCauseDeath)
     {
         final boolean canAttack = this.protectionManager.canHitEntity(attackedPlayer, sourcePlayer, false).hasAccess();
         if (!canAttack)
@@ -213,8 +212,8 @@ public class EntityDamageListener extends AbstractListener
         if (!willCauseDeath)
             return false;
 
-        final Optional<Faction> attackedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(attackedPlayer.getUniqueId());
-        final Optional<Faction> sourcePlayerFFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.getUniqueId());
+        final Optional<Faction> attackedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(attackedPlayer.uniqueId());
+        final Optional<Faction> sourcePlayerFFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.uniqueId());
 
         if (attackedPlayerFaction.isPresent() && sourcePlayerFFaction.isPresent())
         {
@@ -248,16 +247,16 @@ public class EntityDamageListener extends AbstractListener
     @Listener
     public void onIgniteEntity(final IgniteEntityEvent event)
     {
-        final EventContext eventContext = event.getContext();
-        final Entity entity = event.getTargetEntity();
-        final World world = event.getTargetEntity().getWorld();
+        final EventContext eventContext = event.context();
+        final Entity entity = event.entity();
+        final ServerWorld world = event.entity().serverLocation().world();
 
         //Only if ignited entity is player
         if(!(entity instanceof Player))
             return;
 
         //Check safezone world
-        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.getName()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.key().asString()))
         {
             event.setCancelled(true);
             return;
@@ -266,20 +265,20 @@ public class EntityDamageListener extends AbstractListener
         final Player ignitedPlayer = (Player) entity;
 
         //Check if location is safezone
-        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.getUniqueId(), ignitedPlayer.getLocation().getChunkPosition());
+        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), ignitedPlayer.serverLocation().chunkPosition());
         if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
         {
             event.setCancelled(true);
             return;
         }
 
-        if(!eventContext.containsKey(EventContextKeys.OWNER) || !(eventContext.get(EventContextKeys.OWNER).get() instanceof Player))
+        if(!eventContext.containsKey(EventContextKeys.PLAYER))
             return;
 
 //        if(!cause.containsType(Player.class))
 //            return;
 
-        final Player igniterPlayer = (Player) eventContext.get(EventContextKeys.OWNER).get();
+        final Player igniterPlayer = eventContext.get(EventContextKeys.PLAYER).get();
         final boolean isFactionFriendlyFireOn = this.factionsConfig.isFactionFriendlyFire();
         final boolean isAllianceFriendlyFireOn = this.factionsConfig.isAllianceFriendlyFire();
         final boolean isTruceFriendlyFireOn = this.factionsConfig.isTruceFriendlyFire();
@@ -287,8 +286,8 @@ public class EntityDamageListener extends AbstractListener
         if(isFactionFriendlyFireOn && isAllianceFriendlyFireOn && isTruceFriendlyFireOn)
             return;
 
-        final Optional<Faction> optionalIgnitedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(ignitedPlayer.getUniqueId());
-        final Optional<Faction> optionalIgniterPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(igniterPlayer.getUniqueId());
+        final Optional<Faction> optionalIgnitedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(ignitedPlayer.uniqueId());
+        final Optional<Faction> optionalIgniterPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(igniterPlayer.uniqueId());
 
         if(optionalIgnitedPlayerFaction.isPresent() && optionalIgniterPlayerFaction.isPresent())
         {
@@ -324,33 +323,33 @@ public class EntityDamageListener extends AbstractListener
         }
     }
 
-    private void sendPenaltyMessageAndDecreasePower(final Player player)
+    private void sendPenaltyMessageAndDecreasePower(final ServerPlayer player)
     {
-        super.getPlugin().getPowerManager().penalty(player.getUniqueId());
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getPenalty())))));
-        player.sendMessage(Text.of(TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
+        super.getPlugin().getPowerManager().penalty(player.uniqueId());
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, NamedTextColor.WHITE, ImmutableMap.of(Placeholders.NUMBER, Component.text(this.powerConfig.getPenalty(), GOLD)))));
+        player.sendMessage(Component.text(Messages.CURRENT_POWER + " " + super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId()), GRAY));
     }
 
-    private void sendKillAwardMessageAndIncreasePower(final Player player)
+    private void sendKillAwardMessageAndIncreasePower(final ServerPlayer player)
     {
-        super.getPlugin().getPowerManager().addPower(player.getUniqueId(), true);
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY, TextColors.RESET, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.powerConfig.getKillAward())))));
-        player.sendMessage(Text.of(TextColors.GRAY, Messages.CURRENT_POWER + " ", super.getPlugin().getPowerManager().getPlayerPower(player.getUniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.getUniqueId())));
+        super.getPlugin().getPowerManager().addPower(player.uniqueId(), true);
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY, WHITE, ImmutableMap.of(Placeholders.NUMBER, Component.text(this.powerConfig.getKillAward(), GOLD)))));
+        player.sendMessage(Component.text(Messages.CURRENT_POWER + " " + super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId()), GRAY));
     }
 
-    private boolean isInOwnTerritory(final Player player)
+    private boolean isInOwnTerritory(final ServerPlayer player)
     {
-        final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition());
-        return optionalFaction.filter(x-> x.getPlayerMemberType(player.getUniqueId()) != null).isPresent();
+        final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        return optionalFaction.filter(x-> x.getPlayerMemberType(player.uniqueId()) != null).isPresent();
     }
 
-    private boolean isSafeZone(final Location<World> location)
+    private boolean isSafeZone(final ServerLocation location)
     {
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
-        if (safeZoneWorlds.contains(location.getExtent().getName()))
+        if (safeZoneWorlds.contains(location.world().key().asString()))
             return true;
 
-        final Optional<Faction> faction = super.getPlugin().getFactionLogic().getFactionByChunk(location.getExtent().getUniqueId(), location.getChunkPosition());
+        final Optional<Faction> faction = super.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
         return faction.map(Faction::isSafeZone).orElse(false);
     }
 }

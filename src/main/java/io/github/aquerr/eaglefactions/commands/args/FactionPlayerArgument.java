@@ -1,75 +1,80 @@
 package io.github.aquerr.eaglefactions.commands.args;
 
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.text.Text;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.exception.ArgumentParseException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class FactionPlayerArgument extends CommandElement
+public class FactionPlayerArgument
 {
-    private final EagleFactions plugin;
-
-    public FactionPlayerArgument(final EagleFactions plugin, final @Nullable Text key)
+    private FactionPlayerArgument()
     {
-        super(key);
-        this.plugin = plugin;
+
     }
 
-    @Nullable
-    @Override
-    protected FactionPlayer parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
+    public static class ValueParser implements org.spongepowered.api.command.parameter.managed.ValueParser<FactionPlayer>
     {
-        //Just in case someone new entered the server after start.
-        Set<FactionPlayer> serverPlayers = new HashSet<>(FactionsCache.getPlayersMap().values());
-
-        if (args.hasNext())
+        @Override
+        public Optional<? extends FactionPlayer> parseValue(Parameter.Key<? super FactionPlayer> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException
         {
-            String argument = args.next();
+            //Just in case someone new entered the server after start.
+            Set<FactionPlayer> serverPlayers = new HashSet<>(FactionsCache.getPlayersMap().values());
 
-            for(FactionPlayer player : serverPlayers)
+            if (reader.canRead())
             {
-                if(player.getName().equals(argument))
-                    return player;
+                String argument = reader.parseUnquotedString();
+
+                for(FactionPlayer player : serverPlayers)
+                {
+                    if(player.getName().equals(argument))
+                        return Optional.of(player);
+                }
+
+                throw reader.createException(Component.text("Argument is not a valid player!"));
             }
-
-            throw args.createError(Text.of("Argument is not a valid player!"));
-        }
-        else
-        {
-            throw args.createError(Text.of("Argument is not a valid player!"));
+            else
+            {
+                throw reader.createException(Component.text("Argument is not a valid player!"));
+            }
         }
     }
 
-    @Override
-    public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
+    public static class Completer implements ValueCompleter
     {
-        final Map<UUID, FactionPlayer> factionPlayerMap = FactionsCache.getPlayersMap();
-
-        final List<FactionPlayer> list = new ArrayList<>(factionPlayerMap.values());
-        if (args.hasNext())
+        @Override
+        public List<CommandCompletion> complete(CommandContext context, String currentInput)
         {
-            String charSequence = args.nextIfPresent().get();
-            final List<String> resultList = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++)
+            final Map<UUID, FactionPlayer> factionPlayerMap = FactionsCache.getPlayersMap();
+
+            final List<FactionPlayer> list = new ArrayList<>(factionPlayerMap.values());
+            final List<String> resultList = new LinkedList<>();
+            for (final FactionPlayer factionPlayer : list)
             {
-                final FactionPlayer factionPlayer = list.get(i);
                 final String factionPlayerName = factionPlayer.getName();
-                if (factionPlayerName.toLowerCase().startsWith(charSequence.toLowerCase()))
+                if (factionPlayerName.toLowerCase().startsWith(currentInput.toLowerCase()))
                 {
                     resultList.add(factionPlayerName);
                 }
             }
-            return resultList;
+            return list.stream()
+                    .map(FactionPlayer::getName)
+                    .map(CommandCompletion::of)
+                    .collect(Collectors.toList());
         }
-        return list.stream().map(FactionPlayer::getName).collect(Collectors.toList());
     }
 }

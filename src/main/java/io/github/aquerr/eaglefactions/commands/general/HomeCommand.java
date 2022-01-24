@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
@@ -10,28 +9,31 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsConsumerTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.scheduler.ScheduledTask;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class HomeCommand extends AbstractCommand
 {
@@ -44,64 +46,62 @@ public class HomeCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.getOne(Text.of("faction"));
-
-        if (!(source instanceof Player))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
-
-        final Player player = (Player) source;
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        final ServerPlayer player = requirePlayerSource(context);
 
         if (optionalFaction.isPresent())
         {
-            if (player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_TELEPORT_TO_OTHERS) || super.getPlugin().getPlayerManager().hasAdminMode(player))
+            if (player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_TELEPORT_TO_OTHERS) || super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             {
                 final Faction faction = optionalFaction.get();
                 if (faction.getHome() == null)
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET));
+                    throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET, RED)));
 
-                teleportHome(player, player.getLocation().getBlockPosition(), faction.getHome());
+                teleportHome(player, player.serverLocation().blockPosition(), faction.getHome());
             }
             else
             {
-                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+                final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
                 if (!optionalPlayerFaction.isPresent())
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                    throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND, RED)));
 
                 final Faction faction = optionalFaction.get();
                 if (!optionalPlayerFaction.get().getName().equals(faction.getName()) && !optionalPlayerFaction.get().getAlliances().contains(faction.getName()))
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_TELEPORT_TO_THIS_FACTION_HOME_ALLIANCE_NEEDED));
+                    throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_CANT_TELEPORT_TO_THIS_FACTION_HOME_ALLIANCE_NEEDED, RED)));
 
                 if (faction.getHome() == null)
-                    throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET));
+                    throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.THIS_FACTION_DOES_NOT_HAVE_ITS_HOME_SET, RED)));
 
-                if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(player.getUniqueId()))
+                if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(player.uniqueId()))
                 {
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + Messages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(player.getUniqueId()) + " " + Messages.SECONDS + " ", TextColors.RED, Messages.TO_BE_ABLE_TO_USE_IT_AGAIN));
+                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + Messages.YOU_NEED_TO_WAIT + " ", RED))
+                            .append(Component.text(EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(player.uniqueId()) + " " + Messages.SECONDS + " ", YELLOW))
+                            .append(Component.text(Messages.TO_BE_ABLE_TO_USE_IT_AGAIN, RED)));
                     return CommandResult.success();
                 }
-                else if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactionsPlugin.BLOCKED_HOME.containsKey(player.getUniqueId()))
+                else if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactionsPlugin.BLOCKED_HOME.containsKey(player.uniqueId()))
                 {
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
+                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND, RED)));
                     return CommandResult.success();
                 }
                 else
                 {
                     if (this.factionsConfig.canHomeBetweenWorlds())
                     {
-                        teleportHome(player, player.getLocation().getBlockPosition(), faction.getHome());
+                        teleportHome(player, player.serverLocation().chunkPosition(), faction.getHome());
                     }
                     else
                     {
-                        if (player.getWorld().getUniqueId().equals(faction.getHome().getWorldUUID()))
+                        if (player.world().uniqueId().equals(faction.getHome().getWorldUUID()))
                         {
-                            player.sendMessage(ChatTypes.ACTION_BAR, Text.of(Messages.STAND_STILL_FOR + " ", TextColors.GOLD, this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, TextColors.RESET, "!"));
-                            teleportHome(player, player.getLocation().getBlockPosition(), faction.getHome());
+                            player.sendActionBar(Component.text(Messages.STAND_STILL_FOR + " ").append(Component.text(this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, GOLD)).append(Component.text("!")));
+                            teleportHome(player, player.serverLocation().blockPosition(), faction.getHome());
                         }
                         else
                         {
-                            source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, Messages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD));
+                            context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text(Messages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD)));
                         }
                     }
                 }
@@ -109,47 +109,47 @@ public class HomeCommand extends AbstractCommand
         }
         else
         {
-            final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+            final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
 
             if (!optionalPlayerFaction.isPresent())
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND, RED)));
 
             final Faction playerFaction = optionalPlayerFaction.get();
 
             if (playerFaction.getHome() == null)
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTIONS_HOME_IS_NOT_SET));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.FACTIONS_HOME_IS_NOT_SET, RED)));
 
-            if (super.getPlugin().getPlayerManager().hasAdminMode(player))
+            if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             {
-                teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
+                teleportHome(player, player.serverLocation().chunkPosition(), playerFaction.getHome());
                 return CommandResult.success();
             }
 
-            if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(player.getUniqueId()))
+            if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(player.uniqueId()))
             {
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + Messages.YOU_NEED_TO_WAIT + " ", TextColors.YELLOW, EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(player.getUniqueId()) + " " + Messages.SECONDS + " ", TextColors.RED, Messages.TO_BE_ABLE_TO_USE_IT_AGAIN));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.HOME_COMMAND_IS_CURRENTLY_ON_COOLDOWN + " " + Messages.YOU_NEED_TO_WAIT + " ", RED)).append(Component.text(EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(player.uniqueId()) + " " + Messages.SECONDS + " ", YELLOW)).append(Component.text(Messages.TO_BE_ABLE_TO_USE_IT_AGAIN, RED)));
                 return CommandResult.success();
             }
-            else if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactionsPlugin.BLOCKED_HOME.containsKey(player.getUniqueId()))
+            else if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction() && EagleFactionsPlugin.BLOCKED_HOME.containsKey(player.uniqueId()))
             {
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.YOU_CANT_TELEPORT_TO_FACTIONS_HOME_BECAUSE_YOU_DIED_RECENTLY_IN_YOUR_FACTIONS_LAND, RED)));
                 return CommandResult.success();
             }
             else
             {
                 if (this.factionsConfig.canHomeBetweenWorlds())
                 {
-                    teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
+                    teleportHome(player, player.serverLocation().blockPosition(), playerFaction.getHome());
                 }
                 else
                 {
-                    if (player.getWorld().getUniqueId().equals(playerFaction.getHome().getWorldUUID()))
+                    if (player.world().uniqueId().equals(playerFaction.getHome().getWorldUUID()))
                     {
-                        teleportHome(player, player.getLocation().getBlockPosition(), playerFaction.getHome());
+                        teleportHome(player, player.serverLocation().chunkPosition(), playerFaction.getHome());
                     }
                     else
                     {
-                        source.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, Messages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD));
+                        context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text(Messages.FACTIONS_HOME_IS_NOT_SET_IN_THIS_WORLD)));
                     }
                 }
             }
@@ -157,7 +157,7 @@ public class HomeCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private void teleportHome(Player player, Vector3i lastBlockPosition, FactionHome factionHome)
+    private void teleportHome(ServerPlayer player, Vector3i lastBlockPosition, FactionHome factionHome)
     {
         if (this.factionsConfig.getHomeDelayTime() == 0 || player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_NO_DELAY))
         {
@@ -165,20 +165,20 @@ public class HomeCommand extends AbstractCommand
             return;
         }
 
-        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(Messages.STAND_STILL_FOR + " ", TextColors.GOLD, this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, TextColors.RESET, "!"));
+        player.sendActionBar(Component.text(Messages.STAND_STILL_FOR + " ").append(Component.text(this.factionsConfig.getHomeDelayTime() + " " + Messages.SECONDS, GOLD)).append(Component.text("!")));
 
         final EagleFactionsScheduler eagleFactionsScheduler = EagleFactionsScheduler.getInstance();
         eagleFactionsScheduler.scheduleWithDelayedInterval(new ParticlesUtil.HomeParticles(player), 0, TimeUnit.SECONDS, 50, TimeUnit.MILLISECONDS);
-        eagleFactionsScheduler.scheduleWithDelayedInterval(new EagleFactionsConsumerTask<Task>()
+        eagleFactionsScheduler.scheduleWithDelayedInterval(new EagleFactionsConsumerTask<ScheduledTask>()
         {
             int seconds = factionsConfig.getHomeDelayTime();
 
             @Override
-            public void accept(Task task)
+            public void accept(ScheduledTask task)
             {
-                if (!player.getLocation().getBlockPosition().equals(lastBlockPosition))
+                if (!player.serverLocation().chunkPosition().equals(lastBlockPosition))
                 {
-                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.RED, Messages.YOU_MOVED + " " + Messages.TELEPORTING_HAS_BEEN_CANCELLED));
+                    player.sendActionBar(Component.text(Messages.YOU_MOVED + " " + Messages.TELEPORTING_HAS_BEEN_CANCELLED, RED));
                     task.cancel();
                     return;
                 }
@@ -190,45 +190,49 @@ public class HomeCommand extends AbstractCommand
                 }
                 else
                 {
-                    player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.AQUA, MessageLoader.parseMessage(Messages.TELEPORTING_TO_FACTION_HOME, TextColors.AQUA, ImmutableMap.of(Placeholders.NUMBER, Text.of(TextColors.GOLD, seconds)))));
+                    player.sendActionBar(MessageLoader.parseMessage(Messages.TELEPORTING_TO_FACTION_HOME, AQUA, ImmutableMap.of(Placeholders.NUMBER, Component.text(seconds, GOLD))));
                     seconds--;
                 }
             }
         }, 2, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
     }
 
-    private void teleport(final Player player, final FactionHome factionHome)
+    private void teleport(final ServerPlayer player, final FactionHome factionHome)
     {
-        final Optional<World> optionalWorld = Sponge.getServer().getWorld(factionHome.getWorldUUID());
+        final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(factionHome.getWorldUUID());
         if (!optionalWorld.isPresent())
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.MISSING_OR_CORRUPTED_HOME));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.MISSING_OR_CORRUPTED_HOME, RED)));
             return;
         }
-        player.setLocationSafely(new Location<>(optionalWorld.get(), factionHome.getBlockPosition()));
-        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(TextColors.GREEN, Messages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME));
-        startHomeCooldown(player.getUniqueId());
+        ServerLocation safeLocation = Sponge.server().teleportHelper().findSafeLocation(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()))
+                .orElse(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
+        player.setLocation(safeLocation);
+        player.sendActionBar(Component.text(Messages.YOU_WERE_TELEPORTED_TO_FACTIONS_HOME, GREEN));
+        startHomeCooldown(player.uniqueId());
     }
 
     private void startHomeCooldown(UUID playerUUID)
     {
         EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.put(playerUUID, this.factionsConfig.getHomeCooldown());
 
-        final Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
-
-        taskBuilder.interval(1, TimeUnit.SECONDS).execute(task ->
-        {
-            if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(playerUUID))
-            {
-                int seconds = EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(playerUUID);
-
-                if (seconds < 1)
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(
+                scheduledTask ->
                 {
-                    EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.remove(playerUUID);
-                    task.cancel();
-                }
-                EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.replace(playerUUID, seconds, seconds - 1);
-            }
-        }).submit(super.getPlugin());
+                    if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(playerUUID))
+                    {
+                        int seconds = EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.get(playerUUID);
+
+                        if (seconds < 1)
+                        {
+                            EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.remove(playerUUID);
+                            scheduledTask.cancel();
+                        }
+                        EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.replace(playerUUID, seconds, seconds - 1);
+                    }
+                },
+                0, TimeUnit.SECONDS,
+                1, TimeUnit.SECONDS
+        );
     }
 }

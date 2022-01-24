@@ -5,12 +5,12 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
 public class ReloadCommand extends AbstractCommand
 {
@@ -20,7 +20,7 @@ public class ReloadCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
         try
         {
@@ -32,7 +32,7 @@ public class ReloadCommand extends AbstractCommand
                 EagleFactionsPlugin.getPlugin().getDynmapService().reload();
             }
 
-            source.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.CONFIG_HAS_BEEN_RELOADED));
+            context.cause().audience().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.CONFIG_HAS_BEEN_RELOADED, GREEN)));
         }
         catch (Exception exception)
         {

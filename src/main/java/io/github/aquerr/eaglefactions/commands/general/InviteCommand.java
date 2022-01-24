@@ -9,13 +9,14 @@ import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class InviteCommand extends AbstractCommand
 {
@@ -34,19 +35,19 @@ public class InviteCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Player invitedPlayer = context.requireOne("player");
-        final Player senderPlayer = requirePlayerSource(source);
+        final ServerPlayer invitedPlayer = context.requireOne(CommonParameters.PLAYER);
+        final ServerPlayer senderPlayer = requirePlayerSource(context);
         final Faction senderFaction = requirePlayerFaction(senderPlayer);
-        if (!this.permsManager.canInvite(senderPlayer.getUniqueId(), senderFaction))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION));
+        if (!this.permsManager.canInvite(senderPlayer.uniqueId(), senderFaction))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PLAYERS_WITH_YOUR_RANK_CANT_INVITE_PLAYERS_TO_FACTION, RED)));
 
         if(hasReachedPlayerLimit(senderFaction))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + Messages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_INVITE_MORE_PLAYERS_TO_YOUR_FACTION + " " + Messages.FACTIONS_PLAYER_LIMIT_HAS_BEEN_REACHED, RED)));
 
-        if(this.factionLogic.getFactionByPlayerUUID(invitedPlayer.getUniqueId()).isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYER_IS_ALREADY_IN_A_FACTION));
+        if(this.factionLogic.getFactionByPlayerUUID(invitedPlayer.uniqueId()).isPresent())
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PLAYER_IS_ALREADY_IN_A_FACTION, RED)));
 
         this.invitationManager.sendInvitation(senderPlayer, invitedPlayer, senderFaction);
         return CommandResult.success();

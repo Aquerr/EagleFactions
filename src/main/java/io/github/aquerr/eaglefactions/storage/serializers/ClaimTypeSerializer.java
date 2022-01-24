@@ -1,50 +1,40 @@
 package io.github.aquerr.eaglefactions.storage.serializers;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.spongepowered.api.util.TypeTokens;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+import org.spongepowered.math.vector.Vector3i;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class ClaimTypeSerializer implements TypeSerializer<Claim>
 {
     @Override
-    public Claim deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException
+    public Claim deserialize(Type type, ConfigurationNode node) throws SerializationException
     {
-        Vector3i chunkPosition = Vector3i.ZERO;
-        UUID worldUniqueId = new UUID(0, 0);
         Set<UUID> owners;
         boolean isAccessibleByFaction;
-
-        try
-        {
-            worldUniqueId = value.getNode("worldUUID").getValue(TypeTokens.UUID_TOKEN, new UUID(0, 0));
-            chunkPosition = value.getNode("chunkPosition").getValue(TypeTokens.VECTOR_3I_TOKEN, Vector3i.ZERO);
-            isAccessibleByFaction = value.getNode("accessibleByFaction").getBoolean(true);
-            owners = new HashSet<>(value.getNode("owners").getList(TypeTokens.UUID_TOKEN, Collections.EMPTY_LIST));
-        }
-        catch (Exception e)
-        {
-            throw new ObjectMappingException("Could not deserialize the claim: " + worldUniqueId.toString() + "|" + chunkPosition, e);
-        }
+        UUID worldUniqueId = node.node("worldUUID").get(EFTypeTokens.UUID_TOKEN, new UUID(0, 0));
+        Vector3i chunkPosition = node.node("chunkPosition").get(EFTypeTokens.VECTOR_3I_TOKEN, Vector3i.ZERO);
+        isAccessibleByFaction = node.node("accessibleByFaction").getBoolean(true);
+        owners = new HashSet<>(node.node("owners").getList(EFTypeTokens.UUID_TOKEN, Collections.emptyList()));
 
         return new Claim(worldUniqueId, chunkPosition, owners, isAccessibleByFaction);
     }
 
     @Override
-    public void serialize(TypeToken<?> type, Claim obj, ConfigurationNode value) throws ObjectMappingException
+    public void serialize(Type type, @Nullable Claim obj, ConfigurationNode node) throws SerializationException
     {
         if (obj == null)
             return;
 
-        value.getNode("worldUUID").setValue(TypeTokens.UUID_TOKEN, obj.getWorldUUID());
-        value.getNode("chunkPosition").setValue(TypeTokens.VECTOR_3I_TOKEN, obj.getChunkPosition());
-        value.getNode("accessibleByFaction").setValue(obj.isAccessibleByFaction());
-        value.getNode("owners").setValue(EFTypeSerializers.UUID_LIST_TYPE_TOKEN, new ArrayList<>(obj.getOwners()));
+        node.node("worldUUID").set(EFTypeTokens.UUID_TOKEN, obj.getWorldUUID());
+        node.node("chunkPosition").set(EFTypeTokens.VECTOR_3I_TOKEN, obj.getChunkPosition());
+        node.node("accessibleByFaction").set(obj.isAccessibleByFaction());
+        node.node("owners").set(EFTypeTokens.UUID_LIST_TYPE_TOKEN, new ArrayList<>(obj.getOwners()));
     }
 
     public static Vector3i deserializeVector3i(String vectorAsString)

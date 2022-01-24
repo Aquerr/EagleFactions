@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.events;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionEvent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.impl.AbstractEvent;
 
 abstract class FactionAbstractEvent extends AbstractEvent implements FactionEvent
@@ -34,7 +34,7 @@ abstract class FactionAbstractEvent extends AbstractEvent implements FactionEven
     }
 
     @Override
-    public Cause getCause()
+    public Cause cause()
     {
         return this.cause;
     }

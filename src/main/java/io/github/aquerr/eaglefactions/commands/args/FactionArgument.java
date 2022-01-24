@@ -2,13 +2,16 @@ package io.github.aquerr.eaglefactions.commands.args;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.exception.ArgumentParseException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.configurate.util.Strings;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,43 +21,58 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FactionArgument extends CommandElement
+public class FactionArgument
 {
-	private final EagleFactions plugin;
-
-	public FactionArgument(final EagleFactions plugin, @Nullable Text key)
+	private FactionArgument()
 	{
-		super(key);
-		this.plugin = plugin;
+
 	}
 
-	@Nullable
-	@Override
-	protected Faction parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException
+	public static class ValueParser implements org.spongepowered.api.command.parameter.managed.ValueParser<Faction>
 	{
-		if(!args.hasNext())
-			throw args.createError(Text.of("Argument is not a valid faction!"));
+		private final FactionLogic factionLogic;
 
-		final String factionName = args.next();
-		if (StringUtils.isBlank(factionName))
-			throw args.createError(Text.of("Argument is not a valid faction!"));
-		return Optional.ofNullable(this.plugin.getFactionLogic().getFactionByName(factionName))
-				.orElseThrow(() -> args.createError(Text.of("Argument is not a valid faction!")));
-	}
-
-	@Override
-	public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context)
-	{
-		final Set<String> factionNames = plugin.getFactionLogic().getFactionsNames();
-		final List<String> list = new ArrayList<>(factionNames);
-		Collections.sort(list);
-
-		if (args.hasNext())
+		public ValueParser(FactionLogic factionLogic)
 		{
-			String charSequence = args.nextIfPresent().get().toLowerCase();
-			return list.stream().filter(x->x.contains(charSequence)).collect(Collectors.toList());
+			this.factionLogic = factionLogic;
 		}
 
-		return list;
+		@Override
+		public Optional<Faction> parseValue(Parameter.Key<? super Faction> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException
+		{
+			if(!reader.canRead())
+				throw reader.createException(Component.text("Argument is not a valid faction!"));
+
+			final String factionName = reader.parseUnquotedString();
+			if (Strings.isBlank(factionName))
+				throw reader.createException(Component.text("Argument is not a valid faction!"));
+			Faction faction = Optional.ofNullable(this.factionLogic.getFactionByName(factionName))
+					.orElseThrow(() -> reader.createException(Component.text("Argument is not a valid faction!")));
+			return Optional.ofNullable(faction);
+		}
+	}
+
+	public static class Completer implements ValueCompleter
+	{
+		private final FactionLogic factionLogic;
+
+		public Completer(FactionLogic factionLogic)
+		{
+			this.factionLogic = factionLogic;
+		}
+
+		@Override
+		public List<CommandCompletion> complete(CommandContext context, String currentInput)
+		{
+			final Set<String> factionNames = this.factionLogic.getFactionsNames();
+			final List<String> list = new ArrayList<>(factionNames);
+			Collections.sort(list);
+
+			String charSequence = currentInput.toLowerCase();
+			return list.stream()
+					.filter(x->x.contains(charSequence))
+					.map(CommandCompletion::of)
+					.collect(Collectors.toList());
+		}
 	}
 }

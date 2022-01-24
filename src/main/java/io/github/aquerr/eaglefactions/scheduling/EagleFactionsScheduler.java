@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
@@ -10,71 +10,89 @@ import java.util.concurrent.TimeUnit;
 public class EagleFactionsScheduler
 {
     private static final EagleFactionsScheduler INSTANCE = new EagleFactionsScheduler();
-    private final Scheduler underlyingScheduler = Sponge.getScheduler();
+    private final Scheduler asyncScheduler = Sponge.asyncScheduler();
+    private final Scheduler syncScheduler = Sponge.server().scheduler();
 
     public static EagleFactionsScheduler getInstance()
     {
         return INSTANCE;
     }
 
-    public Task scheduleWithDelayAsync(EagleFactionsRunnableTask task, long delay)
+    public ScheduledTask scheduleWithDelayAsync(EagleFactionsRunnableTask task, long delay)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, TimeUnit.SECONDS).execute(task).async().submit(EagleFactionsPlugin.getPlugin());
+        return asyncScheduler.submit(Task.builder()
+                .delay(delay, TimeUnit.SECONDS)
+                .execute(task)
+                .build());
     }
 
-    public Task scheduleWithDelayAsync(EagleFactionsConsumerTask<Task> task, long delay)
+    public ScheduledTask scheduleWithDelayAsync(EagleFactionsConsumerTask<ScheduledTask> task, long delay)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, TimeUnit.SECONDS).execute(task).async().submit(EagleFactionsPlugin.getPlugin());
+        return asyncScheduler.submit(Task.builder()
+                .delay(delay, TimeUnit.SECONDS)
+                .execute(task)
+                .build());
     }
 
-    public Task scheduleWithDelayAsync(EagleFactionsRunnableTask task, long delay, TimeUnit timeUnit)
+    public ScheduledTask scheduleWithDelayAsync(EagleFactionsRunnableTask task, long delay, TimeUnit timeUnit)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, timeUnit).execute(task).async().submit(EagleFactionsPlugin.getPlugin());
+        return this.asyncScheduler.submit(Task.builder()
+                .execute(task)
+                .delay(delay, timeUnit)
+                .build());
     }
 
-    public Task scheduleWithDelay(EagleFactionsRunnableTask task, long delay, TimeUnit timeUnit)
+    public ScheduledTask scheduleWithDelay(EagleFactionsRunnableTask task, long delay, TimeUnit timeUnit)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, timeUnit).execute(task).submit(EagleFactionsPlugin.getPlugin());
+        return this.syncScheduler.submit(Task.builder()
+                .execute(task)
+                .delay(delay, timeUnit)
+                .build());
     }
 
-    public Task scheduleWithDelayedIntervalAsync(EagleFactionsRunnableTask task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
+    public ScheduledTask scheduleWithDelayedIntervalAsync(EagleFactionsRunnableTask task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, delayUnit)
+        return this.asyncScheduler.submit(Task.builder()
+                .execute(task)
+                .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
-                .execute(task).async().submit(EagleFactionsPlugin.getPlugin());
+                .build());
     }
 
-    public Task scheduleWithDelayedIntervalAsync(EagleFactionsConsumerTask<Task> task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
+    public ScheduledTask scheduleWithDelayedIntervalAsync(EagleFactionsConsumerTask<ScheduledTask> task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, delayUnit)
+        return this.asyncScheduler.submit(Task.builder()
+                .execute(task)
+                .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
-                .execute(task).async().submit(EagleFactionsPlugin.getPlugin());
+                .build());
     }
 
-    public Task scheduleWithDelayedInterval(EagleFactionsConsumerTask<Task> task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
+    public ScheduledTask scheduleWithDelayedInterval(EagleFactionsConsumerTask<ScheduledTask> task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, delayUnit)
+        return this.syncScheduler.submit(Task.builder()
+                .execute(task)
+                .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
-                .execute(task).submit(EagleFactionsPlugin.getPlugin());
+                .build());
     }
 
-    public Task scheduleWithDelayedInterval(EagleFactionsRunnableTask task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
+    public ScheduledTask scheduleWithDelayedInterval(EagleFactionsRunnableTask task, long delay, TimeUnit delayUnit, long interval, TimeUnit intervalUnit)
     {
-        Task.Builder taskBuilder = underlyingScheduler.createTaskBuilder();
-        return taskBuilder.delay(delay, delayUnit)
+        return this.syncScheduler.submit(Task.builder()
+                .execute(task)
+                .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
-                .execute(task).submit(EagleFactionsPlugin.getPlugin());
+                .build());
     }
 
-    public Scheduler getUnderlyingScheduler()
+    public Scheduler getSyncScheduler()
     {
-        return this.underlyingScheduler;
+        return this.syncScheduler;
+    }
+
+    public Scheduler getAsyncScheduler()
+    {
+        return this.asyncScheduler;
     }
 }

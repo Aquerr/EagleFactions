@@ -5,18 +5,27 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 
 public class HelpCommand extends AbstractCommand
 {
@@ -26,46 +35,61 @@ public class HelpCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        final int pageNumber = context.<Integer>getOne(Text.of("page")).orElse(1);
-        final Map<List<String>, CommandSpec> commands = EagleFactionsPlugin.SUBCOMMANDS;
-        final List<Text> helpList = Lists.newArrayList();
+        final int pageNumber = context.one(Parameter.integerNumber().key("page").build()).orElse(1);
+        final Map<List<String>, Command.Parameterized> commands = EagleFactionsPlugin.SUBCOMMANDS;
+        final List<TextComponent> helpList = Lists.newArrayList();
 
-        for (final List<String> aliases: commands.keySet())
+        for (final Map.Entry<List<String>, Command.Parameterized> command : commands.entrySet())
         {
-            CommandSpec commandSpec = commands.get(aliases);
+            if(context.cause().audience() instanceof Player && !command.getValue().canExecute(context.cause()))
+                continue;
 
-            if(source instanceof Player)
-            {
-                Player player = (Player)source;
-
-                if(!commandSpec.testPermission(player))
-                {
-                    continue;
-                }
-            }
-
-            final Text commandHelp = Text.builder()
-                    .append(Text.builder()
-                            .append(Text.of(TextColors.AQUA, "/f " + aliases.toString().replace("[","").replace("]","")))
-                            .build())
-                    .append(Text.builder()
-                            .append(Text.of(TextColors.WHITE, " - " + commandSpec.getShortDescription(source).get().toPlain() + "\n"))
-                            .build())
-                    .append(Text.builder()
-                            .append(Text.of(TextColors.GRAY, Messages.USAGE + " /f " + aliases.toString().replace("[","").replace("]","") + " " + commandSpec.getUsage(source).toPlain()))
-                            .build())
-                    .build();
+            final TextComponent commandHelp = Component.empty()
+                    .append(Component.empty()
+                            .append(Component.text("/f " + String.join(", ", command.getKey()), AQUA)))
+                    .append(Component.empty()
+                            .append(Component.text(" - ").append(command.getValue().shortDescription(CommandCause.create()).get().append(Component.newline())).color(WHITE)))
+                    .append(Component.empty()
+                            .append(Component.text(Messages.USAGE + " /f " + String.join(", ", command.getKey()) + " " + getParameters(command.getValue()), GRAY)));
             helpList.add(commandHelp);
         }
 
         //Sort commands alphabetically.
-        helpList.sort(Text::compareTo);
+        helpList.sort(Comparator.comparing(o -> PlainTextComponentSerializer.plainText().serialize(o)));
 
-        PaginationList.Builder paginationBuilder = PaginationList.builder().title(Text.of(TextColors.GREEN, Messages.EAGLEFACTIONS_COMMAND_LIST)).padding(Text.of("-")).contents(helpList).linesPerPage(14);
-        paginationBuilder.build().sendTo(source, pageNumber);
+        PaginationList.Builder paginationBuilder = Sponge.serviceProvider().paginationService().builder();
+        paginationBuilder.title(Component.text(Messages.EAGLEFACTIONS_COMMAND_LIST, GREEN))
+            .padding(Component.text("-"))
+            .contents(helpList.toArray(new Component[0]))
+            .linesPerPage(10);
+        paginationBuilder.build().sendTo(context.cause().audience(), pageNumber);
         return CommandResult.success();
+    }
+
+    private String getParameters(Command.Parameterized command)
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (final Parameter parameter : command.parameters())
+        {
+            if (parameter instanceof Parameter.Value)
+            {
+                if (parameter.isOptional())
+                {
+                    stringBuilder.append("[");
+                }
+                stringBuilder.append("<")
+                        .append(((Parameter.Value<?>) parameter).key().key())
+                        .append(">");
+                if (parameter.isOptional())
+                {
+                    stringBuilder.append("]");
+                }
+                stringBuilder.append(" ");
+            }
+        }
+        return stringBuilder.toString();
     }
 
 }

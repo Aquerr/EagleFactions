@@ -2,10 +2,10 @@ package io.github.aquerr.eaglefactions.logic;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +26,7 @@ public class CommandBlockerOtherFactionTerritory
             this.shouldBlockAllCommands = true;
     }
 
-    public boolean shouldBlockCommand(final Player player, final String command)
+    public boolean shouldBlockCommand(final ServerPlayer player, final String command)
     {
         if (this.shouldBlockAllCommands)
             return true;
@@ -65,18 +65,18 @@ public class CommandBlockerOtherFactionTerritory
             }
             catch(final PatternSyntaxException exception)
             {
-                Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "The syntax of your blocked command pattern is wrong. Command = " + blockedCommand));
+                Sponge.server().sendMessage(Component.text("The syntax of your blocked command pattern is wrong. Command = " + blockedCommand, NamedTextColor.RED));
             }
         }
 
         return false;
     }
 
-    private boolean isPlayerInOthersTerritory(Player player)
+    private boolean isPlayerInOthersTerritory(ServerPlayer player)
     {
-        return !Objects.equals(this.factionLogic.getFactionByChunk(player.getWorld().getUniqueId(), player.getLocation().getChunkPosition())
+        return !Objects.equals(this.factionLogic.getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition())
                 .map(Faction::getName)
-                .orElse(null), this.factionLogic.getFactionByPlayerUUID(player.getUniqueId())
+                .orElse(null), this.factionLogic.getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getName)
                 .orElse(null));
     }

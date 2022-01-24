@@ -1,9 +1,7 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
 import io.github.aquerr.eaglefactions.api.entities.Claim;
-import org.spongepowered.api.Sponge;
-
-import java.util.UUID;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 
 public class WorldRegenTask implements EagleFactionsRunnableTask
 {
@@ -15,14 +13,9 @@ public class WorldRegenTask implements EagleFactionsRunnableTask
     }
 
     @Override
-    public String getName()
-    {
-        return UUID.randomUUID().toString();
-    }
-
-    @Override
     public void run()
     {
-        Sponge.getServer().getWorld(claim.getWorldUUID()).ifPresent(world -> world.regenerateChunk(claim.getChunkPosition()));
+        WorldUtil.getWorldByUUID(claim.getWorldUUID())
+                .ifPresent(serverWorld -> serverWorld.chunkManager().regenerateChunk(claim.getChunkPosition()));
     }
 }

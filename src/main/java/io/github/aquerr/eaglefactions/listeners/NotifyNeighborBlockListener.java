@@ -1,21 +1,16 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.transaction.NotificationTicket;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.*;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Iterator;
 
@@ -29,24 +24,25 @@ public class NotifyNeighborBlockListener extends AbstractListener
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onNeighborNotify(final NotifyNeighborBlockEvent event)
 	{
-		final Cause cause = event.getCause();
-		final EventContext context = event.getContext();
-		final TileEntity tileEntity = event.getCause().first(TileEntity.class).orElse(null);
+		final Cause cause = event.cause();
+		final EventContext context = event.context();
+		final BlockEntity tileEntity = event.cause().first(BlockEntity.class).orElse(null);
 		final LocatableBlock locatableBlock = cause.first(LocatableBlock.class).orElse(null);
-		Location<World> sourceLocation = locatableBlock != null ? locatableBlock.getLocation() : tileEntity != null ? tileEntity.getLocation() : null;
+		ServerLocation sourceLocation = locatableBlock != null ? locatableBlock.serverLocation() : tileEntity != null ? tileEntity.serverLocation() : null;
 
 		User user;
-		if (cause.root() instanceof TileEntity) {
-			user = context.get(EventContextKeys.OWNER)
-					.orElse(context.get(EventContextKeys.NOTIFIER)
-							.orElse(context.get(EventContextKeys.CREATOR)
-									.orElse(null)));
-		} else {
-			user = context.get(EventContextKeys.NOTIFIER)
-					.orElse(context.get(EventContextKeys.OWNER)
-							.orElse(context.get(EventContextKeys.CREATOR)
-									.orElse(null)));
-		}
+//		if (cause.root() instanceof BlockEntity) {
+//			user = context.get(EventContextKeys.OWNER)
+//					.orElse(context.get(EventContextKeys.NOTIFIER)
+//							.orElse(context.get(EventContextKeys.CREATOR)
+//									.orElse(null)));
+//		} else {
+		user = context.get(EventContextKeys.PLAYER)
+				.filter(ServerPlayer.class::isInstance)
+				.map(ServerPlayer.class::cast)
+				.map(ServerPlayer::user)
+				.orElse(null);
+//		}
 
 		if (user == null) {
 			if (event instanceof ExplosionEvent) {
@@ -63,14 +59,14 @@ public class NotifyNeighborBlockListener extends AbstractListener
 			if (sourceLocation == null)
 				return;
 
-			final Iterator<Direction> directionIterator = event.getNeighbors().keySet().iterator();
-			while(directionIterator.hasNext())
+			final Iterator<NotificationTicket> notificationTicketIterator = event.tickets().iterator();
+			while(notificationTicketIterator.hasNext())
 			{
-				final Direction direction = directionIterator.next();
-				final Location<World> blockLocation = sourceLocation.getBlockRelative(direction);
+				final NotificationTicket notificationTicket = notificationTicketIterator.next();
+				final ServerLocation blockLocation = notificationTicket.target().location().get();
 				if(!super.getPlugin().getProtectionManager().canNotifyBlock(sourceLocation, blockLocation).hasAccess())
 				{
-					directionIterator.remove();
+					notificationTicketIterator.remove();
 				}
 			}
 			return;
@@ -78,11 +74,11 @@ public class NotifyNeighborBlockListener extends AbstractListener
 
 		if(sourceLocation == null)
 		{
-			final Player player = event.getCause().first(Player.class).orElse(null);
+			final ServerPlayer player = event.cause().first(ServerPlayer.class).orElse(null);
 			if(player == null)
 				return;
 
-			sourceLocation = player.getLocation();
+			sourceLocation = player.serverLocation();
 		}
 
 		if(!super.getPlugin().getProtectionManager().canInteractWithBlock(sourceLocation, user, false).hasAccess())
@@ -91,16 +87,15 @@ public class NotifyNeighborBlockListener extends AbstractListener
 			return;
 		}
 
-		Location<World> finalSourceLocation = sourceLocation;
 		User finalUser = user;
-		final Iterator<Direction> directionIterator = event.getNeighbors().keySet().iterator();
-		while(directionIterator.hasNext())
+		final Iterator<NotificationTicket> notificationTicketIterator = event.tickets().iterator();
+		while(notificationTicketIterator.hasNext())
 		{
-			final Direction direction = directionIterator.next();
-			final Location<World> blockLocation = finalSourceLocation.getBlockRelative(direction);
+			final NotificationTicket notificationTicket = notificationTicketIterator.next();
+			final ServerLocation blockLocation = notificationTicket.target().location().get();
 			if(!super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, finalUser, false).hasAccess())
 			{
-				directionIterator.remove();
+				notificationTicketIterator.remove();
 			}
 		}
 	}

@@ -7,7 +7,6 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.user.UserStorageService;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -93,8 +92,7 @@ public class FactionPlayerImpl implements FactionPlayer
     @Override
     public Optional<User> getUser()
     {
-        final Optional<UserStorageService> userStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
-        return userStorageService.flatMap(storageService -> storageService.get(this.uniqueId));
+        return Sponge.server().userManager().load(this.uniqueId).join();
     }
 
     @Override

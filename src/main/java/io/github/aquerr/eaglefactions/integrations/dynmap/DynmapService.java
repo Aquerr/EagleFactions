@@ -3,17 +3,18 @@ package io.github.aquerr.eaglefactions.integrations.dynmap;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
+import net.kyori.adventure.text.Component;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
 import org.dynmap.markers.*;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 /**
  * Main Dynmap Integration class, contains Dynmap API fields and activate void
@@ -37,7 +38,7 @@ public class DynmapService
 
     private final EagleFactions plugin;
 
-    private Task dynmapUpdateTask;
+    private ScheduledTask dynmapUpdateTask;
 
     public DynmapService(final EagleFactions plugin)
     {
@@ -54,7 +55,7 @@ public class DynmapService
 
                 if (markerSet == null)
                 {
-                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.RED, "Could not create MarkerSet in Dynmap. Restarting the server may help."));
+                    Sponge.server().sendMessage(Component.text("Could not create MarkerSet in Dynmap. Restarting the server may help.", RED));
                     return;
                 }
 

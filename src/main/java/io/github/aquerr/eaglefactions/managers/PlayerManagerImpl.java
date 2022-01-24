@@ -9,9 +9,9 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.util.Identifiable;
 
 import java.util.*;
@@ -27,7 +27,7 @@ public class PlayerManagerImpl implements PlayerManager
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
 
-    private UserStorageService userStorageService;
+    private UserManager userManager;
 
     private final Set<UUID> adminModePlayers = new HashSet<>();
 
@@ -37,9 +37,7 @@ public class PlayerManagerImpl implements PlayerManager
         this.factionLogic = factionLogic;
         this.factionsConfig = factionsConfig;
         this.powerConfig = powerConfig;
-
-        Optional<UserStorageService> optionalUserStorageService = Sponge.getServiceManager().provide(UserStorageService.class);
-        optionalUserStorageService.ifPresent(x -> userStorageService = x);
+        this.userManager = Sponge.server().userManager();
     }
 
     @Override
@@ -62,9 +60,9 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public Optional<Player> getPlayer(final UUID playerUUID)
+    public Optional<ServerPlayer> getPlayer(final UUID playerUUID)
     {
-        return getUser(playerUUID).flatMap(User::getPlayer);
+        return getUser(playerUUID).flatMap(User::player);
     }
 
     @Override
@@ -81,31 +79,34 @@ public class PlayerManagerImpl implements PlayerManager
 
     private Optional<User> getUser(final UUID playerUUID)
     {
-        return userStorageService.get(playerUUID);
+        return userManager.load(playerUUID).join();
     }
 
     @Override
     public boolean hasAdminMode(final User player)
     {
-        return player.hasPermission(PluginPermissions.CONSTANT_ADMIN_MODE) || this.adminModePlayers.contains(player.getUniqueId());
+        return player.hasPermission(PluginPermissions.CONSTANT_ADMIN_MODE) || this.adminModePlayers.contains(player.uniqueId());
     }
 
     @Override
     public boolean activateAdminMode(final User player)
     {
-        return this.adminModePlayers.add(player.getUniqueId());
+        return this.adminModePlayers.add(player.uniqueId());
     }
 
     @Override
     public boolean deactivateAdminMode(final User player)
     {
-        return this.adminModePlayers.remove(player.getUniqueId());
+        return this.adminModePlayers.remove(player.uniqueId());
     }
 
     @Override
     public Set<UUID> getAdminModePlayers()
     {
-        return Sponge.getServer().getOnlinePlayers().stream().filter(this::hasAdminMode).map(Identifiable::getUniqueId).collect(Collectors.toSet());
+        return Sponge.server().onlinePlayers().stream()
+                .filter(serverPlayer -> hasAdminMode(serverPlayer.user()))
+                .map(Identifiable::uniqueId)
+                .collect(Collectors.toSet());
     }
 
     @Override

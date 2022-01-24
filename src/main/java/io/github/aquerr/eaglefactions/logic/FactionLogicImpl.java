@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -19,12 +18,13 @@ import io.github.aquerr.eaglefactions.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -97,11 +99,11 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public List<Player> getOnlinePlayers(final Faction faction)
+    public List<ServerPlayer> getOnlinePlayers(final Faction faction)
     {
         checkNotNull(faction);
 
-        final List<Player> factionPlayers = new ArrayList<>();
+        final List<ServerPlayer> factionPlayers = new ArrayList<>();
         final UUID factionLeader = faction.getLeader();
         if(!faction.getLeader().equals(DUMMY_UUID) && this.playerManager.isPlayerOnline(factionLeader))
         {
@@ -555,11 +557,11 @@ public class FactionLogicImpl implements FactionLogic
             final Vector3i chunkToCheck = claimToCheck.getChunkPosition();
             final Vector3i claimChunk = claim.getChunkPosition();
 
-            if((claimChunk.getX() == chunkToCheck.getX()) && ((claimChunk.getZ() + 1 == chunkToCheck.getZ()) || (claimChunk.getZ() - 1 == chunkToCheck.getZ())))
+            if((claimChunk.x() == chunkToCheck.x()) && ((claimChunk.z() + 1 == chunkToCheck.z()) || (claimChunk.z() - 1 == chunkToCheck.z())))
             {
                 return true;
             }
-            else if((claimChunk.getZ() == chunkToCheck.getZ()) && ((claimChunk.getX() + 1 == chunkToCheck.getX()) || (claimChunk.getX() - 1 == chunkToCheck.getX())))
+            else if((claimChunk.z() == chunkToCheck.z()) && ((claimChunk.x() + 1 == chunkToCheck.x()) || (claimChunk.x() - 1 == chunkToCheck.x())))
             {
                 return true;
             }
@@ -653,7 +655,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(final Faction faction : factionsList)
         {
-            factionsTags.add(faction.getTag().toPlain());
+            factionsTags.add(PlainTextComponentSerializer.plainText().serialize(faction.getTag()));
         }
 
         return factionsTags;
@@ -763,7 +765,7 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void startClaiming(final Player player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
+    public void startClaiming(final ServerPlayer player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
     {
         checkNotNull(player);
         checkNotNull(faction);
@@ -772,7 +774,8 @@ public class FactionLogicImpl implements FactionLogic
 
         if(this.factionsConfig.shouldDelayClaim())
         {
-            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_CLAIM_IT, TextColors.GREEN, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, this.factionsConfig.getClaimDelay())))));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_CLAIM_IT, GREEN,
+                    Collections.singletonMap(Placeholders.NUMBER, text(this.factionsConfig.getClaimDelay(), GOLD)))));
             EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunkPosition), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
         }
         else
@@ -781,21 +784,21 @@ public class FactionLogicImpl implements FactionLogic
             {
                 boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunkPosition);
                 if(didSucceed)
-                    player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
                 else
-                    player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY, RED)));
             }
             else
             {
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, Messages.LAND + " ", TextColors.GOLD, chunkPosition.toString(), TextColors.WHITE, " " + Messages.HAS_BEEN_SUCCESSFULLY + " ", TextColors.GOLD, Messages.CLAIMED, TextColors.WHITE, "!"));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
                 addClaim(faction, new Claim(worldUUID, chunkPosition));
             }
-            EventRunner.runFactionClaimEventPost(player, faction, player.getWorld(), chunkPosition);
+            EventRunner.runFactionClaimEventPost(player, faction, player.world(), chunkPosition);
         }
     }
 
     @Override
-    public boolean addClaimByItems(final Player player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
+    public boolean addClaimByItems(final ServerPlayer player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
     {
         checkNotNull(player);
         checkNotNull(faction);
@@ -810,8 +813,7 @@ public class FactionLogicImpl implements FactionLogic
         }
         catch (RequiredItemsNotFoundException e)
         {
-            player.sendMessage(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED,
-                    Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage()));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage(), RED)));
             return false;
         }
     }
@@ -832,12 +834,12 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void changeTagColor(final Faction faction, final TextColor textColor)
+    public void changeTagColor(final Faction faction, final NamedTextColor textColor)
     {
         checkNotNull(faction);
         checkNotNull(textColor);
 
-        final Text text = Text.of(textColor, faction.getTag().toPlainSingle());
+        final TextComponent text = text(PlainTextComponentSerializer.plainText().serialize(faction.getTag()), textColor);
         final Faction updatedFaction = faction.toBuilder().setTag(text).build();
         storageManager.saveFaction(updatedFaction);
     }
@@ -898,7 +900,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         Validate.notBlank(newTag);
 
-        final Faction updatedFaction = faction.toBuilder().setTag(Text.of(faction.getTag().getColor(), newTag)).build();
+        final Faction updatedFaction = faction.toBuilder().setTag(text(newTag, faction.getTag().color())).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 

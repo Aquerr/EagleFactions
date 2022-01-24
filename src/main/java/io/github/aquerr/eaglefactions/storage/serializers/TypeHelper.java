@@ -6,8 +6,8 @@ package io.github.aquerr.eaglefactions.storage.serializers;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.util.Tuple;
 
 import java.util.Arrays;

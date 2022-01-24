@@ -7,7 +7,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.resource.Resource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +33,7 @@ public class ConfigurationImpl implements Configuration
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
 
-    public ConfigurationImpl(final Path configDir, final Asset configAsset)
+    public ConfigurationImpl(final Path configDir, final Resource configAsset)
     {
         this.configDirectoryPath = configDir;
         if (!Files.exists(this.configDirectoryPath))
@@ -52,7 +52,9 @@ public class ConfigurationImpl implements Configuration
 
         try
         {
-            configAsset.copyToFile(this.configPath, false, true);
+            if (Files.notExists(this.configPath))
+                Files.copy(configAsset.inputStream(), this.configPath);
+//            configAsset.copyToFile(this.configPath, false, true);
         }
         catch (final IOException e)
         {

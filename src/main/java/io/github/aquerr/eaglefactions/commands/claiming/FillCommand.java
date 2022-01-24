@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.claiming;
 
-import com.flowpowered.math.vector.Vector3i;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
@@ -10,20 +9,22 @@ import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class FillCommand extends AbstractCommand
 {
@@ -36,40 +37,33 @@ public class FillCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext context) throws CommandException
+    public CommandResult execute(CommandContext context) throws CommandException
     {
-        if (!isPlayer(source))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND));
 
-        final Player player = (Player)source;
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.getUniqueId());
+        ServerPlayer player = requirePlayerSource(context);
+        Faction faction = requirePlayerFaction(player);
 
-        //Check if player is in the faction.
-        if (!optionalPlayerFaction.isPresent())
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND));
+        final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
+        if (!isAdmin && !super.getPlugin().getPermsManager().canClaim(player.uniqueId(), faction))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS, RED)));
 
-        final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player);
-        final Faction playerFaction = optionalPlayerFaction.get();
-        if (!isAdmin && !super.getPlugin().getPermsManager().canClaim(player.getUniqueId(), playerFaction))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS));
-
-        final World world = player.getWorld();
+        final ServerWorld world = player.world();
 
         if (!canClaimInWorld(world, isAdmin))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD));
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD, RED)));
 
-        if (isFactionUnderAttack(playerFaction))
-            throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_IS_UNDER_ATTACK + " ", MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_SECONDS_TO_BE_ABLE_TO_CLAIM_AGAIN, TextColors.RED, Collections.singletonMap(Placeholders.NUMBER, Text.of(TextColors.GOLD, EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))))));
+        if (isFactionUnderAttack(faction))
+            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOUR_FACTION_IS_UNDER_ATTACK + " ", RED).append(MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_SECONDS_TO_BE_ABLE_TO_CLAIM_AGAIN, RED, Collections.singletonMap(Placeholders.NUMBER, text(EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()), GOLD))))));
 
-        fill(player, playerFaction);
+        fill(player, faction);
         return CommandResult.success();
     }
 
-    private boolean canClaimInWorld(World world, boolean isAdmin)
+    private boolean canClaimInWorld(ServerWorld world, boolean isAdmin)
     {
-        if (this.protectionConfig.getClaimableWorldNames().contains(world.getName()))
+        if (this.protectionConfig.getClaimableWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get())))
             return true;
-        else return this.protectionConfig.getNotClaimableWorldNames().contains(world.getName()) && isAdmin;
+        else return this.protectionConfig.getNotClaimableWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get())) && isAdmin;
     }
 
     private boolean hasReachedClaimLimit(Faction faction)
@@ -83,15 +77,15 @@ public class FillCommand extends AbstractCommand
     }
 
     // Starts where player is standing
-    private void fill(final Player player, Faction faction) throws CommandException
+    private void fill(final ServerPlayer player, Faction faction) throws CommandException
     {
-        final UUID worldUUID = player.getWorld().getUniqueId();
+        final UUID worldUUID = player.world().uniqueId();
         final Queue<Vector3i> chunks = new LinkedList<>();
-        chunks.add(player.getLocation().getChunkPosition());
+        chunks.add(player.location().chunkPosition());
         while (!chunks.isEmpty())
         {
             if (hasReachedClaimLimit(faction))
-                throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS));
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS, RED)));
 
             final Vector3i chunkPosition = chunks.poll();
             if (!super.getPlugin().getFactionLogic().isClaimed(worldUUID, chunkPosition))

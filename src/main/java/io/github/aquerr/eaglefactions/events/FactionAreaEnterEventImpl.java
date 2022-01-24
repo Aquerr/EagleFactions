@@ -2,12 +2,11 @@ package io.github.aquerr.eaglefactions.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionAreaEnterEvent;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.impl.AbstractEvent;
-import org.spongepowered.api.world.World;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
@@ -62,27 +61,27 @@ public class FactionAreaEnterEventImpl extends AbstractEvent implements FactionA
 	}
 
 	@Override
-	public Cause getCause()
+	public Cause cause()
 	{
 		return this.cause;
 	}
 
 	@Override
-	public Transform<World> getFromTransform()
+	public Vector3d getOriginalPosition()
 	{
-		return this.moveEntityEvent.getFromTransform();
+		return this.moveEntityEvent.originalPosition();
 	}
 
 	@Override
-	public Transform<World> getToTransform()
+	public Vector3d getDestinationPosition()
 	{
-		return this.moveEntityEvent.getToTransform();
+		return this.moveEntityEvent.destinationPosition();
 	}
 
 	@Override
-	public void setToTransform(Transform<World> transform)
+	public void setDestinationPosition(Vector3d position)
 	{
-		this.moveEntityEvent.setToTransform(transform);
+		this.moveEntityEvent.setDestinationPosition(position);
 	}
 
 	static class Pre extends FactionAreaEnterEventImpl implements FactionAreaEnterEvent.Pre

@@ -9,7 +9,7 @@ import io.github.aquerr.eaglefactions.api.managers.RankManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -28,7 +28,7 @@ public class RankManagerImpl implements RankManager
     }
 
     @Override
-    public FactionMemberType demotePlayer(final @Nullable Player player, final FactionPlayer targetPlayer) throws PlayerNotInFactionException
+    public FactionMemberType demotePlayer(final @Nullable ServerPlayer player, final FactionPlayer targetPlayer) throws PlayerNotInFactionException
     {
         checkNotNull(targetPlayer);
 
@@ -75,7 +75,7 @@ public class RankManagerImpl implements RankManager
     }
 
     @Override
-    public FactionMemberType promotePlayer(final @Nullable Player player, FactionPlayer targetPlayer) throws PlayerNotInFactionException
+    public FactionMemberType promotePlayer(final @Nullable ServerPlayer player, FactionPlayer targetPlayer) throws PlayerNotInFactionException
     {
         checkNotNull(targetPlayer);
 

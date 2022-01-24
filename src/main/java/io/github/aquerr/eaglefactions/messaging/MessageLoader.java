@@ -3,16 +3,17 @@ package io.github.aquerr.eaglefactions.messaging;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -21,27 +22,35 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 
+import static net.kyori.adventure.text.Component.text;
+
 @Singleton
 public class MessageLoader
 {
     private static final String LANG_DIR_NAME = "lang";
 
+    private final PluginContainer pluginContainer;
     private final EagleFactions plugin;
     private final FactionsConfig factionsConfig;
 
     private static MessageLoader instance = null;
 
-    public static MessageLoader getInstance(EagleFactions plugin)
+    public static MessageLoader getInstance()
     {
-        if (instance == null)
-            return new MessageLoader(plugin);
-        return instance;
+        return Optional.ofNullable(instance)
+                .orElseThrow(() -> new RuntimeException("MessageLoader not yet initialized!"));
     }
 
-    private MessageLoader(final EagleFactions plugin)
+    public static void init(EagleFactions eagleFactions, PluginContainer pluginContainer)
     {
-        instance = this;
+        if (instance == null)
+            instance = new MessageLoader(eagleFactions, pluginContainer);
+    }
+
+    private MessageLoader(final EagleFactions plugin, PluginContainer pluginContainer)
+    {
         this.plugin = plugin;
+        this.pluginContainer = pluginContainer;
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         Path configDir = plugin.getConfigDir();
         String langFileName = this.factionsConfig.getLanguageFileName();
@@ -59,7 +68,7 @@ public class MessageLoader
             }
         }
 
-        Optional<Asset> optionalLangFile = Sponge.getAssetManager().getAsset(plugin, LANG_DIR_NAME + "/" + langFileName);
+        Optional<Asset> optionalLangFile = Sponge.server().resourceManager().getAsset(plugin, LANG_DIR_NAME + "/" + langFileName);
         if (optionalLangFile.isPresent())
         {
             try
@@ -175,26 +184,22 @@ public class MessageLoader
 //        return result;
 //    }
 
-    public static Text parseMessage(final String message, final TextColor messageBaseColor, final Map<Placeholder, Text> placeholdersMap)
+    public static TextComponent parseMessage(final String message, final NamedTextColor messageBaseColor, final Map<Placeholder, TextComponent> placeholdersMap)
     {
-        final Text.Builder resultText = Text.builder();
+        TextComponent resultText = Component.empty();
         final String[] splitMessage = message.split(" ");
         for (final String word : splitMessage)
         {
             boolean didFill = false;
-            for (final Map.Entry<Placeholder, Text> mapEntry : placeholdersMap.entrySet())
+            for (final Map.Entry<Placeholder, TextComponent> mapEntry : placeholdersMap.entrySet())
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {
-                    final String placeholderReplacement = TextSerializers.FORMATTING_CODE.serialize(mapEntry.getValue().toBuilder().append(Text.of(messageBaseColor)).build());
+                    final String placeholderReplacement = LegacyComponentSerializer.legacyAmpersand().serialize(mapEntry.getValue().color(messageBaseColor));
                     final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), placeholderReplacement);
-                    final Text formattedText = TextSerializers.FORMATTING_CODE.deserialize(filledPlaceholder + " ");
-                    resultText.append(formattedText);
+                    final TextComponent formattedText = LegacyComponentSerializer.legacyAmpersand().deserialize(filledPlaceholder + " ");
+                    resultText = resultText.append(formattedText);
                     didFill = true;
-
-//                    final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), mapEntry.getValue().toPlainSingle());
-//                    resultText.append(Text.builder().append(Text.of(filledPlaceholder)).build());
-//                    didFill = true;
                     break;
                 }
             }
@@ -202,9 +207,9 @@ public class MessageLoader
             if (didFill)
                 continue;
 
-            resultText.append(Text.of(messageBaseColor, word + " "));
+            resultText = resultText.append(text(word + " ", messageBaseColor));
         }
-        return resultText.build();
+        return resultText;
     }
 
 //    public static TextTemplate toTextTemplate(final String message)

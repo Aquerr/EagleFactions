@@ -6,16 +6,15 @@ import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.scoreboard.critieria.Criteria;
+import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class PVPLoggerImpl implements PVPLogger
 {
@@ -72,7 +73,7 @@ public class PVPLoggerImpl implements PVPLogger
     }
 
     @Override
-    public boolean shouldBlockCommand(final Player player, final String command)
+    public boolean shouldBlockCommand(final ServerPlayer player, final String command)
     {
         if (!isPlayerBlocked(player))
             return false;
@@ -103,12 +104,12 @@ public class PVPLoggerImpl implements PVPLogger
 
     //TODO: Go through this code and try to improve it.
     @Override
-    public synchronized void addOrUpdatePlayer(final Player player)
+    public synchronized void addOrUpdatePlayer(final ServerPlayer player)
     {
         if(!isActive())
             return;
 
-        final UUID playerUUID = player.getUniqueId();
+        final UUID playerUUID = player.uniqueId();
 
         //Update player's time if player is already blocked.
         if (playerPVPLoggerObjectives.containsKey(playerUUID) && playerPVPLoggerObjectives.containsKey(playerUUID))
@@ -123,7 +124,7 @@ public class PVPLoggerImpl implements PVPLogger
 
         if (shouldDisplayInScoreboard)
         {
-            final Scoreboard scoreboard = Optional.ofNullable(player.getScoreboard()).orElse(Scoreboard.builder().build());
+            final Scoreboard scoreboard = Optional.ofNullable(player.scoreboard()).orElse(Scoreboard.builder().build());
             final Objective objective = createPVPLoggerObjective(objectiveId);
             scoreboard.addObjective(objective);
             scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
@@ -133,7 +134,7 @@ public class PVPLoggerImpl implements PVPLogger
 
         this.playerPVPLoggerObjectives.put(playerUUID, pvpLoggerObjective);
 
-        player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.RED, Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!"));
+        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!", RED)));
 
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(task ->
                 {
@@ -142,7 +143,7 @@ public class PVPLoggerImpl implements PVPLogger
                         PVPLoggerObjective loggerObjective = this.playerPVPLoggerObjectives.get(playerUUID);
                         if (loggerObjective.getSeconds() <= 0)
                         {
-                            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY));
+                            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY, GREEN)));
                             removePlayer(player);
                             task.cancel();
                             return;
@@ -152,7 +153,7 @@ public class PVPLoggerImpl implements PVPLogger
 
                         if(shouldDisplayInScoreboard)
                         {
-                            final Optional<Player> optionalPlayer = Sponge.getServer().getPlayer(playerUUID);
+                            final Optional<ServerPlayer> optionalPlayer = Sponge.server().player(playerUUID);
                             optionalPlayer.ifPresent(value -> createOrUpdatePVPLoggerObjective(value, loggerObjective));
                         }
                     }
@@ -173,43 +174,43 @@ public class PVPLoggerImpl implements PVPLogger
         return preferredId;
     }
 
-    private void createOrUpdatePVPLoggerObjective(Player player, PVPLoggerObjective pvpLoggerObjective)
+    private void createOrUpdatePVPLoggerObjective(ServerPlayer player, PVPLoggerObjective pvpLoggerObjective)
     {
         Objective objective = pvpLoggerObjective.getObjective();
         if (objective == null)
         {
             final int objectiveId = getNextFreeId(1);
             objective = createPVPLoggerObjective(objectiveId);
-            player.getScoreboard().addObjective(objective);
-            player.getScoreboard().updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+            player.scoreboard().addObjective(objective);
+            player.scoreboard().updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
         }
-        Score pvpTimerScore = objective.getOrCreateScore(Text.of("Time:"));
+        Score pvpTimerScore = objective.findOrCreateScore(Component.text("Time:"));
         pvpTimerScore.setScore(pvpLoggerObjective.getSeconds());
     }
 
     @Override
-    public synchronized boolean isPlayerBlocked(final Player player)
+    public synchronized boolean isPlayerBlocked(final ServerPlayer player)
     {
-        return this.playerPVPLoggerObjectives.containsKey(player.getUniqueId());
+        return this.playerPVPLoggerObjectives.containsKey(player.uniqueId());
     }
 
     @Override
-    public synchronized void removePlayer(final Player player)
+    public synchronized void removePlayer(final ServerPlayer player)
     {
         if (!isPlayerBlocked(player))
             return;
 
         //Remove PVPLoggerImpl objective
-        Scoreboard scoreboard = player.getScoreboard();
-        PVPLoggerObjective pvpLoggerObjective = this.playerPVPLoggerObjectives.get(player.getUniqueId());
+        Scoreboard scoreboard = player.scoreboard();
+        PVPLoggerObjective pvpLoggerObjective = this.playerPVPLoggerObjectives.get(player.uniqueId());
         scoreboard.removeObjective(pvpLoggerObjective.getObjective());
-        this.playerPVPLoggerObjectives.remove(player.getUniqueId());
+        this.playerPVPLoggerObjectives.remove(player.uniqueId());
     }
 
     @Override
-    public synchronized int getPlayerBlockTime(final Player player)
+    public synchronized int getPlayerBlockTime(final ServerPlayer player)
     {
-        return Optional.ofNullable(this.playerPVPLoggerObjectives.get(player.getUniqueId()))
+        return Optional.ofNullable(this.playerPVPLoggerObjectives.get(player.uniqueId()))
                 .map(PVPLoggerObjective::getSeconds)
                 .orElse(0);
     }
@@ -218,7 +219,7 @@ public class PVPLoggerImpl implements PVPLogger
     {
         return Objective.builder()
                 .name(PVPLOGGER_OBJECTIVE_NAME + objectiveId)
-                .displayName(Text.of(TextColors.WHITE, "===", TextColors.RED, "PVP-LOGGER", TextColors.WHITE, "==="))
+                .displayName(Component.text("===", WHITE).append(Component.text("PVP-LOGGER", RED)).append(Component.text("===", WHITE)))
                 .criterion(Criteria.DUMMY)
                 .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
                 .build();

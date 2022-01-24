@@ -3,18 +3,17 @@ package io.github.aquerr.eaglefactions.commands.general;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import org.spongepowered.api.command.CommandException;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -23,6 +22,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Created by Aquerr on 2017-08-04.
@@ -37,33 +40,33 @@ public class PlayerCommand extends AbstractCommand
     }
 
     @Override
-    public CommandResult execute(final CommandSource source, final CommandContext context) throws CommandException
+    public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<FactionPlayer> optionalPlayer = context.getOne("player");
+        final Optional<FactionPlayer> optionalPlayer = context.one(EagleFactionsCommandParameters.factionPlayer());
         if (optionalPlayer.isPresent())
         {
             final FactionPlayer player = optionalPlayer.get();
-            showPlayerInfo(source, player);
+            showPlayerInfo(context.cause().audience(), player);
         }
         else
         {
-            if (source instanceof Player)
+            if (context.cause().audience() instanceof Player)
             {
-                final Player player = (Player) source;
-                final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(player.getUniqueId());
+                final Player player = (Player) context.cause().audience();
+                final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(player.uniqueId());
                 if (!optionalFactionPlayer.isPresent())
                     return CommandResult.success();
                 final FactionPlayer factionPlayer = optionalFactionPlayer.get();
 
-                showPlayerInfo(source, factionPlayer);
+                showPlayerInfo(player, factionPlayer);
             }
         }
         return CommandResult.success();
     }
 
-    private void showPlayerInfo(CommandSource source, FactionPlayer factionPlayer)
+    private void showPlayerInfo(Audience audience, FactionPlayer factionPlayer)
     {
-        List<Text> playerInfo = new ArrayList<>();
+        List<Component> playerInfo = new ArrayList<>();
         String playerFactionName = "";
         if (factionPlayer.getFactionName().isPresent())
             playerFactionName = factionPlayer.getFactionName().get();
@@ -82,18 +85,21 @@ public class PlayerCommand extends AbstractCommand
 
         String formattedDate = DATE_TIME_FORMATTER.format(lastPlayed);
         final boolean isOnline = optionalUser.isPresent() && optionalUser.get().isOnline();
-        final Text online = isOnline ? Text.of(TextColors.GREEN, "ONLINE") : Text.of(TextColors.RED, "OFFLINE");
-        Text info = Text.builder()
-                .append(Text.of(TextColors.AQUA, Messages.NAME + ": ", TextColors.GOLD, factionPlayer.getName() + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.PLAYER_STATUS + ": ")).append(online).append(Text.of("\n"))
-                .append(Text.of(TextColors.AQUA, Messages.FACTION + ": ", TextColors.GOLD, playerFactionName + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.POWER + ": ", TextColors.GOLD, factionPlayer.getPower() + "/" + factionPlayer.getMaxPower() + "\n"))
-                .append(Text.of(TextColors.AQUA, Messages.LAST_PLAYED + ": ", TextColors.GOLD, formattedDate))
+        final Component online = isOnline ? text("ONLINE", GREEN) : text("OFFLINE", RED);
+        Component info = text()
+                .append(text(Messages.NAME + ": ", AQUA)).append(text(factionPlayer.getName(), GOLD)).append(newline())
+                .append(text(Messages.PLAYER_STATUS + ": ", AQUA)).append(online).append(newline())
+                .append(text(Messages.FACTION + ": ", AQUA)).append(text(playerFactionName, GOLD)).append(newline())
+                .append(text(Messages.POWER + ": ", AQUA)).append(text(factionPlayer.getPower() + "/" + factionPlayer.getMaxPower(), GOLD)).append(newline())
+                .append(text(Messages.LAST_PLAYED + ": ", AQUA)).append(text(formattedDate, GOLD))
                 .build();
 
         playerInfo.add(info);
 
-        PaginationList.Builder paginationBuilder = PaginationList.builder().title(Text.of(TextColors.GREEN, Messages.PLAYER_INFO)).padding(Text.of("=")).contents(playerInfo);
-        paginationBuilder.sendTo(source);
+        PaginationList.Builder paginationBuilder = PaginationList.builder()
+                .title(text(Messages.PLAYER_INFO, GREEN))
+                .padding(text("="))
+                .contents(playerInfo);
+        paginationBuilder.sendTo(audience);
     }
 }

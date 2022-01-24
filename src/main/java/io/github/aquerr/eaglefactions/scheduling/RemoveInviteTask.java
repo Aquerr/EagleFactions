@@ -13,12 +13,6 @@ public class RemoveInviteTask implements EagleFactionsRunnableTask
     }
 
     @Override
-    public String getName()
-    {
-        return "EagleFactions Remove Invite Task - " + factionInvite.getInvitedPlayerUniqueId() + " " + factionInvite.getSenderFaction();
-    }
-
-    @Override
     public void run()
     {
         EagleFactionsPlugin.INVITE_LIST.remove(factionInvite);
