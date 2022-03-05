@@ -8,6 +8,9 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.regex.Pattern;
 
+/**
+ * Validates if faction name and tag are not null and alphanumeric only.
+ */
 public final class AlphaNumericFactionNameTagValidator
 {
     private AlphaNumericFactionNameTagValidator()
@@ -15,7 +18,7 @@ public final class AlphaNumericFactionNameTagValidator
         
     }
 
-    private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9]*$");
+    private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z0-9]+$");
 
     private static final AlphaNumericFactionNameTagValidator INSTANCE = new AlphaNumericFactionNameTagValidator();
 
@@ -26,21 +29,19 @@ public final class AlphaNumericFactionNameTagValidator
 
     public void validate(String factionName, String tag) throws CommandException
     {
-        if(!ALPHANUMERIC_PATTERN.matcher(factionName).matches() || !ALPHANUMERIC_PATTERN.matcher(tag).matches())
+        if(factionName == null || tag == null || !ALPHANUMERIC_PATTERN.matcher(factionName).matches() || !ALPHANUMERIC_PATTERN.matcher(tag).matches())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_NAME_AND_TAG_MUST_BE_ALPHANUMERIC));
     }
 
     public void validateTag(String tag) throws CommandException
     {
-        if (!ALPHANUMERIC_PATTERN.matcher(tag).matches())
+        if (tag == null || !ALPHANUMERIC_PATTERN.matcher(tag).matches())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_TAG_MUST_BE_ALPHANUMERIC));
     }
 
     public void validateFactionName(String factionName) throws CommandException
     {
-        if (!ALPHANUMERIC_PATTERN.matcher(factionName).matches())
+        if (factionName == null || !ALPHANUMERIC_PATTERN.matcher(factionName).matches())
             throw new CommandException(Text.of(PluginInfo.ERROR_PREFIX, TextColors.RED, Messages.FACTION_NAME_MUST_BE_ALPHANUMERIC));
     }
-
-
 }

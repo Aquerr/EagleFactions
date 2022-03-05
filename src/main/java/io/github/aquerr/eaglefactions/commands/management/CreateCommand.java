@@ -35,8 +35,6 @@ import java.util.regex.Pattern;
  */
 public class CreateCommand extends AbstractCommand
 {
-    private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9]*$");
-
     private final ChatConfig chatConfig;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
