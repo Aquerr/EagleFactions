@@ -15,13 +15,13 @@ plugins {
 allprojects {
     description = "A factions plugin that will make managing your battle-server easier. :)"
     group = "io.github.aquerr"
-    version = "0.16.0"
+    version = "0.17.0"
 
     tasks.withType(JavaCompile::class).configureEach {
         options.apply {
             encoding = "utf-8" // Consistent source file encoding
             if (JavaVersion.current().isJava10Compatible) {
-                release.set(8)
+                release.set(17)
             }
         }
     }
@@ -40,8 +40,8 @@ allprojects {
     }
 }
 
-group = "org.spongepowered"
-version = "0.17"
+group = "o.github.aquerr"
+version = "0.17.0"
 
 repositories {
     mavenCentral()
@@ -74,8 +74,8 @@ sponge {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 blossom {
