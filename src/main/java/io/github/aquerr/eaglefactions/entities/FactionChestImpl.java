@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public class FactionChestImpl implements FactionChest
 {
     private String factionName; //Reference to faction holding this chest
-    private Supplier<Inventory> inventory;
+    private Supplier<Inventory> inventorySupplier;
     private Inventory rawInventory;
 
     public FactionChestImpl(final String factionName)
@@ -31,20 +31,22 @@ public class FactionChestImpl implements FactionChest
     public FactionChestImpl(final String factionName, final List<SlotItem> items)
     {
         this.factionName = factionName;
-        this.inventory = () -> {
+        this.inventorySupplier = () -> {
             if (this.rawInventory != null)
                 return this.rawInventory;
-            return buildInventory(items);
+            this.rawInventory = buildInventory(items);
+            return this.rawInventory;
         };
     }
 
-    public FactionChestImpl(final String factionName, final Inventory inventory)
+    public FactionChestImpl(final String factionName, final Inventory inventorySupplier)
     {
         this.factionName = factionName;
-        this.inventory = () -> {
+        this.inventorySupplier = () -> {
             if (this.rawInventory != null)
                 return this.rawInventory;
-            return buildInventory(toSlotItems(inventory));
+            this.rawInventory = buildInventory(toSlotItems(inventorySupplier));
+            return this.rawInventory;
         };
     }
 
@@ -57,17 +59,15 @@ public class FactionChestImpl implements FactionChest
     @Override
     public List<SlotItem> getItems()
     {
-        if(this.inventory == null)
+        if(this.inventorySupplier == null)
             return new ArrayList<>();
-        return toSlotItems(this.inventory.get());
+        return toSlotItems(this.inventorySupplier.get());
     }
 
     @Override
     public Inventory getInventory()
     {
-        if(this.inventory.get() == null)
-            this.rawInventory = buildInventory(new ArrayList<>());
-        return this.rawInventory;
+        return this.inventorySupplier.get();
     }
 
     private Inventory buildInventory(final List<SlotItem> slotItems)
@@ -94,7 +94,7 @@ public class FactionChestImpl implements FactionChest
         int column = 1;
         int row = 1;
 
-        for(final Inventory slot : inventory.get().slots())
+        for(final Inventory slot : inventoryMenu.inventory().slots())
         {
             ItemStack itemStack = getAtPosition(slotItems, row, column);
             if(itemStack != null)
