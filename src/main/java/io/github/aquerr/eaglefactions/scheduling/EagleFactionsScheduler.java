@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -23,6 +24,7 @@ public class EagleFactionsScheduler
         return asyncScheduler.submit(Task.builder()
                 .delay(delay, TimeUnit.SECONDS)
                 .execute(task)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -31,6 +33,7 @@ public class EagleFactionsScheduler
         return asyncScheduler.submit(Task.builder()
                 .delay(delay, TimeUnit.SECONDS)
                 .execute(task)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -39,6 +42,7 @@ public class EagleFactionsScheduler
         return this.asyncScheduler.submit(Task.builder()
                 .execute(task)
                 .delay(delay, timeUnit)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -47,6 +51,7 @@ public class EagleFactionsScheduler
         return this.syncScheduler.submit(Task.builder()
                 .execute(task)
                 .delay(delay, timeUnit)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -56,6 +61,7 @@ public class EagleFactionsScheduler
                 .execute(task)
                 .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -65,6 +71,7 @@ public class EagleFactionsScheduler
                 .execute(task)
                 .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -74,6 +81,7 @@ public class EagleFactionsScheduler
                 .execute(task)
                 .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
@@ -83,6 +91,7 @@ public class EagleFactionsScheduler
                 .execute(task)
                 .delay(delay, delayUnit)
                 .interval(interval, intervalUnit)
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
                 .build());
     }
 
