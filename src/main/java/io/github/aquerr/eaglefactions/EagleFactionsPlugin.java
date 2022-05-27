@@ -280,6 +280,9 @@ public class EagleFactionsPlugin implements EagleFactions
             disablePlugin();
         }
 
+        // Reloads storage and cache.
+        this.storageManager.reloadStorage();
+
         initializeIntegrations();
 
         if (isDisabled)

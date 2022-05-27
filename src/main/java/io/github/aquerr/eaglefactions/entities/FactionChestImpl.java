@@ -20,12 +20,18 @@ import java.util.function.Supplier;
 public class FactionChestImpl implements FactionChest
 {
     private String factionName; //Reference to faction holding this chest
-    private Supplier<Inventory> inventorySupplier;
-    private Inventory rawInventory;
+    private Supplier<InventoryMenu> inventorySupplier;
+    private InventoryMenu rawInventory;
 
     public FactionChestImpl(final String factionName)
     {
         this.factionName = factionName;
+        this.inventorySupplier = () -> {
+            if (this.rawInventory != null)
+                return this.rawInventory;
+            this.rawInventory = buildInventory(new ArrayList<>());
+            return this.rawInventory;
+        };
     }
 
     public FactionChestImpl(final String factionName, final List<SlotItem> items)
@@ -39,13 +45,13 @@ public class FactionChestImpl implements FactionChest
         };
     }
 
-    public FactionChestImpl(final String factionName, final Inventory inventorySupplier)
+    public FactionChestImpl(final String factionName, final Inventory inventory)
     {
         this.factionName = factionName;
         this.inventorySupplier = () -> {
             if (this.rawInventory != null)
                 return this.rawInventory;
-            this.rawInventory = buildInventory(toSlotItems(inventorySupplier));
+            this.rawInventory = buildInventory(toSlotItems(inventory));
             return this.rawInventory;
         };
     }
@@ -61,21 +67,22 @@ public class FactionChestImpl implements FactionChest
     {
         if(this.inventorySupplier == null)
             return new ArrayList<>();
-        return toSlotItems(this.inventorySupplier.get());
+        return toSlotItems(this.inventorySupplier.get().inventory());
     }
 
     @Override
-    public Inventory getInventory()
+    public InventoryMenu getInventory()
     {
         return this.inventorySupplier.get();
     }
 
-    private Inventory buildInventory(final List<SlotItem> slotItems)
+    private InventoryMenu buildInventory(final List<SlotItem> slotItems)
     {
         FactionChest factionChest = this;
 
         //Create inventory
-        InventoryMenu inventoryMenu = InventoryMenu.of(ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3)
+        InventoryMenu inventoryMenu = InventoryMenu.of(ViewableInventory.builder()
+                .type(ContainerTypes.GENERIC_9X3)
                 .completeStructure()
                 .identity(UUID.randomUUID())
                 .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
@@ -108,7 +115,7 @@ public class FactionChestImpl implements FactionChest
             }
         }
 
-        return inventoryMenu.inventory();
+        return inventoryMenu;
     }
 
     private List<SlotItem> toSlotItems(final Inventory inventory)

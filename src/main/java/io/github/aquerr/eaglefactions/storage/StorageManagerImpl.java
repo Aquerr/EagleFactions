@@ -88,9 +88,6 @@ public class StorageManagerImpl implements StorageManager
                 break;
         }
         this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
-        LOGGER.info("Filling cache with data...");
-        prepareFactionsCache();
-        preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }
 
     private void queueStorageTask(IStorageTask task)
@@ -177,17 +174,9 @@ public class StorageManagerImpl implements StorageManager
     {
         FactionsCache.clear();
         this.factionsStorage.load();
-        prepareFactionsCache();
 
-        //Must be run after factions.
-        preparePlayerCache();
+        reloadCache();
     }
-
-//    @Override
-//    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
-//    {
-//        return FactionsCache.getPlayer(playerUUID) != null;
-//    }
 
     @Override
     public boolean savePlayer(final FactionPlayer factionPlayer)
@@ -254,5 +243,14 @@ public class StorageManagerImpl implements StorageManager
     public List<String> listBackups()
     {
         return this.backupStorage.listBackups();
+    }
+
+    public void reloadCache()
+    {
+        LOGGER.info("Reloading cache...");
+        prepareFactionsCache();
+
+        //Must be run after factions cache
+        preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }
 }

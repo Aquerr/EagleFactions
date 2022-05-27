@@ -373,7 +373,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 }
             }
 
-            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory());
+            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory().inventory());
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
