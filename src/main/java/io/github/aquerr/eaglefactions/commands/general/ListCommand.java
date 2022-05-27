@@ -38,7 +38,10 @@ public class ListCommand extends AbstractCommand
 
             for(final Faction faction : factionsList)
             {
-                TextComponent tag = Component.empty().append(tagPrefix).append(faction.getTag()).append(tagSuffix.append(Component.text(" ")));
+                TextComponent tag = Component.empty()
+                        .append(tagPrefix)
+                        .append(faction.getTag())
+                        .append(tagSuffix.append(Component.text(" ")));
 
                 TextComponent factionHelp = Component.empty()
                         .append(Component.empty()

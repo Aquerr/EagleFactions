@@ -197,7 +197,7 @@ public class MessageLoader
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {
-                    final String placeholderReplacement = LegacyComponentSerializer.legacyAmpersand().serialize(mapEntry.getValue().color(messageBaseColor));
+                    final String placeholderReplacement = LegacyComponentSerializer.legacyAmpersand().serialize(mapEntry.getValue());
                     final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), placeholderReplacement);
                     final TextComponent formattedText = LegacyComponentSerializer.legacyAmpersand().deserialize(filledPlaceholder + " ");
                     resultText = resultText.append(formattedText);

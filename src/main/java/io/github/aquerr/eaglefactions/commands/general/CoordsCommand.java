@@ -87,7 +87,7 @@ public class CoordsCommand extends AbstractCommand
         if(faction.getHome() != null)
         {
             final Optional<ServerWorld> optionalHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().getWorldUUID());
-            final TextComponent textComponent = Component.text(Messages.FACTIONS_HOME, NamedTextColor.AQUA).append(Component.text(": " + ((TextComponent)optionalHomeWorld.map(world -> world.properties().displayName().orElse(Component.text("Unknown World"))).get()).content() + "|" + faction.getHome().getBlockPosition().toString()));
+            final TextComponent textComponent = Component.text(Messages.FACTIONS_HOME, NamedTextColor.AQUA).append(Component.text(": " + (optionalHomeWorld.map(world -> world.properties().name()).orElse("Unknow World")) + "|" + faction.getHome().getBlockPosition().toString()));
             teamCoords.add(textComponent);
         }
 

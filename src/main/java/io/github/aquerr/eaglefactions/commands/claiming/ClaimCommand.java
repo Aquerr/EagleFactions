@@ -80,7 +80,7 @@ public class ClaimCommand extends AbstractCommand
     {
         final ServerWorld world = player.world();
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
-        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get()));
+        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.properties().name());
 
         if(!optionalPlayerFaction.isPresent() || !optionalPlayerFaction.get().getName().equals(faction.getName()))
             throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS, RED)));
@@ -94,8 +94,8 @@ public class ClaimCommand extends AbstractCommand
     private CommandResult preformAdminClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
-        final boolean safeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get()));
-        final boolean warZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get()));
+        final boolean safeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(world.properties().name());
+        final boolean warZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(world.properties().name());
 
         //Even admin cannot claim territories in safezone nor warzone world.
         if (safeZoneWorld || warZoneWorld)
@@ -115,7 +115,7 @@ public class ClaimCommand extends AbstractCommand
     private CommandResult preformNormalClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
-        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get()));
+        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.properties().name());
 
         if(!isClaimableWorld)
             throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD, RED)));

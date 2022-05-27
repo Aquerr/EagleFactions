@@ -45,10 +45,10 @@ public class ChatConfigImpl implements ChatConfig
 		this.suppressOtherFactionsMessagesWhileInTeamChat = this.configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
 		this.displayProtectionSystemMessages = this.configuration.getBoolean(true, "display-protection-system-messages");
 		this.canColorTags = this.configuration.getBoolean(true, "colored-tags-allowed");
-		this.factionStartPrefix = LegacyComponentSerializer.legacySection().deserialize(configuration.getString("[", "faction-prefix-start"));
-		this.factionEndPrefix = LegacyComponentSerializer.legacySection().deserialize(configuration.getString("]", "faction-prefix-end"));
+		this.factionStartPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("[", "faction-prefix-start"));
+		this.factionEndPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("]", "faction-prefix-end"));
 		this.isFactionPrefixFirstInChat = this.configuration.getBoolean(true, "faction-prefix-first-in-chat");
-		this.nonFactionPlayerPrefix = LegacyComponentSerializer.legacySection().deserialize(configuration.getString("", "non-faction-player-prefix"));
+		this.nonFactionPlayerPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("", "non-faction-player-prefix"));
 		this.showFactionEnterPhrase = this.configuration.getBoolean(true, "show-faction-enter-phrase");
 
 		this.visibleRanks = loadVisibleRanks();

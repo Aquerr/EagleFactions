@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 
@@ -33,7 +34,7 @@ public class PlayerJoinListener extends AbstractListener
     }
 
     @Listener(order = Order.POST)
-    public void onPlayerJoin(final ServerSideConnectionEvent.Join event, final @Root ServerPlayer player)
+    public void onPlayerJoin(final ServerSideConnectionEvent.Join event, final @First ServerPlayer player)
     {
         CompletableFuture.runAsync(() -> {
             if (player.hasPermission(PluginPermissions.VERSION_NOTIFY) && !VersionChecker.isLatest(PluginInfo.VERSION))
@@ -43,11 +44,7 @@ public class PlayerJoinListener extends AbstractListener
             if (!super.getPlugin().getPlayerManager().getFactionPlayer(player.uniqueId()).isPresent())
                 super.getPlugin().getPlayerManager().addPlayer(player.uniqueId(), player.name()); //Maybe we could add loadCache method instead?
 
-//            super.getPlugin().getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
-
-//            super.getPlugin().getPlayerManager().updatePlayerName(player.getUniqueId(), player.getName());
             super.getPlugin().getPowerManager().startIncreasingPower(player.uniqueId());
-
 
             //Check if the world that player is connecting to is already in the config file
             //TODO: To Test

@@ -68,7 +68,7 @@ public final class ParticlesUtil
 		final ServerWorld world = optionalWorld.get();
 		final Vector3d position = getChunkCenter(world, claim.getChunkPosition());
 		world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD).option(ParticleOptions.VELOCITY, new Vector3d(0, 0.15, 0)).quantity(800).offset(new Vector3d(8, 1, 8)).build(), position);
-		world.playSound(Sound.sound(SoundTypes.BLOCK_ENDER_CHEST_OPEN, Sound.Source.AMBIENT, 5, -20), position);
+		world.playSound(Sound.sound(SoundTypes.ENTITY_SHULKER_SHOOT, Sound.Source.AMBIENT, 5, -20), position);
 	}
 
 	public static void spawnDestroyClaimParticles(final Claim claim)

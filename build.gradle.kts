@@ -48,7 +48,7 @@ repositories {
 }
 
 sponge {
-    apiVersion("8.0.0")
+    apiVersion("8.1.0")
     license("CHANGEME")
     loader {
         name(PluginLoaders.JAVA_PLAIN)

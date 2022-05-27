@@ -66,6 +66,7 @@ public class CreateCommand extends AbstractCommand
         alphaNumericFactionNameTagValidator.validate(factionName, factionTag);
 
         if (getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
+//            throw new CommandException(MessageLoader.getMessage("error.command.create.faction-tag-already-taken"));
             throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PROVIDED_FACTION_TAG_IS_ALREADY_TAKEN, RED)));
 
         if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))

@@ -17,6 +17,7 @@ import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.EFTypeTokens;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemTypeSerializer;
+import io.github.aquerr.eaglefactions.storage.serializers.Vector3iTypeSerializer;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -306,6 +307,7 @@ public class ConfigurateHelper
                 .register(new TypeToken<Set<Claim>>() {}, new ClaimSetTypeSerializer())
                 .register(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, new SlotItemListTypeSerializer())
                 .register(EFTypeTokens.SLOT_ITEM_TYPE_TOKEN, new SlotItemTypeSerializer())
+                .register(EFTypeTokens.VECTOR_3I_TOKEN, new Vector3iTypeSerializer())
                 .build();
 
         final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults()

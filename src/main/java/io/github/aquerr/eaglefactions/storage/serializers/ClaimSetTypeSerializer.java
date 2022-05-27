@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.storage.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;

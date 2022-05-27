@@ -61,9 +61,9 @@ public class FillCommand extends AbstractCommand
 
     private boolean canClaimInWorld(ServerWorld world, boolean isAdmin)
     {
-        if (this.protectionConfig.getClaimableWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get())))
+        if (this.protectionConfig.getClaimableWorldNames().contains(world.properties().name()))
             return true;
-        else return this.protectionConfig.getNotClaimableWorldNames().contains(PlainTextComponentSerializer.plainText().serialize(world.properties().displayName().get())) && isAdmin;
+        else return this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()) && isAdmin;
     }
 
     private boolean hasReachedClaimLimit(Faction faction)

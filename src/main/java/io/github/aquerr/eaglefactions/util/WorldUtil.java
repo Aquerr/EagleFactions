@@ -1,8 +1,6 @@
 package io.github.aquerr.eaglefactions.util;
 
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Optional;
@@ -19,8 +17,6 @@ public class WorldUtil
 
     public static String getPlainWorldName(final ServerWorld serverWorld)
     {
-        return serverWorld.properties().displayName()
-                .map(PlainTextComponentSerializer.plainText()::serialize)
-                .orElse("");
+        return serverWorld.properties().name();
     }
 }
