@@ -91,7 +91,6 @@ blossom {
 
 dependencies {
     implementation(project(":EagleFactionsAPI"))
-    api("org.spongepowered:spongeapi:8.0.0")
     api("com.github.rojo8399:PlaceholderAPI:4.5.1")
     api("org.mariadb.jdbc:mariadb-java-client:2.6.0")
     api("com.zaxxer:HikariCP:2.6.3")
@@ -101,7 +100,7 @@ dependencies {
     api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
     testImplementation(project(":EagleFactionsAPI"))
-    testImplementation("org.spongepowered:spongeapi:7.3.0")
+    testImplementation("org.spongepowered:spongeapi:8.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testImplementation("org.mockito:mockito-core:3.10.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.10.0")

@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
-import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
