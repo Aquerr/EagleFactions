@@ -83,7 +83,6 @@ import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
-import io.github.aquerr.eaglefactions.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
 import io.github.aquerr.eaglefactions.listeners.ChatMessageListener;
@@ -112,6 +111,7 @@ import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.placeholder.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
@@ -133,6 +133,7 @@ import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
@@ -195,8 +196,9 @@ public class EagleFactionsPlugin implements EagleFactions
     //Integrations
 //    @Inject
 //    private Metrics metrics;
-    private EFPlaceholderService efPlaceholderService;
+//    private PAPIPlaceholderService PAPIPlaceholderService;
     private DynmapService dynmapService;
+    private EFPlaceholderService efPlaceholderService;
 //    private UltimateChatService ultimateChatService;
 
     public static EagleFactionsPlugin getPlugin()
@@ -402,6 +404,12 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
+    @Listener
+    public void onRegisterPlaceholderEvent(RegisterRegistryValueEvent.GameScoped event)
+    {
+        this.efPlaceholderService.onRegisterPlaceholderEvent(event);
+    }
+
     @Override
     public Configuration getConfiguration()
     {
@@ -468,10 +476,10 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.rankManager;
     }
 
-    public EFPlaceholderService getEfPlaceholderService()
-    {
-        return this.efPlaceholderService;
-    }
+//    public PAPIPlaceholderService getEfPlaceholderService()
+//    {
+//        return this.PAPIPlaceholderService;
+//    }
 
     public DynmapService getDynmapService()
     {
@@ -513,6 +521,8 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void setupManagers()
     {
+        this.efPlaceholderService = new EFPlaceholderService(this);
+
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
         this.powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
