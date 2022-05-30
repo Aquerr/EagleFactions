@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.storage;
 
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;

@@ -9,9 +9,9 @@ import io.github.aquerr.eaglefactions.api.managers.RankManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
