@@ -10,9 +10,9 @@ import io.github.aquerr.eaglefactions.messaging.chat.ChatMessageHelper;
 import io.github.aquerr.eaglefactions.messaging.chat.FactionAudienceImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.IsCancelled;
@@ -40,7 +40,6 @@ public class ChatMessageListener extends AbstractListener
     public void onChatMessage(final PlayerChatEvent event, final @Root ServerPlayer player)
     {
         Audience audience = event.audience().orElse(event.originalAudience());
-        final PlayerChatFormatter playerChatFormatter = event.chatFormatter().orElse(event.originalChatFormatter());
         Component message = event.message();
 
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
@@ -56,7 +55,8 @@ public class ChatMessageListener extends AbstractListener
             //Add non-faction prefix tag.
             if(!PlainTextComponentSerializer.plainText().serialize(this.chatConfig.getNonFactionPlayerPrefix()).equals(""))
             {
-                event.setMessage(this.chatConfig.getNonFactionPlayerPrefix().append(message));
+                event.setChatFormatter((sender, target, msg, originalMessage) ->
+                        Optional.of(LinearComponents.linear(this.chatConfig.getNonFactionPlayerPrefix(), Component.text("<" + player.name() + "> "), event.message())));
             }
             return;
         }
@@ -122,7 +122,9 @@ public class ChatMessageListener extends AbstractListener
             factionAndRankPrefix.append(factionPrefix.build());
         }
 
+        event.setChatFormatter((sender, target, msg, originalMessage) ->
+                Optional.of(LinearComponents.linear(chatTypePrefix, factionAndRankPrefix, Component.text("<" + player.name() + "> "), finalMessage)));
+        event.setMessage(message);
         event.setAudience(audience);
-        event.setMessage(factionAndRankPrefix.append(chatTypePrefix).append(finalMessage).build());
     }
 }
