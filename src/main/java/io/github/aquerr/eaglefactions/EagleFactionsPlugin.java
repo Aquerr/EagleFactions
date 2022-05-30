@@ -18,6 +18,7 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.managers.RankManager;
+import io.github.aquerr.eaglefactions.api.messaging.placeholder.PlaceholderService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.commands.VersionCommand;
 import io.github.aquerr.eaglefactions.commands.access.AccessCommand;
@@ -111,7 +112,7 @@ import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.placeholder.EFPlaceholderService;
+import io.github.aquerr.eaglefactions.messaging.placeholder.parser.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
@@ -476,10 +477,11 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.rankManager;
     }
 
-//    public PAPIPlaceholderService getEfPlaceholderService()
-//    {
-//        return this.PAPIPlaceholderService;
-//    }
+    @Override
+    public PlaceholderService getPlaceholderService()
+    {
+        return this.efPlaceholderService;
+    }
 
     public DynmapService getDynmapService()
     {
