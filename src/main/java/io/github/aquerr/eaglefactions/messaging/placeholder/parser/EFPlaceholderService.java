@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.messaging.placeholder.parser;
 
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.placeholder.PlaceholderService;
@@ -59,7 +60,7 @@ public class EFPlaceholderService implements PlaceholderService
         RegisterRegistryValueEvent.RegistryStep<PlaceholderParser> placeholderParserRegistryStep = event.registry(RegistryTypes.PLACEHOLDER_PARSER);
         for (Map.Entry<Placeholder, EFPlaceholderParser> entry : this.placeholderParsers.entrySet())
         {
-            placeholderParserRegistryStep.register(ResourceKey.of("eaglefactions", entry.getKey().getName()), (context) -> processSpongePlaceholderContext(context, entry.getKey()));
+            placeholderParserRegistryStep.register(ResourceKey.of(PluginInfo.ID, entry.getKey().getName()), (context) -> processSpongePlaceholderContext(context, entry.getKey()));
         }
     }
 
