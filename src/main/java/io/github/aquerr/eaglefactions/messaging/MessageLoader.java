@@ -7,16 +7,18 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -47,7 +49,7 @@ public class MessageLoader
             instance = new MessageLoader(eagleFactions, pluginContainer);
     }
 
-    private MessageLoader(final EagleFactions plugin, PluginContainer pluginContainer)
+    private MessageLoader(final EagleFactions plugin, final PluginContainer pluginContainer)
     {
         this.plugin = plugin;
         this.pluginContainer = pluginContainer;
@@ -68,40 +70,40 @@ public class MessageLoader
             }
         }
 
-        Optional<Asset> optionalLangFile = Sponge.server().resourceManager().getAsset(plugin, LANG_DIR_NAME + "/" + langFileName);
-        if (optionalLangFile.isPresent())
+        try
         {
-            try
+            Optional<InputStream> optionalLangFile = pluginContainer.openResource(URI.create(LANG_DIR_NAME + "/" + langFileName));
+            if (optionalLangFile.isPresent())
             {
-                optionalLangFile.get().copyToFile(langFilePath, false, true);
+                Files.copy(optionalLangFile.get(), langFilePath);
             }
-            catch (IOException e)
+            else
             {
-                e.printStackTrace();
+                optionalLangFile = pluginContainer.openResource(URI.create(LANG_DIR_NAME + "/english.conf"));
+                optionalLangFile.ifPresent(x->
+                {
+                    try
+                    {
+                        Files.copy(x, langFilePath);
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                });
             }
         }
-        else
+        catch (final IOException e)
         {
-            optionalLangFile = Sponge.getAssetManager().getAsset(plugin, LANG_DIR_NAME + "/english.conf");
-            optionalLangFile.ifPresent(x->
-            {
-                try
-                {
-                    x.copyToFile(langFilePath, false, true);
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            });
+            e.printStackTrace();
         }
 
-        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().setPath(langFilePath).build();
+        final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder().path(langFilePath).build();
         ConfigurationNode configNode;
 
         try
         {
-            configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
+            configNode = configLoader.load(ConfigurationOptions.defaults().shouldCopyDefaults(true));
             loadPluginMessages(configNode, configLoader);
         }
         catch (IOException e)
@@ -117,16 +119,16 @@ public class MessageLoader
 
         for (final Field messageField : messageFields)
         {
-            String message = configNode.getNode(messageField.getName()).getString();
+            String message = configNode.node(messageField.getName()).getString();
 
             if (message == null || message.equals(""))
             {
                 missingNodes = true;
                 try
                 {
-                    configNode.getNode(messageField.getName()).setValue(messageField.get(null));
+                    configNode.node(messageField.getName()).set(messageField.get(null));
                 }
-                catch (IllegalAccessException e)
+                catch (IllegalAccessException | SerializationException e)
                 {
                     e.printStackTrace();
                 }
@@ -195,7 +197,7 @@ public class MessageLoader
             {
                 if (word.contains(mapEntry.getKey().getPlaceholder()))
                 {
-                    final String placeholderReplacement = LegacyComponentSerializer.legacyAmpersand().serialize(mapEntry.getValue().color(messageBaseColor));
+                    final String placeholderReplacement = LegacyComponentSerializer.legacyAmpersand().serialize(mapEntry.getValue());
                     final String filledPlaceholder = word.replace(mapEntry.getKey().getPlaceholder(), placeholderReplacement);
                     final TextComponent formattedText = LegacyComponentSerializer.legacyAmpersand().deserialize(filledPlaceholder + " ");
                     resultText = resultText.append(formattedText);

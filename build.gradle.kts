@@ -15,13 +15,13 @@ plugins {
 allprojects {
     description = "A factions plugin that will make managing your battle-server easier. :)"
     group = "io.github.aquerr"
-    version = "0.16.0"
+    version = "0.17.0"
 
     tasks.withType(JavaCompile::class).configureEach {
         options.apply {
             encoding = "utf-8" // Consistent source file encoding
             if (JavaVersion.current().isJava10Compatible) {
-                release.set(8)
+                release.set(17)
             }
         }
     }
@@ -34,22 +34,21 @@ allprojects {
 
     repositories {
         mavenCentral()
-        jcenter()
         maven("https://repo.spongepowered.org/maven")
         maven("https://jitpack.io")
         maven("https://raw.github.com/FabioZumbi12/UltimateChat/mvn-repo/")
     }
 }
 
-group = "org.spongepowered"
-version = "1.0-SNAPSHOT"
+group = "o.github.aquerr"
+version = "0.17.0"
 
 repositories {
     mavenCentral()
 }
 
 sponge {
-    apiVersion("8.0.0")
+    apiVersion("8.1.0")
     license("CHANGEME")
     loader {
         name(PluginLoaders.JAVA_PLAIN)
@@ -75,8 +74,8 @@ sponge {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 blossom {
@@ -92,17 +91,16 @@ blossom {
 
 dependencies {
     implementation(project(":EagleFactionsAPI"))
-    api("org.spongepowered:spongeapi:8.0.0")
-    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
+//    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
     api("org.mariadb.jdbc:mariadb-java-client:2.6.0")
     api("com.zaxxer:HikariCP:2.6.3")
     api("com.h2database:h2:1.4.196")
     api("org.xerial:sqlite-jdbc:3.20.0")
     api("com.github.webbukkit:DynmapCoreAPI:v2.5")
-    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
+//    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
     testImplementation(project(":EagleFactionsAPI"))
-    testImplementation("org.spongepowered:spongeapi:7.3.0")
+    testImplementation("org.spongepowered:spongeapi:8.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testImplementation("org.mockito:mockito-core:3.10.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.10.0")

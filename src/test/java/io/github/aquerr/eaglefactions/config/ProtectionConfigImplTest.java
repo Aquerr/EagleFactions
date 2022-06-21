@@ -3,12 +3,12 @@ package io.github.aquerr.eaglefactions.config;
 import com.google.common.collect.ImmutableSet;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +19,7 @@ class ProtectionConfigImplTest
     @Mock
     private Configuration configuration;
     @Mock
-    private ConfigurationLoader configurationLoader;
+    private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
     @Mock
     private CommentedConfigurationNode configurationNode;
 

@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -13,27 +14,46 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 public class FactionChestImpl implements FactionChest
 {
     private String factionName; //Reference to faction holding this chest
-    private Inventory inventory;
+    private Supplier<InventoryMenu> inventorySupplier;
+    private InventoryMenu rawInventory;
 
     public FactionChestImpl(final String factionName)
     {
         this.factionName = factionName;
+        this.inventorySupplier = () -> {
+            if (this.rawInventory != null)
+                return this.rawInventory;
+            this.rawInventory = buildInventory(new ArrayList<>());
+            return this.rawInventory;
+        };
     }
 
     public FactionChestImpl(final String factionName, final List<SlotItem> items)
     {
         this.factionName = factionName;
-        this.inventory = buildInventory(items);
+        this.inventorySupplier = () -> {
+            if (this.rawInventory != null)
+                return this.rawInventory;
+            this.rawInventory = buildInventory(items);
+            return this.rawInventory;
+        };
     }
 
     public FactionChestImpl(final String factionName, final Inventory inventory)
     {
         this.factionName = factionName;
-        this.inventory = buildInventory(toSlotItems(inventory));
+        this.inventorySupplier = () -> {
+            if (this.rawInventory != null)
+                return this.rawInventory;
+            this.rawInventory = buildInventory(toSlotItems(inventory));
+            return this.rawInventory;
+        };
     }
 
     @Override
@@ -45,30 +65,28 @@ public class FactionChestImpl implements FactionChest
     @Override
     public List<SlotItem> getItems()
     {
-        if(this.inventory == null)
+        if(this.inventorySupplier == null)
             return new ArrayList<>();
-        return toSlotItems(this.inventory);
+        return toSlotItems(this.inventorySupplier.get().inventory());
     }
 
     @Override
-    public Inventory getInventory()
+    public InventoryMenu getInventory()
     {
-        if(this.inventory == null)
-            this.inventory = buildInventory(new ArrayList<>());
-        return this.inventory;
+        return this.inventorySupplier.get();
     }
 
-    private Inventory buildInventory(final List<SlotItem> slotItems)
+    private InventoryMenu buildInventory(final List<SlotItem> slotItems)
     {
         FactionChest factionChest = this;
 
         //Create inventory
-        final Inventory inventory = Inventory.builder()
-                .slots(27)
+        InventoryMenu inventoryMenu = InventoryMenu.of(ViewableInventory.builder()
+                .type(ContainerTypes.GENERIC_9X3)
                 .completeStructure()
-                .build();
-        final ViewableInventory viewableInventory = inventory.asViewable().get();
-        final InventoryMenu inventoryMenu = viewableInventory.asMenu();
+                .identity(UUID.randomUUID())
+                .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
+                .build());
         inventoryMenu.setTitle(Component.text("Faction's chest", NamedTextColor.BLUE));
         inventoryMenu.registerClose((cause, container) ->
         {
@@ -83,7 +101,7 @@ public class FactionChestImpl implements FactionChest
         int column = 1;
         int row = 1;
 
-        for(final Inventory slot : inventory.slots())
+        for(final Inventory slot : inventoryMenu.inventory().slots())
         {
             ItemStack itemStack = getAtPosition(slotItems, row, column);
             if(itemStack != null)
@@ -97,7 +115,7 @@ public class FactionChestImpl implements FactionChest
             }
         }
 
-        return inventory;
+        return inventoryMenu;
     }
 
     private List<SlotItem> toSlotItems(final Inventory inventory)

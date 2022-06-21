@@ -2,19 +2,26 @@ package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
+import io.github.aquerr.eaglefactions.entities.vo.FactionName;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.util.FileUtils;
 import net.kyori.adventure.identity.Identity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,9 +33,7 @@ public class HOCONFactionStorage implements FactionStorage
     private final Path configDir;
     private final Path factionsDir;
 
-    // Faction name --> Configuration Loader
-    //TODO: Maybe we should also store ConfigurationNodes here?
-    private final Map<String, ConfigurationLoader<? extends ConfigurationNode>> factionLoaders;
+    private final Map<FactionName, ConfigurationLoader<CommentedConfigurationNode>> factionLoaders;
 
     public HOCONFactionStorage(final Path configDir)
     {
@@ -62,9 +67,9 @@ public class HOCONFactionStorage implements FactionStorage
                 final String factionFileName = path.getFileName().toString().toLowerCase();
                 final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder()
                         .defaultOptions(ConfigurateHelper.getDefaultOptions())
-                        .path(this.factionsDir.resolve(path))
+                        .path(path)
                         .build();
-                factionLoaders.put(factionFileName, configurationLoader);
+                factionLoaders.put(FactionName.of(factionFileName.toLowerCase().substring(0, factionFileName.lastIndexOf("."))), configurationLoader);
             });
         }
         catch (final IOException e)
@@ -75,12 +80,12 @@ public class HOCONFactionStorage implements FactionStorage
 
     private void preCreate()
     {
-        if (!this.factionLoaders.containsKey("warzone.conf"))
+        if (!this.factionLoaders.containsKey(FactionName.of("warzone")))
         {
             final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0)).build();
             saveFaction(warzone);
         }
-        if (!this.factionLoaders.containsKey("safezone.conf"))
+        if (!this.factionLoaders.containsKey(FactionName.of("safezone")))
         {
             final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0)).build();
             saveFaction(safezone);
@@ -94,14 +99,14 @@ public class HOCONFactionStorage implements FactionStorage
         {
             FileUtils.createDirectoryIfNotExists(this.factionsDir);
 
-            ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(faction.getName().toLowerCase() + ".conf");
+            ConfigurationLoader<CommentedConfigurationNode> configurationLoader = this.factionLoaders.get(FactionName.of(faction.getName().toLowerCase()));
 
             if (configurationLoader == null)
             {
                 final Path factionFilePath = this.factionsDir.resolve(faction.getName().toLowerCase() + ".conf");
                 Files.createFile(factionFilePath);
                 configurationLoader = HoconConfigurationLoader.builder().defaultOptions(ConfigurateHelper.getDefaultOptions()).path(factionFilePath).build();
-                this.factionLoaders.put(factionFilePath.getFileName().toString(), configurationLoader);
+                this.factionLoaders.put(FactionName.of(faction.getName().toLowerCase()), configurationLoader);
             }
 
             final ConfigurationNode configurationNode = configurationLoader.load();
@@ -133,7 +138,7 @@ public class HOCONFactionStorage implements FactionStorage
             e.printStackTrace();
         }
 
-        this.factionLoaders.remove(factionName.toLowerCase() + ".conf");
+        this.factionLoaders.remove(FactionName.of(factionName.toLowerCase()));
         return true;
     }
 
@@ -168,7 +173,7 @@ public class HOCONFactionStorage implements FactionStorage
     @Override
     public @Nullable Faction getFaction(final String factionName)
     {
-        ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(factionName.toLowerCase() + ".conf");
+        ConfigurationLoader<? extends ConfigurationNode> configurationLoader = this.factionLoaders.get(FactionName.of(factionName.toLowerCase()));
         if (configurationLoader == null)
         {
             final Path filePath = this.factionsDir.resolve(factionName.toLowerCase() + ".conf");
@@ -178,7 +183,7 @@ public class HOCONFactionStorage implements FactionStorage
                 return null;
 
             // Create configuration loader
-            configurationLoader = HoconConfigurationLoader.builder().defaultOptions(ConfigurateHelper.getDefaultOptions()).path(this.factionsDir.resolve(filePath)).build();
+            configurationLoader = HoconConfigurationLoader.builder().defaultOptions(ConfigurateHelper.getDefaultOptions()).path(filePath).build();
         }
 
         try

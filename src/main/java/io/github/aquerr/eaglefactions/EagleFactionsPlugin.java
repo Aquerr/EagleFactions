@@ -1,14 +1,11 @@
 package io.github.aquerr.eaglefactions;
 
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.AcceptableInvite;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
-import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionInvite;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
@@ -21,6 +18,7 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.managers.RankManager;
+import io.github.aquerr.eaglefactions.api.messaging.placeholder.PlaceholderService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.commands.VersionCommand;
 import io.github.aquerr.eaglefactions.commands.access.AccessCommand;
@@ -86,7 +84,6 @@ import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
-import io.github.aquerr.eaglefactions.integrations.placeholderapi.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
 import io.github.aquerr.eaglefactions.listeners.ChatMessageListener;
@@ -115,18 +112,16 @@ import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.placeholder.parser.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
-import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer;
-import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
-import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
+import io.github.aquerr.eaglefactions.util.resource.Resource;
+import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.spongepowered.api.Server;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.CommonParameters;
@@ -135,21 +130,17 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.resource.Resource;
-import org.spongepowered.api.resource.ResourcePath;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -159,23 +150,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static io.github.aquerr.eaglefactions.PluginInfo.PLUGIN_PREFIX_PLAIN;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
-import static net.kyori.adventure.text.format.NamedTextColor.YELLOW;
 
 
 @Plugin(PluginInfo.ID)
-//@Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION, authors = PluginInfo.AUTHOR,
-//        dependencies = {@Dependency(id = "placeholderapi", optional = true)}, url = PluginInfo.URL)
 public class EagleFactionsPlugin implements EagleFactions
 {
     //TODO: Convert these fields to instance fields.
@@ -192,6 +175,7 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final List<UUID> DEBUG_MODE_PLAYERS = new LinkedList<>();
 
     private static EagleFactionsPlugin eagleFactions;
+    private final Logger logger;
 
     private Configuration configuration;
     private PVPLogger pvpLogger;
@@ -210,15 +194,12 @@ public class EagleFactionsPlugin implements EagleFactions
     private final PluginContainer pluginContainer;
     private final Path configDir;
 
-//    @Inject
-//    @AssetId("Settings.conf")
-//    private Asset configAsset;
-
     //Integrations
 //    @Inject
 //    private Metrics metrics;
-    private EFPlaceholderService efPlaceholderService;
+//    private PAPIPlaceholderService PAPIPlaceholderService;
     private DynmapService dynmapService;
+    private EFPlaceholderService efPlaceholderService;
 //    private UltimateChatService ultimateChatService;
 
     public static EagleFactionsPlugin getPlugin()
@@ -231,7 +212,13 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         eagleFactions = this;
         this.pluginContainer = pluginContainer;
+        this.logger = pluginContainer.logger();
         this.configDir = configDir;
+    }
+
+    public PluginContainer getPluginContainer()
+    {
+        return pluginContainer;
     }
 
     public Path getConfigDir()
@@ -240,43 +227,54 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
-    public void onServerInitialization(final ConstructPluginEvent event)
+    public void onPluginConstruct(final ConstructPluginEvent event)
     {
         try
         {
-            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Preparing wings...", AQUA)));
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Preparing wings...");
 
             setupConfigs();
 
-            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Configs loaded.", AQUA)));
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Configs loaded.");
 
-            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Loading managers and cache...", AQUA)));
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Loading managers and cache...");
             setupManagers();
 
-            Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Managers loaded.", AQUA)));
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Managers loaded.");
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+            disablePlugin();
+        }
+    }
 
+    @Listener
+    public void onPluginLoad(final LoadedGameEvent event)
+    {
+        if (this.isDisabled)
+            return;
 
+        try
+        {
             registerListeners();
 
             EventRunner.init(Sponge.eventManager());
 
             //Display some info text in the console.
-            Sponge.server().sendMessage(text("==========================================", GREEN));
-            Sponge.server().sendMessage(text("Eagle Factions", AQUA).append(text(" is ready to use!", WHITE)));
-            Sponge.server().sendMessage(text("Thank you for choosing this plugin!", WHITE));
-            Sponge.server().sendMessage(text("Current version: " + PluginInfo.VERSION, WHITE));
-            Sponge.server().sendMessage(text("Have a great time with Eagle Factions! :D", WHITE));
-            Sponge.server().sendMessage(text("==========================================", GREEN));
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "==========================================");
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Eagle Factions is ready to use!");
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Thank you for choosing this plugin!");
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Current version: " + PluginInfo.VERSION);
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Have a great time with Eagle Factions! :D");
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "==========================================");
 
             CompletableFuture.runAsync(() ->
             {
                 if(!VersionChecker.isLatest(PluginInfo.VERSION))
                 {
-                    Sponge.server().sendMessage(Component.join(JoinConfiguration.noSeparators(),
-                            text("Hey! A new version of ", GOLD),
-                            text(PluginInfo.NAME, AQUA),
-                            text(" is available online!", GOLD)));
-                    Sponge.server().sendMessage(text("==========================================", GREEN));
+                    this.logger.info(PLUGIN_PREFIX_PLAIN + "Hey! A new version of " + PluginInfo.NAME + " is available online!");
+                    this.logger.info("==========================================");
                 }
             });        }
         catch (Exception exception)
@@ -285,12 +283,23 @@ public class EagleFactionsPlugin implements EagleFactions
             disablePlugin();
         }
 
+        // Reloads storage and cache.
+        this.storageManager.reloadStorage();
+
         initializeIntegrations();
+
+        if (isDisabled)
+            return;
+
+        startFactionsRemover();
     }
 
     @Listener
     public void onFactoryRegister(RegisterFactoryEvent event)
     {
+        if (this.isDisabled)
+            return;
+
         registerAPI(event);
     }
 
@@ -342,9 +351,12 @@ public class EagleFactionsPlugin implements EagleFactions
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event)
     {
+        if (this.isDisabled)
+            return;
+
         //Register commands...
         initializeCommands(event);
-        Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Commands loaded.", AQUA)));
+        this.logger.info(PLUGIN_PREFIX_PLAIN + "Commands loaded!");
     }
 
     private void setDefaultPermissions()
@@ -372,16 +384,6 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
-    // Start removing inactive factions when server is fully started.
-    @Listener
-    public void onGameLoad(final StartedEngineEvent<Server> event)
-    {
-        if (isDisabled)
-            return;
-
-        startFactionsRemover();
-    }
-
     @Listener
     public void onReload(final RefreshGameEvent event)
     {
@@ -401,6 +403,12 @@ public class EagleFactionsPlugin implements EagleFactions
             Player player = (Player)event.source();
             player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.CONFIG_HAS_BEEN_RELOADED)));
         }
+    }
+
+    @Listener
+    public void onRegisterPlaceholderEvent(RegisterRegistryValueEvent.GameScoped event)
+    {
+        this.efPlaceholderService.onRegisterPlaceholderEvent(event);
     }
 
     @Override
@@ -469,7 +477,8 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.rankManager;
     }
 
-    public EFPlaceholderService getEfPlaceholderService()
+    @Override
+    public PlaceholderService getPlaceholderService()
     {
         return this.efPlaceholderService;
     }
@@ -491,11 +500,6 @@ public class EagleFactionsPlugin implements EagleFactions
         return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, diedInWarZone);
     }
 
-    public InputStream getResourceAsStream(String fileName)
-    {
-        return this.getClass().getClassLoader().getResourceAsStream(fileName);
-    }
-
     public URL getResource(final String fileName)
     {
         return this.getClass().getResource(fileName);
@@ -503,28 +507,24 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public void printInfo(final String message)
     {
-        Sponge.server().sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(message, YELLOW)));
+        this.logger.info(PLUGIN_PREFIX_PLAIN + message);
     }
 
     private void setupConfigs()
     {
-        Resource resource = null;
-        try
-        {
-            resource = Sponge.server().resourceManager().load(ResourcePath.of(this.pluginContainer, "Settings.conf"));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        configuration = new ConfigurationImpl(configDir, resource);
+        Resource resource = ResourceUtils.getResource("assets/eaglefactions/Settings.conf");
+        if (resource == null)
+            return;
+
+        configuration = new ConfigurationImpl(this.pluginContainer, configDir, resource);
         MessageLoader.init(eagleFactions, pluginContainer);
-        MessageLoader messageLoader = MessageLoader.getInstance();
         pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void setupManagers()
     {
+        this.efPlaceholderService = new EFPlaceholderService(this);
+
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
         this.powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
@@ -1063,7 +1063,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().unregisterListeners(this);
 //        Sponge.server().commandManager().registrar(Command.Parameterized.class).get()
 //        Sponge.server().commandManager().getOwnedBy(this).forEach(Sponge.getCommandManager()::removeMapping);
-        Sponge.server().sendMessage(PluginInfo.ERROR_PREFIX.append(text("EagleFactions has been disabled!", RED)));
+        this.logger.info(PLUGIN_PREFIX_PLAIN + "EagleFactions has been disabled!");
     }
 
     private boolean isUltimateChatLoaded() {

@@ -1,19 +1,24 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.common.reflect.TypeToken;
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import io.github.aquerr.eaglefactions.util.resource.Resource;
+import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -53,16 +58,22 @@ public class ProtectionConfigImpl implements ProtectionConfig
 
 	private List<String> blockedCommandsInOtherFactionsTerritory = new ArrayList<>();
 
-	public ProtectionConfigImpl(final Configuration configuration)
+	public ProtectionConfigImpl(final PluginContainer pluginContainer, final Configuration configuration)
 	{
 		this.configuration = configuration;
 
 		try
 		{
-			Optional<Asset> worldsFile = Sponge.getAssetManager().getAsset(EagleFactionsPlugin.getPlugin(), "Worlds.conf");
-			if (worldsFile.isPresent())
+			Optional<Resource> worldResource = Optional.ofNullable(ResourceUtils.getResource("assets/eaglefactions/Worlds.conf"));
+			if (!worldResource.isPresent())
 			{
-				worldsFile.get().copyToDirectory(configuration.getConfigDirectoryPath(), false, true);
+				throw new IllegalStateException("Could not open World.conf file which is required for plugin to work!");
+			}
+
+			Path worldsFilePath = configuration.getConfigDirectoryPath().resolve("Worlds.conf");
+			if (Files.notExists(worldsFilePath))
+			{
+				Files.copy(worldResource.get().getInputStream(), worldsFilePath);
 			}
 		}
 		catch (final IOException e)
@@ -70,7 +81,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 			e.printStackTrace();
 		}
 
-		this.configurationLoader = HoconConfigurationLoader.builder().setPath(configuration.getConfigDirectoryPath().resolve("Worlds.conf")).build();
+		this.configurationLoader = HoconConfigurationLoader.builder().path(configuration.getConfigDirectoryPath().resolve("Worlds.conf")).build();
 		loadWorldsFile();
 		saveWorldsFile();
 	}
@@ -96,12 +107,12 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		//Worlds
 		try
 		{
-			this.claimableWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "CLAIMABLE").getList(TypeToken.of(String.class), new ArrayList<>()));
-			this.notClaimableWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "NOT_CLAIMABLE").getList(TypeToken.of(String.class), new ArrayList<>()));
-			this.safeZoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "SAFE_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
-			this.warZoneWorldNames = new HashSet<>(this.worldsConfigNode.getNode("worlds", "WAR_ZONE").getList(TypeToken.of(String.class), new ArrayList<>()));
+			this.claimableWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "CLAIMABLE").getList(TypeToken.get(String.class), ArrayList::new));
+			this.notClaimableWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "NOT_CLAIMABLE").getList(TypeToken.get(String.class), ArrayList::new));
+			this.safeZoneWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "SAFE_ZONE").getList(TypeToken.get(String.class), ArrayList::new));
+			this.warZoneWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "WAR_ZONE").getList(TypeToken.get(String.class), ArrayList::new));
 		}
-		catch (final ObjectMappingException e)
+		catch (final SerializationException e)
 		{
 			e.printStackTrace();
 		}
@@ -193,7 +204,14 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	public void addWorld(final String name)
 	{
 		this.claimableWorldNames.add(name);
-		this.worldsConfigNode.getNode("worlds", "CLAIMABLE").setValue(this.claimableWorldNames);
+		try
+		{
+			this.worldsConfigNode.node("worlds", "CLAIMABLE").set(this.claimableWorldNames);
+		}
+		catch (SerializationException e)
+		{
+			e.printStackTrace();
+		}
 		saveWorldsFile();
 	}
 
@@ -262,7 +280,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	{
 		try
 		{
-			this.worldsConfigNode = this.configurationLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
+			this.worldsConfigNode = this.configurationLoader.load(ConfigurationOptions.defaults().shouldCopyDefaults(true));
 		}
 		catch (IOException e)
 		{

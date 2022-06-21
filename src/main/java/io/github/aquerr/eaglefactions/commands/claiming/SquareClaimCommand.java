@@ -53,9 +53,9 @@ public class SquareClaimCommand extends AbstractCommand
         final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
 
         //Check if it is a claimable world
-        if (!this.protectionConfig.getClaimableWorldNames().contains(((TextComponent)world.properties().displayName().get()).content()))
+        if (!this.protectionConfig.getClaimableWorldNames().contains(world.properties().name()))
         {
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(((TextComponent)world.properties().displayName().get()).content()) && isAdmin)
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()) && isAdmin)
             {
                 return preformSquareClaim(player, faction, radius);
             }

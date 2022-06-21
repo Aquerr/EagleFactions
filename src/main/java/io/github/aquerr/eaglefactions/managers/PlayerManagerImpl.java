@@ -15,6 +15,7 @@ import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.util.Identifiable;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +28,7 @@ public class PlayerManagerImpl implements PlayerManager
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
 
-    private UserManager userManager;
+    private Supplier<UserManager> userManager;
 
     private final Set<UUID> adminModePlayers = new HashSet<>();
 
@@ -37,7 +38,7 @@ public class PlayerManagerImpl implements PlayerManager
         this.factionLogic = factionLogic;
         this.factionsConfig = factionsConfig;
         this.powerConfig = powerConfig;
-        this.userManager = Sponge.server().userManager();
+        this.userManager = () -> Sponge.server().userManager();
     }
 
     @Override
@@ -79,7 +80,7 @@ public class PlayerManagerImpl implements PlayerManager
 
     private Optional<User> getUser(final UUID playerUUID)
     {
-        return userManager.load(playerUUID).join();
+        return userManager.get().load(playerUUID).join();
     }
 
     @Override

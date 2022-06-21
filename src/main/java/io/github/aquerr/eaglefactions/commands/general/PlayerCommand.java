@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
@@ -59,6 +60,10 @@ public class PlayerCommand extends AbstractCommand
                 final FactionPlayer factionPlayer = optionalFactionPlayer.get();
 
                 showPlayerInfo(player, factionPlayer);
+            }
+            else
+            {
+                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
             }
         }
         return CommandResult.success();

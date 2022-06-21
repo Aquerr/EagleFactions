@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -11,18 +10,20 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
+import net.kyori.adventure.text.TextComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.kyori.adventure.text.Component.text;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.*;
 class FactionLogicImplTest
 {
     private static final String FACTION_NAME = "Test Faction";
-    private static final Text FACTION_TAG = Text.of("TF");
+    private static final TextComponent FACTION_TAG = text("TF");
     private static final UUID PLAYER_UUID = UUID.randomUUID();
     private static final String PLAYER_NAME = "Test Player Name";
 
@@ -60,7 +61,7 @@ class FactionLogicImplTest
         //given
         when(playerManager.getFactionPlayer(any(UUID.class))).thenReturn(Optional.of(factionPlayer));
         when(factionPlayer.getFactionName()).thenReturn(Optional.of("Test"));
-        when(storageManager.getFaction("Test")).thenReturn(FactionImpl.builder("Test", Text.of("Tag"), UUID.randomUUID()).build());
+        when(storageManager.getFaction("Test")).thenReturn(FactionImpl.builder("Test", text("Tag"), UUID.randomUUID()).build());
 
         //when
         final Optional<Faction> faction = factionLogic.getFactionByPlayerUUID(UUID.randomUUID());
@@ -101,7 +102,7 @@ class FactionLogicImplTest
         final UUID worldUUID = UUID.randomUUID();
         final Vector3i chunk = Vector3i.ZERO;
         final Claim claim = new Claim(worldUUID, chunk);
-        final Faction faction = FactionImpl.builder("Test", Text.of("TS"), UUID.randomUUID()).setClaims(ImmutableSet.of(claim)).build();
+        final Faction faction = FactionImpl.builder("Test", text("TS"), UUID.randomUUID()).setClaims(ImmutableSet.of(claim)).build();
 
         when(factionLogic.getFactions()).thenReturn(ImmutableMap.of("test", faction));
 

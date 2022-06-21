@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.sql;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.*;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
@@ -21,7 +22,9 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.*;
@@ -370,7 +373,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 }
             }
 
-            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory());
+            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory().inventory());
             final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
             dataContainer.set(DataQuery.of("inventory"), dataViews);
             ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
@@ -942,7 +945,11 @@ public abstract class AbstractFactionStorage implements FactionStorage
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(factionChestItems);
             DataContainer dataContainer = DataFormats.NBT.get().readFrom(byteArrayInputStream);
             byteArrayInputStream.close();
-            Inventory inventory = Inventory.builder().slots(27).build();
+            Inventory inventory = ViewableInventory.builder()
+                    .type(ContainerTypes.GENERIC_9X3)
+                    .completeStructure()
+                    .plugin(EagleFactionsPlugin.getPlugin().getPluginContainer())
+                    .build();
             InventorySerializer.deserializeInventory(dataContainer.getViewList(DataQuery.of("inventory")).orElse(new ArrayList<>()), inventory);
             factionChest = new FactionChestImpl(factionName, inventory);
         }

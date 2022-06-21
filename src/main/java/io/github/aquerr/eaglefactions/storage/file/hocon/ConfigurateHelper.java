@@ -2,7 +2,13 @@ package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import com.google.common.collect.ImmutableSet;
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionChest;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
@@ -10,14 +16,14 @@ import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.EFTypeTokens;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
+import io.github.aquerr.eaglefactions.storage.serializers.SlotItemTypeSerializer;
+import io.github.aquerr.eaglefactions.storage.serializers.Vector3iTypeSerializer;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.Sponge;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -28,13 +34,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class ConfigurateHelper
 {
+    private static final Logger LOGGER = LogManager.getLogger(ConfigurateHelper.class);
+
     public static boolean putFactionInNode(final ConfigurationNode configNode, final Faction faction)
     {
         try
@@ -68,7 +81,7 @@ public class ConfigurateHelper
         }
         catch(final Exception exception)
         {
-            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text("Error while putting faction '" + faction.getName() + "' in node.", RED)));
+            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting faction '" + faction.getName() + "' in node.");
             exception.printStackTrace();
             return false;
         }
@@ -87,7 +100,7 @@ public class ConfigurateHelper
         }
         catch (Exception exception)
         {
-            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text("Error while putting player'" + factionPlayer.getName() + "' in node.", RED)));
+            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting player'" + factionPlayer.getName() + "' in node.");
             exception.printStackTrace();
             return false;
         }
@@ -109,7 +122,7 @@ public class ConfigurateHelper
                 }
                 catch (final Exception e)
                 {
-                    Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text("Error while getting faction'" + object + "' from node.", RED)));
+                    LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while getting faction'" + object + "' from node.");
                     e.printStackTrace();
                 }
             }
@@ -204,7 +217,7 @@ public class ConfigurateHelper
         }
         catch(IOException e)
         {
-            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text("Error while opening the file " + file.getName(), RED)));
+            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while opening the file " + file.getName());
             e.printStackTrace();
             return null;
         }
@@ -292,8 +305,9 @@ public class ConfigurateHelper
                 .registerAll(TypeSerializerCollection.defaults())
                 .register(TypeToken.get(Claim.class), new ClaimTypeSerializer())
                 .register(new TypeToken<Set<Claim>>() {}, new ClaimSetTypeSerializer())
-//                .register(TypeToken.get(FactionChest.SlotItem.class), new SlotItemTypeSerializer())
-                .register(new TypeToken<List<FactionChest.SlotItem>>() {}, new SlotItemListTypeSerializer())
+                .register(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, new SlotItemListTypeSerializer())
+                .register(EFTypeTokens.SLOT_ITEM_TYPE_TOKEN, new SlotItemTypeSerializer())
+                .register(EFTypeTokens.VECTOR_3I_TOKEN, new Vector3iTypeSerializer())
                 .build();
 
         final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults()

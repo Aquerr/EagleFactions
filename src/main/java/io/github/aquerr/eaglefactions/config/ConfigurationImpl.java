@@ -1,13 +1,14 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.config.*;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.resource.Resource;
+import io.github.aquerr.eaglefactions.util.resource.Resource;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +34,7 @@ public class ConfigurationImpl implements Configuration
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
 
-    public ConfigurationImpl(final Path configDir, final Resource configAsset)
+    public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset)
     {
         this.configDirectoryPath = configDir;
         if (!Files.exists(this.configDirectoryPath))
@@ -53,7 +54,7 @@ public class ConfigurationImpl implements Configuration
         try
         {
             if (Files.notExists(this.configPath))
-                Files.copy(configAsset.inputStream(), this.configPath);
+                Files.copy(configAsset.getInputStream(), this.configPath);
 //            configAsset.copyToFile(this.configPath, false, true);
         }
         catch (final IOException e)
@@ -61,14 +62,14 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
 
-        this.configLoader = HoconConfigurationLoader.builder().setPath(this.configPath).build();
+        this.configLoader = (HoconConfigurationLoader.builder()).path(this.configPath).build();
         loadConfiguration();
 
         this.storageConfig = new StorageConfigImpl(this);
         this.chatConfig = new ChatConfigImpl(this);
         this.dynmapConfig = new DynmapConfigImpl(this);
         this.powerConfig = new PowerConfigImpl(this);
-        this.protectionConfig = new ProtectionConfigImpl(this);
+        this.protectionConfig = new ProtectionConfigImpl(pluginContainer, this);
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
         reloadConfiguration();
@@ -143,7 +144,7 @@ public class ConfigurationImpl implements Configuration
     {
         try
         {
-            configNode = configLoader.load(ConfigurationOptions.defaults().setShouldCopyDefaults(true));
+            configNode = configLoader.load(ConfigurationOptions.defaults().shouldCopyDefaults(true));
         }
         catch (IOException e)
         {
@@ -167,42 +168,31 @@ public class ConfigurationImpl implements Configuration
     @Override
     public int getInt(final int defaultValue, final Object... nodePath)
     {
-        return configNode.getNode(nodePath).getInt(defaultValue);
+        return configNode.node(nodePath).getInt(defaultValue);
     }
 
     @Override
     public double getDouble(final double defaultValue, final Object... nodePath)
     {
-        Object value = configNode.getNode(nodePath).getValue(defaultValue);
-
-        if (value instanceof Integer)
-        {
-            int number = (Integer) value;
-            return number;
-        }
-        else if(value instanceof Double)
-        {
-            return (double) value;
-        }
-        else return 0;
+        return configNode.node(nodePath).getDouble(defaultValue);
     }
 
     @Override
     public float getFloat(final float defaultValue, final Object... nodePath)
     {
-       return configNode.getNode(nodePath).getFloat(defaultValue);
+       return configNode.node(nodePath).getFloat(defaultValue);
     }
 
     @Override
     public boolean getBoolean(final boolean defaultValue, final Object... nodePath)
     {
-        return configNode.getNode(nodePath).getBoolean(defaultValue);
+        return configNode.node(nodePath).getBoolean(defaultValue);
     }
 
     @Override
     public String getString(final String defaultValue, final Object... nodePath)
     {
-        return configNode.getNode(nodePath).getString(defaultValue);
+        return configNode.node(nodePath).getString(defaultValue);
     }
 
     @Override
@@ -210,9 +200,9 @@ public class ConfigurationImpl implements Configuration
     {
         try
         {
-            return configNode.getNode(nodePath).getList(TypeToken.of(String.class), new ArrayList<>(defaultValue));
+            return configNode.node(nodePath).getList(TypeToken.get(String.class), () -> new ArrayList<>(defaultValue));
         }
-        catch(ObjectMappingException e)
+        catch(SerializationException e)
         {
             e.printStackTrace();
         }
@@ -224,9 +214,9 @@ public class ConfigurationImpl implements Configuration
     {
         try
         {
-            return new HashSet<>(configNode.getNode(nodePath).getList(TypeToken.of(String.class), new ArrayList<>(defaultValue)));
+            return new HashSet<>(configNode.node(nodePath).getList(TypeToken.get(String.class), new ArrayList<>(defaultValue)));
         }
-        catch(ObjectMappingException e)
+        catch(SerializationException e)
         {
             e.printStackTrace();
         }

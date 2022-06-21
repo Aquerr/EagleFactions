@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.storage;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -22,30 +21,31 @@ import io.github.aquerr.eaglefactions.storage.task.DeleteFactionTask;
 import io.github.aquerr.eaglefactions.storage.task.IStorageTask;
 import io.github.aquerr.eaglefactions.storage.task.SavePlayerTask;
 import io.github.aquerr.eaglefactions.storage.task.UpdateFactionTask;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-
 public class StorageManagerImpl implements StorageManager
 {
+    private static final Logger LOGGER = LogManager.getLogger(StorageManagerImpl.class);
+
     private final FactionStorage factionsStorage;
     private final PlayerStorage playerStorage;
     private final BackupStorage backupStorage;
-    private final Path configDir;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor(); //Only one thread.
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
-        this.configDir = configDir;
         Optional<StorageType> storageType = StorageType.findByName(storageConfig.getStorageType().toLowerCase());
         if (!storageType.isPresent())
         {
@@ -88,9 +88,6 @@ public class StorageManagerImpl implements StorageManager
                 break;
         }
         this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
-        Sponge.server().sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(Component.text("Filling cache with data...", AQUA)));
-        prepareFactionsCache();
-        preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }
 
     private void queueStorageTask(IStorageTask task)
@@ -177,17 +174,9 @@ public class StorageManagerImpl implements StorageManager
     {
         FactionsCache.clear();
         this.factionsStorage.load();
-        prepareFactionsCache();
 
-        //Must be run after factions.
-        preparePlayerCache();
+        reloadCache();
     }
-
-//    @Override
-//    public boolean checkIfPlayerExists(final UUID playerUUID, final String playerName)
-//    {
-//        return FactionsCache.getPlayer(playerUUID) != null;
-//    }
 
     @Override
     public boolean savePlayer(final FactionPlayer factionPlayer)
@@ -254,5 +243,14 @@ public class StorageManagerImpl implements StorageManager
     public List<String> listBackups()
     {
         return this.backupStorage.listBackups();
+    }
+
+    public void reloadCache()
+    {
+        LOGGER.info("Reloading cache...");
+        prepareFactionsCache();
+
+        //Must be run after factions cache
+        preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
     }
 }
