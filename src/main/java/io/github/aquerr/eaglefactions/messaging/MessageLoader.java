@@ -112,78 +112,50 @@ public class MessageLoader
         }
     }
 
-    private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader<CommentedConfigurationNode> configLoader)
-    {
-        final Field[] messageFields = Messages.class.getFields();
-        boolean missingNodes = false;
-
-        for (final Field messageField : messageFields)
-        {
-            String message = configNode.node(messageField.getName()).getString();
-
-            if (message == null || message.equals(""))
-            {
-                missingNodes = true;
-                try
-                {
-                    configNode.node(messageField.getName()).set(messageField.get(null));
-                }
-                catch (IllegalAccessException | SerializationException e)
-                {
-                    e.printStackTrace();
-                }
-                continue;
-            }
-
-            try
-            {
-                messageField.set(Messages.class.getClass(), message);
-            }
-            catch (IllegalAccessException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (missingNodes)
-        {
-            try
-            {
-                configLoader.save(configNode);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
-//    public static String parseMessage(String message, Object supplier)
+//    private void loadPluginMessages(ConfigurationNode configNode, ConfigurationLoader<CommentedConfigurationNode> configLoader)
 //    {
-//        String result = message;
-//        if (supplier instanceof Faction)
+//        final Field[] messageFields = Messages.class.getFields();
+//        boolean missingNodes = false;
+//
+//        for (final Field messageField : messageFields)
 //        {
-//            Faction faction = (Faction) supplier;
-//            result = result.replace(Placeholders.FACTION_NAME.getPlaceholder(), faction.getName());
-//        }
-//        else if (supplier instanceof User)
-//        {
-//            User user = (User) supplier;
-//            result = result.replace(Placeholders.PLAYER_NAME.getPlaceholder(), user.getName());
-//            result = result.replace(Placeholders.POWER.getPlaceholder(), String.valueOf(EagleFactionsPlugin.getPlugin().getPowerManager().getPlayerPower(user.getUniqueId())));
-//        }
-//        else if (supplier instanceof String)
-//        {
-//            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
+//            String message = configNode.node(messageField.getName()).getString();
+//
+//            if (message == null || message.equals(""))
 //            {
-//                result = result.replace(placeholder.getPlaceholder(), (String) supplier);
+//                missingNodes = true;
+//                try
+//                {
+//                    configNode.node(messageField.getName()).set(messageField.get(null));
+//                }
+//                catch (IllegalAccessException | SerializationException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//                continue;
+//            }
+//
+//            try
+//            {
+//                messageField.set(Messages.class.getClass(), message);
+//            }
+//            catch (IllegalAccessException e)
+//            {
+//                e.printStackTrace();
 //            }
 //        }
-//        else if (supplier instanceof Integer)
+//
+//        if (missingNodes)
 //        {
-//            result = result.replace(Placeholders.NUMBER.getPlaceholder(), String.valueOf(supplier));
+//            try
+//            {
+//                configLoader.save(configNode);
+//            }
+//            catch (IOException e)
+//            {
+//                e.printStackTrace();
+//            }
 //        }
-//        return result;
 //    }
 
     public static TextComponent parseMessage(final String message, final NamedTextColor messageBaseColor, final Map<Placeholder, TextComponent> placeholdersMap)
@@ -213,30 +185,4 @@ public class MessageLoader
         }
         return resultText;
     }
-
-//    public static TextTemplate toTextTemplate(final String message)
-//    {
-//        final String[] splitMessage = message.split(" ");
-//        final List<Object> newWords = new ArrayList<>();
-//        for (final String word : splitMessage)
-//        {
-//            boolean didReplace = false;
-//            for (final Placeholder placeholder : Placeholders.PLACEHOLDERS)
-//            {
-//                if (word.contains(placeholder.getPlaceholder()))
-//                {
-//                    newWords.add(TextTemplate.arg(word.replace("%", "")).color(TextColors.GOLD).build());
-//                    didReplace = true;
-//                    break;
-//                }
-//            }
-//
-//            if (didReplace)
-//                continue;
-//
-//            newWords.add(word);
-//            newWords.add(" ");
-//        }
-//        return TextTemplate.of(newWords);
-//    }
 }
