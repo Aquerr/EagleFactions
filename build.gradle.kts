@@ -20,9 +20,6 @@ allprojects {
     tasks.withType(JavaCompile::class).configureEach {
         options.apply {
             encoding = "utf-8" // Consistent source file encoding
-            if (JavaVersion.current().isJava10Compatible) {
-                release.set(17)
-            }
         }
     }
 
@@ -74,8 +71,8 @@ sponge {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 blossom {
@@ -90,14 +87,12 @@ blossom {
 }
 
 dependencies {
-    implementation(project(":EagleFactionsAPI"))
-//    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
-    api("org.mariadb.jdbc:mariadb-java-client:2.6.0")
-    api("com.zaxxer:HikariCP:2.6.3")
-    api("com.h2database:h2:1.4.196")
-    api("org.xerial:sqlite-jdbc:3.20.0")
-    api("com.github.webbukkit:DynmapCoreAPI:v2.5")
-//    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
+    api(project(":EagleFactionsAPI"))
+    compileOnlyApi("org.mariadb.jdbc:mariadb-java-client:2.6.0")
+    compileOnlyApi("com.zaxxer:HikariCP:2.6.3")
+    compileOnlyApi("com.h2database:h2:1.4.196")
+    compileOnlyApi("org.xerial:sqlite-jdbc:3.20.0")
+    compileOnlyApi("com.github.webbukkit:DynmapCoreAPI:v2.5")
 
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:8.1.0")
@@ -160,7 +155,7 @@ tasks.register("publishBuildOnDiscord") {
             }
 
             exec {
-                commandLine("java", "-jar", "..\\jenkinsdiscordbot-1.0.jar", "EagleFactions", jarFiles[0], lastCommitDescription)
+                commandLine("java", "-jar", ".." + File.separator + "jenkinsdiscordbot-1.0.jar", "EagleFactions", jarFiles[0], lastCommitDescription)
             }
         }
     }
