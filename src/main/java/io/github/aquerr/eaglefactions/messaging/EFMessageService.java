@@ -21,6 +21,8 @@ public class EFMessageService implements MessageService
     public static final String ERROR_ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND = "error.command.in-game-player-required";
     public static final String ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS = "error.access.you-must-be-faction-leader-or-officer-to-do-this";
     public static final String ERROR_ADMIN_MODE_REQUIRED = "error.command.admin-mode-required";
+    public static final String ERROR_THIS_PLACE_IS_ALREADY_CLAIMED = "error.claim.place-is-already-claimed";
+    public static final String ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS = "error.general.you-dont-have-access-to-do-this";
 
     private final Localization localization;
 
@@ -32,7 +34,7 @@ public class EFMessageService implements MessageService
     @Override
     public Component resolveMessageWithPrefix(String messageKey)
     {
-        return LinearComponents.linear(PluginInfo.PLUGIN_PREFIX, resolveComponentWithMessage(messageKey));
+        return resolveMessageWithPrefix(messageKey, new Object[0]);
     }
 
     @Override
@@ -44,7 +46,13 @@ public class EFMessageService implements MessageService
     @Override
     public CommandException resolveExceptionWithMessage(String messageKey)
     {
-        return new CommandException(LinearComponents.linear(PluginInfo.ERROR_PREFIX, resolveComponentWithMessage(messageKey)));
+        return resolveExceptionWithMessage(messageKey, new Object[0]);
+    }
+
+    @Override
+    public CommandException resolveExceptionWithMessage(String messageKey, Object... args)
+    {
+        return new CommandException(LinearComponents.linear(PluginInfo.ERROR_PREFIX, resolveComponentWithMessage(messageKey, args)));
     }
 
     @Override
@@ -56,7 +64,7 @@ public class EFMessageService implements MessageService
     @Override
     public TextComponent resolveComponentWithMessage(String messageKey)
     {
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(resolveMessage(messageKey));
+        return resolveComponentWithMessage(messageKey, new Object[0]);
     }
 
     @Override
@@ -68,7 +76,7 @@ public class EFMessageService implements MessageService
     @Override
     public String resolveMessage(String messageKey)
     {
-        return this.localization.getMessage(messageKey);
+        return this.resolveMessage(messageKey, new Object[0]);
     }
 
     @Override

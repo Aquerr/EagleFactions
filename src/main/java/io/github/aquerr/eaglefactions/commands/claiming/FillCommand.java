@@ -1,15 +1,11 @@
 package io.github.aquerr.eaglefactions.commands.claiming;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -17,23 +13,20 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
 public class FillCommand extends AbstractCommand
 {
     private final ProtectionConfig protectionConfig;
+    private final MessageService messageService;
 
     public FillCommand(EagleFactions plugin)
     {
         super(plugin);
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -45,15 +38,15 @@ public class FillCommand extends AbstractCommand
 
         final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
         if (!isAdmin && !super.getPlugin().getPermsManager().canClaim(player.uniqueId(), faction))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.claim.players-with-your-rank-cant-claim-lands");
 
         final ServerWorld world = player.world();
 
         if (!canClaimInWorld(world, isAdmin))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.claim.not-claimable-world");
 
         if (isFactionUnderAttack(faction))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOUR_FACTION_IS_UNDER_ATTACK + " ", RED).append(MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_SECONDS_TO_BE_ABLE_TO_CLAIM_AGAIN, RED, Collections.singletonMap(Placeholders.NUMBER, text(EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()), GOLD))))));
+            throw messageService.resolveExceptionWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()));
 
         fill(player, faction);
         return CommandResult.success();
@@ -85,7 +78,7 @@ public class FillCommand extends AbstractCommand
         while (!chunks.isEmpty())
         {
             if (hasReachedClaimLimit(faction))
-                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS, RED)));
+                throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
 
             final Vector3i chunkPosition = chunks.poll();
             if (!super.getPlugin().getFactionLogic().isClaimed(worldUUID, chunkPosition))
