@@ -14,7 +14,6 @@ import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import net.kyori.adventure.audience.Audience;
