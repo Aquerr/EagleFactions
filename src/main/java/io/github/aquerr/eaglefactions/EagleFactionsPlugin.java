@@ -26,14 +26,8 @@ import io.github.aquerr.eaglefactions.commands.access.AccessFactionCommand;
 import io.github.aquerr.eaglefactions.commands.access.AccessPlayerCommand;
 import io.github.aquerr.eaglefactions.commands.access.NotAccessibleByFactionCommand;
 import io.github.aquerr.eaglefactions.commands.access.OwnedByCommand;
-import io.github.aquerr.eaglefactions.commands.admin.AdminCommand;
-import io.github.aquerr.eaglefactions.commands.admin.DebugCommand;
-import io.github.aquerr.eaglefactions.commands.admin.RegenCommand;
-import io.github.aquerr.eaglefactions.commands.admin.ReloadCommand;
-import io.github.aquerr.eaglefactions.commands.admin.SetFactionCommand;
-import io.github.aquerr.eaglefactions.commands.admin.SetMaxPowerCommand;
+import io.github.aquerr.eaglefactions.commands.admin.*;
 import io.github.aquerr.eaglefactions.commands.admin.SetMaxPowerForAllCommand;
-import io.github.aquerr.eaglefactions.commands.admin.SetPowerCommand;
 import io.github.aquerr.eaglefactions.commands.args.BackupNameArgument;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.commands.args.FactionArgument;
@@ -819,13 +813,13 @@ public class EagleFactionsPlugin implements EagleFactions
                 .build());
 
         // MaxPowerAll Command
-        SUBCOMMANDS.put(Collections.singletonList("setmaxpower_forall"), Command.builder()
+        SUBCOMMANDS.put(Collections.singletonList("setmaxpower_for_everyone"), Command.builder()
                 .shortDescription(Component.text(Messages.COMMAND_SET_MAX_POWER_FOR_ALL_DESC))
-                .permission(PluginPermissions.MAX_POWER_FOR_ALL_COMMAND)
+                .permission(PluginPermissions.MAX_POWER_FOR_EVERYONE_COMMAND)
                 .addParameter(Parameter.doubleNumber()
                         .key("power")
                         .build())
-                .executor(new SetMaxPowerForAllCommand(this))
+                .executor(new SetMaxPowerForEveryoneCommand(this))
                 .build());
 
         //Attack Command

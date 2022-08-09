@@ -1,15 +1,14 @@
 package io.github.aquerr.eaglefactions.commands.access;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -25,14 +24,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.LinearComponents.linear;
 
 public class NotAccessibleByFactionCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public NotAccessibleByFactionCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -43,7 +45,7 @@ public class NotAccessibleByFactionCommand extends AbstractCommand
 
         // Access can be run only by leader and officers
         if (!playerFaction.getLeader().equals(player.uniqueId()) && !playerFaction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
+            throw super.getPlugin().getMessageService().resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
         // Get claim at player's location
         return showNotAccessibleByFaction(player, playerFaction);
@@ -59,29 +61,26 @@ public class NotAccessibleByFactionCommand extends AbstractCommand
             if (claim.isAccessibleByFaction())
                 continue;
 
-            final TextComponent.Builder claimHoverInfo = Component.text();
-            claimHoverInfo.append(text("Accessible by faction: ", GOLD)).append(text(claim.isAccessibleByFaction(), WHITE)).append(Component.newline());
             final List<String> ownersNames = claim.getOwners().stream()
                     .map(owner -> super.getPlugin().getPlayerManager().getFactionPlayer(owner))
                     .filter(Optional::isPresent)
                     .map(factionPlayer -> factionPlayer.get().getName())
                     .collect(Collectors.toList());
-            claimHoverInfo.append(text("Owners: ", GOLD)).append(text(String.join(", ", ownersNames), WHITE));
+            final Component claimHoverInfo = linear(messageService.resolveComponentWithMessage("command.access.accessible-by-faction", claim.isAccessibleByFaction()), newline(),
+                    messageService.resolveComponentWithMessage("command.access.owners", String.join(", ", ownersNames)));
 
-            final TextComponent.Builder textBuilder = Component.text();
             final Optional<ServerWorld> world = WorldUtil.getWorldByUUID(claim.getWorldUUID());
             String worldName = "";
             if (world.isPresent())
                 worldName = WorldUtil.getPlainWorldName(world.get());
-            textBuilder.append(text("- ")).append(text("World: ", YELLOW)).append(text(worldName, GREEN)).append(text(" | ", WHITE)).append(text("Chunk: ", YELLOW)).append(text(claim.getChunkPosition().toString(), GREEN))
-                    .hoverEvent(HoverEvent.showText(claimHoverInfo.build()));
-            resultList.add(textBuilder.build());
+            resultList.add(messageService.resolveComponentWithMessage("command.access.access-line", worldName, claim.getChunkPosition().toString())
+                .hoverEvent(HoverEvent.showText(claimHoverInfo)));
             spawnParticlesInClaim(claim);
         }
 
         final PaginationList paginationList = PaginationList.builder()
-                .padding(text("="))
-                .title(text("Claims List", YELLOW))
+                .padding(super.getPlugin().getMessageService().resolveComponentWithMessage("command.access.padding-character"))
+                .title(super.getPlugin().getMessageService().resolveComponentWithMessage("command.access.header"))
                 .contents(resultList)
                 .linesPerPage(10)
                 .build();

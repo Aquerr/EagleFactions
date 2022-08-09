@@ -1,23 +1,27 @@
 package io.github.aquerr.eaglefactions.messaging;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.messaging.locale.Localization;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.command.exception.CommandException;
 
-import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 /**
  * Eagle Factions Message Service that create messages loaded from language files.
  */
 public class EFMessageService implements MessageService
 {
-    private final EagleFactions plugin;
+    public static final String ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY = "error.command.must-be-in-faction-to-use-this-command";
+    public static final String ERROR_ONLY_IN_GAME_PLAYERS_CAN_USE_THIS_COMMAND = "error.command.in-game-player-required";
+    public static final String ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS = "error.access.you-must-be-faction-leader-or-officer-to-do-this";
+    public static final String ERROR_ADMIN_MODE_REQUIRED = "error.command.admin-mode-required";
+
     private final Localization localization;
 
     public EFMessageService(FactionsConfig factionsConfig)
@@ -32,20 +36,44 @@ public class EFMessageService implements MessageService
     }
 
     @Override
+    public Component resolveMessageWithPrefix(String messageKey, Object... args)
+    {
+        return LinearComponents.linear(PluginInfo.PLUGIN_PREFIX, resolveComponentWithMessage(messageKey, args));
+    }
+
+    @Override
     public CommandException resolveExceptionWithMessage(String messageKey)
     {
         return new CommandException(LinearComponents.linear(PluginInfo.ERROR_PREFIX, resolveComponentWithMessage(messageKey)));
     }
 
     @Override
-    public Component resolveComponentWithMessage(String messageKey)
+    public CommandException resolveExceptionWithMessageAndThrowable(String messageKey, Throwable throwable)
+    {
+        return new CommandException(LinearComponents.linear(PluginInfo.ERROR_PREFIX, resolveComponentWithMessage(messageKey)), throwable);
+    }
+
+    @Override
+    public TextComponent resolveComponentWithMessage(String messageKey)
     {
         return LegacyComponentSerializer.legacyAmpersand().deserialize(resolveMessage(messageKey));
     }
 
     @Override
+    public TextComponent resolveComponentWithMessage(String messageKey, Object... args)
+    {
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(resolveMessage(messageKey, args));
+    }
+
+    @Override
     public String resolveMessage(String messageKey)
     {
-        return null;
+        return this.localization.getMessage(messageKey);
+    }
+
+    @Override
+    public String resolveMessage(String messageKey, Object... args)
+    {
+        return MessageFormat.format(this.localization.getMessage(messageKey), args);
     }
 }

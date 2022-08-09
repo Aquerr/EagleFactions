@@ -16,7 +16,7 @@ public class Localization
 
     public static Localization forTag(String languageTag)
     {
-        if (languageTag == null || languageTag.isBlank())
+        if (languageTag == null || languageTag.isEmpty())
         {
             throw new IllegalArgumentException("languageTag cannot be empty!");
         }

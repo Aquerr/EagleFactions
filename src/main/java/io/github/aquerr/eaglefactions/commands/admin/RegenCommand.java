@@ -1,13 +1,12 @@
 package io.github.aquerr.eaglefactions.commands.admin;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
-import io.github.aquerr.eaglefactions.messaging.Messages;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.command.CommandResult;
@@ -20,14 +19,14 @@ import org.spongepowered.api.world.server.ServerWorld;
 import java.util.Optional;
 import java.util.UUID;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 public class RegenCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public RegenCommand(EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -37,7 +36,7 @@ public class RegenCommand extends AbstractCommand
 
         if (factionToRegen.isSafeZone() || factionToRegen.isWarZone())
         {
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.THIS_FACTION_CANNOT_BE_DISBANDED, RED)));
+            throw messageService.resolveExceptionWithMessage("error.disband.this-faction-cannot-be-disbanded");
         }
 
         /*
@@ -50,7 +49,7 @@ public class RegenCommand extends AbstractCommand
 
         if (!EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.containsKey(uuid) || !EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.get(uuid).equals(factionToRegen.getName()))
         {
-            audience.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.REGEN_WARNING_CONFIRMATION_REQUIRED, YELLOW)));
+            audience.sendMessage(messageService.resolveMessageWithPrefix("command.regen.confirmation-required"));
 
             EagleFactionsPlugin.REGEN_CONFIRMATION_MAP.put(uuid, factionToRegen.getName());
 
@@ -74,7 +73,7 @@ public class RegenCommand extends AbstractCommand
         }
         else
         {
-            throw new CommandException(PluginInfo.PLUGIN_PREFIX.append(text(Messages.SOMETHING_WENT_WRONG, RED)));
+            throw messageService.resolveExceptionWithMessage("error.general.something-went-wrong");
         }
 
         /* After a successful disband we can regenerate faction claims. */
@@ -85,13 +84,13 @@ public class RegenCommand extends AbstractCommand
 
             if (!world.isPresent())
             {
-                throw new CommandException(PluginInfo.PLUGIN_PREFIX.append(text(Messages.SOMETHING_WENT_WRONG, RED)));
+                throw messageService.resolveExceptionWithMessage("error.general.something-went-wrong");
             }
 
             world.get().chunkManager().regenerateChunk(claim.getChunkPosition());
         }
 
-        audience.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.FACTION_HAS_BEEN_REGENERATED, WHITE)));
+        audience.sendMessage(messageService.resolveMessageWithPrefix("command.regen.faction-has-been-regenerated"));
         return CommandResult.success();
     }
 }
