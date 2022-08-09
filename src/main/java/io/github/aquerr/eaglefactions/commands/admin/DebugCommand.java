@@ -26,12 +26,12 @@ public class DebugCommand extends AbstractCommand
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(player.uniqueId()))
         {
             EagleFactionsPlugin.DEBUG_MODE_PLAYERS.remove(player.uniqueId());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.debug.turned-off"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.debug.disabled"));
         }
         else
         {
             EagleFactionsPlugin.DEBUG_MODE_PLAYERS.add(player.uniqueId());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.debug.turned-on"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.debug.enabled"));
         }
         return CommandResult.success();
     }

@@ -1,11 +1,11 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Created by Aquerr on 2017-08-04.
@@ -35,9 +34,12 @@ public class PlayerCommand extends AbstractCommand
 {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
+    private final MessageService messageService;
+
     public PlayerCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -63,7 +65,7 @@ public class PlayerCommand extends AbstractCommand
             }
             else
             {
-                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
+                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY);
             }
         }
         return CommandResult.success();
@@ -90,20 +92,21 @@ public class PlayerCommand extends AbstractCommand
 
         String formattedDate = DATE_TIME_FORMATTER.format(lastPlayed);
         final boolean isOnline = optionalUser.isPresent() && optionalUser.get().isOnline();
-        final Component online = isOnline ? text("ONLINE", GREEN) : text("OFFLINE", RED);
+        final Component online = isOnline ? messageService.resolveComponentWithMessage("command.player.online")
+                : messageService.resolveComponentWithMessage("command.player.offline");
         Component info = text()
-                .append(text(Messages.NAME + ": ", AQUA)).append(text(factionPlayer.getName(), GOLD)).append(newline())
-                .append(text(Messages.PLAYER_STATUS + ": ", AQUA)).append(online).append(newline())
-                .append(text(Messages.FACTION + ": ", AQUA)).append(text(playerFactionName, GOLD)).append(newline())
-                .append(text(Messages.POWER + ": ", AQUA)).append(text(factionPlayer.getPower() + "/" + factionPlayer.getMaxPower(), GOLD)).append(newline())
-                .append(text(Messages.LAST_PLAYED + ": ", AQUA)).append(text(formattedDate, GOLD))
+                .append(messageService.resolveComponentWithMessage("command.player.name", factionPlayer.getName())).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.player.player-status", online)).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.player.faction", playerFactionName)).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.player.power", factionPlayer.getPower() + "/" + factionPlayer.getMaxPower())).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.player.last-played", formattedDate))
                 .build();
 
         playerInfo.add(info);
 
         PaginationList.Builder paginationBuilder = PaginationList.builder()
-                .title(text(Messages.PLAYER_INFO, GREEN))
-                .padding(text("="))
+                .title(messageService.resolveComponentWithMessage("command.player.header"))
+                .padding(messageService.resolveComponentWithMessage("command.player.padding-character"))
                 .contents(playerInfo);
         paginationBuilder.sendTo(audience);
     }

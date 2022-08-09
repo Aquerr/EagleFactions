@@ -1,14 +1,13 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import net.kyori.adventure.identity.Identity;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
@@ -24,17 +23,31 @@ import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static net.kyori.adventure.text.Component.*;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class InfoCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public InfoCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -57,22 +70,22 @@ public class InfoCommand extends AbstractCommand
     private void selfInfo(final CommandContext context, final Faction faction) throws CommandException
     {
         if (!context.hasPermission(PluginPermissions.INFO_COMMAND) && !context.hasPermission(PluginPermissions.INFO_COMMAND_SELF))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION, RED)));
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
         showFactionInfo(context, faction);
     }
     
-    private void otherInfo(final CommandContext source, final Faction faction)
+    private void otherInfo(final CommandContext source, final Faction faction) throws CommandException
     {
         if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
         {
             //Check permissions
             if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
             {
-                source.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_YOUR_FACTION, RED)));
+                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
             }
             else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
             {
-                source.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_PERMISSIONS_FOR_VEWING_INFO_ABOUT_OTHER_FACTIONS, RED)));
+                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
             }
             else
             {
@@ -81,7 +94,7 @@ public class InfoCommand extends AbstractCommand
         }
         else
         {
-            source.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_PERMISSIONS_TO_USE_THIS_COMMAND, RED)));
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
         }
     }
 
@@ -136,28 +149,28 @@ public class InfoCommand extends AbstractCommand
         }
 
         Component info = text()
-                .append(text(Messages.NAME + ": ", AQUA)).append(text(faction.getName(), GOLD)).append(newline())
-                .append(text(Messages.TAG + ": ", AQUA)).append(faction.getTag().color(GOLD)).append(newline())
-                .append(text(Messages.LAST_ONLINE + ": ", AQUA)).append(lastOnline(faction)).append(newline())
-                .append(text(Messages.DESCRIPTION + ": ", AQUA)).append(text(faction.getDescription(), GOLD)).append(newline())
-                .append(text(Messages.MOTD + ": ", AQUA)).append(text(faction.getMessageOfTheDay(), GOLD)).append(newline())
-                .append(text(Messages.PUBLIC + ": ", AQUA)).append(text(faction.isPublic(), GOLD)).append(newline())
-                .append(text(Messages.LEADER + ": ", AQUA)).append(leaderNameText.color(GOLD)).append(newline())
-                .append(text(Messages.OFFICERS + ": ", AQUA)).append(officersList.color(GOLD)).append(newline())
-                .append(text(Messages.TRUCES + ": ", AQUA)).append(trucesList.color(GOLD)).append(newline())
-                .append(text(Messages.ALLIANCES + ": ", AQUA)).append(alliancesList.color(BLUE)).append(newline())
-                .append(text(Messages.ENEMIES + ": ", AQUA)).append(enemiesList.color(RED)).append(newline())
-                .append(text(Messages.MEMBERS + ": ", AQUA)).append(membersList.color(GREEN)).append(newline())
-                .append(text(Messages.RECRUITS + ": ", AQUA)).append(recruitList.color(GREEN)).append(newline())
-                .append(text(Messages.POWER + ": ", AQUA)).append(text(super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction), GOLD).append(newline())
-                .append(text(Messages.CLAIMS + ": ", AQUA)).append(text(faction.getClaims().size() + "/" + super.getPlugin().getPowerManager().getFactionMaxClaims(faction), GOLD)))
+                .append(messageService.resolveComponentWithMessage("command.info.name", faction.getName())).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.tag", faction.getTag().color(GOLD))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.last-online", lastOnline(faction))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.description", faction.getDescription())).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.motd", faction.getMessageOfTheDay())).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.public", faction.isPublic())).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.leader", leaderNameText.color(GOLD))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.officers", officersList.color(GOLD))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.truces", trucesList.color(GOLD))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.alliances", alliancesList.color(BLUE))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.enemies", enemiesList.color(RED))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.members", membersList.color(GREEN))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(GREEN))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.power", super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + super.getPlugin().getPowerManager().getFactionMaxClaims(faction)))
                 .build();
 
         factionInfo.add(info);
 
         PaginationService paginationService = Sponge.serviceProvider().paginationService();
         PaginationList.Builder paginationBuilder = paginationService.builder()
-                .title(text(Messages.FACTION_INFO, GREEN))
+                .title(messageService.resolveComponentWithMessage("command.info.faction-info-header"))
                 .contents(factionInfo);
         paginationBuilder.sendTo(source.cause().audience());
     }
@@ -165,7 +178,7 @@ public class InfoCommand extends AbstractCommand
     private Component lastOnline(final Faction faction)
     {
         if(getPlugin().getFactionLogic().hasOnlinePlayers(faction))
-            return text(Messages.NOW, GREEN);
+            return messageService.resolveComponentWithMessage("command.info.now");
 
         final Date date = Date.from(faction.getLastOnline());
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

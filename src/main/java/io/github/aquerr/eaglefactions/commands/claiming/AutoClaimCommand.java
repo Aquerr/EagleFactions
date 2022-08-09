@@ -33,12 +33,12 @@ public class AutoClaimCommand extends AbstractCommand
         if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.uniqueId()))
         {
             EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.uniqueId());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-claim.turned-off"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-claim.disabled"));
         }
         else
         {
             EagleFactionsPlugin.AUTO_CLAIM_LIST.add(player.uniqueId());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-claim.turned-on"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-claim.enabled"));
         }
 
         return CommandResult.success();

@@ -25,12 +25,12 @@ public class AdminCommand extends AbstractCommand
         if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
             super.getPlugin().getPlayerManager().deactivateAdminMode(player.user());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.turned-off"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.disabled"));
         }
         else
         {
             super.getPlugin().getPlayerManager().activateAdminMode(player.user());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.turned-on"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.enabled"));
         }
         return CommandResult.success();
     }
