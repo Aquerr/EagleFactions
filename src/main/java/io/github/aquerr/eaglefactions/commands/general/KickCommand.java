@@ -38,10 +38,10 @@ public class KickCommand extends AbstractCommand
 
         final Optional<Faction> optionalSelectedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(selectedPlayer.getUniqueId());
         if(!optionalSelectedPlayerFaction.isPresent())
-            throw messageService.resolveExceptionWithMessage("error.command.kick.this-player-is-not-in-your-faction");
+            throw messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction");
 
         if(!optionalSelectedPlayerFaction.get().getName().equals(playerFaction.getName()))
-            throw messageService.resolveExceptionWithMessage("error.command.kick.this-player-is-not-in-your-faction");
+            throw messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction");
 
         if(playerFaction.getLeader().equals(selectedPlayer.getUniqueId()) || (playerFaction.getOfficers().contains(player.uniqueId()) && playerFaction.getOfficers().contains(selectedPlayer.getUniqueId())))
             throw messageService.resolveExceptionWithMessage("error.command.kick.you-cant-kick-this-player");
