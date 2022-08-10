@@ -16,7 +16,8 @@ import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
@@ -48,11 +49,18 @@ public class ProtectionManagerImpl implements ProtectionManager
     private final FactionLogic factionLogic;
     private final PermsManager permsManager;
     private final PlayerManager playerManager;
+    private final MessageService messageService;
     private final ProtectionConfig protectionConfig;
     private final ChatConfig chatConfig;
     private final FactionsConfig factionsConfig;
 
-    public ProtectionManagerImpl(final FactionLogic factionLogic, final PermsManager permsManager, final PlayerManager playerManager, final ProtectionConfig protectionConfig, final ChatConfig chatConfig, final FactionsConfig factionsConfig)
+    public ProtectionManagerImpl(final FactionLogic factionLogic,
+                                 final PermsManager permsManager,
+                                 final PlayerManager playerManager,
+                                 final MessageService messageService,
+                                 final ProtectionConfig protectionConfig,
+                                 final ChatConfig chatConfig,
+                                 final FactionsConfig factionsConfig)
     {
         this.protectionConfig = protectionConfig;
         this.chatConfig = chatConfig;
@@ -60,6 +68,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         this.factionLogic = factionLogic;
         this.permsManager = permsManager;
         this.playerManager = playerManager;
+        this.messageService = messageService;
     }
 
     @Override
@@ -984,7 +993,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     {
         if (this.chatConfig.shouldDisplayProtectionSystemMessages())
         {
-            user.player().ifPresent(x->x.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ACCESS_TO_DO_THIS, RED))));
+            user.player().ifPresent(x->x.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS))));
         }
     }
 }

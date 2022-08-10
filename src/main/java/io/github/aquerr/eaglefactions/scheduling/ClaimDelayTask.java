@@ -6,8 +6,9 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.math.vector.Vector3i;
@@ -19,6 +20,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
 {
+    private final MessageService messageService;
     private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic = EagleFactionsPlugin.getPlugin().getFactionLogic();
     private final ServerPlayer player;
@@ -33,6 +35,7 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
         this.player = player;
         this.chunkPosition = chunkPosition;
         this.factionsConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig();
+        this.messageService = EagleFactionsPlugin.getPlugin().getMessageService();
         this.claimDelay = this.factionsConfig.getClaimDelay();
         this.shouldClaimByItems = this.factionsConfig.shouldClaimByItems();
     }
@@ -42,7 +45,7 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
     {
         if(!chunkPosition.equals(player.location().chunkPosition()))
         {
-            player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MOVED_FROM_THE_CHUNK, RED)));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.claim.you-moved-from-chunk")));
             task.cancel();
         }
 
@@ -51,7 +54,7 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
             final Optional<Faction> optionalFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
             if(!optionalFaction.isPresent())
             {
-                player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND, RED)));
+                player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY)));
                 task.cancel();
             }
 
@@ -59,14 +62,14 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
             {
                 boolean didSucceed = this.factionLogic.addClaimByItems(player, optionalFaction.get(), player.world().uniqueId(), chunkPosition);
                 if(didSucceed)
-                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
+                    player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
                 else
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY, RED)));
+                    player.sendMessage(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources"));
             }
             else
             {
                 factionLogic.addClaim(optionalFaction.get(), new Claim(player.world().uniqueId(), chunkPosition));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
+                player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
                 EventRunner.runFactionClaimEventPost(player, optionalFaction.get(), player.world(), chunkPosition);
             }
             task.cancel();

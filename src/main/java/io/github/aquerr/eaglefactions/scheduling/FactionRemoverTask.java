@@ -1,16 +1,12 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import org.spongepowered.api.Sponge;
 
 import java.time.Duration;
@@ -18,20 +14,18 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
 public class FactionRemoverTask implements EagleFactionsRunnableTask
 {
     private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
     private final EagleFactionsScheduler scheduler = EagleFactionsScheduler.getInstance();
+    private final MessageService messageService;
 
     public FactionRemoverTask(final EagleFactions plugin)
     {
         this.factionLogic = plugin.getFactionLogic();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -63,7 +57,7 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
             {
                 if (shouldNotifyWhenRemoved)
                 {
-                    Sponge.server().broadcastAudience().sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.FACTION_HAS_BEEN_REMOVED_DUE_TO_INACTIVITY_TIME, RED, ImmutableMap.of(Placeholders.FACTION_NAME, text(faction.getName(), GOLD)))));
+                    Sponge.server().broadcastAudience().sendMessage(messageService.resolveComponentWithMessage("faction-remover.faction-has-been-removed-due-to-inactivity-time", faction.getName()));
                 }
 
                 if (shouldRegenerateWhenRemoved)

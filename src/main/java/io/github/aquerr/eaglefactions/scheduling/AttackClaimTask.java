@@ -1,15 +1,12 @@
 package io.github.aquerr.eaglefactions.scheduling;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.Player;
@@ -19,13 +16,11 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
 {
     int seconds = 1;
 
+    private final MessageService messageService;
     private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic;
     private final AttackLogic attackLogic;
@@ -33,8 +28,9 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
     private final ServerPlayer player;
     private BossBar attackTimeBossBar;
 
-    public AttackClaimTask(final FactionsConfig factionsConfig, final FactionLogic factionLogic, final AttackLogic attackLogic, final ServerPlayer player, final Vector3i attackedChunk)
+    public AttackClaimTask(final MessageService messageService, final FactionsConfig factionsConfig, final FactionLogic factionLogic, final AttackLogic attackLogic, final ServerPlayer player, final Vector3i attackedChunk)
     {
+        this.messageService = messageService;
         this.factionsConfig = factionsConfig;
         this.factionLogic = factionLogic;
         this.attackLogic = attackLogic;
@@ -47,13 +43,13 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
     {
         if (this.player.health().get() <= 0)
         {
-            cancelTask(player, task, PluginInfo.ERROR_PREFIX.append(text(Messages.ATTACK_ON_CLAIM_HAS_BEEN_CANCELLED, RED)));
+            cancelTask(player, task, PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("attack.cancelled")));
             return;
         }
 
         if (!this.attackedChunk.equals(this.player.serverLocation().chunkPosition()))
         {
-            cancelTask(player, task, PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MOVED_FROM_THE_CHUNK, RED)));
+            cancelTask(player, task, PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("attack.you-moved-from-chunk")));
             return;
         }
 
@@ -62,7 +58,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
             final Optional<Faction> optionalChunkFaction = factionLogic.getFactionByChunk(player.world().uniqueId(), attackedChunk);
             if (!optionalChunkFaction.isPresent())
             {
-                cancelTask(player, task, PluginInfo.PLUGIN_PREFIX.append(text("Chunk is already unclaimed!", GREEN)));
+                cancelTask(player, task, PluginInfo.PLUGIN_PREFIX.append(messageService.resolveComponentWithMessage("error.claim.place-does-not-belong-to-anyone")));
                 return;
             }
 
@@ -71,7 +67,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
 
             final Claim claim = new Claim(player.world().uniqueId(), attackedChunk);
             factionLogic.destroyClaim(chunkFaction, claim);
-            cancelTask(player, task, PluginInfo.PLUGIN_PREFIX.append(text(Messages.CLAIM_DESTROYED, GREEN)));
+            cancelTask(player, task, PluginInfo.PLUGIN_PREFIX.append(messageService.resolveComponentWithMessage("attack.claim-destroyed")));
         }
         else
         {
@@ -86,7 +82,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
         {
             if(this.attackTimeBossBar == null)
             {
-                this.attackTimeBossBar = BossBar.bossBar(text("Chunk attack"),
+                this.attackTimeBossBar = BossBar.bossBar(messageService.resolveComponentWithMessage("attack.bar"),
                         calculatePercentage(requiredSeconds, seconds),
                         BossBar.Color.RED,
                         BossBar.Overlay.NOTCHED_20);
@@ -99,7 +95,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
         }
         else
         {
-            this.player.sendActionBar(MessageLoader.parseMessage(Messages.CLAIM_WILL_BE_DESTROYED_IN_SECONDS, AQUA, ImmutableMap.of(Placeholders.NUMBER, text(seconds, GOLD))));
+            this.player.sendActionBar(messageService.resolveComponentWithMessage("attack.claim-will-be-destroyed-in-seconds", seconds));
         }
     }
 
