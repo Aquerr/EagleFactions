@@ -1,25 +1,24 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
 public class DescriptionCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public DescriptionCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -31,14 +30,14 @@ public class DescriptionCommand extends AbstractCommand
 
         //Check if player is leader
         if (!faction.getLeader().equals(player.uniqueId()) && !faction.getOfficers().contains(player.uniqueId()))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
         //Check description length
         if(description.length() > 255)
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.DESCRIPTION_IS_TOO_LONG + " (" + Messages.MAX + " " + 255 + " " + Messages.CHARS + ")", RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.description.too-long", 255);
 
         super.getPlugin().getFactionLogic().setDescription(faction, description);
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.FACTION_DESCRIPTION_HAS_BEEN_UPDATED, GREEN)));
+        player.sendMessage(messageService.resolveMessageWithPrefix("command.description.success"));
         return CommandResult.success();
     }
 }
