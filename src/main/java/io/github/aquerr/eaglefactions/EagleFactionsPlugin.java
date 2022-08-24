@@ -112,7 +112,6 @@ import io.github.aquerr.eaglefactions.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
 import io.github.aquerr.eaglefactions.messaging.placeholder.parser.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
@@ -523,7 +522,6 @@ public class EagleFactionsPlugin implements EagleFactions
             return;
 
         configuration = new ConfigurationImpl(this.pluginContainer, configDir, resource);
-        MessageLoader.init(eagleFactions, pluginContainer);
         pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
@@ -531,15 +529,16 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.efPlaceholderService = new EFPlaceholderService(this);
 
-        this.messageService = new EFMessageService(this.configuration.getFactionsConfig());
+        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageFileName());
+        this.messageService = EFMessageService.getInstance();
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
         this.powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
         this.permsManager = new PermsManagerImpl();
-        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig());
-        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig());
-        this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
-        this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager);
+        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
+        this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager, this.messageService);
         this.rankManager = new RankManagerImpl(this.factionLogic, this.storageManager);
     }
 

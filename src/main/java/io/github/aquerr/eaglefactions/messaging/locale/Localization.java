@@ -1,18 +1,15 @@
 package io.github.aquerr.eaglefactions.messaging.locale;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class Localization
 {
-    private static final String RESOURCE_BASE_NAME = "lang/messages";
+    private static final String RESOURCE_BASE_NAME = "assets/eaglefactions/lang/messages";
 
     private final ResourceBundle resourceBundle;
-
-    public static Localization getDefault()
-    {
-        return forTag("en_US");
-    }
 
     public static Localization forTag(String languageTag)
     {

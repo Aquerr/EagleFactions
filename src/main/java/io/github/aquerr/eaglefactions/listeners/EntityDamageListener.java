@@ -1,7 +1,5 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
@@ -9,12 +7,8 @@ import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.util.ModSupport;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
@@ -23,7 +17,11 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.*;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -41,8 +39,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 public class EntityDamageListener extends AbstractListener
 {
     private final PVPLogger pvpLogger;
@@ -50,6 +46,7 @@ public class EntityDamageListener extends AbstractListener
     private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
     private final ProtectionManager protectionManager;
+    private final MessageService messageService;
 
     private final DamageModifier damageReductionModifier = DamageModifier.builder()
             .type(DamageModifierTypes.ARMOR)
@@ -64,6 +61,7 @@ public class EntityDamageListener extends AbstractListener
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.powerConfig = plugin.getConfiguration().getPowerConfig();
         this.protectionManager = plugin.getProtectionManager();
+        this.messageService = plugin.getMessageService();
     }
 
     //Method used for handling damaging entities like ArmorStands and Item Frames.
@@ -326,15 +324,15 @@ public class EntityDamageListener extends AbstractListener
     private void sendPenaltyMessageAndDecreasePower(final ServerPlayer player)
     {
         super.getPlugin().getPowerManager().penalty(player.uniqueId());
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_DECREASED_BY, NamedTextColor.WHITE, ImmutableMap.of(Placeholders.NUMBER, Component.text(this.powerConfig.getPenalty(), GOLD)))));
-        player.sendMessage(Component.text(Messages.CURRENT_POWER + " " + super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId()), GRAY));
+        player.sendMessage(messageService.resolveMessageWithPrefix("power.decreased-by", this.powerConfig.getPenalty()));
+        player.sendMessage(messageService.resolveComponentWithMessage("power.current-power", super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())));
     }
 
     private void sendKillAwardMessageAndIncreasePower(final ServerPlayer player)
     {
         super.getPlugin().getPowerManager().addPower(player.uniqueId(), true);
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOUR_POWER_HAS_BEEN_INCREASED_BY, WHITE, ImmutableMap.of(Placeholders.NUMBER, Component.text(this.powerConfig.getKillAward(), GOLD)))));
-        player.sendMessage(Component.text(Messages.CURRENT_POWER + " " + super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId()), GRAY));
+        player.sendMessage(messageService.resolveMessageWithPrefix("power.increased-by", this.powerConfig.getKillAward()));
+        player.sendMessage(messageService.resolveComponentWithMessage("power.current-power", super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())));
     }
 
     private boolean isInOwnTerritory(final ServerPlayer player)

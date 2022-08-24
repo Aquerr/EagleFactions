@@ -36,7 +36,6 @@ public class EnemyCommand extends AbstractCommand
         if (armisticeRequest != null)
         {
             armisticeRequest.accept();
-            player.sendMessage();
             player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-accepted-armistice-request-from-faction", enemyFaction.getName()));
         }
         else

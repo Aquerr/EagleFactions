@@ -1,18 +1,14 @@
 package io.github.aquerr.eaglefactions.listeners;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
-import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -27,38 +23,19 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 public class PlayerMoveListener extends AbstractListener
 {
+    private final MessageService messageService;
     private final FactionsConfig factionsConfig;
     private final ChatConfig chatConfig;
 
     public PlayerMoveListener(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.chatConfig = plugin.getConfiguration().getChatConfig();
     }
-
-//    @Listener
-//    public void onFlanEntityMove(final MoveEntityEvent event)
-//    {
-//        final Location<World> lastLocation = event.getFromTransform().getLocation();
-//        final Location<World> newLocation = event.getToTransform().getLocation();
-//
-//        if(lastLocation.getChunkPosition().equals(newLocation.getChunkPosition()))
-//            return;
-//
-//        if (ModSupport.isFlan(event.getTargetEntity()))
-//        {
-//            final Optional<User> optionalPlayer = event.getContext().get(EventContextKeys.OWNER);
-//            if (optionalPlayer.isPresent() && optionalPlayer.get() instanceof Player)
-//            {
-//                onPlayerMove(event, (Player) optionalPlayer.get());
-//            }
-//        }
-//    }
 
     @Listener(order = Order.EARLY)
     public void onPlayerMove(final MoveEntityEvent event, final @Root ServerPlayer player)
@@ -104,7 +81,7 @@ public class PlayerMoveListener extends AbstractListener
                     if (!getPlugin().getFactionLogic().hasOnlinePlayers(optionalNewChunkFaction.get()) && this.factionsConfig.getBlockEnteringFactions())
                     {
                         //Teleport player back if all entering faction's players are offline.
-                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_CANT_ENTER_THIS_FACTION + " " + Messages.NONE_OF_THIS_FACTIONS_PLAYERS_ARE_ONLINE, RED)));
+                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.move.you-cant-enter-this-faction-none-its-members-are-online")));
                         event.setCancelled(true);
                         return;
                     }
@@ -121,7 +98,7 @@ public class PlayerMoveListener extends AbstractListener
                     else
                     {
                         //Block player before going to SafeZone from WarZone
-                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_CANT_ENTER_SAFEZONE_WHEN_YOU_ARE_IN_WARZONE, RED)));
+                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.move.you-cant-enter-safezone-when-you-are-in-warzone")));
                         event.setCancelled(true);
                         return;
                     }
@@ -133,38 +110,7 @@ public class PlayerMoveListener extends AbstractListener
             //Show entering phrase
             if (this.chatConfig.shouldShowFactionEnterPhrase())
             {
-                Component information;
-                if(optionalNewChunkFaction.isPresent())
-                {
-                    information = Component.text()
-                            .append(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, WHITE, ImmutableMap.of(Placeholders.FACTION_NAME, Component.text(newChunkFactionName, GOLD))))
-                            .build();
-                    //TODO: Further consideration needed for code below... Long description does not look so good
-//                    if(optionalNewChunkFaction.get().getDescription().equals(""))
-//                    {
-//                        information = Text.builder()
-//                                .append(Text.of(PluginMessages.YOU_HAVE_ENTERED_FACTION + " ", TextColors.GOLD, newChunkFactionName))
-//                                .build();
-//                    }
-//                    else
-//                    {
-////                        information = Text.builder()
-////                                .append(Text.of(PluginMessages.YOU_HAVE_ENTERED_FACTION + " ", TextColors.GOLD, newChunkFactionName, TextColors.RESET, " - ", TextColors.AQUA, optionalNewChunkFaction.get().getDescription()))
-////                                .build();
-//                        information = Text.builder()
-//                                .append(Text.of(PluginMessages.YOU_HAVE_ENTERED_FACTION + " ", TextColors.GOLD, newChunkFactionName))
-//                                .build();
-//                        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.GOLD, optionalNewChunkFaction.get().getName() + ": ", TextColors.RESET, optionalNewChunkFaction.get().getDescription())));
-//                    }
-                }
-                else
-                {
-                    information = Component.text()
-                            .append(MessageLoader.parseMessage(Messages.YOU_HAVE_ENTERED_FACTION, WHITE, ImmutableMap.of(Placeholders.FACTION_NAME, Component.text(newChunkFactionName, GOLD))))
-                            .build();
-                }
-
-                player.sendActionBar(information);
+                player.sendActionBar(messageService.resolveComponentWithMessage("move.you-entered-faction", newChunkFactionName));
             }
 
             EventRunner.runFactionAreaEnterEventPost(event, player, optionalNewChunkFaction, optionalOldChunkFaction);

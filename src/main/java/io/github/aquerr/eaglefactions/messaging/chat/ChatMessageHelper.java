@@ -5,13 +5,12 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
@@ -92,14 +91,14 @@ public class ChatMessageHelper
     private static TextComponent getAllianceChatPrefix()
     {
         return Component.text()
-                .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.ALLIANCE_CHAT_PREFIX))
+                .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.alliance.prefix"))
                 .build();
     }
 
     private static TextComponent getFactionChatPrefix()
     {
         return Component.text()
-                .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.FACTION_CHAT_PREFIX))
+                .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.faction.prefix"))
                 .build();
     }
 
@@ -113,7 +112,7 @@ public class ChatMessageHelper
                 return null;
 
             return Component.text()
-                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.LEADER_PREFIX))
+                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.leader.prefix"))
                     .build();
         }
         else if(faction.getOfficers().contains(player.uniqueId()))
@@ -122,7 +121,7 @@ public class ChatMessageHelper
                 return null;
 
             return Component.text()
-                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.OFFICER_PREFIX))
+                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.officer.prefix"))
                     .build();
         }
         else if (faction.getMembers().contains(player.uniqueId()))
@@ -131,7 +130,7 @@ public class ChatMessageHelper
                 return null;
 
             return Component.text()
-                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.MEMBER_PREFIX))
+                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.member.prefix"))
                     .build();
         }
         else
@@ -140,7 +139,7 @@ public class ChatMessageHelper
                 return null;
 
             return Component.text()
-                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(Messages.RECRUIT_PREFIX))
+                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.recruit.prefix"))
                     .build();
         }
     }

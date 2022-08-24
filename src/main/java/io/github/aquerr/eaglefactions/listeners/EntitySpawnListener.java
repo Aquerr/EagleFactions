@@ -6,10 +6,9 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.util.ModSupport;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
-import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
@@ -17,7 +16,11 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.*;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -28,18 +31,18 @@ import org.spongepowered.api.world.server.ServerWorld;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
 public class EntitySpawnListener extends AbstractListener
 {
     private final FactionsConfig factionsConfig;
     private final ProtectionConfig protectionConfig;
+    private final MessageService messageService;
 
     public EntitySpawnListener(EagleFactions plugin)
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.messageService = plugin.getMessageService();
     }
 
     @Listener(order = Order.EARLY, beforeModifications = true)
@@ -136,7 +139,7 @@ public class EntitySpawnListener extends AbstractListener
                     }
                     else
                     {
-                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.COULD_NOT_SPAWN_AT_FACTIONS_HOME_HOME_MAY_NOT_BE_SET, RED)));
+                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.home.could-not-spawn-at-faction-home-it-may-not-be-set")));
                     }
                 }
                 return;

@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.messaging;
 
 import io.github.aquerr.eaglefactions.PluginInfo;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.messaging.locale.Localization;
 import net.kyori.adventure.text.Component;
@@ -26,9 +25,20 @@ public class EFMessageService implements MessageService
 
     private final Localization localization;
 
-    public EFMessageService(FactionsConfig factionsConfig)
-    {
-        this.localization = Localization.forTag(factionsConfig.getLanguageFileName());
+    private static class InstanceHolder {
+        public static EFMessageService INSTANCE = null;
+    }
+
+    public static void init(String langTag) {
+        InstanceHolder.INSTANCE = new EFMessageService(langTag);
+    }
+
+    public static EFMessageService getInstance() {
+        return InstanceHolder.INSTANCE;
+    }
+
+    private EFMessageService(String langTag) {
+        this.localization = Localization.forTag(langTag);
     }
 
     @Override

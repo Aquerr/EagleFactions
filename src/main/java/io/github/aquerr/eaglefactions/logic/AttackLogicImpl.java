@@ -33,7 +33,7 @@ public class AttackLogicImpl implements AttackLogic
     @Override
     public void attack(final ServerPlayer player, final Vector3i attackedChunk)
     {
-        final AttackClaimTask attackClaimTask = new AttackClaimTask(this.factionsConfig, this.factionLogic, this, player, attackedChunk);
+        final AttackClaimTask attackClaimTask = new AttackClaimTask(this.messageService, this.factionsConfig, this.factionLogic, this, player, attackedChunk);
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(attackClaimTask, 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
     }
 
@@ -75,7 +75,7 @@ public class AttackLogicImpl implements AttackLogic
         final List<ServerPlayer> playersList = factionLogic.getOnlinePlayers(faction);
         if (this.factionsConfig.shouldShowAttackedClaim())
         {
-            playersList.forEach(x -> x.sendMessage(messageService.resolveMessageWithPrefix("attack.claim-at-coords-is-being-attacked-by-the-enemy", ParticlesUtil.getChunkCenter(location.world(), location.chunkPosition()).toString())));
+            playersList.forEach(x -> x.sendMessage(messageService.resolveMessageWithPrefix("attack.claim-at-coords-is-being-attacked-by-an-enemy", ParticlesUtil.getChunkCenter(location.world(), location.chunkPosition()).toString())));
         }
         else
         {
