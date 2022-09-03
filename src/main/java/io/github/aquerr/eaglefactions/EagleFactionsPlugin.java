@@ -83,6 +83,7 @@ import io.github.aquerr.eaglefactions.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.entities.vo.FactionName;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
@@ -154,6 +155,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.aquerr.eaglefactions.PluginInfo.PLUGIN_PREFIX_PLAIN;
+import static net.kyori.adventure.text.Component.text;
 
 
 @Plugin(PluginInfo.ID)
@@ -256,6 +258,8 @@ public class EagleFactionsPlugin implements EagleFactions
 
         try
         {
+            preCreateSafeZoneAndWarZone();
+
             registerListeners();
 
             EventRunner.init(Sponge.eventManager());
@@ -291,6 +295,20 @@ public class EagleFactionsPlugin implements EagleFactions
             return;
 
         startFactionsRemover();
+    }
+
+    private void preCreateSafeZoneAndWarZone()
+    {
+        if (this.factionLogic.getFactionByName("WarZone") != null)
+        {
+            final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0)).build();
+            this.factionLogic.addFaction(warzone);
+        }
+        if (this.factionLogic.getFactionByName("SafeZone") != null)
+        {
+            final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0)).build();
+            this.factionLogic.addFaction(safezone);
+        }
     }
 
     @Listener

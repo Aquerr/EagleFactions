@@ -150,7 +150,7 @@ public class InfoCommand extends AbstractCommand
 
         Component info = text()
                 .append(messageService.resolveComponentWithMessage("command.info.name", faction.getName())).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.tag", faction.getTag().color(GOLD))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.tag", faction.getTag())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.last-online", lastOnline(faction))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.description", faction.getDescription())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.motd", faction.getMessageOfTheDay())).append(newline())
@@ -178,7 +178,7 @@ public class InfoCommand extends AbstractCommand
     private Component lastOnline(final Faction faction)
     {
         if(getPlugin().getFactionLogic().hasOnlinePlayers(faction))
-            return messageService.resolveComponentWithMessage("command.info.now");
+            return messageService.resolveComponentWithMessage("command.info.now").color(GREEN);
 
         final Date date = Date.from(faction.getLastOnline());
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -26,12 +26,12 @@ public class AutoMapCommand extends AbstractCommand
         if(EagleFactionsPlugin.AUTO_MAP_LIST.contains(player.uniqueId()))
         {
             EagleFactionsPlugin.AUTO_MAP_LIST.remove(player.uniqueId());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-map.enabled"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-map.disabled"));
         }
         else
         {
             EagleFactionsPlugin.AUTO_MAP_LIST.add(player.uniqueId());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-map.disabled"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-map.enabled"));
         }
 
         return CommandResult.success();

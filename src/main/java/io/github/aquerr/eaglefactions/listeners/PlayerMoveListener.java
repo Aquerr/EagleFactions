@@ -43,12 +43,12 @@ public class PlayerMoveListener extends AbstractListener
         final Vector3d lastLocation = event.originalPosition();
         final Vector3d newLocation = event.destinationPosition();
 
-        if(lastLocation.equals(newLocation))
-            return;
-
         final ServerWorld world = player.world();
         final Vector3i oldChunk = world.chunkAtBlock(lastLocation.toInt()).chunkPosition();
         final Vector3i newChunk = world.chunkAtBlock(newLocation.toInt()).chunkPosition();
+
+        if(oldChunk.equals(newChunk))
+            return;
 
         //TODO: Add checks for safezone, warzone and unclaimable worlds.
 
@@ -116,18 +116,29 @@ public class PlayerMoveListener extends AbstractListener
             EventRunner.runFactionAreaEnterEventPost(event, player, optionalNewChunkFaction, optionalOldChunkFaction);
         }
 
-        //Is there any better way for doing this? :O
-        //I am feeling bad that I needed to write something like this...
+        if ("Wilderness".equals(newChunkFactionName))
+        {
+            EagleFactionsScheduler.getInstance().scheduleWithDelayAsync(() ->
+            {
+                try
+                {
+                    //Check if player has tuned on AutoClaim
+                    if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.uniqueId()))
+                    {
+                        Sponge.server().commandManager().process(player, "f claim");
+                    }
+                }
+                catch (CommandException exception)
+                {
+                    exception.printStackTrace();
+                }
+            }, 50, TimeUnit.MILLISECONDS);
+        }
+
         EagleFactionsScheduler.getInstance().scheduleWithDelayAsync(() ->
         {
             try
             {
-                //Check if player has tuned on AutoClaim
-                if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.uniqueId()))
-                {
-                    Sponge.server().commandManager().process(player, "f claim");
-                }
-
                 //Check if player has turned on AutoMap
                 if (EagleFactionsPlugin.AUTO_MAP_LIST.contains(player.uniqueId()))
                 {

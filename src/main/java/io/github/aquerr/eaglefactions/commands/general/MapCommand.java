@@ -12,6 +12,7 @@ import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.adventure.SpongeComponents;
@@ -57,7 +58,7 @@ public class MapCommand extends AbstractCommand
     public CommandResult execute(final CommandContext context) throws CommandException
     {
         final ServerPlayer player = requirePlayerSource(context);
-        if (this.protectionConfig.getClaimableWorldNames().contains(player.world().key().asString()))
+        if (this.protectionConfig.getClaimableWorldNames().contains(WorldUtil.getPlainWorldName(player.world())))
         {
             generateMap(player);
         }
@@ -250,7 +251,7 @@ public class MapCommand extends AbstractCommand
         //Print factions on map
         if (optionalPlayerFaction.isPresent())
         {
-            player.sendMessage(messageService.resolveComponentWithMessage("command.map.your-faction", optionalPlayerPositionFaction.get().getName()));
+            player.sendMessage(messageService.resolveComponentWithMessage("command.map.your-faction", optionalPlayerFaction.get().getName()));
         }
         if (!normalFactions.isEmpty())
         {

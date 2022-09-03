@@ -7,9 +7,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 /**
  * Eagle Factions Message Service that create messages loaded from language files.
@@ -80,6 +82,14 @@ public class EFMessageService implements MessageService
     @Override
     public TextComponent resolveComponentWithMessage(String messageKey, Object... args)
     {
+        args = Arrays.stream(args)
+                .map(arg -> {
+                    if (arg instanceof Component)
+                    {
+                        return PlainTextComponentSerializer.plainText().serialize((Component) arg);
+                    }
+                    return arg;
+                }).toArray();
         return LegacyComponentSerializer.legacyAmpersand().deserialize(resolveMessage(messageKey, args));
     }
 
