@@ -86,7 +86,7 @@ public class EFMessageService implements MessageService
                 .map(arg -> {
                     if (arg instanceof Component)
                     {
-                        return PlainTextComponentSerializer.plainText().serialize((Component) arg);
+                        return LegacyComponentSerializer.legacyAmpersand().serialize((Component) arg);
                     }
                     return arg;
                 }).toArray();
