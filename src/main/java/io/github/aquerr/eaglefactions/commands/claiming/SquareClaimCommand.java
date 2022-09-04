@@ -7,14 +7,9 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -24,7 +19,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -33,12 +27,14 @@ public class SquareClaimCommand extends AbstractCommand
 {
     private final FactionsConfig factionsConfig;
     private final ProtectionConfig protectionConfig;
+    private final MessageService messageService;
 
     public SquareClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -59,7 +55,7 @@ public class SquareClaimCommand extends AbstractCommand
             {
                 return preformSquareClaim(player, faction, radius);
             }
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_CANNOT_CLAIM_TERRITORIES_IN_THIS_WORLD, NamedTextColor.RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.claim.not-claimable-world");
         }
 
         return preformSquareClaim(player, faction, radius);
@@ -103,12 +99,7 @@ public class SquareClaimCommand extends AbstractCommand
                         continue;
 
                     newFactionClaims.add(new Claim(world.uniqueId(), chunk));
-                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.LAND + " "))
-                            .append(Component.text(chunk.toString(), NamedTextColor.GOLD))
-                            .append(Component.text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", NamedTextColor.WHITE))
-                            .append(Component.text(Messages.CLAIMED, NamedTextColor.GOLD))
-                            .append(Component.text("!")));
-
+                    player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
                     EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
@@ -116,22 +107,21 @@ public class SquareClaimCommand extends AbstractCommand
                 //If not admin then check faction perms for player
                 if (!this.getPlugin().getPermsManager().canClaim(player.uniqueId(), playerFaction))
                 {
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.PLAYERS_WITH_YOUR_RANK_CANT_CLAIM_LANDS, NamedTextColor.RED)));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.players-with-your-rank-cant-claim-lands")));
                     return;
                 }
 
                 //Check if faction has enough power to claim territory
                 if (super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
                 {
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOUR_FACTION_DOES_NOT_HAVE_POWER_TO_CLAIM_MORE_LANDS, NamedTextColor.RED)));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
                     break;
                 }
 
                 //If attacked then It should not be able to claim territories
                 if (EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName()))
                 {
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOUR_FACTION_IS_UNDER_ATTACK + " ", NamedTextColor.RED))
-                            .append(MessageLoader.parseMessage(Messages.YOU_NEED_TO_WAIT_NUMBER_SECONDS_TO_BE_ABLE_TO_CLAIM_AGAIN, NamedTextColor.RED, Collections.singletonMap(Placeholders.NUMBER, Component.text(EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()), NamedTextColor.GOLD)))));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))));
                     break;
                 }
 
@@ -142,11 +132,7 @@ public class SquareClaimCommand extends AbstractCommand
                         continue;
 
                     newFactionClaims.add(new Claim(world.uniqueId(), chunk));
-                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.LAND + " "))
-                            .append(Component.text(chunk.toString(), NamedTextColor.GOLD))
-                            .append(Component.text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " "))
-                            .append(Component.text(Messages.CLAIMED, NamedTextColor.GOLD))
-                            .append(Component.text("!")));
+                    player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
                     EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
@@ -160,16 +146,12 @@ public class SquareClaimCommand extends AbstractCommand
 
                 if(this.factionsConfig.shouldDelayClaim())
                 {
-                    player.sendMessage(Component.text(Messages.CANT_RECTANGLE_CLAIM_IF_DELAYED_CLAIMING_IS_ON));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.cant-square-claim-when-delayed-claiming-is-on")));
                     break;
                 }
 
                 newFactionClaims.add(new Claim(world.uniqueId(), chunk));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.LAND + " "))
-                        .append(Component.text(chunk.toString(), NamedTextColor.GOLD))
-                        .append(Component.text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " "))
-                        .append(Component.text(Messages.CLAIMED, NamedTextColor.GOLD))
-                        .append(Component.text("!")));
+                player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
                 EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
             }
 

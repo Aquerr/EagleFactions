@@ -1,17 +1,14 @@
 package io.github.aquerr.eaglefactions.commands.rank;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.exception.PlayerNotInFactionException;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -24,16 +21,19 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 /**
  * Created by Aquerr on 2018-06-24.
  */
 public class DemoteCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public DemoteCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class DemoteCommand extends AbstractCommand
         final Faction playerFaction = requirePlayerFaction(sourcePlayer);
         super.getPlugin().getFactionLogic().getFactionByPlayerUUID(demotedPlayer.getUniqueId())
                 .filter(faction -> faction.getName().equals(playerFaction.getName()))
-                .orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.THIS_PLAYER_IS_NOT_IN_YOUR_FACTION, RED))));
+                .orElseThrow(() -> messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction"));
 
         return tryDemotePlayer(playerFaction, sourcePlayer, demotedPlayer);
     }
@@ -62,12 +62,12 @@ public class DemoteCommand extends AbstractCommand
         if (hasAdminMode)
         {
             if (targetPlayerMemberType == FactionMemberType.RECRUIT)
-                throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE, RED)));
+                throw messageService.resolveExceptionWithMessage("error.command.demote.you-cant-demote-this-player-more");
 
             else if (targetPlayerMemberType == FactionMemberType.LEADER)
             {
                 super.getPlugin().getRankManager().setLeader(null, faction);
-                sourcePlayer.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(targetPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(Messages.OFFICER, GOLD)))));
+                sourcePlayer.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", targetPlayer.getName(), messageService.resolveComponentWithMessage("rank.officer")));
                 return CommandResult.success();
             }
 
@@ -76,7 +76,7 @@ public class DemoteCommand extends AbstractCommand
 
         List<FactionMemberType> demotableRoles = getDemotableRolesForRole(sourcePlayerMemberType);
         if (!demotableRoles.contains(targetPlayerMemberType))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.demote.you-cant-demote-this-player-more");
 
         return demotePlayer(sourcePlayer, targetPlayer);
     }
@@ -91,12 +91,12 @@ public class DemoteCommand extends AbstractCommand
         if (targetPlayerRole == FactionMemberType.LEADER)
         {
             super.getPlugin().getRankManager().setLeader(null, faction);
-            audience.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(demotedPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(Messages.OFFICER, GOLD)))));
+            audience.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), messageService.resolveComponentWithMessage("rank.officer")));
             return CommandResult.success();
         }
 
         if (targetPlayerRole == FactionMemberType.RECRUIT)
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_CANT_DEMOTE_THIS_PLAYER_MORE, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.demote.you-cant-demote-this-player-more");
 
         FactionMemberType oldRank = demotedPlayer.getFactionRole();
         FactionMemberType demotedTo = null;
@@ -104,7 +104,7 @@ public class DemoteCommand extends AbstractCommand
         {
             demotedTo = super.getPlugin().getRankManager().demotePlayer(null, demotedPlayer);
             if (oldRank != demotedTo) {
-                audience.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(demotedPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(demotedTo.name(), GOLD)))));
+                audience.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), demotedTo.name()));
             }
         }
         catch (PlayerNotInFactionException ignored)
@@ -119,7 +119,7 @@ public class DemoteCommand extends AbstractCommand
         try
         {
             demotedTo = getPlugin().getRankManager().demotePlayer(demotedBy, demotedPlayer);
-            demotedBy.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_DEMOTED_PLAYER_TO_MEMBER_TYPE, GREEN, ImmutableMap.of(Placeholders.PLAYER, text(demotedPlayer.getName(), GOLD), Placeholders.MEMBER_TYPE, text(demotedTo.name(), GOLD)))));
+            demotedBy.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), demotedTo.name()));
         }
         catch (PlayerNotInFactionException ignored)
         {

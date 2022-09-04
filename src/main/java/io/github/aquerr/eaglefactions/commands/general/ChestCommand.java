@@ -1,42 +1,38 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Container;
 
-import java.util.Collections;
 import java.util.Optional;
-
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class ChestCommand extends AbstractCommand
 {
     private final FactionsConfig factionsConfig;
+    private final MessageService messageService;
 
     public ChestCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
         if (!this.factionsConfig.canUseFactionChest())
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.FACTION_CHESTS_ARE_DISABLED, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.chest.chests-are-disabled");
 
         ServerPlayer player = requirePlayerSource(context);
         final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
@@ -58,7 +54,7 @@ public class ChestCommand extends AbstractCommand
 
         if (!super.getPlugin().getPermsManager().canUseChest(player.uniqueId(), faction))
         {
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.PLAYERS_WITH_YOUR_RANK_CANT_OPEN_FACTION_CHEST, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.chest.players-with-your-rank-cant-open-faction-chests");
         }
 
         return open(player, faction);
@@ -78,7 +74,7 @@ public class ChestCommand extends AbstractCommand
         }
         else
         {
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_NEED_TO_TOGGLE_FACTION_ADMIN_MODE_TO_DO_THIS, RED)));
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_ADMIN_MODE_REQUIRED);
         }
     }
 
@@ -97,7 +93,7 @@ public class ChestCommand extends AbstractCommand
         final Optional<Container> optionalContainer = faction.getChest().getInventory().open(player);
         if(optionalContainer.isPresent())
         {
-            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_OPENED_FACTION_CHEST, GREEN, Collections.singletonMap(Placeholders.FACTION_NAME, text(faction.getName(), GOLD)))));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.chest.you-opened-faction-chest"));
         }
     }
 

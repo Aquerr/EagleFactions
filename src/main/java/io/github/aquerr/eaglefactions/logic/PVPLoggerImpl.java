@@ -4,7 +4,7 @@ import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
@@ -30,6 +30,7 @@ public class PVPLoggerImpl implements PVPLogger
     private static PVPLogger INSTANCE = null;
 
     private final PVPLoggerConfig pvpLoggerConfig;
+    private final MessageService messageService;
     private Map<UUID, PVPLoggerObjective> playerPVPLoggerObjectives;
 
     private final boolean isActive;
@@ -49,6 +50,7 @@ public class PVPLoggerImpl implements PVPLogger
     private PVPLoggerImpl(final EagleFactions plugin)
     {
         this.pvpLoggerConfig = plugin.getConfiguration().getPvpLoggerConfig();
+        this.messageService = plugin.getMessageService();
         this.isActive = pvpLoggerConfig.isPVPLoggerActive();
 
         if (this.isActive)
@@ -134,7 +136,7 @@ public class PVPLoggerImpl implements PVPLogger
 
         this.playerPVPLoggerObjectives.put(playerUUID, pvpLoggerObjective);
 
-        player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.PVPLOGGER_HAS_TURNED_ON + " " + Messages.YOU_WILL_DIE_IF_YOU_DISCONNECT_IN + " " + getBlockTime() + " " + Messages.SECONDS + "!", RED)));
+        player.sendMessage(messageService.resolveMessageWithPrefix("pvplogger.pvp-logger-has-truned-on-you-will-die-if-you-disconnect", getBlockTime()));
 
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(task ->
                 {
@@ -143,7 +145,7 @@ public class PVPLoggerImpl implements PVPLogger
                         PVPLoggerObjective loggerObjective = this.playerPVPLoggerObjectives.get(playerUUID);
                         if (loggerObjective.getSeconds() <= 0)
                         {
-                            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.PVPLOGGER_HAS_TURNED_OFF + " " + Messages.YOU_CAN_NOW_DISCONNECT_SAFELY, GREEN)));
+                            player.sendMessage(messageService.resolveMessageWithPrefix("pvplogger.pvp-logger-has-turned-off-you-can-disconnect-sefely"));
                             removePlayer(player);
                             task.cancel();
                             return;

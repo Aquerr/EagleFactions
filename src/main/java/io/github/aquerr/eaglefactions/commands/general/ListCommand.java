@@ -2,28 +2,30 @@ package io.github.aquerr.eaglefactions.commands.general;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.service.pagination.PaginationList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ListCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public ListCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -49,14 +51,14 @@ public class ListCommand extends AbstractCommand
                                 .append(tag)
                                 .append(Component.text(faction.getName() + " (" + getPlugin().getPowerManager().getFactionPower(faction) + "/" + getPlugin().getPowerManager().getFactionMaxPower(faction) + ")")))
                         .clickEvent(ClickEvent.runCommand("/f info " + faction.getName()))
-                        .hoverEvent(Component.text("Click", Style.style().decoration(TextDecoration.ITALIC, true).color(NamedTextColor.BLUE).build()).append(Component.text(" for more info...", Style.style().decoration(TextDecoration.ITALIC, true).build())));
+                        .hoverEvent(messageService.resolveComponentWithMessage("command.list.faction-list.click-for-more-info"));
 
                 helpList.add(factionHelp);
             }
 
             PaginationList.Builder paginationBuilder = PaginationList.builder()
-                    .title(Component.text(Messages.FACTIONS_LIST, NamedTextColor.GREEN))
-                    .padding(Component.text("-"))
+                    .title(messageService.resolveComponentWithMessage("command.list.faction-list.header"))
+                    .padding(messageService.resolveComponentWithMessage("command.list.faction-list.padding-character"))
                     .contents(helpList.toArray(new Component[0]));
             paginationBuilder.sendTo(context.cause().audience());
         });

@@ -78,7 +78,7 @@ public final class PluginPermissions
 
     public static final String SET_POWER_COMMAND = "eaglefactions.admin.setpower";
     public static final String MAX_POWER_COMMAND = "eaglefactions.admin.maxpower";
-    public static final String MAX_POWER_FOR_ALL_COMMAND = "eaglefactions.admin.maxpowerforall";
+    public static final String MAX_POWER_FOR_EVERYONE_COMMAND = "eaglefactions.admin.maxpowerforeveryone";
 
     public static final String FEATHER_COMMAND = "eaglefactions.admin.feather";
 

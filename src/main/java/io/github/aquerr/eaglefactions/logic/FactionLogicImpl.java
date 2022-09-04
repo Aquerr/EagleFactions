@@ -3,17 +3,21 @@ package io.github.aquerr.eaglefactions.logic;
 import com.google.common.base.Preconditions;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
-import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionChest;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
 import io.github.aquerr.eaglefactions.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
@@ -28,14 +32,21 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Created by Aquerr on 2017-07-12.
@@ -47,12 +58,14 @@ public class FactionLogicImpl implements FactionLogic
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
+    private final MessageService messageService;
 
-    public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig)
+    public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig, final MessageService messageService)
     {
         this.storageManager = storageManager;
         this.playerManager = playerManager;
         this.factionsConfig = factionsConfig;
+        this.messageService = messageService;
     }
 
     @Override
@@ -169,7 +182,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction factionToDisband = this.storageManager.getFaction(factionName);
 
-        Preconditions.checkNotNull(factionToDisband, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), factionName));
+        Preconditions.checkNotNull(factionToDisband, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", factionName));
 
         //Update players...
         CompletableFuture.runAsync(() -> {
@@ -213,7 +226,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction faction = getFactionByName(factionName);
 
-        checkNotNull(faction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), factionName));
+        checkNotNull(faction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", factionName));
 
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
@@ -333,8 +346,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
 
-        checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
-        checkNotNull(invitedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), invitedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
+        checkNotNull(invitedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", invitedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
         final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getTruces());
@@ -358,8 +371,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
 
-        checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
-        checkNotNull(removedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), removedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
+        checkNotNull(removedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", removedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
         final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getTruces());
@@ -386,8 +399,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
 
-        checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
-        checkNotNull(invitedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), invitedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
+        checkNotNull(invitedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", invitedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
         final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getAlliances());
@@ -411,8 +424,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
 
-        checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
-        checkNotNull(removedFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), removedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
+        checkNotNull(removedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", removedFactionName));
 
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
@@ -437,8 +450,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
 
-        checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
-        checkNotNull(enemyFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), enemyFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
+        checkNotNull(enemyFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", enemyFactionName));
 
         final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
         final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
@@ -462,8 +475,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
 
-        checkNotNull(playerFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), playerFactionName));
-        checkNotNull(enemyFaction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), enemyFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
+        checkNotNull(enemyFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", enemyFactionName));
 
         final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
         final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
@@ -722,7 +735,7 @@ public class FactionLogicImpl implements FactionLogic
         Validate.notBlank(factionName);
 
         final Faction faction = getFactionByName(factionName);
-        checkNotNull(faction, Messages.THERE_IS_NO_FACTION_CALLED_FACTION_NAME.replace(Placeholders.FACTION_NAME.getPlaceholder(), factionName));
+        checkNotNull(faction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", factionName));
 
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
@@ -774,8 +787,7 @@ public class FactionLogicImpl implements FactionLogic
 
         if(this.factionsConfig.shouldDelayClaim())
         {
-            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.STAY_IN_THE_CHUNK_FOR_NUMBER_SECONDS_TO_CLAIM_IT, GREEN,
-                    Collections.singletonMap(Placeholders.NUMBER, text(this.factionsConfig.getClaimDelay(), GOLD)))));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.stay-in-the-chunk-for-number-of-seconds-to-claim-it", this.factionsConfig.getClaimDelay()));
             EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunkPosition), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
         }
         else
@@ -784,13 +796,13 @@ public class FactionLogicImpl implements FactionLogic
             {
                 boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunkPosition);
                 if(didSucceed)
-                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
+                    player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
                 else
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CLAIM_A_TERRITORY, RED)));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources")));
             }
             else
             {
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.LAND + " ")).append(text(chunkPosition.toString(), GOLD)).append(text(" " + Messages.HAS_BEEN_SUCCESSFULLY + " ", WHITE)).append(text(Messages.CLAIMED, GOLD)).append(text("!", WHITE)));
+                player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
                 addClaim(faction, new Claim(worldUUID, chunkPosition));
             }
             EventRunner.runFactionClaimEventPost(player, faction, player.world(), chunkPosition);
@@ -813,7 +825,7 @@ public class FactionLogicImpl implements FactionLogic
         }
         catch (RequiredItemsNotFoundException e)
         {
-            player.sendMessage(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_DONT_HAVE_ENOUGH_RESOURCES_TO_CREATE_A_FACTION + " Required items: " + e.buildAllRequiredItemsMessage(), RED)));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources", e.buildAllRequiredItemsMessage())));
             return false;
         }
     }

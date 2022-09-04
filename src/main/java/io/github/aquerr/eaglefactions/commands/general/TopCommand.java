@@ -2,8 +2,8 @@ package io.github.aquerr.eaglefactions.commands.general;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -17,13 +17,15 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
 public class TopCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public TopCommand(EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -58,8 +60,8 @@ public class TopCommand extends AbstractCommand
             }
 
             final PaginationList.Builder paginationBuilder = PaginationList.builder()
-                    .title(text(Messages.FACTIONS_LIST, GREEN))
-                    .padding(text("-"))
+                    .title(messageService.resolveComponentWithMessage("command.top.header"))
+                    .padding(messageService.resolveComponentWithMessage("command.top.padding-character"))
                     .contents(helpList);
             paginationBuilder.sendTo(context.cause().audience());
         });

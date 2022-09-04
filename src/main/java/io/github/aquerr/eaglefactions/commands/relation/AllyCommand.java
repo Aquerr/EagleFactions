@@ -1,34 +1,29 @@
 package io.github.aquerr.eaglefactions.commands.relation;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 public class AllyCommand extends AbstractCommand
 {
 	private final InvitationManager invitationManager;
+	private final MessageService messageService;
 
     public AllyCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.invitationManager = plugin.getInvitationManager();
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -41,12 +36,12 @@ public class AllyCommand extends AbstractCommand
 		if (allyRequest != null) // Accept if request exists
 		{
 			allyRequest.accept();
-			player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_HAVE_ACCEPTED_AN_INVITATION_FROM_FACTION, GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Component.text(selectedFaction.getName(), GOLD)))));
+			player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-accepted-invitation-from-faction", selectedFaction.getName()));
 		}
 		else // Invite if request does not exist
 		{
 			if (findAllyRequest(playerFaction, selectedFaction) != null)
-				throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_HAVE_ALREADY_INVITED_THIS_FACTION_TO_THE_ALLIANCE, RED)));
+				throw messageService.resolveExceptionWithMessage("error.relations.you-have-already-invited-this-faction-to-the-alliance");
 			sendInvite(player, playerFaction, selectedFaction);
 		}
         return CommandResult.success();

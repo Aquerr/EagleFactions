@@ -37,7 +37,7 @@ public class BackupStorage
         this.playerStorage = playerStorage;
     }
 
-    public boolean createBackup()
+    public Path createBackup()
     {
         try
         {
@@ -80,7 +80,8 @@ public class BackupStorage
             }
 
             // Now when factions and players are ready, we can move them into a zip file.
-            FileOutputStream fileOutputStream = new FileOutputStream(backupDirPath.toAbsolutePath().toString() + ".zip");
+            Path backupPath = backupDirPath.toAbsolutePath().resolve(".zip");
+            FileOutputStream fileOutputStream = new FileOutputStream(backupPath.toFile());
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
             ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
             File file = backupDirPath.toFile();
@@ -94,12 +95,12 @@ public class BackupStorage
             //Delete temp files
             deleteDirectoryRecursive(backupDirPath.toFile());
 
-            return true;
+            return backupPath;
         }
         catch (final Exception e)
         {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 

@@ -1,18 +1,15 @@
 package io.github.aquerr.eaglefactions.commands.backup;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
-
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 /**
  * Command used for making backups of Eagle Factions data.
@@ -20,9 +17,12 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
  */
 public class BackupCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public BackupCommand(EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -33,15 +33,15 @@ public class BackupCommand extends AbstractCommand
 
         //We run it async so that It does not freeze the server.
         CompletableFuture.runAsync(() ->{
-            context.sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(text("Creating a backup...")));
-            final boolean result = super.getPlugin().getStorageManager().createBackup();
-            if (result)
+            context.sendMessage(Identity.nil(), messageService.resolveMessageWithPrefix("command.backup.create.start"));
+            final Path backupPath = super.getPlugin().getStorageManager().createBackup();
+            if (backupPath != null)
             {
-                context.sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(text("Backup has been successfully created!", GREEN)));
+                context.sendMessage(Identity.nil(), messageService.resolveMessageWithPrefix("command.backup.create.success", backupPath.getFileName().toString()));
             }
             else
             {
-                context.sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(text("Something went wrong during creation of backup. Check your server log file for more details.", RED)));
+                context.sendMessage(Identity.nil(), messageService.resolveMessageWithPrefix("command.backup.create.error"));
             }
         });
 

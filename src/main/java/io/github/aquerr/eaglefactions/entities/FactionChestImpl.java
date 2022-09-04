@@ -13,9 +13,12 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import static java.util.Optional.ofNullable;
 
 public class FactionChestImpl implements FactionChest
 {
@@ -65,9 +68,10 @@ public class FactionChestImpl implements FactionChest
     @Override
     public List<SlotItem> getItems()
     {
-        if(this.inventorySupplier == null)
-            return new ArrayList<>();
-        return toSlotItems(this.inventorySupplier.get().inventory());
+        return ofNullable(this.inventorySupplier.get())
+                .map(InventoryMenu::inventory)
+                .map(this::toSlotItems)
+                .orElse(Collections.emptyList());
     }
 
     @Override
@@ -104,22 +108,24 @@ public class FactionChestImpl implements FactionChest
         for(final Inventory slot : inventoryMenu.inventory().slots())
         {
             ItemStack itemStack = getAtPosition(slotItems, row, column);
-            if(itemStack != null)
+            if (itemStack != null)
                 slot.offer(itemStack);
 
             column++;
-            if(column > 9)
+            if (column > 9)
             {
                 column = 1;
                 row++;
             }
         }
-
         return inventoryMenu;
     }
 
     private List<SlotItem> toSlotItems(final Inventory inventory)
     {
+        if (inventory == null)
+            return Collections.emptyList();
+
         final List<FactionChest.SlotItem> slotItemList = new ArrayList<>();
         final List<Slot> slots = inventory.slots();
         int column = 1;

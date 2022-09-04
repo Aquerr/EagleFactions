@@ -4,7 +4,8 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -27,11 +28,13 @@ public class OwnFactionPlayerArgument
     {
         private final FactionLogic factionLogic;
         private final PlayerManager playerManager;
+        private final MessageService messageService;
 
-        public ValueParser(FactionLogic factionLogic, PlayerManager playerManager)
+        public ValueParser(MessageService messageService, FactionLogic factionLogic, PlayerManager playerManager)
         {
             this.factionLogic = factionLogic;
             this.playerManager = playerManager;
+            this.messageService = messageService;
         }
 
         @Override
@@ -42,7 +45,7 @@ public class OwnFactionPlayerArgument
             {
                 UUID playerUUID = serverPlayer.uniqueId();
                 final Faction faction = this.factionLogic.getFactionByPlayerUUID(playerUUID)
-                        .orElseThrow(() -> reader.createException(Component.text(Messages.YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND)));
+                        .orElseThrow(() -> reader.createException(Component.text(messageService.resolveMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY))));
 
                 final List<FactionPlayer> factionPlayers = new LinkedList<>();
                 for (final UUID uuid : faction.getPlayers())

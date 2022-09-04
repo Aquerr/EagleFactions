@@ -3,8 +3,8 @@ package io.github.aquerr.eaglefactions.commands.general;
 import com.google.common.collect.Lists;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -23,15 +23,16 @@ import java.util.List;
 import java.util.Map;
 
 import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 
 public class HelpCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public HelpCommand(EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class HelpCommand extends AbstractCommand
                     .append(Component.empty()
                             .append(Component.text(" - ").append(command.getValue().shortDescription(CommandCause.create()).get().append(Component.newline())).color(WHITE)))
                     .append(Component.empty()
-                            .append(Component.text(Messages.USAGE + " /f " + String.join(", ", command.getKey()) + " " + getParameters(command.getValue()), GRAY)));
+                            .append(messageService.resolveComponentWithMessage("command.info.usage").append(Component.text(" /f " + String.join(", ", command.getKey()) + " " + getParameters(command.getValue())))));
             helpList.add(commandHelp);
         }
 
@@ -60,8 +61,8 @@ public class HelpCommand extends AbstractCommand
         helpList.sort(Comparator.comparing(o -> PlainTextComponentSerializer.plainText().serialize(o)));
 
         PaginationList.Builder paginationBuilder = Sponge.serviceProvider().paginationService().builder();
-        paginationBuilder.title(Component.text(Messages.EAGLEFACTIONS_COMMAND_LIST, GREEN))
-            .padding(Component.text("-"))
+        paginationBuilder.title(messageService.resolveComponentWithMessage("command.help.header"))
+            .padding(messageService.resolveComponentWithMessage("command.help.padding-character"))
             .contents(helpList.toArray(new Component[0]))
             .linesPerPage(10);
         paginationBuilder.build().sendTo(context.cause().audience(), pageNumber);

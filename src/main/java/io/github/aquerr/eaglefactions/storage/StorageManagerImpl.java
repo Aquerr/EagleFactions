@@ -220,7 +220,7 @@ public class StorageManagerImpl implements StorageManager
     }
 
     @Override
-    public boolean createBackup()
+    public Path createBackup()
     {
         return this.backupStorage.createBackup();
     }

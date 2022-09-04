@@ -1,35 +1,29 @@
 package io.github.aquerr.eaglefactions.commands.relation;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
-import io.github.aquerr.eaglefactions.messaging.MessageLoader;
-import io.github.aquerr.eaglefactions.messaging.Messages;
-import io.github.aquerr.eaglefactions.messaging.Placeholders;
-import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-
 public class EnemyCommand extends AbstractCommand
 {
     private InvitationManager invitationManager;
+    private MessageService messageService;
 
     public EnemyCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.invitationManager = plugin.getInvitationManager();
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -42,7 +36,7 @@ public class EnemyCommand extends AbstractCommand
         if (armisticeRequest != null)
         {
             armisticeRequest.accept();
-            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(MessageLoader.parseMessage(Messages.YOU_HAVE_ACCEPTED_ARMISTICE_REQUEST_FROM_FACTION, GREEN, ImmutableMap.of(Placeholders.FACTION_NAME, Component.text(enemyFaction.getName(), GOLD)))));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-accepted-armistice-request-from-faction", enemyFaction.getName()));
         }
         else
         {

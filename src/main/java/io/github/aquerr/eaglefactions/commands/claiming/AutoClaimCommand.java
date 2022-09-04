@@ -1,25 +1,24 @@
 package io.github.aquerr.eaglefactions.commands.claiming;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
 public class AutoClaimCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public AutoClaimCommand(EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -29,17 +28,17 @@ public class AutoClaimCommand extends AbstractCommand
         final Faction faction = requirePlayerFaction(player);
 
         if (!faction.getLeader().equals(player.uniqueId()) && !faction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS, RED)));
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
         if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.uniqueId()))
         {
             EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(player.uniqueId());
-            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.AUTO_CLAIM_HAS_BEEN_TURNED_OFF, GREEN)));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-claim.disabled"));
         }
         else
         {
             EagleFactionsPlugin.AUTO_CLAIM_LIST.add(player.uniqueId());
-            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text(Messages.AUTO_CLAIM_HAS_BEEN_TURNED_ON, GREEN)));
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.auto-claim.enabled"));
         }
 
         return CommandResult.success();

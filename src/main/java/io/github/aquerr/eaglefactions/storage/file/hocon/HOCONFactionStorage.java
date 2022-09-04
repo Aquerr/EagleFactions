@@ -46,7 +46,6 @@ public class HOCONFactionStorage implements FactionStorage
             try
             {
                 Files.createDirectory(this.factionsDir);
-                preCreate();
             }
             catch (IOException e)
             {
@@ -75,20 +74,6 @@ public class HOCONFactionStorage implements FactionStorage
         catch (final IOException e)
         {
             e.printStackTrace();
-        }
-    }
-
-    private void preCreate()
-    {
-        if (!this.factionLoaders.containsKey(FactionName.of("warzone")))
-        {
-            final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0)).build();
-            saveFaction(warzone);
-        }
-        if (!this.factionLoaders.containsKey(FactionName.of("safezone")))
-        {
-            final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0)).build();
-            saveFaction(safezone);
         }
     }
 

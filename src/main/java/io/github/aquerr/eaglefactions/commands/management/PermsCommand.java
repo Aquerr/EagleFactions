@@ -1,12 +1,11 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.messaging.Messages;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -21,13 +20,18 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class PermsCommand extends AbstractCommand
 {
+    private final MessageService messageService;
+
     public PermsCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.messageService = plugin.getMessageService();
     }
 
     @Override
@@ -36,7 +40,7 @@ public class PermsCommand extends AbstractCommand
         final ServerPlayer player = requirePlayerSource(context);
         final Faction faction = requirePlayerFaction(player);
         if(!faction.getLeader().equals(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
-            throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text(Messages.YOU_MUST_BE_THE_FACTIONS_LEADER_TO_DO_THIS, RED)));
+            throw messageService.resolveExceptionWithMessage("error.command.perms.leader-required");
 
         showPerms(player, faction);
         return CommandResult.success();
@@ -64,7 +68,7 @@ public class PermsCommand extends AbstractCommand
                 }
 
                 permTextBuilder.clickEvent(SpongeComponents.executeCallback((commandCause) -> togglePerm(faction, memberEntry.getKey(), permEntry.getKey(), !permEntry.getValue())));
-                permTextBuilder.hoverEvent(HoverEvent.showText(Component.text(Messages.SET_TO + " " + String.valueOf(!permEntry.getValue()).toUpperCase())));
+                permTextBuilder.hoverEvent(HoverEvent.showText(messageService.resolveComponentWithMessage("command.perms.set-to", String.valueOf(!permEntry.getValue()).toUpperCase())));
 
                 textBuilder.append(permTextBuilder.build());
                 textBuilder.append(Component.text(" | "));
@@ -73,9 +77,9 @@ public class PermsCommand extends AbstractCommand
             textBuilder.append(Component.newline());
         }
 
-        audience.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(Messages.CLICK_ON_THE_PERMISSION_YOU_WANT_TO_CHANGE)));
-        audience.sendMessage(Component.text("RED", RED).append(Component.text(" = " + Messages.HAS_NOT_PERMISSIONS_FOR, WHITE)));
-        audience.sendMessage(Component.text("GREEN", GREEN).append(Component.text(" = " + Messages.HAS_PERMISSIONS_FOR, WHITE)));
+        audience.sendMessage(messageService.resolveMessageWithPrefix("command.perms.click-permission-you-want-to-change"));
+        audience.sendMessage(messageService.resolveComponentWithMessage("command.perms.red-has-not-permission"));
+        audience.sendMessage(messageService.resolveComponentWithMessage("command.perms.green-has-permission"));
         audience.sendMessage(Component.text("=============================="));
         audience.sendMessage(textBuilder.build());
     }
