@@ -258,8 +258,6 @@ public class EagleFactionsPlugin implements EagleFactions
 
         try
         {
-            preCreateSafeZoneAndWarZone();
-
             registerListeners();
 
             EventRunner.init(Sponge.eventManager());
@@ -295,6 +293,8 @@ public class EagleFactionsPlugin implements EagleFactions
             return;
 
         startFactionsRemover();
+
+        preCreateSafeZoneAndWarZone();
     }
 
     private void preCreateSafeZoneAndWarZone()
