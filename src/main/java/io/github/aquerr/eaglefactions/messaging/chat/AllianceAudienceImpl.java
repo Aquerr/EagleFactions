@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class AllianceAudienceImpl implements AllianceAudience
 {
 	private final Set<Faction> factions;
-	private final List<Audience> audiences;
+	private final Set<Audience> audiences;
 
 	public static AllianceAudienceImpl forFaction(final Faction faction)
 	{
@@ -44,7 +44,7 @@ public class AllianceAudienceImpl implements AllianceAudience
 	public AllianceAudienceImpl(final Set<Faction> factions)
 	{
 		super();
-		this.audiences = new ArrayList<>();
+		this.audiences = new HashSet<>();
 		this.factions = Collections.unmodifiableSet(factions);
 		registerReceivers();
 	}
@@ -63,7 +63,7 @@ public class AllianceAudienceImpl implements AllianceAudience
 			}
 		}
 
-		addAudience(Sponge.server());
+		addAudience(Sponge.systemSubject());
 		getAdminReceivers().forEach(this::addAudience);
 	}
 

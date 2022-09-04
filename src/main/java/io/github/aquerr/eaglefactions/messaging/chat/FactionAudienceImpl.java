@@ -11,14 +11,16 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class FactionAudienceImpl implements FactionAudience
 {
 	private final Faction faction;
-	private final List<Audience> audiences;
+	private final Set<Audience> audiences;
 
 	public static FactionAudienceImpl forFaction(final Faction faction)
 	{
@@ -29,7 +31,7 @@ public class FactionAudienceImpl implements FactionAudience
 	public FactionAudienceImpl(final Faction faction)
 	{
 		super();
-		this.audiences = new ArrayList<>();
+		this.audiences = new HashSet<>();
 		this.faction = faction;
 		registerReceivers();
 	}
@@ -47,7 +49,7 @@ public class FactionAudienceImpl implements FactionAudience
 		{
 			addAudience(player);
 		}
-		addAudience(Sponge.server());
+		addAudience(Sponge.systemSubject());
 		getAdminReceivers().forEach(this::addAudience);
 	}
 
