@@ -299,12 +299,12 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void preCreateSafeZoneAndWarZone()
     {
-        if (this.factionLogic.getFactionByName("WarZone") != null)
+        if (this.factionLogic.getFactionByName("WarZone") == null)
         {
             final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0)).build();
             this.factionLogic.addFaction(warzone);
         }
-        if (this.factionLogic.getFactionByName("SafeZone") != null)
+        if (this.factionLogic.getFactionByName("SafeZone") == null)
         {
             final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0)).build();
             this.factionLogic.addFaction(safezone);
