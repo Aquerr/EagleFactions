@@ -88,11 +88,13 @@ blossom {
 
 dependencies {
     api(project(":EagleFactionsAPI"))
-    compileOnlyApi("org.mariadb.jdbc:mariadb-java-client:2.6.0")
-    compileOnlyApi("com.zaxxer:HikariCP:2.6.3")
-    compileOnlyApi("com.h2database:h2:1.4.196")
-    compileOnlyApi("org.xerial:sqlite-jdbc:3.20.0")
-    compileOnlyApi("com.github.webbukkit:DynmapCoreAPI:v2.5")
+//    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
+    compileOnly("org.mariadb.jdbc:mariadb-java-client:2.0.3")
+    compileOnly("com.zaxxer:HikariCP:2.6.3")
+    compileOnly("com.h2database:h2:1.4.196")
+    compileOnly("org.xerial:sqlite-jdbc:3.20.0")
+    compileOnly("com.github.webbukkit:DynmapCoreAPI:v2.5")
+//    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:8.1.0")
