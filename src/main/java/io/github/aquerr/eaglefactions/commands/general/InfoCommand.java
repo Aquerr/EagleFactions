@@ -178,7 +178,7 @@ public class InfoCommand extends AbstractCommand
     private Component lastOnline(final Faction faction)
     {
         if(getPlugin().getFactionLogic().hasOnlinePlayers(faction))
-            return messageService.resolveComponentWithMessage("command.info.now").color(GREEN);
+            return messageService.resolveComponentWithMessage("command.info.now");
 
         final Date date = Date.from(faction.getLastOnline());
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

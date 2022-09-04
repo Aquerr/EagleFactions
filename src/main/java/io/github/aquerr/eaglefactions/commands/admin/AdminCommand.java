@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands.admin;
 
+import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
@@ -22,15 +23,22 @@ public class AdminCommand extends AbstractCommand
     public CommandResult execute(final CommandContext context) throws CommandException
     {
         final ServerPlayer player = requirePlayerSource(context);
-        if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+        if (player.hasPermission(PluginPermissions.CONSTANT_ADMIN_MODE))
         {
-            super.getPlugin().getPlayerManager().deactivateAdminMode(player.user());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.disabled"));
+            player.sendMessage(messageService.resolveMessageWithPrefix("error.command.admin.cant-disable-because-of-constant-admin-permission"));
         }
         else
         {
-            super.getPlugin().getPlayerManager().activateAdminMode(player.user());
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.enabled"));
+            if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+            {
+                super.getPlugin().getPlayerManager().deactivateAdminMode(player.user());
+                player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.disabled"));
+            }
+            else
+            {
+                super.getPlugin().getPlayerManager().activateAdminMode(player.user());
+                player.sendMessage(messageService.resolveMessageWithPrefix("command.admin.enabled"));
+            }
         }
         return CommandResult.success();
     }
