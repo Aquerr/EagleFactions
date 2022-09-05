@@ -11,6 +11,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -19,6 +20,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static io.github.aquerr.eaglefactions.util.FileUtils.createDirectoryIfNotExists;
+import static io.github.aquerr.eaglefactions.util.FileUtils.createFileIfNotExists;
 import static io.github.aquerr.eaglefactions.util.FileUtils.deleteDirectoryRecursive;
 import static io.github.aquerr.eaglefactions.util.FileUtils.getFileNameWithoutExtension;
 
@@ -55,7 +57,7 @@ public class BackupStorage
             for (final Faction faction : factions)
             {
                 final Path factionFilePath = factionsDir.resolve(faction.getName().toLowerCase() + ".conf");
-//                createFileIfNotExists(factionFilePath, false);
+                createFileIfNotExists(factionFilePath);
                 final HoconConfigurationLoader configurationLoader = HoconConfigurationLoader.builder()
                         .defaultOptions(ConfigurateHelper.getDefaultOptions())
                         .path(factionFilePath)
@@ -70,7 +72,7 @@ public class BackupStorage
             for (final FactionPlayer factionPlayer : players)
             {
                 final Path playerFile = playersDir.resolve(factionPlayer.getUniqueId().toString() + ".conf");
-//                createFileIfNotExists(playerFile, false);
+                createFileIfNotExists(playerFile);
                 final HoconConfigurationLoader playerConfigLoader = HoconConfigurationLoader.builder()
                         .path(playerFile)
                         .build();
@@ -80,7 +82,7 @@ public class BackupStorage
             }
 
             // Now when factions and players are ready, we can move them into a zip file.
-            Path backupPath = backupDirPath.toAbsolutePath().resolve(".zip");
+            Path backupPath = backupDirPath.toAbsolutePath().resolveSibling(backupDirPath.getFileName() + ".zip");
             FileOutputStream fileOutputStream = new FileOutputStream(backupPath.toFile());
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
             ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
@@ -154,7 +156,7 @@ public class BackupStorage
         // Load data from backup
         final Path backupTempDirectory = destPath.resolve(getFileNameWithoutExtension(backupName));
         final Path factionsDirPath = backupTempDirectory.resolve("factions");
-//        createFileIfNotExists(factionsDirPath, true);
+        createDirectoryIfNotExists(factionsDirPath);
         final File factionsDir = factionsDirPath.toFile();
         final File[] factionsFiles = factionsDir.listFiles();
         final List<Faction> factions = new ArrayList<>();
@@ -181,7 +183,7 @@ public class BackupStorage
 
         final List<FactionPlayer> players = new ArrayList<>();
         final Path playersDirPath = backupTempDirectory.resolve("players");
-//        createFileIfNotExists(playersDirPath, true);
+        createDirectoryIfNotExists(playersDirPath);
         final File playersDir = playersDirPath.toFile();
         final File[] playerFiles = playersDir.listFiles();
         if (playerFiles != null)
