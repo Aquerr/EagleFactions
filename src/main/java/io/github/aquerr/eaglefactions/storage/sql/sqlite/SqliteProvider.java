@@ -53,7 +53,7 @@ public class SqliteProvider extends SQLAbstractProvider
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName() + ".db");
         final SqlManager sqlManager = Sponge.sqlManager();
-        this.dataSource = sqlManager.dataSource("jdbc:sqlite://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
+        this.dataSource = sqlManager.dataSource("jdbc:sqlite:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
         final Connection connection = getConnection();
         connection.close();
     }
