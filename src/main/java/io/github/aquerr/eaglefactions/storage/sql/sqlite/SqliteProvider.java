@@ -41,6 +41,15 @@ public class SqliteProvider extends SQLAbstractProvider
     private SqliteProvider(final EagleFactions eagleFactions) throws SQLException
     {
         super(eagleFactions);
+        try
+        {
+            Class.forName("org.sqlite.JDBC");
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new IllegalStateException("Could not register SQLite Driver.", e);
+        }
+
         final Path databaseDir = eagleFactions.getConfigDir().resolve("data/sqlite");
         try
         {
@@ -49,7 +58,7 @@ public class SqliteProvider extends SQLAbstractProvider
         catch (IOException exception)
         {
             exception.printStackTrace();
-            throw new RuntimeException(exception);
+            throw new IllegalStateException(exception);
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName() + ".db");
         final SqlManager sqlManager = Sponge.sqlManager();

@@ -179,10 +179,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private List<Path> getSqlFilesPaths() throws URISyntaxException, IOException
     {
         final List<Path> filePaths = new ArrayList<>();
-        final URL url = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
-        if (url != null)
+        final URI uri = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
+        if (uri != null)
         {
-            final URI uri = url.toURI();
             Path myPath;
             if (uri.getScheme().equals("jar"))
             {

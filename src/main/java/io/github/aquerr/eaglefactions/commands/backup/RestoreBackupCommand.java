@@ -37,7 +37,7 @@ public class RestoreBackupCommand extends AbstractCommand
             }
             else
             {
-                context.sendMessage(Identity.nil(), messageService.resolveMessageWithPrefix("command.backup.restore.success"));
+                context.sendMessage(Identity.nil(), messageService.resolveMessageWithPrefix("command.backup.restore.error"));
             }
         });
 

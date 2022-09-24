@@ -83,7 +83,6 @@ import io.github.aquerr.eaglefactions.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
-import io.github.aquerr.eaglefactions.entities.vo.FactionName;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
@@ -141,7 +140,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-import java.net.URL;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -523,9 +522,10 @@ public class EagleFactionsPlugin implements EagleFactions
         return new FactionPlayerImpl(playerName, uniqueId, factionName, power, maxpower, diedInWarZone);
     }
 
-    public URL getResource(final String fileName)
+    public URI getResource(final String fileName)
     {
-        return this.getClass().getResource(fileName);
+        return this.getPluginContainer().locateResource(URI.create(fileName))
+                .orElse(null);
     }
 
     public void printInfo(final String message)
