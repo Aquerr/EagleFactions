@@ -6,22 +6,32 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
+import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionMaxPowerProvider;
+import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionPowerProvider;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.PowerIncrementTask;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static io.github.aquerr.eaglefactions.util.MathUtil.round;
 
 @Singleton
 public class PowerManagerImpl implements PowerManager
 {
+    private final Set<FactionMaxPowerProvider> factionMaxPowerProviders = new HashSet<>();
+    private final Set<FactionPowerProvider> factionPowerProviders = new HashSet<>();
+
     private final PlayerManager playerManager;
     private final PowerConfig powerConfig;
 
-    private final UUID dummyUUID = new UUID(0, 0);
+    private static final UUID dummyUUID = new UUID(0, 0);
 
     public PowerManagerImpl(final PlayerManager playerManager, final PowerConfig powerConfig)
     {
@@ -30,10 +40,41 @@ public class PowerManagerImpl implements PowerManager
     }
 
     @Override
-    public int getFactionMaxClaims(final Faction faction)
+    public void addFactionPowerProvider(FactionPowerProvider provider)
     {
-        float power = getFactionPower(faction);
-        return (int)power;
+        this.factionPowerProviders.add(provider);
+    }
+
+    @Override
+    public void addFactionMaxPowerProvider(FactionMaxPowerProvider provider)
+    {
+        this.factionMaxPowerProviders.add(provider);
+    }
+
+    @Override
+    public void setFactionPowerProviders(Set<FactionPowerProvider> providers)
+    {
+        this.factionPowerProviders.clear();
+        this.factionPowerProviders.addAll(providers);
+    }
+
+    @Override
+    public void setFactionMaxPowerProviders(Set<FactionMaxPowerProvider> providers)
+    {
+        this.factionMaxPowerProviders.clear();
+        this.factionMaxPowerProviders.addAll(providers);
+    }
+
+    @Override
+    public Set<FactionPowerProvider> getFactionPowerProviders()
+    {
+        return Collections.unmodifiableSet(this.factionPowerProviders);
+    }
+
+    @Override
+    public Set<FactionMaxPowerProvider> getFactionMaxPowerProviders()
+    {
+        return Collections.unmodifiableSet(this.factionMaxPowerProviders);
     }
 
     @Override
@@ -49,80 +90,23 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public float getFactionPower(final Faction faction)
     {
-        if(faction.isSafeZone() || faction.isWarZone())
-            return 9999.0f;
-
-        float factionPower = 0;
-        if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
+        float power = 0;
+        for (final FactionPowerProvider factionPowerProvider : this.factionPowerProviders)
         {
-            factionPower = factionPower + getPlayerPower(faction.getLeader());
+            power = power + factionPowerProvider.getFactionPower(faction);
         }
-        if(faction.getOfficers() != null && !faction.getOfficers().isEmpty())
-        {
-            for (UUID officer: faction.getOfficers())
-            {
-                float officerPower = getPlayerPower(officer);
-                factionPower =factionPower + officerPower;
-            }
-        }
-        if(faction.getMembers() != null && !faction.getMembers().isEmpty())
-        {
-            for (UUID member: faction.getMembers())
-            {
-                float memberPower = getPlayerPower(member);
-                factionPower = factionPower + memberPower;
-            }
-        }
-        if(faction.getRecruits() != null && !faction.getRecruits().isEmpty())
-        {
-            for (UUID recruit: faction.getRecruits())
-            {
-                float recruitPower = getPlayerPower(recruit);
-                factionPower = factionPower + recruitPower;
-            }
-        }
-
-        return round(factionPower, 2);
+        return power;
     }
 
     @Override
     public float getFactionMaxPower(final Faction faction)
     {
-        if(faction.isSafeZone() || faction.isWarZone())
-            return 9999.0f;
-
-        float factionMaxPower = 0;
-
-        if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
+        float maxpower = 0;
+        for (final FactionMaxPowerProvider factionMaxPowerProvider : this.factionMaxPowerProviders)
         {
-            factionMaxPower = factionMaxPower + getPlayerMaxPower(faction.getLeader());
+            maxpower = maxpower + factionMaxPowerProvider.getFactionMaxPower(faction);
         }
-
-        if(faction.getOfficers() != null && !faction.getOfficers().isEmpty())
-        {
-            for (UUID officer : faction.getOfficers())
-            {
-                factionMaxPower = factionMaxPower + getPlayerMaxPower(officer);
-            }
-        }
-
-        if(faction.getMembers() != null && !faction.getMembers().isEmpty())
-        {
-            for (UUID member : faction.getMembers())
-            {
-                factionMaxPower = factionMaxPower + getPlayerMaxPower(member);
-            }
-        }
-
-        if(faction.getRecruits() != null && !faction.getRecruits().isEmpty())
-        {
-            for (UUID recruit: faction.getRecruits())
-            {
-                factionMaxPower = factionMaxPower + getPlayerMaxPower(recruit);
-            }
-        }
-
-        return round(factionMaxPower, 2);
+        return maxpower;
     }
 
     @Override
@@ -181,14 +165,6 @@ public class PowerManagerImpl implements PowerManager
         {
             setPlayerPower(playerUUID, round(Math.min(playerPower + this.powerConfig.getPowerIncrement(), playerMaxPower), 2));
         }
-    }
-
-    public static float round(final float number, final int decimalPlace) {
-        int pow = 10;
-        for (int i = 1; i < decimalPlace; i++)
-            pow *= 10;
-        float tmp = number * pow;
-        return ( (float) ( (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) ) ) / pow;
     }
 
     @Override

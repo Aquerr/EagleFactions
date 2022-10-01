@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -25,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class SquareClaimCommand extends AbstractCommand
 {
+    private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
@@ -32,6 +34,7 @@ public class SquareClaimCommand extends AbstractCommand
     public SquareClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionLogic = plugin.getFactionLogic();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
@@ -87,7 +90,7 @@ public class SquareClaimCommand extends AbstractCommand
 
             for(final Vector3i chunk : chunksToClaim)
             {
-                final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), chunk);
+                final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), chunk);
                 if (optionalChunkFaction.isPresent())
                     continue;
 
@@ -112,7 +115,7 @@ public class SquareClaimCommand extends AbstractCommand
                 }
 
                 //Check if faction has enough power to claim territory
-                if (super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
+                if (this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
                 {
                     player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
                     break;
@@ -137,7 +140,7 @@ public class SquareClaimCommand extends AbstractCommand
                     continue;
                 }
 
-                if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, new Claim(world.uniqueId(), chunk)))
+                if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(playerFaction, new Claim(world.uniqueId(), chunk)))
                     continue;
 
                 boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
@@ -155,7 +158,7 @@ public class SquareClaimCommand extends AbstractCommand
                 EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
             }
 
-            super.getPlugin().getFactionLogic().addClaims(playerFaction, newFactionClaims);
+            this.factionLogic.addClaims(playerFaction, newFactionClaims);
         });
         return CommandResult.success();
     }

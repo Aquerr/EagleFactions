@@ -13,6 +13,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
@@ -34,6 +35,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +57,8 @@ public class FactionLogicImpl implements FactionLogic
 {
     private static final UUID DUMMY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
+    private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
+
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
@@ -66,6 +70,25 @@ public class FactionLogicImpl implements FactionLogic
         this.playerManager = playerManager;
         this.factionsConfig = factionsConfig;
         this.messageService = messageService;
+    }
+
+    @Override
+    public void addFactionMaxClaimCountProvider(FactionMaxClaimCountProvider provider)
+    {
+        this.factionMaxClaimCountProviders.add(provider);
+    }
+
+    @Override
+    public void setFactionMaxClaimCountProviders(Set<FactionMaxClaimCountProvider> providers)
+    {
+        this.factionMaxClaimCountProviders.clear();
+        this.factionMaxClaimCountProviders.addAll(providers);
+    }
+
+    @Override
+    public Set<FactionMaxClaimCountProvider> getFactionMaxClaimCountProviders()
+    {
+        return Collections.unmodifiableSet(this.factionMaxClaimCountProviders);
     }
 
     @Override
@@ -953,6 +976,17 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction updatedFaction = faction.toBuilder().setIsPublic(isPublic).build();
         this.storageManager.saveFaction(updatedFaction);
+    }
+
+    @Override
+    public int getFactionMaxClaims(final Faction faction)
+    {
+        int maxclaims = 0;
+        for (final FactionMaxClaimCountProvider provider : this.factionMaxClaimCountProviders)
+        {
+            maxclaims = maxclaims + provider.getMaxClaimCount(faction);
+        }
+        return maxclaims;
     }
 
     private void removeClaimInternal(final Faction faction, final Claim claim)

@@ -111,6 +111,12 @@ import io.github.aquerr.eaglefactions.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
+import io.github.aquerr.eaglefactions.managers.claim.provider.DefaultFactionMaxClaimCountProvider;
+import io.github.aquerr.eaglefactions.managers.claim.provider.FactionMaxClaimCountByPlayerPowerProvider;
+import io.github.aquerr.eaglefactions.managers.power.provider.DefaultFactionMaxPowerProvider;
+import io.github.aquerr.eaglefactions.managers.power.provider.DefaultFactionPowerProvider;
+import io.github.aquerr.eaglefactions.managers.power.provider.FactionMaxPowerByPlayerMaxPowerProvider;
+import io.github.aquerr.eaglefactions.managers.power.provider.FactionPowerByPlayerPowerProvider;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.messaging.placeholder.parser.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
@@ -551,9 +557,16 @@ public class EagleFactionsPlugin implements EagleFactions
         this.messageService = EFMessageService.getInstance();
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
+
         this.powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
+        this.powerManager.addFactionPowerProvider(new DefaultFactionPowerProvider(new FactionPowerByPlayerPowerProvider(this.playerManager)));
+        this.powerManager.addFactionMaxPowerProvider(new DefaultFactionMaxPowerProvider(new FactionMaxPowerByPlayerMaxPowerProvider(this.playerManager)));
+
         this.permsManager = new PermsManagerImpl();
+
         this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
+
         this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService);
         this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
         this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager, this.messageService);

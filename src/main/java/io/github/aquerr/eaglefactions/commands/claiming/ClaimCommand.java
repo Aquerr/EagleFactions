@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
@@ -24,6 +25,7 @@ public class ClaimCommand extends AbstractCommand
 {
     private static final String ERROR_NOT_CLAIMABLE_WORLD = "error.command.claim.not-claimable-world";
 
+    private final FactionLogic factionLogic;
     private final ProtectionConfig protectionConfig;
     private final FactionsConfig factionsConfig;
     private final MessageService messageService;
@@ -31,6 +33,7 @@ public class ClaimCommand extends AbstractCommand
     public ClaimCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionLogic = plugin.getFactionLogic();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.messageService = plugin.getMessageService();
@@ -43,8 +46,8 @@ public class ClaimCommand extends AbstractCommand
         final ServerPlayer player = requirePlayerSource(context);
         final ServerWorld world = player.world();
         final Vector3i chunk = player.serverLocation().chunkPosition();
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
-        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), chunk);
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), chunk);
         final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
 
         if (optionalChunkFaction.isPresent())
@@ -73,7 +76,7 @@ public class ClaimCommand extends AbstractCommand
     private CommandResult preformClaimByFaction(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
         final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.properties().name());
 
         if(!optionalPlayerFaction.isPresent() || !optionalPlayerFaction.get().getName().equals(faction.getName()))
@@ -99,7 +102,7 @@ public class ClaimCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        super.getPlugin().getFactionLogic().addClaim(faction, new Claim(world.uniqueId(), chunk));
+        this.factionLogic.addClaim(faction, new Claim(world.uniqueId(), chunk));
         player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
         EventRunner.runFactionClaimEventPost(player, faction, player.world(), chunk);
         return CommandResult.success();
@@ -118,21 +121,21 @@ public class ClaimCommand extends AbstractCommand
             throw messageService.resolveExceptionWithMessage("error.command.claim.players-with-your-rank-cant-claim-lands");
 
         //Check if faction has enough power to claim territory
-        if (super.getPlugin().getPowerManager().getFactionMaxClaims(faction) <= faction.getClaims().size())
+        if (this.factionLogic.getFactionMaxClaims(faction) <= faction.getClaims().size())
             throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
 
         //If attacked then It should not be able to claim territories
         if (EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(faction.getName()))
             throw messageService.resolveExceptionWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()));
 
-        if (this.factionsConfig.requireConnectedClaims() && !super.getPlugin().getFactionLogic().isClaimConnected(faction, new Claim(world.uniqueId(), chunk)))
+        if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(faction, new Claim(world.uniqueId(), chunk)))
             throw messageService.resolveExceptionWithMessage("error.command.claim.claim.claims-need-to-be-connected");
 
         boolean isCancelled = EventRunner.runFactionClaimEventPre(player, faction, world, chunk);
         if (isCancelled)
             return CommandResult.success();
 
-        super.getPlugin().getFactionLogic().startClaiming(player, faction, world.uniqueId(), chunk);
+        this.factionLogic.startClaiming(player, faction, world.uniqueId(), chunk);
         return CommandResult.success();
     }
 }

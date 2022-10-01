@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
@@ -42,11 +43,13 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class InfoCommand extends AbstractCommand
 {
+    private final FactionLogic factionLogic;
     private final MessageService messageService;
 
     public InfoCommand(final EagleFactions plugin)
     {
         super(plugin);
+        this.factionLogic = plugin.getFactionLogic();
         this.messageService = plugin.getMessageService();
     }
 
@@ -79,11 +82,11 @@ public class InfoCommand extends AbstractCommand
         if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
         {
             //Check permissions
-            if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
+            if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && this.factionLogic.getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && this.factionLogic.getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
             {
                 throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
             }
-            else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && !getPlugin().getFactionLogic().getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
+            else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && this.factionLogic.getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && !this.factionLogic.getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
             {
                 throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
             }
@@ -163,7 +166,7 @@ public class InfoCommand extends AbstractCommand
                 .append(messageService.resolveComponentWithMessage("command.info.members", membersList.color(GREEN))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(GREEN))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.power", super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + super.getPlugin().getPowerManager().getFactionMaxClaims(faction)))
+                .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + this.factionLogic.getFactionMaxClaims(faction)))
                 .build();
 
         factionInfo.add(info);
@@ -177,7 +180,7 @@ public class InfoCommand extends AbstractCommand
 
     private Component lastOnline(final Faction faction)
     {
-        if(getPlugin().getFactionLogic().hasOnlinePlayers(faction))
+        if(this.factionLogic.hasOnlinePlayers(faction))
             return messageService.resolveComponentWithMessage("command.info.now");
 
         final Date date = Date.from(faction.getLastOnline());

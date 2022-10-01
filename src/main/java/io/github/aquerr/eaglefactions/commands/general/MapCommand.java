@@ -72,7 +72,7 @@ public class MapCommand extends AbstractCommand
 
     private void generateMap(ServerPlayer player)
     {
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
         final boolean showPlayerFactionClaimsOnly = this.factionsConfig.shouldShowOnlyPlayerFactionsClaimsInMap();
 
         final ServerWorld world = player.world();
@@ -233,7 +233,7 @@ public class MapCommand extends AbstractCommand
 
         String playerPositionClaim = "none";
 
-        Optional<Faction> optionalPlayerPositionFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), playerPosition);
+        Optional<Faction> optionalPlayerPositionFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), playerPosition);
 
         if (optionalPlayerPositionFaction.isPresent())
         {
@@ -277,7 +277,7 @@ public class MapCommand extends AbstractCommand
     {
         //Because faction could have changed we need to get it again here.
 
-        final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
+        final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
         final ServerWorld world = player.world();
         final Claim claim = new Claim(player.world().uniqueId(), chunk);
         final boolean hasFactionsAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
@@ -299,7 +299,7 @@ public class MapCommand extends AbstractCommand
         }
 
         //If claimed then unclaim
-        if(super.getPlugin().getFactionLogic().isClaimed(world.uniqueId(), chunk))
+        if(this.factionLogic.isClaimed(world.uniqueId(), chunk))
         {
             if (EventRunner.runFactionUnclaimEventPre(player, playerFaction, world, chunk))
                 return;
@@ -312,11 +312,11 @@ public class MapCommand extends AbstractCommand
                     final ServerLocation homeLocation = world.location(playerFaction.getHome().getBlockPosition());
                     if (homeLocation.chunkPosition().toString().equals(player.serverLocation().chunkPosition().toString()))
                     {
-                        super.getPlugin().getFactionLogic().setHome(playerFaction, null);
+                        this.factionLogic.setHome(playerFaction, null);
                     }
                 }
             }
-            super.getPlugin().getFactionLogic().removeClaim(playerFaction, new Claim(world.uniqueId(), chunk));
+            this.factionLogic.removeClaim(playerFaction, new Claim(world.uniqueId(), chunk));
             player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));
             EventRunner.runFactionUnclaimEventPost(player, playerFaction, world, chunk);
         }
@@ -328,7 +328,7 @@ public class MapCommand extends AbstractCommand
                 return;
             }
 
-            if(super.getPlugin().getPowerManager().getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size())
+            if(this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size())
             {
                 player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
                 return;
@@ -339,19 +339,19 @@ public class MapCommand extends AbstractCommand
                 if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                     return;
 
-                super.getPlugin().getFactionLogic().addClaim(playerFaction, claim);
+                this.factionLogic.addClaim(playerFaction, claim);
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
             }
             else
             {
                 if(this.factionsConfig.requireConnectedClaims())
                 {
-                    if(super.getPlugin().getFactionLogic().isClaimConnected(playerFaction, claim))
+                    if(this.factionLogic.isClaimConnected(playerFaction, claim))
                     {
                         if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                             return;
 
-                        super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.uniqueId(), chunk);
+                        this.factionLogic.startClaiming(player, playerFaction, world.uniqueId(), chunk);
                     }
                     else
                     {
@@ -363,7 +363,7 @@ public class MapCommand extends AbstractCommand
                     if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                         return;
 
-                    super.getPlugin().getFactionLogic().startClaiming(player, playerFaction, world.uniqueId(), chunk);
+                    this.factionLogic.startClaiming(player, playerFaction, world.uniqueId(), chunk);
                 }
             }
         }

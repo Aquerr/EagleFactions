@@ -4,6 +4,9 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import org.spongepowered.api.command.CommandResult;
@@ -19,12 +22,18 @@ import java.util.UUID;
 
 public class FillCommand extends AbstractCommand
 {
+    private final FactionLogic factionLogic;
+    private final PermsManager permsManager;
+    private final PlayerManager playerManager;
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
 
     public FillCommand(EagleFactions plugin)
     {
         super(plugin);
+        this.factionLogic = plugin.getFactionLogic();
+        this.permsManager = plugin.getPermsManager();
+        this.playerManager = plugin.getPlayerManager();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
     }
@@ -36,8 +45,8 @@ public class FillCommand extends AbstractCommand
         ServerPlayer player = requirePlayerSource(context);
         Faction faction = requirePlayerFaction(player);
 
-        final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
-        if (!isAdmin && !super.getPlugin().getPermsManager().canClaim(player.uniqueId(), faction))
+        final boolean isAdmin = this.playerManager.hasAdminMode(player.user());
+        if (!isAdmin && !this.permsManager.canClaim(player.uniqueId(), faction))
             throw messageService.resolveExceptionWithMessage("error.command.claim.players-with-your-rank-cant-claim-lands");
 
         final ServerWorld world = player.world();
@@ -61,7 +70,7 @@ public class FillCommand extends AbstractCommand
 
     private boolean hasReachedClaimLimit(Faction faction)
     {
-        return super.getPlugin().getPowerManager().getFactionMaxClaims(faction) <= faction.getClaims().size();
+        return this.factionLogic.getFactionMaxClaims(faction) <= faction.getClaims().size();
     }
 
     private boolean isFactionUnderAttack(Faction faction)
@@ -81,10 +90,10 @@ public class FillCommand extends AbstractCommand
                 throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
 
             final Vector3i chunkPosition = chunks.poll();
-            if (!super.getPlugin().getFactionLogic().isClaimed(worldUUID, chunkPosition))
+            if (!this.factionLogic.isClaimed(worldUUID, chunkPosition))
             {
-                faction = super.getPlugin().getFactionLogic().getFactionByName(faction.getName());
-                super.getPlugin().getFactionLogic().startClaiming(player, faction, worldUUID, chunkPosition);
+                faction = this.factionLogic.getFactionByName(faction.getName());
+                this.factionLogic.startClaiming(player, faction, worldUUID, chunkPosition);
                 chunks.add(chunkPosition.add(1, 0, 0));
                 chunks.add(chunkPosition.add(-1, 0, 0));
                 chunks.add(chunkPosition.add(0, 0, 1));
