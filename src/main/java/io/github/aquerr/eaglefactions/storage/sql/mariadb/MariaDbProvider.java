@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.sql.mariadb;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
@@ -54,17 +55,28 @@ public class MariaDbProvider extends SQLAbstractProvider
 	private MariaDbProvider(final EagleFactions eagleFactions) throws SQLException
 	{
 		super(eagleFactions);
-		final SqlManager sqlManager = Sponge.sqlManager();
-		this.dataSource = sqlManager.dataSource("jdbc:mariadb://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl());
+
+		prepareHikariDataSource();
 
 		if(!databaseExists())
 		{
 			createDatabase();
 		}
+	}
 
-		final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
-		hikariDataSource.close();
-		this.dataSource = sqlManager.dataSource("jdbc:mariadb://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName());
+	private void prepareHikariDataSource()
+	{
+		String jdbcUrl = "jdbc:mariadb:" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl();
+		HikariConfig config = new HikariConfig();
+		HikariDataSource hikariDataSource = new HikariDataSource(config);
+		config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+		config.setJdbcUrl(jdbcUrl);
+		config.setUsername(super.getUsername());
+		config.setPassword(super.getPassword());
+		config.setPoolName("eaglefactions");
+		config.addDataSourceProperty("databaseName", getDatabaseName());
+		config.setMaximumPoolSize(10);
+		this.dataSource = hikariDataSource;
 	}
 
 	private boolean databaseExists() throws SQLException

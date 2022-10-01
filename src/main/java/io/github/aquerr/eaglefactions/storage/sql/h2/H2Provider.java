@@ -40,6 +40,15 @@ public class H2Provider extends SQLAbstractProvider
     private H2Provider(final EagleFactions eagleFactions) throws SQLException
     {
         super(eagleFactions);
+        try
+        {
+            Class.forName("org.h2.Driver");
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new IllegalStateException("Could not register H2 Driver.", e);
+        }
+
         final Path databaseDir = eagleFactions.getConfigDir().resolve("data/h2");
         try
         {
@@ -52,7 +61,7 @@ public class H2Provider extends SQLAbstractProvider
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName());
         final SqlManager sqlManager = Sponge.sqlManager();
-        this.dataSource = sqlManager.dataSource("jdbc:h2://" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
+        this.dataSource = sqlManager.dataSource("jdbc:h2:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
 
         //Create database file
         final Connection connection = getConnection();

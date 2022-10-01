@@ -458,14 +458,14 @@ public abstract class AbstractFactionStorage implements FactionStorage
             try
             {
                 connection.rollback();
+                connection.close();
             }
             catch (SQLException e1)
             {
-                e1.printStackTrace();
+                throw new RuntimeException(e1);
             }
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
     private void saveAlliances(final Connection connection, final Faction faction) throws SQLException
@@ -749,8 +749,12 @@ public abstract class AbstractFactionStorage implements FactionStorage
     @Override
     public boolean deleteFaction(final String factionName)
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        Connection connection = null;
+        try
         {
+            connection = this.sqlProvider.getConnection();
+            connection.setAutoCommit(false);
+
             deleteFactionAlliances(connection, factionName);
             deleteFactionEnemies(connection, factionName);
             deleteFactionTruces(connection, factionName);
@@ -764,9 +768,17 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
         catch (final SQLException e)
         {
-            e.printStackTrace();
+            try
+            {
+                connection.rollback();
+                connection.close();
+            }
+            catch (SQLException e1)
+            {
+                throw new RuntimeException(e1);
+            }
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
     @Override

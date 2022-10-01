@@ -2,8 +2,8 @@ package io.github.aquerr.eaglefactions.util;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class ItemUtil
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ItemUtil.class);
+    private static final Logger LOGGER = LogManager.getLogger(ItemUtil.class);
 
     public static void pollItemsNeededForClaimFromPlayer(final Player player) throws RequiredItemsNotFoundException
     {

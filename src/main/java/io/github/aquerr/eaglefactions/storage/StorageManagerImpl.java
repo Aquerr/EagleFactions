@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -98,14 +99,35 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public void saveFaction(final Faction faction)
     {
-        queueStorageTask(new UpdateFactionTask(faction, () -> this.factionsStorage.saveFaction(faction)));
+        queueStorageTask(new UpdateFactionTask(faction, () ->
+        {
+            try
+            {
+                this.factionsStorage.saveFaction(faction);
+            }
+            catch (Exception exception)
+            {
+                throw new CompletionException("Could not save/update faction: " + faction.getName(), exception);
+            }
+        }
+        ));
         FactionsCache.saveFaction(faction);
     }
 
     @Override
     public boolean deleteFaction(final String factionName)
     {
-        queueStorageTask(new DeleteFactionTask(factionName, () -> this.factionsStorage.deleteFaction(factionName)));
+        queueStorageTask(new DeleteFactionTask(factionName, () ->
+        {
+            try
+            {
+                this.factionsStorage.deleteFaction(factionName);
+            }
+            catch (Exception exception)
+            {
+                throw new CompletionException("Could not delete faction: " + factionName, exception);
+            }
+        }));
         FactionsCache.removeFaction(factionName);
         return true;
     }

@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.sql.mysql;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
@@ -52,17 +53,27 @@ public class MySQLProvider extends SQLAbstractProvider
     {
         super(eagleFactions);
 
-        final SqlManager sqlManager = Sponge.sqlManager();
-        this.dataSource = sqlManager.dataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+        prepareHikariDataSource();
 
         if(!databaseExists())
         {
             createDatabase();
         }
+    }
 
-        final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
-        hikariDataSource.close();
-        this.dataSource = sqlManager.dataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+    private void prepareHikariDataSource()
+    {
+        String jdbcUrl = "jdbc:mysql:" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+        HikariConfig config = new HikariConfig();
+        HikariDataSource hikariDataSource = new HikariDataSource(config);
+        config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(super.getUsername());
+        config.setPassword(super.getPassword());
+        config.setPoolName("eaglefactions");
+        config.addDataSourceProperty("databaseName", getDatabaseName());
+        config.setMaximumPoolSize(10);
+        this.dataSource = hikariDataSource;
     }
 
     private boolean databaseExists() throws SQLException

@@ -4,12 +4,12 @@ import java.io.ByteArrayOutputStream
 
 plugins {
     `java-library`
-    id("org.spongepowered.gradle.plugin") version "2.0.1"
+    id("org.spongepowered.gradle.plugin") version "2.0.2"
     java
     idea
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("net.kyori.blossom") version "1.2.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("net.kyori.blossom") version "1.3.1"
 }
 
 allprojects {
@@ -90,9 +90,9 @@ dependencies {
     api(project(":EagleFactionsAPI"))
 //    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
     implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
-    implementation("com.zaxxer:HikariCP:2.6.3")
-    implementation("com.h2database:h2:1.4.196")
-    implementation("org.xerial:sqlite-jdbc:3.20.0")
+    implementation("com.zaxxer:HikariCP:4.0.3")
+    implementation("com.h2database:h2:1.4.200")
+    implementation("org.xerial:sqlite-jdbc:3.39.3.0")
     compileOnly("com.github.webbukkit:DynmapCoreAPI:v2.5")
 //    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
@@ -107,6 +107,12 @@ dependencies {
 tasks {
     shadowJar {
         dependsOn(test)
+
+        relocate("org.h2", "io.github.aquerr.eaglefactions.lib.db.h2")
+        relocate("org.mariadb.jdbc", "io.github.aquerr.eaglefactions.lib.db.mariadb")
+        relocate("com.zaxxer.hikari", "io.github.aquerr.eaglefactions.lib.pool.hikari")
+
+        archiveClassifier.set("")
     }
 
     build {
