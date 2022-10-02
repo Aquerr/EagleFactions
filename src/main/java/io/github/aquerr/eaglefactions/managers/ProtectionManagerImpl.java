@@ -17,6 +17,7 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
+import io.github.aquerr.eaglefactions.entities.EagleFeatherImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -982,10 +983,10 @@ public class ProtectionManagerImpl implements ProtectionManager
     private boolean isHoldingEagleFeather(final User user)
     {
         return Optional.ofNullable(user.itemInHand(HandTypes.MAIN_HAND))
-                .filter(itemStack -> ItemTypes.FEATHER == itemStack.type())
+                .filter(itemStack -> ItemTypes.FEATHER.find().orElse(null) == itemStack.type())
                 .filter(itemStack -> itemStack.get(Keys.DISPLAY_NAME).isPresent())
                 .flatMap(itemStack -> itemStack.get(Keys.DISPLAY_NAME))
-                .map(EagleFeather.getDisplayName()::equals)
+                .map(EagleFeatherImpl.EAGLE_FEATHER_DISPLAY_NAME::equals)
                 .orElse(false);
     }
 

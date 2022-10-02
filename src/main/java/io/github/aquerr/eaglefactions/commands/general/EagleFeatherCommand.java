@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.commands.general;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.entities.EagleFeather;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.entities.EagleFeatherImpl;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -19,8 +19,7 @@ public class EagleFeatherCommand extends AbstractCommand
     public CommandResult execute(CommandContext context) throws CommandException
     {
         ServerPlayer player = requirePlayerSource(context);
-        player.inventory().offer(EagleFeather.getEagleFeatherItem());
-
+        player.inventory().offer(new EagleFeatherImpl().asItemStack());
         return CommandResult.success();
     }
 }
