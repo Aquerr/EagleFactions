@@ -37,10 +37,10 @@ public class FactionRemoverTask implements EagleFactionsRunnableTask
         final boolean shouldRegenerateWhenRemoved = this.factionsConfig.shouldRegenerateChunksWhenFactionRemoved();
         for(Faction faction : factionsList.values())
         {
-            if(factionLogic.hasOnlinePlayers(faction))
+            if(faction.isSafeZone() || faction.isWarZone())
                 continue;
 
-            if(faction.isSafeZone() || faction.isWarZone())
+            if(factionLogic.hasOnlinePlayers(faction))
                 continue;
 
             final Duration inactiveTime = Duration.between(faction.getLastOnline(), Instant.now());

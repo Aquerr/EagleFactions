@@ -163,7 +163,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 
 		if (!worldNamesThatOccurredMoreThanOnce.isEmpty())
 		{
-			throw new IllegalStateException("World name must exist in only one list! Worlds that exists multiple times: " + String.join(",", worldNamesThatOccurredMoreThanOnce));
+			throw new IllegalStateException("Error processing Worlds.conf file. World name must exist only once and in only one list! " +
+					"Worlds that exists multiple times: " + String.join(",", worldNamesThatOccurredMoreThanOnce));
 		}
 	}
 
