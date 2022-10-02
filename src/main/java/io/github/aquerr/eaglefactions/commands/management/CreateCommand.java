@@ -15,6 +15,7 @@ import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import net.kyori.adventure.audience.Audience;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -137,6 +138,7 @@ public class CreateCommand extends AbstractCommand
         super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
 
         super.getPlugin().getFactionLogic().addFaction(faction);
+        notifyServerPlayersAboutNewFaction(faction);
         player.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
         EventRunner.runFactionCreateEventPost(player, faction);
     }
@@ -150,6 +152,15 @@ public class CreateCommand extends AbstractCommand
                 .setCreatedDate(Instant.now())
                 .build();
         super.getPlugin().getFactionLogic().addFaction(faction);
+        notifyServerPlayersAboutNewFaction(faction);
         audience.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
+    }
+
+    private void notifyServerPlayersAboutNewFaction(Faction faction)
+    {
+        if (this.factionsConfig.shouldNotifyWHenFactionCreated())
+        {
+            Sponge.server().sendMessage(messageService.resolveMessageWithPrefix("command.create.notify-server-about-new-faction", faction.getName()));
+        }
     }
 }

@@ -55,6 +55,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean canAttackOnlyAtNight = false;
 	private String maxInactiveTime = "0";
 	private boolean notifyWhenFactionRemoved = true;
+	private boolean notifyWhenFactionCreated = false;
 	private boolean regenerateChunksWhenFactionRemoved = false;
 	private boolean showOnlyPlayersFactionsClaimsInMap = false;
 
@@ -114,6 +115,7 @@ public class FactionsConfigImpl implements FactionsConfig
 
 		this.maxInactiveTime = this.configuration.getString("30d", "factions-remover", "max-inactive-time");
 		this.notifyWhenFactionRemoved = this.configuration.getBoolean(true, "factions-remover", "notify-when-removed");
+		this.notifyWhenFactionCreated = this.configuration.getBoolean(false, "should-notify-when-faction-created");
 		this.regenerateChunksWhenFactionRemoved = this.configuration.getBoolean(false, "factions-remover", "regenerate-when-removed");
 		this.showOnlyPlayersFactionsClaimsInMap = this.configuration.getBoolean(false, "show-only-player-faction-claims-in-map");
 
@@ -332,6 +334,12 @@ public class FactionsConfigImpl implements FactionsConfig
 	public boolean shouldNotifyWhenFactionRemoved()
 	{
 		return this.notifyWhenFactionRemoved;
+	}
+
+	@Override
+	public boolean shouldNotifyWHenFactionCreated()
+	{
+		return this.notifyWhenFactionCreated;
 	}
 
 	@Override
