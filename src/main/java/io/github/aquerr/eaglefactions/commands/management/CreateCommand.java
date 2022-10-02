@@ -22,6 +22,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -123,7 +124,9 @@ public class CreateCommand extends AbstractCommand
 
     private void createAsPlayer(final String factionName, final String factionTag, final Player player)
     {
-        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), player.uniqueId()).build();
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), player.uniqueId())
+                .setCreatedDate(Instant.now())
+                .build();
         final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
         if (isCancelled)
             return;
@@ -143,7 +146,9 @@ public class CreateCommand extends AbstractCommand
      */
     private void createAsConsole(final String factionName, final String factionTag, final Audience audience)
     {
-        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), new UUID(0, 0)).build();
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), new UUID(0, 0))
+                .setCreatedDate(Instant.now())
+                .build();
         super.getPlugin().getFactionLogic().addFaction(faction);
         audience.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
     }

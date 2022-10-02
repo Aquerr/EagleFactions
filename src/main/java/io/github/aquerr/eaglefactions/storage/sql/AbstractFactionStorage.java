@@ -2,7 +2,12 @@ package io.github.aquerr.eaglefactions.storage.sql;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionChest;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
@@ -27,15 +32,38 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.FileSystem;
-import java.nio.file.*;
-import java.sql.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,8 +72,6 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
 public abstract class AbstractFactionStorage implements FactionStorage
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFactionStorage.class);
-
-    private static final UUID DUMMY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     private static final String SELECT_FACTION_NAMES = "SELECT Name FROM Factions";
     private static final String SELECT_RECRUITS_WHERE_FACTIONNAME = "SELECT RecruitUUID FROM FactionRecruits WHERE FactionName=?";
@@ -64,7 +90,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String SELECT_FACTION_ENEMIES = "SELECT * FROM FactionEnemies WHERE FactionName_1=? OR FactionName_2=?";
     private static final String SELECT_FACTION_TRUCES = "SELECT * FROM FactionTruces WHERE FactionName_1=? OR FactionName_2=?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Description, Motd, IsPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Description, Motd, IsPublic, CreatedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_CLAIM = "INSERT INTO Claims (FactionName, WorldUUID, ChunkPosition, IsAccessibleByFaction) VALUES (?, ?, ?, ?)";
     private static final String INSERT_CLAIM_OWNER = "INSERT INTO ClaimOwners (WorldUUID, ChunkPosition, PlayerUUID) VALUES (?, ?, ?)";
     private static final String INSERT_CHEST = "INSERT INTO FactionChests (FactionName, ChestItems) VALUES (?, ?)";
@@ -79,7 +105,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String INSERT_FACTION_ENEMY = "INSERT INTO FactionEnemies (FactionName_1, FactionName_2) VALUES (?, ?)";
     private static final String INSERT_FACTION_TRUCE = "INSERT INTO FactionTruces (FactionName_1, FactionName_2) VALUES (?, ?)";
 
-    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Description = ?, Motd = ?, IsPublic = ? WHERE Name = ?";
+    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Description = ?, Motd = ?, IsPublic = ?, CreatedDate = ? WHERE Name = ?";
     private static final String UPDATE_OFFICER_PERMS = "UPDATE OfficerPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
     private static final String UPDATE_MEMBER_PERMS = "UPDATE MemberPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
     private static final String UPDATE_RECRUIT_PERMS = "UPDATE RecruitPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
@@ -172,8 +198,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
             System.out.println("Searched for them in: " + this.sqlProvider.getStorageType().getName());
             throw new IllegalStateException("There may be a problem with database script files...");
         }
-        if (databaseVersionNumber == 0)
-            precreate();
     }
 
     private List<Path> getSqlFilesPaths() throws URISyntaxException, IOException
@@ -282,8 +306,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
             preparedStatement.setString(7, faction.getDescription());
             preparedStatement.setString(8, faction.getMessageOfTheDay());
             preparedStatement.setString(9, faction.isPublic() ? "1" : "0");
+            preparedStatement.setString(10, String.valueOf(faction.getCreatedDate()));
             if (isUpdate)
-                preparedStatement.setString(10, faction.getName()); //Where part
+                preparedStatement.setString(11, faction.getName()); //Where part
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -675,7 +700,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 if (factionHomeAsString != null)
                     factionHome = FactionHome.from(factionHomeAsString);
                 final String lastOnlineString = factionsResultSet.getString("LastOnline");
+                final String createdDateString = factionsResultSet.getString("CreatedDate");
                 final Instant lastOnline = Instant.parse(lastOnlineString);
+                final Instant createdDate = Instant.parse(createdDateString);
 
                 final Set<UUID> officers = getFactionOfficers(connection, factionName);
                 final Set<UUID> recruits = getFactionRecruits(connection, factionName);
@@ -692,6 +719,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                         .setEnemies(enemies)
                         .setClaims(claims)
                         .setLastOnline(lastOnline)
+                        .setCreatedDate(createdDate)
                         .setMembers(members)
                         .setRecruits(recruits)
                         .setOfficers(officers)
@@ -1060,7 +1088,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         truceResult.close();
         preparedStatement.close();
 
-        //Get ally perms
+        //Get allay perms
         preparedStatement = connection.prepareStatement(SELECT_ALLY_PERMS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet allyResult = preparedStatement.executeQuery();
@@ -1112,44 +1140,5 @@ public abstract class AbstractFactionStorage implements FactionStorage
         permMap.put(FactionMemberType.ALLY, allyMap);
 
         return permMap;
-    }
-
-    private void precreate()
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            connection.setAutoCommit(false);
-            PreparedStatement warZoneStatement = connection.prepareStatement(INSERT_FACTION);
-            warZoneStatement.setString(1, "WarZone");
-            warZoneStatement.setString(2, "WZ");
-            warZoneStatement.setString(3, "");
-            warZoneStatement.setString(4, DUMMY_UUID.toString());
-            warZoneStatement.setString(5, null);
-            warZoneStatement.setString(6, Instant.now().toString());
-            warZoneStatement.setString(7, "");
-            warZoneStatement.setString(8, "");
-            warZoneStatement.setString(9, "0");
-
-            PreparedStatement safeZoneStatement = connection.prepareStatement(INSERT_FACTION);
-            safeZoneStatement.setString(1, "SafeZone");
-            safeZoneStatement.setString(2, "SZ");
-            safeZoneStatement.setString(3, "");
-            safeZoneStatement.setString(4, DUMMY_UUID.toString());
-            safeZoneStatement.setString(5, null);
-            safeZoneStatement.setString(6, Instant.now().toString());
-            safeZoneStatement.setString(7, "");
-            safeZoneStatement.setString(8, "");
-            safeZoneStatement.setString(9, "0");
-
-            warZoneStatement.execute();
-            safeZoneStatement.execute();
-            safeZoneStatement.close();
-            warZoneStatement.close();
-            connection.commit();
-        }
-        catch(final SQLException e)
-        {
-            e.printStackTrace();
-        }
     }
 }

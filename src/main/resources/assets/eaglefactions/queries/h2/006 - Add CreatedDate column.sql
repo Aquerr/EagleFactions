@@ -1,0 +1,4 @@
+ALTER TABLE Factions ADD CreatedDate VARCHAR(200) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- Set database version to 6
+INSERT INTO Version VALUES (6);

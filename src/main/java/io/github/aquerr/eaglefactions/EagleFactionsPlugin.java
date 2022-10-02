@@ -148,6 +148,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -306,12 +307,16 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         if (this.factionLogic.getFactionByName("WarZone") == null)
         {
-            final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0)).build();
+            final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0))
+                    .setCreatedDate(Instant.now())
+                    .build();
             this.factionLogic.addFaction(warzone);
         }
         if (this.factionLogic.getFactionByName("SafeZone") == null)
         {
-            final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0)).build();
+            final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0))
+                    .setCreatedDate(Instant.now())
+                    .build();
             this.factionLogic.addFaction(safezone);
         }
     }

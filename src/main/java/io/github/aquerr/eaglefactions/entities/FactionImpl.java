@@ -29,6 +29,7 @@ public class FactionImpl implements Faction
     private final Set<Claim> claims;
     private final FactionHome home;
     private final Instant lastOnline;
+    private final Instant createdDate;
     private final boolean isPublic;
     private final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
 
@@ -50,6 +51,7 @@ public class FactionImpl implements Faction
         this.enemies = builder.enemies;
         this.home = builder.home;
         this.lastOnline = builder.lastOnline;
+        this.createdDate = builder.createdDate;
         this.perms = builder.perms;
         this.chest = builder.chest;
         this.isPublic = builder.isPublic;
@@ -158,6 +160,12 @@ public class FactionImpl implements Faction
     }
 
     @Override
+    public Instant getCreatedDate()
+    {
+        return this.lastOnline;
+    }
+
+    @Override
     public FactionMemberType getPlayerMemberType(final UUID playerUUID)
     {
         if (this.leader.equals(playerUUID))
@@ -225,6 +233,7 @@ public class FactionImpl implements Faction
         factionBuilder.setEnemies(this.enemies);
         factionBuilder.setClaims(this.claims);
         factionBuilder.setLastOnline(this.lastOnline);
+        factionBuilder.setCreatedDate(this.createdDate);
         factionBuilder.setHome(this.home);
         factionBuilder.setPerms(this.perms);
         factionBuilder.setChest(this.chest);
@@ -250,13 +259,13 @@ public class FactionImpl implements Faction
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FactionImpl faction = (FactionImpl) o;
-        return isPublic == faction.isPublic && name.equals(faction.name) && tag.equals(faction.tag) && description.equals(faction.description) && messageOfTheDay.equals(faction.messageOfTheDay) && recruits.equals(faction.recruits) && members.equals(faction.members) && truces.equals(faction.truces) && alliances.equals(faction.alliances) && enemies.equals(faction.enemies) && leader.equals(faction.leader) && officers.equals(faction.officers) && claims.equals(faction.claims) && Objects.equals(home, faction.home) && lastOnline.equals(faction.lastOnline) && perms.equals(faction.perms) && chest.equals(faction.chest);
+        return isPublic == faction.isPublic && name.equals(faction.name) && tag.equals(faction.tag) && description.equals(faction.description) && messageOfTheDay.equals(faction.messageOfTheDay) && recruits.equals(faction.recruits) && members.equals(faction.members) && truces.equals(faction.truces) && alliances.equals(faction.alliances) && enemies.equals(faction.enemies) && leader.equals(faction.leader) && officers.equals(faction.officers) && claims.equals(faction.claims) && Objects.equals(home, faction.home) && lastOnline.equals(faction.lastOnline) && createdDate.equals(faction.createdDate) && perms.equals(faction.perms) && chest.equals(faction.chest);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(name, tag, description, messageOfTheDay, recruits, members, truces, alliances, enemies, leader, officers, claims, home, lastOnline, isPublic, perms, chest);
+        return Objects.hash(name, tag, description, messageOfTheDay, recruits, members, truces, alliances, enemies, leader, officers, claims, home, lastOnline, createdDate, isPublic, perms, chest);
     }
 
     //Builder
@@ -276,6 +285,7 @@ public class FactionImpl implements Faction
         private Set<Claim> claims;
         private FactionHome home;
         private Instant lastOnline;
+        private Instant createdDate;
         private Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
         private FactionChest chest;
         private boolean isPublic;
@@ -388,6 +398,12 @@ public class FactionImpl implements Faction
             return this;
         }
 
+        public Builder setCreatedDate(final Instant createdDate)
+        {
+            this.createdDate = createdDate;
+            return this;
+        }
+
         public Builder setPerms(final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms)
         {
             this.perms = perms;
@@ -413,6 +429,8 @@ public class FactionImpl implements Faction
 
             if(this.lastOnline == null)
                 this.lastOnline = Instant.now();
+            if (this.createdDate == null)
+                this.createdDate = Instant.now();
             if(this.perms == null)
                 this.perms = PermsManager.getDefaultFactionPerms();
             if(this.chest == null)

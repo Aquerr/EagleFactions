@@ -65,6 +65,7 @@ public class ConfigurateHelper
             configNode.node("enemies").set(faction.getEnemies());
             configNode.node("claims").set(EFTypeTokens.CLAIM_SET_TYPE_TOKEN, faction.getClaims());
             configNode.node("last_online").set(faction.getLastOnline().toString());
+            configNode.node("created_date").set(String.valueOf(faction.getCreatedDate()));
             configNode.node("perms").set(faction.getPerms());
             configNode.node("chest").set(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, faction.getChest().getItems());
             configNode.node("isPublic").set(faction.isPublic());
