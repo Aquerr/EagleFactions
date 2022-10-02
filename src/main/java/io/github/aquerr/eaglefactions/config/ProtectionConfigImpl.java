@@ -20,8 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
@@ -117,6 +119,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 			e.printStackTrace();
 		}
 
+		validateWorlds();
+
 		//Whitelisted items and blocks
 		final Set<String> factionItemsWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "normal-faction", "items-whitelist");
 		final Set<String> factionPlaceDestroyWhiteList = this.configuration.getSetOfStrings(new HashSet<>(), "allowed-items-and-blocks", "normal-faction", "place-destroy-whitelist");
@@ -139,6 +143,28 @@ public class ProtectionConfigImpl implements ProtectionConfig
 		this.wildernessWhiteLists = new WhiteListsImpl(wildernessItemsWhiteList, wildernessInteractWhiteList, wildernessPlaceDestroyWhiteList);
 
 		this.blockedCommandsInOtherFactionsTerritory = this.configuration.getListOfStrings(new ArrayList<>(), "blocked-commands-in-other-faction-territory");
+	}
+
+	private void validateWorlds()
+	{
+		// World name should exist only in one list.
+		final List<String> worldNames = new ArrayList<>();
+		worldNames.addAll(this.claimableWorldNames);
+		worldNames.addAll(this.notClaimableWorldNames);
+		worldNames.addAll(this.safeZoneWorldNames);
+		worldNames.addAll(this.warZoneWorldNames);
+
+		final List<String> worldNamesThatOccurredMoreThanOnce = worldNames.stream()
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+				.entrySet().stream()
+				.filter(entry -> entry.getValue() > 1)
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toList());
+
+		if (!worldNamesThatOccurredMoreThanOnce.isEmpty())
+		{
+			throw new IllegalStateException("World name must exist in only one list! Worlds that exists multiple times: " + String.join(",", worldNamesThatOccurredMoreThanOnce));
+		}
 	}
 
 	@Override
