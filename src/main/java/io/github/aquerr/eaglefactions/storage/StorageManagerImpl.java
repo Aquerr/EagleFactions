@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -21,8 +22,6 @@ import io.github.aquerr.eaglefactions.storage.task.DeleteFactionTask;
 import io.github.aquerr.eaglefactions.storage.task.IStorageTask;
 import io.github.aquerr.eaglefactions.storage.task.SavePlayerTask;
 import io.github.aquerr.eaglefactions.storage.task.UpdateFactionTask;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.nio.file.Path;
@@ -37,8 +36,6 @@ import java.util.concurrent.Executors;
 
 public class StorageManagerImpl implements StorageManager
 {
-    private static final Logger LOGGER = LogManager.getLogger(StorageManagerImpl.class);
-
     private final FactionStorage factionsStorage;
     private final PlayerStorage playerStorage;
     private final BackupStorage backupStorage;
@@ -269,7 +266,7 @@ public class StorageManagerImpl implements StorageManager
 
     public void reloadCache()
     {
-        LOGGER.info("Reloading cache...");
+        EagleFactionsPlugin.getPlugin().getLogger().info("Reloading cache...");
         prepareFactionsCache();
 
         //Must be run after factions cache

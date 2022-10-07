@@ -1,9 +1,12 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -17,7 +20,11 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.*;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -31,6 +38,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.LinearComponents.linear;
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 
 public class BlockBreakListener extends AbstractListener
 {
@@ -60,66 +72,43 @@ public class BlockBreakListener extends AbstractListener
             user = event.cause().first(User.class).get();
         }
 
+        final boolean isHandUsage = event.context().get(EventContextKeys.USED_HAND).isPresent();
+        if (isHandUsage) // (Should be) Handled by interact event listeners
+            return;
+
         final LocatableBlock locatableBlock = event.cause().first(LocatableBlock.class).orElse(null);
         final BlockEntity tileEntity = event.cause().first(BlockEntity.class).orElse(null);
         final boolean pistonExtend = event.context().containsKey(EventContextKeys.PISTON_EXTEND);
         final boolean pistonRetract = event.context().containsKey(EventContextKeys.PISTON_RETRACT);
         final boolean isLiquidSource = event.context().containsKey(EventContextKeys.LIQUID_FLOW)
-                || (locatableBlock != null && (locatableBlock.blockState().type() == BlockTypes.WATER || locatableBlock.blockState().type() == BlockTypes.LAVA));
+                || (locatableBlock != null && (locatableBlock.blockState().type() == BlockTypes.WATER.get() || locatableBlock.blockState().type() == BlockTypes.LAVA.get()));
         final boolean isFireSource = !isLiquidSource && event.context().containsKey(EventContextKeys.FIRE_SPREAD);
         final boolean isLeafDecay = event.context().containsKey(EventContextKeys.LEAVES_DECAY);
         final boolean isForgePlayerBreak = event.context().containsKey(EventContextKeys.PLAYER_BREAK);
         final ServerLocation sourceLocation = locatableBlock != null ? locatableBlock.serverLocation() : tileEntity != null ? tileEntity.serverLocation() : null;
 
-//        if(user instanceof Player)
-//        {
-//            if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
-//            {
-//                Player player = (Player)user;
-//                if(locatableBlock != null)
-//                {
-//                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "LocatableBlock: ", TextColors.GOLD, locatableBlock.getBlockState().getType().getName())));
-//                }
-//                if(sourceLocation != null)
-//                {
-//                    player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "SourceBlock: ", TextColors.GOLD, sourceLocation.getBlockType().getName())));
-//                }
-//                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "isForgePlayerBreak: ", TextColors.GOLD, isForgePlayerBreak)));
-//                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "EventContext: ", TextColors.GOLD, event.getContext())));
-//                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "Cause: ", TextColors.GOLD, event.getCause())));
-//                player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "Event: ", TextColors.GOLD, event)));
-//            }
-//        }
+        if(user != null)
+        {
+            if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.uniqueId()))
+            {
+                ServerPlayer player = user.player().orElse(null);
+                if (player != null)
+                {
+                    if(locatableBlock != null)
+                    {
+                        player.sendMessage(linear(PluginInfo.PLUGIN_PREFIX, text("LocatableBlock: ", BLUE), locatableBlock.blockState().type().asComponent().color(GOLD)));
+                    }
+                    if(sourceLocation != null)
+                    {
+                        player.sendMessage(linear(PluginInfo.PLUGIN_PREFIX, text("SourceBlock: ", BLUE), sourceLocation.blockType().asComponent().color(GOLD)));
+                    }
+                    player.sendMessage(linear(PluginInfo.PLUGIN_PREFIX, text("Event: ", BLUE), text(event.toString(), GOLD)));
+                }
+            }
+        }
 
         if(isForgePlayerBreak)
         {
-            //Helps blocking mining laser from IC2
-            if(user == null)
-            {
-//                user = event.context().get(EventContextKeys.PLAYER)
-//                        .orElse(event.context().get(EventContextKeys.NOTIFIER).orElse(null));
-
-//                if(user != null)
-//                {
-//                    if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.getUniqueId()))
-//                    {
-//                        Player player = (Player)user;
-//                        if(locatableBlock != null)
-//                        {
-//                            player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "LocatableBlock: ", TextColors.GOLD, locatableBlock.getBlockState().getType().getName())));
-//                        }
-//                        if(sourceLocation != null)
-//                        {
-//                            player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "SourceBlock: ", TextColors.GOLD, sourceLocation.getBlockType().getName())));
-//                        }
-//                        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "isForgePlayerBreak: ", TextColors.GOLD, isForgePlayerBreak)));
-//                        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "EventContext: ", TextColors.GOLD, event.getContext())));
-//                        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "Cause: ", TextColors.GOLD, event.getCause())));
-//                        player.sendMessage(PluginInfo.PLUGIN_PREFIX.concat(Text.of(TextColors.BLUE, "Event: ", TextColors.GOLD, event)));
-//                    }
-//                }
-            }
-
             // Helps with Ancient Warfare machines
             if (user == null)
                 user = event.context().get(EventContextKeys.FAKE_PLAYER).map(ServerPlayer.class::cast)
@@ -130,10 +119,10 @@ public class BlockBreakListener extends AbstractListener
             {
                 for(ServerLocation location : event.locations())
                 {
-                    if(location.blockType() == BlockTypes.AIR)
+                    if(location.blockType() == BlockTypes.AIR.get())
                         continue;
 
-                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
+                    if(!super.getPlugin().getProtectionManager().canBreak(location.createSnapshot(), user, true).hasAccess())
                     {
                         event.setCancelled(true);
                         return;
@@ -163,17 +152,11 @@ public class BlockBreakListener extends AbstractListener
                 }
             }
 
-            if (user == null)
-            {
-//                user = event.context().get(EventContextKeys.OWNER)
-//                        .orElse(event.context().get(EventContextKeys.NOTIFIER).orElse(null));
-            }
-
             for(ServerLocation location : sourceLocations)
             {
                 if(user != null && (pistonExtend || pistonRetract))
                 {
-                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
+                    if(!super.getPlugin().getProtectionManager().canBreak(location.createSnapshot(), user, true).hasAccess())
                     {
                         event.setCancelled(true);
                         return;
@@ -183,28 +166,25 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     final Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
-                    if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
+                    if(optionalChunkFaction.isPresent() && !optionalChunkFaction.get().getProtectionFlags().getValueForFlag(ProtectionFlagType.FIRE_SPREAD))
                     {
                         event.setCancelled(true);
                         return;
                     }
                 }
 
-//                if(isLiquidSource)
-//                    continue;
-
                 if(isLeafDecay)
                     continue;
 
-                if(!isLiquidSource && location.block().type() == BlockTypes.AIR)
+                if(!isLiquidSource && location.block().type() == BlockTypes.AIR.get())
                     continue;
 
-                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
+                if(user != null && !super.getPlugin().getProtectionManager().canBreak(location.createSnapshot(), user, true).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location).hasAccess())
+                else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location.createSnapshot()).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -217,7 +197,7 @@ public class BlockBreakListener extends AbstractListener
             {
                 if(pistonExtend)
                 {
-                    if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
+                    if(!super.getPlugin().getProtectionManager().canBreak(location.createSnapshot(), user, true).hasAccess())
                     {
                         event.setCancelled(true);
                     }
@@ -226,129 +206,20 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
-                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().getName().equalsIgnoreCase("SafeZone")))
+                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()) && !super.getPlugin().getFactionLogic().getFactionByName("SafeZone").getProtectionFlags().getValueForFlag(ProtectionFlagType.FIRE_SPREAD))
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    else if ((optionalChunkFaction.isPresent()) && !optionalChunkFaction.get().getProtectionFlags().getValueForFlag(ProtectionFlagType.FIRE_SPREAD))
                     {
                         event.setCancelled(true);
                         return;
                     }
                 }
-
-                if(isLiquidSource)
-                    continue;
-
-                if(isLeafDecay)
-                    continue;
-
-                //TODO: This runs even when player right clicks the block.
-                if(!super.getPlugin().getProtectionManager().canBreak(location, user, true).hasAccess())
-                {
-                    event.setCancelled(true);
-                    return;
-                }
             }
         }
     }
-
-//    @Listener(order = Order.FIRST, beforeModifications = true)
-//    public void onBlockBreak(final ChangeBlockEvent.Break event)
-//    {
-//        if (event.getCause().containsType(CommandBlockSource.class))
-//            return;
-//
-//        //SpawnType in break event? Should be located in Pre or global event in my opinion.
-//        //Custom Spawn Type = Can be a piston moving block or possibly any other "magically" spawned block.
-//        final boolean isCustomSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.CUSTOM;
-//
-//        if(event instanceof ExplosionEvent || event.getCause().containsType(Explosion.class))
-//            return;
-//
-//        // I guess "placement" in "break" event is something weird?
-//        final boolean isPlacementSpawnType = event.getContext().get(EventContextKeys.SPAWN_TYPE).isPresent() && event.getContext().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.PLACEMENT;
-//        if (isPlacementSpawnType)
-//            return;
-//
-//        final Object source = event.getSource();
-//        User user = null;
-//
-//        //For ICBM
-//        //Missiles and grenades should be handled by explosion listener.
-//        if(source instanceof Entity)
-//        {
-//            // Helps with Mekanism flamethrower
-//            if (ModSupport.isMekenism((Entity)source))
-//            {
-//                final Entity owner = ModSupport.getEntityOwnerFromMekanism((Entity) source);
-//                // Just in case someone gave flamethrower to skeleton or something :P
-//                if (owner instanceof User)
-//                    user = (User)owner;
-//            }
-//            else
-//            {
-//                final Entity entity = (Entity)source;
-//                final String id = entity.getType().getId();
-//                final String name = entity.getType().getName();
-//                if(id.startsWith("icbmclassic:missile") || id.startsWith("icbmclassic:grenade") || name.contains("missile") || name.contains("grenade"))
-//                    return;
-//            }
-//        }
-//
-//        if(event.getCause().containsType(Player.class))
-//        {
-//            user = event.getCause().first(Player.class).get();
-//        }
-//        else if(event.getCause().containsType(User.class))
-//        {
-//            user = event.getCause().first(User.class).get();
-//        }
-//
-//        //Helps blocking dynamite from IC2
-//        if(user == null)
-//        {
-//            user = event.getContext().get(EventContextKeys.OWNER).orElse(null);
-//        }
-//
-//        LocatableBlock locatableBlock = null;
-//        if(event.getSource() instanceof LocatableBlock)
-//        {
-//            locatableBlock = (LocatableBlock) event.getSource();
-//        }
-//        if(locatableBlock != null)
-//        {
-//            if(locatableBlock.getBlockState().getType() == BlockTypes.FLOWING_WATER || locatableBlock.getBlockState().getType() == BlockTypes.FLOWING_LAVA)
-//                return;
-//
-//            Optional<Faction> optionalSourceChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(locatableBlock.getLocation().getExtent().getUniqueId(), locatableBlock.getLocation().getChunkPosition());
-//            if(!optionalSourceChunkFaction.isPresent())
-//                return;
-//        }
-//
-//        if(isCustomSpawnType)
-//            return;
-//
-//        for(Transaction<BlockSnapshot> transaction : event.getTransactions())
-//        {
-//            final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
-//            if(location == null || transaction.getOriginal().getState().getType() == BlockTypes.AIR
-//                    || transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_WATER
-//                    || transaction.getOriginal().getState().getType() == BlockTypes.FLOWING_LAVA)
-//            {
-//                continue;
-//            }
-//
-//            final BlockSnapshot blockSnapshot = transaction.getOriginal();
-//
-//            if(user != null && !super.getPlugin().getProtectionManager().canBreak(blockSnapshot, user, true).hasAccess())
-//            {
-//                event.setCancelled(true);
-//                return;
-//            }
-//            else if(user == null && !super.getPlugin().getProtectionManager().canBreak(location).hasAccess())
-//            {
-//                event.setCancelled(true);
-//                return;
-//            }
-//        }
-//    }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockCollide(final CollideBlockEvent event)
@@ -367,15 +238,7 @@ public class BlockBreakListener extends AbstractListener
                     .filter(ServerPlayer.class::isInstance)
                     .map(ServerPlayer.class::cast)
                     .map(ServerPlayer::user)
-//                    .orElse(context.get(EventContextKeys.NOTIFIER)
-//                            .orElse(context.get(EventContextKeys.CREATOR)
                                     .orElse(null);
-//        } else {
-//            user = context.get(EventContextKeys.NOTIFIER)
-//                    .orElse(context.get(EventContextKeys.OWNER)
-//                            .orElse(context.get(EventContextKeys.CREATOR)
-//                                    .orElse(null)));
-//        }
 
         if (user == null) {
             if (event instanceof ExplosionEvent) {
@@ -391,7 +254,7 @@ public class BlockBreakListener extends AbstractListener
             return;
 
         final BlockType blockType = event.targetBlock().type();
-        if(blockType.equals(BlockTypes.AIR))
+        if(blockType.equals(BlockTypes.AIR.get()))
             return;
 
         Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.uniqueId());
@@ -416,18 +279,11 @@ public class BlockBreakListener extends AbstractListener
         User user = null;
         final Cause cause = event.cause();
         final EventContext context = event.context();
-//        if (cause.root() instanceof BlockEntity) {
-//            user = context.get(EventContextKeys.OWNER)
-//                    .orElse(context.get(EventContextKeys.NOTIFIER)
-//                            .orElse(context.get(EventContextKeys.CREATOR)
-//                                    .orElse(null)));
-//        } else {
             user = context.get(EventContextKeys.PLAYER)
                     .filter(ServerPlayer.class::isInstance)
                     .map(ServerPlayer.class::cast)
                     .map(ServerPlayer::user)
                                     .orElse(null);
-//        }
 
         if (user == null) {
             if (event instanceof ExplosionEvent) {

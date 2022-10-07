@@ -6,6 +6,9 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.util.ModSupport;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
@@ -33,6 +36,8 @@ import java.util.Optional;
 
 public class EntitySpawnListener extends AbstractListener
 {
+    private final ProtectionManager protectionManager;
+    private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
@@ -40,6 +45,8 @@ public class EntitySpawnListener extends AbstractListener
     public EntitySpawnListener(EagleFactions plugin)
     {
         super(plugin);
+        this.protectionManager = plugin.getProtectionManager();
+        this.factionLogic = plugin.getFactionLogic();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
@@ -50,6 +57,7 @@ public class EntitySpawnListener extends AbstractListener
     {
         Cause cause = event.cause();
         Object rootCause = cause.root();
+        ServerPlayer serverPlayerCause = cause.first(ServerPlayer.class).orElse(null);
         EventContext eventContext = event.context();
         final SpawnType spawnType = eventContext.get(EventContextKeys.SPAWN_TYPE).orElse(null);
         final boolean isPlayerPlace = eventContext.get(EventContextKeys.PLAYER_PLACE).isPresent() && eventContext.get(EventContextKeys.CREATOR).isPresent();
@@ -69,7 +77,7 @@ public class EntitySpawnListener extends AbstractListener
                     final Entity entity1 = ModSupport.getEntityOwnerFromMekanism(causeEntity);
                     if (entity1 instanceof User)
                     {
-                        if (!super.getPlugin().getProtectionManager().canBreak(causeEntity.serverLocation(), (User) entity1, false).hasAccess())
+                        if (!this.protectionManager.canBreak(causeEntity.serverLocation().createSnapshot(), (User) entity1, false).hasAccess())
                         {
                             event.setCancelled(true);
                             return;
@@ -78,9 +86,8 @@ public class EntitySpawnListener extends AbstractListener
                 }
                 else if (ModSupport.isIndustrialCraftMiningLaser(entity) && eventContext.containsKey(EventContextKeys.CREATOR))
                 {
-                    ServerPlayer user = (ServerPlayer) eventContext.get(EventContextKeys.PLAYER).get();
                     Entity miningLaser = (Entity)rootCause;
-                    if(!super.getPlugin().getProtectionManager().canExplode(miningLaser.serverLocation(), user.user(), false).hasAccess())
+                    if(!this.protectionManager.canExplode(miningLaser.serverLocation()).hasAccess())
                     {
                         event.setCancelled(true);
                         continue;
@@ -92,20 +99,29 @@ public class EntitySpawnListener extends AbstractListener
 
             if (isItemUsed)
             {
-                final ServerPlayer user = (ServerPlayer) eventContext.get(EventContextKeys.PLAYER).get();
                 final ItemStackSnapshot itemStackSnapshot = eventContext.get(EventContextKeys.USED_ITEM).get();
-                if (!super.getPlugin().getProtectionManager().canUseItem(entity.serverLocation(), user.user(), itemStackSnapshot, true).hasAccess())
+                if (serverPlayerCause != null)
                 {
-                    event.setCancelled(true);
-                    return;
+                    if (!this.protectionManager.canUseItem(entity.serverLocation(), serverPlayerCause.user(), itemStackSnapshot, true).hasAccess())
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (!this.protectionManager.canBreak(entity.serverLocation().createSnapshot()).hasAccess())
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
             }
-            else if(spawnType == SpawnTypes.PLACEMENT && isPlayerPlace)
+            else if(spawnType == SpawnTypes.PLACEMENT.get() && isPlayerPlace)
             {
-                ServerPlayer user = (ServerPlayer) eventContext.get(EventContextKeys.PLAYER).get();
                 //Entity spawned from a command or something similar... (can be a hammer that is being used with right-click on a machine block)
                 //Let's treat is as a place event for now...
-                if(!super.getPlugin().getProtectionManager().canPlace(entity.serverLocation(), user.user(), false).hasAccess())
+                if(!this.protectionManager.canPlace(entity.serverLocation().createSnapshot(), serverPlayerCause.user(), false).hasAccess())
                 {
                     event.setCancelled(true);
                     return;
@@ -153,13 +169,13 @@ public class EntitySpawnListener extends AbstractListener
                     event.setCancelled(true);
                     return;
                 }
-                else if(this.protectionConfig.getWarZoneWorldNames().contains(entity.world().toString()) && !this.protectionConfig.canSpawnHostileMobsInWarZone())
+                else if(this.protectionConfig.getWarZoneWorldNames().contains(entity.world().toString()) && !canSpawnAnimalsInWarzone())
                 {
                     event.setCancelled(true);
                     return;
                 }
 
-                Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
+                Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
                 if(!optionalFaction.isPresent())
                     return;
 
@@ -169,12 +185,12 @@ public class EntitySpawnListener extends AbstractListener
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.isWarZone() && !this.protectionConfig.canSpawnHostileMobsInWarZone())
+                else if(faction.isWarZone() && !faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_MONSTERS))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(!this.protectionConfig.canSpawnHostileMobsInFactionsTerritory())
+                else if(!faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_MONSTERS))
                 {
                     event.setCancelled(true);
                     return;
@@ -190,33 +206,33 @@ public class EntitySpawnListener extends AbstractListener
 
                 //Check worlds
                 if(this.protectionConfig.getSafeZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString())
-                    && !this.protectionConfig.canSpawnMobsInSafeZone())
+                    && !canSpawnAnimalsInSafeZone())
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(this.protectionConfig.getWarZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString()) && !this.protectionConfig.canSpawnMobsInWarZone())
+                else if(this.protectionConfig.getWarZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString()) && !canSpawnAnimalsInWarzone())
                 {
                     event.setCancelled(true);
                     return;
                 }
 
-                Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
+                Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
                 if(!optionalFaction.isPresent())
                     return;
 
                 Faction faction = optionalFaction.get();
-                if(faction.isSafeZone() && !this.protectionConfig.canSpawnMobsInSafeZone())
+                if(faction.isSafeZone() && !faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.isWarZone() && !this.protectionConfig.canSpawnMobsInWarZone())
+                else if(faction.isWarZone() && !faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(!this.protectionConfig.canSpawnMobsInFactionsTerritory())
+                else if(!faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS))
                 {
                     event.setCancelled(true);
                     return;
@@ -224,5 +240,15 @@ public class EntitySpawnListener extends AbstractListener
                 return;
             }
         }
+    }
+
+    private boolean canSpawnAnimalsInSafeZone()
+    {
+        return this.factionLogic.getFactionByName("SafeZone").getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS);
+    }
+
+    private boolean canSpawnAnimalsInWarzone()
+    {
+        return this.factionLogic.getFactionByName("WarZone").getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS);
     }
 }

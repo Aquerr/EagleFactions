@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.config;
 
 import io.github.aquerr.eaglefactions.api.config.*;
+import io.github.aquerr.eaglefactions.util.FileUtils;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -34,20 +35,10 @@ public class ConfigurationImpl implements Configuration
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
 
-    public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset)
+    public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset) throws IOException
     {
         this.configDirectoryPath = configDir;
-        if (!Files.exists(this.configDirectoryPath))
-        {
-            try
-            {
-                Files.createDirectory(this.configDirectoryPath);
-            }
-            catch (IOException exception)
-            {
-                exception.printStackTrace();
-            }
-        }
+        FileUtils.createDirectoryIfNotExists(this.configDirectoryPath);
 
         this.configPath = this.configDirectoryPath.resolve("Settings.conf");
 
@@ -59,7 +50,7 @@ public class ConfigurationImpl implements Configuration
         }
         catch (final IOException e)
         {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
 
         this.configLoader = (HoconConfigurationLoader.builder()).path(this.configPath).build();
@@ -128,7 +119,7 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public void reloadConfiguration()
+    public void reloadConfiguration() throws IOException
     {
         loadConfiguration();
         this.storageConfig.reload();
@@ -140,16 +131,9 @@ public class ConfigurationImpl implements Configuration
         this.factionsConfig.reload();
     }
 
-    private void loadConfiguration()
+    private void loadConfiguration() throws IOException
     {
-        try
-        {
-            configNode = configLoader.load(ConfigurationOptions.defaults().shouldCopyDefaults(true));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        configNode = configLoader.load(ConfigurationOptions.defaults().shouldCopyDefaults(true));
     }
 
     @Override

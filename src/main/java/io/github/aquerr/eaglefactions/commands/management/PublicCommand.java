@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
@@ -15,9 +14,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Optional;
-
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class PublicCommand extends AbstractCommand
 {
@@ -34,17 +30,18 @@ public class PublicCommand extends AbstractCommand
 	{
 		Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
 
-		if(!(context.cause().audience() instanceof ServerPlayer))
+		if(!(isServerPlayer(context.cause().audience())))
 		{
 			if(!optionalFaction.isPresent())
-				throw new CommandException(PluginInfo.ERROR_PREFIX.append(Component.text("You must specify faction name!", RED)));
-			super.getPlugin().getFactionLogic().setIsPublic(optionalFaction.get(), !optionalFaction.get().isPublic());
-			final String publicMessage = !optionalFaction.get().isPublic() ? "Faction is now public." : "Faction is no longer public.";
-			context.sendMessage(Identity.nil(), PluginInfo.PLUGIN_PREFIX.append(Component.text(publicMessage, GREEN)));
+				throw messageService.resolveExceptionWithMessage("error.command.public.no-faction-specified");
+			final Faction faction = optionalFaction.get();
+			final Component message = !faction.isPublic() ? messageService.resolveMessageWithPrefix("command.public.faction-is-now-public") : messageService.resolveMessageWithPrefix("command.public.faction-is-no-longer-public");
+			super.getPlugin().getFactionLogic().setIsPublic(faction, !faction.isPublic());
+			context.sendMessage(Identity.nil(), message);
 			return CommandResult.success();
 		}
 
-		final ServerPlayer player = (ServerPlayer) context.cause().audience();
+		final ServerPlayer player = requirePlayerSource(context);
 		if(!optionalFaction.isPresent())
 			optionalFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
 
@@ -52,11 +49,11 @@ public class PublicCommand extends AbstractCommand
 			throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY);
 
 		final Faction faction = optionalFaction.get();
-		final String publicMessage = !faction.isPublic() ? messageService.resolveMessage("command.public.faction-is-now-public") : messageService.resolveMessage("command.public.faction-is-no-longer-public");
+		final Component message = !faction.isPublic() ? messageService.resolveMessageWithPrefix("command.public.faction-is-now-public") : messageService.resolveMessageWithPrefix("command.public.faction-is-no-longer-public");
 
 		if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
 		{
-			player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(publicMessage, GREEN)));
+			player.sendMessage(message);
 			super.getPlugin().getFactionLogic().setIsPublic(faction, !faction.isPublic());
 			return CommandResult.success();
 		}
@@ -65,7 +62,7 @@ public class PublicCommand extends AbstractCommand
 			throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
 		super.getPlugin().getFactionLogic().setIsPublic(faction, !faction.isPublic());
-		player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(publicMessage, GREEN)));
+		player.sendMessage(message);
 		return CommandResult.success();
 	}
 }

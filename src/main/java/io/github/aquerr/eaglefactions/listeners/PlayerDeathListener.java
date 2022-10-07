@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -12,6 +13,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -35,14 +37,9 @@ public class PlayerDeathListener extends AbstractListener
     @Listener(order = Order.POST)
     public void onPlayerDeath(final DestructEntityEvent.Death event, final @Getter("entity") ServerPlayer player)
     {
-        CompletableFuture.runAsync(() -> super.getPlugin().getPowerManager().decreasePower(player.uniqueId()))
-                .thenRun(() -> player.sendMessage(messageService.resolveComponentWithMessage("power.decreased-by", this.powerConfig.getPowerDecrement())
-                                .append(Component.newline())
-                                .append(messageService.resolveComponentWithMessage("power.current-power",
-                                        super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()),
-                                        super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())))));
+        CompletableFuture.runAsync(() -> checkPowerLossFlagAndDecreasePower(player));
 
-        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        final Optional<Faction> optionalChunkFaction = getFactionAtLocation(player.serverLocation());
         if (this.protectionConfig.getWarZoneWorldNames().contains(player.world().key().asString()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isWarZone()))
         {
             super.getPlugin().getPlayerManager().setDeathInWarZone(player.uniqueId(), true);
@@ -61,5 +58,29 @@ public class PlayerDeathListener extends AbstractListener
         {
             super.getPlugin().getPVPLogger().removePlayer(player);
         }
+    }
+
+    private void checkPowerLossFlagAndDecreasePower(ServerPlayer player)
+    {
+        getFactionAtLocation(player.serverLocation())
+                .map(Faction::getProtectionFlags)
+                .map(protectionFlags -> protectionFlags.getValueForFlag(ProtectionFlagType.TERRITORY_POWER_LOSS))
+                .filter(Boolean.TRUE::equals)
+                .ifPresent((value) -> decreasePower(player));
+    }
+
+    private void decreasePower(ServerPlayer player)
+    {
+        super.getPlugin().getPowerManager().decreasePower(player.uniqueId());
+        player.sendMessage(messageService.resolveComponentWithMessage("power.decreased-by", this.powerConfig.getPowerDecrement())
+                .append(Component.newline())
+                .append(messageService.resolveComponentWithMessage("power.current-power",
+                        super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()),
+                        super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId()))));
+    }
+
+    private Optional<Faction> getFactionAtLocation(ServerLocation serverLocation)
+    {
+        return super.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().uniqueId(), serverLocation.chunkPosition());
     }
 }

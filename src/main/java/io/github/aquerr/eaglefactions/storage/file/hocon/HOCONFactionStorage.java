@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.vo.FactionName;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.util.FileUtils;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,14 +28,12 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class HOCONFactionStorage implements FactionStorage
 {
-    private final Path configDir;
     private final Path factionsDir;
 
     private final Map<FactionName, ConfigurationLoader<CommentedConfigurationNode>> factionLoaders;
 
     public HOCONFactionStorage(final Path configDir)
     {
-        this.configDir = configDir;
         this.factionsDir = configDir.resolve("factions");
         this.factionLoaders = new HashMap<>();
 

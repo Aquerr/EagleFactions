@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionInvite;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
@@ -83,6 +84,7 @@ import io.github.aquerr.eaglefactions.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
@@ -132,26 +134,33 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +188,8 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final Map<UUID, ChatEnum> CHAT_LIST = new HashMap<>();
     public static final Map<UUID, Integer> HOME_COOLDOWN_PLAYERS = new HashMap<>();
     public static final List<UUID> DEBUG_MODE_PLAYERS = new LinkedList<>();
+
+    public static Key<Value<Boolean>> IS_EAGLE_FEATHER_KEY;
 
     private static EagleFactionsPlugin eagleFactions;
     private final Logger logger;
@@ -257,6 +268,13 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Listener
+    public void onDataRegister(RegisterDataEvent event)
+    {
+        IS_EAGLE_FEATHER_KEY = Key.from(this.pluginContainer, "is_eagle_feather", Boolean.class);
+        event.register(DataRegistration.of(IS_EAGLE_FEATHER_KEY, ItemStack.class));
+    }
+
+    @Listener
     public void onPluginLoad(final LoadedGameEvent event)
     {
         if (this.isDisabled)
@@ -309,6 +327,14 @@ public class EagleFactionsPlugin implements EagleFactions
         {
             final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0))
                     .setCreatedDate(Instant.now())
+                    .setProtectionFlags(new HashSet<>(Arrays.asList(
+                    new ProtectionFlagImpl(ProtectionFlagType.PVP, true),
+                    new ProtectionFlagImpl(ProtectionFlagType.FIRE_SPREAD, true),
+                    new ProtectionFlagImpl(ProtectionFlagType.MOB_GRIEF, true),
+                    new ProtectionFlagImpl(ProtectionFlagType.ALLOW_EXPLOSION, true),
+                    new ProtectionFlagImpl(ProtectionFlagType.SPAWN_MONSTERS, true),
+                    new ProtectionFlagImpl(ProtectionFlagType.SPAWN_ANIMALS, true)
+            )))
                     .build();
             this.factionLogic.addFaction(warzone);
         }
@@ -316,6 +342,14 @@ public class EagleFactionsPlugin implements EagleFactions
         {
             final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0))
                     .setCreatedDate(Instant.now())
+                    .setProtectionFlags(new HashSet<>(Arrays.asList(
+                            new ProtectionFlagImpl(ProtectionFlagType.PVP, false),
+                            new ProtectionFlagImpl(ProtectionFlagType.FIRE_SPREAD, false),
+                            new ProtectionFlagImpl(ProtectionFlagType.MOB_GRIEF, false),
+                            new ProtectionFlagImpl(ProtectionFlagType.ALLOW_EXPLOSION, false),
+                            new ProtectionFlagImpl(ProtectionFlagType.SPAWN_MONSTERS, false),
+                            new ProtectionFlagImpl(ProtectionFlagType.SPAWN_ANIMALS, true)
+                    )))
                     .build();
             this.factionLogic.addFaction(safezone);
         }
@@ -417,18 +451,27 @@ public class EagleFactionsPlugin implements EagleFactions
         if (isDisabled)
             return;
 
-        this.configuration.reloadConfiguration();
-        this.storageManager.reloadStorage();
-
-        if (this.configuration.getDynmapConfig().isDynmapIntegrationEnabled())
+        try
         {
-            this.dynmapService.reload();
-        }
+            this.configuration.reloadConfiguration();
+            this.storageManager.reloadStorage();
 
-        if(event.source() instanceof Player)
+            if (this.configuration.getDynmapConfig().isDynmapIntegrationEnabled())
+            {
+                this.dynmapService.reload();
+            }
+
+            if(event.source() instanceof Player)
+            {
+                Player player = (Player)event.source();
+                player.sendMessage(messageService.resolveMessageWithPrefix("command.reload.config-reloaded"));
+            }
+        }
+        catch (IOException e)
         {
             Player player = (Player)event.source();
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.reload.config-reloaded"));
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.reload")));
+            e.printStackTrace();
         }
     }
 
@@ -436,6 +479,11 @@ public class EagleFactionsPlugin implements EagleFactions
     public void onRegisterPlaceholderEvent(RegisterRegistryValueEvent.GameScoped event)
     {
         this.efPlaceholderService.onRegisterPlaceholderEvent(event);
+    }
+
+    public Logger getLogger()
+    {
+        return this.logger;
     }
 
     @Override
@@ -544,7 +592,7 @@ public class EagleFactionsPlugin implements EagleFactions
         this.logger.info(PLUGIN_PREFIX_PLAIN + message);
     }
 
-    private void setupConfigs()
+    private void setupConfigs() throws IOException
     {
         Resource resource = ResourceUtils.getResource("assets/eaglefactions/Settings.conf");
         if (resource == null)
@@ -1105,7 +1153,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().unregisterListeners(this);
 //        Sponge.server().commandManager().registrar(Command.Parameterized.class).get()
 //        Sponge.server().commandManager().getOwnedBy(this).forEach(Sponge.getCommandManager()::removeMapping);
-        this.logger.info(PLUGIN_PREFIX_PLAIN + "EagleFactions has been disabled!");
+        this.logger.info(PLUGIN_PREFIX_PLAIN + "EagleFactions has been disabled due to an error!");
     }
 
     private boolean isUltimateChatLoaded() {

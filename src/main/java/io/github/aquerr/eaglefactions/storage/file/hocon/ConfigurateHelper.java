@@ -9,12 +9,14 @@ import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.EFTypeTokens;
+import io.github.aquerr.eaglefactions.storage.serializers.ProtectionFlagTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.Vector3iTypeSerializer;
@@ -69,6 +71,7 @@ public class ConfigurateHelper
             configNode.node("perms").set(faction.getPerms());
             configNode.node("chest").set(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, faction.getChest().getItems());
             configNode.node("isPublic").set(faction.isPublic());
+            configNode.node("protection_flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags().getProtectionFlags());
 
             if(faction.getHome() == null)
             {
@@ -107,30 +110,6 @@ public class ConfigurateHelper
         }
     }
 
-    public static List<Faction> getFactionsFromNode(final ConfigurationNode configNode)
-    {
-        final List<Faction> factions = new ArrayList<>();
-
-        final Set<Object> keySet = configNode.childrenMap().keySet();
-        for(final Object object : keySet)
-        {
-            if(object instanceof String)
-            {
-                try
-                {
-                    final Faction faction = getFactionFromNode(configNode.node(object));
-                    factions.add(faction);
-                }
-                catch (final Exception e)
-                {
-                    LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while getting faction'" + object + "' from node.");
-                    e.printStackTrace();
-                }
-            }
-        }
-        return factions;
-    }
-
     public static Faction getFactionFromNode(final ConfigurationNode configNode) throws SerializationException
     {
         String factionName;
@@ -164,6 +143,7 @@ public class ConfigurateHelper
         final Instant lastOnline = configNode.node("last_online").get(Instant.class) != null ? Instant.parse(configNode.node("last_online").getString()) : Instant.now();
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.node("perms"));
         final List<FactionChest.SlotItem> slotItems = configNode.node("chest").get(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN);
+        final Set<ProtectionFlag> protectionFlags = configNode.node("protection_flags").get(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, Collections.emptySet());
 
         FactionChest chest;
         if (slotItems == null)
@@ -187,6 +167,7 @@ public class ConfigurateHelper
                 .setPerms(perms)
                 .setChest(chest)
                 .setIsPublic(isPublic)
+                .setProtectionFlags(protectionFlags)
                 .build();
     }
 
@@ -309,6 +290,7 @@ public class ConfigurateHelper
                 .register(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, new SlotItemListTypeSerializer())
                 .register(EFTypeTokens.SLOT_ITEM_TYPE_TOKEN, new SlotItemTypeSerializer())
                 .register(EFTypeTokens.VECTOR_3I_TOKEN, new Vector3iTypeSerializer())
+                .register(EFTypeTokens.PROTECTION_FLAG_TYPE_TOKEN, new ProtectionFlagTypeSerializer())
                 .build();
 
         final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults()

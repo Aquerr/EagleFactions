@@ -1,13 +1,26 @@
 package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.api.entities.*;
+import io.github.aquerr.eaglefactions.api.entities.Claim;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionChest;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import net.kyori.adventure.text.TextComponent;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * The implementation of Faction interface.
@@ -35,6 +48,8 @@ public class FactionImpl implements Faction
 
     private FactionChest chest;
 
+    private ProtectionFlags protectionFlags;
+
     public FactionImpl(final BuilderImpl builder)
     {
         this.name = builder.name;
@@ -55,6 +70,7 @@ public class FactionImpl implements Faction
         this.perms = builder.perms;
         this.chest = builder.chest;
         this.isPublic = builder.isPublic;
+        this.protectionFlags = new ProtectionFlagsImpl(builder.protectionFlags);
     }
 
     @Override
@@ -206,6 +222,12 @@ public class FactionImpl implements Faction
     }
 
     @Override
+    public ProtectionFlags getProtectionFlags()
+    {
+        return protectionFlags;
+    }
+
+    @Override
     public boolean containsPlayer(final UUID playerUUID)
     {
         if (this.leader.equals(playerUUID))
@@ -238,6 +260,7 @@ public class FactionImpl implements Faction
         factionBuilder.setPerms(this.perms);
         factionBuilder.setChest(this.chest);
         factionBuilder.setIsPublic(this.isPublic);
+        factionBuilder.setProtectionFlags(this.getProtectionFlags().getProtectionFlags());
 
         return factionBuilder;
     }
@@ -259,13 +282,13 @@ public class FactionImpl implements Faction
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FactionImpl faction = (FactionImpl) o;
-        return isPublic == faction.isPublic && name.equals(faction.name) && tag.equals(faction.tag) && description.equals(faction.description) && messageOfTheDay.equals(faction.messageOfTheDay) && recruits.equals(faction.recruits) && members.equals(faction.members) && truces.equals(faction.truces) && alliances.equals(faction.alliances) && enemies.equals(faction.enemies) && leader.equals(faction.leader) && officers.equals(faction.officers) && claims.equals(faction.claims) && Objects.equals(home, faction.home) && lastOnline.equals(faction.lastOnline) && createdDate.equals(faction.createdDate) && perms.equals(faction.perms) && chest.equals(faction.chest);
+        return isPublic == faction.isPublic && name.equals(faction.name) && tag.equals(faction.tag) && description.equals(faction.description) && messageOfTheDay.equals(faction.messageOfTheDay) && recruits.equals(faction.recruits) && members.equals(faction.members) && truces.equals(faction.truces) && alliances.equals(faction.alliances) && enemies.equals(faction.enemies) && leader.equals(faction.leader) && officers.equals(faction.officers) && claims.equals(faction.claims) && Objects.equals(home, faction.home) && lastOnline.equals(faction.lastOnline) && createdDate.equals(faction.createdDate) && perms.equals(faction.perms) && chest.equals(faction.chest) && protectionFlags.equals(faction.protectionFlags);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(name, tag, description, messageOfTheDay, recruits, members, truces, alliances, enemies, leader, officers, claims, home, lastOnline, createdDate, isPublic, perms, chest);
+        return Objects.hash(name, tag, description, messageOfTheDay, recruits, members, truces, alliances, enemies, leader, officers, claims, home, lastOnline, createdDate, isPublic, perms, chest, protectionFlags);
     }
 
     //Builder
@@ -288,6 +311,7 @@ public class FactionImpl implements Faction
         private Instant createdDate;
         private Map<FactionMemberType, Map<FactionPermType, Boolean>> perms;
         private FactionChest chest;
+        private Set<ProtectionFlag> protectionFlags;
         private boolean isPublic;
 
         private BuilderImpl()
@@ -301,6 +325,7 @@ public class FactionImpl implements Faction
             this.enemies = new HashSet<>();
             this.officers = new HashSet<>();
             this.claims = new HashSet<>();
+            this.protectionFlags = new HashSet<>();
             this.home = null;
             this.isPublic = false;
         }
@@ -419,6 +444,12 @@ public class FactionImpl implements Faction
         public Builder setIsPublic(final boolean isPublic)
         {
             this.isPublic = isPublic;
+            return this;
+        }
+
+        public Builder setProtectionFlags(Set<ProtectionFlag> protectionFlags)
+        {
+            this.protectionFlags = protectionFlags;
             return this;
         }
 

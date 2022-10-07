@@ -18,8 +18,13 @@ import org.spongepowered.plugin.PluginContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -35,17 +40,8 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	private CommentedConfigurationNode worldsConfigNode;
 
 	private boolean protectWildernessFromPlayers = false;
-	private boolean protectFromMobGrief = false;
-	private boolean protectFromMobGriefWarZone = false;
 	private boolean allowExplosionsByOtherPlayersInClaims = false;
 	private boolean protectWarZoneFromPlayers = true;
-
-	//Mob Spawning
-	private boolean spawnMobsInSafeZone = true;
-	private boolean spawnMobsInWarZone = true;
-	private boolean spawnHostileMobsInWarZone = true;
-	private boolean spawnMobsInFactionsTerritory = true;
-	private boolean spawnHostileMobsInFactionsTerritory = true;
 
 	//Worlds
 	private Set<String> claimableWorldNames = new HashSet<>();
@@ -89,36 +85,19 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	}
 
 	@Override
-	public void reload()
+	public void reload() throws IOException
 	{
 		loadWorldsFile();
 
 		this.protectWildernessFromPlayers = this.configuration.getBoolean(false, "protect-wilderness-from-players");
-		this.protectFromMobGrief = this.configuration.getBoolean(false, "protect-from-mob-grief");
-		this.protectFromMobGriefWarZone = this.configuration.getBoolean(false, "protect-from-mob-grief-warzone");
 		this.allowExplosionsByOtherPlayersInClaims = this.configuration.getBoolean(false, "allow-explosions-by-other-players-in-claims");
 		this.protectWarZoneFromPlayers = this.configuration.getBoolean(true, "protect-warzone-from-players");
 
-		//Mob spawning
-		this.spawnMobsInSafeZone = this.configuration.getBoolean(true, "spawn-mobs-in-safezone");
-		this.spawnMobsInWarZone = this.configuration.getBoolean(true, "spawn-mobs-in-warzone");
-		this.spawnHostileMobsInWarZone = this.configuration.getBoolean(true, "spawn-hostile-mobs-in-warzone");
-		this.spawnMobsInFactionsTerritory = this.configuration.getBoolean(true, "spawn-mobs-in-factions-territory");
-		this.spawnHostileMobsInFactionsTerritory = this.configuration.getBoolean(true, "spawn-hostile-mobs-in-factions-territory");
-
 		//Worlds
-		try
-		{
-			this.claimableWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "CLAIMABLE").getList(TypeToken.get(String.class), ArrayList::new));
-			this.notClaimableWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "NOT_CLAIMABLE").getList(TypeToken.get(String.class), ArrayList::new));
-			this.safeZoneWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "SAFE_ZONE").getList(TypeToken.get(String.class), ArrayList::new));
-			this.warZoneWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "WAR_ZONE").getList(TypeToken.get(String.class), ArrayList::new));
-		}
-		catch (final SerializationException e)
-		{
-			e.printStackTrace();
-		}
-
+		this.claimableWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "CLAIMABLE").getList(TypeToken.get(String.class), ArrayList::new));
+		this.notClaimableWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "NOT_CLAIMABLE").getList(TypeToken.get(String.class), ArrayList::new));
+		this.safeZoneWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "SAFE_ZONE").getList(TypeToken.get(String.class), ArrayList::new));
+		this.warZoneWorldNames = new HashSet<>(this.worldsConfigNode.node("worlds", "WAR_ZONE").getList(TypeToken.get(String.class), ArrayList::new));
 		validateWorlds();
 
 		//Whitelisted items and blocks
@@ -240,49 +219,6 @@ public class ProtectionConfigImpl implements ProtectionConfig
 			e.printStackTrace();
 		}
 		saveWorldsFile();
-	}
-
-	//Mob spawning methods
-	@Override
-	public boolean canSpawnMobsInSafeZone()
-	{
-		return this.spawnMobsInSafeZone;
-	}
-
-	@Override
-	public boolean canSpawnMobsInWarZone()
-	{
-		return this.spawnMobsInWarZone;
-	}
-
-	@Override
-	public boolean canSpawnHostileMobsInWarZone()
-	{
-		return this.spawnHostileMobsInWarZone;
-	}
-
-	@Override
-	public boolean canSpawnMobsInFactionsTerritory()
-	{
-		return this.spawnMobsInFactionsTerritory;
-	}
-
-	@Override
-	public boolean canSpawnHostileMobsInFactionsTerritory()
-	{
-		return this.spawnHostileMobsInFactionsTerritory;
-	}
-
-	@Override
-	public boolean shouldProtectClaimFromMobGrief()
-	{
-		return protectFromMobGrief;
-	}
-
-	@Override
-	public boolean shouldProtectWarZoneFromMobGrief()
-	{
-		return protectFromMobGriefWarZone;
 	}
 
 	@Override

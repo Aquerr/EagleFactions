@@ -5,6 +5,8 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
@@ -12,6 +14,7 @@ import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.validator.AlphaNumericFactionNameTagValidator;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import net.kyori.adventure.audience.Audience;
@@ -24,7 +27,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
@@ -127,6 +133,7 @@ public class CreateCommand extends AbstractCommand
     {
         final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), player.uniqueId())
                 .setCreatedDate(Instant.now())
+                .setProtectionFlags(prepareDefaultProtectionFlags())
                 .build();
         final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
         if (isCancelled)
@@ -150,10 +157,24 @@ public class CreateCommand extends AbstractCommand
     {
         final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), new UUID(0, 0))
                 .setCreatedDate(Instant.now())
+                .setProtectionFlags(prepareDefaultProtectionFlags())
                 .build();
         super.getPlugin().getFactionLogic().addFaction(faction);
         notifyServerPlayersAboutNewFaction(faction);
         audience.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
+    }
+
+    private Set<ProtectionFlag> prepareDefaultProtectionFlags()
+    {
+        return new HashSet<>(Arrays.asList(
+                new ProtectionFlagImpl(ProtectionFlagType.TERRITORY_POWER_LOSS, true),
+                new ProtectionFlagImpl(ProtectionFlagType.ALLOW_EXPLOSION, true),
+                new ProtectionFlagImpl(ProtectionFlagType.MOB_GRIEF, true),
+                new ProtectionFlagImpl(ProtectionFlagType.PVP, true),
+                new ProtectionFlagImpl(ProtectionFlagType.FIRE_SPREAD, true),
+                new ProtectionFlagImpl(ProtectionFlagType.SPAWN_ANIMALS, true),
+                new ProtectionFlagImpl(ProtectionFlagType.SPAWN_MONSTERS, true)
+        ));
     }
 
     private void notifyServerPlayersAboutNewFaction(Faction faction)

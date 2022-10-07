@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.storage.serializers;
 
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -23,6 +24,8 @@ public final class EFTypeTokens
     public static final TypeToken<UUID> UUID_TOKEN = TypeToken.get(UUID.class);
 
     public static final TypeToken<Vector3i> VECTOR_3I_TOKEN = TypeToken.get(Vector3i.class);
+    public static final TypeToken<Set<ProtectionFlag>> PROTECTION_FLAGS_SET_TYPE_TOKEN = new TypeToken<Set<ProtectionFlag>>() {};
+    public static final TypeToken<ProtectionFlag> PROTECTION_FLAG_TYPE_TOKEN = TypeToken.get(ProtectionFlag.class);
 
     private EFTypeTokens()
     {

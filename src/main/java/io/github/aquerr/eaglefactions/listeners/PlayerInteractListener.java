@@ -22,6 +22,7 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
@@ -44,32 +45,10 @@ public class PlayerInteractListener extends AbstractListener
             return;
 
         ServerLocation location = player.serverLocation();
-
-        //TODO: Probably to delete
-//        Location<World> location = event.getInteractionPoint()
-//                .map(interactionPoint -> new Location<>(player.getWorld(), interactionPoint))
-//                .orElse(player.getLocation());
-
-        //TODO: To test... don't know how mods will behave with it.
-//        if (location.getBlockType() == BlockTypes.AIR)
-//            return;
-
-        //Handle hitting entities
-//        boolean hasHitEntity = event.getContext().containsKey(EventContextKeys.ENTITY_HIT);
-//        if(hasHitEntity)
-//        {
-//            final Entity hitEntity = event.getContext().get(EventContextKeys.ENTITY_HIT).get();
-//            if (hitEntity instanceof Living && !(hitEntity instanceof ArmorStand))
-//                return;
-//
-//            location = hitEntity.getLocation();
-//        }
-
         final ProtectionResult protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player.user(), event.itemStack(), true);
         if (!protectionResult.hasAccess())
         {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -85,7 +64,6 @@ public class PlayerInteractListener extends AbstractListener
         if(!canInteractWithEntity)
         {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -93,7 +71,7 @@ public class PlayerInteractListener extends AbstractListener
     public void onBlockInteract(final InteractBlockEvent.Secondary event, @Root final ServerPlayer player)
     {
         //If AIR or NONE then return
-        if (event.block() == BlockSnapshot.empty() || event.block().state().type() == BlockTypes.AIR)
+        if (event.block() == BlockSnapshot.empty() || event.block().state().type() == BlockTypes.AIR.get())
             return;
 
         event.block().location()
@@ -104,7 +82,7 @@ public class PlayerInteractListener extends AbstractListener
     public void onBlockInteract(final InteractBlockEvent.Primary event, @Root final ServerPlayer player)
     {
         //If AIR or NONE then return
-        if (event.block() == BlockSnapshot.empty() || event.block().state().type() == BlockTypes.AIR)
+        if (event.block() == BlockSnapshot.empty() || event.block().state().type() == BlockTypes.AIR.get())
             return;
 
         event.block().location()
@@ -142,7 +120,7 @@ public class PlayerInteractListener extends AbstractListener
         ProtectionResult protectionResult;
         if (usedItem != null)
         {
-            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player.user(), interactBlockEvent.context().get(EventContextKeys.USED_ITEM).get(), shouldNotify);
+            protectionResult = super.getPlugin().getProtectionManager().canUseItem(location, player.user(), usedItem, shouldNotify);
         }
         else
         {
@@ -164,6 +142,6 @@ public class PlayerInteractListener extends AbstractListener
 
     private boolean isItemStackNotAirAndNotEmpty(ItemStackSnapshot itemStackSnapshot)
     {
-        return ItemTypes.AIR != itemStackSnapshot.type() && !itemStackSnapshot.isEmpty();
+        return ItemTypes.AIR.get() != itemStackSnapshot.type() && !itemStackSnapshot.isEmpty();
     }
 }
