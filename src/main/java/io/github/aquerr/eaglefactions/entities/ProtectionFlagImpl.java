@@ -3,6 +3,8 @@ package io.github.aquerr.eaglefactions.entities;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 
+import java.util.Objects;
+
 public class ProtectionFlagImpl implements ProtectionFlag
 {
     private final ProtectionFlagType type;

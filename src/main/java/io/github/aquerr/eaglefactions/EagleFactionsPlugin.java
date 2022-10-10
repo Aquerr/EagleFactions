@@ -30,9 +30,11 @@ import io.github.aquerr.eaglefactions.commands.access.NotAccessibleByFactionComm
 import io.github.aquerr.eaglefactions.commands.access.OwnedByCommand;
 import io.github.aquerr.eaglefactions.commands.admin.AdminCommand;
 import io.github.aquerr.eaglefactions.commands.admin.DebugCommand;
+import io.github.aquerr.eaglefactions.commands.admin.FlagsCommand;
 import io.github.aquerr.eaglefactions.commands.admin.RegenCommand;
 import io.github.aquerr.eaglefactions.commands.admin.ReloadCommand;
 import io.github.aquerr.eaglefactions.commands.admin.SetFactionCommand;
+import io.github.aquerr.eaglefactions.commands.admin.SetFlagCommand;
 import io.github.aquerr.eaglefactions.commands.admin.SetMaxPowerCommand;
 import io.github.aquerr.eaglefactions.commands.admin.SetMaxPowerForEveryoneCommand;
 import io.github.aquerr.eaglefactions.commands.admin.SetPowerCommand;
@@ -1101,6 +1103,23 @@ public class EagleFactionsPlugin implements EagleFactions
                 .addChild(accessFactionCommand, "faction", "f")
                 .addChild(accessOwnedByCommand, "ownedBy")
                 .addChild(accessibleByFactionCommand, "notAccessibleByFaction")
+                .build());
+
+        //Flags Command
+        SUBCOMMANDS.put(Collections.singletonList("flags"), Command.builder()
+                .shortDescription(messageService.resolveComponentWithMessage("command.flags.desc"))
+                .permission(PluginPermissions.FLAGS_COMMAND)
+                .executor(new FlagsCommand(this))
+                .addParameter(EagleFactionsCommandParameters.faction())
+                .build());
+
+        SUBCOMMANDS.put(Collections.singletonList("setflag"), Command.builder()
+                .shortDescription(messageService.resolveComponentWithMessage("command.setflag.desc"))
+                .permission(PluginPermissions.SET_FLAG_COMMAND)
+                .executor(new SetFlagCommand(this))
+                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(Parameter.enumValue(ProtectionFlagType.class).key("flag").build())
+                .addParameter(Parameter.bool().key("value").build())
                 .build());
 
         //Build all commands

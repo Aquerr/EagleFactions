@@ -83,7 +83,8 @@ public final class PluginPermissions
     public static final String FEATHER_COMMAND = "eaglefactions.admin.feather";
 
     public static final String REGEN_COMMAND = "eaglefactions.admin.regen";
-
+    public static final String FLAGS_COMMAND = "eaglefactions.admin.flags";
+    public static final String SET_FLAG_COMMAND = "eaglefactions.admin.setflag";
     public static final String RELOAD_COMMAND = "eaglefactions.admin.reload";
     public static final String VERSION_NOTIFY = "eaglefactions.admin.version.notify";
 
@@ -94,7 +95,6 @@ public final class PluginPermissions
     public static final String WAR_ZONE_INTERACT = "eaglefactions.warzone.interact";
     public static final String BACKUP_COMMAND = "eaglefactions.admin.backup.create";
     public static final String RESTORE_BACKUP_COMMAND = "eaglefactions.admin.backup.restore";
-
     private PluginPermissions()
     {
 

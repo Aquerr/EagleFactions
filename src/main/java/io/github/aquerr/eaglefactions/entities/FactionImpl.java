@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
@@ -222,9 +223,15 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public ProtectionFlags getProtectionFlags()
+    public boolean getProtectionFlagValue(ProtectionFlagType type)
     {
-        return protectionFlags;
+        return this.protectionFlags.getValueForFlag(type);
+    }
+
+    @Override
+    public Set<ProtectionFlag> getProtectionFlags()
+    {
+        return this.protectionFlags.getProtectionFlags();
     }
 
     @Override
@@ -260,7 +267,7 @@ public class FactionImpl implements Faction
         factionBuilder.setPerms(this.perms);
         factionBuilder.setChest(this.chest);
         factionBuilder.setIsPublic(this.isPublic);
-        factionBuilder.setProtectionFlags(this.getProtectionFlags().getProtectionFlags());
+        factionBuilder.setProtectionFlags(this.getProtectionFlags());
 
         return factionBuilder;
     }

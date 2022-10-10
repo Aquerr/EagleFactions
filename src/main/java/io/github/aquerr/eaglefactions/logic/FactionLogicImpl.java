@@ -10,6 +10,9 @@ import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
@@ -18,6 +21,7 @@ import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
@@ -987,6 +991,18 @@ public class FactionLogicImpl implements FactionLogic
             maxclaims = maxclaims + provider.getMaxClaimCount(faction);
         }
         return maxclaims;
+    }
+
+    @Override
+    public void setFactionProtectionFlag(Faction faction, ProtectionFlagType flagType, boolean value)
+    {
+        checkNotNull(faction);
+        checkNotNull(flagType);
+
+        Set<ProtectionFlag> protectionFlags = faction.getProtectionFlags();
+        protectionFlags.add(new ProtectionFlagImpl(flagType, value));
+        Faction updatedFaction = faction.toBuilder().setProtectionFlags(protectionFlags).build();
+        this.storageManager.saveFaction(updatedFaction);
     }
 
     private void removeClaimInternal(final Faction faction, final Claim claim)

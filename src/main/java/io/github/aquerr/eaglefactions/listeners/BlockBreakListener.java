@@ -166,7 +166,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     final Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
-                    if(optionalChunkFaction.isPresent() && !optionalChunkFaction.get().getProtectionFlags().getValueForFlag(ProtectionFlagType.FIRE_SPREAD))
+                    if(optionalChunkFaction.isPresent() && !optionalChunkFaction.get().getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
                     {
                         event.setCancelled(true);
                         return;
@@ -206,12 +206,12 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
-                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()) && !super.getPlugin().getFactionLogic().getFactionByName("SafeZone").getProtectionFlags().getValueForFlag(ProtectionFlagType.FIRE_SPREAD))
+                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()) && !super.getPlugin().getFactionLogic().getFactionByName("SafeZone").getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
                     {
                         event.setCancelled(true);
                         return;
                     }
-                    else if ((optionalChunkFaction.isPresent()) && !optionalChunkFaction.get().getProtectionFlags().getValueForFlag(ProtectionFlagType.FIRE_SPREAD))
+                    else if ((optionalChunkFaction.isPresent()) && !optionalChunkFaction.get().getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
                     {
                         event.setCancelled(true);
                         return;

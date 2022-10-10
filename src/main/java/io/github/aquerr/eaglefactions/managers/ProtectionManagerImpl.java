@@ -429,8 +429,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             else return ProtectionResult.forbiddenSafeZone();
         }
 
-        boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName("WarZone")
-                .getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF);
+        boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName("WarZone").getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF);
         if(this.protectionConfig.getWarZoneWorldNames().contains(world.key().asString()) && shouldProtectWarZoneFromMobGrief)
         {
             //Not sure if we should use white-list for mobs...
@@ -447,7 +446,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         {
             if(isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.SAFE_ZONE))
                 return ProtectionResult.okSafeZone();
-            if (optionalChunkFaction.get().getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+            if (optionalChunkFaction.get().getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                 return ProtectionResult.okSafeZone();
             else return ProtectionResult.forbiddenSafeZone();
         }
@@ -459,7 +458,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             else return ProtectionResult.forbiddenWarZone();
         }
 
-        if(!optionalChunkFaction.get().getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+        if(!optionalChunkFaction.get().getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
         {
             if (isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.FACTION))
                 return ProtectionResult.ok();
@@ -607,7 +606,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             return ProtectionResult.ok();
 
         boolean allowExplosionsFromPlayersInWarZone = this.factionLogic.getFactionByName("WarZone")
-                .getProtectionFlags().getValueForFlag(ProtectionFlagType.ALLOW_EXPLOSION);
+                .getProtectionFlagValue(ProtectionFlagType.ALLOW_EXPLOSION);
         boolean allowExplosionsByOtherServerPlayersInClaims = this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims();
 
         //Check if admin
@@ -641,7 +640,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if (user.hasPermission(PluginPermissions.SAFE_ZONE_BUILD))
                     return ProtectionResult.okSafeZone();
-                if (chunkFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.ALLOW_EXPLOSION))
+                if (chunkFaction.getProtectionFlagValue(ProtectionFlagType.ALLOW_EXPLOSION))
                     return ProtectionResult.okSafeZone();
                 else return ProtectionResult.forbiddenSafeZone();
             }
@@ -649,7 +648,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if (chunkFaction.isWarZone() && user.hasPermission(PluginPermissions.WAR_ZONE_BUILD))
                     return ProtectionResult.okWarZone();
-                if (chunkFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.ALLOW_EXPLOSION))
+                if (chunkFaction.getProtectionFlagValue(ProtectionFlagType.ALLOW_EXPLOSION))
                     return ProtectionResult.okWarZone();
                 else return ProtectionResult.forbiddenWarZone();
             }
@@ -680,8 +679,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(this.protectionConfig.getNotClaimableWorldNames().contains(location.world().key().asString()))
             return ProtectionResult.ok();
 
-        boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName("WarZone")
-                .getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF);
+        boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName("WarZone").getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF);
 
         //Check world
         if (this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()))
@@ -706,8 +704,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         else
         {
             if (!this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition())
-                    .map(Faction::getProtectionFlags)
-                    .map(protectionFlags -> protectionFlags.getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                    .map(faction -> faction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     .orElse(false))
                 return ProtectionResult.ok();
             else return ProtectionResult.forbidden();
@@ -847,7 +844,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.forbiddenSafeZone();
             else if(faction.isWarZone()) //Notified WarZone
             {
-                if (faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                if (faction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     return ProtectionResult.okWarZone();
                 else return ProtectionResult.forbiddenWarZone();
             }
@@ -855,7 +852,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.FACTION))
                     return ProtectionResult.ok();
-                if(faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF)) //Notified Regular faction
+                if(faction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF)) //Notified Regular faction
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
             }
@@ -880,13 +877,13 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.WAR_ZONE))
                     return ProtectionResult.okWarZone();
-                if (targetFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     return ProtectionResult.okWarZone();
                 else return ProtectionResult.forbiddenWarZone();
             }
             else
             {
-                if (targetFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
             }
@@ -903,7 +900,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.FACTION))
                     return ProtectionResult.ok();
-                if (targetFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
             }
@@ -920,7 +917,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.WAR_ZONE))
                     return ProtectionResult.okWarZone();
-                if(targetFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                if(targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     return ProtectionResult.okWarZone();
                 else return ProtectionResult.forbiddenWarZone();
             }
@@ -928,7 +925,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.FACTION))
                     return ProtectionResult.ok();
-                if (targetFaction.getProtectionFlags().getValueForFlag(ProtectionFlagType.MOB_GRIEF))
+                if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     return ProtectionResult.ok();
                 else return ProtectionResult.forbidden();
             }

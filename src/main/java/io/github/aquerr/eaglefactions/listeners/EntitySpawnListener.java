@@ -185,12 +185,12 @@ public class EntitySpawnListener extends AbstractListener
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.isWarZone() && !faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_MONSTERS))
+                else if(faction.isWarZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_MONSTERS))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(!faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_MONSTERS))
+                else if(!faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_MONSTERS))
                 {
                     event.setCancelled(true);
                     return;
@@ -222,17 +222,17 @@ public class EntitySpawnListener extends AbstractListener
                     return;
 
                 Faction faction = optionalFaction.get();
-                if(faction.isSafeZone() && !faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS))
+                if(faction.isSafeZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(faction.isWarZone() && !faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS))
+                else if(faction.isWarZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
                 {
                     event.setCancelled(true);
                     return;
                 }
-                else if(!faction.getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS))
+                else if(!faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
                 {
                     event.setCancelled(true);
                     return;
@@ -244,11 +244,11 @@ public class EntitySpawnListener extends AbstractListener
 
     private boolean canSpawnAnimalsInSafeZone()
     {
-        return this.factionLogic.getFactionByName("SafeZone").getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS);
+        return this.factionLogic.getFactionByName("SafeZone").getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS);
     }
 
     private boolean canSpawnAnimalsInWarzone()
     {
-        return this.factionLogic.getFactionByName("WarZone").getProtectionFlags().getValueForFlag(ProtectionFlagType.SPAWN_ANIMALS);
+        return this.factionLogic.getFactionByName("WarZone").getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS);
     }
 }

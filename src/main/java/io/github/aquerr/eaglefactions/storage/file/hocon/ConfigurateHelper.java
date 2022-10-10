@@ -71,7 +71,7 @@ public class ConfigurateHelper
             configNode.node("perms").set(faction.getPerms());
             configNode.node("chest").set(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, faction.getChest().getItems());
             configNode.node("isPublic").set(faction.isPublic());
-            configNode.node("protection_flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags().getProtectionFlags());
+            configNode.node("protection_flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags());
 
             if(faction.getHome() == null)
             {
