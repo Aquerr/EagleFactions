@@ -7,6 +7,6 @@ public class MySQLFactionStorage extends AbstractFactionStorage
 {
     public MySQLFactionStorage(final EagleFactions plugin)
     {
-        super(plugin, MySQLProvider.getInstance(plugin));
+        super(plugin, MySQLProvider.getInstance(plugin), new FactionProtectionFlagsMySqlStorageImpl(MySQLProvider.getInstance(plugin)));
     }
 }

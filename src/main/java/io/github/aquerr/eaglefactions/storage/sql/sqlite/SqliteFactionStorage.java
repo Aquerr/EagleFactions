@@ -7,6 +7,6 @@ public class SqliteFactionStorage extends AbstractFactionStorage
 {
     public SqliteFactionStorage(EagleFactions plugin)
     {
-        super(plugin, SqliteProvider.getInstance(plugin));
+        super(plugin, SqliteProvider.getInstance(plugin), new FactionProtectionFlagsSqliteStorageImpl(SqliteProvider.getInstance(plugin)));
     }
 }

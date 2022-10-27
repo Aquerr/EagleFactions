@@ -7,6 +7,6 @@ public class MariaDbFactionStorage extends AbstractFactionStorage
 {
 	public MariaDbFactionStorage(final EagleFactions plugin)
 	{
-		super(plugin, MariaDbProvider.getInstance(plugin));
+		super(plugin, MariaDbProvider.getInstance(plugin), new FactionProtectionFlagsMariaDbStorageImpl(MariaDbProvider.getInstance(plugin)));
 	}
 }

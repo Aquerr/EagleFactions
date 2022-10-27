@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
@@ -127,10 +128,15 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
 
-    protected AbstractFactionStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
+    private final FactionProtectionFlagsStorage factionProtectionFlagsStorage;
+
+    protected AbstractFactionStorage(final EagleFactions plugin,
+                                     final SQLProvider sqlProvider,
+                                     final FactionProtectionFlagsStorage factionProtectionFlagsStorage)
     {
         this.plugin = plugin;
         this.sqlProvider = sqlProvider;
+        this.factionProtectionFlagsStorage = factionProtectionFlagsStorage;
 
         if(this.sqlProvider == null)
         {
@@ -316,6 +322,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             saveAlliances(connection, faction);
             saveEnemies(connection, faction);
             saveTruces(connection, faction);
+            this.factionProtectionFlagsStorage.saveProtectionFlags(faction.getName(), faction.getProtectionFlags());
 
             deleteFactionOfficers(connection, faction.getName());
             deleteFactionMembers(connection, faction.getName());
@@ -707,6 +714,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 final Set<UUID> recruits = getFactionRecruits(connection, factionName);
                 final Set<UUID> members = getFactionMembers(connection, factionName);
                 final Set<Claim> claims = getFactionClaims(connection, factionName);
+                final Set<ProtectionFlag> protectionFlags = this.factionProtectionFlagsStorage.getProtectionFlags(factionName);
 
                 final FactionChest factionChest = getFactionChest(connection, factionName);
                 final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
@@ -727,6 +735,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                         .setDescription(description)
                         .setMessageOfTheDay(messageOfTheDay)
                         .setIsPublic(isPublic)
+                        .setProtectionFlags(protectionFlags)
                         .build();
                 return faction;
             }
@@ -785,6 +794,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             deleteFactionAlliances(connection, factionName);
             deleteFactionEnemies(connection, factionName);
             deleteFactionTruces(connection, factionName);
+            this.factionProtectionFlagsStorage.deleteProtectionFlags(factionName);
 
             final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
             preparedStatement.setString(1, factionName);
