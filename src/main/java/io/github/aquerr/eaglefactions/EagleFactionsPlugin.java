@@ -88,6 +88,7 @@ import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.integrations.IntegrationManager;
 import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
@@ -208,6 +209,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private RankManager rankManager;
     private StorageManager storageManager;
     private MessageService messageService;
+    private IntegrationManager integrationManager;
 
     private boolean isDisabled = false;
 
@@ -303,24 +305,22 @@ public class EagleFactionsPlugin implements EagleFactions
                     this.logger.info(PLUGIN_PREFIX_PLAIN + "Hey! A new version of " + PluginInfo.NAME + " is available online!");
                     this.logger.info("==========================================");
                 }
-            });        }
+            });
+
+            // Reloads storage and cache.
+            this.storageManager.reloadStorage();
+
+            initializeIntegrations();
+
+            startFactionsRemover();
+
+            preCreateSafeZoneAndWarZone();
+        }
         catch (Exception exception)
         {
             exception.printStackTrace();
             disablePlugin();
         }
-
-        // Reloads storage and cache.
-        this.storageManager.reloadStorage();
-
-        initializeIntegrations();
-
-        if (isDisabled)
-            return;
-
-        startFactionsRemover();
-
-        preCreateSafeZoneAndWarZone();
     }
 
     private void preCreateSafeZoneAndWarZone()
@@ -388,21 +388,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         setDefaultPermissions();
 
-        if (configuration.getDynmapConfig().isDynmapIntegrationEnabled())
-        {
-            try
-            {
-                Class.forName("org.dynmap.DynmapCommonAPI");
-                this.dynmapService = new DynmapService(this);
-                this.dynmapService.activate();
-
-                printInfo("Dynmap Integration is active!");
-            }
-            catch (final ClassNotFoundException error)
-            {
-                printInfo("Dynmap could not be found. Dynmap integration will not be available.");
-            }
-        }
+        this.integrationManager.activateIntegrations();
 
         if (isUltimateChatLoaded())
         {
@@ -626,6 +612,8 @@ public class EagleFactionsPlugin implements EagleFactions
         this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
         this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager, this.messageService);
         this.rankManager = new RankManagerImpl(this.factionLogic, this.storageManager);
+
+        this.integrationManager = new IntegrationManager(this);
     }
 
     private void startFactionsRemover()

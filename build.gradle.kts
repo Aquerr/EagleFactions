@@ -71,8 +71,8 @@ sponge {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 blossom {
@@ -94,6 +94,7 @@ dependencies {
     compileOnly("com.h2database:h2:1.4.200")
     compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
     compileOnly("com.github.webbukkit:DynmapCoreAPI:v2.5")
+    implementation("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
 //    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
     testImplementation(project(":EagleFactionsAPI"))

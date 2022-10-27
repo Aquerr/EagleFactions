@@ -34,6 +34,7 @@ public class ConfigurationImpl implements Configuration
     private final ProtectionConfig protectionConfig;
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
+    private final BluemapConfig bluemapConfig;
 
     public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset) throws IOException
     {
@@ -63,6 +64,7 @@ public class ConfigurationImpl implements Configuration
         this.protectionConfig = new ProtectionConfigImpl(pluginContainer, this);
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
+        this.bluemapConfig = new BluemapConfigImpl(this);
         reloadConfiguration();
     }
 
@@ -98,6 +100,12 @@ public class ConfigurationImpl implements Configuration
     public StorageConfig getStorageConfig()
     {
         return this.storageConfig;
+    }
+
+    @Override
+    public BluemapConfig getBluemapConfig()
+    {
+        return this.bluemapConfig;
     }
 
     @Override
