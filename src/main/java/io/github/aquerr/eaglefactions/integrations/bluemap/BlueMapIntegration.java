@@ -2,7 +2,12 @@ package io.github.aquerr.eaglefactions.integrations.bluemap;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.integrations.Integration;
+import io.github.aquerr.eaglefactions.integrations.IntegrationActivationResult;
 import io.github.aquerr.eaglefactions.integrations.exception.CouldNotActivateIntegrationException;
+
+import static io.github.aquerr.eaglefactions.integrations.IntegrationActivationResult.failure;
+import static io.github.aquerr.eaglefactions.integrations.IntegrationActivationResult.success;
+import static java.lang.String.format;
 
 public class BlueMapIntegration implements Integration
 {
@@ -23,33 +28,41 @@ public class BlueMapIntegration implements Integration
     @Override
     public void activate() throws CouldNotActivateIntegrationException
     {
-        try
+        IntegrationActivationResult integrationActivationResult = canActivate();
+        if (integrationActivationResult.isCanActivate())
         {
-            this.bluemapService = new BlueMapService();
+            try
+            {
+                this.bluemapService = new BlueMapService(plugin);
+                this.bluemapService.activate();
+                plugin.printInfo(getName() + " is active!");
+            }
+            catch (Exception exception)
+            {
+                throw new CouldNotActivateIntegrationException("Could not activate " + getName(), exception);
+            }
         }
-        catch (Exception exception)
+        else
         {
-            throw new CouldNotActivateIntegrationException("Could not activate " + this.getClass().getSimpleName(), exception);
+            throw new CouldNotActivateIntegrationException(integrationActivationResult.getReason());
         }
     }
 
     @Override
-    public boolean canActivate()
+    public IntegrationActivationResult canActivate()
     {
         if (plugin.getConfiguration().getBluemapConfig().isBluemapIntegrationEnabled())
         {
             try
             {
                 Class.forName("de.bluecolored.bluemap.api.BlueMapAPI");
-                return true;
+                return success();
             }
             catch (ClassNotFoundException e)
             {
-                plugin.printInfo("Bluemap could not be found. " + getName() +" will not be available.");
-                return false;
+                return failure(format("Bluemap could not be found. %s will not be available.", getName()));
             }
         }
-        plugin.printInfo(getName() + " is disabled in the config file.");
-        return false;
+        return failure(format(getName() + " is disabled in the config file."));
     }
 }

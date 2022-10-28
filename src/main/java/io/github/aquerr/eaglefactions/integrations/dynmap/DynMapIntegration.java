@@ -2,11 +2,16 @@ package io.github.aquerr.eaglefactions.integrations.dynmap;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.integrations.Integration;
+import io.github.aquerr.eaglefactions.integrations.IntegrationActivationResult;
 import io.github.aquerr.eaglefactions.integrations.exception.CouldNotActivateIntegrationException;
+
+import static io.github.aquerr.eaglefactions.integrations.IntegrationActivationResult.failure;
+import static io.github.aquerr.eaglefactions.integrations.IntegrationActivationResult.success;
+import static java.lang.String.format;
 
 public class DynMapIntegration implements Integration
 {
-    private EagleFactions plugin;
+    private final EagleFactions plugin;
     private DynmapService dynmapService;
 
     public DynMapIntegration(EagleFactions plugin)
@@ -23,36 +28,42 @@ public class DynMapIntegration implements Integration
     @Override
     public void activate() throws CouldNotActivateIntegrationException
     {
-        try
+        IntegrationActivationResult integrationActivationResult = canActivate();
+        if (integrationActivationResult.isCanActivate())
         {
-            this.dynmapService = new DynmapService(plugin);
-            this.dynmapService.activate();
-            plugin.printInfo(getName() + " is active!");
+            try
+            {
+                this.dynmapService = new DynmapService(plugin);
+                this.dynmapService.activate();
+                plugin.printInfo(getName() + " is active!");
+            }
+            catch (Exception exception)
+            {
+                throw new CouldNotActivateIntegrationException("Could not activate " + this.getClass().getSimpleName(), exception);
+            }
         }
-        catch (Exception exception)
+        else
         {
-            throw new CouldNotActivateIntegrationException("Could not activate " + this.getClass().getSimpleName(), exception);
+            throw new CouldNotActivateIntegrationException(integrationActivationResult.getReason());
         }
     }
 
     @Override
-    public boolean canActivate()
+    public IntegrationActivationResult canActivate()
     {
         if (plugin.getConfiguration().getDynmapConfig().isDynmapIntegrationEnabled())
         {
             try
             {
                 Class.forName("org.dynmap.DynmapCommonAPI");
-                return true;
+                return success();
             }
-            catch (final ClassNotFoundException error)
+            catch (final ClassNotFoundException exception)
             {
-                plugin.printInfo("Dynmap could not be found. " + getName() + " will not be available.");
-                return false;
+                return failure("Dynmap could not be found.");
             }
         }
-        plugin.printInfo(getName() + " is disabled in the config file.");
-        return false;
+        return failure(format(getName() + " is disabled in the config file."));
     }
 
     public DynmapService getDynmapService()

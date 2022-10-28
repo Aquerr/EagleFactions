@@ -151,7 +151,10 @@ public class FactionImpl implements Faction
     {
         //This set does not need to unmodifiable as making changes in it won't affect the faction object.
         final Set<UUID> players = new HashSet<>();
-        players.add(getLeader());
+        if (!UUID.fromString("00000000-0000-0000-0000-000000000000").equals(leader))
+        {
+            players.add(leader);
+        }
         players.addAll(getRecruits());
         players.addAll(getMembers());
         players.addAll(getOfficers());

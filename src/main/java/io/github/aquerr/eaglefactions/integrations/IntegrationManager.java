@@ -42,7 +42,8 @@ public class IntegrationManager
     {
         for (final Integration integration : integrations)
         {
-            if (integration.canActivate())
+            IntegrationActivationResult integrationActivationResult = integration.canActivate();
+            if (integrationActivationResult.isCanActivate())
             {
                 try
                 {
@@ -53,6 +54,10 @@ public class IntegrationManager
                 {
                     throw new RuntimeException(e);
                 }
+            }
+            else
+            {
+                this.plugin.printInfo(String.format("Cannot activate %s. Reason: %s", integration.getName(), integrationActivationResult.getReason()));
             }
         }
     }

@@ -137,6 +137,7 @@ public class ConfigurationImpl implements Configuration
         this.protectionConfig.reload();
         this.pvpLoggerConfig.reload();
         this.factionsConfig.reload();
+        this.bluemapConfig.reload();
     }
 
     private void loadConfiguration() throws IOException

@@ -72,7 +72,7 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
                     Marker marker = DynmapService.markerSet.createMarker(null,
                             faction.getName() + " Home",
-                            factionHomeWorld.key().asString(),
+                            factionHomeWorld.properties().name(),
                             blockPos.x(),
                             blockPos.y(),
                             blockPos.z(),
@@ -123,7 +123,7 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
                     AreaMarker areaMarker = DynmapService.markerSet.createAreaMarker(null,
                             faction.getName(),
                             false,
-                            world.key().asString(),
+                            world.properties().name(),
                             new double[1000],
                             new double[1000],
                             false);
