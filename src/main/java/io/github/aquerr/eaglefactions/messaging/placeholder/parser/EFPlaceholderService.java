@@ -35,7 +35,7 @@ public class EFPlaceholderService implements PlaceholderService
     {
         placeholderParsers.put(Placeholder.FACTION_NAME, new FactionNameParser(this.plugin.getFactionLogic()));
         placeholderParsers.put(Placeholder.FACTION_TAG, new FactionTagParser(this.plugin.getFactionLogic()));
-        placeholderParsers.put(Placeholder.FACTION_TAG_WITH_BRACKETS, new FactionTagWithBracketsParser(this.plugin.getFactionLogic()));
+        placeholderParsers.put(Placeholder.FACTION_TAG_WITH_BRACKETS, new FactionTagWithBracketsParser(this.plugin.getFactionLogic(), this.plugin.getConfiguration().getChatConfig()));
         placeholderParsers.put(Placeholder.FACTION_POWER, new FactionPowerParser(this.plugin.getFactionLogic(), this.plugin.getPowerManager()));
         placeholderParsers.put(Placeholder.FACTION_MAX_POWER, new FactionMaxPowerParser(this.plugin.getFactionLogic(), this.plugin.getPowerManager()));
         placeholderParsers.put(Placeholder.FACTION_LAST_ONLINE, new FactionLastOnlineParser(this.plugin.getFactionLogic()));
