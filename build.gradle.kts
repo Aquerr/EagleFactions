@@ -37,7 +37,7 @@ allprojects {
     }
 }
 
-group = "o.github.aquerr"
+group = "io.github.aquerr"
 version = "0.17.0"
 
 repositories {
@@ -91,7 +91,7 @@ dependencies {
 //    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
     compileOnly("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     implementation("com.zaxxer:HikariCP:4.0.3")
-    implementation("com.h2database:h2:1.4.200")
+    implementation("com.h2database:h2:2.1.214")
     compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
     compileOnly("com.github.webbukkit:DynmapCoreAPI:v2.5")
     compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
@@ -134,9 +134,25 @@ tasks.withType<Test> {
 }
 
 publishing {
+
+    repositories {
+        maven {
+            name = "GithubPackages"
+            url = uri("https://maven.pkg.github.com/Aquerr/EagleFactions")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_PUBLISHING_USERNAME")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_PUBLISHING_TOKEN")
+            }
+        }
+    }
+
     publications {
-        create<MavenPublication>("eaglefactions") {
-            shadow.component(this)
+        create<MavenPublication>("eaglefactions")
+        {
+            artifactId = "eaglefactions"
+            description = project.description
+
+            from(components["java"])
         }
     }
 }
@@ -152,6 +168,14 @@ val getGitCommitDesc by tasks.registering(Exec::class) {
     standardOutput = ByteArrayOutputStream()
     doLast {
         project.extra["gitCommitDesc"] = standardOutput.toString()
+    }
+}
+
+tasks.register("printEnvironment") {
+    doLast {
+        System.getenv().forEach { key, value ->
+            println("$key -> $value")
+        }
     }
 }
 

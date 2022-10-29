@@ -54,6 +54,7 @@ If there is no translation for your language you can make your own and add it as
 ## Links
 
 * [Download Links](https://github.com/Aquerr/EagleFactions/releases)
+* [Dev Builds](https://github.com/Aquerr/EagleFactions/packages)
 * [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * [Permissions](https://github.com/Aquerr/EagleFactions/wiki/Permissions)
 * [Translations](https://github.com/Aquerr/EagleFactions/tree/api-8/src/main/resources/assets/eaglefactions/lang)
