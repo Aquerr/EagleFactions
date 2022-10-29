@@ -90,11 +90,11 @@ dependencies {
     api(project(":EagleFactionsAPI"))
 //    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
     compileOnly("org.mariadb.jdbc:mariadb-java-client:2.0.3")
-    compileOnly("com.zaxxer:HikariCP:4.0.3")
+    implementation("com.zaxxer:HikariCP:4.0.3")
     compileOnly("com.h2database:h2:1.4.200")
     compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
     compileOnly("com.github.webbukkit:DynmapCoreAPI:v2.5")
-    implementation("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
+    compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
 //    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
     testImplementation(project(":EagleFactionsAPI"))
@@ -111,7 +111,8 @@ tasks {
 
         relocate("org.h2", "io.github.aquerr.eaglefactions.lib.db.h2")
         relocate("org.mariadb.jdbc", "io.github.aquerr.eaglefactions.lib.db.mariadb")
-        relocate("com.zaxxer.hikari", "io.github.aquerr.eaglefactions.lib.pool.hikari")
+        relocate("com.zaxxer.hikari", "io.github.aquerr.eaglefactions.lib.db.pool.hikari")
+        relocate("org.slf4j", "io.github.aquerr.eaglefactions.lib.slf4j")
 
         archiveClassifier.set("")
     }
@@ -119,6 +120,13 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
+}
+
+tasks.register("build-release") {
+    group = "build"
+    description = "Task for building the release build"
+
+    finalizedBy(tasks.shadowJar)
 }
 
 tasks.withType<Test> {
