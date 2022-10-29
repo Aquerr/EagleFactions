@@ -47,13 +47,13 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 
 Eagle Factions provides support for translations. In other words, it is possible to change plugin messages to your own language.
 
-You can see all available translations [here](https://github.com/Aquerr/EagleFactions/tree/develop/common/src/main/resources/assets/eaglefactions/messages).
+You can see all available translations [here](https://github.com/Aquerr/EagleFactions/tree/api-8/src/main/resources/assets/eaglefactions/lang).
 
 If there is no translation for your language you can make your own and add it as a pull request.
 
 ## Links
 
-* [Download Links](https://github.com/Aquerr/EagleFactions/releases)
+* [Releases](https://github.com/Aquerr/EagleFactions/releases)
 * [Dev Builds](https://github.com/Aquerr/EagleFactions/packages)
 * [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * [Permissions](https://github.com/Aquerr/EagleFactions/wiki/Permissions)
