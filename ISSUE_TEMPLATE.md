@@ -6,11 +6,11 @@
 
 ## What happens?
 
-<Write here what is happening.>
+<Write here what is happening or what the problem is.>
 
 ## Expected result
 
-<Write here what or how should it work.>
+<Write here what desired outcome is or how should it work in your opinion.>
 
 ## More information
 

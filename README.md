@@ -40,6 +40,7 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 * Plugin Messages' Translations
 * Database support
 * Dynmap support
+* Bluemap support
 * Fully configurable
 
 ## Translations
@@ -55,7 +56,7 @@ If there is no translation for your language you can make your own and add it as
 * [Download Links](https://github.com/Aquerr/EagleFactions/releases)
 * [Wiki](https://github.com/Aquerr/EagleFactions/wiki)
 * [Permissions](https://github.com/Aquerr/EagleFactions/wiki/Permissions)
-* [Translations](https://github.com/Aquerr/EagleFactions/tree/develop/common/src/main/resources/assets/eaglefactions/messages)
+* [Translations](https://github.com/Aquerr/EagleFactions/tree/api-8/src/main/resources/assets/eaglefactions/lang)
 * [Ore](https://ore.spongepowered.org/Niebek/Eagle-Factions)
 * [Discord](https://discord.gg/Zg3rWta)
 
@@ -80,4 +81,4 @@ Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 
 ## Donation
 
-Creation of this plugin is really a time consuming task. If you would like to support me then you can star this repo or send me some cookies through [PayPal](https://www.paypal.me/aquerr).
+Creation of this plugin is really a time-consuming task. If you would like to support me then you can star this repo or send me some cookies through [PayPal](https://www.paypal.me/aquerr).
