@@ -5,8 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -63,14 +61,13 @@ public class MySQLProvider extends SQLAbstractProvider
 
     private void prepareHikariDataSource()
     {
-        String jdbcUrl = "jdbc:mysql:" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+        String jdbcUrl = "jdbc:mysql:" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
         HikariConfig config = new HikariConfig();
         config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
-        config.setJdbcUrl(jdbcUrl);
+        config.addDataSourceProperty("url", jdbcUrl);
         config.setUsername(super.getUsername());
         config.setPassword(super.getPassword());
         config.setPoolName("eaglefactions");
-        config.addDataSourceProperty("databaseName", getDatabaseName());
         config.setMaximumPoolSize(10);
         this.dataSource = new HikariDataSource(config);
     }

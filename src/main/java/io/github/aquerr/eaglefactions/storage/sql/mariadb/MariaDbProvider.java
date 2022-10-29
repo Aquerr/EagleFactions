@@ -9,7 +9,6 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -66,14 +65,13 @@ public class MariaDbProvider extends SQLAbstractProvider
 
 	private void prepareHikariDataSource()
 	{
-		String jdbcUrl = "jdbc:mariadb:" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl();
+		String jdbcUrl = "jdbc:mariadb:" + super.getDatabaseUrl();
 		HikariConfig config = new HikariConfig();
 		config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
-		config.setJdbcUrl(jdbcUrl);
+		config.addDataSourceProperty("url", jdbcUrl);
 		config.setUsername(super.getUsername());
 		config.setPassword(super.getPassword());
 		config.setPoolName("eaglefactions");
-		config.addDataSourceProperty("databaseName", getDatabaseName());
 		config.setMaximumPoolSize(10);
 		this.dataSource = new HikariDataSource(config);
 	}

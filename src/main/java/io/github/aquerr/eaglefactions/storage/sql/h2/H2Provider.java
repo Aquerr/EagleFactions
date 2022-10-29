@@ -5,8 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -83,14 +81,13 @@ public class H2Provider extends SQLAbstractProvider
 
     private void prepareHikariDataSource(Path databasePath)
     {
-        String jdbcUrl = "jdbc:h2:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath;
+        String jdbcUrl = "jdbc:h2:file:" + databasePath;
         HikariConfig config = new HikariConfig();
         config.setDataSourceClassName("org.h2.jdbcx.JdbcDataSource");
-        config.setJdbcUrl(jdbcUrl);
+        config.addDataSourceProperty("url", jdbcUrl);
         config.setUsername(super.getUsername());
         config.setPassword(super.getPassword());
         config.setPoolName("eaglefactions");
-        config.addDataSourceProperty("databaseName", getDatabaseName());
         config.setMaximumPoolSize(10);
         this.dataSource = new HikariDataSource(config);
     }

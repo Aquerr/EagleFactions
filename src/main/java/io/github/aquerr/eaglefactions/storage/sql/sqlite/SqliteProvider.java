@@ -5,8 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.sql.SqlManager;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -85,14 +83,13 @@ public class SqliteProvider extends SQLAbstractProvider
 
     private void prepareHikariDataSource(Path databasePath)
     {
-        String jdbcUrl = "jdbc:sqlite:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath;
+        String jdbcUrl = "jdbc:sqlite:" + databasePath;
         HikariConfig config = new HikariConfig();
         config.setDataSourceClassName("org.sqlite.SQLiteDataSource");
-        config.setJdbcUrl(jdbcUrl);
+        config.addDataSourceProperty("url", jdbcUrl);
         config.setUsername(super.getUsername());
         config.setPassword(super.getPassword());
         config.setPoolName("eaglefactions");
-        config.addDataSourceProperty("databaseName", getDatabaseName());
         config.setMaximumPoolSize(10);
         this.dataSource = new HikariDataSource(config);
     }

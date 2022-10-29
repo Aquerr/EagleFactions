@@ -8,34 +8,29 @@ import io.github.aquerr.eaglefactions.integrations.exception.CouldNotActivateInt
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class IntegrationManager
 {
     private final EagleFactions plugin;
-    private final DynMapIntegration dynMapIntegration;
-    private final BlueMapIntegration blueMapIntegration;
-
     private final List<Integration> integrations = new ArrayList<>();
 
     public IntegrationManager(EagleFactions plugin)
     {
         this.plugin = plugin;
-        this.dynMapIntegration = new DynMapIntegration(plugin);
-        this.blueMapIntegration = new BlueMapIntegration(plugin);
         this.integrations.addAll(Arrays.asList(
-                this.dynMapIntegration,
-                this.blueMapIntegration
+                new DynMapIntegration(plugin),
+                new BlueMapIntegration(plugin)
         ));
     }
 
-    public BlueMapIntegration getBlueMapIntegration()
+    @SuppressWarnings("unchecked")
+    public <T extends Integration> Optional<T> getIntegration(Class<T> integration)
     {
-        return blueMapIntegration;
-    }
-
-    public DynMapIntegration getDynMapIntegration()
-    {
-        return dynMapIntegration;
+        return Optional.ofNullable((T)this.integrations.stream()
+                .filter(integration1 -> integration1.getClass().equals(integration))
+                .findFirst()
+                .orElse(null));
     }
 
     public void activateIntegrations()
