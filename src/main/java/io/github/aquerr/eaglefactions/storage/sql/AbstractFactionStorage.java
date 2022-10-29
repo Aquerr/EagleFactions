@@ -322,7 +322,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             saveAlliances(connection, faction);
             saveEnemies(connection, faction);
             saveTruces(connection, faction);
-            this.factionProtectionFlagsStorage.saveProtectionFlags(faction.getName(), faction.getProtectionFlags());
+            this.factionProtectionFlagsStorage.saveProtectionFlags(connection, faction.getName(), faction.getProtectionFlags());
 
             deleteFactionOfficers(connection, faction.getName());
             deleteFactionMembers(connection, faction.getName());
@@ -714,7 +714,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 final Set<UUID> recruits = getFactionRecruits(connection, factionName);
                 final Set<UUID> members = getFactionMembers(connection, factionName);
                 final Set<Claim> claims = getFactionClaims(connection, factionName);
-                final Set<ProtectionFlag> protectionFlags = this.factionProtectionFlagsStorage.getProtectionFlags(factionName);
+                final Set<ProtectionFlag> protectionFlags = this.factionProtectionFlagsStorage.getProtectionFlags(connection, factionName);
 
                 final FactionChest factionChest = getFactionChest(connection, factionName);
                 final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
@@ -794,12 +794,13 @@ public abstract class AbstractFactionStorage implements FactionStorage
             deleteFactionAlliances(connection, factionName);
             deleteFactionEnemies(connection, factionName);
             deleteFactionTruces(connection, factionName);
-            this.factionProtectionFlagsStorage.deleteProtectionFlags(factionName);
+            this.factionProtectionFlagsStorage.deleteProtectionFlags(connection, factionName);
 
             final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
             preparedStatement.setString(1, factionName);
             final int affectedRows = preparedStatement.executeUpdate();
             preparedStatement.close();
+            connection.commit();
             connection.close();
             return affectedRows == 1;
         }

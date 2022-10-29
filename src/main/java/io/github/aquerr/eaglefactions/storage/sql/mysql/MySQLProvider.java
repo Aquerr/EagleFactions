@@ -65,7 +65,6 @@ public class MySQLProvider extends SQLAbstractProvider
     {
         String jdbcUrl = "jdbc:mysql:" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
         HikariConfig config = new HikariConfig();
-        HikariDataSource hikariDataSource = new HikariDataSource(config);
         config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(super.getUsername());
@@ -73,7 +72,7 @@ public class MySQLProvider extends SQLAbstractProvider
         config.setPoolName("eaglefactions");
         config.addDataSourceProperty("databaseName", getDatabaseName());
         config.setMaximumPoolSize(10);
-        this.dataSource = hikariDataSource;
+        this.dataSource = new HikariDataSource(config);
     }
 
     private boolean databaseExists() throws SQLException

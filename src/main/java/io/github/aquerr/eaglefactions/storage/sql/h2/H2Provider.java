@@ -1,5 +1,7 @@
 package io.github.aquerr.eaglefactions.storage.sql.h2;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
@@ -17,7 +19,7 @@ public class H2Provider extends SQLAbstractProvider
 {
     private static H2Provider INSTANCE = null;
 
-    private final DataSource dataSource;
+    private DataSource dataSource;
 
     public static H2Provider getInstance(final EagleFactions eagleFactions)
     {
@@ -60,8 +62,8 @@ public class H2Provider extends SQLAbstractProvider
             throw new RuntimeException(exception);
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName());
-        final SqlManager sqlManager = Sponge.sqlManager();
-        this.dataSource = sqlManager.dataSource("jdbc:h2:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
+
+        prepareHikariDataSource(databasePath);
 
         //Create database file
         final Connection connection = getConnection();
@@ -77,5 +79,19 @@ public class H2Provider extends SQLAbstractProvider
     public StorageType getStorageType()
     {
         return StorageType.H2;
+    }
+
+    private void prepareHikariDataSource(Path databasePath)
+    {
+        String jdbcUrl = "jdbc:h2:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath;
+        HikariConfig config = new HikariConfig();
+        config.setDataSourceClassName("org.h2.jdbcx.JdbcDataSource");
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(super.getUsername());
+        config.setPassword(super.getPassword());
+        config.setPoolName("eaglefactions");
+        config.addDataSourceProperty("databaseName", getDatabaseName());
+        config.setMaximumPoolSize(10);
+        this.dataSource = new HikariDataSource(config);
     }
 }

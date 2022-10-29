@@ -1,5 +1,7 @@
 package io.github.aquerr.eaglefactions.storage.sql.sqlite;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
@@ -18,7 +20,7 @@ public class SqliteProvider extends SQLAbstractProvider
 {
     private static SqliteProvider INSTANCE = null;
 
-    private final DataSource dataSource;
+    private DataSource dataSource;
 
     public static SqliteProvider getInstance(final EagleFactions eagleFactions)
     {
@@ -61,8 +63,7 @@ public class SqliteProvider extends SQLAbstractProvider
             throw new IllegalStateException(exception);
         }
         final Path databasePath = databaseDir.resolve(getDatabaseName() + ".db");
-        final SqlManager sqlManager = Sponge.sqlManager();
-        this.dataSource = sqlManager.dataSource("jdbc:sqlite:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath);
+        prepareHikariDataSource(databasePath);
         final Connection connection = getConnection();
         connection.close();
     }
@@ -80,5 +81,19 @@ public class SqliteProvider extends SQLAbstractProvider
     public StorageType getStorageType()
     {
         return StorageType.SQLITE;
+    }
+
+    private void prepareHikariDataSource(Path databasePath)
+    {
+        String jdbcUrl = "jdbc:sqlite:" + super.getUsername() + ":" + super.getPassword() + "@" + databasePath;
+        HikariConfig config = new HikariConfig();
+        config.setDataSourceClassName("org.sqlite.SQLiteDataSource");
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(super.getUsername());
+        config.setPassword(super.getPassword());
+        config.setPoolName("eaglefactions");
+        config.addDataSourceProperty("databaseName", getDatabaseName());
+        config.setMaximumPoolSize(10);
+        this.dataSource = new HikariDataSource(config);
     }
 }
