@@ -63,7 +63,7 @@ public class EntitySpawnListener extends AbstractListener
             if(rootCause instanceof Entity)
             {
                 Entity causeEntity = (Entity)rootCause;
-                if (ModSupport.isMekenism(causeEntity))
+                if (ModSupport.isMekanism(causeEntity))
                 {
                     final Entity entity1 = ModSupport.getEntityOwnerFromMekanism(causeEntity);
                     if (entity1 instanceof User)
@@ -86,6 +86,9 @@ public class EntitySpawnListener extends AbstractListener
                     }
                 }
             }
+
+            if(spawnType == SpawnTypes.DROPPED_ITEM)
+                return;
 
             if(entity.toString().contains("EntityCustomNpc")) return;
 

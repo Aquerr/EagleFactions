@@ -278,7 +278,7 @@ public class BlockBreakListener extends AbstractListener
         if(source instanceof Entity)
         {
             // Helps with Mekanism flamethrower
-            if (ModSupport.isMekenism((Entity)source))
+            if (ModSupport.isMekanism((Entity)source))
             {
                 final Entity owner = ModSupport.getEntityOwnerFromMekanism((Entity) source);
                 // Just in case someone gave flamethrower to skeleton or something :P
