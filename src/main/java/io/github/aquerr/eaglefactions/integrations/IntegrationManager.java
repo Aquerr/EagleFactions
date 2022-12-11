@@ -56,4 +56,9 @@ public class IntegrationManager
             }
         }
     }
+
+    public void reloadIntegrations()
+    {
+        this.integrations.forEach(Integration::reload);
+    }
 }

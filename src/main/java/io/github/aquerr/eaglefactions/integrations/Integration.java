@@ -9,4 +9,10 @@ public interface Integration
     void activate() throws CouldNotActivateIntegrationException;
 
     IntegrationActivationResult canActivate();
+
+    /**
+     * Executed on server reload.
+     * Integrations can provide clean-up and/or reload operations in this method.
+     */
+    void reload();
 }

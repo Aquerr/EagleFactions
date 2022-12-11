@@ -66,6 +66,12 @@ public class DynMapIntegration implements Integration
         return failure(format(getName() + " is disabled in the config file."));
     }
 
+    @Override
+    public void reload()
+    {
+        this.dynmapService.reload();
+    }
+
     public DynmapService getDynmapService()
     {
         return dynmapService;

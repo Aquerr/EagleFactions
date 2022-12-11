@@ -89,7 +89,6 @@ import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.IntegrationManager;
-import io.github.aquerr.eaglefactions.integrations.dynmap.DynmapService;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
 import io.github.aquerr.eaglefactions.listeners.ChatMessageListener;
@@ -220,7 +219,6 @@ public class EagleFactionsPlugin implements EagleFactions
 //    @Inject
 //    private Metrics metrics;
 //    private PAPIPlaceholderService PAPIPlaceholderService;
-    private DynmapService dynmapService;
     private EFPlaceholderService efPlaceholderService;
 //    private UltimateChatService ultimateChatService;
 
@@ -444,10 +442,7 @@ public class EagleFactionsPlugin implements EagleFactions
             this.configuration.reloadConfiguration();
             this.storageManager.reloadStorage();
 
-            if (this.configuration.getDynmapConfig().isDynmapIntegrationEnabled())
-            {
-                this.dynmapService.reload();
-            }
+            this.integrationManager.reloadIntegrations();
 
             if(event.source() instanceof Player)
             {
@@ -550,11 +545,6 @@ public class EagleFactionsPlugin implements EagleFactions
     public MessageService getMessageService()
     {
         return this.messageService;
-    }
-
-    public DynmapService getDynmapService()
-    {
-        return this.dynmapService;
     }
 
     @Override

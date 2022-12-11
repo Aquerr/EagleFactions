@@ -6,7 +6,11 @@ import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import net.kyori.adventure.text.Component;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
-import org.dynmap.markers.*;
+import org.dynmap.markers.AreaMarker;
+import org.dynmap.markers.GenericMarker;
+import org.dynmap.markers.Marker;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerSet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.ScheduledTask;
 

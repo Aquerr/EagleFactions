@@ -34,6 +34,7 @@ allprojects {
         maven("https://repo.spongepowered.org/maven")
         maven("https://jitpack.io")
         maven("https://raw.github.com/FabioZumbi12/UltimateChat/mvn-repo/")
+        maven("https://repo.mikeprimm.com/")
     }
 }
 
@@ -93,7 +94,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("com.h2database:h2:2.1.214")
     compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
-    compileOnly("com.github.webbukkit:DynmapCoreAPI:v2.5")
+    compileOnly("us.dynmap:DynmapCoreAPI:3.4")
     compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
 //    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 

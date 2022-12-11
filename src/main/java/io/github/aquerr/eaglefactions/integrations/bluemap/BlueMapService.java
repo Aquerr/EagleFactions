@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.integrations.bluemap;
 
 import com.flowpowered.math.vector.Vector2d;
 import de.bluecolored.bluemap.api.BlueMapAPI;
-import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.markers.ExtrudeMarker;
 import de.bluecolored.bluemap.api.markers.Marker;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
@@ -90,6 +89,18 @@ public class BlueMapService
         this.bluemapUpdateTask = EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new BlueMapUpdateTask(this), 0, TimeUnit.MINUTES, 1, TimeUnit.MINUTES);
     }
 
+    public void reload()
+    {
+        this.markerSetsPerWorld.forEach((uuid, markerSet) -> {
+            markerSet.getMarkers().clear();
+        });
+
+        this.drawnFactions.clear();
+        this.markerSetsPerWorld.clear();
+
+        restartBluemapUpdateTask();
+    }
+
     public void deleteMarkersForFaction(Faction drawnFaction)
     {
         this.drawnFactions.remove(drawnFaction);
@@ -171,27 +182,6 @@ public class BlueMapService
                 index++;
             }
         }
-
-//        for (final Claim claim : faction.getClaims())
-//        {
-//            List<Vector2d> points = new ArrayList<>();
-//            points.add(Vector2d.from((claim.getChunkPosition().x() * 16) - 16, claim.getChunkPosition().z() * 16));
-//            points.add(Vector2d.from(claim.getChunkPosition().x() * 16, claim.getChunkPosition().z() * 16));
-//            points.add(Vector2d.from(claim.getChunkPosition().x() * 16, claim.getChunkPosition().z() * 16 - 16));
-//            points.add(Vector2d.from((claim.getChunkPosition().x() * 16) - 16, (claim.getChunkPosition().z() * 16) - 16));
-//            Shape shape = new Shape(points);
-//
-//            ExtrudeMarker marker = ExtrudeMarker.builder()
-//                    .label(faction.getName())
-//                    .shape(shape, -64, 255)
-//                    .maxDistance(1000)
-//                    .fillColor(determineMarkerColor(faction, 0.3f))
-//                    .lineColor(determineMarkerColor(faction, 1))
-//                    .detail(prepareMarkerDetailsForFaction(faction))
-//                    .build();
-//
-//            claimsMarkerSet.put(faction.getTag().content() + "-" + index, marker);
-//        }
     }
 
     private List<Vector2d> toVector2DList(double[] x, double[] z)
@@ -276,7 +266,7 @@ public class BlueMapService
         return new Color(areaColor, alpha);
     }
 
-    private static void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
+    private void floodFillTarget(TileFlags source, TileFlags destination, int x, int y)
     {
         ArrayDeque<int[]> stack = new ArrayDeque<>();
         stack.push(new int[] { x, y });
@@ -298,7 +288,7 @@ public class BlueMapService
         }
     }
 
-    public static ArrayList<TempAreaMarker> createAreas(Set<Claim> chunks)
+    public ArrayList<TempAreaMarker> createAreas(Set<Claim> chunks)
     {
         ArrayList<TempAreaMarker> ret = new ArrayList<>();
 

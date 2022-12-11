@@ -65,4 +65,10 @@ public class BlueMapIntegration implements Integration
         }
         return failure(format(getName() + " is disabled in the config file."));
     }
+
+    @Override
+    public void reload()
+    {
+        this.bluemapService.reload();
+    }
 }
