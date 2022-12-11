@@ -45,7 +45,7 @@ public class PlayerCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<FactionPlayer> optionalPlayer = context.one(EagleFactionsCommandParameters.factionPlayer());
+        final Optional<FactionPlayer> optionalPlayer = context.one(EagleFactionsCommandParameters.optionalFactionPlayer());
         if (optionalPlayer.isPresent())
         {
             final FactionPlayer player = optionalPlayer.get();

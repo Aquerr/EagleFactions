@@ -46,7 +46,7 @@ public class HomeCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.optionalFaction());
         final ServerPlayer player = requirePlayerSource(context);
 
         if (optionalFaction.isPresent())

@@ -27,7 +27,7 @@ public class SetFactionCommand extends AbstractCommand
     public CommandResult execute(CommandContext context) throws CommandException
     {
         Player player = context.requireOne(CommonParameters.PLAYER);
-        Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
+        Faction faction = context.requireOne(EagleFactionsCommandParameters.optionalFaction());
         FactionMemberType factionMemberType = context.requireOne(Parameter.enumValue(FactionMemberType.class).key("rank").build());
 
         if (factionMemberType == FactionMemberType.ALLY || factionMemberType == FactionMemberType.NONE || factionMemberType == FactionMemberType.TRUCE)

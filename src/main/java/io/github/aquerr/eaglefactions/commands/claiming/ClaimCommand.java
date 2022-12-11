@@ -42,7 +42,7 @@ public class ClaimCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.optionalFaction());
         final ServerPlayer player = requirePlayerSource(context);
         final ServerWorld world = player.world();
         final Vector3i chunk = player.serverLocation().chunkPosition();

@@ -660,7 +660,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("disband"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.disband.desc"))
                 .permission(PluginPermissions.DISBAND_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new DisbandCommand(this))
                 .build());
 
@@ -712,7 +712,7 @@ public class EagleFactionsPlugin implements EagleFactions
         //Info command. Shows info about a faction.
         SUBCOMMANDS.put(Arrays.asList("i", "info"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.info.desc"))
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new InfoCommand(this))
                 .build());
 
@@ -720,7 +720,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("p", "player"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.player.desc"))
                 .permission(PluginPermissions.PLAYER_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.factionPlayer())
+                .addParameter(EagleFactionsCommandParameters.optionalFactionPlayer())
                 .executor(new PlayerCommand(this))
                 .build());
 
@@ -768,7 +768,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Arrays.asList("claims", "listclaims"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.list-claims.desc"))
                 .permission(PluginPermissions.CLAIMS_LIST_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new ClaimsListCommand(this))
                 .build());
 
@@ -776,7 +776,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("claim"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.claim.desc"))
                 .permission(PluginPermissions.CLAIM_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new ClaimCommand(this))
                 .build());
 
@@ -854,7 +854,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("coords"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.coords.desc"))
                 .permission(PluginPermissions.COORDS_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new CoordsCommand(this))
                 .build());
 
@@ -870,7 +870,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .shortDescription(messageService.resolveComponentWithMessage("command.set-faction.desc"))
                 .permission(PluginPermissions.SET_FACTION_COMMAND)
                 .addParameters(CommonParameters.PLAYER,
-                        EagleFactionsCommandParameters.faction(),
+                        EagleFactionsCommandParameters.optionalFaction(),
                         Parameter.enumValue(FactionMemberType.class).key("rank").build())
                 .executor(new SetFactionCommand(this))
                 .build());
@@ -1001,7 +1001,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("chest"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.chest.desc"))
                 .permission(PluginPermissions.CHEST_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new ChestCommand(this))
                 .build());
 
@@ -1009,7 +1009,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("public"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.public.desc"))
                 .permission(PluginPermissions.PUBLIC_COMMAND)
-                .addParameter(EagleFactionsCommandParameters.faction())
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new PublicCommand(this))
                 .build());
 

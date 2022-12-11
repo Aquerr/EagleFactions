@@ -29,7 +29,7 @@ public class EnemyCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Faction enemyFaction = context.requireOne(EagleFactionsCommandParameters.faction());
+        final Faction enemyFaction = context.requireOne(EagleFactionsCommandParameters.optionalFaction());
         final ServerPlayer player = requirePlayerSource(context);
         final Faction playerFaction = requirePlayerFaction(player);
         final ArmisticeRequest armisticeRequest = findArmisticeRequest(enemyFaction, playerFaction);

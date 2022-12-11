@@ -41,7 +41,7 @@ public class CoordsCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.optionalFaction());
         if (!isServerPlayer(context.cause().audience()))
         {
             if(!optionalFaction.isPresent())

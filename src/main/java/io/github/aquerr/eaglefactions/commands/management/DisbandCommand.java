@@ -38,7 +38,7 @@ public class DisbandCommand extends AbstractCommand
         }
         else
         {
-            final Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
+            final Faction faction = context.requireOne(EagleFactionsCommandParameters.optionalFaction());
             consoleDisband(context, faction);
         }
 

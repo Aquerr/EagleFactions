@@ -35,7 +35,7 @@ public class ChestCommand extends AbstractCommand
             throw messageService.resolveExceptionWithMessage("error.command.chest.chests-are-disabled");
 
         ServerPlayer player = requirePlayerSource(context);
-        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.optionalFaction());
         if(optionalFaction.isPresent())
         {
             return openOther(player, optionalFaction.get());

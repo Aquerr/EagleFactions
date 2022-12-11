@@ -28,7 +28,7 @@ public class PublicCommand extends AbstractCommand
 	@Override
 	public CommandResult execute(final CommandContext context) throws CommandException
 	{
-		Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+		Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.optionalFaction());
 
 		if(!(isServerPlayer(context.cause().audience())))
 		{

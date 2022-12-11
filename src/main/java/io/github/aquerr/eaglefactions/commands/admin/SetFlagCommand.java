@@ -28,7 +28,7 @@ public class SetFlagCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandContext context) throws CommandException
     {
-        Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
+        Faction faction = context.requireOne(EagleFactionsCommandParameters.optionalFaction());
         ProtectionFlagType flagType = context.requireOne(Parameter.enumValue(ProtectionFlagType.class).key("flag").build());
         boolean value = context.requireOne(Parameter.bool().key("value").build());
         factionLogic.setFactionProtectionFlag(faction, flagType, value);

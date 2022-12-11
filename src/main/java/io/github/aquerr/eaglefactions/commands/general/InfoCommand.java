@@ -56,7 +56,7 @@ public class InfoCommand extends AbstractCommand
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException
     {
-        final Optional<Faction> faction = context.one(EagleFactionsCommandParameters.faction());
+        final Optional<Faction> faction = context.one(EagleFactionsCommandParameters.optionalFaction());
         if (faction.isPresent())
         {
             otherInfo(context, faction.get());

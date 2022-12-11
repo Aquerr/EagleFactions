@@ -140,7 +140,7 @@ public class ConfigurateHelper
         final Set<String> enemies = new HashSet<>(configNode.node("enemies").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         final Set<String> truces = new HashSet<>(configNode.node("truces").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         final Set<Claim> claims = configNode.node("claims").get(EFTypeTokens.CLAIM_SET_TYPE_TOKEN, Collections.emptySet());
-        final Instant lastOnline = configNode.node("last_online").get(Instant.class) != null ? Instant.parse(configNode.node("last_online").getString()) : Instant.now();
+        final Instant lastOnline = configNode.node("last_online").get(Instant.class) != null ? Instant.parse(configNode.node("last_online").getString(Instant.now().toString())) : Instant.now();
         final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.node("perms"));
         final List<FactionChest.SlotItem> slotItems = configNode.node("chest").get(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN);
         final Set<ProtectionFlag> protectionFlags = configNode.node("protection_flags").get(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, Collections.emptySet());

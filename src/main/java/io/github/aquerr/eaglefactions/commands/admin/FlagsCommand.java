@@ -25,7 +25,7 @@ public class FlagsCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandContext context) throws CommandException
     {
-        Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
+        Faction faction = context.requireOne(EagleFactionsCommandParameters.optionalFaction());
         List<Component> componentList = new ArrayList<>();
         for (final ProtectionFlag protectionFlag : new TreeSet<>(faction.getProtectionFlags()))
         {

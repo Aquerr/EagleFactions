@@ -46,7 +46,7 @@ public class ClaimsListCommand extends AbstractCommand
     @Override
     public CommandResult execute(CommandContext context) throws CommandException
     {
-        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.faction());
+        final Optional<Faction> optionalFaction = context.one(EagleFactionsCommandParameters.optionalFaction());
 
         if (optionalFaction.isPresent())
         {
