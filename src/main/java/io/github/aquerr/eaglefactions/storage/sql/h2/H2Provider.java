@@ -88,7 +88,7 @@ public class H2Provider extends SQLAbstractProvider
         config.setUsername(super.getUsername());
         config.setPassword(super.getPassword());
         config.setPoolName("eaglefactions");
-        config.setMaximumPoolSize(10);
+        config.setMaximumPoolSize(2);
         this.dataSource = new HikariDataSource(config);
     }
 }
