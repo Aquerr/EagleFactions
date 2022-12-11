@@ -547,6 +547,11 @@ public class EagleFactionsPlugin implements EagleFactions
         return this.messageService;
     }
 
+    public IntegrationManager getIntegrationManager()
+    {
+        return integrationManager;
+    }
+
     @Override
     public Faction.Builder getBuilderForFaction(String name, TextComponent tag, UUID leader)
     {

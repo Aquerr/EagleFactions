@@ -22,10 +22,7 @@ public class ReloadCommand extends AbstractCommand
             super.getPlugin().getConfiguration().reloadConfiguration();
             super.getPlugin().getStorageManager().reloadStorage();
 
-            if (super.getPlugin().getConfiguration().getDynmapConfig().isDynmapIntegrationEnabled() && EagleFactionsPlugin.getPlugin().getDynmapService() != null)
-            {
-                EagleFactionsPlugin.getPlugin().getDynmapService().reload();
-            }
+            EagleFactionsPlugin.getPlugin().getIntegrationManager().reloadIntegrations();
 
             context.cause().audience().sendMessage(super.getPlugin().getMessageService().resolveMessageWithPrefix("command.reload.config-reloaded"));
         }

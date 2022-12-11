@@ -13,6 +13,7 @@ import org.spongepowered.api.service.pagination.PaginationList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 public class FlagsCommand extends AbstractCommand
 {
@@ -26,7 +27,7 @@ public class FlagsCommand extends AbstractCommand
     {
         Faction faction = context.requireOne(EagleFactionsCommandParameters.faction());
         List<Component> componentList = new ArrayList<>();
-        for (final ProtectionFlag protectionFlag : faction.getProtectionFlags())
+        for (final ProtectionFlag protectionFlag : new TreeSet<>(faction.getProtectionFlags()))
         {
             componentList.add(Component.text(protectionFlag.getType() + ": " + protectionFlag.getValue()));
         }

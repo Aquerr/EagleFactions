@@ -8,6 +8,8 @@ public interface Integration
 
     void activate() throws CouldNotActivateIntegrationException;
 
+    boolean isActivated();
+
     IntegrationActivationResult canActivate();
 
     /**

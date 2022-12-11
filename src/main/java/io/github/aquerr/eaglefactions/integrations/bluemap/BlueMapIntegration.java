@@ -14,6 +14,8 @@ public class BlueMapIntegration implements Integration
     private EagleFactions plugin;
     private BlueMapService bluemapService;
 
+    private boolean isActivated;
+
     public BlueMapIntegration(EagleFactions plugin)
     {
         this.plugin = plugin;
@@ -36,6 +38,7 @@ public class BlueMapIntegration implements Integration
                 this.bluemapService = new BlueMapService(plugin);
                 this.bluemapService.activate();
                 plugin.printInfo(getName() + " is active!");
+                this.isActivated = true;
             }
             catch (Exception exception)
             {
@@ -46,6 +49,12 @@ public class BlueMapIntegration implements Integration
         {
             throw new CouldNotActivateIntegrationException(integrationActivationResult.getReason());
         }
+    }
+
+    @Override
+    public boolean isActivated()
+    {
+        return this.isActivated;
     }
 
     @Override

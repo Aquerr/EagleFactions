@@ -14,6 +14,8 @@ public class DynMapIntegration implements Integration
     private final EagleFactions plugin;
     private DynmapService dynmapService;
 
+    private boolean isActivated;
+
     public DynMapIntegration(EagleFactions plugin)
     {
         this.plugin = plugin;
@@ -36,6 +38,7 @@ public class DynMapIntegration implements Integration
                 this.dynmapService = new DynmapService(plugin);
                 this.dynmapService.activate();
                 plugin.printInfo(getName() + " is active!");
+                this.isActivated = true;
             }
             catch (Exception exception)
             {
@@ -46,6 +49,12 @@ public class DynMapIntegration implements Integration
         {
             throw new CouldNotActivateIntegrationException(integrationActivationResult.getReason());
         }
+    }
+
+    @Override
+    public boolean isActivated()
+    {
+        return this.isActivated;
     }
 
     @Override

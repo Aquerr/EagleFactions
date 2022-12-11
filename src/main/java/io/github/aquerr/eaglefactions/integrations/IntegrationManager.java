@@ -59,6 +59,12 @@ public class IntegrationManager
 
     public void reloadIntegrations()
     {
-        this.integrations.forEach(Integration::reload);
+        for (final Integration integration : this.integrations)
+        {
+            if (integration.isActivated())
+            {
+                integration.reload();
+            }
+        }
     }
 }
