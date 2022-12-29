@@ -2,6 +2,10 @@ import org.spongepowered.gradle.plugin.config.PluginLoaders
 import org.spongepowered.plugin.metadata.model.PluginDependency
 import java.io.ByteArrayOutputStream
 
+val eaglefactionsId = findProperty("eaglefactions.id") as String
+val eaglefactionsVersion = findProperty("eaglefactions.version") as String
+val spongeApiVersion = findProperty("sponge-api.version") as String
+
 plugins {
     `java-library`
     id("org.spongepowered.gradle.plugin") version "2.0.2"
@@ -39,20 +43,20 @@ allprojects {
 }
 
 group = "io.github.aquerr"
-version = "0.17.0"
+version = "$eaglefactionsVersion-API-$spongeApiVersion"
 
 repositories {
     mavenCentral()
 }
 
 sponge {
-    apiVersion("8.1.0")
-    license("CHANGEME")
+    apiVersion(spongeApiVersion)
+    license("MIT")
     loader {
         name(PluginLoaders.JAVA_PLAIN)
         version("1.0")
     }
-    plugin("eaglefactions") {
+    plugin(eaglefactionsId) {
         displayName("Eagle Factions")
         entrypoint("io.github.aquerr.eaglefactions.EagleFactionsPlugin")
         description("A factions plugin that will make managing your battle-server easier. :)")
@@ -89,17 +93,15 @@ blossom {
 
 dependencies {
     api(project(":EagleFactionsAPI"))
-//    api("com.github.rojo8399:PlaceholderAPI:4.5.1")
     compileOnly("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("com.h2database:h2:2.1.214")
     compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
     compileOnly("us.dynmap:DynmapCoreAPI:3.4")
     compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
-//    api("br.net.fabiozumbi12.UltimateChat:UltimateChat-Sponge-7:1.9.1")
 
     testImplementation(project(":EagleFactionsAPI"))
-    testImplementation("org.spongepowered:spongeapi:8.1.0")
+    testImplementation("org.spongepowered:spongeapi:$spongeApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testImplementation("org.mockito:mockito-core:3.10.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.10.0")
