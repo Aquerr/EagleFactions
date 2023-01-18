@@ -254,7 +254,7 @@ public class EntityDamageListener extends AbstractListener
             return;
 
         //Check safezone world
-        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.key().asString()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.properties().name()))
         {
             event.setCancelled(true);
             return;

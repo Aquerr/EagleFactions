@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -244,11 +245,11 @@ public class EntitySpawnListener extends AbstractListener
 
     private boolean canSpawnAnimalsInSafeZone()
     {
-        return this.factionLogic.getFactionByName("SafeZone").getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS);
+        return this.factionLogic.getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS);
     }
 
     private boolean canSpawnAnimalsInWarzone()
     {
-        return this.factionLogic.getFactionByName("WarZone").getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS);
+        return this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS);
     }
 }

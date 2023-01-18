@@ -6,6 +6,8 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
@@ -27,12 +29,16 @@ public class PlayerMoveListener extends AbstractListener
 {
     private final MessageService messageService;
     private final FactionsConfig factionsConfig;
+    private final FactionLogic factionLogic;
+    private final PlayerManager playerManager;
     private final ChatConfig chatConfig;
 
     public PlayerMoveListener(final EagleFactions plugin)
     {
         super(plugin);
         this.messageService = plugin.getMessageService();
+        this.factionLogic = plugin.getFactionLogic();
+        this.playerManager = plugin.getPlayerManager();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.chatConfig = plugin.getConfiguration().getChatConfig();
     }
@@ -54,8 +60,8 @@ public class PlayerMoveListener extends AbstractListener
 
         final Optional<Faction> optionalOldChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), oldChunk);
         final Optional<Faction> optionalNewChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), newChunk);
-        String oldChunkFactionName = "Wilderness";
-        String newChunkFactionName = "Wilderness";
+        String oldChunkFactionName = EagleFactionsPlugin.WILDERNESS_NAME;
+        String newChunkFactionName = EagleFactionsPlugin.WILDERNESS_NAME;
 
         if (optionalOldChunkFaction.isPresent())
             oldChunkFactionName = optionalOldChunkFaction.get().getName();
@@ -74,11 +80,13 @@ public class PlayerMoveListener extends AbstractListener
                 return;
             }
 
-            if (!newChunkFactionName.equalsIgnoreCase("SafeZone") && !newChunkFactionName.equalsIgnoreCase("WarZone") && !newChunkFactionName.equalsIgnoreCase("Wilderness"))
+            if (!newChunkFactionName.equalsIgnoreCase(EagleFactionsPlugin.SAFE_ZONE_NAME)
+                    && !newChunkFactionName.equalsIgnoreCase(EagleFactionsPlugin.WAR_ZONE_NAME)
+                    && !newChunkFactionName.equalsIgnoreCase(EagleFactionsPlugin.WILDERNESS_NAME))
             {
-                if (!super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+                if (!this.playerManager.hasAdminMode(player.user()))
                 {
-                    if (!getPlugin().getFactionLogic().hasOnlinePlayers(optionalNewChunkFaction.get()) && this.factionsConfig.getBlockEnteringFactions())
+                    if (!this.factionLogic.hasOnlinePlayers(optionalNewChunkFaction.get()) && this.factionsConfig.getBlockEnteringFactions())
                     {
                         //Teleport player back if all entering faction's players are offline.
                         player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.move.you-cant-enter-this-faction-none-its-members-are-online")));
@@ -87,13 +95,14 @@ public class PlayerMoveListener extends AbstractListener
                     }
                 }
             }
-            else if (oldChunkFactionName.equalsIgnoreCase("WarZone") && newChunkFactionName.equalsIgnoreCase("SafeZone"))
+            else if (oldChunkFactionName.equalsIgnoreCase(EagleFactionsPlugin.WAR_ZONE_NAME)
+                    && newChunkFactionName.equalsIgnoreCase(EagleFactionsPlugin.SAFE_ZONE_NAME))
             {
-                if (!super.getPlugin().getPlayerManager().hasAdminMode(player.user()) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
+                if (!this.playerManager.hasAdminMode(player.user()) && this.factionsConfig.shouldBlockEnteringSafezoneFromWarzone())
                 {
-                    if (super.getPlugin().getPlayerManager().getFactionPlayer(player.uniqueId()).get().diedInWarZone())
+                    if (this.playerManager.getFactionPlayer(player.uniqueId()).get().diedInWarZone())
                     {
-                        super.getPlugin().getPlayerManager().setDeathInWarZone(player.uniqueId(), false);
+                        this.playerManager.setDeathInWarZone(player.uniqueId(), false);
                     }
                     else
                     {

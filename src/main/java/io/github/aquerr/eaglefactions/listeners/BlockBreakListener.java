@@ -206,7 +206,7 @@ public class BlockBreakListener extends AbstractListener
                 if(isFireSource)
                 {
                     Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
-                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()) && !super.getPlugin().getFactionLogic().getFactionByName("SafeZone").getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
+                    if(this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()) && !super.getPlugin().getFactionLogic().getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
                     {
                         event.setCancelled(true);
                         return;

@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -36,7 +37,7 @@ public class RenameCommand extends AbstractCommand
         final Player player = requirePlayerSource(context);
         final Faction faction = requirePlayerFaction(player);
 
-        if (newFactionName.equalsIgnoreCase("SafeZone") || newFactionName.equalsIgnoreCase("WarZone"))
+        if (newFactionName.equalsIgnoreCase(EagleFactionsPlugin.SAFE_ZONE_NAME) || newFactionName.equalsIgnoreCase(EagleFactionsPlugin.WAR_ZONE_NAME))
             throw messageService.resolveExceptionWithMessage("error.command.create.you-cant-use-this-faction-name");
 
         if (!faction.getLeader().equals(player.uniqueId()))

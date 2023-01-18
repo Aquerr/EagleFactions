@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
@@ -71,7 +72,7 @@ public class CreateCommand extends AbstractCommand
         if (getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(factionTag)))
             throw messageService.resolveExceptionWithMessage("error.command.create.tag-already-taken");
 
-        if (factionName.equalsIgnoreCase("SafeZone") || factionName.equalsIgnoreCase("WarZone"))
+        if (factionName.equalsIgnoreCase(EagleFactionsPlugin.SAFE_ZONE_NAME) || factionName.equalsIgnoreCase(EagleFactionsPlugin.WAR_ZONE_NAME))
             throw messageService.resolveExceptionWithMessage("error.command.create.you-cant-use-this-faction-name");
 
         //Check tag length

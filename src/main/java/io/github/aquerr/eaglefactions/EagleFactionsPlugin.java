@@ -178,6 +178,10 @@ import static net.kyori.adventure.text.Component.text;
 @Plugin(PluginInfo.ID)
 public class EagleFactionsPlugin implements EagleFactions
 {
+    public static final String WAR_ZONE_NAME = "WarZone";
+    public static final String SAFE_ZONE_NAME = "SafeZone";
+    public static final String WILDERNESS_NAME = "Wilderness";
+
     //TODO: Convert these fields to instance fields.
     public static final Map<List<String>, Command.Parameterized> SUBCOMMANDS = new HashMap<>();
     public static final List<FactionInvite> INVITE_LIST = new LinkedList<>();
@@ -323,9 +327,9 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void preCreateSafeZoneAndWarZone()
     {
-        if (this.factionLogic.getFactionByName("WarZone") == null)
+        if (this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME) == null)
         {
-            final Faction warzone = FactionImpl.builder("WarZone", text("WZ"), new UUID(0, 0))
+            final Faction warzone = FactionImpl.builder(EagleFactionsPlugin.WAR_ZONE_NAME, text("WZ"), new UUID(0, 0))
                     .setCreatedDate(Instant.now())
                     .setProtectionFlags(new HashSet<>(Arrays.asList(
                     new ProtectionFlagImpl(ProtectionFlagType.PVP, true),
@@ -338,9 +342,9 @@ public class EagleFactionsPlugin implements EagleFactions
                     .build();
             this.factionLogic.addFaction(warzone);
         }
-        if (this.factionLogic.getFactionByName("SafeZone") == null)
+        if (this.factionLogic.getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME) == null)
         {
-            final Faction safezone = FactionImpl.builder("SafeZone", text("SZ"), new UUID(0, 0))
+            final Faction safezone = FactionImpl.builder(EagleFactionsPlugin.SAFE_ZONE_NAME, text("SZ"), new UUID(0, 0))
                     .setCreatedDate(Instant.now())
                     .setProtectionFlags(new HashSet<>(Arrays.asList(
                             new ProtectionFlagImpl(ProtectionFlagType.PVP, false),
