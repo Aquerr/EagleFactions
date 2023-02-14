@@ -182,6 +182,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 catch(Exception exception)
                 {
                     exception.printStackTrace();
+                    throw new IllegalStateException("There may be a problem with database script files...");
                 }
             }
         }
