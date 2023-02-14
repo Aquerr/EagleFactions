@@ -88,8 +88,7 @@ public class SlotItemTypeSerializer implements TypeSerializer<FactionChest.SlotI
         }
         catch (NullPointerException e)
         {
-            System.out.println("BOOM!");
-            return;
+            throw new SerializationException(e);
         }
 
         final Map<DataQuery, Object> dataQueryObjectMap = view.values(true);
