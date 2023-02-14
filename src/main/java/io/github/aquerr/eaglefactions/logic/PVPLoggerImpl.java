@@ -123,12 +123,7 @@ public class PVPLoggerImpl implements PVPLogger
 
         if (shouldDisplayInScoreboard)
         {
-            final Scoreboard scoreboard = Optional.ofNullable(player.getScoreboard()).orElse(Scoreboard.builder().build());
-            final Objective objective = createPVPLoggerObjective(objectiveId);
-            scoreboard.addObjective(objective);
-            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
-            player.setScoreboard(scoreboard);
-            pvpLoggerObjective.setObjective(objective);
+            createOrUpdatePVPLoggerObjective(player, pvpLoggerObjective);
         }
 
         this.playerPVPLoggerObjectives.put(playerUUID, pvpLoggerObjective);
@@ -178,10 +173,15 @@ public class PVPLoggerImpl implements PVPLogger
         Objective objective = pvpLoggerObjective.getObjective();
         if (objective == null)
         {
+            final Scoreboard scoreboard = Optional.ofNullable(player.getScoreboard()).orElse(Scoreboard.builder().build());
+            player.setScoreboard(scoreboard);
+
             final int objectiveId = getNextFreeId(1);
             objective = createPVPLoggerObjective(objectiveId);
-            player.getScoreboard().addObjective(objective);
-            player.getScoreboard().updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+            scoreboard.addObjective(objective);
+            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+            pvpLoggerObjective.setObjective(objective);
+            player.setScoreboard(scoreboard);
         }
         Score pvpTimerScore = objective.getOrCreateScore(Text.of("Time:"));
         pvpTimerScore.setScore(pvpLoggerObjective.getSeconds());
