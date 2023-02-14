@@ -1,6 +1,14 @@
 package io.github.aquerr.eaglefactions.config;
 
-import io.github.aquerr.eaglefactions.api.config.*;
+import io.github.aquerr.eaglefactions.api.config.BluemapConfig;
+import io.github.aquerr.eaglefactions.api.config.ChatConfig;
+import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
+import io.github.aquerr.eaglefactions.api.config.PowerConfig;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.util.FileUtils;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.leangen.geantyref.TypeToken;
@@ -14,16 +22,20 @@ import org.spongepowered.plugin.PluginContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Aquerr on 2017-07-12.
  */
 public class ConfigurationImpl implements Configuration
 {
-    private Path configDirectoryPath;
-    private Path configPath;
-    private ConfigurationLoader<CommentedConfigurationNode> configLoader;
+    private final Path configDirectoryPath;
+    private final Path configPath;
+    private final ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
     //Configs
@@ -47,7 +59,6 @@ public class ConfigurationImpl implements Configuration
         {
             if (Files.notExists(this.configPath))
                 Files.copy(configAsset.getInputStream(), this.configPath);
-//            configAsset.copyToFile(this.configPath, false, true);
         }
         catch (final IOException e)
         {
