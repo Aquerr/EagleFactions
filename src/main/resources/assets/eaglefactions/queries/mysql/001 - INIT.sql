@@ -62,24 +62,24 @@ CREATE TABLE `FactionOfficers` (
 CREATE TABLE FactionAlliances (
   `FactionName_1` VARCHAR(200) NOT NULL,
   `FactionName_2` VARCHAR(200) NOT NULL,
-  CONSTRAINT `FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
-  CONSTRAINT `FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+  CONSTRAINT `FactionAlliances_FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
+  CONSTRAINT `FactionAlliances_FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
 );
 
 -- Create FactionEnemies Table
 CREATE TABLE FactionEnemies (
   `FactionName_1` VARCHAR(200) NOT NULL,
   `FactionName_2` VARCHAR(200) NOT NULL,
-  CONSTRAINT `FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
-  CONSTRAINT `FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+  CONSTRAINT `FactionEnemies_FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
+  CONSTRAINT `FactionEnemies_FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
 );
 
 -- Create FactionTruces Table
 CREATE TABLE FactionTruces (
   `FactionName_1` VARCHAR(200) NOT NULL,
   `FactionName_2` VARCHAR(200) NOT NULL,
-  CONSTRAINT `FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
-  CONSTRAINT `FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+  CONSTRAINT `FactionTruces_FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
+  CONSTRAINT `FactionTruces_FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
 );
 
 -- Create OfficerPerms Table
