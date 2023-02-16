@@ -59,5 +59,13 @@ public class PlayerJoinListener extends AbstractListener
                 player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, MessageLoader.parseMessage(Messages.FACTION_MESSAGE_OF_THE_DAY, TextColors.RESET, ImmutableMap.of(Placeholders.FACTION_NAME, Text.of(TextColors.GOLD, optionalPlayerFaction.get().getName()))), Text.of(optionalPlayerFaction.get().getMessageOfTheDay())));
             }
         });
+
+        clearPvpLoggerObjectives(player);
+    }
+
+    private void clearPvpLoggerObjectives(Player player) {
+        CompletableFuture.runAsync(() -> {
+            super.getPlugin().getPVPLogger().removePlayer(player);
+        });
     }
 }
