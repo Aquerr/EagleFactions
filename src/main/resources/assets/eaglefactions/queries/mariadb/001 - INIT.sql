@@ -24,8 +24,6 @@ CREATE TABLE `FactionRecruits` (
   `FactionName` VARCHAR(200) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `RecruitUUID_UNIQUE` ON `FactionRecruits` (`RecruitUUID`);
 
@@ -35,8 +33,6 @@ CREATE TABLE `FactionMembers` (
   `FactionName` VARCHAR(200) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `MemberUUID_UNIQUE` ON `FactionMembers` (`MemberUUID`);
 
@@ -46,8 +42,6 @@ CREATE TABLE `FactionOfficers` (
   `FactionName` VARCHAR(200) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `OfficerUUID_UNIQUE` ON `FactionOfficers` (`OfficerUUID`);
 
@@ -86,8 +80,6 @@ CREATE TABLE `OfficerPerms` (
   `Invite` TINYINT(1) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `OfficerPerms` (`FactionName`);
 
@@ -102,8 +94,6 @@ CREATE TABLE `MemberPerms` (
   `Invite` TINYINT(1) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `MemberPerms` (`FactionName`);
 
@@ -118,8 +108,6 @@ CREATE TABLE `RecruitPerms` (
   `Invite` TINYINT(1) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `RecruitPerms` (`FactionName`);
 
@@ -131,8 +119,6 @@ CREATE TABLE `AllyPerms` (
   `Destroy` TINYINT(1) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `AllyPerms` (`FactionName`);
 
@@ -144,8 +130,6 @@ CREATE TABLE `TrucePerms` (
     `Destroy` TINYINT(1) NOT NULL,
     FOREIGN KEY (`FactionName`)
         REFERENCES `Factions` (`Name`)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `TrucePerms` (`FactionName`);
 
@@ -156,8 +140,6 @@ CREATE TABLE `Claims` (
   `ChunkPosition` VARCHAR(200) NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE,
   PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `Claim_UNIQUE` ON `Claims` (`WorldUUID`, `ChunkPosition`);
@@ -168,8 +150,6 @@ CREATE TABLE `FactionChests` (
   `ChestItems` BLOB NOT NULL,
   FOREIGN KEY (`FactionName`)
       REFERENCES `Factions` (`Name`)
-      ON DELETE CASCADE
-      ON UPDATE CASCADE
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `FactionChests` (`FactionName`);
 

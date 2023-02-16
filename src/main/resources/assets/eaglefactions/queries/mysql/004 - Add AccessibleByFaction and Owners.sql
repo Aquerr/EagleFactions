@@ -4,8 +4,8 @@ CREATE TABLE `ClaimOwners` (
    `WorldUUID`     VARCHAR(36)   NOT NULL,
    `ChunkPosition` VARCHAR(200)  NOT NULL,
    `PlayerUUID`    VARCHAR(36)   NOT NULL,
-   CONSTRAINT `ClaimOwners_Claim` FOREIGN KEY (`WorldUUID`, `ChunkPosition`) REFERENCES `Claims` (`WorldUUID`, `ChunkPosition`) ON DELETE CASCADE,
-   CONSTRAINT `ClaimOwners_PlayerUUID` FOREIGN KEY (`PlayerUUID`) REFERENCES `Players` (`PlayerUUID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+   CONSTRAINT `ClaimOwners_Claim` FOREIGN KEY (`WorldUUID`, `ChunkPosition`) REFERENCES `Claims` (`WorldUUID`, `ChunkPosition`),
+   CONSTRAINT `ClaimOwners_PlayerUUID` FOREIGN KEY (`PlayerUUID`) REFERENCES `Players` (`PlayerUUID`)
 );
 
 -- Set database version to 4

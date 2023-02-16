@@ -27,8 +27,6 @@ CREATE TABLE `FactionRecruits` (
   CONSTRAINT `Faction_Recruit`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create Members Table
@@ -40,8 +38,6 @@ CREATE TABLE `FactionMembers` (
   CONSTRAINT `Faction_Member`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create Officers Table
@@ -54,8 +50,6 @@ CREATE TABLE `FactionOfficers` (
   CONSTRAINT `Faction_Officer`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create FactionAlliances Table
@@ -95,8 +89,6 @@ CREATE TABLE `OfficerPerms` (
   CONSTRAINT `Faction_OfficerPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create MemberPerms Table
@@ -112,8 +104,6 @@ CREATE TABLE `MemberPerms` (
   CONSTRAINT `Faction_MemberPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create RecruitPerms Table
@@ -129,8 +119,6 @@ CREATE TABLE `RecruitPerms` (
   CONSTRAINT `Faction_RecruitPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create AllyPerms Table
@@ -143,8 +131,6 @@ CREATE TABLE `AllyPerms` (
   CONSTRAINT `Faction_AllyPerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create TrucePerms Table
@@ -157,8 +143,6 @@ CREATE TABLE `TrucePerms` (
   CONSTRAINT `Faction_TrucePerms`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create Claims Table
@@ -169,9 +153,7 @@ CREATE TABLE `Claims` (
   UNIQUE INDEX `Claim_UNIQUE` (`WorldUUID`, `ChunkPosition`),
   CONSTRAINT `Faction_Claim`
     FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
+    REFERENCES `Factions` (`Name`),
   PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 );
 
@@ -183,8 +165,6 @@ CREATE TABLE `FactionChests` (
   CONSTRAINT `Faction_FactionChest`
     FOREIGN KEY (`FactionName`)
     REFERENCES `Factions` (`Name`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 -- Create Players Table

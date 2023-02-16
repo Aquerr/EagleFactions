@@ -94,6 +94,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String INSERT_MEMBER_PERMS = "INSERT INTO MemberPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite, Chest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_RECRUIT_PERMS = "INSERT INTO RecruitPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite, Chest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_ALLY_PERMS = "INSERT INTO AllyPerms (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_TRUCE_PERMS = "INSERT INTO TrucePerms (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
     private static final String INSERT_FACTION_ALLIANCE = "INSERT INTO FactionAlliances (FactionName_1, FactionName_2) VALUES (?, ?)";
     private static final String INSERT_FACTION_ENEMY = "INSERT INTO FactionEnemies (FactionName_1, FactionName_2) VALUES (?, ?)";
     private static final String INSERT_FACTION_TRUCE = "INSERT INTO FactionTruces (FactionName_1, FactionName_2) VALUES (?, ?)";
@@ -103,6 +104,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String UPDATE_MEMBER_PERMS = "UPDATE MemberPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
     private static final String UPDATE_RECRUIT_PERMS = "UPDATE RecruitPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
     private static final String UPDATE_ALLY_PERMS = "UPDATE AllyPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
+    private static final String UPDATE_TRUCE_PERMS = "UPDATE TrucePerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
 
     private static final String DELETE_FACTIONS = "DELETE FROM Factions";
     private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM Factions WHERE Name=?";
@@ -117,6 +119,14 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String DELETE_FACTION_ALLIANCE_BETWEEN_FACTIONS = "DELETE FROM FactionAlliances WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
     private static final String DELETE_FACTION_ENEMY_BETWEEN_FACTIONS = "DELETE FROM FactionEnemies WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
     private static final String DELETE_FACTION_TRUCE_BETWEEN_FACTIONS = "DELETE FROM FactionTruces WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
+    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_FACTIONNAME = "DELETE FROM ClaimOwners WHERE FactionName=?";
+    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION = "DELETE FROM ClaimOwners WHERE WorldUUID=? AND ChunkPosition=?";
+
+    private static final String DELETE_FACTION_ALLY_PERMS = "DELETE FROM AllyPerms WHERE FactionName=?";
+    private static final String DELETE_FACTION_TRUCE_PERMS = "DELETE FROM TrucePerms WHERE FactionName=?";
+    private static final String DELETE_FACTION_OFFICER_PERMS = "DELETE FROM OfficerPerms WHERE FactionName=?";
+    private static final String DELETE_FACTION_MEMBER_PERMS = "DELETE FROM MemberPerms WHERE FactionName=?";
+    private static final String DELETE_FACTION_RECRUIT_PERMS = "DELETE FROM RecruitPerms WHERE FactionName=?";
 
     private final EagleFactions plugin;
     private final SQLProvider sqlProvider;
@@ -161,6 +171,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     final Connection connection = this.sqlProvider.getConnection();
                     final Statement statement = connection.createStatement())
                 {
+                    connection.setAutoCommit(false);
                     final StringBuilder stringBuilder = new StringBuilder();
                     String line;
 
@@ -178,6 +189,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                         }
                     }
                     statement.executeBatch();
+                    connection.commit();
                 }
                 catch(Exception exception)
                 {
@@ -258,6 +270,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             {
                 versionTableExists = true;
             }
+            resultSet.close();
 
             if(versionTableExists)
             {
@@ -265,7 +278,11 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 final ResultSet resultSet1 = statement.executeQuery("SELECT MAX(Version) FROM Version");
                 if(resultSet1.next())
                 {
-                    return resultSet1.getInt(1);
+                    int version = resultSet1.getInt(1);
+                    resultSet1.close();
+                    statement.close();
+                    preparedStatement.close();
+                    return version;
                 }
                 statement.close();
             }
@@ -373,7 +390,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 preparedStatement.executeBatch();
                 preparedStatement.close();
 
-                //Can't do it in above loop as it violates the foreign key constraint.
                 // Insert owner into the claim
                 for (final Claim claim : faction.getClaims())
                 {
@@ -407,11 +423,12 @@ public abstract class AbstractFactionStorage implements FactionStorage
             preparedStatement = connection.prepareStatement(DELETE_FACTION_CHEST_WHERE_FACTIONNAME);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.executeUpdate();
+            preparedStatement.close();
 
             preparedStatement = connection.prepareStatement(INSERT_CHEST);
             preparedStatement.setString(1, faction.getName());
             preparedStatement.setBytes(2, chestBytes);
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
             preparedStatement.close();
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_OFFICER_PERMS : INSERT_OFFICER_PERMS);
@@ -426,7 +443,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             if(isUpdate)
                 preparedStatement.setString(9, faction.getName());
 
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
             preparedStatement.close();
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_MEMBER_PERMS : INSERT_MEMBER_PERMS);
@@ -441,7 +458,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             if(isUpdate)
                 preparedStatement.setString(9, faction.getName());
 
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
             preparedStatement.close();
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_RECRUIT_PERMS : INSERT_RECRUIT_PERMS);
@@ -456,7 +473,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             if(isUpdate)
                 preparedStatement.setString(9, faction.getName());
 
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
             preparedStatement.close();
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_ALLY_PERMS : INSERT_ALLY_PERMS);
@@ -467,7 +484,18 @@ public abstract class AbstractFactionStorage implements FactionStorage
             if(isUpdate)
                 preparedStatement.setString(5, faction.getName());
 
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_TRUCE_PERMS : INSERT_TRUCE_PERMS);
+            preparedStatement.setString(1, faction.getName());
+            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.USE));
+            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.PLACE));
+            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.DESTROY));
+            if(isUpdate)
+                preparedStatement.setString(5, faction.getName());
+
+            preparedStatement.executeUpdate();
             preparedStatement.close();
 
             connection.commit();
@@ -487,6 +515,146 @@ public abstract class AbstractFactionStorage implements FactionStorage
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public Faction getFaction(final String factionName)
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            connection.setAutoCommit(false);
+            final Set<String> alliances = getFactionAlliances(connection, factionName);
+            final Set<String> enemies = getFactionEnemies(connection, factionName);
+            final Set<String> truces = getFactionTruces(connection, factionName);
+
+            PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
+            statement.setString(1, factionName);
+            ResultSet factionsResultSet = statement.executeQuery();
+            if (factionsResultSet.next())
+            {
+                final String tag = factionsResultSet.getString("Tag");
+                final String tagColor = factionsResultSet.getString("TagColor");
+                final TextColor textColor = Sponge.getRegistry().getType(TextColor.class, tagColor).orElse(TextColors.RESET);
+                final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
+                final String factionHomeAsString = factionsResultSet.getString("Home");
+                final String description = factionsResultSet.getString("Description");
+                final String messageOfTheDay = factionsResultSet.getString("Motd");
+                final boolean isPublic = factionsResultSet.getBoolean("IsPublic");
+                FactionHome factionHome = null;
+                if (factionHomeAsString != null)
+                    factionHome = FactionHome.from(factionHomeAsString);
+                final String lastOnlineString = factionsResultSet.getString("LastOnline");
+                final Instant lastOnline = Instant.parse(lastOnlineString);
+
+                final Set<UUID> officers = getFactionOfficers(connection, factionName);
+                final Set<UUID> recruits = getFactionRecruits(connection, factionName);
+                final Set<UUID> members = getFactionMembers(connection, factionName);
+                final Set<Claim> claims = getFactionClaims(connection, factionName);
+
+                final FactionChest factionChest = getFactionChest(connection, factionName);
+                final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
+
+                final Faction faction = FactionImpl.builder(factionName, Text.of(textColor, tag), leaderUUID)
+                        .setHome(factionHome)
+                        .setTruces(truces)
+                        .setAlliances(alliances)
+                        .setEnemies(enemies)
+                        .setClaims(claims)
+                        .setLastOnline(lastOnline)
+                        .setMembers(members)
+                        .setRecruits(recruits)
+                        .setOfficers(officers)
+                        .setChest(factionChest)
+                        .setPerms(perms)
+                        .setDescription(description)
+                        .setMessageOfTheDay(messageOfTheDay)
+                        .setIsPublic(isPublic)
+                        .build();
+                return faction;
+            }
+        }
+        catch (IOException | SQLException | ClassNotFoundException exception)
+        {
+            exception.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Set<Faction> getFactions()
+    {
+        final Set<Faction> factions = new HashSet<>();
+        try
+        {
+            final Connection connection = this.sqlProvider.getConnection();
+            final ResultSet resultSet = connection.createStatement().executeQuery(SELECT_FACTION_NAMES);
+            List<String> factionsNames = new ArrayList<>();
+            while (resultSet.next())
+            {
+                factionsNames.add(resultSet.getString("Name"));
+            }
+            connection.close();
+
+            for (final String factionName : factionsNames)
+            {
+                final Faction faction = getFaction(factionName);
+                if(faction != null)
+                    factions.add(faction);
+            }
+        }
+        catch (final SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return factions;
+    }
+
+    @Override
+    public void load()
+    {
+
+    }
+
+    @Override
+    public boolean deleteFaction(final String factionName)
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            deleteFactionOfficers(connection, factionName);
+            deleteFactionMembers(connection, factionName);
+            deleteFactionRecruits(connection, factionName);
+            deleteFactionClaims(connection, factionName);
+            deleteFactionAlliances(connection, factionName);
+            deleteFactionEnemies(connection, factionName);
+            deleteFactionTruces(connection, factionName);
+            deleteFactionPerms(connection, factionName);
+
+            final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
+            preparedStatement.setString(1, factionName);
+            final int affectedRows = preparedStatement.executeUpdate();
+            preparedStatement.close();
+            return affectedRows == 1;
+        }
+        catch (final SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public void deleteFactions()
+    {
+        try(final Connection connection = this.sqlProvider.getConnection())
+        {
+            final Statement statement = connection.createStatement();
+            statement.execute(DELETE_FACTIONS);
+            statement.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void saveAlliances(final Connection connection, final Faction faction) throws SQLException
@@ -603,6 +771,60 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
+    private void deleteFactionPerms(Connection connection, String factionName) throws SQLException
+    {
+        deleteFactionTrucePerms(connection, factionName);
+        deleteFactionAllyPerms(connection, factionName);
+        deleteFactionOfficerPerms(connection, factionName);
+        deleteFactionMemberPerms(connection, factionName);
+        deleteFactionRecruitPerms(connection, factionName);
+    }
+
+    private void deleteFactionOfficerPerms(Connection connection, String factionName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_OFFICER_PERMS);
+        preparedStatement.setString(1, factionName);
+        int affectedRows = preparedStatement.executeUpdate();
+        LOGGER.debug("Deleted " + affectedRows + " officer perms for faction=" + factionName);
+        preparedStatement.close();
+    }
+
+    private void deleteFactionRecruitPerms(Connection connection, String factionName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_RECRUIT_PERMS);
+        preparedStatement.setString(1, factionName);
+        int affectedRows = preparedStatement.executeUpdate();
+        LOGGER.debug("Deleted " + affectedRows + " recruit perms for faction=" + factionName);
+        preparedStatement.close();
+    }
+
+    private void deleteFactionMemberPerms(Connection connection, String factionName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_MEMBER_PERMS);
+        preparedStatement.setString(1, factionName);
+        int affectedRows = preparedStatement.executeUpdate();
+        LOGGER.debug("Deleted " + affectedRows + " member perms for faction=" + factionName);
+        preparedStatement.close();
+    }
+
+    private void deleteFactionTrucePerms(Connection connection, String factionName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_TRUCE_PERMS);
+        preparedStatement.setString(1, factionName);
+        int affectedRows = preparedStatement.executeUpdate();
+        LOGGER.debug("Deleted " + affectedRows + " truce perms for faction=" + factionName);
+        preparedStatement.close();
+    }
+
+    private void deleteFactionAllyPerms(Connection connection, String factionName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_ALLY_PERMS);
+        preparedStatement.setString(1, factionName);
+        int affectedRows = preparedStatement.executeUpdate();
+        LOGGER.debug("Deleted " + affectedRows + " ally perms for faction=" + factionName);
+        preparedStatement.close();
+    }
+
     private void deleteFactionAlliances(final Connection connection, final String factionName) throws SQLException
     {
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ALL_FACTION_ALLIANCES_FOR_FACTION);
@@ -660,9 +882,12 @@ public abstract class AbstractFactionStorage implements FactionStorage
         return didSucceed;
     }
 
-    //Removal of claim owners is handled by database through foreign keys constraints.
     private boolean deleteFactionClaims(final Connection connection, final String name) throws SQLException
     {
+        Set<Claim> claims = getFactionClaims(connection, name);
+
+        deleteFactionClaimOwners(connection, claims);
+
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
         preparedStatement.setString(1, name);
         final boolean didSucceed = preparedStatement.execute();
@@ -670,139 +895,21 @@ public abstract class AbstractFactionStorage implements FactionStorage
         return didSucceed;
     }
 
-    @Override
-    public Faction getFaction(final String factionName)
+    private boolean deleteFactionClaimOwners(Connection connection, Set<Claim> claims) throws SQLException
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        if (claims.isEmpty())
+            return true;
+
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION);
+        for (final Claim claim : claims)
         {
-            final Set<String> alliances = getFactionAlliances(connection, factionName);
-            final Set<String> enemies = getFactionEnemies(connection, factionName);
-            final Set<String> truces = getFactionTruces(connection, factionName);
-
-            PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
-            statement.setString(1, factionName);
-            ResultSet factionsResultSet = statement.executeQuery();
-            if (factionsResultSet.next())
-            {
-                final String tag = factionsResultSet.getString("Tag");
-                final String tagColor = factionsResultSet.getString("TagColor");
-                final TextColor textColor = Sponge.getRegistry().getType(TextColor.class, tagColor).orElse(TextColors.RESET);
-                final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
-                final String factionHomeAsString = factionsResultSet.getString("Home");
-                final String description = factionsResultSet.getString("Description");
-                final String messageOfTheDay = factionsResultSet.getString("Motd");
-                final boolean isPublic = factionsResultSet.getBoolean("IsPublic");
-                FactionHome factionHome = null;
-                if (factionHomeAsString != null)
-                    factionHome = FactionHome.from(factionHomeAsString);
-                final String lastOnlineString = factionsResultSet.getString("LastOnline");
-                final Instant lastOnline = Instant.parse(lastOnlineString);
-
-                final Set<UUID> officers = getFactionOfficers(connection, factionName);
-                final Set<UUID> recruits = getFactionRecruits(connection, factionName);
-                final Set<UUID> members = getFactionMembers(connection, factionName);
-                final Set<Claim> claims = getFactionClaims(connection, factionName);
-
-                final FactionChest factionChest = getFactionChest(connection, factionName);
-                final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
-
-                final Faction faction = FactionImpl.builder(factionName, Text.of(textColor, tag), leaderUUID)
-                        .setHome(factionHome)
-                        .setTruces(truces)
-                        .setAlliances(alliances)
-                        .setEnemies(enemies)
-                        .setClaims(claims)
-                        .setLastOnline(lastOnline)
-                        .setMembers(members)
-                        .setRecruits(recruits)
-                        .setOfficers(officers)
-                        .setChest(factionChest)
-                        .setPerms(perms)
-                        .setDescription(description)
-                        .setMessageOfTheDay(messageOfTheDay)
-                        .setIsPublic(isPublic)
-                        .build();
-                return faction;
-            }
+            preparedStatement.setString(1, claim.getWorldUUID().toString());
+            preparedStatement.setString(2, claim.getChunkPosition().toString());
+            preparedStatement.addBatch();
         }
-        catch (IOException | SQLException | ClassNotFoundException exception)
-        {
-            exception.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public Set<Faction> getFactions()
-    {
-        final Set<Faction> factions = new HashSet<>();
-        try
-        {
-            final Connection connection = this.sqlProvider.getConnection();
-            final ResultSet resultSet = connection.createStatement().executeQuery(SELECT_FACTION_NAMES);
-            List<String> factionsNames = new ArrayList<>();
-            while (resultSet.next())
-            {
-                factionsNames.add(resultSet.getString("Name"));
-            }
-            connection.close();
-
-            for (final String factionName : factionsNames)
-            {
-                final Faction faction = getFaction(factionName);
-                if(faction != null)
-                    factions.add(faction);
-            }
-        }
-        catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return factions;
-    }
-
-    @Override
-    public void load()
-    {
-
-    }
-
-    @Override
-    public boolean deleteFaction(final String factionName)
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            deleteFactionAlliances(connection, factionName);
-            deleteFactionEnemies(connection, factionName);
-            deleteFactionTruces(connection, factionName);
-
-            final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
-            preparedStatement.setString(1, factionName);
-            final int affectedRows = preparedStatement.executeUpdate();
-            preparedStatement.close();
-            connection.close();
-            return affectedRows == 1;
-        }
-        catch (final SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public void deleteFactions()
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            final Statement statement = connection.createStatement();
-            statement.execute(DELETE_FACTIONS);
-            statement.close();
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        preparedStatement.executeBatch();
+        preparedStatement.close();
+        return true;
     }
 
     private Set<String> getFactionAlliances(final Connection connection, final String factionName) throws SQLException
@@ -1121,40 +1228,10 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
     private void precreate()
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            connection.setAutoCommit(false);
-            PreparedStatement warZoneStatement = connection.prepareStatement(INSERT_FACTION);
-            warZoneStatement.setString(1, "WarZone");
-            warZoneStatement.setString(2, "WZ");
-            warZoneStatement.setString(3, "");
-            warZoneStatement.setString(4, DUMMY_UUID.toString());
-            warZoneStatement.setString(5, null);
-            warZoneStatement.setString(6, Instant.now().toString());
-            warZoneStatement.setString(7, "");
-            warZoneStatement.setString(8, "");
-            warZoneStatement.setString(9, "0");
+        final Faction warzone = FactionImpl.builder("WarZone", Text.of("WZ"), DUMMY_UUID).build();
+        saveFaction(warzone);
 
-            PreparedStatement safeZoneStatement = connection.prepareStatement(INSERT_FACTION);
-            safeZoneStatement.setString(1, "SafeZone");
-            safeZoneStatement.setString(2, "SZ");
-            safeZoneStatement.setString(3, "");
-            safeZoneStatement.setString(4, DUMMY_UUID.toString());
-            safeZoneStatement.setString(5, null);
-            safeZoneStatement.setString(6, Instant.now().toString());
-            safeZoneStatement.setString(7, "");
-            safeZoneStatement.setString(8, "");
-            safeZoneStatement.setString(9, "0");
-
-            warZoneStatement.execute();
-            safeZoneStatement.execute();
-            safeZoneStatement.close();
-            warZoneStatement.close();
-            connection.commit();
-        }
-        catch(final SQLException e)
-        {
-            e.printStackTrace();
-        }
+        final Faction safezone = FactionImpl.builder("SafeZone", Text.of("SZ"), DUMMY_UUID).build();
+        saveFaction(safezone);
     }
 }

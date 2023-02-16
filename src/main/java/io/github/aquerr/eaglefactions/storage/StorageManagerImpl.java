@@ -37,13 +37,11 @@ public class StorageManagerImpl implements StorageManager
     private final FactionStorage factionsStorage;
     private final PlayerStorage playerStorage;
     private final BackupStorage backupStorage;
-    private final Path configDir;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor(); //Only one thread.
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
-        this.configDir = configDir;
         Optional<StorageType> storageType = StorageType.findByName(storageConfig.getStorageType().toLowerCase());
         if (!storageType.isPresent())
         {

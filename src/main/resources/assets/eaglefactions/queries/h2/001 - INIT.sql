@@ -19,7 +19,7 @@ CREATE UNIQUE INDEX ON Factions (Name);
 CREATE TABLE FactionRecruits (
     RecruitUUID     VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName     VARCHAR(200)    NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 
@@ -27,7 +27,7 @@ CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 CREATE TABLE FactionMembers (
     MemberUUID  VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName VARCHAR(200) NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
 
@@ -35,7 +35,7 @@ CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
 CREATE TABLE FactionOfficers (
     OfficerUUID VARCHAR(36)    UNIQUE  NOT NULL,
     FactionName VARCHAR(200) NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
 
@@ -72,7 +72,7 @@ CREATE TABLE OfficerPerms (
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
    Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON OfficerPerms (FactionName);
 
@@ -85,7 +85,7 @@ CREATE TABLE MemberPerms (
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
    Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON MemberPerms (FactionName);
 
@@ -98,7 +98,7 @@ CREATE TABLE RecruitPerms (
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
    Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON RecruitPerms (FactionName);
 
@@ -108,7 +108,7 @@ CREATE TABLE AllyPerms (
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON AllyPerms (FactionName);
 
@@ -118,7 +118,7 @@ CREATE TABLE TrucePerms (
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
    Destroy     BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON TrucePerms (FactionName);
 
@@ -129,7 +129,7 @@ CREATE TABLE Claims (
    WorldUUID     VARCHAR(36)                            NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
    PRIMARY KEY (WorldUUID, ChunkPosition),
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON Claims (WorldUUID, ChunkPosition);
 
@@ -137,7 +137,7 @@ CREATE UNIQUE INDEX ON Claims (WorldUUID, ChunkPosition);
 CREATE TABLE FactionChests (
     FactionName VARCHAR(200)    UNIQUE  NOT NULL,
     ChestItems  BINARY            NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX ON FactionChests (FactionName);
 

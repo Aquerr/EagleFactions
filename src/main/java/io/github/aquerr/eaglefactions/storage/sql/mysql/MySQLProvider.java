@@ -55,13 +55,13 @@ public class MySQLProvider extends SQLAbstractProvider
         final SqlService sqlService = Sponge.getServiceManager().provideUnchecked(SqlService.class);
         this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
 
+
         if(!databaseExists())
         {
             createDatabase();
         }
 
-        final HikariDataSource hikariDataSource = this.dataSource.unwrap(HikariDataSource.class);
-        hikariDataSource.close();
+        this.dataSource.unwrap(HikariDataSource.class).close();
         this.dataSource = sqlService.getDataSource("jdbc:mysql://" + super.getUsername() + ":" + super.getPassword() + "@" + super.getDatabaseUrl() + super.getDatabaseName() + "?useUnicode=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
     }
 
@@ -73,8 +73,6 @@ public class MySQLProvider extends SQLAbstractProvider
             {
                 if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
                 {
-                    resultSet.close();
-                    connection.close();
                     return true;
                 }
             }

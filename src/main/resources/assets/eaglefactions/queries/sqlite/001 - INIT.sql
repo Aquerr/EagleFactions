@@ -18,7 +18,7 @@ CREATE UNIQUE INDEX idx_faction_name ON Factions (Name);
 CREATE TABLE FactionRecruits (
     RecruitUUID     TEXT    UNIQUE  NOT NULL,
     FactionName     TEXT    NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_faction_recruit_uuid ON FactionRecruits (RecruitUUID);
 
@@ -26,7 +26,7 @@ CREATE UNIQUE INDEX idx_faction_recruit_uuid ON FactionRecruits (RecruitUUID);
 CREATE TABLE FactionMembers (
     MemberUUID  TEXT    UNIQUE  NOT NULL,
     FactionName TEXT NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_faction_member_uuid ON FactionMembers (MemberUUID);
 
@@ -34,7 +34,7 @@ CREATE UNIQUE INDEX idx_faction_member_uuid ON FactionMembers (MemberUUID);
 CREATE TABLE FactionOfficers (
     OfficerUUID TEXT    UNIQUE  NOT NULL,
     FactionName TEXT NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_faction_officer_uuid ON FactionOfficers (OfficerUUID);
 
@@ -71,7 +71,7 @@ CREATE TABLE OfficerPerms (
    Claim       INTEGER                         NOT NULL,
    Attack      INTEGER                         NOT NULL,
    Invite      INTEGER                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_officer_perms_faction_name ON OfficerPerms (FactionName);
 
@@ -84,7 +84,7 @@ CREATE TABLE MemberPerms (
    Claim       INTEGER                         NOT NULL,
    Attack      INTEGER                         NOT NULL,
    Invite      INTEGER                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_member_perms_faction_name ON MemberPerms (FactionName);
 
@@ -97,7 +97,7 @@ CREATE TABLE RecruitPerms (
    Claim       INTEGER                         NOT NULL,
    Attack      INTEGER                         NOT NULL,
    Invite      INTEGER                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_recruit_perms_faction_name ON RecruitPerms (FactionName);
 
@@ -107,7 +107,7 @@ CREATE TABLE AllyPerms (
    Use         INTEGER                         NOT NULL,
    Place       INTEGER                         NOT NULL,
    Destroy     INTEGER                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_ally_perms_faction_name ON AllyPerms (FactionName);
 
@@ -117,7 +117,7 @@ CREATE TABLE TrucePerms (
    Use         INTEGER                         NOT NULL,
    Place       INTEGER                         NOT NULL,
    Destroy     INTEGER                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_truce_perms_faction_name ON TrucePerms (FactionName);
 
@@ -127,7 +127,7 @@ CREATE TABLE Claims (
    WorldUUID     VARCHAR(36)                            NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
    PRIMARY KEY (WorldUUID, ChunkPosition),
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_claims_world_uuid_position ON Claims (WorldUUID, ChunkPosition);
 
@@ -135,7 +135,7 @@ CREATE UNIQUE INDEX idx_claims_world_uuid_position ON Claims (WorldUUID, ChunkPo
 CREATE TABLE FactionChests (
     FactionName TEXT    UNIQUE  NOT NULL,
     ChestItems  BINARY            NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name) ON DELETE CASCADE
+    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
 );
 CREATE UNIQUE INDEX idx_faction_chest_name ON FactionChests (FactionName);
 
