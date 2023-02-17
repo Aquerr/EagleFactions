@@ -209,6 +209,7 @@ public class ConfigurateHelper
         Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
         Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
         Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
+        Map<FactionPermType, Boolean> truceMap = new LinkedHashMap<>();
 
         //Get officer perms
         boolean officerUSE = factionNode.getNode("OFFICER", "USE").getBoolean(true);
@@ -242,6 +243,11 @@ public class ConfigurateHelper
         boolean allyPLACE = factionNode.getNode( "ALLY", "PLACE").getBoolean(false);
         boolean allyDESTROY = factionNode.getNode("ALLY", "DESTROY").getBoolean(false);
 
+        //Get truce perms
+        boolean truceUSE = factionNode.getNode("TRUCE", "USE").getBoolean(true);
+        boolean trucePLACE = factionNode.getNode( "TRUCE", "PLACE").getBoolean(false);
+        boolean truceDESTROY = factionNode.getNode("TRUCE", "DESTROY").getBoolean(false);
+
         officerMap.put(FactionPermType.USE, officerUSE);
         officerMap.put(FactionPermType.PLACE, officerPLACE);
         officerMap.put(FactionPermType.DESTROY, officerDESTROY);
@@ -270,10 +276,15 @@ public class ConfigurateHelper
         allyMap.put(FactionPermType.PLACE, allyPLACE);
         allyMap.put(FactionPermType.DESTROY, allyDESTROY);
 
+        truceMap.put(FactionPermType.USE, truceUSE);
+        truceMap.put(FactionPermType.PLACE, trucePLACE);
+        truceMap.put(FactionPermType.DESTROY, truceDESTROY);
+
         flagMap.put(FactionMemberType.OFFICER, officerMap);
         flagMap.put(FactionMemberType.MEMBER, membersMap);
         flagMap.put(FactionMemberType.RECRUIT, recruitMap);
         flagMap.put(FactionMemberType.ALLY, allyMap);
+        flagMap.put(FactionMemberType.TRUCE, truceMap);
 
         return flagMap;
     }

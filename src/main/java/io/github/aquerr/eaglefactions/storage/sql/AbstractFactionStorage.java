@@ -503,7 +503,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             connection.close();
             return true;
         }
-        catch (SQLException | IOException e)
+        catch (Exception e)
         {
             try
             {

@@ -23,10 +23,7 @@ CREATE TABLE `FactionRecruits` (
   `RecruitUUID` VARCHAR(36) NOT NULL,
   `FactionName` VARCHAR(200) NOT NULL,
   UNIQUE INDEX `RecruitUUID_UNIQUE` (`RecruitUUID` ASC) ,
-  INDEX `FactionName_idx` (`FactionName` ASC) ,
-  CONSTRAINT `Faction_Recruit`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  INDEX `FactionName_idx` (`FactionName` ASC)
 );
 
 -- Create Members Table
@@ -34,10 +31,7 @@ CREATE TABLE `FactionMembers` (
   `MemberUUID` VARCHAR(36) NOT NULL,
   `FactionName` VARCHAR(200) NOT NULL,
   UNIQUE INDEX `MemberUUID_UNIQUE` (`MemberUUID` ASC) ,
-  INDEX `FactionName_idx` (`FactionName` ASC) ,
-  CONSTRAINT `Faction_Member`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  INDEX `FactionName_idx` (`FactionName` ASC)
 );
 
 -- Create Officers Table
@@ -46,34 +40,25 @@ CREATE TABLE `FactionOfficers` (
   `OfficerUUID` VARCHAR(36) NOT NULL,
   `FactionName` VARCHAR(200) NOT NULL,
   UNIQUE INDEX `OfficerUUID_UNIQUE` (`OfficerUUID` ASC) ,
-  INDEX `FactionName_idx` (`FactionName` ASC) ,
-  CONSTRAINT `Faction_Officer`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  INDEX `FactionName_idx` (`FactionName` ASC)
 );
 
 -- Create FactionAlliances Table
 CREATE TABLE FactionAlliances (
   `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL,
-  CONSTRAINT `FactionAlliances_FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
-  CONSTRAINT `FactionAlliances_FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+  `FactionName_2` VARCHAR(200) NOT NULL
 );
 
 -- Create FactionEnemies Table
 CREATE TABLE FactionEnemies (
   `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL,
-  CONSTRAINT `FactionEnemies_FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
-  CONSTRAINT `FactionEnemies_FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+  `FactionName_2` VARCHAR(200) NOT NULL
 );
 
 -- Create FactionTruces Table
 CREATE TABLE FactionTruces (
   `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL,
-  CONSTRAINT `FactionTruces_FactionName_1_fk` FOREIGN KEY (`FactionName_1`) REFERENCES Factions(Name),
-  CONSTRAINT `FactionTruces_FactionName_2_fk` FOREIGN KEY (`FactionName_2`) REFERENCES Factions(Name)
+  `FactionName_2` VARCHAR(200) NOT NULL
 );
 
 -- Create OfficerPerms Table
@@ -85,10 +70,7 @@ CREATE TABLE `OfficerPerms` (
   `Claim` TINYINT(1) NOT NULL,
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_OfficerPerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create MemberPerms Table
@@ -100,10 +82,7 @@ CREATE TABLE `MemberPerms` (
   `Claim` TINYINT(1) NOT NULL,
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_MemberPerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create RecruitPerms Table
@@ -115,10 +94,7 @@ CREATE TABLE `RecruitPerms` (
   `Claim` TINYINT(1) NOT NULL,
   `Attack` TINYINT(1) NOT NULL,
   `Invite` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_RecruitPerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create AllyPerms Table
@@ -127,10 +103,7 @@ CREATE TABLE `AllyPerms` (
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
   `Destroy` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_AllyPerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create TrucePerms Table
@@ -139,10 +112,7 @@ CREATE TABLE `TrucePerms` (
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
   `Destroy` TINYINT(1) NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_TrucePerms`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create Claims Table
@@ -150,10 +120,7 @@ CREATE TABLE `Claims` (
   `FactionName` VARCHAR(200) NOT NULL,
   `WorldUUID` VARCHAR(36) NOT NULL,
   `ChunkPosition` VARCHAR(200) NOT NULL,
-  UNIQUE INDEX `Claim_UNIQUE` (`WorldUUID`, `ChunkPosition`),
-  CONSTRAINT `Faction_Claim`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`),
+  UNIQUE INDEX `Claim_UNIQUE` (`WorldUUID`, `ChunkPosition`)
   PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 );
 
@@ -161,10 +128,7 @@ CREATE TABLE `Claims` (
 CREATE TABLE `FactionChests` (
   `FactionName` VARCHAR(200) NOT NULL,
   `ChestItems` BLOB NOT NULL,
-  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC),
-  CONSTRAINT `Faction_FactionChest`
-    FOREIGN KEY (`FactionName`)
-    REFERENCES `Factions` (`Name`)
+  UNIQUE INDEX `FactionName_UNIQUE` (`FactionName` ASC)
 );
 
 -- Create Players Table

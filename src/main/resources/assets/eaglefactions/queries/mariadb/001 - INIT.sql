@@ -21,52 +21,40 @@ CREATE UNIQUE INDEX `Name_UNIQUE` ON `Factions` (`Name`);
 -- Create Recruits Table
 CREATE TABLE `FactionRecruits` (
   `RecruitUUID` VARCHAR(36) NOT NULL,
-  `FactionName` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `FactionName` VARCHAR(200) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `RecruitUUID_UNIQUE` ON `FactionRecruits` (`RecruitUUID`);
 
 -- Create Members Table
 CREATE TABLE `FactionMembers` (
   `MemberUUID` VARCHAR(36) NOT NULL,
-  `FactionName` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `FactionName` VARCHAR(200) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `MemberUUID_UNIQUE` ON `FactionMembers` (`MemberUUID`);
 
 -- Create Officers Table
 CREATE TABLE `FactionOfficers` (
   `OfficerUUID` VARCHAR(36) NOT NULL,
-  `FactionName` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `FactionName` VARCHAR(200) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `OfficerUUID_UNIQUE` ON `FactionOfficers` (`OfficerUUID`);
 
 -- Create FactionAlliances Table
 CREATE TABLE FactionAlliances (
   `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName_1`) REFERENCES `Factions` (`Name`),
-  FOREIGN KEY (`FactionName_2`) REFERENCES `Factions` (`Name`)
+  `FactionName_2` VARCHAR(200) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 
 -- Create FactionEnemies Table
 CREATE TABLE FactionEnemies (
   `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName_1`) REFERENCES `Factions` (`Name`),
-  FOREIGN KEY (`FactionName_2`) REFERENCES `Factions` (`Name`)
+  `FactionName_2` VARCHAR(200) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 
 -- Create FactionTruces Table
 CREATE TABLE FactionTruces (
   `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName_1`) REFERENCES `Factions` (`Name`),
-  FOREIGN KEY (`FactionName_2`) REFERENCES `Factions` (`Name`)
+  `FactionName_2` VARCHAR(200) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 
 -- Create OfficerPerms Table
@@ -77,9 +65,7 @@ CREATE TABLE `OfficerPerms` (
   `Destroy` TINYINT(1) NOT NULL,
   `Claim` TINYINT(1) NOT NULL,
   `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `Invite` TINYINT(1) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `OfficerPerms` (`FactionName`);
 
@@ -91,9 +77,7 @@ CREATE TABLE `MemberPerms` (
   `Destroy` TINYINT(1) NOT NULL,
   `Claim` TINYINT(1) NOT NULL,
   `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `Invite` TINYINT(1) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `MemberPerms` (`FactionName`);
 
@@ -105,9 +89,7 @@ CREATE TABLE `RecruitPerms` (
   `Destroy` TINYINT(1) NOT NULL,
   `Claim` TINYINT(1) NOT NULL,
   `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `Invite` TINYINT(1) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `RecruitPerms` (`FactionName`);
 
@@ -116,9 +98,7 @@ CREATE TABLE `AllyPerms` (
   `FactionName` VARCHAR(200) NOT NULL,
   `Use` TINYINT(1) NOT NULL,
   `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `Destroy` TINYINT(1) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `AllyPerms` (`FactionName`);
 
@@ -127,9 +107,7 @@ CREATE TABLE `TrucePerms` (
     `FactionName` VARCHAR(200) NOT NULL,
     `Use` TINYINT(1) NOT NULL,
     `Place` TINYINT(1) NOT NULL,
-    `Destroy` TINYINT(1) NOT NULL,
-    FOREIGN KEY (`FactionName`)
-        REFERENCES `Factions` (`Name`)
+    `Destroy` TINYINT(1) NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `TrucePerms` (`FactionName`);
 
@@ -138,8 +116,6 @@ CREATE TABLE `Claims` (
   `FactionName` VARCHAR(200) NOT NULL,
   `WorldUUID` VARCHAR(36) NOT NULL,
   `ChunkPosition` VARCHAR(200) NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`),
   PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `Claim_UNIQUE` ON `Claims` (`WorldUUID`, `ChunkPosition`);
@@ -147,9 +123,7 @@ CREATE UNIQUE INDEX `Claim_UNIQUE` ON `Claims` (`WorldUUID`, `ChunkPosition`);
 -- Create FactionsChest Table
 CREATE TABLE `FactionChests` (
   `FactionName` VARCHAR(200) NOT NULL,
-  `ChestItems` BLOB NOT NULL,
-  FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+  `ChestItems` BLOB NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `FactionChests` (`FactionName`);
 

@@ -18,49 +18,40 @@ CREATE UNIQUE INDEX ON Factions (Name);
 -- Create Recruits Table
 CREATE TABLE FactionRecruits (
     RecruitUUID     VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName     VARCHAR(200)    NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+    FactionName     VARCHAR(200)    NOT NULL
 );
 CREATE UNIQUE INDEX ON FactionRecruits (RecruitUUID);
 
 -- Create Members Table
 CREATE TABLE FactionMembers (
     MemberUUID  VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName VARCHAR(200) NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+    FactionName VARCHAR(200) NOT NULL
 );
 CREATE UNIQUE INDEX ON FactionMembers (MemberUUID);
 
 -- Create Officers Table
 CREATE TABLE FactionOfficers (
     OfficerUUID VARCHAR(36)    UNIQUE  NOT NULL,
-    FactionName VARCHAR(200) NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+    FactionName VARCHAR(200) NOT NULL
 );
 CREATE UNIQUE INDEX ON FactionOfficers (OfficerUUID);
 
 -- Create FactionAlliances Table
 CREATE TABLE FactionAlliances (
   FactionName_1 VARCHAR(200) NOT NULL,
-  FactionName_2 VARCHAR(200) NOT NULL,
-  FOREIGN KEY (FactionName_1) REFERENCES Factions(Name),
-  FOREIGN KEY (FactionName_2) REFERENCES Factions(Name)
+  FactionName_2 VARCHAR(200) NOT NULL
 );
 
 -- Create FactionEnemies Table
 CREATE TABLE FactionEnemies (
   FactionName_1 VARCHAR(200) NOT NULL,
-  FactionName_2 VARCHAR(200) NOT NULL,
-  FOREIGN KEY (FactionName_1) REFERENCES Factions(Name),
-  FOREIGN KEY (FactionName_2) REFERENCES Factions(Name)
+  FactionName_2 VARCHAR(200) NOT NULL
 );
 
 -- Create FactionTruces Table
 CREATE TABLE FactionTruces (
   FactionName_1 VARCHAR(200) NOT NULL,
-  FactionName_2 VARCHAR(200) NOT NULL,
-  FOREIGN KEY (FactionName_1) REFERENCES Factions(Name),
-  FOREIGN KEY (FactionName_2) REFERENCES Factions(Name)
+  FactionName_2 VARCHAR(200) NOT NULL
 );
 
 -- Create OfficerPerms Table
@@ -71,8 +62,7 @@ CREATE TABLE OfficerPerms (
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+   Invite      BOOLEAN                         NOT NULL
 );
 CREATE UNIQUE INDEX ON OfficerPerms (FactionName);
 
@@ -84,8 +74,7 @@ CREATE TABLE MemberPerms (
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+   Invite      BOOLEAN                         NOT NULL
 );
 CREATE UNIQUE INDEX ON MemberPerms (FactionName);
 
@@ -97,8 +86,7 @@ CREATE TABLE RecruitPerms (
    Destroy     BOOLEAN                         NOT NULL,
    Claim       BOOLEAN                         NOT NULL,
    Attack      BOOLEAN                         NOT NULL,
-   Invite      BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+   Invite      BOOLEAN                         NOT NULL
 );
 CREATE UNIQUE INDEX ON RecruitPerms (FactionName);
 
@@ -107,8 +95,7 @@ CREATE TABLE AllyPerms (
    FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
-   Destroy     BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+   Destroy     BOOLEAN                         NOT NULL
 );
 CREATE UNIQUE INDEX ON AllyPerms (FactionName);
 
@@ -117,8 +104,7 @@ CREATE TABLE TrucePerms (
    FactionName   VARCHAR(200)    UNIQUE        NOT NULL,
    Use         BOOLEAN                         NOT NULL,
    Place       BOOLEAN                         NOT NULL,
-   Destroy     BOOLEAN                         NOT NULL,
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+   Destroy     BOOLEAN                         NOT NULL
 );
 CREATE UNIQUE INDEX ON TrucePerms (FactionName);
 
@@ -128,16 +114,14 @@ CREATE TABLE Claims (
    FactionName   VARCHAR(200)                  NOT NULL,
    WorldUUID     VARCHAR(36)                            NOT NULL,
    ChunkPosition VARCHAR(200)                  NOT NULL,
-   PRIMARY KEY (WorldUUID, ChunkPosition),
-   FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+   PRIMARY KEY (WorldUUID, ChunkPosition)
 );
 CREATE UNIQUE INDEX ON Claims (WorldUUID, ChunkPosition);
 
 -- Create FactionsChest Table
 CREATE TABLE FactionChests (
     FactionName VARCHAR(200)    UNIQUE  NOT NULL,
-    ChestItems  BINARY            NOT NULL,
-    FOREIGN KEY (FactionName) REFERENCES Factions(Name)
+    ChestItems  BINARY            NOT NULL
 );
 CREATE UNIQUE INDEX ON FactionChests (FactionName);
 
