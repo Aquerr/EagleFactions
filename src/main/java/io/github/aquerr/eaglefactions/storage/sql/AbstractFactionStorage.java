@@ -60,6 +60,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+
 public abstract class AbstractFactionStorage implements FactionStorage
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFactionStorage.class);
@@ -119,7 +121,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String DELETE_FACTION_ALLIANCE_BETWEEN_FACTIONS = "DELETE FROM FactionAlliances WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
     private static final String DELETE_FACTION_ENEMY_BETWEEN_FACTIONS = "DELETE FROM FactionEnemies WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
     private static final String DELETE_FACTION_TRUCE_BETWEEN_FACTIONS = "DELETE FROM FactionTruces WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
-    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_FACTIONNAME = "DELETE FROM ClaimOwners WHERE FactionName=?";
     private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION = "DELETE FROM ClaimOwners WHERE WorldUUID=? AND ChunkPosition=?";
 
     private static final String DELETE_FACTION_ALLY_PERMS = "DELETE FROM AllyPerms WHERE FactionName=?";
@@ -433,13 +434,13 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_OFFICER_PERMS : INSERT_OFFICER_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.USE));
-            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.PLACE));
-            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.DESTROY));
-            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CLAIM));
-            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.ATTACK));
-            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.INVITE));
-            preparedStatement.setBoolean(8, faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CHEST));
+            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.USE)).orElse(false));
+            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.PLACE)).orElse(false));
+            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.DESTROY)).orElse(false));
+            preparedStatement.setBoolean(5, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CLAIM)).orElse(false));
+            preparedStatement.setBoolean(6, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.ATTACK)).orElse(false));
+            preparedStatement.setBoolean(7, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.INVITE)).orElse(false));
+            preparedStatement.setBoolean(8, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CHEST)).orElse(false));
             if(isUpdate)
                 preparedStatement.setString(9, faction.getName());
 
@@ -448,13 +449,13 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_MEMBER_PERMS : INSERT_MEMBER_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.USE));
-            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.PLACE));
-            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.DESTROY));
-            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CLAIM));
-            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.ATTACK));
-            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.INVITE));
-            preparedStatement.setBoolean(8, faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CHEST));
+            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.USE)).orElse(false));
+            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.PLACE)).orElse(false));
+            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.DESTROY)).orElse(false));
+            preparedStatement.setBoolean(5, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CLAIM)).orElse(false));
+            preparedStatement.setBoolean(6, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.ATTACK)).orElse(false));
+            preparedStatement.setBoolean(7, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.INVITE)).orElse(false));
+            preparedStatement.setBoolean(8, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CHEST)).orElse(false));
             if(isUpdate)
                 preparedStatement.setString(9, faction.getName());
 
@@ -463,13 +464,13 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_RECRUIT_PERMS : INSERT_RECRUIT_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.USE));
-            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.PLACE));
-            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.DESTROY));
-            preparedStatement.setBoolean(5, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CLAIM));
-            preparedStatement.setBoolean(6, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.ATTACK));
-            preparedStatement.setBoolean(7, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.INVITE));
-            preparedStatement.setBoolean(8, faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CHEST));
+            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.USE)).orElse(false));
+            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.PLACE)).orElse(false));
+            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.DESTROY)).orElse(false));
+            preparedStatement.setBoolean(5, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CLAIM)).orElse(false));
+            preparedStatement.setBoolean(6, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.ATTACK)).orElse(false));
+            preparedStatement.setBoolean(7, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.INVITE)).orElse(false));
+            preparedStatement.setBoolean(8, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CHEST)).orElse(false));
             if(isUpdate)
                 preparedStatement.setString(9, faction.getName());
 
@@ -478,9 +479,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_ALLY_PERMS : INSERT_ALLY_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.USE));
-            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.PLACE));
-            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.DESTROY));
+            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.USE)).orElse(false));
+            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.PLACE)).orElse(false));
+            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.DESTROY)).orElse(false));
             if(isUpdate)
                 preparedStatement.setString(5, faction.getName());
 
@@ -489,9 +490,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_TRUCE_PERMS : INSERT_TRUCE_PERMS);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.USE));
-            preparedStatement.setBoolean(3, faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.PLACE));
-            preparedStatement.setBoolean(4, faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.DESTROY));
+            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.USE)).orElse(false));
+            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.PLACE)).orElse(false));
+            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.DESTROY)).orElse(false));
             if(isUpdate)
                 preparedStatement.setString(5, faction.getName());
 
@@ -507,6 +508,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             try
             {
                 connection.rollback();
+                connection.close();
             }
             catch (SQLException e1)
             {
@@ -645,15 +647,10 @@ public abstract class AbstractFactionStorage implements FactionStorage
     @Override
     public void deleteFactions()
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        Set<Faction> factions = getFactions();
+        for (final Faction faction : factions)
         {
-            final Statement statement = connection.createStatement();
-            statement.execute(DELETE_FACTIONS);
-            statement.close();
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
+            deleteFaction(faction.getName());
         }
     }
 
