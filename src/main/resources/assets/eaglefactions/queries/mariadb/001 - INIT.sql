@@ -139,7 +139,7 @@ CREATE TABLE `Claims` (
   `WorldUUID` VARCHAR(36) NOT NULL,
   `ChunkPosition` VARCHAR(200) NOT NULL,
   FOREIGN KEY (`FactionName`)
-      REFERENCES `Factions` (`Name`)
+      REFERENCES `Factions` (`Name`),
   PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE UNIQUE INDEX `Claim_UNIQUE` ON `Claims` (`WorldUUID`, `ChunkPosition`);
