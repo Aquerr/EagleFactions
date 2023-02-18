@@ -16,12 +16,14 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -178,11 +180,15 @@ public class PVPLoggerImpl implements PVPLogger
         {
             final Scoreboard scoreboard = Optional.ofNullable(player.scoreboard()).orElse(Scoreboard.builder().build());
 
-            final int objectiveId = getNextFreeId(1);
-            objective = createPVPLoggerObjective(objectiveId);
-            scoreboard.addObjective(objective);
-            scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
-            pvpLoggerObjective.setObjective(objective);
+            objective = findObjectiveInScoreBoard(scoreboard, pvpLoggerObjective.getId());
+            if (objective == null)
+            {
+                final int objectiveId = getNextFreeId(1);
+                objective = createPVPLoggerObjective(objectiveId);
+                scoreboard.addObjective(objective);
+                scoreboard.updateDisplaySlot(objective, DisplaySlots.SIDEBAR);
+                pvpLoggerObjective.setObjective(objective);
+            }
             player.setScoreboard(scoreboard);
         }
         Score pvpTimerScore = objective.findOrCreateScore(Component.text("Time:"));
@@ -198,13 +204,12 @@ public class PVPLoggerImpl implements PVPLogger
     @Override
     public synchronized void removePlayer(final ServerPlayer player)
     {
-        if (!isPlayerBlocked(player))
-            return;
-
         //Remove PVPLoggerImpl objective
         Scoreboard scoreboard = player.scoreboard();
-        PVPLoggerObjective pvpLoggerObjective = this.playerPVPLoggerObjectives.get(player.uniqueId());
-        scoreboard.removeObjective(pvpLoggerObjective.getObjective());
+        List<Objective> objectives = scoreboard.objectives().stream()
+                .filter(objective -> objective.name().startsWith(PVPLOGGER_OBJECTIVE_NAME))
+                .collect(Collectors.toList());
+        objectives.forEach(scoreboard::removeObjective);
         this.playerPVPLoggerObjectives.remove(player.uniqueId());
     }
 
@@ -216,10 +221,21 @@ public class PVPLoggerImpl implements PVPLogger
                 .orElse(0);
     }
 
+    private Objective findObjectiveInScoreBoard(Scoreboard scoreboard, int objectiveId)
+    {
+        return scoreboard.objective(getPvploggerObjectiveName(objectiveId))
+                .orElse(null);
+    }
+
+    private String getPvploggerObjectiveName(int objectiveId)
+    {
+        return PVPLOGGER_OBJECTIVE_NAME + objectiveId;
+    }
+
     private Objective createPVPLoggerObjective(int objectiveId)
     {
         return Objective.builder()
-                .name(PVPLOGGER_OBJECTIVE_NAME + objectiveId)
+                .name(getPvploggerObjectiveName(objectiveId))
                 .displayName(Component.text("===", WHITE).append(Component.text("PVP-LOGGER", RED)).append(Component.text("===", WHITE)))
                 .criterion(Criteria.DUMMY)
                 .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)

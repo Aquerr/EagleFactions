@@ -53,5 +53,15 @@ public class PlayerJoinListener extends AbstractListener
                 player.sendMessage(messageService.resolveMessageWithPrefix("motd.notify", optionalPlayerFaction.get().getName(), optionalPlayerFaction.get().getMessageOfTheDay()));
             }
         });
+
+        clearPvpLoggerObjectives(player);
+    }
+
+    private void clearPvpLoggerObjectives(ServerPlayer player)
+    {
+        CompletableFuture.runAsync(() ->
+        {
+            super.getPlugin().getPVPLogger().removePlayer(player);
+        });
     }
 }
