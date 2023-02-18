@@ -80,8 +80,6 @@ public class MySQLProvider extends SQLAbstractProvider
             {
                 if(resultSet.getString(1).equalsIgnoreCase(super.getDatabaseName()))
                 {
-                    resultSet.close();
-                    connection.close();
                     return true;
                 }
             }

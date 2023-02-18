@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.logic;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
