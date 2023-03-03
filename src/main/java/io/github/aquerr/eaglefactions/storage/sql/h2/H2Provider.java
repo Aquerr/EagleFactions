@@ -81,7 +81,7 @@ public class H2Provider extends SQLAbstractProvider
 
     private void prepareHikariDataSource(Path databasePath)
     {
-        String jdbcUrl = "jdbc:h2:file:" + databasePath;
+        String jdbcUrl = "jdbc:h2:file:" + databasePath + ";AUTO_SERVER=TRUE";
         HikariConfig config = new HikariConfig();
         config.setDataSourceClassName("org.h2.jdbcx.JdbcDataSource");
         config.addDataSourceProperty("url", jdbcUrl);
