@@ -4,9 +4,9 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 
 public abstract class AbstractListener
 {
-    private EagleFactions plugin;
+    private final EagleFactions plugin;
 
-    public AbstractListener(EagleFactions plugin){
+    protected AbstractListener(EagleFactions plugin){
         this.plugin = plugin;
     }
 

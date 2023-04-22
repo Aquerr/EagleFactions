@@ -19,7 +19,7 @@ plugins {
 allprojects {
     description = "A factions plugin that will make managing your battle-server easier. :)"
     group = "io.github.aquerr"
-    version = "0.17.0"
+    version = "$eaglefactionsVersion-API-$spongeApiVersion"
 
     tasks.withType(JavaCompile::class).configureEach {
         options.apply {
