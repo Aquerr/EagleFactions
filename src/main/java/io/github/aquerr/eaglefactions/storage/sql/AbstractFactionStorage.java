@@ -8,7 +8,6 @@ import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
-import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
@@ -734,55 +733,10 @@ public abstract class AbstractFactionStorage implements FactionStorage
         try(final Connection connection = this.sqlProvider.getConnection())
         {
             connection.setAutoCommit(false);
-            final Set<String> alliances = getFactionAlliances(connection, factionName);
-            final Set<String> enemies = getFactionEnemies(connection, factionName);
-            final Set<String> truces = getFactionTruces(connection, factionName);
-
             PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
             statement.setString(1, factionName);
             ResultSet factionsResultSet = statement.executeQuery();
-            if (factionsResultSet.next())
-            {
-                final String tag = factionsResultSet.getString("Tag");
-                final String tagColor = factionsResultSet.getString("TagColor");
-                final TextColor textColor = TextColor.fromHexString(tagColor);
-                final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
-                final String factionHomeAsString = factionsResultSet.getString("Home");
-                final String description = factionsResultSet.getString("Description");
-                final String messageOfTheDay = factionsResultSet.getString("Motd");
-                final boolean isPublic = factionsResultSet.getBoolean("IsPublic");
-                FactionHome factionHome = null;
-                if (factionHomeAsString != null)
-                    factionHome = FactionHome.from(factionHomeAsString);
-                final String lastOnlineString = factionsResultSet.getString("LastOnline");
-                final Instant lastOnline = Instant.parse(lastOnlineString);
-
-                final Set<UUID> officers = getFactionOfficers(connection, factionName);
-                final Set<UUID> recruits = getFactionRecruits(connection, factionName);
-                final Set<UUID> members = getFactionMembers(connection, factionName);
-                final Set<Claim> claims = getFactionClaims(connection, factionName);
-
-                final FactionChest factionChest = getFactionChest(connection, factionName);
-                final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
-
-                final Faction faction = FactionImpl.builder(factionName, Component.text(tag, textColor), leaderUUID)
-                        .setHome(factionHome)
-                        .setTruces(truces)
-                        .setAlliances(alliances)
-                        .setEnemies(enemies)
-                        .setClaims(claims)
-                        .setLastOnline(lastOnline)
-                        .setMembers(members)
-                        .setRecruits(recruits)
-                        .setOfficers(officers)
-                        .setChest(factionChest)
-                        .setPerms(perms)
-                        .setDescription(description)
-                        .setMessageOfTheDay(messageOfTheDay)
-                        .setIsPublic(isPublic)
-                        .build();
-                return faction;
-            }
+            return mapToFaction(connection, factionsResultSet, factionName);
         }
         catch (IOException | SQLException | ClassNotFoundException exception)
         {
@@ -1249,5 +1203,55 @@ public abstract class AbstractFactionStorage implements FactionStorage
         permMap.put(FactionMemberType.ALLY, allyMap);
 
         return permMap;
+    }
+
+    private Faction mapToFaction(Connection connection, ResultSet factionsResultSet, String factionName) throws SQLException, IOException, ClassNotFoundException
+    {
+        final Set<String> alliances = getFactionAlliances(connection, factionName);
+        final Set<String> enemies = getFactionEnemies(connection, factionName);
+        final Set<String> truces = getFactionTruces(connection, factionName);
+        final Set<UUID> officers = getFactionOfficers(connection, factionName);
+        final Set<UUID> recruits = getFactionRecruits(connection, factionName);
+        final Set<UUID> members = getFactionMembers(connection, factionName);
+        final Set<Claim> claims = getFactionClaims(connection, factionName);
+
+        if (factionsResultSet.next())
+        {
+            final String tag = factionsResultSet.getString("Tag");
+            final String tagColor = factionsResultSet.getString("TagColor");
+            final TextColor textColor = TextColor.fromHexString(tagColor);
+            final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
+            final String factionHomeAsString = factionsResultSet.getString("Home");
+            final String description = factionsResultSet.getString("Description");
+            final String messageOfTheDay = factionsResultSet.getString("Motd");
+            final boolean isPublic = factionsResultSet.getBoolean("IsPublic");
+            FactionHome factionHome = null;
+            if (factionHomeAsString != null)
+                factionHome = FactionHome.from(factionHomeAsString);
+            final String lastOnlineString = factionsResultSet.getString("LastOnline");
+            final Instant lastOnline = Instant.parse(lastOnlineString);
+
+            final FactionChest factionChest = getFactionChest(connection, factionName);
+            final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
+
+            final Faction faction = FactionImpl.builder(factionName, Component.text(tag, textColor), leaderUUID)
+                    .setHome(factionHome)
+                    .setTruces(truces)
+                    .setAlliances(alliances)
+                    .setEnemies(enemies)
+                    .setClaims(claims)
+                    .setLastOnline(lastOnline)
+                    .setMembers(members)
+                    .setRecruits(recruits)
+                    .setOfficers(officers)
+                    .setChest(factionChest)
+                    .setPerms(perms)
+                    .setDescription(description)
+                    .setMessageOfTheDay(messageOfTheDay)
+                    .setIsPublic(isPublic)
+                    .build();
+            return faction;
+        }
+        return null;
     }
 }

@@ -195,6 +195,17 @@ public class ProtectionManagerImpl implements ProtectionManager
         return canUseItem;
     }
 
+    @Override
+    public boolean isSafeZone(ServerLocation location)
+    {
+        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
+        if (safeZoneWorlds.contains(location.world().key().asString()))
+            return true;
+
+        final Optional<Faction> faction = this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
+        return faction.map(Faction::isSafeZone).orElse(false);
+    }
+
     private ProtectionResult canUseItem(final ServerLocation location, final User user, final ItemStackSnapshot usedItem)
     {
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.uniqueId()))

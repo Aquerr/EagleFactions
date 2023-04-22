@@ -39,4 +39,28 @@ public class ProtectionFlagImpl implements ProtectionFlag, Comparable<Protection
     {
         return this.type.getName().compareTo(o.getType().getName());
     }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProtectionFlagImpl that = (ProtectionFlagImpl) o;
+        return type == that.type;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(type);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ProtectionFlagImpl{" +
+                "type=" + type +
+                ", value=" + value +
+                '}';
+    }
 }

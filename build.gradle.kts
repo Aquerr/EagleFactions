@@ -8,7 +8,7 @@ val spongeApiVersion = findProperty("sponge-api.version") as String
 
 plugins {
     `java-library`
-    id("org.spongepowered.gradle.plugin") version "2.0.2"
+    id("org.spongepowered.gradle.plugin") version "2.1.1"
     java
     idea
     `maven-publish`

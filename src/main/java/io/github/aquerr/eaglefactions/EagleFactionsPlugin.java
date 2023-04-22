@@ -327,6 +327,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void preCreateSafeZoneAndWarZone()
     {
+        // SafeZone and WarZone factions must always exist!
         if (this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME) == null)
         {
             final Faction warzone = FactionImpl.builder(EagleFactionsPlugin.WAR_ZONE_NAME, text("WZ"), new UUID(0, 0))

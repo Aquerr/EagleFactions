@@ -101,7 +101,7 @@ public class EntityDamageListener extends AbstractListener
     @Listener(order = Order.EARLY, beforeModifications = true)
     public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "entity") ServerPlayer attackedPlayer)
     {
-        if(!(event.cause().root() instanceof DamageSource))
+        if(!(event.cause().root() instanceof DamageSource) || ((DamageSource)event.cause().root()).doesAffectCreative())
             return;
 
         final ServerWorld world = attackedPlayer.world();
@@ -343,11 +343,6 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean isSafeZone(final ServerLocation location)
     {
-        final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
-        if (safeZoneWorlds.contains(location.world().key().asString()))
-            return true;
-
-        final Optional<Faction> faction = super.getPlugin().getFactionLogic().getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
-        return faction.map(Faction::isSafeZone).orElse(false);
+        return this.protectionManager.isSafeZone(location);
     }
 }

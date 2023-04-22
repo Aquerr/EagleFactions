@@ -34,4 +34,10 @@ public class ProtectionFlagsImpl implements ProtectionFlags
         return Optional.ofNullable(flags.get(type))
                 .orElse(false);
     }
+
+    @Override
+    public void putFlag(ProtectionFlag protectionFlag)
+    {
+        this.flags.put(protectionFlag.getType(), protectionFlag.getValue());
+    }
 }

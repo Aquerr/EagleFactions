@@ -22,6 +22,7 @@ import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
+import io.github.aquerr.eaglefactions.entities.ProtectionFlagsImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.scheduling.ClaimDelayTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
@@ -999,9 +1000,9 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(flagType);
 
-        Set<ProtectionFlag> protectionFlags = faction.getProtectionFlags();
-        protectionFlags.add(new ProtectionFlagImpl(flagType, value));
-        Faction updatedFaction = faction.toBuilder().setProtectionFlags(protectionFlags).build();
+        ProtectionFlags protectionFlags = new ProtectionFlagsImpl(faction.getProtectionFlags());
+        protectionFlags.putFlag(new ProtectionFlagImpl(flagType, value));
+        Faction updatedFaction = faction.toBuilder().setProtectionFlags(protectionFlags.getProtectionFlags()).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -1012,6 +1013,5 @@ public class FactionLogicImpl implements FactionLogic
         final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
         FactionsCache.removeClaim(claim);
         this.storageManager.saveFaction(updatedFaction);
-//        FactionsCache.updateClaimFaction(claim, Optional.empty());
     }
 }

@@ -13,11 +13,11 @@ import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.util.ModSupport;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -28,15 +28,21 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public class EntitySpawnListener extends AbstractListener
 {
+    private static final Set<UUID> HOME_TELEPORT_PLAYER_UUIDS = new HashSet<>();
+
     private final ProtectionManager protectionManager;
     private final FactionLogic factionLogic;
     private final FactionsConfig factionsConfig;
@@ -98,11 +104,16 @@ public class EntitySpawnListener extends AbstractListener
 
             if(entity.toString().contains("EntityCustomNpc")) return;
 
-            if (isItemUsed)
+            // For dropped items either by destroying a block or killing a mob.
+            if (isDropLoot(spawnType))
             {
-                final ItemStackSnapshot itemStackSnapshot = eventContext.get(EventContextKeys.USED_ITEM).get();
+                return;
+            }
+            else if (isItemUsed)
+            {
                 if (serverPlayerCause != null)
                 {
+                    final ItemStackSnapshot itemStackSnapshot = eventContext.get(EventContextKeys.USED_ITEM).get();
                     if (!this.protectionManager.canUseItem(entity.serverLocation(), serverPlayerCause.user(), itemStackSnapshot, true).hasAccess())
                     {
                         event.setCancelled(true);
@@ -130,117 +141,150 @@ public class EntitySpawnListener extends AbstractListener
             }
 
             boolean isHostile = entity instanceof Hostile;
-            boolean isPlayer = entity instanceof Player;
             boolean isLiving = entity instanceof Living;
 
-            if(!isHostile && !isPlayer && !isLiving)
-                return;
-
-            if(isPlayer)
+            if(!isHostile && !isLiving)
             {
-                if(this.factionsConfig.shouldSpawnAtHomeAfterDeath())
-                {
-                    Player player = (Player)entity;
-                    Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
-                    if(!optionalPlayerFaction.isPresent())
-                        return;
-
-                    Faction faction = optionalPlayerFaction.get();
-                    FactionHome factionHome = faction.getHome();
-                    if(factionHome != null)
-                    {
-                        event.setCancelled(true);
-                        ServerWorld world = WorldUtil.getWorldByUUID(factionHome.getWorldUUID()).get();
-                        player.setLocation(ServerLocation.of(world, factionHome.getBlockPosition()));
-                        return;
-                    }
-                    else
-                    {
-                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.home.could-not-spawn-at-faction-home-it-may-not-be-set")));
-                    }
-                }
                 return;
             }
-
-            if(isHostile)
+            else if(isHostile)
             {
-                //Check worlds
-                if(this.protectionConfig.getSafeZoneWorldNames().contains(entity.world().toString()))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if(this.protectionConfig.getWarZoneWorldNames().contains(entity.world().toString()) && !canSpawnAnimalsInWarzone())
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
-                if(!optionalFaction.isPresent())
-                    return;
-
-                Faction faction = optionalFaction.get();
-                if(faction.isSafeZone())
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if(faction.isWarZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_MONSTERS))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if(!faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_MONSTERS))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                return;
+                handleHostileMobSpawn(event, entity);
             }
-
-            if(isLiving)
+            else if(isLiving)
             {
-                if(entity instanceof ArmorStand)
-                    return;
-
-                //Check worlds
-                if(this.protectionConfig.getSafeZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString())
-                    && !canSpawnAnimalsInSafeZone())
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if(this.protectionConfig.getWarZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString()) && !canSpawnAnimalsInWarzone())
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
-                if(!optionalFaction.isPresent())
-                    return;
-
-                Faction faction = optionalFaction.get();
-                if(faction.isSafeZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if(faction.isWarZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                else if(!faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                return;
+                handleLivingEntitySpawn(event, entity);
             }
         }
+    }
+
+    @Listener(beforeModifications = true)
+    public void onPlayerRespawn(final RespawnPlayerEvent.Recreate event)
+    {
+        if (!event.isDeath())
+            return;
+
+        handlePlayerSpawnAfterDeath(event.entity());
+    }
+
+    /**
+     * Handles the actual teleportation to home after death.
+     */
+    @Listener
+    public void onPlayerRespawnPost(final RespawnPlayerEvent.Post event)
+    {
+        ServerPlayer serverPlayer = event.entity();
+        if (HOME_TELEPORT_PLAYER_UUIDS.contains(serverPlayer.uniqueId()))
+        {
+            HOME_TELEPORT_PLAYER_UUIDS.remove(serverPlayer.uniqueId());
+            Faction faction = getPlugin().getFactionLogic().getFactionByPlayerUUID(serverPlayer.uniqueId())
+                    .orElse(null);
+
+            if(faction == null)
+                return;
+
+            FactionHome factionHome = faction.getHome();
+            if (factionHome == null)
+            {
+                serverPlayer.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.home.could-not-spawn-at-faction-home-it-may-not-be-set")));
+                return;
+            }
+
+            ServerWorld world = WorldUtil.getWorldByUUID(factionHome.getWorldUUID()).orElse(null);
+            if (world != null)
+            {
+                ServerLocation safeLocation = Sponge.server().teleportHelper().findSafeLocation(ServerLocation.of(world, factionHome.getBlockPosition()))
+                        .orElse(ServerLocation.of(world, factionHome.getBlockPosition()));
+                serverPlayer.setLocation(safeLocation);
+            }
+            else
+            {
+                serverPlayer.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.home.could-not-spawn-at-faction-home-it-may-not-be-set")));
+            }
+        }
+    }
+
+    private void handleLivingEntitySpawn(SpawnEntityEvent event, Entity entity)
+    {
+        if(entity instanceof ArmorStand)
+            return;
+
+        //Check worlds
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString())
+                && !canSpawnAnimalsInSafeZone())
+        {
+            event.setCancelled(true);
+            return;
+        }
+        else if(this.protectionConfig.getWarZoneWorldNames().contains(((ServerWorld)entity.world()).key().asString()) && !canSpawnAnimalsInWarzone())
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+        Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
+        if(!optionalFaction.isPresent())
+            return;
+
+        Faction faction = optionalFaction.get();
+        if(faction.isSafeZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
+        {
+            event.setCancelled(true);
+        }
+        else if(faction.isWarZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
+        {
+            event.setCancelled(true);
+        }
+        else if(!faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_ANIMALS))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+    private void handleHostileMobSpawn(SpawnEntityEvent event, Entity entity)
+    {
+        //Check worlds
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(entity.world().toString()))
+        {
+            event.setCancelled(true);
+            return;
+        }
+        else if(this.protectionConfig.getWarZoneWorldNames().contains(entity.world().toString()) && !canSpawnAnimalsInWarzone())
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+        Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
+        if(!optionalFaction.isPresent())
+            return;
+
+        Faction faction = optionalFaction.get();
+        if(faction.isSafeZone())
+        {
+            event.setCancelled(true);
+        }
+        else if(faction.isWarZone() && !faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_MONSTERS))
+        {
+            event.setCancelled(true);
+        }
+        else if(!faction.getProtectionFlagValue(ProtectionFlagType.SPAWN_MONSTERS))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+    private void handlePlayerSpawnAfterDeath(ServerPlayer serverPlayer)
+    {
+        if (!this.factionsConfig.shouldSpawnAtHomeAfterDeath())
+            return;
+
+        HOME_TELEPORT_PLAYER_UUIDS.add(serverPlayer.uniqueId());
+    }
+
+    private boolean isDropLoot(SpawnType spawnType)
+    {
+        return spawnType == SpawnTypes.DROPPED_ITEM.get();
     }
 
     private boolean canSpawnAnimalsInSafeZone()
