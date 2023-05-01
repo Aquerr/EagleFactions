@@ -1,8 +1,6 @@
 package io.github.aquerr.eaglefactions.integrations;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.integrations.bluemap.BlueMapIntegration;
-import io.github.aquerr.eaglefactions.integrations.dynmap.DynMapIntegration;
 import io.github.aquerr.eaglefactions.integrations.exception.CouldNotActivateIntegrationException;
 
 import java.util.ArrayList;
@@ -19,8 +17,8 @@ public class IntegrationManager
     {
         this.plugin = plugin;
         this.integrations.addAll(Arrays.asList(
-                new DynMapIntegration(plugin),
-                new BlueMapIntegration(plugin)
+//                new DynMapIntegration(plugin),
+//                new BlueMapIntegration(plugin)
         ));
     }
 

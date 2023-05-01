@@ -24,4 +24,15 @@ public class Resource
     {
         return path;
     }
+
+    public URL getUrl()
+    {
+        return url;
+    }
+
+    @Override
+    public String toString()
+    {
+        return path.toString();
+    }
 }

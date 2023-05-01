@@ -17,7 +17,6 @@ import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,9 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by Aquerr on 2017-07-12.
- */
 public class ConfigurationImpl implements Configuration
 {
     private final Path configDirectoryPath;
@@ -38,7 +34,6 @@ public class ConfigurationImpl implements Configuration
     private final ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
-    //Configs
     private final StorageConfig storageConfig;
     private final ChatConfig chatConfig;
     private final DynmapConfig dynmapConfig;
@@ -48,7 +43,7 @@ public class ConfigurationImpl implements Configuration
     private final FactionsConfig factionsConfig;
     private final BluemapConfig bluemapConfig;
 
-    public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset) throws IOException
+    public ConfigurationImpl(final Path configDir, final Resource configAsset) throws IOException
     {
         this.configDirectoryPath = configDir;
         FileUtils.createDirectoryIfNotExists(this.configDirectoryPath);
@@ -72,7 +67,7 @@ public class ConfigurationImpl implements Configuration
         this.chatConfig = new ChatConfigImpl(this);
         this.dynmapConfig = new DynmapConfigImpl(this);
         this.powerConfig = new PowerConfigImpl(this);
-        this.protectionConfig = new ProtectionConfigImpl(pluginContainer, this);
+        this.protectionConfig = new ProtectionConfigImpl(this);
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
         this.bluemapConfig = new BluemapConfigImpl(this);

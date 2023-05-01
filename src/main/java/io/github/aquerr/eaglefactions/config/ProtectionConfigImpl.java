@@ -1,19 +1,16 @@
 package io.github.aquerr.eaglefactions.config;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,8 +26,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
-
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class ProtectionConfigImpl implements ProtectionConfig
 {
@@ -56,7 +51,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 
 	private List<String> blockedCommandsInOtherFactionsTerritory = new ArrayList<>();
 
-	public ProtectionConfigImpl(final PluginContainer pluginContainer, final Configuration configuration)
+	public ProtectionConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
 
@@ -170,7 +165,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	{
 		return this.warZoneWorldNames;
 	}
-	
+
 	@Override
 	public WhiteList getFactionWhitelists()
 	{
@@ -333,7 +328,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 				}
 				catch(final PatternSyntaxException exception)
 				{
-					Sponge.server().sendMessage(Identity.nil(), Component.text("The syntax of your pattern is wrong. Id = " + whiteListedIdPattern, RED));
+					EagleFactionsPlugin.LOGGER.warn("The syntax of your pattern is wrong. Id = {}", whiteListedIdPattern);
 				}
 			}
 			return false;

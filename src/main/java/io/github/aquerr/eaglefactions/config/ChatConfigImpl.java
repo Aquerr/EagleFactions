@@ -5,13 +5,15 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ChatConfigImpl implements ChatConfig
@@ -23,12 +25,12 @@ public class ChatConfigImpl implements ChatConfig
 	private boolean suppressOtherFactionsMessagesWhileInTeamChat = false;
 	private boolean displayProtectionSystemMessages = true;
 	private boolean canColorTags = true;
-	private TextComponent factionStartPrefix = Component.text("[");
-	private TextComponent factionEndPrefix = Component.text("]");
+	private Component factionStartPrefix = Component.literal("[");
+	private Component factionEndPrefix = Component.literal("]");
 	private boolean isFactionPrefixFirstInChat = true;
-	private TextComponent nonFactionPlayerPrefix = Component.text("");
+	private Component nonFactionPlayerPrefix = Component.literal("");
 	private boolean showFactionEnterPhrase = true;
-	private TextColor defaultTagColor = NamedTextColor.GREEN;
+	private TextColor defaultTagColor = TextColor.fromLegacyFormat(ChatFormatting.GREEN);
 
 	private Map<ChatEnum, Set<FactionMemberType>> visibleRanks;
 
@@ -45,24 +47,24 @@ public class ChatConfigImpl implements ChatConfig
 		this.suppressOtherFactionsMessagesWhileInTeamChat = this.configuration.getBoolean(false, "suppress-other-factions-messages-while-in-team-chat");
 		this.displayProtectionSystemMessages = this.configuration.getBoolean(true, "display-protection-system-messages");
 		this.canColorTags = this.configuration.getBoolean(true, "colored-tags-allowed");
-		this.factionStartPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("[", "faction-prefix-start"));
-		this.factionEndPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("]", "faction-prefix-end"));
+//		this.factionStartPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("[", "faction-prefix-start"));
+//		this.factionEndPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("]", "faction-prefix-end"));
 		this.isFactionPrefixFirstInChat = this.configuration.getBoolean(true, "faction-prefix-first-in-chat");
-		this.nonFactionPlayerPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("", "non-faction-player-prefix"));
+//		this.nonFactionPlayerPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("", "non-faction-player-prefix"));
 		this.showFactionEnterPhrase = this.configuration.getBoolean(true, "show-faction-enter-phrase");
 
 		this.visibleRanks = loadVisibleRanks();
-		this.defaultTagColor = TextColor.fromHexString(this.configuration.getString(NamedTextColor.GREEN.asHexString(), "default-tag-color"));
+//		this.defaultTagColor = TextColor.fromHexString(this.configuration.getString(NamedTextColor.GREEN.asHexString(), "default-tag-color"));
 	}
 
 	@Override
-	public TextComponent getFactionStartPrefix()
+	public Component getFactionStartPrefix()
 	{
 		return this.factionStartPrefix;
 	}
 
 	@Override
-	public TextComponent getFactionEndPrefix()
+	public Component getFactionEndPrefix()
 	{
 		return this.factionEndPrefix;
 	}
@@ -104,7 +106,7 @@ public class ChatConfigImpl implements ChatConfig
 	}
 
 	@Override
-	public TextComponent getNonFactionPlayerPrefix()
+	public Component getNonFactionPlayerPrefix()
 	{
 		return this.nonFactionPlayerPrefix;
 	}
