@@ -1,13 +1,14 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.minecraftforge.gradle.userdev.UserDevExtension
 import org.gradle.kotlin.dsl.api
-import org.gradle.kotlin.dsl.runtimeClasspath
 import java.io.ByteArrayOutputStream
 
 val eaglefactionsId = findProperty("eaglefactions.id") as String
 val eaglefactionsVersion = findProperty("eaglefactions.version") as String
 val minecraftVersion = findProperty("minecraft.version") as String
 val forgeVersion = findProperty("forge.version") as String
+
+group = "io.github.aquerr"
+version = "$minecraftVersion-$eaglefactionsVersion"
 
 plugins {
     `java-library`
@@ -19,35 +20,16 @@ plugins {
     id("net.kyori.blossom") version "1.3.1"
 }
 
-allprojects {
-    description = "A factions mod that will make managing your battle-server easier. :)"
-    group = "io.github.aquerr"
-    version = "$eaglefactionsVersion-$minecraftVersion"
-
-    tasks.withType(JavaCompile::class).configureEach {
-        options.apply {
-            encoding = "utf-8" // Consistent source file encoding
-        }
-    }
-
-    // Make sure all tasks which produce archives (jar, sources jar, javadoc jar, etc) produce more consistent output
-    tasks.withType(AbstractArchiveTask::class).configureEach {
-        isReproducibleFileOrder = true
-        isPreserveFileTimestamps = false
-    }
-
-    repositories {
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven("https://repo.mikeprimm.com/")
+tasks.withType(JavaCompile::class).configureEach {
+    options.apply {
+        encoding = "utf-8" // Consistent source file encoding
     }
 }
 
-group = "io.github.aquerr"
-version = "$eaglefactionsVersion-$minecraftVersion"
-
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
+    maven("https://repo.mikeprimm.com/")
 }
 
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -57,28 +39,50 @@ blossom {
         rootProject.version = version.toString() + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
         println("Version => " + rootProject.version)
     } else {
-        rootProject.version = version.toString() + "-SNAPSHOT"
+        rootProject.version = "$version-SNAPSHOT"
     }
     replaceTokenIn("src/main/java/io/github/aquerr/eaglefactions/PluginInfo.java")
     replaceToken("%VERSION%", rootProject.version.toString())
 }
 
+configurations {
+    create("shade") {
+        isCanBeResolved = true
+        isCanBeConsumed = true
+    }
+}
+
+val shade = configurations.getByName("shade")
+
+project.configurations.api.configure {
+    isTransitive = false
+    isCanBeResolved = true
+}
+
 dependencies {
-//    shadow(minecraft("net.minecraftforge:forge:${forgeVersion}") as Dependency)
+    // MC + Forge
     minecraft("net.minecraftforge:forge:${forgeVersion}")
+
+    // EF API
     api(project(":EagleFactionsAPI"))
 
-    compileOnly("org.mariadb.jdbc:mariadb-java-client:2.0.3")
-//    implementation("com.zaxxer:HikariCP:4.0.3")
-//    implementation("com.h2database:h2:2.1.214")
-//    implementation("org.spongepowered:configurate-hocon:4.0.0")
-    shadow("com.zaxxer:HikariCP:4.0.3")
-    shadow("com.h2database:h2:2.1.214")
-    shadow("org.spongepowered:configurate-hocon:4.0.0")
-    compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
+    // Used for dev environment only
+    minecraftLibrary("com.zaxxer:HikariCP:5.0.1")
+    minecraftLibrary("com.h2database:h2:2.1.214")
+    minecraftLibrary("org.spongepowered:configurate-hocon:4.1.2")
+
+    // Shading, required for final jar.
+    shade("com.zaxxer:HikariCP:5.0.1")
+    shade("com.h2database:h2:2.1.214")
+    shade("org.spongepowered:configurate-hocon:4.1.2")
+
+    // Compile only. Those dependencies will be provided by the server at runtime.
+    compileOnly("org.mariadb.jdbc:mariadb-java-client:3.1.4")
+    compileOnly("org.xerial:sqlite-jdbc:3.42.0.0")
     compileOnly("us.dynmap:DynmapCoreAPI:3.4")
     compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
 
+    // Tests
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testImplementation("org.mockito:mockito-core:3.10.0")
@@ -86,23 +90,10 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.19.0")
 }
 
-project.configurations {
-
-}
-
-project.configurations.api.configure {
-    isCanBeResolved = true
-}
-
 tasks {
     shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-//        configurations = listOf(project.configurations.shadow.get(), project.configurations.api.get())
+        configurations = listOf(shade, project.configurations.api.get())
         archiveClassifier.set("")
-
-//        dependencies {
-//            include(project(":EagleFactionsAPI"))
-//        }
 
         dependsOn(test)
 
@@ -150,9 +141,9 @@ publishing {
     }
 
     publications {
-        create<MavenPublication>("eaglefactions")
+        create<MavenPublication>(eaglefactionsId)
         {
-            artifactId = "eaglefactions"
+            artifactId = eaglefactionsId
             description = project.description
 
             from(components["java"])
@@ -212,7 +203,7 @@ configure<UserDevExtension> {
     
     runs {
         create("client") {
-            workingDirectory(project.file("run"))
+            workingDirectory(project.file("run/run-client"))
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
@@ -227,56 +218,38 @@ configure<UserDevExtension> {
             property("forge.logging.console.level", "debug")
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property("forge.enabledGameTestNamespaces", "eaglefactions")
+            property("forge.enabledGameTestNamespaces", eaglefactionsId)
 
-//            mods.create("eaglefactions") {
-//                source(sourceSets.main.get())
-//            }
+            mods.create(eaglefactionsId) {
+                source(sourceSets.main.get())
+            }
         }
 
         create("server") {
-            workingDirectory(project.file("run"))
+            workingDirectory(project.file("run/run-server"))
 
             property("forge.logging.markers", "REGISTRIES")
 
             property("forge.logging.console.level", "debug")
 
-            property("forge.enabledGameTestNamespaces", "eaglefactions")
+            property("forge.enabledGameTestNamespaces", eaglefactionsId)
 
             mods {
-                create("eaglefactions") {
-                    source(sourceSets.getByName("main"))
+                create(eaglefactionsId) {
+                    source(sourceSets.getByName("main").apply {
+                        this.java {
+                            srcDir("EagleFactionsAPI/src/main/java")
+                        }
+                    })
                 }
-//                create("eaglefactionsapi") {
-//                    allprojects.forEach {
-//                        println(it)
-//                    }
-//                    sources(allprojects.map {
-//                        println(it)
-//                        println(it.ext)
-//                        it.sourceSets
-//                    })
-//                }
             }
-
-
-//            mods.create("eaglefactions") {
-//                sources(sourceSets.main.get())
-//                sources(project(":EagleFactionsAPI").sourceSets.main.get())
-//            }
-
-
-//            mods.create("eaglefactionsapi") {
-//                println(project(":EagleFactionsAPI").buildDir)
-//                source(project(":EagleFactionsAPI").sourceSets.main.get())
-//            }
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
         create("gameTestServer") {
-            workingDirectory(project.file("run"))
+            workingDirectory(project.file("run/run-test-server"))
 
             property("forge.logging.markers", "REGISTRIES")
 
@@ -284,24 +257,24 @@ configure<UserDevExtension> {
 
             property("forge.enabledGameTestNamespaces", "eaglefactions")
 
-//            mods.create("eaglefactions") {
-//                source(sourceSets.main.get())
-//            }
+            mods.create(eaglefactionsId) {
+                source(sourceSets.main.get())
+            }
         }
 
         create("data") {
-            workingDirectory(project.file("run"))
+            workingDirectory(project.file("run/run-data"))
 
             property("forge.logging.markers", "REGISTRIES")
 
             property("forge.logging.console.level", "debug")
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args("--mod", "eaglefactions", "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources/"))
+            args("--mod", eaglefactionsId, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources/"))
 
-//            mods.create("eaglefactions") {
-//                source(sourceSets.main.get())
-//            }
+            mods.create(eaglefactionsId) {
+                source(sourceSets.main.get())
+            }
         }
     }
 }
@@ -310,11 +283,3 @@ configure<UserDevExtension> {
 sourceSets.main.configure {
     resources.srcDir("src/generated/resources")
 }
-
-//sourceSets {
-//    main {
-//        java {
-//            setSrcDirs(listOf("src/main", "EagleFactionsAPI/src/main"))
-//        }
-//    }
-//}
