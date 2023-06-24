@@ -1,12 +1,11 @@
 package io.github.aquerr.eaglefactions;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
-import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.logic.FactionManager;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
@@ -17,27 +16,28 @@ import io.github.aquerr.eaglefactions.api.managers.RankManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.messaging.placeholder.PlaceholderService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
-import io.github.aquerr.eaglefactions.commands.general.HelpCommand;
+import io.github.aquerr.eaglefactions.commands.EFCommandManager;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.integrations.IntegrationManager;
+import io.github.aquerr.eaglefactions.managers.FactionManagerImpl;
+import io.github.aquerr.eaglefactions.managers.claim.provider.DefaultFactionMaxClaimCountProvider;
+import io.github.aquerr.eaglefactions.managers.claim.provider.FactionMaxClaimCountByPlayerPowerProvider;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.io.IOException;
 import java.net.URI;
@@ -61,7 +61,6 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final String WILDERNESS_NAME = "Wilderness";
 
     //TODO: Convert these fields to instance fields.
-//    public static final Map<List<String>, Command.Parameterized> SUBCOMMANDS = new HashMap<>();
 //    public static final List<FactionInvite> INVITE_LIST = new LinkedList<>();
 //    public static final List<AcceptableInvite> RELATION_INVITES = new LinkedList<>();
     public static final List<UUID> AUTO_CLAIM_LIST = new LinkedList<>();
@@ -79,13 +78,14 @@ public class EagleFactionsPlugin implements EagleFactions
     public static final Logger LOGGER = LoggerFactory.getLogger(EagleFactionsPlugin.class);
 
     private Configuration configuration;
+    private EFCommandManager efCommandManager;
     private PVPLogger pvpLogger;
     private PlayerManager playerManager;
     private PermsManager permsManager;
     private ProtectionManager protectionManager;
     private PowerManager powerManager;
     private AttackLogic attackLogic;
-    private FactionLogic factionLogic;
+    private FactionManager factionManager;
     private InvitationManager invitationManager;
     private RankManager rankManager;
     private StorageManager storageManager;
@@ -110,9 +110,10 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public EagleFactionsPlugin()
     {
+        this.efCommandManager = new EFCommandManager(this);
+
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::onSetupDedicatedServer);
-        modEventBus.addListener(this::onSetupClient);
 
         configDir = FMLPaths.CONFIGDIR.get().resolve(ModInfo.ID);
 
@@ -131,16 +132,23 @@ public class EagleFactionsPlugin implements EagleFactions
         setupServerSideMod();
     }
 
-    public void onSetupClient(final FMLClientSetupEvent event)
-    {
-        setupClientSideMod();
-    }
-
     @SubscribeEvent
     public void onRegisterCommandEvent(final RegisterCommandsEvent event)
     {
+
+        if (this.isDisabled)
+            return;
+
+        //Register commands...
         LOGGER.info("Registering commands...");
-        initializeCommands(event);
+        this.efCommandManager.initializeCommands(event);
+        LOGGER.info(PLUGIN_PREFIX_PLAIN + "Commands loaded!");
+    }
+
+    @SubscribeEvent
+    public void onPermissionRegisterEvent(final PermissionGatherEvent.Nodes event)
+    {
+        event.addNodes(PluginPermissions.getAsPermissionNodesList());
     }
 
     private void setupClientSideMod()
@@ -160,7 +168,7 @@ public class EagleFactionsPlugin implements EagleFactions
             LOGGER.info(PLUGIN_PREFIX_PLAIN + "Configs loaded.");
 
             LOGGER.info(PLUGIN_PREFIX_PLAIN + "Loading managers and cache...");
-//            setupManagers();
+            setupManagers();
 
             LOGGER.info(PLUGIN_PREFIX_PLAIN + "Managers loaded.");
         }
@@ -283,8 +291,6 @@ public class EagleFactionsPlugin implements EagleFactions
 //        {
 //            printInfo("PlaceholderAPI could not be found. Skipping addition of placeholders.");
 //        }
-
-//        setDefaultPermissions();
 
 //        this.integrationManager.activateIntegrations();
 
@@ -411,9 +417,9 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Override
-    public FactionLogic getFactionLogic()
+    public FactionManager getFactionManager()
     {
-        return factionLogic;
+        return this.factionManager;
     }
 
     @Override
@@ -495,32 +501,32 @@ public class EagleFactionsPlugin implements EagleFactions
         configuration = new ConfigurationImpl(configDir, resource);
 //        pvpLogger = PVPLoggerImpl.getInstance(this);
     }
-//
-//    private void setupManagers()
-//    {
+
+    private void setupManagers()
+    {
 //        this.efPlaceholderService = new EFPlaceholderService(this);
-//
-//        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageFileName());
-//        this.messageService = EFMessageService.getInstance();
+
+        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageFileName());
+        this.messageService = EFMessageService.getInstance();
 //        this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
 //        this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
-//
+
 //        this.powerManager = new PowerManagerImpl(this.playerManager, this.configuration.getPowerConfig());
 //        this.powerManager.addFactionPowerProvider(new DefaultFactionPowerProvider(new FactionPowerByPlayerPowerProvider(this.playerManager)));
 //        this.powerManager.addFactionMaxPowerProvider(new DefaultFactionMaxPowerProvider(new FactionMaxPowerByPlayerMaxPowerProvider(this.playerManager)));
-//
+
 //        this.permsManager = new PermsManagerImpl();
-//
-//        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
-//        this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
-//
+
+        this.factionManager = new FactionManagerImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.factionManager.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
+
 //        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService);
 //        this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
 //        this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager, this.messageService);
 //        this.rankManager = new RankManagerImpl(this.factionLogic, this.storageManager);
-//
-//        this.integrationManager = new IntegrationManager(this);
-//    }
+
+        this.integrationManager = new IntegrationManager(this);
+    }
 //
 //    private void startFactionsRemover()
 //    {
@@ -546,11 +552,7 @@ public class EagleFactionsPlugin implements EagleFactions
 //        event.register(RankManager.class, this.rankManager);
 //    }
 //
-    private void initializeCommands(RegisterCommandsEvent event)
-    {
-        LiteralArgumentBuilder<CommandSourceStack> helpCommand = Commands.literal("f").then(Commands.literal("help")).executes(new HelpCommand());
-        event.getDispatcher().register(helpCommand);
-    }
+
 //        EagleFactionsCommandParameters.init(this.factionLogic);
 //
 //        //Help command should display all possible commands in plugin.
