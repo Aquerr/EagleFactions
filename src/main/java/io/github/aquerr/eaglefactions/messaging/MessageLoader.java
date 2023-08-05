@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.messaging;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.util.FileUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -47,16 +48,13 @@ public class MessageLoader
         String langFileName = this.factionsConfig.getLanguageFileName();
         Path langFilePath = configDir.resolve(LANG_DIR_NAME).resolve(langFileName);
 
-        if (Files.notExists(configDir.resolve(LANG_DIR_NAME)))
+        try
         {
-            try
-            {
-                Files.createDirectory(configDir.resolve(LANG_DIR_NAME));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            FileUtils.createDirectoryIfNotExists(configDir.resolve(LANG_DIR_NAME));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
 
         Optional<Asset> optionalLangFile = Sponge.getAssetManager().getAsset(plugin, LANG_DIR_NAME + "/" + langFileName);

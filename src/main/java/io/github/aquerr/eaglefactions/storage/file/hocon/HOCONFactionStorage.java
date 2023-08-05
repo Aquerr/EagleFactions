@@ -40,17 +40,14 @@ public class HOCONFactionStorage implements FactionStorage
         this.factionsDir = configDir.resolve("factions");
         this.factionLoaders = new HashMap<>();
 
-        if (Files.notExists(this.factionsDir))
+        try
         {
-            try
-            {
-                Files.createDirectory(this.factionsDir);
-                preCreate();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            FileUtils.createDirectoryIfNotExists(this.factionsDir);
+            preCreate();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
 
         // Backwards compatibility with 0.14.x

@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.config;
 
 import com.google.common.reflect.TypeToken;
 import io.github.aquerr.eaglefactions.api.config.*;
+import io.github.aquerr.eaglefactions.util.FileUtils;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -36,16 +37,13 @@ public class ConfigurationImpl implements Configuration
     public ConfigurationImpl(final Path configDir, final Asset configAsset)
     {
         this.configDirectoryPath = configDir;
-        if (!Files.exists(this.configDirectoryPath))
+        try
         {
-            try
-            {
-                Files.createDirectory(this.configDirectoryPath);
-            }
-            catch (IOException exception)
-            {
-                exception.printStackTrace();
-            }
+            FileUtils.createDirectoryIfNotExists(this.configDirectoryPath);
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
         }
 
         this.configPath = this.configDirectoryPath.resolve("Settings.conf");
