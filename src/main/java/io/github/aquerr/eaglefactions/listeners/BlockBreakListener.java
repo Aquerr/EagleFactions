@@ -7,11 +7,14 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.CommandBlock;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
@@ -48,12 +51,14 @@ public class BlockBreakListener extends AbstractListener
 {
     private final FactionsConfig factionsConfig;
     private final ProtectionConfig protectionConfig;
+    private final ProtectionManager protectionManager;
 
     public BlockBreakListener(final EagleFactions plugin)
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
+        this.protectionManager = plugin.getProtectionManager();
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
@@ -80,10 +85,11 @@ public class BlockBreakListener extends AbstractListener
         final BlockEntity tileEntity = event.cause().first(BlockEntity.class).orElse(null);
         final boolean pistonExtend = event.context().containsKey(EventContextKeys.PISTON_EXTEND);
         final boolean pistonRetract = event.context().containsKey(EventContextKeys.PISTON_RETRACT);
-        final boolean isLiquidSource = event.context().containsKey(EventContextKeys.LIQUID_FLOW)
-                || (locatableBlock != null && (locatableBlock.blockState().type() == BlockTypes.WATER.get() || locatableBlock.blockState().type() == BlockTypes.LAVA.get()));
-        final boolean isFireSource = !isLiquidSource && event.context().containsKey(EventContextKeys.FIRE_SPREAD);
-        final boolean isLeafDecay = event.context().containsKey(EventContextKeys.LEAVES_DECAY);
+//        final boolean isLiquidSource = event.context().containsKey(EventContextKeys.LIQUID_FLOW)
+//                || (locatableBlock != null && (locatableBlock.blockState().type() == BlockTypes.WATER.get() || locatableBlock.blockState().type() == BlockTypes.LAVA.get()));
+//        final boolean isFireSource = !isLiquidSource && event.context().containsKey(EventContextKeys.FIRE_SPREAD);
+//        final boolean isLeafDecay = event.context().containsKey(EventContextKeys.LEAVES_DECAY);
+        final boolean isFireSource = event.context().containsKey(EventContextKeys.FIRE_SPREAD);
         final boolean isForgePlayerBreak = event.context().containsKey(EventContextKeys.PLAYER_BREAK);
         final ServerLocation sourceLocation = locatableBlock != null ? locatableBlock.serverLocation() : tileEntity != null ? tileEntity.serverLocation() : null;
 
@@ -173,11 +179,11 @@ public class BlockBreakListener extends AbstractListener
                     }
                 }
 
-                if(isLeafDecay)
-                    continue;
+//                if(isLeafDecay)
+//                    continue;
 
-                if(!isLiquidSource && location.block().type() == BlockTypes.AIR.get())
-                    continue;
+//                if(!isLiquidSource && location.block().type() == BlockTypes.AIR.get())
+//                    continue;
 
                 if(user != null && !super.getPlugin().getProtectionManager().canBreak(location.createSnapshot(), user, true).hasAccess())
                 {
@@ -216,6 +222,40 @@ public class BlockBreakListener extends AbstractListener
                         event.setCancelled(true);
                         return;
                     }
+                }
+            }
+        }
+    }
+
+    @Listener
+    public void onBlockDestroy(final ChangeBlockEvent.All event)
+    {
+        if (event.cause().containsType(CommandBlock.class))
+            return;
+
+        User user = null;
+        if(event.cause().containsType(ServerPlayer.class))
+        {
+            user = event.cause().first(ServerPlayer.class).get().user();
+        }
+        else if(event.cause().containsType(User.class))
+        {
+            user = event.cause().first(User.class).get();
+        }
+
+        for (final BlockTransaction blockTransaction : event.transactions())
+        {
+            if (blockTransaction.operation() == Operations.BREAK.get())
+            {
+                if (user != null && !this.protectionManager.canBreak(blockTransaction.finalReplacement(), user, true).hasAccess())
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                else if (!this.protectionManager.canBreak(blockTransaction.finalReplacement()).hasAccess())
+                {
+                    event.setCancelled(true);
+                    return;
                 }
             }
         }
