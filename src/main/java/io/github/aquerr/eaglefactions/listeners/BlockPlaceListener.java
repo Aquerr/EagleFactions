@@ -7,13 +7,10 @@ import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.entity.CommandBlock;
-import org.spongepowered.api.block.entity.Piston;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -36,25 +33,14 @@ public class BlockPlaceListener extends AbstractListener
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
-    @Listener(order = Order.EARLY)
+    @Listener(order = Order.FIRST, beforeModifications = true)
     public void onBlockPlace(ChangeBlockEvent.All event)
     {
-        if (event.cause().containsType(CommandBlock.class))
+        if (isTriggeredByCommandBlock(event))
             return;
 
         final Object source = event.source();
-        if(source instanceof Piston)
-            return;
-
-        User user = null;
-        if(event.cause().containsType(ServerPlayer.class))
-        {
-            user = event.cause().first(ServerPlayer.class).get().user();
-        }
-        else if(event.cause().containsType(User.class))
-        {
-            user = event.cause().first(User.class).get();
-        }
+        User user = getUserFromEvent(event).orElse(null);
 
         if(user != null)
         {
@@ -72,6 +58,11 @@ public class BlockPlaceListener extends AbstractListener
                         event.setCancelled(true);
                         break;
                     }
+                }
+                else if (transaction.operation() == Operations.LIQUID_SPREAD.get())
+                {
+                    // We allow liquid spread in any territory.
+                    continue;
                 }
                 else if (transaction.operation() == Operations.MODIFY.get() && event.context().get(EventContextKeys.USED_ITEM).isPresent() && serverLocation != null)
                 {
@@ -112,6 +103,16 @@ public class BlockPlaceListener extends AbstractListener
                         event.setCancelled(true);
                         return;
                     }
+                    else if (!this.protectionManager.canBreak(transaction.finalReplacement()).hasAccess())
+                    {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+                else if (transaction.operation() == Operations.LIQUID_SPREAD.get())
+                {
+                    // We allow liquid spread in any territory.
+                    continue;
                 }
             }
         }

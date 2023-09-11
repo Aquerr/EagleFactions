@@ -91,7 +91,10 @@ import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.IntegrationManager;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
+import io.github.aquerr.eaglefactions.listeners.ChangeBlockEventListener;
 import io.github.aquerr.eaglefactions.listeners.ChatMessageListener;
+import io.github.aquerr.eaglefactions.listeners.CollideBlockEventListener;
+import io.github.aquerr.eaglefactions.listeners.CollideEntityEventListener;
 import io.github.aquerr.eaglefactions.listeners.EntityDamageListener;
 import io.github.aquerr.eaglefactions.listeners.EntitySpawnListener;
 import io.github.aquerr.eaglefactions.listeners.ExplosionListener;
@@ -1127,6 +1130,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new EntityDamageListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerJoinListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerDeathListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new ChangeBlockEventListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new BlockPlaceListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new BlockBreakListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerInteractListener(this));
@@ -1137,6 +1141,8 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new ExplosionListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new ModifyBlockListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new NotifyNeighborBlockListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new CollideBlockEventListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new CollideEntityEventListener(this));
 
         // Chat
         if(isUltimateChatLoaded())

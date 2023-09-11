@@ -1,51 +1,103 @@
 package io.github.aquerr.eaglefactions.listeners;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.living.player.Player;
+import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
+import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 
 public class ModifyBlockListener extends AbstractListener
 {
+    private final ProtectionConfig protectionConfig;
+    private final ProtectionManager protectionManager;
+
     public ModifyBlockListener(EagleFactions plugin)
     {
         super(plugin);
+        this.protectionManager = plugin.getProtectionManager();
+        this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
     }
 
-//    @Listener
-//    public void onBlockModify(ChangeBlockEvent.Modify event)
-//    {
-//        User user = null;
-//        if(event.getCause().containsType(Player.class))
-//        {
-//            user = event.getCause().first(Player.class).get();
-//        }
-//        else if(event.getCause().containsType(User.class))
-//        {
-//            user = event.getCause().first(User.class).get();
-//        }
-//
-////        if(event.getContext().containsKey(EventContextKeys.OWNER)
-////            && event.getContext().get(EventContextKeys.OWNER).isPresent()
-////            && event.getContext().get(EventContextKeys.OWNER).get() instanceof Player)
-////        {
-////            Player player = (Player) event.getContext().get(EventContextKeys.OWNER).get();
-//        if(user != null)
-//        {
-//            for (Transaction<BlockSnapshot> transaction : event.getTransactions())
-//            {
-//                final Optional<Location<World>> optionalLocation = transaction.getFinal().getLocation();
-//                if(optionalLocation.isPresent() && !super.getPlugin().getProtectionManager().canInteractWithBlock(optionalLocation.get(), user, true).hasAccess())
-//                    event.setCancelled(true);
-//            }
-//        }
-////        }
-//    }
+    @Listener(order = Order.FIRST, beforeModifications = true)
+    public void onBlockModify(ChangeBlockEvent.All event)
+    {
+        if (isTriggeredByCommandBlock(event))
+            return;
+
+        for (BlockTransaction blockTransaction : event.transactions())
+        {
+            if (blockTransaction.operation() == Operations.MODIFY.get())
+            {
+                if (isFireCause(event) && shouldCancelFire(blockTransaction))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                else if (shouldCancelEvent(event, blockTransaction))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean isFireCause(ChangeBlockEvent.All event)
+    {
+        return event.cause().first(LocatableBlock.class)
+                .map(LocatableBlock::blockState)
+                .map(BlockState::type)
+                .map(BlockTypes.FIRE.get()::equals)
+                .orElse(false);
+    }
+
+    private boolean shouldCancelFire(BlockTransaction blockTransaction)
+    {
+        ServerLocation serverLocation = blockTransaction.finalReplacement().location().orElse(null);
+        if (serverLocation != null)
+        {
+            Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().uniqueId(), serverLocation.chunkPosition());
+            if (this.protectionConfig.getSafeZoneWorldNames().contains(serverLocation.world().properties().name())
+                    && !super.getPlugin().getFactionLogic().getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
+            {
+                return true;
+            }
+            else return (optionalChunkFaction.isPresent()) && !optionalChunkFaction.get().getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD);
+        }
+        return false;
+    }
+
+    private boolean shouldCancelEvent(ChangeBlockEvent.All event, BlockTransaction blockTransaction)
+    {
+        User user = getUserFromEvent(event).orElse(null);
+        printDebugMessageForUser(user, blockTransaction.finalReplacement(), event);
+        if (user == null)
+        {
+            if (!this.protectionManager.canBreak(blockTransaction.original()).hasAccess())
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (!this.protectionManager.canPlace(blockTransaction.finalReplacement(), user, true).hasAccess())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
