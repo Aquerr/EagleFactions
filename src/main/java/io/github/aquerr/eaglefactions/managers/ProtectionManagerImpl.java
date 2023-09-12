@@ -19,6 +19,7 @@ import io.github.aquerr.eaglefactions.api.managers.ProtectionResult;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.entities.EagleFeatherImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.github.aquerr.eaglefactions.util.WorldUtil.getPlainWorldName;
 import static java.util.Optional.ofNullable;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
@@ -89,7 +91,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 ServerPlayer player = (ServerPlayer)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("BlockInteract:", GOLD)));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(location.world().key().asString() + " " + location.blockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(getPlainWorldName(location.world()) + " " + location.blockPosition().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("User: ", GOLD)).append(text(user.name())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Block at location: ", GOLD)).append(text(location.block().toString())));
             }
@@ -98,7 +100,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         final ServerWorld world = location.world();
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.ok();
 
         if (this.playerManager.hasAdminMode(user))
@@ -109,7 +111,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final boolean isBlockCarrierAtLocation = location.blockEntity().isPresent() && location.blockEntity().get() instanceof BlockCarrier;
 
-        if (safeZoneWorlds.contains(world.properties().name()))
+        if (safeZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForInteraction(location.blockType().toString(), FactionType.SAFE_ZONE))
                 return ProtectionResult.builder().hasAccess(true).isSafeZone(true).build();
@@ -117,7 +119,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.builder().hasAccess(true).isSafeZone(true).build();
             else return ProtectionResult.forbiddenSafeZone();
         }
-        if (warZoneWorlds.contains(world.properties().name()))
+        if (warZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForInteraction(location.blockType().toString(), FactionType.WAR_ZONE))
                 return ProtectionResult.okWarZone();
@@ -199,7 +201,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     public boolean isSafeZone(ServerLocation location)
     {
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
-        if (safeZoneWorlds.contains(location.world().key().asString()))
+        if (safeZoneWorlds.contains(getPlainWorldName(location.world())))
             return true;
 
         final Optional<Faction> faction = this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
@@ -214,7 +216,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 ServerPlayer player = (ServerPlayer)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("ItemUsage:", GOLD)));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(location.world().key().asString() + " " + location.blockPosition().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(getPlainWorldName(location.world()) + " " + location.blockPosition().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("User: ", GOLD)).append(text(user.name())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Block at location: ", GOLD)).append(text(location.block().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Used item: ", GOLD)).append(text(usedItem.type().toString())));
@@ -224,7 +226,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         final ServerWorld world = location.world();
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.ok();
 
         if (this.playerManager.hasAdminMode(user))
@@ -235,7 +237,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final boolean isBlockCarrierAtLocation = location.blockEntity().isPresent() && location.blockEntity().get() instanceof BlockCarrier;
 
-        if (safeZoneWorlds.contains(world.properties().name()))
+        if (safeZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isItemWhitelisted(usedItem.type().toString(), FactionType.SAFE_ZONE))
                 return ProtectionResult.okSafeZone();
@@ -243,7 +245,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.okSafeZone();
             else return ProtectionResult.forbiddenSafeZone();
         }
-        if (warZoneWorlds.contains(world.properties().name()))
+        if (warZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isItemWhitelisted(usedItem.type().toString(), FactionType.WAR_ZONE))
                 return ProtectionResult.okWarZone();
@@ -335,7 +337,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 ServerPlayer player = (ServerPlayer)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("BlockBreak:", GOLD)));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(location.world().key().asString() + " " + blockSnapshot.position().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(getPlainWorldName(location.world()) + " " + blockSnapshot.position().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("User: ", GOLD)).append(text(user.name())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Block at location: ", GOLD)).append(text(blockSnapshot.state().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Block id: ", GOLD)).append(text(blockSnapshot.state().toString())));
@@ -345,7 +347,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         final ServerWorld world = location.world();
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.ok();
 
         if(this.playerManager.hasAdminMode(user))
@@ -354,7 +356,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
-        if (safeZoneWorlds.contains(world.properties().name()))
+        if (safeZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.state().type().toString(), FactionType.SAFE_ZONE))
                 return ProtectionResult.okSafeZone();
@@ -362,7 +364,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.okSafeZone();
             else return ProtectionResult.forbiddenSafeZone();
         }
-        if (warZoneWorlds.contains(world.properties().name()))
+        if (warZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.state().type().toString(), FactionType.WAR_ZONE))
                 return ProtectionResult.okWarZone();
@@ -431,10 +433,10 @@ public class ProtectionManagerImpl implements ProtectionManager
         final ServerWorld world = location.world();
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.ok();
 
-        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.SAFE_ZONE))
                 return ProtectionResult.okSafeZone();
@@ -442,7 +444,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF);
-        if(this.protectionConfig.getWarZoneWorldNames().contains(world.properties().name()) && shouldProtectWarZoneFromMobGrief)
+        if(this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(world)) && shouldProtectWarZoneFromMobGrief)
         {
             //Not sure if we should use white-list for mobs...
             if (isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.WAR_ZONE))
@@ -503,7 +505,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             {
                 ServerPlayer player = (ServerPlayer)user;
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("BlockPlace:", GOLD)));
-                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(location.world().key().asString() + " " + blockSnapshot.position().toString())));
+                player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(getPlainWorldName(location.world()) + " " + blockSnapshot.position().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("User: ", GOLD)).append(text(user.name())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Block at location: ", GOLD)).append(text(blockSnapshot.state().type().toString())));
                 player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Item in hand: ", GOLD)).append(text(ofNullable(user.itemInHand(HandTypes.MAIN_HAND))
@@ -517,7 +519,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         final String itemId = user.itemInHand(HandTypes.MAIN_HAND) != null ? user.itemInHand(HandTypes.MAIN_HAND).type().toString() : "";
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.ok();
 
         if(this.playerManager.hasAdminMode(user))
@@ -526,7 +528,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
 
-        if (safeZoneWorlds.contains(world.properties().name()))
+        if (safeZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForPlaceDestroy(itemId, FactionType.SAFE_ZONE))
                 return ProtectionResult.okSafeZone();
@@ -534,7 +536,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ProtectionResult.okSafeZone();
             else return ProtectionResult.forbiddenSafeZone();
         }
-        if (warZoneWorlds.contains(world.properties().name()))
+        if (warZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForPlaceDestroy(itemId, FactionType.WAR_ZONE))
                 return ProtectionResult.okWarZone();
@@ -614,7 +616,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.ok();
 
         //Check if admin
@@ -622,9 +624,9 @@ public class ProtectionManagerImpl implements ProtectionManager
             return ProtectionResult.okAdmin();
 
         //Check world
-        if (this.protectionConfig.getSafeZoneWorldNames().contains(world.properties().name()))
+        if (this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(world)))
             return ProtectionResult.forbiddenSafeZone();
-        else if (this.protectionConfig.getWarZoneWorldNames().contains(world.properties().name()))
+        else if (this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(world)))
         {
             boolean allowExplosionsFromPlayersInWarZone = ofNullable(this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME))
                     .map(faction -> faction.getProtectionFlagValue(ProtectionFlagType.ALLOW_EXPLOSION))
@@ -688,16 +690,16 @@ public class ProtectionManagerImpl implements ProtectionManager
     public ProtectionResult canExplode(final ServerLocation location)
     {
         //Not claimable worlds should be always ignored by protection system.
-        if(this.protectionConfig.getNotClaimableWorldNames().contains(location.world().key().asString()))
+        if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(location.world())))
             return ProtectionResult.ok();
 
         boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF);
 
         //Check world
-        if (this.protectionConfig.getSafeZoneWorldNames().contains(location.world().key().asString()))
+        if (this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(location.world())))
             return ProtectionResult.forbiddenSafeZone();
 
-        if (this.protectionConfig.getWarZoneWorldNames().contains(location.world().key().asString()))
+        if (this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(location.world())))
         {
             if (!shouldProtectWarZoneFromMobGrief)
                 return ProtectionResult.okWarZone();
@@ -737,7 +739,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(player.uniqueId()))
         {
             player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("EntityAttack:", GOLD)));
-            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(attackedEntity.serverLocation().world().key().asString() + " " + attackedEntity.serverLocation().blockPosition().toString())));
+            player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Location: ", GOLD)).append(text(getPlainWorldName(attackedEntity.serverLocation().world()) + " " + attackedEntity.serverLocation().blockPosition().toString())));
             player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("Entity at location: ", GOLD)).append(text(attackedEntity.type().toString())));
             player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(text("User: ", GOLD)).append(text(player.name())));
         }
@@ -755,9 +757,9 @@ public class ProtectionManagerImpl implements ProtectionManager
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.world().uniqueId(), entityLocation.chunkPosition());
         final Optional<Faction> optionalAttackerServerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
         final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
-        final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(entityLocation.world().key().asString());
-        final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(entityLocation.world().key().asString());
-        final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(entityLocation.world().key().asString());
+        final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(entityLocation.world()));
+        final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(entityLocation.world()));
+        final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(entityLocation.world()));
 
         if (isServerPlayer)
         {
@@ -831,9 +833,9 @@ public class ProtectionManagerImpl implements ProtectionManager
     {
         //First, let's check the world.
         //TODO: Maybe we should check notifier's world as well?
-        final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(notifiedLocation.world().key().asString());
-        final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(notifiedLocation.world().key().asString());
-        final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(notifiedLocation.world().key().asString());
+        final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(notifiedLocation.world()));
+        final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(notifiedLocation.world()));
+        final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(notifiedLocation.world()));
 
         //Entire world is one claim type thus we should allow the notification.
         if (isSafeZoneWorld || isWarZoneWorld || notClaimableWorld)

@@ -10,7 +10,6 @@ import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
@@ -61,6 +60,7 @@ import static net.kyori.adventure.text.Component.text;
 public class FactionLogicImpl implements FactionLogic
 {
     private static final UUID DUMMY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private static final String THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY = "error.general.there-is-no-faction-called-faction-name";
 
     private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
 
@@ -101,7 +101,6 @@ public class FactionLogicImpl implements FactionLogic
     {
         checkNotNull(playerUUID);
 
-        //TODO: Theoretically, we could get faction directly from the player... but... let's test it before...
         return this.playerManager.getFactionPlayer(playerUUID)
                 .flatMap(FactionPlayer::getFactionName)
                 .map(this::getFactionByName);
@@ -116,19 +115,19 @@ public class FactionLogicImpl implements FactionLogic
         Claim claim = new Claim(worldUUID, chunk);
 
         Optional<Faction> cachedOptional = FactionsCache.getClaimFaction(claim);
-        //noinspection OptionalAssignedToNull
-        if (cachedOptional != null) return cachedOptional;
+        if (cachedOptional.isPresent())
+            return cachedOptional;
 
         for(Faction faction : getFactions().values())
         {
             if(faction.getClaims().contains(claim))
             {
-                FactionsCache.updateClaimFaction(claim, Optional.of(faction));
+                FactionsCache.updateClaimFaction(claim, faction);
                 return Optional.of(faction);
             }
         }
 
-        FactionsCache.updateClaimFaction(claim, Optional.empty());
+        FactionsCache.updateClaimFaction(claim, null);
         return Optional.empty();
     }
 
@@ -187,13 +186,13 @@ public class FactionLogicImpl implements FactionLogic
     @Override
     public Map<String, Faction> getFactions()
     {
-        return new HashMap<>(FactionsCache.getFactionsMap());
+        return FactionsCache.getFactionsMap();
     }
 
     @Override
-    public Map<Claim, Optional<Faction>> getAllClaims()
+    public Map<Claim, Faction> getAllClaims()
     {
-        return new HashMap<>(FactionsCache.getClaims());
+        return FactionsCache.getClaims();
     }
 
     @Override
@@ -210,7 +209,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction factionToDisband = this.storageManager.getFaction(factionName);
 
-        Preconditions.checkNotNull(factionToDisband, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", factionName));
+        Preconditions.checkNotNull(factionToDisband, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, factionName));
 
         //Update players...
         CompletableFuture.runAsync(() -> {
@@ -254,7 +253,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final Faction faction = getFactionByName(factionName);
 
-        checkNotNull(faction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", factionName));
+        checkNotNull(faction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, factionName));
 
         final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
         final Set<UUID> members = new HashSet<>(faction.getMembers());
@@ -374,8 +373,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
 
-        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
-        checkNotNull(invitedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", invitedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, playerFactionName));
+        checkNotNull(invitedFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, invitedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
         final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getTruces());
@@ -399,8 +398,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
 
-        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
-        checkNotNull(removedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", removedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, playerFactionName));
+        checkNotNull(removedFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, removedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getTruces());
         final Set<String> removedFactionAlliances = new HashSet<>(removedFaction.getTruces());
@@ -427,8 +426,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction invitedFaction = getFactionByName(invitedFactionName);
 
-        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
-        checkNotNull(invitedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", invitedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, playerFactionName));
+        checkNotNull(invitedFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, invitedFactionName));
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
         final Set<String> invitedFactionAlliances = new HashSet<>(invitedFaction.getAlliances());
@@ -452,8 +451,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction removedFaction = getFactionByName(removedFactionName);
 
-        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
-        checkNotNull(removedFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", removedFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, playerFactionName));
+        checkNotNull(removedFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, removedFactionName));
 
 
         final Set<String> playerFactionAlliances = new HashSet<>(playerFaction.getAlliances());
@@ -478,8 +477,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
 
-        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
-        checkNotNull(enemyFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", enemyFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, playerFactionName));
+        checkNotNull(enemyFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, enemyFactionName));
 
         final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
         final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
@@ -503,8 +502,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction playerFaction = getFactionByName(playerFactionName);
         final Faction enemyFaction = getFactionByName(enemyFactionName);
 
-        checkNotNull(playerFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", playerFactionName));
-        checkNotNull(enemyFaction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", enemyFactionName));
+        checkNotNull(playerFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, playerFactionName));
+        checkNotNull(enemyFaction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, enemyFactionName));
 
         final Set<String> playerFactionEnemies = new HashSet<>(playerFaction.getEnemies());
         final Set<String> enemyFactionEnemies = new HashSet<>(enemyFaction.getEnemies());
@@ -587,7 +586,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(claimToCheck);
 
-        if (faction.getClaims().size() == 0)
+        if (faction.getClaims().isEmpty())
             return true;
 
         for(final Claim claim : faction.getClaims())
@@ -750,7 +749,6 @@ public class FactionLogicImpl implements FactionLogic
         for (final Claim claim: faction.getClaims())
         {
             FactionsCache.removeClaim(claim);
-//            FactionsCache.updateClaimFaction(claim, Optional.empty());
         }
         final Faction updatedFaction = faction.toBuilder().setClaims(new HashSet<>()).build();
         storageManager.saveFaction(updatedFaction);
@@ -763,7 +761,7 @@ public class FactionLogicImpl implements FactionLogic
         Validate.notBlank(factionName);
 
         final Faction faction = getFactionByName(factionName);
-        checkNotNull(faction, messageService.resolveMessage("error.general.there-is-no-faction-called-faction-name", factionName));
+        checkNotNull(faction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, factionName));
 
         final Set<UUID> officers = new HashSet<>(faction.getOfficers());
         final Set<UUID> members = new HashSet<>(faction.getMembers());

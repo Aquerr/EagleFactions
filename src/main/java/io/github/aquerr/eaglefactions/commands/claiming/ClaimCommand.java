@@ -12,6 +12,7 @@ import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -20,6 +21,8 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
+
+import static io.github.aquerr.eaglefactions.util.WorldUtil.getPlainWorldName;
 
 public class ClaimCommand extends AbstractCommand
 {
@@ -77,7 +80,7 @@ public class ClaimCommand extends AbstractCommand
     {
         final ServerWorld world = player.world();
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
-        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.properties().name());
+        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(getPlainWorldName(world));
 
         if(!optionalPlayerFaction.isPresent() || !optionalPlayerFaction.get().getName().equals(faction.getName()))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
@@ -91,8 +94,8 @@ public class ClaimCommand extends AbstractCommand
     private CommandResult preformAdminClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
-        final boolean safeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(world.properties().name());
-        final boolean warZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(world.properties().name());
+        final boolean safeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(world));
+        final boolean warZoneWorld = this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(world));
 
         //Even admin cannot claim territories in safezone nor warzone world.
         if (safeZoneWorld || warZoneWorld)
@@ -111,7 +114,7 @@ public class ClaimCommand extends AbstractCommand
     private CommandResult preformNormalClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
-        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(world.properties().name());
+        final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(getPlainWorldName(world));
 
         if(!isClaimableWorld)
             throw messageService.resolveExceptionWithMessage(ERROR_NOT_CLAIMABLE_WORLD);

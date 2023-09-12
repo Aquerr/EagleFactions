@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
@@ -70,7 +71,7 @@ public class ModifyBlockListener extends AbstractListener
         if (serverLocation != null)
         {
             Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().uniqueId(), serverLocation.chunkPosition());
-            if (this.protectionConfig.getSafeZoneWorldNames().contains(serverLocation.world().properties().name())
+            if (this.protectionConfig.getSafeZoneWorldNames().contains(WorldUtil.getPlainWorldName(serverLocation.world()))
                     && !super.getPlugin().getFactionLogic().getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
             {
                 return true;
@@ -86,18 +87,11 @@ public class ModifyBlockListener extends AbstractListener
         printDebugMessageForUser(user, blockTransaction.finalReplacement(), event);
         if (user == null)
         {
-            if (!this.protectionManager.canBreak(blockTransaction.original()).hasAccess())
-            {
-                return true;
-            }
+            return !this.protectionManager.canBreak(blockTransaction.original()).hasAccess();
         }
         else
         {
-            if (!this.protectionManager.canPlace(blockTransaction.finalReplacement(), user, true).hasAccess())
-            {
-                return true;
-            }
+            return !this.protectionManager.canPlace(blockTransaction.finalReplacement(), user, true).hasAccess();
         }
-        return false;
     }
 }

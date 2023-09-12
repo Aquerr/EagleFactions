@@ -10,14 +10,11 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class FactionPlayerArgument
@@ -33,7 +30,7 @@ public class FactionPlayerArgument
         public Optional<? extends FactionPlayer> parseValue(Parameter.Key<? super FactionPlayer> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException
         {
             //Just in case someone new entered the server after start.
-            Set<FactionPlayer> serverPlayers = new HashSet<>(FactionsCache.getPlayersMap().values());
+            Set<FactionPlayer> serverPlayers = new HashSet<>(FactionsCache.getPlayers());
 
             if (reader.canRead())
             {
@@ -59,11 +56,9 @@ public class FactionPlayerArgument
         @Override
         public List<CommandCompletion> complete(CommandContext context, String currentInput)
         {
-            final Map<UUID, FactionPlayer> factionPlayerMap = FactionsCache.getPlayersMap();
-
-            final List<FactionPlayer> list = new ArrayList<>(factionPlayerMap.values());
+            final Set<FactionPlayer> factionPlayers = FactionsCache.getPlayers();
             final List<String> resultList = new LinkedList<>();
-            for (final FactionPlayer factionPlayer : list)
+            for (final FactionPlayer factionPlayer : factionPlayers)
             {
                 final String factionPlayerName = factionPlayer.getName();
                 if (factionPlayerName.toLowerCase().startsWith(currentInput.toLowerCase()))
@@ -71,7 +66,7 @@ public class FactionPlayerArgument
                     resultList.add(factionPlayerName);
                 }
             }
-            return list.stream()
+            return factionPlayers.stream()
                     .map(FactionPlayer::getName)
                     .map(CommandCompletion::of)
                     .collect(Collectors.toList());

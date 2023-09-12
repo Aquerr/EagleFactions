@@ -6,8 +6,13 @@ import org.spongepowered.api.world.server.ServerWorld;
 import java.util.Optional;
 import java.util.UUID;
 
-public class WorldUtil
+public final class WorldUtil
 {
+    private WorldUtil()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     public static Optional<ServerWorld> getWorldByUUID(final UUID uuid)
     {
         return Sponge.server().worldManager().worlds().stream()

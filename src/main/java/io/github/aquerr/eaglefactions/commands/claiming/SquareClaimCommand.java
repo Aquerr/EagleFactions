@@ -11,6 +11,7 @@ import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static io.github.aquerr.eaglefactions.util.WorldUtil.getPlainWorldName;
 
 public class SquareClaimCommand extends AbstractCommand
 {
@@ -52,9 +55,9 @@ public class SquareClaimCommand extends AbstractCommand
         final boolean isAdmin = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
 
         //Check if it is a claimable world
-        if (!this.protectionConfig.getClaimableWorldNames().contains(world.properties().name()))
+        if (!this.protectionConfig.getClaimableWorldNames().contains(getPlainWorldName(world)))
         {
-            if(this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()) && isAdmin)
+            if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)) && isAdmin)
             {
                 return preformSquareClaim(player, faction, radius);
             }

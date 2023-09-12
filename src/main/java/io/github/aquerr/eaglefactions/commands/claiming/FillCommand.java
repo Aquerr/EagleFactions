@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -63,9 +64,9 @@ public class FillCommand extends AbstractCommand
 
     private boolean canClaimInWorld(ServerWorld world, boolean isAdmin)
     {
-        if (this.protectionConfig.getClaimableWorldNames().contains(world.properties().name()))
+        if (this.protectionConfig.getClaimableWorldNames().contains(WorldUtil.getPlainWorldName(world)))
             return true;
-        else return this.protectionConfig.getNotClaimableWorldNames().contains(world.properties().name()) && isAdmin;
+        else return this.protectionConfig.getNotClaimableWorldNames().contains(WorldUtil.getPlainWorldName(world)) && isAdmin;
     }
 
     private boolean hasReachedClaimLimit(Faction faction)

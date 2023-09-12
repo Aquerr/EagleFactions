@@ -29,13 +29,11 @@ public class BlockBreakListener extends AbstractListener
         boolean isPlayerBreak = event.context().containsKey(EventContextKeys.PLAYER_BREAK);
         for (BlockTransaction blockTransaction : event.transactions())
         {
-            if (isPlayerBreak || blockTransaction.operation() == Operations.BREAK.get())
+            if (isPlayerBreak || blockTransaction.operation() == Operations.BREAK.get() && (shouldCancelEvent(event, blockTransaction)))
             {
-                if (shouldCancelEvent(event, blockTransaction))
-                {
                     event.setCancelled(true);
                     return;
-                }
+
             }
         }
     }
@@ -47,18 +45,11 @@ public class BlockBreakListener extends AbstractListener
 
         if (user == null)
         {
-            if (!this.protectionManager.canBreak(blockTransaction.original()).hasAccess())
-            {
-                return true;
-            }
+            return !this.protectionManager.canBreak(blockTransaction.original()).hasAccess();
         }
         else
         {
-            if (!this.protectionManager.canBreak(blockTransaction.original(), user, true).hasAccess())
-            {
-                return true;
-            }
+            return !this.protectionManager.canBreak(blockTransaction.original(), user, true).hasAccess();
         }
-        return false;
     }
 }

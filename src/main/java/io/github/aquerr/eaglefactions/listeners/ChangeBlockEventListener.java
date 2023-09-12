@@ -38,7 +38,8 @@ public class ChangeBlockEventListener extends AbstractListener
         final boolean pistonExtend = event.context().containsKey(EventContextKeys.PISTON_EXTEND);
         final boolean pistonRetract = event.context().containsKey(EventContextKeys.PISTON_RETRACT);
         final boolean isForgePlayerBreak = event.context().containsKey(EventContextKeys.PLAYER_BREAK);
-        final ServerLocation sourceLocation = locatableBlock != null ? locatableBlock.serverLocation() : tileEntity != null ? tileEntity.serverLocation() : null;
+        final ServerLocation tileEntityLocation = tileEntity != null ? tileEntity.serverLocation() : null;
+        final ServerLocation sourceLocation = locatableBlock != null ? locatableBlock.serverLocation() : tileEntityLocation;
 
         printDebugMessageForUser(user, locatableBlock, sourceLocation, event);
 

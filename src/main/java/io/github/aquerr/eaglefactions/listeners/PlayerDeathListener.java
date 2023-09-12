@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -40,7 +41,7 @@ public class PlayerDeathListener extends AbstractListener
         CompletableFuture.runAsync(() -> checkPowerLossFlagAndDecreasePower(player));
 
         final Optional<Faction> optionalChunkFaction = getFactionAtLocation(player.serverLocation());
-        if (this.protectionConfig.getWarZoneWorldNames().contains(player.world().key().asString()) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isWarZone()))
+        if (this.protectionConfig.getWarZoneWorldNames().contains(WorldUtil.getPlainWorldName(player.world())) || (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isWarZone()))
         {
             super.getPlugin().getPlayerManager().setDeathInWarZone(player.uniqueId(), true);
         }

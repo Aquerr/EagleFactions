@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.util.ModSupport;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.Entity;
@@ -254,7 +255,7 @@ public class EntityDamageListener extends AbstractListener
             return;
 
         //Check safezone world
-        if(this.protectionConfig.getSafeZoneWorldNames().contains(world.properties().name()))
+        if(this.protectionConfig.getSafeZoneWorldNames().contains(WorldUtil.getPlainWorldName(world)))
         {
             event.setCancelled(true);
             return;
