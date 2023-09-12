@@ -40,8 +40,11 @@ import static io.github.aquerr.eaglefactions.PluginPermissions.SAFE_ZONE_BUILD;
 import static io.github.aquerr.eaglefactions.PluginPermissions.SAFE_ZONE_INTERACT;
 import static io.github.aquerr.eaglefactions.PluginPermissions.WAR_ZONE_BUILD;
 import static io.github.aquerr.eaglefactions.PluginPermissions.WAR_ZONE_INTERACT;
+import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.*;
+import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.forbidden;
 import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.forbiddenSafeZone;
 import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.forbiddenWarZone;
+import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.okEagleFeather;
 import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.okSafeZone;
 import static io.github.aquerr.eaglefactions.api.managers.ProtectionResult.okWarZone;
 import static io.github.aquerr.eaglefactions.util.WorldUtil.getPlainWorldName;
@@ -105,10 +108,10 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
-            return ProtectionResult.ok();
+            return ok();
 
         if (this.playerManager.hasAdminMode(user))
-            return ProtectionResult.okAdmin();
+            return okAdmin();
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
@@ -118,9 +121,9 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (safeZoneWorlds.contains(getPlainWorldName(world)))
         {
             if (isBlockWhitelistedForInteraction(location.blockType().toString(), FactionType.SAFE_ZONE))
-                return ProtectionResult.builder().hasAccess(true).isSafeZone(true).build();
+                return builder().hasAccess(true).isSafeZone(true).build();
             if (user.hasPermission(SAFE_ZONE_INTERACT))
-                return ProtectionResult.builder().hasAccess(true).isSafeZone(true).build();
+                return builder().hasAccess(true).isSafeZone(true).build();
             else return forbiddenSafeZone();
         }
         if (warZoneWorlds.contains(getPlainWorldName(world)))
@@ -139,12 +142,12 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (!optionalChunkFaction.isPresent())
         {
             if(!this.protectionConfig.shouldProtectWildernessFromPlayers())
-                return ProtectionResult.ok();
+                return ok();
             else
             {
                 if (isBlockWhitelistedForInteraction(location.blockType().toString(), FactionType.WILDERNESS))
-                    return ProtectionResult.ok();
-                return ProtectionResult.forbidden();
+                    return ok();
+                return forbidden();
             }
         }
 
@@ -164,31 +167,31 @@ public class ProtectionManagerImpl implements ProtectionManager
             if(user.hasPermission(WAR_ZONE_INTERACT))
                 return okWarZone();
             if (isBlockCarrierAtLocation && isHoldingEagleFeather(user))
-                return ProtectionResult.okEagleFeather();
+                return okEagleFeather();
             return forbiddenWarZone();
         }
 
         if (isBlockWhitelistedForInteraction(location.blockType().toString(), FactionType.FACTION))
-            return ProtectionResult.ok();
+            return ok();
 
         //If player is not in a faction but there is a faction at chunk
         if(!optionalServerPlayerFaction.isPresent())
         {
             //Holding Eagle Feather?
             if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
-                return ProtectionResult.okEagleFeather();
-            return ProtectionResult.forbidden();
+                return okEagleFeather();
+            return forbidden();
         }
 
         final Faction playerFaction = optionalServerPlayerFaction.get();
         if (this.permsManager.canInteract(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get()))
-            return ProtectionResult.okFactionPerm();
+            return okFactionPerm();
         else
         {
             //Holding Eagle Feather?
             if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
-                return ProtectionResult.okEagleFeather();
-            return ProtectionResult.forbidden();
+                return okEagleFeather();
+            return forbidden();
         }
     }
 
@@ -231,10 +234,10 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
-            return ProtectionResult.ok();
+            return ok();
 
         if (this.playerManager.hasAdminMode(user))
-            return ProtectionResult.okAdmin();
+            return okAdmin();
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
@@ -265,12 +268,12 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (!optionalChunkFaction.isPresent())
         {
             if (!this.protectionConfig.shouldProtectWildernessFromPlayers())
-                return ProtectionResult.ok();
+                return ok();
             else
             {
                 if (isItemWhitelisted(usedItem.type().toString(), FactionType.WILDERNESS))
-                    return ProtectionResult.ok();
-                return ProtectionResult.forbidden();
+                    return ok();
+                return forbidden();
             }
         }
 
@@ -290,30 +293,30 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (user.hasPermission(WAR_ZONE_INTERACT))
                 return okWarZone();
             if (isBlockCarrierAtLocation && isHoldingEagleFeather(user))
-                return ProtectionResult.okEagleFeather();
+                return okEagleFeather();
             else return forbiddenWarZone();
         }
 
         if (isItemWhitelisted(usedItem.type().toString(), FactionType.FACTION))
-            return ProtectionResult.ok();
+            return ok();
 
         //If player is not in a faction but there is a faction at chunk
         if(!optionalServerPlayerFaction.isPresent())
         {
             if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
-                return ProtectionResult.okEagleFeather();
-            return ProtectionResult.forbidden();
+                return okEagleFeather();
+            return forbidden();
         }
 
         Faction playerFaction = optionalServerPlayerFaction.get();
         if(this.permsManager.canInteract(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get()))
-            return ProtectionResult.okFactionPerm();
+            return okFactionPerm();
         else
         {
             //Holding Eagle Feather?
             if(isBlockCarrierAtLocation && isHoldingEagleFeather(user))
-                return ProtectionResult.okEagleFeather();
-            else return ProtectionResult.forbidden();
+                return okEagleFeather();
+            else return forbidden();
         }
     }
 
@@ -332,7 +335,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (location == null)
         {
             EagleFactionsPlugin.getPlugin().printInfo("Broken BlockSnapshot does not contain a location. This is not normal.");
-            return ProtectionResult.forbidden();
+            return forbidden();
         }
 
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.uniqueId()))
@@ -352,10 +355,10 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
-            return ProtectionResult.ok();
+            return ok();
 
         if(this.playerManager.hasAdminMode(user))
-            return ProtectionResult.okAdmin();
+            return okAdmin();
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
@@ -402,24 +405,24 @@ public class ProtectionManagerImpl implements ProtectionManager
             }
 
             if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.state().type().toString(), FactionType.FACTION))
-                return ProtectionResult.ok();
+                return ok();
 
             final Faction chunkFaction = optionalChunkFaction.get();
             final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition());
 
             if (optionalServerPlayerFaction.filter(faction -> this.permsManager.canBreakBlock(user.uniqueId(), faction, optionalChunkFaction.get(), optionalClaim.get())).isPresent())
-                return ProtectionResult.okFactionPerm();
-            else return ProtectionResult.forbidden();
+                return okFactionPerm();
+            else return forbidden();
         }
         else
         {
             if (!this.protectionConfig.shouldProtectWildernessFromPlayers())
-                return ProtectionResult.ok();
+                return ok();
             else
             {
                 if (isBlockWhitelistedForPlaceDestroy(blockSnapshot.state().type().toString(), FactionType.WILDERNESS))
-                    return ProtectionResult.ok();
-                return ProtectionResult.forbidden();
+                    return ok();
+                return forbidden();
             }
         }
     }
@@ -431,14 +434,14 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (location == null)
         {
             EagleFactionsPlugin.getPlugin().printInfo("Broken BlockSnapshot does not contain a location. This is not normal.");
-            return ProtectionResult.forbidden();
+            return forbidden();
         }
 
         final ServerWorld world = location.world();
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
-            return ProtectionResult.ok();
+            return ok();
 
         if(this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(world)))
         {
@@ -458,7 +461,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
         if(!optionalChunkFaction.isPresent())
-            return ProtectionResult.ok();
+            return ok();
 
         if(optionalChunkFaction.get().isSafeZone())
         {
@@ -479,10 +482,10 @@ public class ProtectionManagerImpl implements ProtectionManager
         if(!optionalChunkFaction.get().getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
         {
             if (isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.FACTION))
-                return ProtectionResult.ok();
-            else return ProtectionResult.forbidden();
+                return ok();
+            else return forbidden();
         }
-        return ProtectionResult.ok();
+        return ok();
     }
 
     @Override
@@ -500,7 +503,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (location == null)
         {
             EagleFactionsPlugin.getPlugin().printInfo("Placed BlockSnapshot does not contain a location. This is not normal.");
-            return ProtectionResult.forbidden();
+            return forbidden();
         }
 
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.uniqueId()))
@@ -524,10 +527,10 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
-            return ProtectionResult.ok();
+            return ok();
 
         if(this.playerManager.hasAdminMode(user))
-            return ProtectionResult.okAdmin();
+            return okAdmin();
 
         final Set<String> safeZoneWorlds = this.protectionConfig.getSafeZoneWorldNames();
         final Set<String> warZoneWorlds = this.protectionConfig.getWarZoneWorldNames();
@@ -574,22 +577,22 @@ public class ProtectionManagerImpl implements ProtectionManager
             }
 
             if (isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.FACTION))
-                return ProtectionResult.ok();
+                return ok();
 
             final Faction chunkFaction = optionalChunkFaction.get();
             if (optionalServerPlayerFaction.filter(faction -> this.permsManager.canPlaceBlock(user.uniqueId(), faction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get())).isPresent())
-                return ProtectionResult.okFactionPerm();
-            else return ProtectionResult.forbidden();
+                return okFactionPerm();
+            else return forbidden();
         }
         else
         {
             if (!this.protectionConfig.shouldProtectWildernessFromPlayers())
-                return ProtectionResult.ok();
+                return ok();
             else
             {
                 if (isBlockWhitelistedForPlaceDestroy(location.block().toString(), FactionType.WILDERNESS))
-                    return ProtectionResult.ok();
-                return ProtectionResult.forbidden();
+                    return ok();
+                return forbidden();
             }
         }
     }
@@ -621,11 +624,11 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)))
-            return ProtectionResult.ok();
+            return ok();
 
         //Check if admin
         if(this.playerManager.hasAdminMode(user))
-            return ProtectionResult.okAdmin();
+            return okAdmin();
 
         //Check world
         if (this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(world)))
@@ -645,8 +648,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (!optionalChunkFaction.isPresent())
         {
             if (!this.protectionConfig.shouldProtectWildernessFromPlayers())
-                return ProtectionResult.ok();
-            return ProtectionResult.forbidden();
+                return ok();
+            return forbidden();
         }
 
         //If SafeZone or WarZone
@@ -679,15 +682,15 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
             {
                 if (this.permsManager.canPlaceBlock(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get()))
-                    return ProtectionResult.okFactionPerm();
-                else return ProtectionResult.forbidden();
+                    return okFactionPerm();
+                else return forbidden();
             }
         }
 
         boolean allowExplosionsByOtherServerPlayersInClaims = this.protectionConfig.shouldAllowExplosionsByOtherPlayersInClaims();
         if (allowExplosionsByOtherServerPlayersInClaims)
-            return ProtectionResult.ok();
-        else return ProtectionResult.forbidden();
+            return ok();
+        else return forbidden();
     }
 
     @Override
@@ -695,7 +698,7 @@ public class ProtectionManagerImpl implements ProtectionManager
     {
         //Not claimable worlds should be always ignored by protection system.
         if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(location.world())))
-            return ProtectionResult.ok();
+            return ok();
 
         boolean shouldProtectWarZoneFromMobGrief = !this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF);
 
@@ -712,7 +715,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
         if (!optionalChunkFaction.isPresent())
-            return ProtectionResult.ok();
+            return ok();
 
         Faction chunkFaction = optionalChunkFaction.get();
         if (chunkFaction.isSafeZone())
@@ -724,8 +727,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (!this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition())
                     .map(faction -> faction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     .orElse(false))
-                return ProtectionResult.ok();
-            else return ProtectionResult.forbidden();
+                return ok();
+            else return forbidden();
         }
     }
 
@@ -750,12 +753,12 @@ public class ProtectionManagerImpl implements ProtectionManager
 
 
         if (this.playerManager.hasAdminMode(player.user()))
-            return ProtectionResult.okAdmin();
+            return okAdmin();
 
         final boolean isServerPlayer = attackedEntity instanceof ServerPlayer;
         final boolean isMob = !isServerPlayer && (attackedEntity instanceof Living && !(attackedEntity instanceof ArmorStand));
         if (isMob)
-            return ProtectionResult.ok();
+            return ok();
 
         final ServerLocation entityLocation = attackedEntity.serverLocation();
         final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.world().uniqueId(), entityLocation.chunkPosition());
@@ -775,34 +778,34 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                 return forbiddenSafeZone();
             if (attackedEntity.equals(player))
-                return ProtectionResult.ok();
+                return ok();
             if (optionalSourceChunkFaction.isPresent() && optionalSourceChunkFaction.get().isSafeZone())
                 return forbiddenSafeZone();
             if (!optionalAttackerServerPlayerFaction.isPresent())
-                return ProtectionResult.ok();
+                return ok();
             if (!optionalAttackedServerPlayerFaction.isPresent())
-                return ProtectionResult.ok();
+                return ok();
             final Faction attackedFaction = optionalAttackedServerPlayerFaction.get();
             final Faction attackerFaction = optionalAttackerServerPlayerFaction.get();
             if (!attackerFaction.getName().equals(attackedFaction.getName()))
             {
                 if (attackerFaction.isAlly(attackedFaction) && !this.factionsConfig.isAllianceFriendlyFire())
-                    return ProtectionResult.forbidden();
+                    return forbidden();
                 else if (attackerFaction.isTruce(attackedFaction) && !this.factionsConfig.isTruceFriendlyFire())
-                    return ProtectionResult.forbidden();
+                    return forbidden();
             }
             else
             {
                 if (this.factionsConfig.isFactionFriendlyFire())
-                    return ProtectionResult.ok();
-                else return ProtectionResult.forbidden();
+                    return ok();
+                else return forbidden();
             }
         }
         else //Item Frame, Minecraft, Painting etc.
         {
             //Not claimable worlds should be always ignored by protection system.
             if (notClaimableWorld)
-                return ProtectionResult.ok();
+                return ok();
             if (isSafeZoneWorld)
                 return forbiddenSafeZone();
             if (isWarZoneWorld)
@@ -812,7 +815,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 else return forbiddenWarZone();
             }
             if (!optionalChunkFaction.isPresent())
-                return ProtectionResult.ok();
+                return ok();
             final Faction chunkFaction = optionalChunkFaction.get();
             if (chunkFaction.isSafeZone())
                 return forbiddenSafeZone();
@@ -823,13 +826,13 @@ public class ProtectionManagerImpl implements ProtectionManager
                 else return forbiddenWarZone();
             }
             if (!optionalAttackerServerPlayerFaction.isPresent())
-                return ProtectionResult.forbidden();
+                return forbidden();
             final Faction attackerFaction = optionalAttackerServerPlayerFaction.get();
             if (this.permsManager.canBreakBlock(player.uniqueId(), attackerFaction, chunkFaction, chunkFaction.getClaimAt(entityLocation.world().uniqueId(), entityLocation.chunkPosition()).get()))
-                return ProtectionResult.okFactionPerm();
-            return ProtectionResult.forbidden();
+                return okFactionPerm();
+            return forbidden();
         }
-        return ProtectionResult.ok();
+        return ok();
     }
 
     @Override
@@ -843,7 +846,7 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Entire world is one claim type thus we should allow the notification.
         if (isSafeZoneWorld || isWarZoneWorld || notClaimableWorld)
-            return ProtectionResult.ok();
+            return ok();
 
         final Optional<Faction> notifierFaction = this.factionLogic.getFactionByChunk(notifier.world().uniqueId(), notifier.chunkPosition());
         final Optional<Faction> notifiedFaction = this.factionLogic.getFactionByChunk(notifiedLocation.world().uniqueId(), notifiedLocation.chunkPosition());
@@ -856,7 +859,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         {
             //Both wilderness
             if (!notifiedFaction.isPresent())
-                return ProtectionResult.ok();
+                return ok();
             final Faction faction = notifiedFaction.get();
             if (faction.isSafeZone()) //Notified SafeZone
                 return forbiddenSafeZone();
@@ -869,10 +872,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             else
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.FACTION))
-                    return ProtectionResult.ok();
+                    return ok();
                 if(faction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF)) //Notified Regular faction
-                    return ProtectionResult.ok();
-                else return ProtectionResult.forbidden();
+                    return ok();
+                else return forbidden();
             }
 
         }
@@ -881,13 +884,13 @@ public class ProtectionManagerImpl implements ProtectionManager
 
         //Regular factions can notify locations in wilderness.
         if (!notifiedFaction.isPresent())
-            return ProtectionResult.ok();
+            return ok();
 
         final Faction targetFaction = notifiedFaction.get();
 
         //Check if factions are equal.
         if(targetFaction.equals(sourceFaction))
-            return ProtectionResult.ok();
+            return ok();
 
         if (sourceFaction.isSafeZone())
         {
@@ -902,8 +905,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             else
             {
                 if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
-                    return ProtectionResult.ok();
-                else return ProtectionResult.forbidden();
+                    return ok();
+                else return forbidden();
             }
         }
         else if (sourceFaction.isWarZone())
@@ -917,10 +920,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             else
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.FACTION))
-                    return ProtectionResult.ok();
+                    return ok();
                 if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
-                    return ProtectionResult.ok();
-                else return ProtectionResult.forbidden();
+                    return ok();
+                else return forbidden();
             }
         }
         else
@@ -942,10 +945,10 @@ public class ProtectionManagerImpl implements ProtectionManager
             else
             {
                 if(this.isBlockWhitelistedForPlaceDestroy(notifiedLocation.block().toString(), FactionType.FACTION))
-                    return ProtectionResult.ok();
+                    return ok();
                 if (targetFaction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
-                    return ProtectionResult.ok();
-                else return ProtectionResult.forbidden();
+                    return ok();
+                else return forbidden();
             }
         }
     }
