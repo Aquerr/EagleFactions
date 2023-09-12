@@ -3,9 +3,8 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.entity.CommandBlock;
 import org.spongepowered.api.entity.living.player.User;
@@ -23,8 +22,6 @@ import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 
 public abstract class AbstractListener
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractListener.class);
-
     private final EagleFactions plugin;
 
     protected AbstractListener(EagleFactions plugin){
@@ -102,7 +99,8 @@ public abstract class AbstractListener
 
     protected void logDebug(String message)
     {
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug(message);
+        Logger logger = EagleFactionsPlugin.getPlugin().getLogger();
+        if (EagleFactionsPlugin.getPlugin().getLogger().isDebugEnabled())
+            logger.debug(getClass().getName() + ": " + message);
     }
 }
