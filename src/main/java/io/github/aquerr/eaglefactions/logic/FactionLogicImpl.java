@@ -127,7 +127,7 @@ public class FactionLogicImpl implements FactionLogic
             }
         }
 
-        FactionsCache.updateClaimFaction(claim, null);
+        FactionsCache.removeClaim(claim);
         return Optional.empty();
     }
 
