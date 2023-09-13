@@ -31,13 +31,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean isTruceFriendlyFire = true;
 	private boolean isAllianceFriendlyFire = false;
 
-	private int homeDelay = 5;
-	private int homeCooldown = 60;
-	private boolean blockHomeAfterDeathInOwnFaction = false;
-	private int homeBlockTimeAfterDeathInOwnFaction = 60;
-	private boolean canHomeBetweenWorlds = false;
-	private boolean canPlaceHomeOutsideFactionClaim = false;
-
 	private boolean requireConnectedClaims = true;
 	private boolean shouldDelayClaim = false;
 	private int claimDelay = 10;
@@ -51,7 +44,6 @@ public class FactionsConfigImpl implements FactionsConfig
 
 	private boolean blockEnteringOfflineFactions = false;
 	private boolean blockEnteringSafezoneFromWarzone = false;
-	private boolean spawnAtHomeAfterDeath = false;
 	private boolean canAttackOnlyAtNight = false;
 	private String maxInactiveTime = "0";
 	private boolean notifyWhenFactionRemoved = true;
@@ -89,13 +81,6 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.isTruceFriendlyFire = this.configuration.getBoolean(true, "friendlyfire-truce");
 		this.isAllianceFriendlyFire = this.configuration.getBoolean(false, "friendlyfire-alliance");
 
-		this.homeDelay = this.configuration.getInt(5, "home-delay");
-		this.homeCooldown = this.configuration.getInt(60, "home-cooldown");
-		this.blockHomeAfterDeathInOwnFaction = this.configuration.getBoolean(false, "block-home-after-death-in-own-faction", "toggled");
-		this.homeBlockTimeAfterDeathInOwnFaction = this.configuration.getInt(60, "block-home-after-death-in-own-faction", "time");
-		this.canHomeBetweenWorlds = this.configuration.getBoolean(false, "home-from-other-worlds");
-		this.canPlaceHomeOutsideFactionClaim = this.configuration.getBoolean(false, "can-place-home-outside-faction-claim");
-
 		this.requireConnectedClaims = this.configuration.getBoolean(true, "connected-claims");
 		this.shouldDelayClaim = this.configuration.getBoolean(false, "delayed-claim", "toggled");
 		this.claimDelay = this.configuration.getInt(10, "delayed-claim", "claiming-time");
@@ -110,7 +95,6 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.blockEnteringOfflineFactions = this.configuration.getBoolean(true, "block-entering-faction-while-offline");
 		this.blockEnteringSafezoneFromWarzone = this.configuration.getBoolean(false, "block-safezone-from-warzone");
 
-		this.spawnAtHomeAfterDeath = this.configuration.getBoolean(false, "spawn-at-home-after-death");
 		this.canAttackOnlyAtNight = this.configuration.getBoolean(false, "attack-only-at-night");
 
 		this.maxInactiveTime = this.configuration.getString("30d", "factions-remover", "max-inactive-time");
@@ -199,18 +183,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	}
 
 	@Override
-	public int getHomeDelayTime()
-	{
-		return this.homeDelay;
-	}
-
-	@Override
-	public int getHomeCooldown()
-	{
-		return this.homeCooldown;
-	}
-
-	@Override
 	public boolean shouldDelayClaim()
 	{
 		return this.shouldDelayClaim;
@@ -220,18 +192,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	public int getClaimDelay()
 	{
 		return this.claimDelay;
-	}
-
-	@Override
-	public boolean shouldBlockHomeAfterDeathInOwnFaction()
-	{
-		return this.blockHomeAfterDeathInOwnFaction;
-	}
-
-	@Override
-	public int getHomeBlockTimeAfterDeathInOwnFaction()
-	{
-		return this.homeBlockTimeAfterDeathInOwnFaction;
 	}
 
 	@Override
@@ -283,21 +243,9 @@ public class FactionsConfigImpl implements FactionsConfig
 	}
 
 	@Override
-	public boolean shouldSpawnAtHomeAfterDeath()
-	{
-		return this.spawnAtHomeAfterDeath;
-	}
-
-	@Override
 	public boolean canAttackOnlyAtNight()
 	{
 		return this.canAttackOnlyAtNight;
-	}
-
-	@Override
-	public boolean canHomeBetweenWorlds()
-	{
-		return this.canHomeBetweenWorlds;
 	}
 
 	@Override
@@ -352,12 +300,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	public boolean shouldShowOnlyPlayerFactionsClaimsInMap()
 	{
 		return this.showOnlyPlayersFactionsClaimsInMap;
-	}
-
-	@Override
-	public boolean canPlaceHomeOutsideFactionClaim()
-	{
-		return this.canPlaceHomeOutsideFactionClaim;
 	}
 
 	@Override

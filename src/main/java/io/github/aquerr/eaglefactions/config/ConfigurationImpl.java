@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
@@ -47,6 +48,7 @@ public class ConfigurationImpl implements Configuration
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
     private final BluemapConfig bluemapConfig;
+    private final HomeConfig homeConfig;
 
     public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset) throws IOException
     {
@@ -76,6 +78,7 @@ public class ConfigurationImpl implements Configuration
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
         this.bluemapConfig = new BluemapConfigImpl(this);
+        this.homeConfig = new HomeConfigImpl(this);
         reloadConfiguration();
     }
 
@@ -138,6 +141,12 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
+    public HomeConfig getHomeConfig()
+    {
+        return homeConfig;
+    }
+
+    @Override
     public void reloadConfiguration() throws IOException
     {
         loadConfiguration();
@@ -149,6 +158,7 @@ public class ConfigurationImpl implements Configuration
         this.pvpLoggerConfig.reload();
         this.factionsConfig.reload();
         this.bluemapConfig.reload();
+        this.homeConfig.reload();
     }
 
     private void loadConfiguration() throws IOException

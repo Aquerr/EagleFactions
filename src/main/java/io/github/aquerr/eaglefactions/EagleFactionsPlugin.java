@@ -611,7 +611,7 @@ public class EagleFactionsPlugin implements EagleFactions
         this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
         this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
 
-        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService, this.getConfiguration().getHomeConfig());
         this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
         this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager, this.messageService);
         this.rankManager = new RankManagerImpl(this.factionLogic, this.storageManager);

@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.listeners;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class PlayerDeathListener extends AbstractListener
 {
-    private final FactionsConfig factionsConfig;
+    private final HomeConfig homeConfig;
     private final ProtectionConfig protectionConfig;
     private final PowerConfig powerConfig;
     private final MessageService messageService;
@@ -29,7 +29,7 @@ public class PlayerDeathListener extends AbstractListener
     public PlayerDeathListener(final EagleFactions plugin)
     {
         super(plugin);
-        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.homeConfig = plugin.getConfiguration().getHomeConfig();
         this.powerConfig = plugin.getConfiguration().getPowerConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
@@ -46,7 +46,7 @@ public class PlayerDeathListener extends AbstractListener
             super.getPlugin().getPlayerManager().setDeathInWarZone(player.uniqueId(), true);
         }
 
-        if (this.factionsConfig.shouldBlockHomeAfterDeathInOwnFaction())
+        if (this.homeConfig.shouldBlockHomeAfterDeathInOwnFaction())
         {
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
             if (optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent() && optionalChunkFaction.get().getName().equals(optionalPlayerFaction.get().getName()))

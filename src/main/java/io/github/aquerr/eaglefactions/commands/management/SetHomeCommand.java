@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.commands.management;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
@@ -17,13 +17,13 @@ import java.util.Optional;
 
 public class SetHomeCommand extends AbstractCommand
 {
-    private final FactionsConfig factionsConfig;
+    private final HomeConfig homeConfig;
     private final MessageService messageService;
 
     public SetHomeCommand(final EagleFactions plugin)
     {
         super(plugin);
-        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.homeConfig = plugin.getConfiguration().getHomeConfig();
         this.messageService = plugin.getMessageService();
     }
 
@@ -45,12 +45,12 @@ public class SetHomeCommand extends AbstractCommand
         if(playerFaction.getLeader().equals(player.uniqueId()) || playerFaction.getOfficers().contains(player.uniqueId()))
         {
             final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), player.serverLocation().chunkPosition());
-            if (!chunkFaction.isPresent() && this.factionsConfig.canPlaceHomeOutsideFactionClaim())
+            if (!chunkFaction.isPresent() && this.homeConfig.canPlaceHomeOutsideFactionClaim())
             {
                 super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.set-home.success"));
             }
-            else if (!chunkFaction.isPresent() && !this.factionsConfig.canPlaceHomeOutsideFactionClaim())
+            else if (!chunkFaction.isPresent() && !this.homeConfig.canPlaceHomeOutsideFactionClaim())
             {
                 throw messageService.resolveExceptionWithMessage("error.command.set-home.faction-home-must-be-placed-inside-faction-territory");
             }
