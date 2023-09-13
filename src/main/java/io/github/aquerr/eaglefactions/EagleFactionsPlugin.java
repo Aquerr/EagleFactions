@@ -82,6 +82,7 @@ import io.github.aquerr.eaglefactions.commands.rank.PromoteCommand;
 import io.github.aquerr.eaglefactions.commands.rank.SetLeaderCommand;
 import io.github.aquerr.eaglefactions.commands.relation.AllyCommand;
 import io.github.aquerr.eaglefactions.commands.relation.EnemyCommand;
+import io.github.aquerr.eaglefactions.commands.relation.RelationsCommand;
 import io.github.aquerr.eaglefactions.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
@@ -722,6 +723,13 @@ public class EagleFactionsPlugin implements EagleFactions
                 .shortDescription(messageService.resolveComponentWithMessage("command.info.desc"))
                 .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new InfoCommand(this))
+                .build());
+
+        // Relations command
+        SUBCOMMANDS.put(Arrays.asList("rel", "relations"), Command.builder()
+                .shortDescription(messageService.resolveComponentWithMessage("command.relations.desc"))
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
+                .executor(new RelationsCommand(this))
                 .build());
 
         //Player command. Shows info about a player. (its factions etc.)

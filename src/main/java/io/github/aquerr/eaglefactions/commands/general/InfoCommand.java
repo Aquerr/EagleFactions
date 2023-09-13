@@ -29,14 +29,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
@@ -133,24 +132,6 @@ public class InfoCommand extends AbstractCommand
         	officersList = buildPlayerList(faction.getOfficers());
         }
 
-        Component trucesList = empty();
-        if(!faction.getTruces().isEmpty())
-        {
-            trucesList = buildRelationList(faction.getTruces());
-        }
-
-        Component alliancesList = empty();
-        if(!faction.getAlliances().isEmpty())
-        {
-        	alliancesList = buildRelationList(faction.getAlliances());
-        }
-
-        Component enemiesList = empty();
-        if(!faction.getEnemies().isEmpty())
-        {
-        	enemiesList = buildRelationList(faction.getEnemies());
-        }
-
         Component info = text()
                 .append(messageService.resolveComponentWithMessage("command.info.name", faction.getName())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.tag", faction.getTag())).append(newline())
@@ -160,11 +141,8 @@ public class InfoCommand extends AbstractCommand
                 .append(messageService.resolveComponentWithMessage("command.info.public", faction.isPublic())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.leader", leaderNameText.color(GOLD))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.officers", officersList.color(GOLD))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.truces", trucesList.color(GOLD))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.alliances", alliancesList.color(BLUE))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.enemies", enemiesList.color(RED))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.members", membersList.color(GREEN))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(GREEN))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(DARK_AQUA))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.power", super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + this.factionLogic.getFactionMaxClaims(faction)))
                 .build();
@@ -199,24 +177,10 @@ public class InfoCommand extends AbstractCommand
                 .collect(Collectors.toList()));
     }
 
-    private Component buildRelationList(Set<String> relations)
-    {
-         return Component.join(JoinConfiguration.separator(text(",")), relations.stream()
-                .map(this::buildClickableFactionName)
-                .collect(Collectors.toList()));
-    }
-
-    private TextComponent buildClickableFactionName(String factionName)
-    {
-        return text(factionName)
-                .hoverEvent(HoverEvent.showText(text("Click to view information about the faction", BLUE)))
-                .clickEvent(ClickEvent.runCommand("/f info " + factionName));
-    }
-
     private TextComponent buildClickablePlayerNickname(FactionPlayer factionPlayer)
     {
         return text(factionPlayer.getName())
-                .hoverEvent(HoverEvent.showText(text("Click to view information about the player", BLUE)))
+                .hoverEvent(HoverEvent.showText(messageService.resolveComponentWithMessage("command.info.click-to-view-information-about-player")))
                 .clickEvent(ClickEvent.runCommand("/f player " + factionPlayer.getName()));
     }
 }
