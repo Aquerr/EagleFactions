@@ -76,6 +76,10 @@ Thanks to all of you who contributed to this project and were using it!
 
 Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
 
+Also thanks to JetBrains for their IDE
+
+<img width="200" alt="jetbrains" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png">
+
 ## License
 
 [MIT](https://github.com/Aquerr/EagleFactions/blob/master/LICENSE)
