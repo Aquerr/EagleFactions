@@ -93,19 +93,19 @@ blossom {
 
 dependencies {
     api(project(":EagleFactionsAPI"))
-    compileOnly("org.mariadb.jdbc:mariadb-java-client:2.0.3")
-    implementation("com.zaxxer:HikariCP:4.0.3")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.2.0")
+    implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("com.h2database:h2:2.1.214")
-    compileOnly("org.xerial:sqlite-jdbc:3.39.3.0")
-    compileOnly("us.dynmap:DynmapCoreAPI:3.4")
-    compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.2.1")
+    compileOnly("org.xerial:sqlite-jdbc:3.43.0.0")
+    compileOnly("us.dynmap:DynmapCoreAPI:3.6")
+    compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.6.0")
 
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:$spongeApiVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testImplementation("org.mockito:mockito-core:3.10.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.10.0")
-    testImplementation("org.assertj:assertj-core:3.19.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+    testImplementation("org.assertj:assertj-core:3.24.2")
 }
 
 tasks {
@@ -120,8 +120,8 @@ tasks {
         archiveClassifier.set("")
     }
 
-    build {
-        dependsOn(shadowJar)
+    artifacts {
+        archives(shadowJar)
     }
 }
 
