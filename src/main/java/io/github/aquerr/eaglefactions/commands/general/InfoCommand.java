@@ -18,7 +18,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
@@ -58,7 +57,14 @@ public class InfoCommand extends AbstractCommand
         final Optional<Faction> faction = context.one(EagleFactionsCommandParameters.optionalFaction());
         if (faction.isPresent())
         {
-            otherInfo(context, faction.get());
+            if (isPlayerFaction(faction.get(), context))
+            {
+                selfInfo(context, faction.get());
+            }
+            else
+            {
+                otherInfo(context, faction.get());
+            }
         }
         else
         {
@@ -69,35 +75,29 @@ public class InfoCommand extends AbstractCommand
         return CommandResult.success();
     }
 
+    private boolean isPlayerFaction(Faction faction, CommandContext context) throws CommandException
+    {
+        if (!isServerPlayer(context.cause().audience()))
+            return false;
+        Faction playerFaction = this.factionLogic.getFactionByPlayerUUID(requirePlayerSource(context).uniqueId())
+                .orElse(null);
+        return playerFaction != null && playerFaction.getName().equalsIgnoreCase(faction.getName());
+    }
+
+
     private void selfInfo(final CommandContext context, final Faction faction) throws CommandException
     {
         if (!context.hasPermission(PluginPermissions.INFO_COMMAND) && !context.hasPermission(PluginPermissions.INFO_COMMAND_SELF))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
         showFactionInfo(context, faction);
     }
-    
-    private void otherInfo(final CommandContext source, final Faction faction) throws CommandException
+
+    private void otherInfo(CommandContext context, Faction faction) throws CommandException
     {
-        if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
-        {
-            //Check permissions
-            if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && this.factionLogic.getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && this.factionLogic.getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
-            {
-                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
-            }
-            else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && this.factionLogic.getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && !this.factionLogic.getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
-            {
-                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
-            }
-            else
-            {
-                showFactionInfo(source, faction);
-            }
-        }
-        else
-        {
+        if (!context.hasPermission(PluginPermissions.INFO_COMMAND) && !context.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
-        }
+
+        showFactionInfo(context, faction);
     }
 
     private void showFactionInfo(final CommandContext source, final Faction faction)
