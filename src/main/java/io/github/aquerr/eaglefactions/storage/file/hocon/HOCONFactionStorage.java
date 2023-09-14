@@ -1,12 +1,11 @@
 package io.github.aquerr.eaglefactions.storage.file.hocon;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.entities.vo.FactionName;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.util.FileUtils;
-import net.kyori.adventure.identity.Identity;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -22,9 +21,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class HOCONFactionStorage implements FactionStorage
 {
@@ -174,7 +170,7 @@ public class HOCONFactionStorage implements FactionStorage
         }
         catch (IOException e)
         {
-            Sponge.server().sendMessage(Identity.nil(), text("Could not deserialize faction object from file! faction name = " + factionName, RED));
+            EagleFactionsPlugin.getPlugin().getLogger().error("Could not deserialize faction object from file! faction name = " + factionName);
             e.printStackTrace();
         }
         return null;

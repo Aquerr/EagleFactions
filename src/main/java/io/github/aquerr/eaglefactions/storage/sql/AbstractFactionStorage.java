@@ -17,11 +17,9 @@ import io.github.aquerr.eaglefactions.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteProvider;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -66,7 +64,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public abstract class AbstractFactionStorage implements FactionStorage
 {
@@ -149,7 +146,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
         if(this.sqlProvider == null)
         {
-            Sponge.server().sendMessage(Identity.nil(), Component.text("Could not establish connection to the database. Aborting...", RED));
+            EagleFactionsPlugin.getPlugin().getLogger().error("Could not establish connection to the database. Aborting...");
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         try
@@ -166,6 +163,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     {
         final int databaseVersionNumber = getDatabaseVersion();
 
+
         //Get all .sql files
         final List<Path> filePaths = getSqlFilesPaths();
 
@@ -180,9 +178,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
                     final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                     final Connection connection = this.sqlProvider.getConnection();
-                    final Statement statement = connection.createStatement())
+                    final Statement statement = connection.createStatement()
+                    )
                 {
-                    connection.setAutoCommit(false);
                     final StringBuilder stringBuilder = new StringBuilder();
                     String line;
 
@@ -216,7 +214,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
-    private List<Path> getSqlFilesPaths() throws URISyntaxException, IOException
+    private List<Path> getSqlFilesPaths() throws IOException
     {
         final List<Path> filePaths = new ArrayList<>();
         final URI uri = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());

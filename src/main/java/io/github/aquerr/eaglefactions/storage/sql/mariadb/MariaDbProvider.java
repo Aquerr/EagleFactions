@@ -2,13 +2,10 @@ package io.github.aquerr.eaglefactions.storage.sql.mariadb;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import io.github.aquerr.eaglefactions.storage.sql.SQLAbstractProvider;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.Sponge;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -32,7 +29,7 @@ public class MariaDbProvider extends SQLAbstractProvider
 			}
 			catch(final SQLException e)
 			{
-				Sponge.server().sendMessage(Identity.nil(), Component.text("Error Code: " + e.getErrorCode() + " | SQL State: " + e.getSQLState() + " | Error Message: " + e.getMessage(), NamedTextColor.RED));
+				EagleFactionsPlugin.getPlugin().getLogger().error("Error Code: " + e.getErrorCode() + " | SQL State: " + e.getSQLState() + " | Error Message: " + e.getMessage());
 				e.printStackTrace();
 				return null;
 			}
@@ -42,7 +39,9 @@ public class MariaDbProvider extends SQLAbstractProvider
 
 	public Connection getConnection() throws SQLException
 	{
-		return this.dataSource.getConnection();
+		Connection connection = this.dataSource.getConnection();
+		connection.setCatalog(getDatabaseName());
+		return connection;
 	}
 
 	@Override

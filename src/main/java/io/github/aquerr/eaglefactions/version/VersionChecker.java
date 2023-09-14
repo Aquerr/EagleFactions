@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.version;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import org.spongepowered.api.Sponge;
 
 import java.io.BufferedReader;
@@ -85,7 +86,7 @@ public class VersionChecker
         }
         catch (IOException e)
         {
-            Sponge.server().sendMessage(nil(), text("Couldn't lookup if there is a new version of Eagle Factions available. Reason: " + e.getMessage(), RED));
+            EagleFactionsPlugin.getPlugin().getLogger().error("Couldn't lookup if there is a new version of Eagle Factions available. Reason: " + e.getMessage());
         }
 
         return null;

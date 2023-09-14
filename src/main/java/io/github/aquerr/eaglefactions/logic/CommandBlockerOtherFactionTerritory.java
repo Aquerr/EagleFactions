@@ -1,10 +1,8 @@
 package io.github.aquerr.eaglefactions.logic;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.List;
@@ -65,7 +63,7 @@ public class CommandBlockerOtherFactionTerritory
             }
             catch(final PatternSyntaxException exception)
             {
-                Sponge.server().sendMessage(Component.text("The syntax of your blocked command pattern is wrong. Command = " + blockedCommand, NamedTextColor.RED));
+                EagleFactionsPlugin.getPlugin().getLogger().error("The syntax of your blocked command pattern is wrong. Command = " + blockedCommand);
             }
         }
 

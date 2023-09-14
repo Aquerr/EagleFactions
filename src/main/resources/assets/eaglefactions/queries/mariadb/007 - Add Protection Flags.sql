@@ -1,9 +1,7 @@
 CREATE TABLE `protection_flag_type` (
-    `id`            INT             NOT NULL,
-    `flag_type`     VARCHAR(200)    NOT NULL,
-    PRIMARY KEY (`id`)
+    `id`            INT             NOT NULL   UNIQUE PRIMARY KEY,
+    `flag_type`     VARCHAR(200)    NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `protection_flag_type_UNIQUE` ON (`id`);
 
 CREATE TABLE `faction_protection_flag` (
      `faction_name`               VARCHAR(200)    NOT NULL,
