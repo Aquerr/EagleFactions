@@ -1,4 +1,4 @@
-![alt text](http://i.imgur.com/Lh7W1Mo.png)
+![alt text](https://i.imgur.com/YNvnziY.png)
 
 # Eagle Factions
 
@@ -64,8 +64,6 @@ If there is no translation for your language you can make your own and add it as
 ## Credits / Thanks
 
 Plugin author: [Aquerr](https://github.com/Aquerr)
-
-Logo by: joxuk
 
 Many thanks to:
 - **[Iterator](https://github.com/IteratorW)** (Dynmap Support and his help at Discord)
