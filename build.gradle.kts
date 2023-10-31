@@ -8,7 +8,7 @@ val spongeApiVersion = findProperty("sponge-api.version") as String
 
 plugins {
     `java-library`
-    id("org.spongepowered.gradle.plugin") version "2.1.1"
+    id("org.spongepowered.gradle.plugin") version "2.2.0"
     java
     idea
     `maven-publish`
@@ -61,9 +61,9 @@ sponge {
         entrypoint("io.github.aquerr.eaglefactions.EagleFactionsPlugin")
         description("A factions plugin that will make managing your battle-server easier. :)")
         links {
-            homepage("https://github.com/Aquerr/EagleFactions")
-            source("https://github.com/Aquerr/EagleFactions")
-            issues("https://github.com/Aquerr/EagleFactions/issues")
+            homepageLink.set(uri("https://github.com/Aquerr/EagleFactions"))
+            sourceLink.set(uri("https://github.com/Aquerr/EagleFactions"))
+            issuesLink.set(uri("https://github.com/Aquerr/EagleFactions/issues"))
         }
         contributor("Aquerr") {
             description("Lead Developer")
