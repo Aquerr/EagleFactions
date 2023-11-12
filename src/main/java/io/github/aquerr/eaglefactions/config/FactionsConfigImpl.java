@@ -14,8 +14,7 @@ public class FactionsConfigImpl implements FactionsConfig
 
 	//TODO: Maybe move to GeneralConfig class?
 	//TODO: This should be possibly changed to .lang file.
-	private String languageFile = "english.conf";
-//	private String language = "en_us";
+	private String languageTag = "en";
 
 	private int maxNameLength = 30;
 	private int minNameLength = 3;
@@ -65,7 +64,7 @@ public class FactionsConfigImpl implements FactionsConfig
 	@Override
 	public void reload()
 	{
-		this.languageFile = this.configuration.getString("english.conf", "language-file");
+		this.languageTag = this.configuration.getString("en", "language");
 
 		this.maxNameLength = this.configuration.getInt(30,"name", "max-length");
 		this.minNameLength = this.configuration.getInt(3, "name", "min-length");
@@ -111,9 +110,9 @@ public class FactionsConfigImpl implements FactionsConfig
 	}
 
 	@Override
-	public String getLanguageFileName()
+	public String getLanguageTag()
 	{
-		return this.languageFile;
+		return this.languageTag;
 	}
 
 	@Override

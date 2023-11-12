@@ -304,14 +304,7 @@ public class EagleFactionsPlugin implements EagleFactions
             this.logger.info(PLUGIN_PREFIX_PLAIN + "Have a great time with Eagle Factions! :D");
             this.logger.info(PLUGIN_PREFIX_PLAIN + "==========================================");
 
-            CompletableFuture.runAsync(() ->
-            {
-                if(!VersionChecker.isLatest(PluginInfo.VERSION))
-                {
-                    this.logger.info(PLUGIN_PREFIX_PLAIN + "Hey! A new version of " + PluginInfo.NAME + " is available online!");
-                    this.logger.info("==========================================");
-                }
-            });
+            CompletableFuture.runAsync(this::checkVersionAndInform);
 
             // Reloads storage and cache.
             this.storageManager.reloadStorage();
@@ -598,7 +591,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.efPlaceholderService = new EFPlaceholderService(this);
 
-        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageFileName());
+        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageTag());
         this.messageService = EFMessageService.getInstance();
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
@@ -1179,5 +1172,20 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private boolean isUltimateChatLoaded() {
         return Sponge.pluginManager().plugin("ultimatechat").isPresent();
+    }
+
+    private void checkVersionAndInform()
+    {
+        if (!this.configuration.getVersionConfig().shouldPerformVersionCheck())
+        {
+            this.logger.info("Version check: Disabled.");
+            return;
+        }
+
+        if(!VersionChecker.getInstance().isLatest(PluginInfo.VERSION))
+        {
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Hey! A new version of " + PluginInfo.NAME + " is available online!");
+            this.logger.info("==========================================");
+        }
     }
 }

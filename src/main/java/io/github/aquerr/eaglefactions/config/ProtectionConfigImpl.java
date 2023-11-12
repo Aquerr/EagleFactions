@@ -81,7 +81,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	}
 
 	@Override
-	public void reload() throws IOException
+	public void reload() throws SerializationException
 	{
 		loadWorldsFile();
 
