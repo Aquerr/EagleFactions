@@ -259,14 +259,8 @@ public class EagleFactionsPlugin implements EagleFactions
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.WHITE, "Have a great time with Eagle Factions! :D"));
             Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
 
-            CompletableFuture.runAsync(() ->
-            {
-                if(!VersionChecker.isLatest(PluginInfo.VERSION))
-                {
-                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
-                    Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
-                }
-            });        }
+            CompletableFuture.runAsync(this::checkVersionAndInform);
+        }
         catch (Exception exception)
         {
             exception.printStackTrace();
@@ -1020,5 +1014,20 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private boolean isUltimateChatLoaded() {
         return Sponge.getPluginManager().isLoaded("ultimatechat");
+    }
+
+    private void checkVersionAndInform()
+    {
+        if (!this.configuration.getVersionConfig().shouldPerformVersionCheck())
+        {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Version check: Disabled."));
+            return;
+        }
+
+        if(!VersionChecker.getInstance().isLatest(PluginInfo.VERSION))
+        {
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GOLD, "Hey! A new version of ", TextColors.AQUA, PluginInfo.NAME, TextColors.GOLD, " is available online!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(TextColors.GREEN, "=========================================="));
+        }
     }
 }

@@ -35,8 +35,7 @@ public class PlayerJoinListener extends AbstractListener
     public void onPlayerJoin(final ClientConnectionEvent.Join event, final @Root Player player)
     {
         CompletableFuture.runAsync(() -> {
-            if (player.hasPermission(PluginPermissions.VERSION_NOTIFY) && !VersionChecker.isLatest(PluginInfo.VERSION))
-                player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + Messages.IS_AVAILABLE));
+            checkVersionAndInform(player);
 
             //Create player file and set power if player does not exist.
             if (!super.getPlugin().getPlayerManager().getFactionPlayer(player.getUniqueId()).isPresent())
@@ -61,6 +60,17 @@ public class PlayerJoinListener extends AbstractListener
         });
 
         clearPvpLoggerObjectives(player);
+    }
+
+    private void checkVersionAndInform(Player player)
+    {
+        if (!this.getPlugin().getConfiguration().getVersionConfig().shouldPerformVersionCheck())
+            return;
+
+        if (player.hasPermission(PluginPermissions.VERSION_NOTIFY) && !VersionChecker.getInstance().isLatest(PluginInfo.VERSION))
+        {
+            player.sendMessage(Text.of(PluginInfo.PLUGIN_PREFIX, TextColors.GREEN, Messages.A_NEW_VERSION_OF + " ", TextColors.AQUA, "Eagle Factions", TextColors.GREEN, " " + Messages.IS_AVAILABLE));
+        }
     }
 
     private void clearPvpLoggerObjectives(Player player) {

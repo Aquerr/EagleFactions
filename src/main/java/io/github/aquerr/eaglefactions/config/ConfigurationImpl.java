@@ -11,7 +11,6 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.asset.Asset;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -33,6 +32,7 @@ public class ConfigurationImpl implements Configuration
     private final ProtectionConfig protectionConfig;
     private final PVPLoggerConfig pvpLoggerConfig;
     private final FactionsConfig factionsConfig;
+    private final VersionConfig versionConfig;
 
     public ConfigurationImpl(final Path configDir, final Asset configAsset)
     {
@@ -67,6 +67,7 @@ public class ConfigurationImpl implements Configuration
         this.protectionConfig = new ProtectionConfigImpl(this);
         this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
         this.factionsConfig = new FactionsConfigImpl(this);
+        this.versionConfig = new VersionConfigImpl(this);
         reloadConfiguration();
     }
 
@@ -123,6 +124,12 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
+    public VersionConfig getVersionConfig()
+    {
+        return versionConfig;
+    }
+
+    @Override
     public void reloadConfiguration()
     {
         loadConfiguration();
@@ -133,6 +140,7 @@ public class ConfigurationImpl implements Configuration
         this.protectionConfig.reload();
         this.pvpLoggerConfig.reload();
         this.factionsConfig.reload();
+        this.versionConfig.reload();
     }
 
     private void loadConfiguration()
