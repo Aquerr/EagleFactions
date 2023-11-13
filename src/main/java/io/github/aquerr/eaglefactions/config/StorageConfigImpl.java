@@ -25,7 +25,7 @@ public class StorageConfigImpl implements StorageConfig
 		this.storageType = configuration.getString("hocon", "storage", "type");
 		this.storageUserName = configuration.getString("sa", "storage", "username");
 		this.storagePassword = configuration.getString("", "storage", "password");
-		this.databaseUrl = configuration.getString("localhost:3306/", "storage", "database-url");
+		this.databaseUrl = configuration.getString("//localhost:3306/", "storage", "database-url");
 		this.databaseFileName = configuration.getString("database", "storage", "database-file-name");
 	}
 

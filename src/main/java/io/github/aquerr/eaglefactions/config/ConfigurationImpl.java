@@ -2,13 +2,16 @@ package io.github.aquerr.eaglefactions.config;
 
 import io.github.aquerr.eaglefactions.api.config.BluemapConfig;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
+import io.github.aquerr.eaglefactions.api.config.ConfigReloadable;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.config.StorageConfig;
+import io.github.aquerr.eaglefactions.api.config.VersionConfig;
 import io.github.aquerr.eaglefactions.util.FileUtils;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.leangen.geantyref.TypeToken;
@@ -24,13 +27,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by Aquerr on 2017-07-12.
- */
 public class ConfigurationImpl implements Configuration
 {
     private final Path configDirectoryPath;
@@ -38,15 +40,7 @@ public class ConfigurationImpl implements Configuration
     private final ConfigurationLoader<CommentedConfigurationNode> configLoader;
     private CommentedConfigurationNode configNode;
 
-    //Configs
-    private final StorageConfig storageConfig;
-    private final ChatConfig chatConfig;
-    private final DynmapConfig dynmapConfig;
-    private final PowerConfig powerConfig;
-    private final ProtectionConfig protectionConfig;
-    private final PVPLoggerConfig pvpLoggerConfig;
-    private final FactionsConfig factionsConfig;
-    private final BluemapConfig bluemapConfig;
+    private final Map<Class<? extends ConfigReloadable>, ConfigReloadable> configs = new HashMap<>();
 
     public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset) throws IOException
     {
@@ -68,21 +62,23 @@ public class ConfigurationImpl implements Configuration
         this.configLoader = (HoconConfigurationLoader.builder()).path(this.configPath).build();
         loadConfiguration();
 
-        this.storageConfig = new StorageConfigImpl(this);
-        this.chatConfig = new ChatConfigImpl(this);
-        this.dynmapConfig = new DynmapConfigImpl(this);
-        this.powerConfig = new PowerConfigImpl(this);
-        this.protectionConfig = new ProtectionConfigImpl(pluginContainer, this);
-        this.pvpLoggerConfig = new PVPLoggerConfigImpl(this);
-        this.factionsConfig = new FactionsConfigImpl(this);
-        this.bluemapConfig = new BluemapConfigImpl(this);
+        this.configs.put(StorageConfig.class, new StorageConfigImpl(this));
+        this.configs.put(ChatConfig.class, new ChatConfigImpl(this));
+        this.configs.put(DynmapConfig.class, new DynmapConfigImpl(this));
+        this.configs.put(PowerConfig.class, new PowerConfigImpl(this));
+        this.configs.put(ProtectionConfig.class, new ProtectionConfigImpl(pluginContainer, this));
+        this.configs.put(PVPLoggerConfig.class, new PVPLoggerConfigImpl(this));
+        this.configs.put(FactionsConfig.class, new FactionsConfigImpl(this));
+        this.configs.put(BluemapConfig.class, new BluemapConfigImpl(this));
+        this.configs.put(HomeConfig.class, new HomeConfigImpl(this));
+        this.configs.put(VersionConfig.class, new VersionConfigImpl(this));
         reloadConfiguration();
     }
 
     @Override
     public FactionsConfig getFactionsConfig()
     {
-        return this.factionsConfig;
+        return getConfig(FactionsConfig.class);
     }
 
     @Override
@@ -98,57 +94,65 @@ public class ConfigurationImpl implements Configuration
     @Override
     public ChatConfig getChatConfig()
     {
-        return this.chatConfig;
+        return getConfig(ChatConfig.class);
     }
 
     @Override
     public DynmapConfig getDynmapConfig()
     {
-        return this.dynmapConfig;
+        return getConfig(DynmapConfig.class);
     }
 
     @Override
     public StorageConfig getStorageConfig()
     {
-        return this.storageConfig;
+        return getConfig(StorageConfig.class);
     }
 
     @Override
     public BluemapConfig getBluemapConfig()
     {
-        return this.bluemapConfig;
+        return getConfig(BluemapConfig.class);
     }
 
     @Override
     public PowerConfig getPowerConfig()
     {
-        return this.powerConfig;
+        return getConfig(PowerConfig.class);
     }
 
     @Override
     public ProtectionConfig getProtectionConfig()
     {
-        return this.protectionConfig;
+        return getConfig(ProtectionConfig.class);
     }
 
     @Override
     public PVPLoggerConfig getPvpLoggerConfig()
     {
-        return this.pvpLoggerConfig;
+        return getConfig(PVPLoggerConfig.class);
+    }
+
+    @Override
+    public HomeConfig getHomeConfig()
+    {
+        return getConfig(HomeConfig.class);
+    }
+
+    @Override
+    public VersionConfig getVersionConfig()
+    {
+        return getConfig(VersionConfig.class);
     }
 
     @Override
     public void reloadConfiguration() throws IOException
     {
         loadConfiguration();
-        this.storageConfig.reload();
-        this.chatConfig.reload();
-        this.dynmapConfig.reload();
-        this.powerConfig.reload();
-        this.protectionConfig.reload();
-        this.pvpLoggerConfig.reload();
-        this.factionsConfig.reload();
-        this.bluemapConfig.reload();
+        for (ConfigReloadable value : this.configs.values())
+        {
+            value.reload();
+        }
     }
 
     private void loadConfiguration() throws IOException
@@ -225,5 +229,11 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
         return new HashSet<>();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getConfig(Class<T> clazz)
+    {
+        return (T)this.configs.get(clazz);
     }
 }

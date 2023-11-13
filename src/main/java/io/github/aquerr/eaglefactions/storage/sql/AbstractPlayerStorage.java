@@ -1,20 +1,20 @@
 package io.github.aquerr.eaglefactions.storage.sql;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.storage.PlayerStorage;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public abstract class AbstractPlayerStorage implements PlayerStorage
 {
@@ -45,7 +45,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     {
         if(sqlProvider == null)
         {
-            Sponge.server().sendMessage(Identity.nil(), Component.text("Could not establish connection to the database. Aborting...", RED));
+            EagleFactionsPlugin.getPlugin().getLogger().error("Could not establish connection to the database. Aborting...");
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         this.plugin = plugin;

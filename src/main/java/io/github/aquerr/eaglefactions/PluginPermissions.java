@@ -28,6 +28,9 @@ public final class PluginPermissions
     public static final String INFO_COMMAND = "eaglefactions.player.info";
     public static final String INFO_COMMAND_SELF = "eaglefactions.player.info.self";
     public static final String INFO_COMMAND_OTHERS = "eaglefactions.player.info.others";
+    public static final String RELATIONS_COMMAND = "eaglefactions.player.relations";
+    public static final String RELATIONS_SELF_COMMAND = "eaglefactions.player.relations.self";
+    public static final String RELATIONS_OTHERS_COMMAND = "eaglefactions.player.relations.others";
     public static final String VERSION_COMMAND = "eaglefactions.player.version";
 
     public static final String DEBUG_COMMAND = "eaglefactions.player.debug";

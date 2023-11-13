@@ -1,13 +1,11 @@
 package io.github.aquerr.eaglefactions.config;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -29,8 +27,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
-
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class ProtectionConfigImpl implements ProtectionConfig
 {
@@ -85,7 +81,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 	}
 
 	@Override
-	public void reload() throws IOException
+	public void reload() throws SerializationException
 	{
 		loadWorldsFile();
 
@@ -333,7 +329,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 				}
 				catch(final PatternSyntaxException exception)
 				{
-					Sponge.server().sendMessage(Identity.nil(), Component.text("The syntax of your pattern is wrong. Id = " + whiteListedIdPattern, RED));
+					EagleFactionsPlugin.getPlugin().getLogger().error("The syntax of your pattern is wrong. Id = " + whiteListedIdPattern);
 				}
 			}
 			return false;

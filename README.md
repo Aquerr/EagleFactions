@@ -1,4 +1,4 @@
-![alt text](http://i.imgur.com/Lh7W1Mo.png)
+![alt text](https://i.imgur.com/YNvnziY.png)
 
 # Eagle Factions
 
@@ -65,8 +65,6 @@ If there is no translation for your language you can make your own and add it as
 
 Plugin author: [Aquerr](https://github.com/Aquerr)
 
-Logo by: joxuk
-
 Many thanks to:
 - **[Iterator](https://github.com/IteratorW)** (Dynmap Support and his help at Discord)
 - **[ROM](https://github.com/ROMVoid95)** (French translation and his help at Discord)
@@ -75,6 +73,10 @@ Many thanks to:
 Thanks to all of you who contributed to this project and were using it!
 
 Many thanks for the inspiration to: Polis, MCClans & Massivecraft's Factions!
+
+Also thanks to JetBrains for their IDE
+
+<img width="200" alt="jetbrains" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png">
 
 ## License
 

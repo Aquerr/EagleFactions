@@ -33,8 +33,8 @@ public class PlayerJoinListener extends AbstractListener
     public void onPlayerJoin(final ServerSideConnectionEvent.Join event, final @First ServerPlayer player)
     {
         CompletableFuture.runAsync(() -> {
-            if (player.hasPermission(PluginPermissions.VERSION_NOTIFY) && !VersionChecker.isLatest(PluginInfo.VERSION))
-                player.sendMessage(messageService.resolveMessageWithPrefix("version.notify"));
+
+            checkVersionAndInform(player);
 
             //Create player file and set power if player does not exist.
             if (!super.getPlugin().getPlayerManager().getFactionPlayer(player.uniqueId()).isPresent())
@@ -55,6 +55,17 @@ public class PlayerJoinListener extends AbstractListener
         });
 
         clearPvpLoggerObjectives(player);
+    }
+
+    private void checkVersionAndInform(ServerPlayer player)
+    {
+        if (!this.getPlugin().getConfiguration().getVersionConfig().shouldPerformVersionCheck())
+            return;
+
+        if (player.hasPermission(PluginPermissions.VERSION_NOTIFY) && !VersionChecker.getInstance().isLatest(PluginInfo.VERSION))
+        {
+            player.sendMessage(messageService.resolveMessageWithPrefix("version.notify"));
+        }
     }
 
     private void clearPvpLoggerObjectives(ServerPlayer player)

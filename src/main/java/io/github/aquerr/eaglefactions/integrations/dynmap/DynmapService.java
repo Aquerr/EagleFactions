@@ -1,9 +1,9 @@
 package io.github.aquerr.eaglefactions.integrations.dynmap;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
-import net.kyori.adventure.text.Component;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
 import org.dynmap.markers.AreaMarker;
@@ -11,14 +11,11 @@ import org.dynmap.markers.GenericMarker;
 import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerSet;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 /**
  * Main Dynmap Integration class, contains Dynmap API fields and activate void
@@ -59,7 +56,7 @@ public class DynmapService
 
                 if (markerSet == null)
                 {
-                    Sponge.server().sendMessage(Component.text("Could not create MarkerSet in Dynmap. Restarting the server may help.", RED));
+                    EagleFactionsPlugin.getPlugin().getLogger().error("Could not create MarkerSet in Dynmap. Restarting the server may help.");
                     return;
                 }
 

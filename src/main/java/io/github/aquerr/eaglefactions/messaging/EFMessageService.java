@@ -19,6 +19,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.PropertyResourceBundle;
 
+import static java.lang.String.format;
+
 /**
  * Eagle Factions Message Service that create messages loaded from language files.
  */
@@ -36,40 +38,41 @@ public class EFMessageService implements MessageService
 
     private final Localization localization;
 
-    private static class InstanceHolder {
-
+    private static class InstanceHolder
+    {
         public static EFMessageService INSTANCE = null;
     }
 
-    public static void init(String langTag) {
+    public static void init(String langTag)
+    {
         Path langDir = EagleFactionsPlugin.getPlugin().getConfigDir().resolve("lang");
         String jarLangFilePath = DEFAULT_LANG_FILE_PATH;
-        if (!langTag.equals("en_US"))
+        if (!langTag.equals("en"))
         {
-            jarLangFilePath = String.format(LANG_FILE_BASE_PATH + "_%s.properties", langTag);
+            jarLangFilePath = format(LANG_FILE_BASE_PATH + "_%s.properties", langTag);
         }
 
-        Path fileLangFilePath = langDir.resolve(String.format("messages_%s.properties", langTag));
+        Path fileLangFilePath = langDir.resolve(format("messages_%s.properties", langTag));
 
         try
         {
             Files.createDirectories(langDir);
             generateLangFile(jarLangFilePath, fileLangFilePath);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             try
             {
+                EagleFactionsPlugin.getPlugin().getLogger().warn("Could not generate language file for language tag = {}. Generating fallback config file instead.", langTag, e);
                 jarLangFilePath = DEFAULT_LANG_FILE_PATH;
                 fileLangFilePath = fileLangFilePath.resolveSibling("messages.properties");
                 generateLangFile(jarLangFilePath, fileLangFilePath);
             }
-            catch (IOException exception)
+            catch (Exception exception)
             {
                 exception.printStackTrace();
                 throw new IllegalStateException("Could not generate language file!");
             }
-            e.printStackTrace();
         }
 
         PropertyResourceBundle propertyResourceBundle;
@@ -96,7 +99,8 @@ public class EFMessageService implements MessageService
         return InstanceHolder.INSTANCE;
     }
 
-    private EFMessageService(PropertyResourceBundle resourceBundle) {
+    private EFMessageService(PropertyResourceBundle resourceBundle)
+    {
         this.localization = Localization.forResourceBundle(resourceBundle);
     }
 

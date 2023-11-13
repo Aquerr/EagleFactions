@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
@@ -45,7 +45,7 @@ public class EntitySpawnListener extends AbstractListener
 
     private final ProtectionManager protectionManager;
     private final FactionLogic factionLogic;
-    private final FactionsConfig factionsConfig;
+    private final HomeConfig homeConfig;
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
 
@@ -54,7 +54,7 @@ public class EntitySpawnListener extends AbstractListener
         super(plugin);
         this.protectionManager = plugin.getProtectionManager();
         this.factionLogic = plugin.getFactionLogic();
-        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.homeConfig = plugin.getConfiguration().getHomeConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
     }
@@ -276,7 +276,7 @@ public class EntitySpawnListener extends AbstractListener
 
     private void handlePlayerSpawnAfterDeath(ServerPlayer serverPlayer)
     {
-        if (!this.factionsConfig.shouldSpawnAtHomeAfterDeath())
+        if (!this.homeConfig.shouldSpawnAtHomeAfterDeath())
             return;
 
         HOME_TELEPORT_PLAYER_UUIDS.add(serverPlayer.uniqueId());

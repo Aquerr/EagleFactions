@@ -7,7 +7,6 @@ import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
-import io.github.aquerr.eaglefactions.util.ParticlesUtil;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -78,7 +77,7 @@ public class CoordsCommand extends AbstractCommand
             final Claim claim = getNearestClaim(player, faction);
             if (claim != null)
             {
-                final Vector3d blockPosition = ParticlesUtil.getChunkCenter(player.world(), claim.getChunkPosition());
+                final Vector3d blockPosition = WorldUtil.getChunkTopCenter(player.world(), claim.getChunkPosition());
                 teamCoords.add(messageService.resolveComponentWithMessage("command.coords.faction-coords", blockPosition.toString()));
             }
         }

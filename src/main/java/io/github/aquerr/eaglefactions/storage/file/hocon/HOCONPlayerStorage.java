@@ -1,5 +1,6 @@
 package io.github.aquerr.eaglefactions.storage.file.hocon;
 
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.storage.PlayerStorage;
@@ -67,8 +68,7 @@ public class HOCONPlayerStorage implements PlayerStorage
         }
         catch(IOException e)
         {
-            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(Component.text("Error while putting player'" + player.getName() + "' in node.", RED)));
-            e.printStackTrace();
+            EagleFactionsPlugin.getPlugin().getLogger().error("Error while putting player'" + player.getName() + "' in node.", e);
         }
 
         return false;

@@ -7,18 +7,22 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class FactionsCache
 {
-    //TODO: Consider converting factions and players cache into Guava Cache.
     private static final Map<String, Faction> FACTIONS_CACHE = new HashMap<>();
     private static final Map<UUID, FactionPlayer> FACTION_PLAYER_CACHE = new HashMap<>();
 
-    // TODO: Add cache time to configuration?
-    private static final Cache<Claim, Optional<Faction>> CLAIMS_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(30, TimeUnit.SECONDS)
+    private static final Cache<Claim, Faction> CLAIMS_CACHE = CacheBuilder.newBuilder()
+            .expireAfterAccess(30, TimeUnit.SECONDS)
             .build();
 
     private FactionsCache()
@@ -27,16 +31,16 @@ public class FactionsCache
     }
 
     public static Optional<Faction> getClaimFaction(Claim claim) {
-        return CLAIMS_CACHE.getIfPresent(claim);
+        return Optional.ofNullable(CLAIMS_CACHE.getIfPresent(claim));
     }
 
-    public static void updateClaimFaction(Claim claim, Optional<Faction> faction) {
+    public static void updateClaimFaction(Claim claim, Faction faction) {
         CLAIMS_CACHE.put(claim, faction);
     }
 
-    public static Map<UUID, FactionPlayer> getPlayersMap()
+    public static Set<FactionPlayer> getPlayers()
     {
-        return FACTION_PLAYER_CACHE;
+        return Collections.unmodifiableSet(new HashSet<>(FACTION_PLAYER_CACHE.values()));
     }
 
     public static void savePlayer(final FactionPlayer factionPlayer)
@@ -77,7 +81,7 @@ public class FactionsCache
             if (factionToUpdate != null)
             {
                 FACTIONS_CACHE.replace(factionToUpdate.getName().toLowerCase(), faction);
-                factionToUpdate.getClaims().forEach(claim -> CLAIMS_CACHE.put(claim, Optional.empty()));
+                factionToUpdate.getClaims().forEach(CLAIMS_CACHE::invalidate);
             }
             else
             {
@@ -86,7 +90,7 @@ public class FactionsCache
 
             if(!faction.getClaims().isEmpty())
             {
-                faction.getClaims().forEach(claim -> CLAIMS_CACHE.put(claim, Optional.of(faction)));
+                faction.getClaims().forEach(claim -> CLAIMS_CACHE.put(claim, faction));
             }
         }
     }
@@ -96,25 +100,24 @@ public class FactionsCache
         synchronized (FACTIONS_CACHE)
         {
             Faction faction = FACTIONS_CACHE.remove(factionName.toLowerCase());
-            faction.getClaims().forEach(claim -> CLAIMS_CACHE.put(claim, Optional.empty()));
+            faction.getClaims().forEach(CLAIMS_CACHE::invalidate);
         }
     }
 
     @Nullable
     public static Faction getFaction(final String factionName)
     {
-        final Faction optionalFaction = FACTIONS_CACHE.get(factionName.toLowerCase());
-        return optionalFaction;
+        return FACTIONS_CACHE.get(factionName.toLowerCase());
     }
 
-    public static Map<Claim, Optional<Faction>> getClaims()
+    public static Map<Claim, Faction> getClaims()
     {
-        return CLAIMS_CACHE.asMap();
+        return Collections.unmodifiableMap(CLAIMS_CACHE.asMap());
     }
 
     public static void removeClaim(final Claim claim)
     {
-        CLAIMS_CACHE.put(claim, Optional.empty());
+        CLAIMS_CACHE.invalidate(claim);
     }
 
     public static void clear()

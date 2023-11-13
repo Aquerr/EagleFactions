@@ -82,6 +82,7 @@ import io.github.aquerr.eaglefactions.commands.rank.PromoteCommand;
 import io.github.aquerr.eaglefactions.commands.rank.SetLeaderCommand;
 import io.github.aquerr.eaglefactions.commands.relation.AllyCommand;
 import io.github.aquerr.eaglefactions.commands.relation.EnemyCommand;
+import io.github.aquerr.eaglefactions.commands.relation.RelationsCommand;
 import io.github.aquerr.eaglefactions.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
@@ -91,7 +92,10 @@ import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.integrations.IntegrationManager;
 import io.github.aquerr.eaglefactions.listeners.BlockBreakListener;
 import io.github.aquerr.eaglefactions.listeners.BlockPlaceListener;
+import io.github.aquerr.eaglefactions.listeners.ChangeBlockEventListener;
 import io.github.aquerr.eaglefactions.listeners.ChatMessageListener;
+import io.github.aquerr.eaglefactions.listeners.CollideBlockEventListener;
+import io.github.aquerr.eaglefactions.listeners.CollideEntityEventListener;
 import io.github.aquerr.eaglefactions.listeners.EntityDamageListener;
 import io.github.aquerr.eaglefactions.listeners.EntitySpawnListener;
 import io.github.aquerr.eaglefactions.listeners.ExplosionListener;
@@ -300,14 +304,7 @@ public class EagleFactionsPlugin implements EagleFactions
             this.logger.info(PLUGIN_PREFIX_PLAIN + "Have a great time with Eagle Factions! :D");
             this.logger.info(PLUGIN_PREFIX_PLAIN + "==========================================");
 
-            CompletableFuture.runAsync(() ->
-            {
-                if(!VersionChecker.isLatest(PluginInfo.VERSION))
-                {
-                    this.logger.info(PLUGIN_PREFIX_PLAIN + "Hey! A new version of " + PluginInfo.NAME + " is available online!");
-                    this.logger.info("==========================================");
-                }
-            });
+            CompletableFuture.runAsync(this::checkVersionAndInform);
 
             // Reloads storage and cache.
             this.storageManager.reloadStorage();
@@ -594,7 +591,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.efPlaceholderService = new EFPlaceholderService(this);
 
-        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageFileName());
+        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageTag());
         this.messageService = EFMessageService.getInstance();
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.factionLogic, this.getConfiguration().getFactionsConfig(), this.configuration.getPowerConfig());
@@ -608,7 +605,7 @@ public class EagleFactionsPlugin implements EagleFactions
         this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
         this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
 
-        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService, this.getConfiguration().getHomeConfig());
         this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
         this.invitationManager = new InvitationManagerImpl(this.storageManager, this.factionLogic, this.playerManager, this.messageService);
         this.rankManager = new RankManagerImpl(this.factionLogic, this.storageManager);
@@ -719,6 +716,13 @@ public class EagleFactionsPlugin implements EagleFactions
                 .shortDescription(messageService.resolveComponentWithMessage("command.info.desc"))
                 .addParameter(EagleFactionsCommandParameters.optionalFaction())
                 .executor(new InfoCommand(this))
+                .build());
+
+        // Relations command
+        SUBCOMMANDS.put(Arrays.asList("rel", "relations"), Command.builder()
+                .shortDescription(messageService.resolveComponentWithMessage("command.relations.desc"))
+                .addParameter(EagleFactionsCommandParameters.optionalFaction())
+                .executor(new RelationsCommand(this))
                 .build());
 
         //Player command. Shows info about a player. (its factions etc.)
@@ -1127,6 +1131,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new EntityDamageListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerJoinListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerDeathListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new ChangeBlockEventListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new BlockPlaceListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new BlockBreakListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerInteractListener(this));
@@ -1137,6 +1142,8 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new ExplosionListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new ModifyBlockListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new NotifyNeighborBlockListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new CollideBlockEventListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new CollideEntityEventListener(this));
 
         // Chat
         if(isUltimateChatLoaded())
@@ -1165,5 +1172,20 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private boolean isUltimateChatLoaded() {
         return Sponge.pluginManager().plugin("ultimatechat").isPresent();
+    }
+
+    private void checkVersionAndInform()
+    {
+        if (!this.configuration.getVersionConfig().shouldPerformVersionCheck())
+        {
+            this.logger.info("Version check: Disabled.");
+            return;
+        }
+
+        if(!VersionChecker.getInstance().isLatest(PluginInfo.VERSION))
+        {
+            this.logger.info(PLUGIN_PREFIX_PLAIN + "Hey! A new version of " + PluginInfo.NAME + " is available online!");
+            this.logger.info("==========================================");
+        }
     }
 }

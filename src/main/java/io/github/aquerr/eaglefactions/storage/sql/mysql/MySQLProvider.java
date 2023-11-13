@@ -38,7 +38,9 @@ public class MySQLProvider extends SQLAbstractProvider
 
     public Connection getConnection() throws SQLException
     {
-        return this.dataSource.getConnection();
+        Connection connection = this.dataSource.getConnection();
+        connection.setCatalog(getDatabaseName());
+        return connection;
     }
 
     @Override

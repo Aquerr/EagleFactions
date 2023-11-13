@@ -1,15 +1,16 @@
 package io.github.aquerr.eaglefactions.util;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
-import net.kyori.adventure.identity.Identity;
-import org.spongepowered.api.Sponge;
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 
-import static net.kyori.adventure.text.Component.text;
-
-public class ModSupport
+public final class ModSupport
 {
+    private ModSupport()
+    {
+        throw new IllegalStateException();
+    }
+
     /**
      * Checks if the given class comes from TechGuns
      * @param clazz class to check
@@ -46,7 +47,7 @@ public class ModSupport
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text("Could not get 'attacker' from techguns entityDamangeSource: " + entityDamageSource.source().type().toString())));
+            EagleFactionsPlugin.getPlugin().getLogger().warn("Could not get 'attacker' from techguns entityDamangeSource: " + entityDamageSource.source().type().toString(), e);
         }
         if (attacker instanceof Entity)
             return (Entity)attacker;
@@ -77,7 +78,7 @@ public class ModSupport
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            Sponge.server().sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(text("Could not get 'owner' from mekanism entity: " + entity.type().toString())));
+            EagleFactionsPlugin.getPlugin().getLogger().warn("Could not get 'owner' from mekanism entity: " + entity.type().toString());
         }
         if (owner instanceof Entity)
             return (Entity)owner;

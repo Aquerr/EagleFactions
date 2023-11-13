@@ -1,4 +1,4 @@
 [submodule "EagleFactionsAPI"]
 	path = EagleFactionsAPI
 	url = https://github.com/Aquerr/EagleFactionsAPI.git
-	branch = api-8
+	branch = api-9

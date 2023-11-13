@@ -18,7 +18,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
@@ -29,14 +28,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
@@ -59,7 +57,14 @@ public class InfoCommand extends AbstractCommand
         final Optional<Faction> faction = context.one(EagleFactionsCommandParameters.optionalFaction());
         if (faction.isPresent())
         {
-            otherInfo(context, faction.get());
+            if (isPlayerFaction(faction.get(), context))
+            {
+                selfInfo(context, faction.get());
+            }
+            else
+            {
+                otherInfo(context, faction.get());
+            }
         }
         else
         {
@@ -70,35 +75,29 @@ public class InfoCommand extends AbstractCommand
         return CommandResult.success();
     }
 
+    private boolean isPlayerFaction(Faction faction, CommandContext context) throws CommandException
+    {
+        if (!isServerPlayer(context.cause().audience()))
+            return false;
+        Faction playerFaction = this.factionLogic.getFactionByPlayerUUID(requirePlayerSource(context).uniqueId())
+                .orElse(null);
+        return playerFaction != null && playerFaction.getName().equalsIgnoreCase(faction.getName());
+    }
+
+
     private void selfInfo(final CommandContext context, final Faction faction) throws CommandException
     {
         if (!context.hasPermission(PluginPermissions.INFO_COMMAND) && !context.hasPermission(PluginPermissions.INFO_COMMAND_SELF))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
         showFactionInfo(context, faction);
     }
-    
-    private void otherInfo(final CommandContext source, final Faction faction) throws CommandException
+
+    private void otherInfo(CommandContext context, Faction faction) throws CommandException
     {
-        if(source.hasPermission(PluginPermissions.INFO_COMMAND) || source.hasPermission(PluginPermissions.INFO_COMMAND_SELF) || source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
-        {
-            //Check permissions
-            if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_SELF)) && (source instanceof Player && this.factionLogic.getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && this.factionLogic.getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
-            {
-                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
-            }
-            else if((!source.hasPermission(PluginPermissions.INFO_COMMAND) && !source.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS)) && (source instanceof Player && this.factionLogic.getFactionByPlayerUUID(((Player) source).uniqueId()).isPresent() && !this.factionLogic.getFactionByPlayerUUID(((Player)source).uniqueId()).get().getName().equals(faction.getName())))
-            {
-                throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
-            }
-            else
-            {
-                showFactionInfo(source, faction);
-            }
-        }
-        else
-        {
+        if (!context.hasPermission(PluginPermissions.INFO_COMMAND) && !context.hasPermission(PluginPermissions.INFO_COMMAND_OTHERS))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
-        }
+
+        showFactionInfo(context, faction);
     }
 
     private void showFactionInfo(final CommandContext source, final Faction faction)
@@ -133,24 +132,6 @@ public class InfoCommand extends AbstractCommand
         	officersList = buildPlayerList(faction.getOfficers());
         }
 
-        Component trucesList = empty();
-        if(!faction.getTruces().isEmpty())
-        {
-            trucesList = buildRelationList(faction.getTruces());
-        }
-
-        Component alliancesList = empty();
-        if(!faction.getAlliances().isEmpty())
-        {
-        	alliancesList = buildRelationList(faction.getAlliances());
-        }
-
-        Component enemiesList = empty();
-        if(!faction.getEnemies().isEmpty())
-        {
-        	enemiesList = buildRelationList(faction.getEnemies());
-        }
-
         Component info = text()
                 .append(messageService.resolveComponentWithMessage("command.info.name", faction.getName())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.tag", faction.getTag())).append(newline())
@@ -160,11 +141,8 @@ public class InfoCommand extends AbstractCommand
                 .append(messageService.resolveComponentWithMessage("command.info.public", faction.isPublic())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.leader", leaderNameText.color(GOLD))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.officers", officersList.color(GOLD))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.truces", trucesList.color(GOLD))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.alliances", alliancesList.color(BLUE))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.enemies", enemiesList.color(RED))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.members", membersList.color(GREEN))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(GREEN))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(DARK_AQUA))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.power", super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + this.factionLogic.getFactionMaxClaims(faction)))
                 .build();
@@ -199,24 +177,10 @@ public class InfoCommand extends AbstractCommand
                 .collect(Collectors.toList()));
     }
 
-    private Component buildRelationList(Set<String> relations)
-    {
-         return Component.join(JoinConfiguration.separator(text(",")), relations.stream()
-                .map(this::buildClickableFactionName)
-                .collect(Collectors.toList()));
-    }
-
-    private TextComponent buildClickableFactionName(String factionName)
-    {
-        return text(factionName)
-                .hoverEvent(HoverEvent.showText(text("Click to view information about the faction", BLUE)))
-                .clickEvent(ClickEvent.runCommand("/f info " + factionName));
-    }
-
     private TextComponent buildClickablePlayerNickname(FactionPlayer factionPlayer)
     {
         return text(factionPlayer.getName())
-                .hoverEvent(HoverEvent.showText(text("Click to view information about the player", BLUE)))
+                .hoverEvent(HoverEvent.showText(messageService.resolveComponentWithMessage("command.info.click-to-view-information-about-player")))
                 .clickEvent(ClickEvent.runCommand("/f player " + factionPlayer.getName()));
     }
 }

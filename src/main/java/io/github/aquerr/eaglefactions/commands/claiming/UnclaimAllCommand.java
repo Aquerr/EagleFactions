@@ -1,7 +1,7 @@
 package io.github.aquerr.eaglefactions.commands.claiming;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
@@ -14,13 +14,13 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class UnclaimAllCommand extends AbstractCommand
 {
-    private final FactionsConfig factionsConfig;
+    private final HomeConfig homeConfig;
     private final MessageService messageService;
 
     public UnclaimAllCommand(final EagleFactions plugin)
     {
         super(plugin);
-        this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
+        this.homeConfig = plugin.getConfiguration().getHomeConfig();
         this.messageService = plugin.getMessageService();
     }
 
@@ -37,7 +37,7 @@ public class UnclaimAllCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        if(!this.factionsConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
+        if(!this.homeConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
         {
             super.getPlugin().getFactionLogic().setHome(playerFaction, null);
         }

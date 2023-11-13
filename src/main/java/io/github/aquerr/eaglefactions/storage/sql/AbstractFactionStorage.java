@@ -17,12 +17,9 @@ import io.github.aquerr.eaglefactions.storage.sql.h2.H2Provider;
 import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbProvider;
 import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLProvider;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteProvider;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.Sponge;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -67,12 +64,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public abstract class AbstractFactionStorage implements FactionStorage
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFactionStorage.class);
-
     private static final String SELECT_FACTION_NAMES = "SELECT Name FROM Factions";
     private static final String SELECT_RECRUITS_WHERE_FACTIONNAME = "SELECT RecruitUUID FROM FactionRecruits WHERE FactionName=?";
     private static final String SELECT_OFFICERS_WHERE_FACTIONNAME = "SELECT OfficerUUID FROM FactionOfficers WHERE FactionName=?";
@@ -139,17 +133,20 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
     private final FactionProtectionFlagsStorage factionProtectionFlagsStorage;
 
+    private final Logger logger;
+
     protected AbstractFactionStorage(final EagleFactions plugin,
                                      final SQLProvider sqlProvider,
                                      final FactionProtectionFlagsStorage factionProtectionFlagsStorage)
     {
         this.plugin = plugin;
+        this.logger = EagleFactionsPlugin.getPlugin().getLogger();
         this.sqlProvider = sqlProvider;
         this.factionProtectionFlagsStorage = factionProtectionFlagsStorage;
 
         if(this.sqlProvider == null)
         {
-            Sponge.server().sendMessage(Identity.nil(), Component.text("Could not establish connection to the database. Aborting...", RED));
+            EagleFactionsPlugin.getPlugin().getLogger().error("Could not establish connection to the database. Aborting...");
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
         try
@@ -166,6 +163,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     {
         final int databaseVersionNumber = getDatabaseVersion();
 
+
         //Get all .sql files
         final List<Path> filePaths = getSqlFilesPaths();
 
@@ -180,9 +178,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
                     final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                     final Connection connection = this.sqlProvider.getConnection();
-                    final Statement statement = connection.createStatement())
+                    final Statement statement = connection.createStatement()
+                    )
                 {
-                    connection.setAutoCommit(false);
                     final StringBuilder stringBuilder = new StringBuilder();
                     String line;
 
@@ -216,7 +214,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
-    private List<Path> getSqlFilesPaths() throws URISyntaxException, IOException
+    private List<Path> getSqlFilesPaths() throws IOException
     {
         final List<Path> filePaths = new ArrayList<>();
         final URI uri = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
@@ -532,8 +530,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final List<String> alliancesToRemove = existingAlliancesNames.stream().filter(alliance -> !faction.getAlliances().contains(alliance)).collect(Collectors.toList());
         final List<String> alliancesToAdd = faction.getAlliances().stream().filter(alliance -> !existingAlliancesNames.contains(alliance)).collect(Collectors.toList());
 
-        LOGGER.debug("Alliances to add: " + Arrays.toString(alliancesToAdd.toArray()));
-        LOGGER.debug("Alliances to remove: " + Arrays.toString(alliancesToRemove.toArray()));
+        logger.debug("Alliances to add: " + Arrays.toString(alliancesToAdd.toArray()));
+        logger.debug("Alliances to remove: " + Arrays.toString(alliancesToRemove.toArray()));
 
         if(!alliancesToRemove.isEmpty())
         {
@@ -570,8 +568,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final List<String> enemiesToRemove = existingEnemiesNames.stream().filter(enemy -> !faction.getEnemies().contains(enemy)).collect(Collectors.toList());
         final List<String> enemiesToAdd = faction.getEnemies().stream().filter(enemy -> !existingEnemiesNames.contains(enemy)).collect(Collectors.toList());
 
-        LOGGER.debug("Enemies to add: " + Arrays.toString(enemiesToAdd.toArray()));
-        LOGGER.debug("Enemies to remove: " + Arrays.toString(enemiesToRemove.toArray()));
+        logger.debug("Enemies to add: " + Arrays.toString(enemiesToAdd.toArray()));
+        logger.debug("Enemies to remove: " + Arrays.toString(enemiesToRemove.toArray()));
 
         if(!enemiesToRemove.isEmpty())
         {
@@ -608,8 +606,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final List<String> trucesToRemove = existingTrucesNames.stream().filter(truce -> !faction.getTruces().contains(truce)).collect(Collectors.toList());
         final List<String> trucesToAdd = faction.getTruces().stream().filter(truce -> !existingTrucesNames.contains(truce)).collect(Collectors.toList());
 
-        LOGGER.debug("Truces to add: " + Arrays.toString(trucesToAdd.toArray()));
-        LOGGER.debug("Truces to remove: " + Arrays.toString(trucesToRemove.toArray()));
+        logger.debug("Truces to add: " + Arrays.toString(trucesToAdd.toArray()));
+        logger.debug("Truces to remove: " + Arrays.toString(trucesToRemove.toArray()));
 
         if(!trucesToRemove.isEmpty())
         {
@@ -646,7 +644,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         preparedStatement.setString(1, factionName);
         preparedStatement.setString(2, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " alliances for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " alliances for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -656,7 +654,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         preparedStatement.setString(1, factionName);
         preparedStatement.setString(2, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " enemies for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " enemies for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -666,7 +664,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         preparedStatement.setString(1, factionName);
         preparedStatement.setString(2, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " truces for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " truces for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -847,7 +845,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_OFFICER_PERMS);
         preparedStatement.setString(1, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " officer perms for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " officer perms for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -856,7 +854,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_RECRUIT_PERMS);
         preparedStatement.setString(1, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " recruit perms for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " recruit perms for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -865,7 +863,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_MEMBER_PERMS);
         preparedStatement.setString(1, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " member perms for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " member perms for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -874,7 +872,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_TRUCE_PERMS);
         preparedStatement.setString(1, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " truce perms for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " truce perms for faction=" + factionName);
         preparedStatement.close();
     }
 
@@ -883,7 +881,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_ALLY_PERMS);
         preparedStatement.setString(1, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        LOGGER.debug("Deleted " + affectedRows + " ally perms for faction=" + factionName);
+        logger.debug("Deleted " + affectedRows + " ally perms for faction=" + factionName);
         preparedStatement.close();
     }
 
