@@ -29,6 +29,7 @@ public class ChatConfigImpl implements ChatConfig
 	private TextComponent nonFactionPlayerPrefix = Component.text("");
 	private boolean showFactionEnterPhrase = true;
 	private TextColor defaultTagColor = NamedTextColor.GREEN;
+	private boolean displayFactionTagsInTabList = true;
 
 	private Map<ChatEnum, Set<FactionMemberType>> visibleRanks;
 
@@ -50,6 +51,7 @@ public class ChatConfigImpl implements ChatConfig
 		this.isFactionPrefixFirstInChat = this.configuration.getBoolean(true, "faction-prefix-first-in-chat");
 		this.nonFactionPlayerPrefix = LegacyComponentSerializer.legacyAmpersand().deserialize(configuration.getString("", "non-faction-player-prefix"));
 		this.showFactionEnterPhrase = this.configuration.getBoolean(true, "show-faction-enter-phrase");
+		this.displayFactionTagsInTabList = this.configuration.getBoolean(true, "display-faction-tags-in-tablist");
 
 		this.visibleRanks = loadVisibleRanks();
 		this.defaultTagColor = TextColor.fromHexString(this.configuration.getString(NamedTextColor.GREEN.asHexString(), "default-tag-color"));
@@ -119,6 +121,12 @@ public class ChatConfigImpl implements ChatConfig
 	public Map<ChatEnum, Set<FactionMemberType>> getVisibleRanks()
 	{
 		return this.visibleRanks;
+	}
+
+	@Override
+	public boolean shouldDisplayFactionTagsInTabList()
+	{
+		return displayFactionTagsInTabList;
 	}
 
 	private Map<ChatEnum, Set<FactionMemberType>> loadVisibleRanks()

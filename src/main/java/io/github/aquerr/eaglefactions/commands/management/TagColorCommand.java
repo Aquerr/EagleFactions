@@ -4,7 +4,9 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -41,8 +43,13 @@ public class TagColorCommand extends AbstractCommand
                 && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
-        super.getPlugin().getFactionLogic().changeTagColor(playerFaction, color);
-        player.sendMessage(messageService.resolveMessageWithPrefix("command.tag-color.success"));
+        final boolean isCancelled = EventRunner.runFactionTagColorUpdateEventPre(player, playerFaction, Optional.ofNullable(playerFaction.getTag().color()).map(NamedTextColor::nearestTo).orElse(NamedTextColor.WHITE), color);
+        if (!isCancelled)
+        {
+            super.getPlugin().getFactionLogic().changeTagColor(playerFaction, color);
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.tag-color.success"));
+            EventRunner.runFactionTagColorUpdateEventPost(player, playerFaction, Optional.ofNullable(playerFaction.getTag().color()).map(NamedTextColor::nearestTo).orElse(NamedTextColor.WHITE), color);
+        }
         return CommandResult.success();
     }
 }

@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.FactionKickEvent;
 import io.github.aquerr.eaglefactions.listeners.AbstractListener;
+import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -41,5 +42,6 @@ public class FactionKickListener extends AbstractListener
 
             player.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text("Player " + kickedPlayer.getName() + " has been kicked from the faction.")));
         }
+        TabListUpdater.requestUpdate();
     }
 }

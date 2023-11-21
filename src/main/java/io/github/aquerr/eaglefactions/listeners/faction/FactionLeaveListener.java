@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionLeaveEvent;
 import io.github.aquerr.eaglefactions.listeners.AbstractListener;
+import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -39,5 +40,6 @@ public class FactionLeaveListener extends AbstractListener
                 continue;
             factionPlayer.sendMessage(PluginInfo.PLUGIN_PREFIX.append(Component.text(player.name(), GOLD)).append(Component.text(" left your faction.", AQUA)));
         }
+        TabListUpdater.requestUpdate();
     }
 }

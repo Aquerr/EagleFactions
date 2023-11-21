@@ -107,9 +107,12 @@ import io.github.aquerr.eaglefactions.listeners.PlayerInteractListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerJoinListener;
 import io.github.aquerr.eaglefactions.listeners.PlayerMoveListener;
 import io.github.aquerr.eaglefactions.listeners.SendCommandListener;
+import io.github.aquerr.eaglefactions.listeners.faction.FactionCreateListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionJoinListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionKickListener;
 import io.github.aquerr.eaglefactions.listeners.faction.FactionLeaveListener;
+import io.github.aquerr.eaglefactions.listeners.faction.FactionTagColorUpdateListener;
+import io.github.aquerr.eaglefactions.listeners.faction.FactionTagUpdateListener;
 import io.github.aquerr.eaglefactions.logic.AttackLogicImpl;
 import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.logic.PVPLoggerImpl;
@@ -129,6 +132,7 @@ import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.messaging.placeholder.parser.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
+import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
@@ -312,6 +316,7 @@ public class EagleFactionsPlugin implements EagleFactions
             initializeIntegrations();
 
             startFactionsRemover();
+            startTabListUpdater();
 
             preCreateSafeZoneAndWarZone();
         }
@@ -620,6 +625,15 @@ public class EagleFactionsPlugin implements EagleFactions
             return;
 
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new FactionRemoverTask(eagleFactions), 0, TimeUnit.SECONDS, 1, TimeUnit.HOURS);
+    }
+
+    private void startTabListUpdater()
+    {
+        EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(
+                new TabListUpdater(this.configuration, this.playerManager),
+                5, TimeUnit.SECONDS,
+                10, TimeUnit.SECONDS
+        );
     }
 
     private void registerAPI(RegisterFactoryEvent event)
@@ -1159,6 +1173,9 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionKickListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionLeaveListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionJoinListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionCreateListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionTagUpdateListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionTagColorUpdateListener(this));
     }
 
     private void disablePlugin()

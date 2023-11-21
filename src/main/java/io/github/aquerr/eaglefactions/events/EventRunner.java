@@ -5,6 +5,8 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.*;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -332,6 +334,38 @@ public final class EventRunner
         final EventContext eventContext = getEventContextForPlayer(inviter).build();
         final Cause cause = Cause.of(eventContext, inviter, faction, invited);
         final FactionInviteEvent event = new FactionInviteEventImpl.Post(inviter, invited, faction, cause);
+        return eventManager.post(event);
+    }
+
+    public static boolean runFactionTagUpdateEventPre(Player player, Faction faction, TextComponent oldTag, String newTag)
+    {
+        final EventContext eventContext = getEventContextForPlayer(player).build();
+        final Cause cause = Cause.of(eventContext, player, faction);
+        final FactionTagUpdateEvent.Pre event = new FactionTagUpdateEventImpl.Pre(player, faction, cause, oldTag, newTag);
+        return eventManager.post(event);
+    }
+
+    public static boolean runFactionTagUpdateEventPost(Player player, Faction faction, TextComponent oldTag, String newTag)
+    {
+        final EventContext eventContext = getEventContextForPlayer(player).build();
+        final Cause cause = Cause.of(eventContext, player, faction);
+        final FactionTagUpdateEvent.Post event = new FactionTagUpdateEventImpl.Post(player, faction, cause, oldTag, newTag);
+        return eventManager.post(event);
+    }
+
+    public static boolean runFactionTagColorUpdateEventPre(Player player, Faction faction, NamedTextColor oldColor, NamedTextColor newColor)
+    {
+        final EventContext eventContext = getEventContextForPlayer(player).build();
+        final Cause cause = Cause.of(eventContext, player, faction);
+        final FactionTagColorUpdateEvent.Pre event = new FactionTagColorUpdateEventImpl.Pre(player, faction, cause, oldColor, newColor);
+        return eventManager.post(event);
+    }
+
+    public static boolean runFactionTagColorUpdateEventPost(Player player, Faction faction, NamedTextColor oldColor, NamedTextColor newColor)
+    {
+        final EventContext eventContext = getEventContextForPlayer(player).build();
+        final Cause cause = Cause.of(eventContext, player, faction);
+        final FactionTagColorUpdateEvent.Post event = new FactionTagColorUpdateEventImpl.Post(player, faction, cause, oldColor, newColor);
         return eventManager.post(event);
     }
 

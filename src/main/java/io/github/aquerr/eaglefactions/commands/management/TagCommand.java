@@ -6,6 +6,8 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.validator.AlphaNumericFactionNameTagValidator;
+import io.github.aquerr.eaglefactions.events.EventRunner;
+import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -50,8 +52,15 @@ public class TagCommand extends AbstractCommand
             throw messageService.resolveExceptionWithMessage("error.command.create.tag-too-short", this.factionsConfig.getMinTagLength());
 
         //Change tag function
-        super.getPlugin().getFactionLogic().changeTag(faction, newFactionTag);
-        player.sendMessage(messageService.resolveMessageWithPrefix("command.tag.success"));
+
+        final TextComponent oldTag = faction.getTag();
+        final boolean isCancelled = EventRunner.runFactionTagUpdateEventPre(player, faction, oldTag, newFactionTag);
+        if (!isCancelled)
+        {
+            super.getPlugin().getFactionLogic().changeTag(faction, newFactionTag);
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.tag.success"));
+            EventRunner.runFactionTagUpdateEventPost(player, faction, oldTag, newFactionTag);
+        }
         return CommandResult.success();
     }
 }
