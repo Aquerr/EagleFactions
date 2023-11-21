@@ -53,7 +53,7 @@ public class HelpCommand extends AbstractCommand
                     .append(Component.empty()
                             .append(Component.text(" - ").append(command.getValue().shortDescription(CommandCause.create()).get().append(Component.newline())).color(WHITE)))
                     .append(Component.empty()
-                            .append(messageService.resolveComponentWithMessage("command.help.usage").append(Component.text(" /f " + String.join(", ", command.getKey()) + " " + getParameters(command.getValue())))));
+                            .append(messageService.resolveComponentWithMessage("command.help.usage", Component.text("/f " + String.join(", ", command.getKey()) + " " + getParameters(command.getValue())))));
             helpList.add(commandHelp);
         }
 
