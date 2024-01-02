@@ -48,7 +48,7 @@ public abstract class AbstractListener
 
     protected void printDebugMessageForUser(@Nullable User user, LocatableBlock locatableBlock, ServerLocation serverLocation, Event event)
     {
-        logDebug(event.toString());
+        logDebug(event);
 
         if (user == null)
             return;
@@ -73,7 +73,7 @@ public abstract class AbstractListener
 
     protected void printDebugMessageForUser(@Nullable User user, BlockSnapshot blockSnapshot, Event event)
     {
-        logDebug(event.toString());
+        logDebug(event);
 
         if (user == null)
             return;
@@ -97,10 +97,10 @@ public abstract class AbstractListener
         return event.cause().containsType(CommandBlock.class);
     }
 
-    protected void logDebug(String message)
+    protected void logDebug(Event event)
     {
         Logger logger = EagleFactionsPlugin.getPlugin().getLogger();
         if (EagleFactionsPlugin.getPlugin().getLogger().isDebugEnabled())
-            logger.debug(getClass().getName() + ": " + message);
+            logger.debug(getClass().getName() + ": " + event.toString());
     }
 }
