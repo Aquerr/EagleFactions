@@ -3,7 +3,6 @@ package io.github.aquerr.eaglefactions.listeners;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
-import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.entity.CommandBlock;
@@ -99,8 +98,14 @@ public abstract class AbstractListener
 
     protected void logDebug(Event event)
     {
-        Logger logger = EagleFactionsPlugin.getPlugin().getLogger();
-        if (EagleFactionsPlugin.getPlugin().getLogger().isDebugEnabled())
-            logger.debug(getClass().getName() + ": " + event.toString());
+        if (isDebugEnabled())
+        {
+            EagleFactionsPlugin.getPlugin().getLogger().debug(getClass().getName() + ": " + event.source());
+        }
+    }
+
+    protected boolean isDebugEnabled()
+    {
+        return !EagleFactionsPlugin.DEBUG_MODE_PLAYERS.isEmpty();
     }
 }
