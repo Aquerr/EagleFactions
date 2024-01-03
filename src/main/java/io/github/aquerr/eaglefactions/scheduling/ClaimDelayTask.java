@@ -63,8 +63,6 @@ public class ClaimDelayTask implements EagleFactionsConsumerTask<ScheduledTask>
                 boolean didSucceed = this.factionLogic.addClaimByItems(player, optionalFaction.get(), player.world().uniqueId(), chunkPosition);
                 if(didSucceed)
                     player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
-                else
-                    player.sendMessage(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources"));
             }
             else
             {

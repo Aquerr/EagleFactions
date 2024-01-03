@@ -4,12 +4,13 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +36,8 @@ public class ItemUtil
     }
 
     /**
-     * Converts a map that contains mappings between items ids (String) and amount (Integer).
-     * Example mapping: minecraft:wool:1 --> 25
+     * Converts a map that contains mappings between items ids (String) and quantity (Integer).
+     * Example mapping: minecraft:orange_wool --> 25
      *
      * @param items to convert
      * @return list of itemstacks.
@@ -44,33 +45,22 @@ public class ItemUtil
     public static List<ItemStack> convertToItemStackList(final Map<String, Integer> items)
     {
         final List<ItemStack> itemStacks = new ArrayList<>(items.size());
-        for (String requiredItem : items.keySet())
+        for (Map.Entry<String, Integer> itemEntry : items.entrySet())
         {
-            final String[] idAndVariant = requiredItem.split(":");
-            final String itemId = idAndVariant[0] + ":" + idAndVariant[1];
-            //TODO: To fix
-            final Optional<ItemType> itemType = Optional.empty();
-//            final Optional<ItemType> itemType = Sponge.server().reg(ItemType.class, itemId);
+            final String itemId = itemEntry.getKey();
+            final int quantity = itemEntry.getValue();
+            final Optional<ItemType> itemType = RegistryTypes.ITEM_TYPE.get().findValue(ResourceKey.resolve(itemId));
 
-            if (!itemType.isPresent())
+            if (itemType.isEmpty())
             {
                 LOGGER.warn("ItemType has not been found for id = " + itemId);
                 continue;
             }
 
             ItemStack itemStack = ItemStack.builder()
-                    .itemType(itemType.get()).build();
-            itemStack.setQuantity(items.get(requiredItem));
-
-            if (idAndVariant.length == 3)
-            {
-                if (itemType.get().block().isPresent())
-                {
-                    final int variant = Integer.parseInt(idAndVariant[2]);
-                    final BlockState blockState = (BlockState) itemType.get().block().get().validStates().toArray()[variant];
-                    itemStack = ItemStack.builder().fromBlockState(blockState).build();
-                }
-            }
+                    .itemType(itemType.get())
+                    .quantity(quantity)
+                    .build();
 
             itemStacks.add(itemStack);
         }

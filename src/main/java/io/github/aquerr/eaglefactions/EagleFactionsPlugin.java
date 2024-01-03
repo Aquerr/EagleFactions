@@ -691,7 +691,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("invite"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.invite.desc"))
                 .permission(PluginPermissions.INVITE_COMMAND)
-                .addParameter(Parameter.player().key("player").build())
+                .addParameter(CommonParameters.PLAYER)
                 .executor(new InviteCommand(this))
                 .build());
 
@@ -699,7 +699,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("kick"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.kick.desc"))
                 .permission(PluginPermissions.KICK_COMMAND)
-                .addParameter(Parameter.player().key("player").build())
+                .addParameter(EagleFactionsCommandParameters.factionPlayer())
                 .executor(new KickCommand(this))
                 .build());
 
@@ -893,7 +893,7 @@ public class EagleFactionsPlugin implements EagleFactions
                 .shortDescription(messageService.resolveComponentWithMessage("command.set-faction.desc"))
                 .permission(PluginPermissions.SET_FACTION_COMMAND)
                 .addParameters(CommonParameters.PLAYER,
-                        EagleFactionsCommandParameters.optionalFaction(),
+                        EagleFactionsCommandParameters.faction(),
                         Parameter.enumValue(FactionMemberType.class).key("rank").build())
                 .executor(new SetFactionCommand(this))
                 .build());
@@ -902,7 +902,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setpower"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.set-power.desc"))
                 .permission(PluginPermissions.SET_POWER_COMMAND)
-                .addParameters(Parameter.player().key("player").build(),
+                .addParameters(CommonParameters.PLAYER,
                         Parameter.doubleNumber().key("power").build())
                 .executor(new SetPowerCommand(this))
                 .build());
@@ -911,7 +911,7 @@ public class EagleFactionsPlugin implements EagleFactions
         SUBCOMMANDS.put(Collections.singletonList("setmaxpower"), Command.builder()
                 .shortDescription(messageService.resolveComponentWithMessage("command.set-max-power.desc"))
                 .permission(PluginPermissions.MAX_POWER_COMMAND)
-                .addParameters(Parameter.player().key("player").build(),
+                .addParameters(CommonParameters.PLAYER,
                         Parameter.doubleNumber().key("power").build())
                 .executor(new SetMaxPowerCommand(this))
                 .build());

@@ -84,12 +84,12 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.shouldDelayClaim = this.configuration.getBoolean(false, "delayed-claim", "toggled");
 		this.claimDelay = this.configuration.getInt(10, "delayed-claim", "claiming-time");
 		this.claimByItems = this.configuration.getBoolean(false, "claiming-by-items", "toggled");
-		this.requiredItemsToClaim = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20", "minecraft:iron_ingot|4"), "claiming-by-items", "items"));
+		this.requiredItemsToClaim = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20", "minecraft:iron_ingot|4"), "claiming-by-items", "items"));
 
 		this.canUseFactionChest = this.configuration.getBoolean(true, "faction-chest");
 
 		this.factionCreationByItems = this.configuration.getBoolean(false, "creating-by-items", "toggled");
-		this.requiredItemsToCreateFaction = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:wool:1|35", "minecraft:planks|20"), "creating-by-items", "items"));
+		this.requiredItemsToCreateFaction = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20"), "creating-by-items", "items"));
 
 		this.blockEnteringOfflineFactions = this.configuration.getBoolean(true, "block-entering-faction-while-offline");
 		this.blockEnteringSafezoneFromWarzone = this.configuration.getBoolean(false, "block-safezone-from-warzone");

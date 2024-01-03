@@ -158,7 +158,7 @@ public class HomeCommand extends AbstractCommand
     private void teleportHome(ServerPlayer player, FactionHome factionHome)
     {
         if (this.homeConfig.getHomeDelayTime() == 0
-//                || player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_NO_DELAY)
+                || player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_NO_DELAY)
         )
         {
             teleport(player, factionHome);

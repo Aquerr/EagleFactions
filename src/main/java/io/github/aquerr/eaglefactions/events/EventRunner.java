@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.events.*;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -16,10 +17,12 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
- * An util class used for running Eagle Factions events.
+ * A util class used for running Eagle Factions events.
  */
 public final class EventRunner
 {
@@ -217,7 +220,7 @@ public final class EventRunner
         return eventManager.post(event);
     }
 
-    public static boolean runFactionDisbandEventPre(final Object source, final Faction playerFaction, final boolean forceRemovedByAdmin, final boolean removedDueToInactiviy)
+    public static boolean runFactionDisbandEventPre(final Object source, final Faction playerFaction, final boolean forceRemovedByAdmin, final boolean removedDueToInactivity)
     {
         // Some special code here... because DisbandEvent can also be fired by FactionsRemover.
         // TODO: Maybe it can be written better?
@@ -242,11 +245,11 @@ public final class EventRunner
 
         if (source instanceof Player)
         {
-            event = new FactionDisbandEventImpl.Pre((Player)source, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
+            event = new FactionDisbandEventImpl.Pre((Player)source, playerFaction, forceRemovedByAdmin, removedDueToInactivity, cause);
         }
         else
         {
-            event = new FactionDisbandEventImpl.Pre(null, playerFaction, forceRemovedByAdmin, removedDueToInactiviy, cause);
+            event = new FactionDisbandEventImpl.Pre(null, playerFaction, forceRemovedByAdmin, removedDueToInactivity, cause);
         }
         return eventManager.post(event);
     }
@@ -285,38 +288,78 @@ public final class EventRunner
         return eventManager.post(event);
     }
 
-    public static boolean runFactionDemoteEventPre(final Player demotedBy, final FactionPlayer demotedPlayer, final Faction faction)
+    public static boolean runFactionDemoteEventPre(@Nullable final Player demotedBy, final FactionPlayer demotedPlayer, final Faction faction)
     {
-        EventContext eventContext = EventContext.builder().build();
+        final EventContext eventContext = Optional.ofNullable(demotedBy)
+                .map(EventRunner::getEventContextForPlayer)
+                .map(EventContext.Builder::build)
+                .orElse(defaultEventContext().build());
+
+        List<Object> causes = new ArrayList<>();
         if (demotedBy != null)
         {
-            eventContext = getEventContextForPlayer(demotedBy).build();
+            causes.add(demotedBy);
         }
-        final Cause cause = Cause.of(eventContext, demotedBy, faction, demotedPlayer);
-        final FactionDemoteEvent.Pre event = new FactionDemoteEventImpl.Pre(faction, (Player)demotedBy, demotedPlayer, cause);
+        causes.add(faction);
+        causes.add(demotedPlayer);
+        final Cause cause = Cause.of(eventContext, causes);
+        final FactionDemoteEvent.Pre event = new FactionDemoteEventImpl.Pre(faction, demotedBy, demotedPlayer, cause);
         return eventManager.post(event);
     }
 
-    public static boolean runFactionDemoteEventPost(final Player demotedBy, final FactionPlayer demotedPlayer, final FactionMemberType demotedTo, final Faction faction)
+    public static boolean runFactionDemoteEventPost(@Nullable final Player demotedBy, final FactionPlayer demotedPlayer, final FactionMemberType demotedTo, final Faction faction)
     {
-        final EventContext eventContext = getEventContextForPlayer(demotedBy).build();
-        final Cause cause = Cause.of(eventContext, demotedBy, faction, demotedPlayer);
+        final EventContext eventContext = Optional.ofNullable(demotedBy)
+                .map(EventRunner::getEventContextForPlayer)
+                .map(EventContext.Builder::build)
+                .orElse(defaultEventContext().build());
+
+        List<Object> causes = new ArrayList<>();
+        if (demotedBy != null)
+        {
+            causes.add(demotedBy);
+        }
+        causes.add(faction);
+        causes.add(demotedPlayer);
+        final Cause cause = Cause.of(eventContext, causes);
         final FactionDemoteEvent event = new FactionDemoteEventImpl.Post(faction, demotedBy, demotedPlayer, demotedTo, cause);
         return eventManager.post(event);
     }
 
-    public static boolean runFactionPromoteEventPre(final Player promotedBy, final FactionPlayer promotedPlayer, final Faction faction)
+    public static boolean runFactionPromoteEventPre(@Nullable final Player promotedBy, final FactionPlayer promotedPlayer, final Faction faction)
     {
-        final EventContext eventContext = getEventContextForPlayer(promotedBy).build();
-        final Cause cause = Cause.of(eventContext, promotedBy, faction, promotedPlayer);
+        final EventContext eventContext = Optional.ofNullable(promotedBy)
+                .map(EventRunner::getEventContextForPlayer)
+                .map(EventContext.Builder::build)
+                .orElse(defaultEventContext().build());
+
+        List<Object> causes = new ArrayList<>();
+        if (promotedBy != null)
+        {
+            causes.add(promotedBy);
+        }
+        causes.add(faction);
+        causes.add(promotedPlayer);
+        final Cause cause = Cause.of(eventContext, causes);
         final FactionPromoteEvent.Pre event = new FactionPromoteEventImpl.Pre(promotedBy, promotedPlayer, faction, cause);
         return eventManager.post(event);
     }
 
-    public static boolean runFactionPromoteEventPost(final Player promotedBy, final FactionPlayer promotedPlayer, final FactionMemberType promotedToRank, final Faction faction)
+    public static boolean runFactionPromoteEventPost(@Nullable final Player promotedBy, final FactionPlayer promotedPlayer, final FactionMemberType promotedToRank, final Faction faction)
     {
-        final EventContext eventContext = getEventContextForPlayer(promotedBy).build();
-        final Cause cause = Cause.of(eventContext, promotedBy, faction, promotedPlayer);
+        final EventContext eventContext = Optional.ofNullable(promotedBy)
+                .map(EventRunner::getEventContextForPlayer)
+                .map(EventContext.Builder::build)
+                .orElse(defaultEventContext().build());
+
+        List<Object> causes = new ArrayList<>();
+        if (promotedBy != null)
+        {
+            causes.add(promotedBy);
+        }
+        causes.add(faction);
+        causes.add(promotedPlayer);
+        final Cause cause = Cause.of(eventContext, causes);
         final FactionPromoteEvent event = new FactionPromoteEventImpl.Post(promotedBy, promotedPlayer, faction, promotedToRank, cause);
         return eventManager.post(event);
     }
@@ -374,6 +417,12 @@ public final class EventRunner
         return EventContext.builder()
                 .add(EventContextKeys.AUDIENCE, player)
                 .add(EventContextKeys.PLAYER, player)
-                .add(EventContextKeys.CREATOR, player.uniqueId());
+                .add(EventContextKeys.CREATOR, player.uniqueId())
+                .add(EventContextKeys.PLUGIN, EagleFactionsPlugin.getPlugin().getPluginContainer());
+    }
+
+    private static EventContext.Builder defaultEventContext() {
+        return EventContext.builder()
+                .add(EventContextKeys.PLUGIN, EagleFactionsPlugin.getPlugin().getPluginContainer());
     }
 }

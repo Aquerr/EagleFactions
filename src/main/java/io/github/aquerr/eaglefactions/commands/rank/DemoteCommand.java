@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.rank;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
@@ -20,12 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
-/**
- * Created by Aquerr on 2018-06-24.
- */
 public class DemoteCommand extends AbstractCommand
 {
     private final MessageService messageService;
@@ -40,72 +33,70 @@ public class DemoteCommand extends AbstractCommand
     public CommandResult execute(final CommandContext context) throws CommandException
     {
         final FactionPlayer demotedPlayer = context.requireOne(EagleFactionsCommandParameters.factionPlayer());
+        final Faction demotedPlayerFaction = demotedPlayer.getFaction()
+                .orElseThrow(() -> messageService.resolveExceptionWithMessage("error.general.player-is-not-in-faction"));
 
         if(!isServerPlayer(context.cause().audience()))
-            return demoteByConsole(context.cause().audience(), demotedPlayer);
+            return demoteByConsole(context.cause().audience(), demotedPlayer, demotedPlayerFaction);
 
         ServerPlayer sourcePlayer = requirePlayerSource(context);
         final Faction playerFaction = requirePlayerFaction(sourcePlayer);
-        super.getPlugin().getFactionLogic().getFactionByPlayerUUID(demotedPlayer.getUniqueId())
-                .filter(faction -> faction.getName().equals(playerFaction.getName()))
-                .orElseThrow(() -> messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction"));
-
+        if (!isSameFaction(demotedPlayerFaction, playerFaction))
+        {
+            throw messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction");
+        }
         return tryDemotePlayer(playerFaction, sourcePlayer, demotedPlayer);
     }
 
-    private CommandResult tryDemotePlayer(final Faction faction, final ServerPlayer sourcePlayer, final FactionPlayer targetPlayer) throws CommandException
+    private boolean isSameFaction(Faction faction1, Faction faction2)
+    {
+        return faction1 != null
+                && faction2 != null
+                && faction1.getName().equals(faction2.getName());
+    }
+
+    private CommandResult tryDemotePlayer(final Faction faction, final ServerPlayer sourcePlayer, final FactionPlayer demotedPlayer) throws CommandException
     {
         final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(sourcePlayer.user());
         final FactionMemberType sourcePlayerMemberType = faction.getPlayerMemberType(sourcePlayer.uniqueId());
-        final FactionMemberType targetPlayerMemberType = targetPlayer.getFactionRole();
+        final FactionMemberType currentRole = demotedPlayer.getFactionRole();
 
         if (hasAdminMode)
         {
-            if (targetPlayerMemberType == FactionMemberType.RECRUIT)
+            if (currentRole == FactionMemberType.RECRUIT)
                 throw messageService.resolveExceptionWithMessage("error.command.demote.you-cant-demote-this-player-more");
 
-            else if (targetPlayerMemberType == FactionMemberType.LEADER)
+            else if (currentRole == FactionMemberType.LEADER)
             {
-                super.getPlugin().getRankManager().setLeader(null, faction);
-                sourcePlayer.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", targetPlayer.getName(), messageService.resolveComponentWithMessage("rank.officer")));
-                return CommandResult.success();
+                return demoteLeader(sourcePlayer, demotedPlayer, faction);
             }
 
-            return demotePlayer(sourcePlayer, targetPlayer);
+            return demotePlayer(sourcePlayer, demotedPlayer);
         }
 
         List<FactionMemberType> demotableRoles = getDemotableRolesForRole(sourcePlayerMemberType);
-        if (!demotableRoles.contains(targetPlayerMemberType))
+        if (!demotableRoles.contains(currentRole))
             throw messageService.resolveExceptionWithMessage("error.command.demote.you-cant-demote-this-player-more");
 
-        return demotePlayer(sourcePlayer, targetPlayer);
+        return demotePlayer(sourcePlayer, demotedPlayer);
     }
 
-    private CommandResult demoteByConsole(final Audience audience, final FactionPlayer demotedPlayer) throws CommandException
+    private CommandResult demoteByConsole(final Audience audience, final FactionPlayer demotedPlayer, final Faction demotedPlayerFaction) throws CommandException
     {
-        final Faction faction = demotedPlayer.getFaction()
-                .orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(text("This player is not in a faction.", RED))));
+        FactionMemberType currentRole = demotedPlayer.getFactionRole();
 
-        FactionMemberType targetPlayerRole = demotedPlayer.getFactionRole();
-
-        if (targetPlayerRole == FactionMemberType.LEADER)
+        if (currentRole == FactionMemberType.LEADER)
         {
-            super.getPlugin().getRankManager().setLeader(null, faction);
-            audience.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), messageService.resolveComponentWithMessage("rank.officer")));
-            return CommandResult.success();
+            return demoteLeader(audience, demotedPlayer, demotedPlayerFaction);
         }
 
-        if (targetPlayerRole == FactionMemberType.RECRUIT)
+        if (currentRole == FactionMemberType.RECRUIT)
             throw messageService.resolveExceptionWithMessage("error.command.demote.you-cant-demote-this-player-more");
 
-        FactionMemberType oldRank = demotedPlayer.getFactionRole();
-        FactionMemberType demotedTo = null;
         try
         {
-            demotedTo = super.getPlugin().getRankManager().demotePlayer(null, demotedPlayer);
-            if (oldRank != demotedTo) {
-                audience.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), demotedTo.name()));
-            }
+            final FactionMemberType demotedTo = super.getPlugin().getRankManager().demotePlayer(null, demotedPlayer);
+            audience.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), demotedTo.name()));
         }
         catch (PlayerNotInFactionException ignored)
         {
@@ -115,15 +106,21 @@ public class DemoteCommand extends AbstractCommand
 
     private CommandResult demotePlayer(final ServerPlayer demotedBy, final FactionPlayer demotedPlayer)
     {
-        final FactionMemberType demotedTo;
         try
         {
-            demotedTo = getPlugin().getRankManager().demotePlayer(demotedBy, demotedPlayer);
+            final FactionMemberType demotedTo = getPlugin().getRankManager().demotePlayer(demotedBy, demotedPlayer);
             demotedBy.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), demotedTo.name()));
         }
         catch (PlayerNotInFactionException ignored)
         {
         }
+        return CommandResult.success();
+    }
+
+    private CommandResult demoteLeader(Audience context, FactionPlayer demotedPlayer, Faction promotedPlayerFaction)
+    {
+        super.getPlugin().getRankManager().setLeader(null, promotedPlayerFaction);
+        context.sendMessage(messageService.resolveMessageWithPrefix("command.demote.you-demoted-player-to-rank", demotedPlayer.getName(), messageService.resolveComponentWithMessage("rank.officer")));
         return CommandResult.success();
     }
 

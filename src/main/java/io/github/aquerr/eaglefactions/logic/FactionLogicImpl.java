@@ -310,7 +310,7 @@ public class FactionLogicImpl implements FactionLogic
                     }
                     else
                     {
-                        leaveFaction(playerUUID, factionName);
+                        leaveFaction(playerUUID, faction.getName());
                     }
                 });
 
@@ -823,8 +823,6 @@ public class FactionLogicImpl implements FactionLogic
                 boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunkPosition);
                 if(didSucceed)
                     player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
-                else
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources")));
             }
             else
             {
@@ -851,7 +849,7 @@ public class FactionLogicImpl implements FactionLogic
         }
         catch (RequiredItemsNotFoundException e)
         {
-            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources", e.buildAllRequiredItemsMessage())));
+            player.sendMessage(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources", e.buildAllRequiredItemsMessage()));
             return false;
         }
     }

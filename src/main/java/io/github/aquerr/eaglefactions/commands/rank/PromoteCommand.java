@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.commands.rank;
 
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
@@ -20,12 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
-/**
- * Created by Aquerr on 2018-06-24.
- */
 public class PromoteCommand extends AbstractCommand
 {
     private final MessageService messageService;
@@ -40,17 +33,26 @@ public class PromoteCommand extends AbstractCommand
     public CommandResult execute(final CommandContext context) throws CommandException
     {
         final FactionPlayer promotedPlayer = context.requireOne(EagleFactionsCommandParameters.factionPlayer());
+        final Faction promotedPlayerFaction = promotedPlayer.getFaction()
+                .orElseThrow(() -> messageService.resolveExceptionWithMessage("error.general.player-is-not-in-faction"));
 
         if(!isServerPlayer(context.cause().audience()))
-            return promoteByConsole(context.cause().audience(), promotedPlayer);
+            return promoteByConsole(context.cause().audience(), promotedPlayer, promotedPlayerFaction);
 
         final ServerPlayer sourcePlayer = requirePlayerSource(context);
         final Faction playerFaction = requirePlayerFaction(sourcePlayer);
-        promotedPlayer.getFaction()
-                .filter(faction -> faction.getName().equals(playerFaction.getName()))
-                .orElseThrow(() -> messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction"));
-
+        if (!isSameFaction(promotedPlayerFaction, playerFaction))
+        {
+            throw messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction");
+        }
         return tryPromotePlayer(playerFaction, sourcePlayer, promotedPlayer);
+    }
+
+    private boolean isSameFaction(Faction faction1, Faction faction2)
+    {
+        return faction1 != null
+                && faction2 != null
+                && faction1.getName().equals(faction2.getName());
     }
 
     private CommandResult tryPromotePlayer(final Faction faction, final ServerPlayer sourcePlayer, final FactionPlayer targetPlayer) throws CommandException
@@ -63,9 +65,7 @@ public class PromoteCommand extends AbstractCommand
         {
             if (targetPlayerMemberType == FactionMemberType.OFFICER)
             {
-                super.getPlugin().getRankManager().setLeader(targetPlayer, faction);
-                sourcePlayer.sendMessage(messageService.resolveMessageWithPrefix("command.promote.you-promoted-player-to-rank", targetPlayer.getName(), messageService.resolveComponentWithMessage("rank.leader")));
-                return CommandResult.success();
+                return setAsLeader(sourcePlayer, targetPlayer, faction);
             }
 
             if (targetPlayerMemberType == FactionMemberType.LEADER)
@@ -81,25 +81,23 @@ public class PromoteCommand extends AbstractCommand
         return promotePlayer(sourcePlayer, targetPlayer);
     }
 
-    private CommandResult promoteByConsole(final Audience context, final FactionPlayer promotedPlayer) throws CommandException
+    private CommandResult promoteByConsole(final Audience audience, final FactionPlayer promotedPlayer, final Faction promotedPlayerFaction) throws CommandException
     {
-        final Faction faction = promotedPlayer.getFaction().orElseThrow(() -> new CommandException(PluginInfo.ERROR_PREFIX.append(text("This player is not in a faction.", RED))));
-        FactionMemberType targetPlayerRole = promotedPlayer.getFactionRole();
-        if (targetPlayerRole == FactionMemberType.OFFICER)
+        FactionMemberType currentRole = promotedPlayer.getFactionRole();
+        if (currentRole == FactionMemberType.OFFICER)
         {
-            super.getPlugin().getRankManager().setLeader(promotedPlayer, faction);
-            context.sendMessage(messageService.resolveMessageWithPrefix("command.promote.you-promoted-player-to-rank", promotedPlayer.getName(), messageService.resolveComponentWithMessage("rank.leader")));
-            return CommandResult.success();
+            return setAsLeader(audience, promotedPlayer, promotedPlayerFaction);
         }
 
-        if (targetPlayerRole == FactionMemberType.LEADER)
+        if (currentRole == FactionMemberType.LEADER)
+        {
             throw messageService.resolveExceptionWithMessage("error.command.promote.you-cant-promote-this-player-more");
+        }
 
-        final FactionMemberType promotedTo;
         try
         {
-            promotedTo = super.getPlugin().getRankManager().promotePlayer(null, promotedPlayer);
-            context.sendMessage(messageService.resolveMessageWithPrefix("command.promote.you-promoted-player-to-rank", promotedPlayer.getName(), promotedTo.name()));
+            final FactionMemberType promotedTo = super.getPlugin().getRankManager().promotePlayer(null, promotedPlayer);
+            audience.sendMessage(messageService.resolveMessageWithPrefix("command.promote.you-promoted-player-to-rank", promotedPlayer.getName(), promotedTo.name()));
         }
         catch (PlayerNotInFactionException ignored)
         {
@@ -107,12 +105,18 @@ public class PromoteCommand extends AbstractCommand
         return CommandResult.success();
     }
 
+    private CommandResult setAsLeader(Audience audience, FactionPlayer promotedPlayer, Faction promotedPlayerFaction)
+    {
+        super.getPlugin().getRankManager().setLeader(promotedPlayer, promotedPlayerFaction);
+        audience.sendMessage(messageService.resolveMessageWithPrefix("command.promote.you-promoted-player-to-rank", promotedPlayer.getName(), messageService.resolveComponentWithMessage("rank.leader")));
+        return CommandResult.success();
+    }
+
     private CommandResult promotePlayer(final ServerPlayer promotedBy, final FactionPlayer promotedPlayer)
     {
-        final FactionMemberType promotedTo;
         try
         {
-            promotedTo = getPlugin().getRankManager().promotePlayer(promotedBy, promotedPlayer);
+            final FactionMemberType promotedTo = getPlugin().getRankManager().promotePlayer(promotedBy, promotedPlayer);
             promotedBy.sendMessage(messageService.resolveMessageWithPrefix("command.promote.you-promoted-player-to-rank", promotedPlayer.getName(), promotedTo.name()));
         }
         catch (PlayerNotInFactionException ignored)

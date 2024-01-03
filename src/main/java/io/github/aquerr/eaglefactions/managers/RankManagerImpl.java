@@ -12,7 +12,9 @@ import io.github.aquerr.eaglefactions.events.EventRunner;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

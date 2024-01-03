@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -48,7 +49,11 @@ public class SetLeaderCommand extends AbstractCommand
 
             super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);
             player.sendMessage(messageService.resolveMessageWithPrefix("command.set-leader.you-set-player-as-your-new-leader", newLeaderPlayer.getName()));
+            return CommandResult.success();
         }
-        return CommandResult.success();
+        else
+        {
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
+        }
     }
 }
