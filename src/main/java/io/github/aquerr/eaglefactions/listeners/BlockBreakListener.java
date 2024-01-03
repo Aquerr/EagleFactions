@@ -31,9 +31,8 @@ public class BlockBreakListener extends AbstractListener
         {
             if (isPlayerBreak || blockTransaction.operation() == Operations.BREAK.get() && (shouldCancelEvent(event, blockTransaction)))
             {
-                    event.setCancelled(true);
-                    return;
-
+                event.setCancelled(true);
+                return;
             }
         }
     }

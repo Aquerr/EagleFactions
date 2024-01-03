@@ -94,7 +94,14 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private ProtectionResult canInteractWithBlock(final ServerLocation location, final User user)
     {
+        if (location == null)
+        {
+            EagleFactionsPlugin.getPlugin().printInfo("Broken BlockSnapshot does not contain a location. This is not normal.");
+            return forbidden();
+        }
+
         String blockId = location.blockType().key(RegistryTypes.BLOCK_TYPE).asString();
+
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.uniqueId()))
         {
             if(user instanceof ServerPlayer)
@@ -220,6 +227,9 @@ public class ProtectionManagerImpl implements ProtectionManager
 
     private ProtectionResult canUseItem(final ServerLocation location, final User user, final ItemStackSnapshot usedItem)
     {
+        if (usedItem.type() == ItemTypes.AIR.get())
+            return ok();
+
         String itemId = usedItem.type().key(RegistryTypes.ITEM_TYPE).asString();
 
         if(EagleFactionsPlugin.DEBUG_MODE_PLAYERS.contains(user.uniqueId()))

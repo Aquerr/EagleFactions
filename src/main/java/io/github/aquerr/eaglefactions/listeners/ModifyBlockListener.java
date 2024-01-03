@@ -91,7 +91,7 @@ public class ModifyBlockListener extends AbstractListener
         }
         else
         {
-            return !this.protectionManager.canPlace(blockTransaction.finalReplacement(), user, true).hasAccess();
+            return !this.protectionManager.canInteractWithBlock(blockTransaction.finalReplacement().location().orElse(null), user, true).hasAccess();
         }
     }
 }

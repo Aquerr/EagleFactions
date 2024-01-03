@@ -70,9 +70,8 @@ public class NotifyNeighborBlockListener extends AbstractListener
 			final NotificationTicket notificationTicket = notificationTicketIterator.next();
 			final ServerLocation blockLocation = notificationTicket.target().location().orElse(null);
 			if (blockLocation != null && (!super.getPlugin().getProtectionManager().canInteractWithBlock(blockLocation, user, false).hasAccess()))
-				{
+			{
 					notificationTicketIterator.remove();
-
 			}
 		}
 	}
