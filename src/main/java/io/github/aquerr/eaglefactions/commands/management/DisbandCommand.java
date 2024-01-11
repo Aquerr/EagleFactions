@@ -78,7 +78,7 @@ public class DisbandCommand extends AbstractCommand
         if(!isCancelled)
         {
             super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
-            audience.sendMessage(Identity.nil(), messageService.resolveMessageWithPrefix("command.disband.success"));
+            audience.sendMessage(messageService.resolveMessageWithPrefix("command.disband.success"));
             clearAutoClaimAndChatForFactionMembers(faction);
             EventRunner.runFactionDisbandEventPost(audience, faction, forceRemovedByAdmin, false);
         }

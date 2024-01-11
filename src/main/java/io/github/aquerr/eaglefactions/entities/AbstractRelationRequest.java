@@ -1,40 +1,28 @@
 package io.github.aquerr.eaglefactions.entities;
 
-import java.util.Objects;
+import io.github.aquerr.eaglefactions.api.entities.AcceptableInvite;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 
-public abstract class AbstractRelationRequest
+public abstract class AbstractRelationRequest implements AcceptableInvite<Faction, Faction>
 {
-    private final String senderFaction;
-    private final String invitedFaction;
+    private final Faction sender;
+    private final Faction invited;
 
-    protected AbstractRelationRequest(String senderFaction, String invitedFaction)
+    protected AbstractRelationRequest(Faction sender, Faction invited)
     {
-        this.senderFaction = senderFaction;
-        this.invitedFaction = invitedFaction;
-    }
-
-    public String getSenderFaction()
-    {
-        return senderFaction;
-    }
-
-    public String getInvitedFaction()
-    {
-        return invitedFaction;
+        this.sender = sender;
+        this.invited = invited;
     }
 
     @Override
-    public boolean equals(Object o)
+    public Faction getInvited()
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AbstractRelationRequest that = (AbstractRelationRequest) o;
-        return senderFaction.equals(that.senderFaction) && invitedFaction.equals(that.invitedFaction);
+        return invited;
     }
 
     @Override
-    public int hashCode()
+    public Faction getSender()
     {
-        return Objects.hash(senderFaction, invitedFaction);
+        return sender;
     }
 }

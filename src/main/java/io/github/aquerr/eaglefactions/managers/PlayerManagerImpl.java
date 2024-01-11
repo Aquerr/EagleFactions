@@ -102,11 +102,10 @@ public class PlayerManagerImpl implements PlayerManager
     }
 
     @Override
-    public Set<UUID> getAdminModePlayers()
+    public Set<ServerPlayer> getAdminModePlayers()
     {
         return Sponge.server().onlinePlayers().stream()
                 .filter(serverPlayer -> hasAdminMode(serverPlayer.user()))
-                .map(Identifiable::uniqueId)
                 .collect(Collectors.toSet());
     }
 

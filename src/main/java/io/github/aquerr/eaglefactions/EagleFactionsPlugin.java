@@ -139,6 +139,7 @@ import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import net.kyori.adventure.text.TextComponent;
 import org.apache.logging.log4j.Logger;
+import org.bstats.sponge.Metrics;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.CommonParameters;
@@ -228,11 +229,9 @@ public class EagleFactionsPlugin implements EagleFactions
     private final Path configDir;
 
     //Integrations
-//    @Inject
-//    private Metrics metrics;
+    private final Metrics metrics;
 //    private PAPIPlaceholderService PAPIPlaceholderService;
     private EFPlaceholderService efPlaceholderService;
-//    private UltimateChatService ultimateChatService;
 
     public static EagleFactionsPlugin getPlugin()
     {
@@ -240,12 +239,15 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Inject
-    public EagleFactionsPlugin(final PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) final Path configDir)
+    public EagleFactionsPlugin(final PluginContainer pluginContainer,
+                               @ConfigDir(sharedRoot = false) final Path configDir,
+                               Metrics.Factory factory)
     {
         eagleFactions = this;
         this.pluginContainer = pluginContainer;
         this.logger = pluginContainer.logger();
         this.configDir = configDir;
+        metrics = factory.make(6831);
     }
 
     public PluginContainer getPluginContainer()
@@ -394,12 +396,6 @@ public class EagleFactionsPlugin implements EagleFactions
         setDefaultPermissions();
 
         this.integrationManager.activateIntegrations();
-
-        if (isUltimateChatLoaded())
-        {
-//            this.ultimateChatService = new UltimateChatService(this.configuration.getChatConfig());
-//            this.ultimateChatService.registerTags();
-        }
     }
 
     @Listener
@@ -1159,15 +1155,9 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new CollideBlockEventListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new CollideEntityEventListener(this));
 
-        // Chat
-        if(isUltimateChatLoaded())
-        {
-//            Sponge.eventManager().registerListeners(this.pluginContainer, new UltimateChatMessageListener(this));
-        }
-        else // Sponge/Vanilla
-        {
-            Sponge.eventManager().registerListeners(this.pluginContainer, new ChatMessageListener(this));
-        }
+
+
+        Sponge.eventManager().registerListeners(this.pluginContainer, new ChatMessageListener(this));
 
         //EF events
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionKickListener(this));
@@ -1185,10 +1175,6 @@ public class EagleFactionsPlugin implements EagleFactions
 //        Sponge.server().commandManager().registrar(Command.Parameterized.class).get()
 //        Sponge.server().commandManager().getOwnedBy(this).forEach(Sponge.getCommandManager()::removeMapping);
         this.logger.info(PLUGIN_PREFIX_PLAIN + "EagleFactions has been disabled due to an error!");
-    }
-
-    private boolean isUltimateChatLoaded() {
-        return Sponge.pluginManager().plugin("ultimatechat").isPresent();
     }
 
     private void checkVersionAndInform()

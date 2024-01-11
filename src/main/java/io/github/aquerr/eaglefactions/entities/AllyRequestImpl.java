@@ -2,14 +2,13 @@ package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
-
-import java.util.Objects;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 
 public class AllyRequestImpl extends AbstractRelationRequest implements AllyRequest
 {
-    public AllyRequestImpl(String senderFaction, String invitedFaction)
+    public AllyRequestImpl(Faction inviter, Faction invited)
     {
-        super(senderFaction, invitedFaction);
+        super(inviter, invited);
     }
 
     @Override

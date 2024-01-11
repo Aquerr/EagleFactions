@@ -13,10 +13,12 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
+import java.util.Set;
+
 import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
-public class ChatMessageHelper
+public final class ChatMessageHelper
 {
     public static TextComponent getFactionPrefix(Faction faction)
     {
@@ -161,5 +163,13 @@ public class ChatMessageHelper
         });
     }
 
+    public static Set<? extends Audience> getAdminReceivers()
+    {
+        return EagleFactionsPlugin.getPlugin().getPlayerManager().getAdminModePlayers();
+    }
 
+    private ChatMessageHelper()
+    {
+
+    }
 }

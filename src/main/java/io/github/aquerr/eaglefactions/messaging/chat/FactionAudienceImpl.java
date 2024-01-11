@@ -50,18 +50,7 @@ public class FactionAudienceImpl implements FactionAudience
 			addAudience(player);
 		}
 		addAudience(Sponge.systemSubject());
-		getAdminReceivers().forEach(this::addAudience);
-	}
-
-	private List<Audience> getAdminReceivers()
-	{
-		final List<Audience> admins = new ArrayList<>();
-		for(final UUID adminUUID : EagleFactionsPlugin.getPlugin().getPlayerManager().getAdminModePlayers())
-		{
-			final Optional<ServerPlayer> optionalAdminPlayer = Sponge.server().player(adminUUID);
-			optionalAdminPlayer.ifPresent(admins::add);
-		}
-		return admins;
+		ChatMessageHelper.getAdminReceivers().forEach(this::addAudience);
 	}
 
 	@Override

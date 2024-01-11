@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -35,7 +36,14 @@ public class AllyCommand extends AbstractCommand
 		AllyRequest allyRequest = findAllyRequest(selectedFaction, playerFaction);
 		if (allyRequest != null) // Accept if request exists
 		{
-			allyRequest.accept();
+			try
+			{
+				allyRequest.accept();
+			}
+			catch (Exception exception)
+			{
+				throw new CommandException(Component.text(exception.getMessage()));
+			}
 			player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-accepted-invitation-from-faction", selectedFaction.getName()));
 		}
 		else // Invite if request does not exist
@@ -53,7 +61,7 @@ public class AllyCommand extends AbstractCommand
 		return EagleFactionsPlugin.RELATION_INVITES.stream()
 				.filter(AllyRequest.class::isInstance)
 				.map(AllyRequest.class::cast)
-				.filter(allyRequest -> allyRequest.getInvitedFaction().equals(invitedFaction.getName()) && allyRequest.getSenderFaction().equals(senderFaction.getName()))
+				.filter(allyRequest -> allyRequest.getInvited().getName().equals(invitedFaction.getName()) && allyRequest.getSender().getName().equals(senderFaction.getName()))
 				.findFirst()
 				.orElse(null);
 	}

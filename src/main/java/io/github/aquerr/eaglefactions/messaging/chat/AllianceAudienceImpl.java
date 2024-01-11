@@ -8,7 +8,7 @@ import io.github.aquerr.eaglefactions.api.messaging.chat.AllianceAudience;
 import net.kyori.adventure.audience.Audience;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.*;
@@ -29,16 +29,6 @@ public class AllianceAudienceImpl implements AllianceAudience
 		receivers.addAll(faction.getAlliances().stream().map(factionLogic::getFactionByName).filter(Objects::nonNull).collect(Collectors.toList()));
 
 		return new AllianceAudienceImpl(receivers);
-	}
-
-	public static AllianceAudienceImpl forPlayer(final Player player)
-	{
-		Preconditions.checkNotNull(player);
-
-		final Optional<Faction> optionalFaction = EagleFactionsPlugin.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
-		if (!optionalFaction.isPresent())
-			throw new IllegalArgumentException("Player must be in faction!");
-		return forFaction(optionalFaction.get());
 	}
 
 	public AllianceAudienceImpl(final Set<Faction> factions)
@@ -64,24 +54,13 @@ public class AllianceAudienceImpl implements AllianceAudience
 		}
 
 		addAudience(Sponge.systemSubject());
-		getAdminReceivers().forEach(this::addAudience);
+		ChatMessageHelper.getAdminReceivers().forEach(this::addAudience);
 	}
 
 	@Override
 	public Set<Faction> getFactions()
 	{
 		return this.factions;
-	}
-
-	private List<Audience> getAdminReceivers()
-	{
-		final List<Audience> admins = new ArrayList<>();
-		for(final UUID adminUUID : EagleFactionsPlugin.getPlugin().getPlayerManager().getAdminModePlayers())
-		{
-			final Optional<ServerPlayer> optionalAdminPlayer = Sponge.server().player(adminUUID);
-			optionalAdminPlayer.ifPresent(admins::add);
-		}
-		return admins;
 	}
 
 	private void addAudience(Audience audience)

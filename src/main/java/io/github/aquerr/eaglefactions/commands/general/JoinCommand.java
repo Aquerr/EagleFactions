@@ -51,7 +51,7 @@ public class JoinCommand extends AbstractCommand
         if(!faction.isPublic())
         {
             FactionInvite factionInvite = EagleFactionsPlugin.INVITE_LIST.stream()
-                    .filter(invite -> invite.getInvitedPlayerUniqueId().equals(player.uniqueId()) && invite.getSenderFaction().equals(faction.getName()))
+                    .filter(invite -> invite.getInvited().getUniqueId().equals(player.uniqueId()) && invite.getSender().getName().equals(faction.getName()))
                     .findFirst()
                     .orElseThrow(() -> messageService.resolveExceptionWithMessage("error.command.join.you-have-not-been-invited-to-this-faction"));
 

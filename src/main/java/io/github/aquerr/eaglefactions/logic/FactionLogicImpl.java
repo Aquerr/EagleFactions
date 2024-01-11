@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.google.common.base.Preconditions;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;

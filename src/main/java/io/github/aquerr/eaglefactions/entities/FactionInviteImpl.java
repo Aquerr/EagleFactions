@@ -1,20 +1,21 @@
 package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionInvite;
+import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class FactionInviteImpl implements FactionInvite
 {
-    private final String factionName;
-    private final UUID playerUUID;
+    private final Faction sender;
+    private final FactionPlayer invited;
 
-    public FactionInviteImpl(String factionName, UUID playerUUID)
+    public FactionInviteImpl(Faction sender, FactionPlayer invited)
     {
-        this.factionName = factionName;
-        this.playerUUID = playerUUID;
+        this.sender = sender;
+        this.invited = invited;
     }
 
     @Override
@@ -24,17 +25,16 @@ public class FactionInviteImpl implements FactionInvite
     }
 
     @Override
-    public String getSenderFaction()
+    public Faction getSender()
     {
-        return this.factionName;
+        return sender;
     }
 
     @Override
-    public UUID getInvitedPlayerUniqueId()
+    public FactionPlayer getInvited()
     {
-        return this.playerUUID;
+        return invited;
     }
-
 
     @Override
     public boolean equals(Object o)
@@ -42,21 +42,21 @@ public class FactionInviteImpl implements FactionInvite
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FactionInviteImpl that = (FactionInviteImpl) o;
-        return factionName.equals(that.factionName) && playerUUID.equals(that.playerUUID);
+        return Objects.equals(sender, that.sender) && Objects.equals(invited, that.invited);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(factionName, playerUUID);
+        return Objects.hash(sender, invited);
     }
 
     @Override
     public String toString()
     {
         return "FactionInviteImpl{" +
-                "factionName='" + factionName + '\'' +
-                ", playerUUID=" + playerUUID +
+                "sender=" + sender +
+                ", invited=" + invited +
                 '}';
     }
 }

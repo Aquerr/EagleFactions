@@ -13,6 +13,7 @@ import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.RegistryTypes;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public class EFPlaceholderService implements PlaceholderService
 {
     private final EagleFactions plugin;
 
-    private final Map<Placeholder, EFPlaceholderParser> placeholderParsers = new HashMap<>();
+    private final Map<Placeholder, EFPlaceholderParser> placeholderParsers = new EnumMap<>(Placeholder.class);
 
     public EFPlaceholderService(EagleFactions plugin)
     {

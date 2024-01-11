@@ -3,6 +3,7 @@ import org.spongepowered.plugin.metadata.model.PluginDependency
 import java.io.ByteArrayOutputStream
 
 val eaglefactionsId = findProperty("eaglefactions.id") as String
+val eaglefactionsDescription = findProperty("eaglefactions.description") as String
 val eaglefactionsVersion = findProperty("eaglefactions.version") as String
 val spongeApiVersion = findProperty("sponge-api.version") as String
 
@@ -16,11 +17,11 @@ plugins {
     id("net.kyori.blossom") version "1.3.1"
 }
 
-allprojects {
-    description = "A factions plugin that will make managing your battle-server easier. :)"
-    group = "io.github.aquerr"
-    version = "$eaglefactionsVersion-API-$spongeApiVersion"
+description = eaglefactionsDescription
+group = "io.github.aquerr"
+version = "$eaglefactionsVersion-API-$spongeApiVersion"
 
+allprojects {
     tasks.withType(JavaCompile::class).configureEach {
         options.apply {
             encoding = "utf-8" // Consistent source file encoding
@@ -32,21 +33,6 @@ allprojects {
         isReproducibleFileOrder = true
         isPreserveFileTimestamps = false
     }
-
-    repositories {
-        mavenCentral()
-        maven("https://repo.spongepowered.org/maven")
-        maven("https://jitpack.io")
-        maven("https://raw.github.com/FabioZumbi12/UltimateChat/mvn-repo/")
-        maven("https://repo.mikeprimm.com/")
-    }
-}
-
-group = "io.github.aquerr"
-version = "$eaglefactionsVersion-API-$spongeApiVersion"
-
-repositories {
-    mavenCentral()
 }
 
 sponge {
@@ -59,7 +45,7 @@ sponge {
     plugin(eaglefactionsId) {
         displayName("Eagle Factions")
         entrypoint("io.github.aquerr.eaglefactions.EagleFactionsPlugin")
-        description("A factions plugin that will make managing your battle-server easier. :)")
+        description(eaglefactionsDescription)
         links {
             homepageLink.set(uri("https://github.com/Aquerr/EagleFactions"))
             sourceLink.set(uri("https://github.com/Aquerr/EagleFactions"))
@@ -91,14 +77,22 @@ blossom {
     replaceToken("%VERSION%", rootProject.version.toString())
 }
 
+repositories {
+    mavenCentral()
+    maven("https://repo.spongepowered.org/maven")
+    maven("https://jitpack.io")
+    maven("https://repo.mikeprimm.com/")
+}
+
 dependencies {
     api(project(":EagleFactionsAPI"))
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.2.0")
-    implementation("com.zaxxer:HikariCP:5.0.1")
-    implementation("com.h2database:h2:2.1.214")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("com.h2database:h2:2.2.220")
     compileOnly("org.xerial:sqlite-jdbc:3.43.0.0")
     compileOnly("us.dynmap:DynmapCoreAPI:3.6")
-    compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.6.0")
+    compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.6.2")
+    implementation("org.bstats:bstats-sponge:3.0.2")
 
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:$spongeApiVersion")
@@ -116,6 +110,7 @@ tasks {
         relocate("org.mariadb.jdbc", "io.github.aquerr.eaglefactions.lib.db.mariadb")
         relocate("com.zaxxer.hikari", "io.github.aquerr.eaglefactions.lib.db.pool.hikari")
         relocate("org.slf4j", "io.github.aquerr.eaglefactions.lib.slf4j")
+        relocate("org.bstats", "io.github.aquerr.eaglefactions.lib.bstats")
 
         archiveClassifier.set("")
     }

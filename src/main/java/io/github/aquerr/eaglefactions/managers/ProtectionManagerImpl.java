@@ -425,7 +425,8 @@ public class ProtectionManagerImpl implements ProtectionManager
             final Faction chunkFaction = optionalChunkFaction.get();
             final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition());
 
-            if (optionalServerPlayerFaction.filter(faction -> this.permsManager.canBreakBlock(user.uniqueId(), faction, optionalChunkFaction.get(), optionalClaim.get())).isPresent())
+            if (optionalServerPlayerFaction.map(faction -> this.permsManager.canBreakBlock(user.uniqueId(), faction, optionalChunkFaction.get(), optionalClaim.get()))
+                    .orElse(false))
                 return okFactionPerm();
             else return forbidden();
         }

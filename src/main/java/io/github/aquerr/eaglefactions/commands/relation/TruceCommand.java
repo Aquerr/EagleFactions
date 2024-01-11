@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -35,7 +36,15 @@ public class TruceCommand extends AbstractCommand
 		final TruceRequest truceRequest = findTruceRequest(selectedFaction, playerFaction);
 		if (truceRequest != null)
 		{
-			truceRequest.accept();
+			try
+			{
+				truceRequest.accept();
+			}
+			catch (Exception exception)
+			{
+				throw new CommandException(Component.text(exception.getMessage()));
+
+			}
 			player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-accepted-invitation-from-faction", selectedFaction.getName()));
 		}
 		else
@@ -53,7 +62,7 @@ public class TruceCommand extends AbstractCommand
 		return EagleFactionsPlugin.RELATION_INVITES.stream()
 				.filter(TruceRequest.class::isInstance)
 				.map(TruceRequest.class::cast)
-				.filter(truceRequest -> truceRequest.getInvitedFaction().equals(invitedFaction.getName()) && truceRequest.getSenderFaction().equals(senderFaction.getName()))
+				.filter(truceRequest -> truceRequest.getInvited().getName().equals(invitedFaction.getName()) && truceRequest.getSender().getName().equals(senderFaction.getName()))
 				.findFirst()
 				.orElse(null);
 	}

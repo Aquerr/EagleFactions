@@ -1,13 +1,14 @@
 package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.TruceRequest;
 
 public class TruceRequestImpl extends AbstractRelationRequest implements TruceRequest
 {
-    public TruceRequestImpl(String senderFaction, String invitedFaction)
+    public TruceRequestImpl(Faction inviter, Faction invited)
     {
-        super(senderFaction, invitedFaction);
+        super(inviter, invited);
     }
 
     @Override

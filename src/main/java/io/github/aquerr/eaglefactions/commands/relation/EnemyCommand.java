@@ -8,6 +8,7 @@ import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -16,8 +17,8 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class EnemyCommand extends AbstractCommand
 {
-    private InvitationManager invitationManager;
-    private MessageService messageService;
+    private final InvitationManager invitationManager;
+    private final MessageService messageService;
 
     public EnemyCommand(final EagleFactions plugin)
     {
@@ -35,7 +36,14 @@ public class EnemyCommand extends AbstractCommand
         final ArmisticeRequest armisticeRequest = findArmisticeRequest(enemyFaction, playerFaction);
         if (armisticeRequest != null)
         {
-            armisticeRequest.accept();
+            try
+            {
+                armisticeRequest.accept();
+            }
+            catch (Exception exception)
+            {
+                throw new CommandException(Component.text(exception.getMessage()));
+            }
             player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-accepted-armistice-request-from-faction", enemyFaction.getName()));
         }
         else
@@ -52,7 +60,7 @@ public class EnemyCommand extends AbstractCommand
         return EagleFactionsPlugin.RELATION_INVITES.stream()
                 .filter(ArmisticeRequest.class::isInstance)
                 .map(ArmisticeRequest.class::cast)
-                .filter(armisticeRequest -> armisticeRequest.getInvitedFaction().equals(invitedFaction.getName()) && armisticeRequest.getSenderFaction().equals(senderFaction.getName()))
+                .filter(armisticeRequest -> armisticeRequest.getInvited().getName().equals(invitedFaction.getName()) && armisticeRequest.getSender().getName().equals(senderFaction.getName()))
                 .findFirst()
                 .orElse(null);
     }

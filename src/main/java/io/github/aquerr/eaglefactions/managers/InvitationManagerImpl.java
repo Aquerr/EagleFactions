@@ -65,9 +65,9 @@ public class InvitationManagerImpl implements InvitationManager
     {
         checkNotNull(factionInvite);
 
-        final ServerPlayer player = this.playerManager.getPlayer(factionInvite.getInvitedPlayerUniqueId())
+        final ServerPlayer player = this.playerManager.getPlayer(factionInvite.getInvited().getUniqueId())
             .orElseThrow(() -> new IllegalArgumentException("Player with the given UUID does not exist!"));
-        final Faction faction = this.factionLogic.getFactionByName(factionInvite.getSenderFaction());
+        final Faction faction = this.factionLogic.getFactionByName(factionInvite.getSender().getName());
         checkNotNull(faction);
 
         joinAndNotify(player, faction);
@@ -82,7 +82,7 @@ public class InvitationManagerImpl implements InvitationManager
         if (isCancelled)
             return false;
 
-        final FactionInvite invite = new FactionInviteImpl(senderFaction.getName(), invitedPlayer.uniqueId());
+        final FactionInvite invite = new FactionInviteImpl(senderFaction, playerManager.getFactionPlayer(invitedPlayer.uniqueId()).get());
         EagleFactionsPlugin.INVITE_LIST.add(invite);
 
         invitedPlayer.sendMessage(getInviteReceivedMessage(senderFaction));
@@ -176,7 +176,7 @@ public class InvitationManagerImpl implements InvitationManager
             else
             {
                 // Preform send operation
-                final AllyRequest invite = new AllyRequestImpl(sourceFaction.getName(), targetFaction.getName());
+                final AllyRequest invite = new AllyRequestImpl(sourceFaction, targetFaction);
                 EagleFactionsPlugin.RELATION_INVITES.add(invite);
 
                 final Optional<ServerPlayer> optionalInvitedFactionLeader = this.playerManager.getPlayer(targetFaction.getLeader());
@@ -250,7 +250,7 @@ public class InvitationManagerImpl implements InvitationManager
             else
             {
                 // Preform send operation
-                final TruceRequest invite = new TruceRequestImpl(sourceFaction.getName(), targetFaction.getName());
+                final TruceRequest invite = new TruceRequestImpl(sourceFaction, targetFaction);
                 EagleFactionsPlugin.RELATION_INVITES.add(invite);
 
                 final Optional<ServerPlayer> optionalInvitedFactionLeader = this.playerManager.getPlayer(targetFaction.getLeader());
@@ -331,37 +331,37 @@ public class InvitationManagerImpl implements InvitationManager
     @Override
     public void acceptAllyRequest(AllyRequest allyRequest)
     {
-        this.factionLogic.addAlly(allyRequest.getInvitedFaction(), allyRequest.getSenderFaction());
-        final Faction senderFaction = this.factionLogic.getFactionByName(allyRequest.getSenderFaction());
+        this.factionLogic.addAlly(allyRequest.getSender().getName(), allyRequest.getInvited().getName());
+        final Faction senderFaction = this.factionLogic.getFactionByName(allyRequest.getSender().getName());
         final Optional<ServerPlayer> optionalSenderFactionLeader = this.playerManager.getPlayer(senderFaction.getLeader());
         optionalSenderFactionLeader.ifPresent(x -> optionalSenderFactionLeader.get()
-                .sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvitedFaction())));
+                .sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvited().getName())));
         senderFaction.getOfficers().forEach(x -> this.playerManager.getPlayer(x)
-                .ifPresent(y -> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvitedFaction()))));
+                .ifPresent(y -> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvited().getName()))));
         EagleFactionsPlugin.RELATION_INVITES.remove(allyRequest);
     }
 
     @Override
     public void acceptTruceRequest(TruceRequest truceRequest)
     {
-        this.factionLogic.addTruce(truceRequest.getInvitedFaction(), truceRequest.getSenderFaction());
-        final Faction senderFaction = this.factionLogic.getFactionByName(truceRequest.getSenderFaction());
+        this.factionLogic.addTruce(truceRequest.getSender().getName(), truceRequest.getInvited().getName());
+        final Faction senderFaction = this.factionLogic.getFactionByName(truceRequest.getSender().getName());
         final Optional<ServerPlayer> optionalSenderFactionLeader = this.playerManager.getPlayer(senderFaction.getLeader());
-        optionalSenderFactionLeader.ifPresent(x -> optionalSenderFactionLeader.get().sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvitedFaction())));
+        optionalSenderFactionLeader.ifPresent(x -> optionalSenderFactionLeader.get().sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvited().getName())));
         senderFaction.getOfficers().forEach(x-> this.playerManager.getPlayer(x)
-                .ifPresent(y -> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvitedFaction()))));
+                .ifPresent(y -> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvited().getName()))));
         EagleFactionsPlugin.RELATION_INVITES.remove(truceRequest);
     }
 
     @Override
     public void acceptArmisticeRequest(ArmisticeRequest armisticeRequest)
     {
-        this.factionLogic.removeEnemy(armisticeRequest.getInvitedFaction(), armisticeRequest.getSenderFaction());
-        final Faction senderFaction = this.factionLogic.getFactionByName(armisticeRequest.getSenderFaction());
+        this.factionLogic.removeEnemy(armisticeRequest.getInvited().getName(), armisticeRequest.getSender().getName());
+        final Faction senderFaction = this.factionLogic.getFactionByName(armisticeRequest.getSender().getName());
         final Optional<ServerPlayer> senderFactionLeader = this.playerManager.getPlayer(senderFaction.getLeader());
-        senderFactionLeader.ifPresent(x->x.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvitedFaction())));
+        senderFactionLeader.ifPresent(x->x.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvited().getName())));
         senderFaction.getOfficers().forEach(x-> this.playerManager.getPlayer(x)
-                .ifPresent(y->y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvitedFaction()))));
+                .ifPresent(y->y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvited().getName()))));
         EagleFactionsPlugin.RELATION_INVITES.remove(armisticeRequest);
     }
 
@@ -403,7 +403,7 @@ public class InvitationManagerImpl implements InvitationManager
 
     private boolean sendArmisticeRequest(Player player, Faction sourceFaction, Faction targetFaction)
     {
-        final ArmisticeRequest armisticeRequest = new ArmisticeRequestImpl(sourceFaction.getName(), targetFaction.getName());
+        final ArmisticeRequest armisticeRequest = new ArmisticeRequestImpl(sourceFaction, targetFaction);
         if(EagleFactionsPlugin.RELATION_INVITES.contains(armisticeRequest))
         {
             player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.relations.you-have-already-sent-armistice-request")));
