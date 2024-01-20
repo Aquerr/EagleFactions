@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public abstract class AbstractCommand implements CommandExecutor
 {
-    private EagleFactions plugin;
+    private final EagleFactions plugin;
 
     protected AbstractCommand(final EagleFactions plugin)
     {

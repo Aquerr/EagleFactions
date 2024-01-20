@@ -1,10 +1,8 @@
 package io.github.aquerr.eaglefactions.managers;
 
 import io.github.aquerr.eaglefactions.PluginPermissions;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
@@ -12,31 +10,26 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.user.UserManager;
-import org.spongepowered.api.util.Identifiable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * Created by Aquerr on 2017-08-04.
- */
 public class PlayerManagerImpl implements PlayerManager
 {
     private final StorageManager storageManager;
-    private final FactionLogic factionLogic;
-    private final FactionsConfig factionsConfig;
     private final PowerConfig powerConfig;
 
     private Supplier<UserManager> userManager;
 
     private final Set<UUID> adminModePlayers = new HashSet<>();
 
-    public PlayerManagerImpl(final StorageManager storageManager, final FactionLogic factionLogic, final FactionsConfig factionsConfig, final PowerConfig powerConfig)
+    public PlayerManagerImpl(final StorageManager storageManager, final PowerConfig powerConfig)
     {
         this.storageManager = storageManager;
-        this.factionLogic = factionLogic;
-        this.factionsConfig = factionsConfig;
         this.powerConfig = powerConfig;
         this.userManager = () -> Sponge.server().userManager();
     }

@@ -35,16 +35,16 @@ public class SetLeaderCommand extends AbstractCommand
 
         if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
-            if(playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
+            if(playerFaction.getLeader().getUniqueId().equals(newLeaderPlayer.getUniqueId()))
                 throw messageService.resolveExceptionWithMessage("error.command.set-leader.you-are-already-the-leader-of-this-faction");
 
             super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);
             player.sendMessage(messageService.resolveMessageWithPrefix("command.set-leader.you-set-player-as-your-new-leader", newLeaderPlayer.getName()));
             return CommandResult.success();
         }
-        else if (playerFaction.getLeader().equals(player.uniqueId()))
+        else if (playerFaction.getLeader().getUniqueId().equals(player.uniqueId()))
         {
-            if(playerFaction.getLeader().equals(newLeaderPlayer.getUniqueId()))
+            if(playerFaction.getLeader().getUniqueId().equals(newLeaderPlayer.getUniqueId()))
                 throw messageService.resolveExceptionWithMessage("error.command.set-leader.you-are-already-the-leader-of-this-faction");
 
             super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);

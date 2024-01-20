@@ -3,6 +3,8 @@ package io.github.aquerr.eaglefactions.commands.access;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -20,9 +22,12 @@ import java.util.stream.Collectors;
 
 public class AccessCommand extends AbstractCommand
 {
+    private final PermsManager permsManager;
+
     public AccessCommand(EagleFactionsPlugin plugin)
     {
         super(plugin);
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -38,7 +43,8 @@ public class AccessCommand extends AbstractCommand
         if (!playerFaction.equals(chunkFaction))
             throw this.getPlugin().getMessageService().resolveExceptionWithMessage("error.claim.place-does-not-belong-to-your-faction");
 
-        if (!playerFaction.getLeader().equals(player.uniqueId()) && !playerFaction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+        if (!permsManager.hasPermission(player.uniqueId(), playerFaction, FactionPermission.MANAGE_INTERNAL_CLAIMS)
+                && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             throw this.getPlugin().getMessageService().resolveExceptionWithMessage("error.access.you-must-be-faction-leader-or-officer-to-do-this");
 
         // Get claim at player's location

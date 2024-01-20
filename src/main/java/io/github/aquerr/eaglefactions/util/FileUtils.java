@@ -19,7 +19,7 @@ public final class FileUtils
     {
         if (Files.notExists(path))
         {
-            Files.createDirectory(path);
+            Files.createDirectories(path);
         }
     }
 

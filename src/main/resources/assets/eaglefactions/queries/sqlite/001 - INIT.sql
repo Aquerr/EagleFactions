@@ -1,138 +1,135 @@
-CREATE TABLE Version (
-    Version INTEGER NOT NULL
+CREATE TABLE version
+(
+    version INTEGER UNIQUE NOT NULL
 );
-CREATE UNIQUE INDEX idx_version ON Version (Version);
 
 -- Create Factions Table
-CREATE TABLE Factions (
-   Name        TEXT PRIMARY KEY        NOT NULL,
-   Tag         TEXT                     NOT NULL,
-   TagColor    TEXT                     NULL,
-   Leader      TEXT                     NOT NULL,
-   Home        TEXT                    NULL,
-   LastOnline  TEXT                    NOT NULL
+CREATE TABLE faction
+(
+    name              TEXT PRIMARY KEY NOT NULL,
+    tag               TEXT             NOT NULL,
+    tag_color         TEXT             NULL,
+    leader            TEXT             NOT NULL,
+    home              TEXT             NULL,
+    last_online       INTEGER          NOT NULL,
+    description       TEXT             NOT NULL,
+    motd              TEXT             NOT NULL,
+    is_public         INTEGER          NOT NULL,
+    created_date      INTEGER          NOT NULL,
+    default_rank_name VARCHAR(36)      NOT NULL
 );
-CREATE UNIQUE INDEX idx_faction_name ON Factions (Name);
-
--- Create Recruits Table
-CREATE TABLE FactionRecruits (
-    RecruitUUID     TEXT    UNIQUE  NOT NULL,
-    FactionName     TEXT    NOT NULL
-);
-CREATE UNIQUE INDEX idx_faction_recruit_uuid ON FactionRecruits (RecruitUUID);
 
 -- Create Members Table
-CREATE TABLE FactionMembers (
-    MemberUUID  TEXT    UNIQUE  NOT NULL,
-    FactionName TEXT NOT NULL
-);
-CREATE UNIQUE INDEX idx_faction_member_uuid ON FactionMembers (MemberUUID);
-
--- Create Officers Table
-CREATE TABLE FactionOfficers (
-    OfficerUUID TEXT    UNIQUE  NOT NULL,
-    FactionName TEXT NOT NULL
-);
-CREATE UNIQUE INDEX idx_faction_officer_uuid ON FactionOfficers (OfficerUUID);
-
--- Create FactionAlliances Table
-CREATE TABLE FactionAlliances (
-    FactionName_1 TEXT   NOT NULL,
-    FactionName_2 TEXT   NOT NULL
+CREATE TABLE faction_member
+(
+    member_uuid  TEXT NOT NULL PRIMARY KEY,
+    faction_name TEXT NOT NULL
 );
 
--- Create FactionEnemies Table
-CREATE TABLE FactionEnemies (
-  FactionName_1 TEXT   NOT NULL,
-  FactionName_2 TEXT   NOT NULL
+-- Create Faction Ranks Table
+CREATE TABLE faction_rank
+(
+    name            TEXT    NOT NULL,
+    faction_name    TEXT    NOT NULL,
+    display_name    TEXT,
+    ladder_position INTEGER NOT NULL,
+    display_in_chat INTEGER NOT NULL,
+    PRIMARY KEY (name, faction_name)
 );
 
--- Create FactionTruces Table
-CREATE TABLE FactionTruces (
-  FactionName_1 TEXT   NOT NULL,
-  FactionName_2 TEXT   NOT NULL
+-- Create Faction Rank Permissions
+CREATE TABLE faction_rank_permission
+(
+    faction_name TEXT NOT NULL,
+    rank_name    TEXT NOT NULL,
+    permission   TEXT NOT NULL,
+    PRIMARY KEY (faction_name, rank_name, permission)
 );
 
--- Create OfficerPerms Table
-CREATE TABLE OfficerPerms (
-   FactionName   TEXT    UNIQUE        NOT NULL,
-   Use         INTEGER                         NOT NULL,
-   Place       INTEGER                         NOT NULL,
-   Destroy     INTEGER                         NOT NULL,
-   Claim       INTEGER                         NOT NULL,
-   Attack      INTEGER                         NOT NULL,
-   Invite      INTEGER                         NOT NULL
+-- Create Faction Member Rank Mapping Table
+CREATE TABLE faction_member_rank
+(
+    member_uuid  TEXT NOT NULL,
+    faction_name TEXT NOT NULL,
+    rank_name    TEXT NOT NULL
 );
-CREATE UNIQUE INDEX idx_officer_perms_faction_name ON OfficerPerms (FactionName);
+--
+-- Create Faction Relation Table
+CREATE TABLE faction_relation
+(
+    faction_name_1 TEXT NOT NULL,
+    faction_name_2 TEXT NOT NULL,
+    relation_type  TEXT NOT NULL
+);
 
--- Create MemberPerms Table
-CREATE TABLE MemberPerms (
-   FactionName   TEXT      UNIQUE      NOT NULL,
-   Use         INTEGER                         NOT NULL,
-   Place       INTEGER                         NOT NULL,
-   Destroy     INTEGER                         NOT NULL,
-   Claim       INTEGER                         NOT NULL,
-   Attack      INTEGER                         NOT NULL,
-   Invite      INTEGER                         NOT NULL
+-- Relation permissions
+CREATE TABLE faction_relation_permission
+(
+    faction_name  TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    permission    TEXT NOT NULL
 );
-CREATE UNIQUE INDEX idx_member_perms_faction_name ON MemberPerms (FactionName);
 
--- Create RecruitPerms Table
-CREATE TABLE RecruitPerms (
-   FactionName   TEXT   UNIQUE         NOT NULL,
-   Use         INTEGER                         NOT NULL,
-   Place       INTEGER                         NOT NULL,
-   Destroy     INTEGER                         NOT NULL,
-   Claim       INTEGER                         NOT NULL,
-   Attack      INTEGER                         NOT NULL,
-   Invite      INTEGER                         NOT NULL
-);
-CREATE UNIQUE INDEX idx_recruit_perms_faction_name ON RecruitPerms (FactionName);
-
--- Create AllyPerms Table
-CREATE TABLE AllyPerms (
-   FactionName   TEXT    UNIQUE        NOT NULL,
-   Use         INTEGER                         NOT NULL,
-   Place       INTEGER                         NOT NULL,
-   Destroy     INTEGER                         NOT NULL
-);
-CREATE UNIQUE INDEX idx_ally_perms_faction_name ON AllyPerms (FactionName);
-
--- Create TrucePerms Table
-CREATE TABLE TrucePerms (
-   FactionName   TEXT    UNIQUE        NOT NULL,
-   Use         INTEGER                         NOT NULL,
-   Place       INTEGER                         NOT NULL,
-   Destroy     INTEGER                         NOT NULL
-);
-CREATE UNIQUE INDEX idx_truce_perms_faction_name ON TrucePerms (FactionName);
 
 -- Create Claims Table
-CREATE TABLE Claims (
-   FactionName   VARCHAR(200)                  NOT NULL,
-   WorldUUID     VARCHAR(36)                            NOT NULL,
-   ChunkPosition VARCHAR(200)                  NOT NULL,
-   PRIMARY KEY (WorldUUID, ChunkPosition)
+CREATE TABLE claim
+(
+    faction_name             TEXT    NOT NULL,
+    world_uuid               TEXT    NOT NULL,
+    chunk_position           TEXT    NOT NULL,
+    is_accessible_by_faction INTEGER NOT NULL DEFAULT 1,
+    PRIMARY KEY (world_uuid, chunk_position)
 );
-CREATE UNIQUE INDEX idx_claims_world_uuid_position ON Claims (WorldUUID, ChunkPosition);
+
+CREATE TABLE claim_owner
+(
+    world_uuid     TEXT NOT NULL,
+    chunk_position TEXT NOT NULL,
+    player_uuid    TEXT NOT NULL
+);
 
 -- Create FactionsChest Table
-CREATE TABLE FactionChests (
-    FactionName TEXT    UNIQUE  NOT NULL,
-    ChestItems  BINARY            NOT NULL
+CREATE TABLE faction_chest
+(
+    faction_name TEXT PRIMARY KEY NOT NULL,
+    chest_items  BINARY           NOT NULL
 );
-CREATE UNIQUE INDEX idx_faction_chest_name ON FactionChests (FactionName);
 
 -- Create Players Table
-CREATE TABLE Players (
-    PlayerUUID TEXT PRIMARY KEY,
-    Name    TEXT    NOT NULL,
-    Faction TEXT    NULL,
-    Power   REAL NOT NULL,
-    MaxPower    REAL NOT NULL,
-    DeathInWarzone INTEGER NOT NULL
+CREATE TABLE player
+(
+    player_uuid      TEXT PRIMARY KEY NOT NULL,
+    name             TEXT             NOT NULL,
+    faction_name     TEXT             NULL,
+    power            REAL             NOT NULL,
+    max_power        REAL             NOT NULL,
+    death_in_warzone INTEGER          NOT NULL
 );
-CREATE UNIQUE INDEX idx_player_uuid ON Players (PlayerUUID);
+
+
+-- Protection Flags
+CREATE TABLE protection_flag_type
+(
+    id        INTEGER NOT NULL,
+    flag_type TEXT    NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE faction_protection_flag
+(
+    faction_name            TEXT    NOT NULL,
+    protection_flag_type_id INTEGER NOT NULL,
+    flag_value              INTEGER NOT NULL
+);
+
+INSERT INTO protection_flag_type VALUES (1, 'SPAWN_MONSTERS'),
+       (2, 'SPAWN_ANIMALS'),
+       (3, 'FIRE_SPREAD'),
+       (4, 'ALLOW_EXPLOSION'),
+       (5, 'MOB_GRIEF'),
+       (6, 'PVP'),
+       (7, 'TERRITORY_POWER_LOSS');
+
 
 -- Set database version to 1
-INSERT INTO Version VALUES (1);
+INSERT INTO version VALUES (1);

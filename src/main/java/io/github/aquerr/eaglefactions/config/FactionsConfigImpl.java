@@ -2,7 +2,10 @@ package io.github.aquerr.eaglefactions.config;
 
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,9 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean shouldShowDestroyedClaim = true;
 	private boolean shouldShowAttackInBossBar = true;
 
+	private List<Rank> defaultRanks = new ArrayList<>();
+	private String defaultRankName = RankManagerImpl.buildDefaultRecruitRank().getName();
+
 	public FactionsConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
@@ -107,6 +113,15 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.shouldInformAboutDestroy = this.configuration.getBoolean(true, "inform-about-destroy");
 		this.shouldShowDestroyedClaim = this.configuration.getBoolean(true, "show-destroyed-claim");
 		this.shouldShowAttackInBossBar = this.configuration.getBoolean(true, "show-attack-in-bossbar");
+
+		List<Rank> defaultRanks = RankManagerImpl.getDefaultRanks();
+		this.defaultRanks = this.configuration.getGenericList(Rank.class, defaultRanks, "default-ranks", "ranks");
+		String defaultRank = this.configuration.getString("recruit", "default-ranks", "default-rank");
+		this.defaultRankName = defaultRanks.stream()
+				.filter(rank -> rank.getName().equals(defaultRank))
+				.map(Rank::getName)
+				.findFirst()
+				.orElseThrow();
 	}
 
 	@Override
@@ -331,6 +346,18 @@ public class FactionsConfigImpl implements FactionsConfig
 		return this.shouldShowAttackInBossBar;
 	}
 
+	@Override
+	public List<Rank> getDefaultRanks()
+	{
+		return this.defaultRanks;
+	}
+
+	@Override
+	public String getDefaultRankName()
+	{
+		return this.defaultRankName;
+	}
+
 	private HashMap<String, Integer> prepareItems(final List<String> itemsToPrepare)
 	{
 		final HashMap<String, Integer> items = new HashMap<>();
@@ -343,4 +370,12 @@ public class FactionsConfigImpl implements FactionsConfig
 		}
 		return items;
 	}
+
+//        truceMap.put(FactionPermission.INTERACT, true);
+//        truceMap.put(FactionPermission.BLOCK_PLACE, false);
+//        truceMap.put(FactionPermission.BLOCK_DESTROY, false);
+//
+//        allyMap.put(FactionPermission.INTERACT, true);
+//        allyMap.put(FactionPermission.BLOCK_PLACE, true);
+//        allyMap.put(FactionPermission.BLOCK_DESTROY, true);
 }

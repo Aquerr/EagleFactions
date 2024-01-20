@@ -236,7 +236,7 @@ public class HomeCommand extends AbstractCommand
             return;
         }
         ServerLocation safeLocation = Sponge.server().teleportHelper().findSafeLocation(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()))
-                .orElse(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
+                .orElseGet(() -> ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
         player.setLocation(safeLocation);
         player.sendActionBar(messageService.resolveComponentWithMessage("command.home.teleport-success"));
         startHomeCooldown(player.uniqueId());
@@ -313,7 +313,7 @@ public class HomeCommand extends AbstractCommand
                 return;
             }
             ServerLocation safeLocation = Sponge.server().teleportHelper().findSafeLocation(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()))
-                    .orElse(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
+                    .orElseGet(() -> ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
             player.setLocation(safeLocation);
             player.sendActionBar(messageService.resolveComponentWithMessage("command.home.teleport-success"));
             startHomeCooldown(player.uniqueId());

@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.events.FactionPromoteEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
@@ -33,16 +33,16 @@ public class FactionPromoteEventImpl extends FactionAbstractEvent implements Fac
 
     static class Post extends FactionPromoteEventImpl implements FactionPromoteEvent.Post
     {
-        private final FactionMemberType promotedToRank;
+        private final Rank promotedToRank;
 
-        Post(Player creator, FactionPlayer promotedPlayer, Faction faction, final FactionMemberType promotedToRank, Cause cause)
+        Post(Player creator, FactionPlayer promotedPlayer, Faction faction, final Rank promotedToRank, Cause cause)
         {
             super(creator, promotedPlayer, faction, cause);
             this.promotedToRank = promotedToRank;
         }
 
         @Override
-        public FactionMemberType getPromotedToRank()
+        public Rank getPromotedToRank()
         {
             return this.promotedToRank;
         }

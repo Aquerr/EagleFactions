@@ -1,12 +1,11 @@
 package io.github.aquerr.eaglefactions.storage.sql.sqlite;
 
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.sql.AbstractPlayerStorage;
 
 public class SqlitePlayerStorage extends AbstractPlayerStorage
 {
-    public SqlitePlayerStorage(final EagleFactions plugin)
+    public SqlitePlayerStorage(final SqliteConnectionProvider sqliteConnectionProvider)
     {
-        super(plugin, SqliteProvider.getInstance(plugin));
+        super(sqliteConnectionProvider);
     }
 }

@@ -1,12 +1,31 @@
 package io.github.aquerr.eaglefactions.storage.sql.mariadb;
 
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.storage.sql.AbstractFactionStorage;
+import io.github.aquerr.eaglefactions.storage.sql.FactionChestSqlHelper;
+import io.github.aquerr.eaglefactions.storage.sql.FactionProtectionFlagsStorage;
+import io.github.aquerr.eaglefactions.storage.sql.SQLConnectionProvider;
+import org.apache.logging.log4j.Logger;
 
 public class MariaDbFactionStorage extends AbstractFactionStorage
 {
-	public MariaDbFactionStorage(final EagleFactions plugin)
+	public MariaDbFactionStorage(Logger logger, final MariaDbConnectionProvider mariaDbConnectionProvider)
 	{
-		super(plugin, MariaDbProvider.getInstance(plugin), new FactionProtectionFlagsMariaDbStorageImpl());
+		super(
+				logger,
+				mariaDbConnectionProvider,
+				new FactionProtectionFlagsMariaDbStorageImpl(),
+				new FactionChestSqlHelper());
+	}
+
+	public MariaDbFactionStorage(Logger logger,
+							SQLConnectionProvider sqlConnectionProvider,
+							FactionProtectionFlagsStorage factionProtectionFlagsStorage,
+							FactionChestSqlHelper factionChestSqlHelper)
+	{
+		super(
+				logger,
+				sqlConnectionProvider,
+				factionProtectionFlagsStorage,
+				factionChestSqlHelper);
 	}
 }

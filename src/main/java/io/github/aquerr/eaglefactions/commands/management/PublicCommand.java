@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.commands.management;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
@@ -17,12 +19,14 @@ import java.util.Optional;
 
 public class PublicCommand extends AbstractCommand
 {
+	private final PermsManager permsManager;
 	private final MessageService messageService;
 
 	public PublicCommand(final EagleFactions plugin)
 	{
 		super(plugin);
 		this.messageService = plugin.getMessageService();
+		this.permsManager = plugin.getPermsManager();
 	}
 
 	@Override
@@ -58,8 +62,8 @@ public class PublicCommand extends AbstractCommand
 			return CommandResult.success();
 		}
 
-		if(!faction.getLeader().equals(player.uniqueId()) && !faction.getOfficers().contains(player.uniqueId()))
-			throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
+		if (!permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.MANAGE_IS_PUBLIC))
+			throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
 
 		super.getPlugin().getFactionLogic().setIsPublic(faction, !faction.isPublic());
 		player.sendMessage(message);

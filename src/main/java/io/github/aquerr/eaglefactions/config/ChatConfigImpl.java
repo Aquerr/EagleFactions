@@ -1,18 +1,12 @@
 package io.github.aquerr.eaglefactions.config;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
-import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class ChatConfigImpl implements ChatConfig
 {
@@ -30,8 +24,6 @@ public class ChatConfigImpl implements ChatConfig
 	private boolean showFactionEnterPhrase = true;
 	private TextColor defaultTagColor = NamedTextColor.GREEN;
 	private boolean displayFactionTagsInTabList = true;
-
-	private Map<ChatEnum, Set<FactionMemberType>> visibleRanks;
 
 	public ChatConfigImpl(final Configuration configuration)
 	{
@@ -53,7 +45,6 @@ public class ChatConfigImpl implements ChatConfig
 		this.showFactionEnterPhrase = this.configuration.getBoolean(true, "show-faction-enter-phrase");
 		this.displayFactionTagsInTabList = this.configuration.getBoolean(true, "display-faction-tags-in-tablist");
 
-		this.visibleRanks = loadVisibleRanks();
 		this.defaultTagColor = TextColor.fromHexString(this.configuration.getString(NamedTextColor.GREEN.asHexString(), "default-tag-color"));
 	}
 
@@ -118,30 +109,8 @@ public class ChatConfigImpl implements ChatConfig
 	}
 
 	@Override
-	public Map<ChatEnum, Set<FactionMemberType>> getVisibleRanks()
-	{
-		return this.visibleRanks;
-	}
-
-	@Override
 	public boolean shouldDisplayFactionTagsInTabList()
 	{
 		return displayFactionTagsInTabList;
-	}
-
-	private Map<ChatEnum, Set<FactionMemberType>> loadVisibleRanks()
-	{
-		Map<ChatEnum, Set<FactionMemberType>> visibleRanks = new HashMap<>();
-		final Set<FactionMemberType> globalRanks = new HashSet<>();
-		final Set<FactionMemberType> allianceRanks = new HashSet<>();
-		final Set<FactionMemberType> factionRanks = new HashSet<>();
-		globalRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "global-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		allianceRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "alliance-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		factionRanks.addAll(this.configuration.getListOfStrings(Collections.emptyList(), "visible-ranks", "faction-chat").stream().map(FactionMemberType::valueOf).collect(Collectors.toSet()));
-		visibleRanks.put(ChatEnum.GLOBAL, globalRanks);
-		visibleRanks.put(ChatEnum.ALLIANCE, allianceRanks);
-		visibleRanks.put(ChatEnum.FACTION, factionRanks);
-		visibleRanks = ImmutableMap.copyOf(visibleRanks);
-		return visibleRanks;
 	}
 }

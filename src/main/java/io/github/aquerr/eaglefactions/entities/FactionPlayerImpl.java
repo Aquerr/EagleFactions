@@ -2,12 +2,14 @@ package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -65,9 +67,11 @@ public class FactionPlayerImpl implements FactionPlayer
     }
 
     @Override
-    public FactionMemberType getFactionRole()
+    public List<Rank> getFactionRanks()
     {
-        return this.getFaction().map(faction -> faction.getPlayerMemberType(this.uniqueId)).orElse(FactionMemberType.NONE);
+        return this.getFaction()
+                .map(faction -> faction.getPlayerRanks(this.uniqueId))
+                .orElse(Collections.emptyList());
     }
 
     @Override

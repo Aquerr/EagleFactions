@@ -1,16 +1,18 @@
 package io.github.aquerr.eaglefactions.logic;
 
 import com.google.common.base.Preconditions;
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
@@ -18,6 +20,7 @@ import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClai
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.caching.FactionsCache;
+import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagsImpl;
@@ -39,6 +42,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,12 +57,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.text;
 
-/**
- * Created by Aquerr on 2017-07-12.
- */
 public class FactionLogicImpl implements FactionLogic
 {
-    private static final UUID DUMMY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    public static final UUID DUMMY_UUID = new UUID(0, 0);
     private static final String THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY = "error.general.there-is-no-faction-called-faction-name";
 
     private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
@@ -143,33 +144,17 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
 
         final List<ServerPlayer> factionPlayers = new ArrayList<>();
-        final UUID factionLeader = faction.getLeader();
-        if(!faction.getLeader().equals(DUMMY_UUID) && this.playerManager.isPlayerOnline(factionLeader))
+        final FactionMember factionLeader = faction.getLeader();
+        if(!faction.getLeader().getUniqueId().equals(DUMMY_UUID) && this.playerManager.isPlayerOnline(factionLeader.getUniqueId()))
         {
-            factionPlayers.add(playerManager.getPlayer(factionLeader).get());
+            factionPlayers.add(playerManager.getPlayer(factionLeader.getUniqueId()).get());
         }
 
-        for(final UUID uuid : faction.getOfficers())
+        for(final FactionMember factionMember : faction.getMembers())
         {
-            if(playerManager.isPlayerOnline(uuid))
+            if(playerManager.isPlayerOnline(factionMember.getUniqueId()))
             {
-                factionPlayers.add(playerManager.getPlayer(uuid).get());
-            }
-        }
-
-        for(final UUID uuid : faction.getMembers())
-        {
-            if(playerManager.isPlayerOnline(uuid))
-            {
-                factionPlayers.add(playerManager.getPlayer(uuid).get());
-            }
-        }
-
-        for(final UUID uuid : faction.getRecruits())
-        {
-            if(playerManager.isPlayerOnline(uuid))
-            {
-                factionPlayers.add(playerManager.getPlayer(uuid).get());
+                factionPlayers.add(playerManager.getPlayer(factionMember.getUniqueId()).get());
             }
         }
 
@@ -212,11 +197,11 @@ public class FactionLogicImpl implements FactionLogic
 
         //Update players...
         CompletableFuture.runAsync(() -> {
-            final Set<UUID> playerUUIDs = factionToDisband.getPlayers();
-            for (final UUID playerUUID : playerUUIDs)
+            final Set<FactionMember> playerUUIDs = factionToDisband.getMembers();
+            for (final FactionMember playerUUID : playerUUIDs)
             {
                 //Faction Player should always exists so we do not need to check if it is present.
-                final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID).get();
+                final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID.getUniqueId()).get();
                 final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
                 this.storageManager.savePlayer(updatedPlayer);
             }
@@ -254,22 +239,12 @@ public class FactionLogicImpl implements FactionLogic
 
         checkNotNull(faction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, factionName));
 
-        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
-        final Set<UUID> members = new HashSet<>(faction.getMembers());
-        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
+        if (faction.getLeader().getUniqueId().equals(playerUUID))
+            throw new IllegalArgumentException(messageService.resolveMessage("error.command.leave.you-cant-leave-your-faction-because-you-are-its-leader"));
 
-        if(faction.getRecruits().contains(playerUUID))
-        {
-            recruits.remove(playerUUID);
-        }
-        else if(faction.getMembers().contains(playerUUID))
-        {
-            members.remove(playerUUID);
-        }
-        else
-        {
-            officers.remove(playerUUID);
-        }
+        final Set<FactionMember> members = new HashSet<>(faction.getMembers());
+
+        members.removeIf(member -> member.getUniqueId().equals(playerUUID));
 
         //Remove player from claim owners
         final Set<Claim> updatedClaims = new HashSet<>();
@@ -280,7 +255,7 @@ public class FactionLogicImpl implements FactionLogic
             updatedClaims.add(updatedClaim);
         }
 
-        final Faction updatedFaction = faction.toBuilder().setRecruits(recruits).setMembers(members).setOfficers(officers).setClaims(updatedClaims).build();
+        final Faction updatedFaction = faction.toBuilder().members(members).claims(updatedClaims).build();
         storageManager.saveFaction(updatedFaction);
 
         //Save player...
@@ -290,71 +265,38 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void setFaction(UUID playerUUID, String factionName, FactionMemberType rank)
+    public void setFaction(UUID playerUUID,
+                           String factionName,
+                           @Nullable String rankName)
     {
         checkNotNull(playerUUID);
         checkNotNull(factionName);
-        checkNotNull(rank);
 
         // Delete player in old faction
         getFactionByPlayerUUID(playerUUID)
                 .ifPresent((faction) -> {
-                    if (playerUUID.equals(faction.getLeader()))
+                    if (playerUUID.equals(faction.getLeader().getUniqueId()))
                     {
-                        final Faction updatedFaction = faction.toBuilder()
-                                .setLeader(DUMMY_UUID)
-                                .build();
-
-                        storageManager.saveFaction(updatedFaction);
+                        EagleFactionsPlugin.getPlugin().getRankManager().setLeader(
+                                null, faction
+                        );
                     }
-                    else
-                    {
-                        leaveFaction(playerUUID, faction.getName());
-                    }
+                    leaveFaction(playerUUID, faction.getName());
                 });
 
         Faction faction = getFactionByName(factionName);
         checkNotNull(faction);
 
-        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
-        final Set<UUID> members = new HashSet<>(faction.getMembers());
-        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
+        final Set<FactionMember> members = new HashSet<>(faction.getMembers());
+        Rank newRank = Optional.ofNullable(rankName)
+                .flatMap(r -> faction.getRanks().stream()
+                        .filter(rank -> rank.getName().equals(rankName))
+                        .findFirst()
+                )
+                .orElse(faction.getDefaultRank());
+        members.add(new FactionMemberImpl(playerUUID, Set.of(newRank.getName())));
 
-        Faction.Builder factionBuilder = faction.toBuilder();
-
-        switch (rank)
-        {
-            case LEADER:
-            {
-                final UUID leaderUUID = faction.getLeader();
-                if (!DUMMY_UUID.equals(leaderUUID))
-                {
-                    officers.add(leaderUUID);
-                }
-                factionBuilder.setLeader(playerUUID).setOfficers(officers);
-                break;
-            }
-            case OFFICER:
-            {
-                officers.add(playerUUID);
-                factionBuilder.setOfficers(officers);
-                break;
-            }
-            case MEMBER:
-            {
-                members.add(playerUUID);
-                factionBuilder.setMembers(members);
-                break;
-            }
-            case RECRUIT:
-            {
-                recruits.add(playerUUID);
-                factionBuilder.setRecruits(recruits);
-                break;
-            }
-            default:
-        }
-
+        Faction.Builder factionBuilder = faction.toBuilder().members(members);
         storageManager.saveFaction(factionBuilder.build());
 
         //Save player...
@@ -381,8 +323,8 @@ public class FactionLogicImpl implements FactionLogic
         playerFactionAlliances.add(invitedFactionName);
         invitedFactionAlliances.add(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setTruces(playerFactionAlliances).build();
-        final Faction updatedInvitedFaction = invitedFaction.toBuilder().setTruces(invitedFactionAlliances).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().truces(playerFactionAlliances).build();
+        final Faction updatedInvitedFaction = invitedFaction.toBuilder().truces(invitedFactionAlliances).build();
 
         storageManager.saveFaction(updatedPlayerFaction);
         storageManager.saveFaction(updatedInvitedFaction);
@@ -406,8 +348,8 @@ public class FactionLogicImpl implements FactionLogic
         playerFactionAlliances.remove(removedFactionName);
         removedFactionAlliances.remove(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setTruces(playerFactionAlliances).build();
-        final Faction updatedRemovedFaction = removedFaction.toBuilder().setTruces(removedFactionAlliances).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().truces(playerFactionAlliances).build();
+        final Faction updatedRemovedFaction = removedFaction.toBuilder().truces(removedFactionAlliances).build();
 
         storageManager.saveFaction(updatedPlayerFaction);
         storageManager.saveFaction(updatedRemovedFaction);
@@ -434,8 +376,8 @@ public class FactionLogicImpl implements FactionLogic
         playerFactionAlliances.add(invitedFactionName);
         invitedFactionAlliances.add(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionAlliances).build();
-        final Faction updatedInvitedFaction = invitedFaction.toBuilder().setAlliances(invitedFactionAlliances).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().alliances(playerFactionAlliances).build();
+        final Faction updatedInvitedFaction = invitedFaction.toBuilder().alliances(invitedFactionAlliances).build();
 
         storageManager.saveFaction(updatedPlayerFaction);
         storageManager.saveFaction(updatedInvitedFaction);
@@ -460,8 +402,8 @@ public class FactionLogicImpl implements FactionLogic
         playerFactionAlliances.remove(removedFactionName);
         removedFactionAlliances.remove(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setAlliances(playerFactionAlliances).build();
-        final Faction updatedRemovedFaction = removedFaction.toBuilder().setAlliances(removedFactionAlliances).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().alliances(playerFactionAlliances).build();
+        final Faction updatedRemovedFaction = removedFaction.toBuilder().alliances(removedFactionAlliances).build();
 
         storageManager.saveFaction(updatedPlayerFaction);
         storageManager.saveFaction(updatedRemovedFaction);
@@ -485,8 +427,8 @@ public class FactionLogicImpl implements FactionLogic
         playerFactionEnemies.add(enemyFactionName);
         enemyFactionEnemies.add(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setEnemies(playerFactionEnemies).build();
-        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setEnemies(enemyFactionEnemies).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().enemies(playerFactionEnemies).build();
+        final Faction updatedEnemyFaction = enemyFaction.toBuilder().enemies(enemyFactionEnemies).build();
 
         storageManager.saveFaction(updatedPlayerFaction);
         storageManager.saveFaction(updatedEnemyFaction);
@@ -510,8 +452,8 @@ public class FactionLogicImpl implements FactionLogic
         playerFactionEnemies.remove(enemyFactionName);
         enemyFactionEnemies.remove(playerFactionName);
 
-        final Faction updatedPlayerFaction = playerFaction.toBuilder().setEnemies(playerFactionEnemies).build();
-        final Faction updatedEnemyFaction = enemyFaction.toBuilder().setEnemies(enemyFactionEnemies).build();
+        final Faction updatedPlayerFaction = playerFaction.toBuilder().enemies(playerFactionEnemies).build();
+        final Faction updatedEnemyFaction = enemyFaction.toBuilder().enemies(enemyFactionEnemies).build();
 
         storageManager.saveFaction(updatedPlayerFaction);
         storageManager.saveFaction(updatedEnemyFaction);
@@ -531,7 +473,7 @@ public class FactionLogicImpl implements FactionLogic
             ParticlesUtil.spawnClaimParticles(claim);
         }
 
-        final Faction updatedFaction = faction.toBuilder().setClaims(factionClaims).build();
+        final Faction updatedFaction = faction.toBuilder().claims(factionClaims).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -543,7 +485,7 @@ public class FactionLogicImpl implements FactionLogic
 
         final Set<Claim> claims = new HashSet<>(faction.getClaims());
         claims.add(claim);
-        final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
+        final Faction updatedFaction = faction.toBuilder().claims(claims).build();
         this.storageManager.saveFaction(updatedFaction);
 
 		ParticlesUtil.spawnClaimParticles(claim);
@@ -624,7 +566,7 @@ public class FactionLogicImpl implements FactionLogic
         final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
         updatedClaims.add(updatedClaim);
 
-        final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+        final Faction updatedFaction = faction.toBuilder().claims(updatedClaims).build();
 
         this.storageManager.saveFaction(updatedFaction);
         return true;
@@ -646,7 +588,7 @@ public class FactionLogicImpl implements FactionLogic
         final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
         updatedClaims.add(updatedClaim);
 
-        final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+        final Faction updatedFaction = faction.toBuilder().claims(updatedClaims).build();
 
         this.storageManager.saveFaction(updatedFaction);
         return true;
@@ -664,7 +606,7 @@ public class FactionLogicImpl implements FactionLogic
         final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claim.getOwners(), isAccessibleByFaction);
         updatedClaims.add(updatedClaim);
 
-        final Faction updatedFaction = faction.toBuilder().setClaims(updatedClaims).build();
+        final Faction updatedFaction = faction.toBuilder().claims(updatedClaims).build();
 
         this.storageManager.saveFaction(updatedFaction);
     }
@@ -676,11 +618,11 @@ public class FactionLogicImpl implements FactionLogic
 
         if (home != null && home.getBlockPosition() != null && home.getWorldUUID() != null)
         {
-            faction = faction.toBuilder().setHome(home).build();
+            faction = faction.toBuilder().home(home).build();
         }
         else
         {
-            faction = faction.toBuilder().setHome(null).build();
+            faction = faction.toBuilder().home(null).build();
         }
 
         storageManager.saveFaction(faction);
@@ -705,33 +647,17 @@ public class FactionLogicImpl implements FactionLogic
     {
         checkNotNull(faction);
 
-        if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
+        if(faction.getLeader() != null && !faction.getLeader().getUniqueId().toString().isEmpty())
         {
-            if(playerManager.isPlayerOnline(faction.getLeader()))
+            if(playerManager.isPlayerOnline(faction.getLeader().getUniqueId()))
             {
                 return true;
             }
         }
 
-        for(final UUID playerUUID : faction.getOfficers())
+        for(final FactionMember factionMember : faction.getMembers())
         {
-            if(playerManager.isPlayerOnline(playerUUID))
-            {
-                return true;
-            }
-        }
-
-        for(final UUID playerUUID : faction.getMembers())
-        {
-            if(playerManager.isPlayerOnline(playerUUID))
-            {
-                return true;
-            }
-        }
-
-        for(final UUID playerUUID : faction.getRecruits())
-        {
-            if(playerManager.isPlayerOnline(playerUUID))
+            if(playerManager.isPlayerOnline(factionMember.getUniqueId()))
             {
                 return true;
             }
@@ -749,7 +675,7 @@ public class FactionLogicImpl implements FactionLogic
         {
             FactionsCache.removeClaim(claim);
         }
-        final Faction updatedFaction = faction.toBuilder().setClaims(new HashSet<>()).build();
+        final Faction updatedFaction = faction.toBuilder().claims(new HashSet<>()).build();
         storageManager.saveFaction(updatedFaction);
     }
 
@@ -762,22 +688,8 @@ public class FactionLogicImpl implements FactionLogic
         final Faction faction = getFactionByName(factionName);
         checkNotNull(faction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, factionName));
 
-        final Set<UUID> officers = new HashSet<>(faction.getOfficers());
-        final Set<UUID> members = new HashSet<>(faction.getMembers());
-        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
-
-        if(faction.getRecruits().contains(playerUUID))
-        {
-            recruits.remove(playerUUID);
-        }
-        else if(faction.getMembers().contains(playerUUID))
-        {
-            members.remove(playerUUID);
-        }
-        else
-        {
-            officers.remove(playerUUID);
-        }
+        final Set<FactionMember> members = new HashSet<>(faction.getMembers());
+        members.removeIf(member -> member.getUniqueId().equals(playerUUID));
 
         //Remove player from claim owners
         final Set<Claim> updatedClaims = new HashSet<>();
@@ -789,10 +701,8 @@ public class FactionLogicImpl implements FactionLogic
         }
 
         final Faction updatedFaction = faction.toBuilder()
-                .setOfficers(officers)
-                .setMembers(members)
-                .setRecruits(recruits)
-                .setClaims(updatedClaims)
+                .members(members)
+                .claims(updatedClaims)
                 .build();
         this.storageManager.saveFaction(updatedFaction);
 
@@ -853,20 +763,20 @@ public class FactionLogicImpl implements FactionLogic
         }
     }
 
-    @Override
-    public void togglePerm(final Faction faction, final FactionMemberType factionMemberType, final FactionPermType factionPermType, final Boolean flagValue)
-    {
-        checkNotNull(faction);
-        checkNotNull(factionMemberType);
-        checkNotNull(factionPermType);
-        checkNotNull(flagValue);
-
-        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = new HashMap<>(faction.getPerms());
-        perms.get(factionMemberType).replace(factionPermType, flagValue);
-
-        final Faction updatedFaction = faction.toBuilder().setPerms(perms).build();
-        storageManager.saveFaction(updatedFaction);
-    }
+//    @Override
+//    public void togglePerm(final Faction faction, final FactionMemberType factionMemberType, final FactionPermission factionPermission, final Boolean flagValue)
+//    {
+//        checkNotNull(faction);
+//        checkNotNull(factionMemberType);
+//        checkNotNull(factionPermission);
+//        checkNotNull(flagValue);
+//
+//        final Map<FactionMemberType, Map<FactionPermission, Boolean>> perms = new HashMap<>(faction.getPerms());
+//        perms.get(factionMemberType).replace(factionPermission, flagValue);
+//
+//        final Faction updatedFaction = faction.toBuilder().setPerms(perms).build();
+//        storageManager.saveFaction(updatedFaction);
+//    }
 
     @Override
     public void changeTagColor(final Faction faction, final NamedTextColor textColor)
@@ -875,7 +785,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(textColor);
 
         final TextComponent text = text(PlainTextComponentSerializer.plainText().serialize(faction.getTag()), textColor);
-        final Faction updatedFaction = faction.toBuilder().setTag(text).build();
+        final Faction updatedFaction = faction.toBuilder().tag(text).build();
         storageManager.saveFaction(updatedFaction);
     }
 
@@ -885,7 +795,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(instantTime);
 
-        final Faction updatedFaction = faction.toBuilder().setLastOnline(instantTime).build();
+        final Faction updatedFaction = faction.toBuilder().lastOnline(instantTime).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -895,7 +805,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         Validate.notBlank(newFactionName);
 
-        Faction updatedFaction = faction.toBuilder().setName(newFactionName).build();
+        Faction updatedFaction = faction.toBuilder().name(newFactionName).build();
         this.storageManager.saveFaction(updatedFaction);
 
         // Update other factions
@@ -919,10 +829,10 @@ public class FactionLogicImpl implements FactionLogic
                 addEnemy(enemy, newFactionName);
             }
         }).thenRunAsync(() -> {
-           final Set<UUID> playerUUIDs = updatedFaction.getPlayers();
-           for (final UUID playerUUID : playerUUIDs)
+           final Set<FactionMember> playerUUIDs = updatedFaction.getMembers();
+           for (final FactionMember playerUUID : playerUUIDs)
            {
-               final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
+               final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID.getUniqueId());
                final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), updatedFaction.getName(), factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
                this.storageManager.savePlayer(updatedPlayer);
            }
@@ -935,7 +845,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         Validate.notBlank(newTag);
 
-        final Faction updatedFaction = faction.toBuilder().setTag(text(newTag, faction.getTag().color())).build();
+        final Faction updatedFaction = faction.toBuilder().tag(text(newTag, faction.getTag().color())).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -945,7 +855,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(inventory);
 
-        final Faction updatedFaction = faction.toBuilder().setChest(inventory).build();
+        final Faction updatedFaction = faction.toBuilder().chest(inventory).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -955,7 +865,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(description);
 
-        final Faction updatedFaction = faction.toBuilder().setDescription(description).build();
+        final Faction updatedFaction = faction.toBuilder().description(description).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -965,7 +875,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(motd);
 
-        final Faction updatedFaction = faction.toBuilder().setMessageOfTheDay(motd).build();
+        final Faction updatedFaction = faction.toBuilder().messageOfTheDay(motd).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -974,7 +884,7 @@ public class FactionLogicImpl implements FactionLogic
     {
         checkNotNull(faction);
 
-        final Faction updatedFaction = faction.toBuilder().setIsPublic(isPublic).build();
+        final Faction updatedFaction = faction.toBuilder().isPublic(isPublic).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -997,7 +907,7 @@ public class FactionLogicImpl implements FactionLogic
 
         ProtectionFlags protectionFlags = new ProtectionFlagsImpl(faction.getProtectionFlags());
         protectionFlags.putFlag(new ProtectionFlagImpl(flagType, value));
-        Faction updatedFaction = faction.toBuilder().setProtectionFlags(protectionFlags.getProtectionFlags()).build();
+        Faction updatedFaction = faction.toBuilder().protectionFlags(protectionFlags.getProtectionFlags()).build();
         this.storageManager.saveFaction(updatedFaction);
     }
 
@@ -1005,7 +915,7 @@ public class FactionLogicImpl implements FactionLogic
     {
         final Set<Claim> claims = new HashSet<>(faction.getClaims());
         claims.remove(claim);
-        final Faction updatedFaction = faction.toBuilder().setClaims(claims).build();
+        final Faction updatedFaction = faction.toBuilder().claims(claims).build();
         FactionsCache.removeClaim(claim);
         this.storageManager.saveFaction(updatedFaction);
     }

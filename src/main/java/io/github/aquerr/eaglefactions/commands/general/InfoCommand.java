@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands.general;
 import io.github.aquerr.eaglefactions.PluginPermissions;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
@@ -34,7 +35,6 @@ import java.util.stream.Collectors;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
@@ -105,31 +105,19 @@ public class InfoCommand extends AbstractCommand
         final List<Component> factionInfo = new ArrayList<>();
 
         Component leaderNameText = empty();
-        if(faction.getLeader() != null && !faction.getLeader().equals(new UUID(0,0)))
+        if(faction.getLeader() != null && !faction.getLeader().getUniqueId().equals(new UUID(0,0)))
         {
-            final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(faction.getLeader());
+            final Optional<FactionPlayer> optionalFactionPlayer = super.getPlugin().getPlayerManager().getFactionPlayer(faction.getLeader().getUniqueId());
             if (optionalFactionPlayer.isPresent())
             {
                 leaderNameText = buildClickablePlayerNickname(optionalFactionPlayer.get());
             }
         }
 
-        Component recruitList = empty();
-        if(!faction.getRecruits().isEmpty())
-        {
-            recruitList = buildPlayerList(faction.getRecruits());
-        }
-
         Component membersList = empty();
         if(!faction.getMembers().isEmpty())
         {
         	membersList = buildPlayerList(faction.getMembers());
-        }
-
-        Component officersList = empty();
-        if(!faction.getOfficers().isEmpty())
-        {
-        	officersList = buildPlayerList(faction.getOfficers());
         }
 
         Component info = text()
@@ -140,9 +128,7 @@ public class InfoCommand extends AbstractCommand
                 .append(messageService.resolveComponentWithMessage("command.info.motd", faction.getMessageOfTheDay())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.public", faction.isPublic())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.leader", leaderNameText.color(GOLD))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.officers", officersList.color(GOLD))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.members", membersList.color(GREEN))).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.recruits", recruitList.color(DARK_AQUA))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.power", super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + this.factionLogic.getFactionMaxClaims(faction)))
                 .build();
@@ -167,10 +153,10 @@ public class InfoCommand extends AbstractCommand
         return text(formattedDate, RED);
     }
 
-    private Component buildPlayerList(Collection<UUID> playerUUIDs)
+    private Component buildPlayerList(Collection<FactionMember> factionMembers)
     {
-        return Component.join(JoinConfiguration.separator(text(",")), playerUUIDs.stream()
-                .map(recruit -> getPlugin().getPlayerManager().getFactionPlayer(recruit))
+        return Component.join(JoinConfiguration.separator(text(",")), factionMembers.stream()
+                .map(recruit -> getPlugin().getPlayerManager().getFactionPlayer(recruit.getUniqueId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(this::buildClickablePlayerNickname)

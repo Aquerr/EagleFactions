@@ -1,13 +1,9 @@
 package io.github.aquerr.eaglefactions.storage.file.hocon;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.storage.PlayerStorage;
 import io.github.aquerr.eaglefactions.util.FileUtils;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
@@ -19,8 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class HOCONPlayerStorage implements PlayerStorage
 {

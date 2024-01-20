@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
+import io.github.aquerr.eaglefactions.entities.RankImpl;
 import net.kyori.adventure.text.TextComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,12 +21,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,18 +53,18 @@ class FactionLogicImplTest
     private FactionLogicImpl factionLogic;
 
     @Test
-    public void whenGettingFactionByNullPlayerThenThrowNullPointerException()
+    void whenGettingFactionByNullPlayerThenThrowNullPointerException()
     {
         assertThrows(NullPointerException.class, () -> factionLogic.getFactionByPlayerUUID(null));
     }
 
     @Test
-    public void whenGettingFactionByPlayerThenReturnFaction()
+    void whenGettingFactionByPlayerThenReturnFaction()
     {
         //given
         when(playerManager.getFactionPlayer(any(UUID.class))).thenReturn(Optional.of(factionPlayer));
         when(factionPlayer.getFactionName()).thenReturn(Optional.of("Test"));
-        when(storageManager.getFaction("Test")).thenReturn(FactionImpl.builder("Test", text("Tag"), UUID.randomUUID()).build());
+        when(storageManager.getFaction("Test")).thenReturn(prepareFaction());
 
         //when
         final Optional<Faction> faction = factionLogic.getFactionByPlayerUUID(UUID.randomUUID());
@@ -72,7 +75,7 @@ class FactionLogicImplTest
     }
 
     @Test
-    public void whenGettingFactionByPlayerThatIsNotInFactionThenReturnEmptyFaction()
+    void whenGettingFactionByPlayerThatIsNotInFactionThenReturnEmptyFaction()
     {
         //given
         when(playerManager.getFactionPlayer(any(UUID.class))).thenReturn(Optional.of(factionPlayer));
@@ -87,7 +90,7 @@ class FactionLogicImplTest
     }
 
     @Test
-    public void whenGettingFactionByNullWorldAndChunkThenThrowNullPointerException()
+    void whenGettingFactionByNullWorldAndChunkThenThrowNullPointerException()
     {
         //given
         //when
@@ -96,13 +99,13 @@ class FactionLogicImplTest
     }
 
     @Test
-    public void whenGettingFactionByWorldAndChunkThenReturnFaction()
+    void whenGettingFactionByWorldAndChunkThenReturnFaction()
     {
         //given
         final UUID worldUUID = UUID.randomUUID();
         final Vector3i chunk = Vector3i.ZERO;
         final Claim claim = new Claim(worldUUID, chunk);
-        final Faction faction = FactionImpl.builder("Test", text("TS"), UUID.randomUUID()).setClaims(ImmutableSet.of(claim)).build();
+        final Faction faction = prepareFaction().toBuilder().claims(ImmutableSet.of(claim)).build();
 
         when(factionLogic.getFactions()).thenReturn(ImmutableMap.of("test", faction));
 
@@ -111,11 +114,11 @@ class FactionLogicImplTest
 
         //then
         assertTrue(resultFaction.isPresent());
-        assertEquals("Test", resultFaction.get().getName());
+        assertEquals(FACTION_NAME, resultFaction.get().getName());
     }
 
     @Test
-    public void whenGettingFactionByWorldAndChunkThenReturnEmptyFaction()
+    void whenGettingFactionByWorldAndChunkThenReturnEmptyFaction()
     {
         //given
         final UUID worldUUID = UUID.randomUUID();
@@ -131,7 +134,7 @@ class FactionLogicImplTest
     }
 
     @Test
-    public void whenGettingFactionByEmptyNameThenThrowException()
+    void whenGettingFactionByEmptyNameThenThrowException()
     {
         assertThrows(NullPointerException.class, () -> factionLogic.getFactionByName(null));
         assertThrows(IllegalArgumentException.class, () -> factionLogic.getFactionByName(""));
@@ -231,6 +234,11 @@ class FactionLogicImplTest
 
     private Faction prepareFaction()
     {
-        return FactionImpl.builder(FACTION_NAME, FACTION_TAG, PLAYER_UUID).build();
+        return FactionImpl.builder(FACTION_NAME, FACTION_TAG, PLAYER_UUID)
+                .ranks(List.of(RankImpl.builder()
+                                .name("test")
+                        .build()))
+                .defaultRankName("test")
+                .build();
     }
 }

@@ -1,143 +1,136 @@
-
 -- Create Version Table
-CREATE TABLE `Version` (
-  `Version` INT NOT NULL,
-  PRIMARY KEY (`Version`)
+CREATE TABLE `version`
+(
+    `version` INT UNIQUE NOT NULL,
+    PRIMARY KEY (`version`)
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `Version_UNIQUE` ON `Version` (`Version`);
 
 -- Create Factions Table
-CREATE TABLE `Factions` (
-  `Name` VARCHAR(200) NOT NULL,
-  `Tag` VARCHAR(200) NOT NULL,
-  `TagColor` VARCHAR(40) NULL,
-  `Leader` VARCHAR(36) NOT NULL,
-  `Home` VARCHAR(200) NULL,
-  `LastOnline` VARCHAR(200) NOT NULL,
-  PRIMARY KEY (`Name`)
+CREATE TABLE `faction`
+(
+    `name`              VARCHAR(200) NOT NULL,
+    `tag`               VARCHAR(200) NOT NULL,
+    `tag_color`         VARCHAR(40)  NULL,
+    `leader`            VARCHAR(36)  NOT NULL,
+    `home`              VARCHAR(200) NULL,
+    `last_online`       DATETIME     NOT NULL,
+    `description`       VARCHAR(255) NOT NULL,
+    `motd`              VARCHAR(255) NOT NULL,
+    `is_public`         BOOLEAN      NOT NULL,
+    `created_date`      DATETIME     NOT NULL,
+    `default_rank_name` VARCHAR(36)  NOT NULL,
+    PRIMARY KEY (`name`)
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `Name_UNIQUE` ON `Factions` (`Name`);
-
--- Create Recruits Table
-CREATE TABLE `FactionRecruits` (
-  `RecruitUUID` VARCHAR(36) NOT NULL,
-  `FactionName` VARCHAR(200) NOT NULL
-) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `RecruitUUID_UNIQUE` ON `FactionRecruits` (`RecruitUUID`);
 
 -- Create Members Table
-CREATE TABLE `FactionMembers` (
-  `MemberUUID` VARCHAR(36) NOT NULL,
-  `FactionName` VARCHAR(200) NOT NULL
-) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `MemberUUID_UNIQUE` ON `FactionMembers` (`MemberUUID`);
-
--- Create Officers Table
-CREATE TABLE `FactionOfficers` (
-  `OfficerUUID` VARCHAR(36) NOT NULL,
-  `FactionName` VARCHAR(200) NOT NULL
-) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `OfficerUUID_UNIQUE` ON `FactionOfficers` (`OfficerUUID`);
-
--- Create FactionAlliances Table
-CREATE TABLE FactionAlliances (
-  `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL
+CREATE TABLE `faction_member`
+(
+    `member_uuid`  VARCHAR(36) UNIQUE NOT NULL,
+    `faction_name` VARCHAR(200)       NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
 
--- Create FactionEnemies Table
-CREATE TABLE FactionEnemies (
-  `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL
+-- Create Faction Ranks Table
+CREATE TABLE `faction_rank`
+(
+    `name`            VARCHAR(36)  NOT NULL,
+    `faction_name`    VARCHAR(200) NOT NULL,
+    `display_name`    VARCHAR(36),
+    `ladder_position` INT          NOT NULL,
+    `display_in_chat` BOOLEAN      NOT NULL,
+    PRIMARY KEY (`name`, `faction_name`)
 ) DEFAULT CHARSET = utf8mb4;
 
--- Create FactionTruces Table
-CREATE TABLE FactionTruces (
-  `FactionName_1` VARCHAR(200) NOT NULL,
-  `FactionName_2` VARCHAR(200) NOT NULL
+-- Create Faction Rank Permissions
+CREATE TABLE `faction_rank_permission`
+(
+    `faction_name` VARCHAR(200) NOT NULL,
+    `rank_name`    VARCHAR(36)  NOT NULL,
+    `permission`   VARCHAR(36)  NOT NULL,
+    PRIMARY KEY (`faction_name`, `rank_name`, `permission`)
 ) DEFAULT CHARSET = utf8mb4;
 
--- Create OfficerPerms Table
-CREATE TABLE `OfficerPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  `Claim` TINYINT(1) NOT NULL,
-  `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL
+-- Create Faction Member Rank Mapping Table
+CREATE TABLE `faction_member_rank`
+(
+    `member_uuid`  VARCHAR(36)  NOT NULL,
+    `faction_name` VARCHAR(200) NOT NULL,
+    `rank_name`    VARCHAR(36)  NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `OfficerPerms` (`FactionName`);
 
--- Create MemberPerms Table
-CREATE TABLE `MemberPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  `Claim` TINYINT(1) NOT NULL,
-  `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL
+-- Create Faction Relation Table
+CREATE TABLE `faction_relation`
+(
+    `faction_name_1` VARCHAR(200) NOT NULL,
+    `faction_name_2` VARCHAR(200) NOT NULL,
+    `relation_type`  VARCHAR(20)  NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `MemberPerms` (`FactionName`);
 
--- Create RecruitPerms Table
-CREATE TABLE `RecruitPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL,
-  `Claim` TINYINT(1) NOT NULL,
-  `Attack` TINYINT(1) NOT NULL,
-  `Invite` TINYINT(1) NOT NULL
+-- Relation permissions
+CREATE TABLE `faction_relation_permission`
+(
+    `faction_name`  VARCHAR(200) NOT NULL,
+    `relation_type` VARCHAR(20)  NOT NULL,
+    `permission`    VARCHAR(36)  NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `RecruitPerms` (`FactionName`);
-
--- Create AllyPerms Table
-CREATE TABLE `AllyPerms` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `Use` TINYINT(1) NOT NULL,
-  `Place` TINYINT(1) NOT NULL,
-  `Destroy` TINYINT(1) NOT NULL
-) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `AllyPerms` (`FactionName`);
-
--- Create TrucePerms Table
-CREATE TABLE `TrucePerms` (
-    `FactionName` VARCHAR(200) NOT NULL,
-    `Use` TINYINT(1) NOT NULL,
-    `Place` TINYINT(1) NOT NULL,
-    `Destroy` TINYINT(1) NOT NULL
-) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `TrucePerms` (`FactionName`);
 
 -- Create Claims Table
-CREATE TABLE `Claims` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `WorldUUID` VARCHAR(36) NOT NULL,
-  `ChunkPosition` VARCHAR(200) NOT NULL,
-  PRIMARY KEY (`WorldUUID`, `ChunkPosition`)
+CREATE TABLE `claim`
+(
+    `faction_name`             VARCHAR(200) NOT NULL,
+    `world_uuid`               VARCHAR(36)  NOT NULL,
+    `chunk_position`           VARCHAR(200) NOT NULL,
+    `is_accessible_by_faction` BOOLEAN      NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`world_uuid`, `chunk_position`)
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `Claim_UNIQUE` ON `Claims` (`WorldUUID`, `ChunkPosition`);
+
+CREATE TABLE claim_owner
+(
+    `world_uuid`     VARCHAR(36)  NOT NULL,
+    `chunk_position` VARCHAR(200) NOT NULL,
+    `player_uuid`    VARCHAR(36)  NOT NULL,
+    PRIMARY KEY (`world_uuid`, `chunk_position`)
+) DEFAULT CHARSET = utf8mb4;
 
 -- Create FactionsChest Table
-CREATE TABLE `FactionChests` (
-  `FactionName` VARCHAR(200) NOT NULL,
-  `ChestItems` BLOB NOT NULL
+CREATE TABLE faction_chest
+(
+    `faction_name` VARCHAR(200) PRIMARY KEY NOT NULL,
+    `chest_items`  BINARY                   NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `FactionName_UNIQUE` ON `FactionChests` (`FactionName`);
 
 -- Create Players Table
-CREATE TABLE `Players` (
-  `PlayerUUID` VARCHAR(36) NOT NULL,
-  `Name` VARCHAR(200) NOT NULL,
-  `Faction` VARCHAR(200) NULL,
-  `Power` FLOAT NOT NULL,
-  `MaxPower` FLOAT NOT NULL,
-  `DeathInWarzone` TINYINT(1) NOT NULL,
-  PRIMARY KEY (`PlayerUUID`)
+CREATE TABLE player
+(
+    `player_uuid`      VARCHAR(36) PRIMARY KEY NOT NULL,
+    `name`             VARCHAR(200)            NOT NULL,
+    `faction_name`     VARCHAR(200)            NULL,
+    `power`            FLOAT                   NOT NULL,
+    `max_power`        FLOAT                   NOT NULL,
+    `death_in_warzone` TINYINT(1)              NOT NULL
 ) DEFAULT CHARSET = utf8mb4;
-CREATE UNIQUE INDEX `PlayerUUID_UNIQUE` ON `Players` (`PlayerUUID`);
+
+-- Protection Flags
+CREATE TABLE protection_flag_type
+(
+    `id`        INT PRIMARY KEY NOT NULL,
+    `flag_type` VARCHAR(200)    NOT NULL
+);
+
+CREATE TABLE faction_protection_flag
+(
+    `faction_name`            VARCHAR(200) NOT NULL,
+    `protection_flag_type_id` INT          NOT NULL,
+    `flag_value`              BOOLEAN      NOT NULL,
+    UNIQUE (`faction_name`, `protection_flag_type_id`)
+);
+
+INSERT INTO protection_flag_type VALUES (1, 'SPAWN_MONSTERS'),
+       (2, 'SPAWN_ANIMALS'),
+       (3, 'FIRE_SPREAD'),
+       (4, 'ALLOW_EXPLOSION'),
+       (5, 'MOB_GRIEF'),
+       (6, 'PVP'),
+       (7, 'TERRITORY_POWER_LOSS');
 
 -- Set database version to 1
-INSERT INTO Version VALUES (1);
+INSERT INTO `version` VALUES (1);

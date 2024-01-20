@@ -3,10 +3,13 @@ package io.github.aquerr.eaglefactions.commands.management;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.validator.AlphaNumericFactionNameTagValidator;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -19,12 +22,14 @@ public class TagCommand extends AbstractCommand
     private final FactionsConfig factionsConfig;
     private final AlphaNumericFactionNameTagValidator alphaNumericFactionNameTagValidator = AlphaNumericFactionNameTagValidator.getInstance();
     private final MessageService messageService;
+    private final PermsManager permsManager;
 
     public TagCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.messageService = plugin.getMessageService();
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -38,8 +43,8 @@ public class TagCommand extends AbstractCommand
         final Faction faction = requirePlayerFaction(player);
 
         //Check if player is leader
-        if (!faction.getLeader().equals(player.uniqueId()))
-            throw messageService.resolveExceptionWithMessage("error.command.perms.leader-required");
+        if (!permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.MANAGE_TAG_NAME))
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
 
         //Check if faction with such tag already exists
         if(super.getPlugin().getFactionLogic().getFactionsTags().stream().anyMatch(x -> x.equalsIgnoreCase(newFactionTag)))

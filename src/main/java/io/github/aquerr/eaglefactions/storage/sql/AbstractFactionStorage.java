@@ -1,299 +1,119 @@
 package io.github.aquerr.eaglefactions.storage.sql;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
+import io.github.aquerr.eaglefactions.api.entities.RelationType;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
+import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
+import io.github.aquerr.eaglefactions.entities.RankImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.InventorySerializer;
-import io.github.aquerr.eaglefactions.storage.sql.h2.H2Provider;
-import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbProvider;
-import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLProvider;
-import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
 
 public abstract class AbstractFactionStorage implements FactionStorage
 {
-    private static final String SELECT_FACTION_NAMES = "SELECT Name FROM Factions";
-    private static final String SELECT_RECRUITS_WHERE_FACTIONNAME = "SELECT RecruitUUID FROM FactionRecruits WHERE FactionName=?";
-    private static final String SELECT_OFFICERS_WHERE_FACTIONNAME = "SELECT OfficerUUID FROM FactionOfficers WHERE FactionName=?";
-    private static final String SELECT_MEMBERS_WHERE_FACTIONNAME = "SELECT MemberUUID FROM FactionMembers WHERE FactionName=?";
-    private static final String SELECT_CLAIMS_WHERE_FACTIONNAME = "SELECT * FROM Claims WHERE FactionName=?";
-    private static final String SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK = "SELECT * FROM ClaimOwners WHERE WorldUUID=? AND ChunkPosition=?";
-    private static final String SELECT_CHEST_WHERE_FACTIONNAME = "SELECT ChestItems FROM FactionChests WHERE FactionName=?";
-    private static final String SELECT_OFFICER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM OfficerPerms WHERE FactionName=?";
-    private static final String SELECT_MEMBER_PERMS_WHERE_FACTIONNAME = "SELECT * FROM MemberPerms WHERE FactionName=?";
-    private static final String SELECT_RECRUIT_PERMS_WHERE_FACTIONNAME = "SELECT * FROM RecruitPerms WHERE FactionName=?";
-    private static final String SELECT_TRUCE_PERMS_WHERE_FACTIONNAME = "SELECT * FROM TrucePerms WHERE FactionName=?";
-    private static final String SELECT_ALLY_PERMS_WHERE_FACTIONNAME = "SELECT * FROM AllyPerms WHERE FactionName=?";
-    private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM Factions WHERE Name=?";
-    private static final String SELECT_FACTION_ALLIANCES = "SELECT * FROM FactionAlliances WHERE FactionName_1=? OR FactionName_2=?";
-    private static final String SELECT_FACTION_ENEMIES = "SELECT * FROM FactionEnemies WHERE FactionName_1=? OR FactionName_2=?";
-    private static final String SELECT_FACTION_TRUCES = "SELECT * FROM FactionTruces WHERE FactionName_1=? OR FactionName_2=?";
+    private static final String SELECT_FACTION_NAMES = "SELECT name FROM faction";
+    private static final String SELECT_MEMBERS_WHERE_FACTIONNAME = "SELECT faction_member.member_uuid, rank_name " +
+            "FROM faction_member " +
+            "JOIN faction_member_rank ON faction_member.member_uuid = faction_member_rank.member_uuid " +
+            "WHERE faction_member.faction_name=?";
+    private static final String SELECT_MEMBERS_RANKS_WHERE_MEMBER_UUID = "SELECT rank_name FROM faction_member_rank WHERE faction_name=? AND member_uuid=?";
+    private static final String SELECT_CLAIMS_WHERE_FACTIONNAME = "SELECT * FROM claim WHERE faction_name=?";
+    private static final String SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK = "SELECT * FROM claim_owner WHERE world_uuid=? AND chunk_position=?";
+    private static final String SELECT_CHEST_WHERE_FACTIONNAME = "SELECT chest_items FROM faction_chest WHERE faction_name=?";
+    private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM faction WHERE name=?";
+    private static final String SELECT_FACTION_RELATIONS_BY_TYPE = "SELECT * FROM faction_relation WHERE relation_type=? AND (faction_name_1=? OR faction_name_2=?)";
+    private static final String SELECT_RELATION_PERMISSION_WHERE_FACTION_NAME = "SELECT permission FROM faction_relation_permission WHERE faction_name=? AND relation_type=?";
+    private static final String SELECT_FACTION_RANKS_WHERE_FACTION_NAME = "SELECT name, faction_name, display_name, ladder_position, display_in_chat FROM faction_rank WHERE faction_name=?";
+    private static final String SELECT_FACTION_RANK_PERMSSIONS_WHERE_FACTION_NAME = "SELECT rank_name, faction_name, permission FROM faction_rank_permission WHERE faction_name=?";
+    private static final String INSERT_FACTION = "INSERT INTO faction (name, tag, tag_color, leader, home, last_online, description, motd, is_public, created_date, default_rank_name) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_CLAIM = "INSERT INTO claim (faction_name, world_uuid, chunk_position, is_accessible_by_faction) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_CLAIM_OWNER = "INSERT INTO claim_owner (world_uuid, chunk_position, player_uuid) VALUES (?, ?, ?)";
+    private static final String INSERT_MEMBER = "INSERT INTO faction_member (member_uuid, faction_name) VALUES (?, ?)";
+    private static final String INSERT_MEMBER_RANK_MAPPING = "INSERT INTO faction_member_rank (member_uuid, faction_name, rank_name) VALUES (?, ?, ?)";
+    private static final String INSERT_RELATION = "INSERT INTO faction_relation (relation_type, faction_name_1, faction_name_2) VALUES (?, ?, ?)";
+    private static final String INSERT_RELATION_PERMISSION = "INSERT INTO faction_relation_permission (faction_name, relation_type, permission) VALUES (?, ?, ?)";
+    private static final String INSERT_RANK = "INSERT INTO faction_rank (name, faction_name, display_name, ladder_position, display_in_chat) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_RANK_PERMISSION = "INSERT INTO faction_rank_permission (faction_name, rank_name, permission) VALUES (?, ?, ?)";
+    private static final String UPDATE_FACTION = "UPDATE faction SET name = ?, tag = ?, tag_color = ?, leader = ?, home = ?, last_online = ?, description = ?, motd = ?, is_public = ?, created_date = ?, default_rank_name = ? " +
+            "WHERE name = ?";
 
-    private static final String INSERT_FACTION = "INSERT INTO Factions (Name, Tag, TagColor, Leader, Home, LastOnline, Description, Motd, IsPublic, CreatedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_CLAIM = "INSERT INTO Claims (FactionName, WorldUUID, ChunkPosition, IsAccessibleByFaction) VALUES (?, ?, ?, ?)";
-    private static final String INSERT_CLAIM_OWNER = "INSERT INTO ClaimOwners (WorldUUID, ChunkPosition, PlayerUUID) VALUES (?, ?, ?)";
-    private static final String INSERT_CHEST = "INSERT INTO FactionChests (FactionName, ChestItems) VALUES (?, ?)";
-    private static final String INSERT_OFFICERS = "INSERT INTO FactionOfficers (OfficerUUID, FactionName) VALUES (?, ?)";
-    private static final String INSERT_MEMBERS = "INSERT INTO FactionMembers (MemberUUID, FactionName) VALUES (?, ?)";
-    private static final String INSERT_RECRUITS = "INSERT INTO FactionRecruits (RecruitUUID, FactionName) VALUES (?, ?)";
-    private static final String INSERT_OFFICER_PERMS = "INSERT INTO OfficerPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite, Chest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_MEMBER_PERMS = "INSERT INTO MemberPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite, Chest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_RECRUIT_PERMS = "INSERT INTO RecruitPerms (FactionName, `Use`, Place, Destroy, Claim, Attack, Invite, Chest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_ALLY_PERMS = "INSERT INTO AllyPerms (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
-    private static final String INSERT_TRUCE_PERMS = "INSERT INTO TrucePerms (FactionName, `Use`, Place, Destroy) VALUES (?, ?, ?, ?)";
-    private static final String INSERT_FACTION_ALLIANCE = "INSERT INTO FactionAlliances (FactionName_1, FactionName_2) VALUES (?, ?)";
-    private static final String INSERT_FACTION_ENEMY = "INSERT INTO FactionEnemies (FactionName_1, FactionName_2) VALUES (?, ?)";
-    private static final String INSERT_FACTION_TRUCE = "INSERT INTO FactionTruces (FactionName_1, FactionName_2) VALUES (?, ?)";
-
-    private static final String UPDATE_FACTION = "UPDATE Factions SET Name = ?, Tag = ?, TagColor = ?, Leader = ?, Home = ?, LastOnline = ?, Description = ?, Motd = ?, IsPublic = ?, CreatedDate = ? WHERE Name = ?";
-    private static final String UPDATE_OFFICER_PERMS = "UPDATE OfficerPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
-    private static final String UPDATE_MEMBER_PERMS = "UPDATE MemberPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
-    private static final String UPDATE_RECRUIT_PERMS = "UPDATE RecruitPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ?, Claim = ?, Attack = ?, Invite = ?, Chest = ? WHERE FactionName = ?";
-    private static final String UPDATE_ALLY_PERMS = "UPDATE AllyPerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
-    private static final String UPDATE_TRUCE_PERMS = "UPDATE TrucePerms SET FactionName = ?, `Use` = ?, Place = ?, Destroy = ? WHERE FactionName = ?";
-
-    private static final String DELETE_FACTIONS = "DELETE FROM Factions";
-    private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM Factions WHERE Name=?";
-    private static final String DELETE_OFFICERS_WHERE_FACIONNAME = "DELETE FROM FactionOfficers WHERE FactionName=?";
-    private static final String DELETE_MEMBERS_WHERE_FACIONNAME = "DELETE FROM FactionMembers WHERE FactionName=?";
-    private static final String DELETE_RECRUITS_WHERE_FACIONNAME = "DELETE FROM FactionRecruits WHERE FactionName=?";
-    private static final String DELETE_FACTION_CHEST_WHERE_FACTIONNAME = "DELETE FROM FactionChests WHERE FactionName=?";
-    private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM Claims WHERE FactionName=?";
-    private static final String DELETE_ALL_FACTION_ALLIANCES_FOR_FACTION = "DELETE FROM FactionAlliances WHERE FactionName_1=? OR FactionName_2=?";
-    private static final String DELETE_ALL_FACTION_ENEMIES_FOR_FACTION = "DELETE FROM FactionEnemies WHERE FactionName_1=? OR FactionName_2=?";
-    private static final String DELETE_ALL_FACTION_TRUCES_FOR_FACTION = "DELETE FROM FactionTruces WHERE FactionName_1=? OR FactionName_2=?";
-    private static final String DELETE_FACTION_ALLIANCE_BETWEEN_FACTIONS = "DELETE FROM FactionAlliances WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
-    private static final String DELETE_FACTION_ENEMY_BETWEEN_FACTIONS = "DELETE FROM FactionEnemies WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
-    private static final String DELETE_FACTION_TRUCE_BETWEEN_FACTIONS = "DELETE FROM FactionTruces WHERE (FactionName_1=? AND FactionName_2=?) OR (FactionName_1=? AND FactionName_2=?)";
-    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION = "DELETE FROM ClaimOwners WHERE WorldUUID=? AND ChunkPosition=?";
-
-    private static final String DELETE_FACTION_ALLY_PERMS = "DELETE FROM AllyPerms WHERE FactionName=?";
-    private static final String DELETE_FACTION_TRUCE_PERMS = "DELETE FROM TrucePerms WHERE FactionName=?";
-    private static final String DELETE_FACTION_OFFICER_PERMS = "DELETE FROM OfficerPerms WHERE FactionName=?";
-    private static final String DELETE_FACTION_MEMBER_PERMS = "DELETE FROM MemberPerms WHERE FactionName=?";
-    private static final String DELETE_FACTION_RECRUIT_PERMS = "DELETE FROM RecruitPerms WHERE FactionName=?";
-
-    private final EagleFactions plugin;
-    private final SQLProvider sqlProvider;
+    private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM faction WHERE name=?";
+    private static final String DELETE_FACTION_RANKS_WHERE_FACTION_NAME = "DELETE FROM faction_rank WHERE faction_name=?";
+    private static final String DELETE_MEMBERS_WHERE_FACIONNAME = "DELETE FROM faction_member WHERE faction_name=?";
+    private static final String DELETE_MEMBERS_RANKS_WHERE_FACTIONNAME = "DELETE FROM faction_member_rank WHERE faction_name=?";
+    private static final String DELETE_RANK_PERMISSIONS_WHERE_FACTION_NAME = "DELETE FROM faction_rank_permission WHERE faction_name=?";
+    private static final String DELETE_MEMBER_RANK_MAPPINGS_WHERE_FACTION_NAME_AND_MEMBER_UUID = "DELETE FROM faction_member_rank WHERE faction_name=? AND member_uuid=?";
+    private static final String DELETE_MEMBER_RANK_MAPPING_WHERE_FACTIONp_NAME_AND_RANK_NAME = "DELTE FROM faction_member_rank WHERE faction_name=? AND rank_name=?";
+    private static final String DELETE_RANK_WHERE_FACTION_NAME = "DELETE faction_rank WHERE faction_name=? AND name=?";
+    private static final String DELETE_RANK_PERMISSIONS_WHERE_FACTION_NAME_AND_RANK_NAME = "DELETE faction_rank_permission WHERE faction_name=? AND rank_name=?";
+    private static final String DELETE_RELATION_BETWEEN_FACTIONS = "DELETE FROM faction_relation WHERE relation_type=? AND (faction_name_1=? AND faction_name_2=?) OR (faction_name_1=? AND faction_name_2=?)";
+    private static final String DELETE_RELATION_PERMISSION_WHERE_FACTION_NAME = "DELETE FROM faction_relation_permission WHERE faction_name=?";
+    private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM claim WHERE faction_name=?";
+    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION = "DELETE FROM claim_owner WHERE world_uuid=? AND chunk_position=?";
+    private final SQLConnectionProvider sqlConnectionProvider;
 
     private final FactionProtectionFlagsStorage factionProtectionFlagsStorage;
+    private final FactionChestSqlHelper factionChestSqlHelper;
 
     private final Logger logger;
 
-    protected AbstractFactionStorage(final EagleFactions plugin,
-                                     final SQLProvider sqlProvider,
-                                     final FactionProtectionFlagsStorage factionProtectionFlagsStorage)
+    protected AbstractFactionStorage (
+            final Logger logger,
+            final SQLConnectionProvider sqlConnectionProvider,
+            final FactionProtectionFlagsStorage factionProtectionFlagsStorage,
+            final FactionChestSqlHelper factionChestSqlHelper)
     {
-        this.plugin = plugin;
-        this.logger = EagleFactionsPlugin.getPlugin().getLogger();
-        this.sqlProvider = sqlProvider;
+        this.logger = logger;
+        this.sqlConnectionProvider = sqlConnectionProvider;
         this.factionProtectionFlagsStorage = factionProtectionFlagsStorage;
+        this.factionChestSqlHelper = factionChestSqlHelper;
 
-        if(this.sqlProvider == null)
+        if(this.sqlConnectionProvider == null)
         {
-            EagleFactionsPlugin.getPlugin().getLogger().error("Could not establish connection to the database. Aborting...");
+            this.logger.error("Could not establish connection to the database. Aborting...");
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
-        try
-        {
-            updateDatabase();
-        }
-        catch(SQLException | IOException | URISyntaxException e)
-        {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private void updateDatabase() throws IOException, SQLException, URISyntaxException
-    {
-        final int databaseVersionNumber = getDatabaseVersion();
-
-
-        //Get all .sql files
-        final List<Path> filePaths = getSqlFilesPaths();
-
-        if (!filePaths.isEmpty())
-        {
-            for(final Path resourceFilePath : filePaths)
-            {
-                final int scriptNumber = Integer.parseInt(resourceFilePath.getFileName().toString().substring(0, 3));
-                if(scriptNumber <= databaseVersionNumber)
-                    continue;
-
-                try(final InputStream inputStream = Files.newInputStream(resourceFilePath, StandardOpenOption.READ);
-                    final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    final Connection connection = this.sqlProvider.getConnection();
-                    final Statement statement = connection.createStatement()
-                    )
-                {
-                    final StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-
-                    while((line = bufferedReader.readLine()) != null)
-                    {
-                        if(line.startsWith("--"))
-                            continue;
-
-                        stringBuilder.append(line);
-
-                        if(line.endsWith(";"))
-                        {
-                            statement.addBatch(stringBuilder.toString().trim());
-                            stringBuilder.setLength(0);
-                        }
-                    }
-                    statement.executeBatch();
-                    connection.commit();
-                }
-                catch(Exception exception)
-                {
-                    throw new IllegalStateException("There may be a problem with database script files...", exception);
-                }
-            }
-        }
-        else
-        {
-            System.out.println("There may be a problem with database script files...");
-            System.out.println("Searched for them in: " + this.sqlProvider.getStorageType().getName());
-            throw new IllegalStateException("There may be a problem with database script files...");
-        }
-    }
-
-    private List<Path> getSqlFilesPaths() throws IOException
-    {
-        final List<Path> filePaths = new ArrayList<>();
-        final URI uri = this.plugin.getResource("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
-        if (uri != null)
-        {
-            Path myPath;
-            if (uri.getScheme().equals("jar"))
-            {
-                final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                myPath = fileSystem.getPath("/assets/eaglefactions/queries/" + this.sqlProvider.getStorageType().getName());
-            }
-            else
-            {
-                myPath = Paths.get(uri);
-            }
-
-            final Stream<Path> walk = Files.walk(myPath, 1);
-            boolean skipFirst = true;
-            for (final Iterator<Path> it = walk.iterator(); it.hasNext();) {
-                if (skipFirst)
-                {
-                    it.next();
-                    skipFirst = false;
-                }
-
-                final Path zipPath = it.next();
-                filePaths.add(zipPath);
-            }
-        }
-
-        //Sort .sql files
-        filePaths.sort(Comparator.comparing(x -> x.getFileName().toString()));
-        return filePaths;
-    }
-
-    private int getDatabaseVersion() throws SQLException
-    {
-        try(final Connection connection = this.sqlProvider.getConnection())
-        {
-            PreparedStatement preparedStatement = null;
-            if(this.sqlProvider instanceof SqliteProvider)
-            {
-                preparedStatement = connection.prepareStatement("SELECT * FROM sqlite_master WHERE type='table' AND name='Version'");
-            }
-            else if(this.sqlProvider instanceof H2Provider)
-            {
-                preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VERSION'");
-            }
-            else if(this.sqlProvider instanceof MySQLProvider || this.sqlProvider instanceof MariaDbProvider)
-            {
-                preparedStatement = connection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Version'");
-                preparedStatement.setString(1, this.plugin.getConfiguration().getStorageConfig().getDatabaseName());
-            }
-
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            boolean versionTableExists = false;
-            while(resultSet.next())
-            {
-                versionTableExists = true;
-            }
-            resultSet.close();
-
-            if(versionTableExists)
-            {
-                final Statement statement = connection.createStatement();
-                final ResultSet resultSet1 = statement.executeQuery("SELECT MAX(Version) FROM Version");
-                if(resultSet1.next())
-                {
-                    int version = resultSet1.getInt(1);
-                    resultSet1.close();
-                    statement.close();
-                    preparedStatement.close();
-                    return version;
-                }
-                statement.close();
-            }
-            preparedStatement.close();
-        }
-        return 0;
     }
 
     @Override
@@ -302,7 +122,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         Connection connection = null;
         try
         {
-            connection = this.sqlProvider.getConnection();
+            connection = this.sqlConnectionProvider.getConnection();
             connection.setAutoCommit(false);
 
             //Add or update?
@@ -315,195 +135,39 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             preparedStatement = connection.prepareStatement(queryToUse);
             preparedStatement.setString(1, faction.getName());
-            preparedStatement.setString(2, faction.getTag().toString());
-            preparedStatement.setString(3, faction.getTag().color().asHexString());
-            preparedStatement.setString(4, faction.getLeader().toString());
+            preparedStatement.setString(2, PlainTextComponentSerializer.plainText().serialize(faction.getTag()));
+            preparedStatement.setString(3, Optional.ofNullable(faction.getTag())
+                    .map(Component::color)
+                    .map(TextColor::asHexString)
+                    .orElse("GREEN"));
+            preparedStatement.setString(4, faction.getLeader().getUniqueId().toString());
             if (faction.getHome() != null)
                 preparedStatement.setString(5, faction.getHome().toString());
             else preparedStatement.setString(5, null);
-            preparedStatement.setString(6, faction.getLastOnline().toString());
+            preparedStatement.setTimestamp(6, Timestamp.from(faction.getLastOnline()));
             preparedStatement.setString(7, faction.getDescription());
             preparedStatement.setString(8, faction.getMessageOfTheDay());
             preparedStatement.setString(9, faction.isPublic() ? "1" : "0");
-            preparedStatement.setString(10, String.valueOf(faction.getCreatedDate()));
+            preparedStatement.setTimestamp(10, Timestamp.from(faction.getCreatedDate()));
+            preparedStatement.setString(11, faction.getDefaultRank().getName());
             if (isUpdate)
-                preparedStatement.setString(11, faction.getName()); //Where part
+                preparedStatement.setString(12, faction.getName()); //Where part
 
             preparedStatement.execute();
             preparedStatement.close();
 
-            // Save or update alliance
-            saveAlliances(connection, faction);
-            saveEnemies(connection, faction);
-            saveTruces(connection, faction);
+            // Save relations
+            saveRelations(connection, faction.getName(), faction.getAlliances(), RelationType.ALLIANCE);
+            saveRelations(connection, faction.getName(), faction.getTruces(), RelationType.TRUCE);
+            saveRelations(connection, faction.getName(), faction.getEnemies(), RelationType.ENEMY);
+            saveRelationsPermissions(connection, faction);
+
             this.factionProtectionFlagsStorage.saveProtectionFlags(connection, faction.getName(), faction.getProtectionFlags());
 
-            deleteFactionOfficers(connection, faction.getName());
-            deleteFactionMembers(connection, faction.getName());
-            deleteFactionRecruits(connection, faction.getName());
-            deleteFactionClaims(connection, faction.getName());
-
-            if (!faction.getOfficers().isEmpty())
-            {
-                preparedStatement = connection.prepareStatement(INSERT_OFFICERS);
-                for (final UUID officer : faction.getOfficers())
-                {
-                    preparedStatement.setString(1, officer.toString());
-                    preparedStatement.setString(2, faction.getName());
-                    preparedStatement.addBatch();
-                }
-                preparedStatement.executeBatch();
-                preparedStatement.close();
-            }
-
-            if (!faction.getMembers().isEmpty())
-            {
-                preparedStatement = connection.prepareStatement(INSERT_MEMBERS);
-                for (UUID member : faction.getMembers())
-                {
-                    preparedStatement.setString(1, member.toString());
-                    preparedStatement.setString(2, faction.getName());
-                    preparedStatement.addBatch();
-                }
-                preparedStatement.executeBatch();
-                preparedStatement.close();
-            }
-
-            if (!faction.getRecruits().isEmpty())
-            {
-                preparedStatement = connection.prepareStatement(INSERT_RECRUITS);
-                for (final UUID recruit : faction.getRecruits())
-                {
-                    preparedStatement.setString(1, recruit.toString());
-                    preparedStatement.setString(2, faction.getName());
-                    preparedStatement.addBatch();
-                }
-                preparedStatement.executeBatch();
-                preparedStatement.close();
-            }
-
-            if (!faction.getClaims().isEmpty())
-            {
-                preparedStatement = connection.prepareStatement(INSERT_CLAIM);
-                for (final Claim claim : faction.getClaims())
-                {
-                    preparedStatement.setString(1, faction.getName());
-                    preparedStatement.setString(2, claim.getWorldUUID().toString());
-                    preparedStatement.setString(3, claim.getChunkPosition().toString());
-                    preparedStatement.setBoolean(4, claim.isAccessibleByFaction());
-
-                    preparedStatement.addBatch();
-                }
-                preparedStatement.executeBatch();
-                preparedStatement.close();
-
-                // Insert owner into the claim
-                for (final Claim claim : faction.getClaims())
-                {
-                    if (!claim.getOwners().isEmpty())
-                    {
-                        final PreparedStatement ownerPreparedStatement = connection.prepareStatement(INSERT_CLAIM_OWNER);
-                        for (final UUID owner : claim.getOwners())
-                        {
-                            ownerPreparedStatement.setString(1, claim.getWorldUUID().toString());
-                            ownerPreparedStatement.setString(2, claim.getChunkPosition().toString());
-                            ownerPreparedStatement.setString(3, owner.toString());
-                            ownerPreparedStatement.addBatch();
-                        }
-                        ownerPreparedStatement.executeBatch();
-                        ownerPreparedStatement.close();
-                    }
-                }
-            }
-
-            List<DataView> dataViews = InventorySerializer.serializeInventory(faction.getChest().getInventory().inventory());
-            final DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.ALL_DATA_CLONED);
-            dataContainer.set(DataQuery.of("inventory"), dataViews);
-            ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
-            DataFormats.NBT.get().writeTo(byteArrayStream, dataContainer);
-//            String hocon = DataFormats.HOCON.write(test);
-            byteArrayStream.flush();
-            byte[] chestBytes = byteArrayStream.toByteArray();
-            byteArrayStream.close();
-
-            //Delete chest before
-            preparedStatement = connection.prepareStatement(DELETE_FACTION_CHEST_WHERE_FACTIONNAME);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(INSERT_CHEST);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBytes(2, chestBytes);
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_OFFICER_PERMS : INSERT_OFFICER_PERMS);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.USE)).orElse(false));
-            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.PLACE)).orElse(false));
-            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.DESTROY)).orElse(false));
-            preparedStatement.setBoolean(5, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CLAIM)).orElse(false));
-            preparedStatement.setBoolean(6, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.ATTACK)).orElse(false));
-            preparedStatement.setBoolean(7, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.INVITE)).orElse(false));
-            preparedStatement.setBoolean(8, ofNullable(faction.getPerms().get(FactionMemberType.OFFICER).get(FactionPermType.CHEST)).orElse(false));
-            if(isUpdate)
-                preparedStatement.setString(9, faction.getName());
-
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_MEMBER_PERMS : INSERT_MEMBER_PERMS);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.USE)).orElse(false));
-            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.PLACE)).orElse(false));
-            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.DESTROY)).orElse(false));
-            preparedStatement.setBoolean(5, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CLAIM)).orElse(false));
-            preparedStatement.setBoolean(6, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.ATTACK)).orElse(false));
-            preparedStatement.setBoolean(7, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.INVITE)).orElse(false));
-            preparedStatement.setBoolean(8, ofNullable(faction.getPerms().get(FactionMemberType.MEMBER).get(FactionPermType.CHEST)).orElse(false));
-            if(isUpdate)
-                preparedStatement.setString(9, faction.getName());
-
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_RECRUIT_PERMS : INSERT_RECRUIT_PERMS);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.USE)).orElse(false));
-            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.PLACE)).orElse(false));
-            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.DESTROY)).orElse(false));
-            preparedStatement.setBoolean(5, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CLAIM)).orElse(false));
-            preparedStatement.setBoolean(6, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.ATTACK)).orElse(false));
-            preparedStatement.setBoolean(7, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.INVITE)).orElse(false));
-            preparedStatement.setBoolean(8, ofNullable(faction.getPerms().get(FactionMemberType.RECRUIT).get(FactionPermType.CHEST)).orElse(false));
-            if(isUpdate)
-                preparedStatement.setString(9, faction.getName());
-
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_ALLY_PERMS : INSERT_ALLY_PERMS);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.USE)).orElse(false));
-            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.PLACE)).orElse(false));
-            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.ALLY).get(FactionPermType.DESTROY)).orElse(false));
-            if(isUpdate)
-                preparedStatement.setString(5, faction.getName());
-
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-            preparedStatement = connection.prepareStatement(isUpdate ? UPDATE_TRUCE_PERMS : INSERT_TRUCE_PERMS);
-            preparedStatement.setString(1, faction.getName());
-            preparedStatement.setBoolean(2, ofNullable(faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.USE)).orElse(false));
-            preparedStatement.setBoolean(3, ofNullable(faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.PLACE)).orElse(false));
-            preparedStatement.setBoolean(4, ofNullable(faction.getPerms().get(FactionMemberType.TRUCE).get(FactionPermType.DESTROY)).orElse(false));
-            if(isUpdate)
-                preparedStatement.setString(5, faction.getName());
-
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
+            saveRanks(connection, faction);
+            saveMembers(connection, faction);
+            saveClaims(connection, faction);
+            saveChest(connection, faction);
 
             connection.commit();
             connection.close();
@@ -524,24 +188,204 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
-    private void saveAlliances(final Connection connection, final Faction faction) throws SQLException
+    private void saveRelationsPermissions(Connection connection, Faction faction) throws SQLException
     {
-        final Set<String> existingAlliancesNames = getFactionAlliances(connection, faction.getName());
-        final List<String> alliancesToRemove = existingAlliancesNames.stream().filter(alliance -> !faction.getAlliances().contains(alliance)).collect(Collectors.toList());
-        final List<String> alliancesToAdd = faction.getAlliances().stream().filter(alliance -> !existingAlliancesNames.contains(alliance)).collect(Collectors.toList());
+        deleteAllRelationsPermissions(connection, faction.getName());
+
+        // Save relation permissions
+        Map<RelationType, Set<FactionPermission>> relationPermissions = new HashMap<>();
+        relationPermissions.put(RelationType.ALLIANCE, faction.getRelationPermissions(RelationType.ALLIANCE));
+        relationPermissions.put(RelationType.TRUCE, faction.getRelationPermissions(RelationType.TRUCE));
+        relationPermissions.put(RelationType.ENEMY, faction.getRelationPermissions(RelationType.ENEMY));
+
+        final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_RELATION_PERMISSION);
+        for (Map.Entry<RelationType, Set<FactionPermission>> entry : relationPermissions.entrySet())
+        {
+            for (FactionPermission permission : entry.getValue())
+            {
+                preparedStatement.setString(1, faction.getName());
+                preparedStatement.setString(2, entry.getKey().getName());
+                preparedStatement.setString(3, permission.name());
+                preparedStatement.addBatch();
+            }
+        }
+
+        preparedStatement.executeBatch();
+        preparedStatement.close();
+    }
+
+    private void saveChest(Connection connection, Faction faction) throws SQLException, IOException
+    {
+        this.factionChestSqlHelper.saveChest(connection, faction);
+    }
+
+    private void saveClaims(Connection connection, Faction faction) throws SQLException
+    {
+        deleteFactionClaims(connection, faction.getName());
+
+        if (!faction.getClaims().isEmpty())
+        {
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CLAIM);
+            for (final Claim claim : faction.getClaims())
+            {
+                preparedStatement.setString(1, faction.getName());
+                preparedStatement.setString(2, claim.getWorldUUID().toString());
+                preparedStatement.setString(3, claim.getChunkPosition().toString());
+                preparedStatement.setBoolean(4, claim.isAccessibleByFaction());
+
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
+            preparedStatement.close();
+
+            // Insert owner into the claim
+            for (final Claim claim : faction.getClaims())
+            {
+                if (!claim.getOwners().isEmpty())
+                {
+                    final PreparedStatement ownerPreparedStatement = connection.prepareStatement(INSERT_CLAIM_OWNER);
+                    for (final UUID owner : claim.getOwners())
+                    {
+                        ownerPreparedStatement.setString(1, claim.getWorldUUID().toString());
+                        ownerPreparedStatement.setString(2, claim.getChunkPosition().toString());
+                        ownerPreparedStatement.setString(3, owner.toString());
+                        ownerPreparedStatement.addBatch();
+                    }
+                    ownerPreparedStatement.executeBatch();
+                    ownerPreparedStatement.close();
+                }
+            }
+        }
+
+    }
+
+    private void saveRanks(Connection connection, Faction faction) throws SQLException
+    {
+        deleteAllRanks(connection, faction.getName());
+
+        final List<Rank> ranks = faction.getRanks();
+
+        // Save ranks
+        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_RANK);
+        for (Rank rank : ranks)
+        {
+            preparedStatement.setString(1, rank.getName());
+            preparedStatement.setString(2, faction.getName());
+            preparedStatement.setString(3, rank.getDisplayName());
+            preparedStatement.setInt(4, rank.getLadderPosition());
+            preparedStatement.setBoolean(5, rank.canDisplayInChat());
+            preparedStatement.executeUpdate();
+        }
+
+        preparedStatement.executeBatch();
+        preparedStatement.close();
+
+        // Save rank permissions
+        for (Rank rank: ranks)
+        {
+            if (!rank.getPermissions().isEmpty())
+            {
+                preparedStatement = connection.prepareStatement(INSERT_RANK_PERMISSION);
+                for (FactionPermission permission : rank.getPermissions())
+                {
+                    preparedStatement.setString(1, faction.getName());
+                    preparedStatement.setString(2, rank.getName());
+                    preparedStatement.setString(3, permission.name());
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+                preparedStatement.close();
+            }
+        }
+    }
+
+    private void deleteAllRanks(Connection connection, String factionName) throws SQLException
+    {
+        deleteAllFactionMemberRanksMappings(connection, factionName);
+        deleteAllFactionRankPermissions(connection, factionName);
+
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_RANKS_WHERE_FACTION_NAME);
+        preparedStatement.setString(1, factionName);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    private void saveMembers(Connection connection, Faction faction) throws SQLException
+    {
+        deleteAllFactionMembers(connection, faction.getName());
+
+        Set<FactionMember> factionMembers = faction.getMembers();
+
+        if (!factionMembers.isEmpty())
+        {
+            // Save member
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_MEMBER);
+            for (final FactionMember factionMember : factionMembers)
+            {
+                preparedStatement.setString(1, factionMember.getUniqueId().toString());
+                preparedStatement.setString(2, faction.getName());
+                preparedStatement.executeUpdate();
+
+                // Save member rank mapping
+                if (!factionMember.getRankNames().isEmpty())
+                {
+                    preparedStatement = connection.prepareStatement(INSERT_MEMBER_RANK_MAPPING);
+                    for (final String rankName : factionMember.getRankNames())
+                    {
+                        preparedStatement.setString(1, factionMember.getUniqueId().toString());
+                        preparedStatement.setString(2, faction.getName());
+                        preparedStatement.setString(3, rankName);
+                        preparedStatement.addBatch();
+                    }
+                    preparedStatement.executeBatch();
+                }
+            }
+            preparedStatement.close();
+        }
+    }
+
+    private Set<String> getRelations(Connection connection, String factionName, RelationType relationType) throws SQLException
+    {
+        final Set<String> existingRelationsNames = new HashSet<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FACTION_RELATIONS_BY_TYPE);
+        preparedStatement.setString(1, relationType.getName());
+        preparedStatement.setString(2, factionName);
+        preparedStatement.setString(3, factionName);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next())
+        {
+            String firstFactionName = resultSet.getString("faction_name_1");
+            String secondFactionName = resultSet.getString("faction_name_2");
+            if (factionName.equals(firstFactionName))
+                existingRelationsNames.add(secondFactionName);
+            else
+                existingRelationsNames.add(firstFactionName);
+        }
+        resultSet.close();
+        preparedStatement.close();
+        return existingRelationsNames;
+    }
+
+    private void saveRelations(Connection connection, String factionName, Set<String> relations, RelationType relationType) throws SQLException
+    {
+        final Set<String> existingRelationsNames = getRelations(connection, factionName, relationType);
+        final List<String> alliancesToRemove = existingRelationsNames.stream().filter(alliance -> !relations.contains(alliance)).collect(Collectors.toList());
+        final List<String> alliancesToAdd = relations.stream().filter(alliance -> !existingRelationsNames.contains(alliance)).collect(Collectors.toList());
 
         logger.debug("Alliances to add: " + Arrays.toString(alliancesToAdd.toArray()));
         logger.debug("Alliances to remove: " + Arrays.toString(alliancesToRemove.toArray()));
 
         if(!alliancesToRemove.isEmpty())
         {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_ALLIANCE_BETWEEN_FACTIONS);
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RELATION_BETWEEN_FACTIONS);
             for (final String allianceToRemove : alliancesToRemove)
             {
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, allianceToRemove);
+                preparedStatement.setString(1, relationType.getName());
+                preparedStatement.setString(2, factionName);
                 preparedStatement.setString(3, allianceToRemove);
-                preparedStatement.setString(4, faction.getName());
+                preparedStatement.setString(4, allianceToRemove);
+                preparedStatement.setString(5, factionName);
                 preparedStatement.addBatch();
             }
             preparedStatement.executeBatch();
@@ -550,11 +394,12 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
         if (!alliancesToAdd.isEmpty())
         {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_FACTION_ALLIANCE);
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_RELATION);
             for (final String allianceToAdd : alliancesToAdd)
             {
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, allianceToAdd);
+                preparedStatement.setString(1, relationType.getName());
+                preparedStatement.setString(2, factionName);
+                preparedStatement.setString(3, allianceToAdd);
                 preparedStatement.addBatch();
             }
             preparedStatement.executeBatch();
@@ -562,157 +407,157 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
-    private void saveEnemies(final Connection connection, final Faction faction) throws SQLException
+    private void deleteRelations(final Connection connection, final String factionName, RelationType relationType) throws SQLException
     {
-        final Set<String> existingEnemiesNames = getFactionEnemies(connection, faction.getName());
-        final List<String> enemiesToRemove = existingEnemiesNames.stream().filter(enemy -> !faction.getEnemies().contains(enemy)).collect(Collectors.toList());
-        final List<String> enemiesToAdd = faction.getEnemies().stream().filter(enemy -> !existingEnemiesNames.contains(enemy)).collect(Collectors.toList());
-
-        logger.debug("Enemies to add: " + Arrays.toString(enemiesToAdd.toArray()));
-        logger.debug("Enemies to remove: " + Arrays.toString(enemiesToRemove.toArray()));
-
-        if(!enemiesToRemove.isEmpty())
-        {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_ENEMY_BETWEEN_FACTIONS);
-            for (final String enemyToRemove : enemiesToRemove)
-            {
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, enemyToRemove);
-                preparedStatement.setString(3, enemyToRemove);
-                preparedStatement.setString(4, faction.getName());
-                preparedStatement.addBatch();
-            }
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-        }
-
-        if (!enemiesToAdd.isEmpty())
-        {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_FACTION_ENEMY);
-            for (final String enemyToAdd : enemiesToAdd)
-            {
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, enemyToAdd);
-                preparedStatement.addBatch();
-            }
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-        }
-    }
-
-    private void saveTruces(final Connection connection, final Faction faction) throws SQLException
-    {
-        final Set<String> existingTrucesNames = getFactionTruces(connection, faction.getName());
-        final List<String> trucesToRemove = existingTrucesNames.stream().filter(truce -> !faction.getTruces().contains(truce)).collect(Collectors.toList());
-        final List<String> trucesToAdd = faction.getTruces().stream().filter(truce -> !existingTrucesNames.contains(truce)).collect(Collectors.toList());
-
-        logger.debug("Truces to add: " + Arrays.toString(trucesToAdd.toArray()));
-        logger.debug("Truces to remove: " + Arrays.toString(trucesToRemove.toArray()));
-
-        if(!trucesToRemove.isEmpty())
-        {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_TRUCE_BETWEEN_FACTIONS);
-            for (final String allianceToRemove : trucesToRemove)
-            {
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, allianceToRemove);
-                preparedStatement.setString(3, allianceToRemove);
-                preparedStatement.setString(4, faction.getName());
-                preparedStatement.addBatch();
-            }
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-        }
-
-        if (!trucesToAdd.isEmpty())
-        {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_FACTION_TRUCE);
-            for (final String truceToAdd : trucesToAdd)
-            {
-                preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, truceToAdd);
-                preparedStatement.addBatch();
-            }
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-        }
-    }
-
-    private void deleteFactionAlliances(final Connection connection, final String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ALL_FACTION_ALLIANCES_FOR_FACTION);
-        preparedStatement.setString(1, factionName);
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RELATION_BETWEEN_FACTIONS);
+        preparedStatement.setString(1, relationType.getName());
         preparedStatement.setString(2, factionName);
+        preparedStatement.setString(3, factionName);
+        preparedStatement.setString(4, factionName);
+        preparedStatement.setString(5, factionName);
         int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " alliances for faction=" + factionName);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Deleted {} relations of type {} for faction={}", affectedRows, relationType.getName(), factionName);
+        }
         preparedStatement.close();
     }
 
-    private void deleteFactionEnemies(final Connection connection, final String factionName) throws SQLException
+    private Set<FactionPermission> getRelationPermissions(Connection connection, String factionName, RelationType relationType) throws SQLException
     {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ALL_FACTION_ENEMIES_FOR_FACTION);
+        final Set<FactionPermission> permissions = new HashSet<>();
+        final PreparedStatement preparedStatement = connection.prepareStatement(SELECT_RELATION_PERMISSION_WHERE_FACTION_NAME);
         preparedStatement.setString(1, factionName);
-        preparedStatement.setString(2, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " enemies for faction=" + factionName);
+        preparedStatement.setString(2, relationType.getName());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next())
+        {
+            permissions.add(FactionPermission.valueOf(resultSet.getString("permission").toUpperCase()));
+        }
+
+        resultSet.close();
         preparedStatement.close();
+        return permissions;
     }
 
-    private void deleteFactionTruces(final Connection connection, final String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ALL_FACTION_TRUCES_FOR_FACTION);
-        preparedStatement.setString(1, factionName);
-        preparedStatement.setString(2, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " truces for faction=" + factionName);
-        preparedStatement.close();
-    }
-
-    private boolean deleteFactionOfficers(final Connection connection, final String name) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_OFFICERS_WHERE_FACIONNAME);
-        preparedStatement.setString(1, name);
-        final boolean didSucceed = preparedStatement.execute();
-        preparedStatement.close();
-        return didSucceed;
-    }
-
-    private boolean deleteFactionMembers(final Connection connection, final String name) throws SQLException
+    private boolean deleteAllFactionMembers(final Connection connection, final String factionName) throws SQLException
     {
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MEMBERS_WHERE_FACIONNAME);
-        preparedStatement.setString(1, name);
+        preparedStatement.setString(1, factionName);
         final boolean didSucceed = preparedStatement.execute();
         preparedStatement.close();
         return didSucceed;
     }
 
-    private boolean deleteFactionRecruits(final Connection connection, final String name) throws SQLException
+    private boolean deleteAllFactionMemberRanksMappings(final Connection connection, final String factionName) throws SQLException
     {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RECRUITS_WHERE_FACIONNAME);
-        preparedStatement.setString(1, name);
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MEMBERS_RANKS_WHERE_FACTIONNAME);
+        preparedStatement.setString(1, factionName);
         final boolean didSucceed = preparedStatement.execute();
         preparedStatement.close();
         return didSucceed;
     }
 
-    private boolean deleteFactionClaims(final Connection connection, final String name) throws SQLException
+    private boolean deleteAllFactionRankPermissions(final Connection connection, final String factionName) throws SQLException
     {
-        Set<Claim> claims = getFactionClaims(connection, name);
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RANK_PERMISSIONS_WHERE_FACTION_NAME);
+        preparedStatement.setString(1, factionName);
+        final boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
+        return didSucceed;
+    }
+
+    private boolean deleteRanksForMember(final Connection connection, final String factionName, final UUID memberUUID) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MEMBER_RANK_MAPPINGS_WHERE_FACTION_NAME_AND_MEMBER_UUID);
+        preparedStatement.setString(1, factionName);
+        preparedStatement.setString(2, memberUUID.toString());
+        final boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
+        return didSucceed;
+    }
+
+    private boolean deleteRank(final Connection connection, final String factionName, final String rankName) throws SQLException
+    {
+        deleteFactionMemberRankMapping(connection, factionName, rankName);
+        deleteFactionRankPermissions(connection, factionName, rankName);
+
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RANK_WHERE_FACTION_NAME);
+        preparedStatement.setString(1, factionName);
+        preparedStatement.setString(2, rankName);
+        boolean didSucceed = preparedStatement.execute();
+        preparedStatement.close();
+        return didSucceed;
+    }
+
+    private List<Rank> getFactionRanks(Connection connection, String factionName) throws SQLException
+    {
+        final Map<String, Rank.Builder> rankBuilders = new HashMap<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FACTION_RANKS_WHERE_FACTION_NAME);
+        preparedStatement.setString(1, factionName);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next())
+        {
+            String rankName = resultSet.getString("name");
+            Rank.Builder rankBuilder = rankBuilders.computeIfAbsent(rankName, t -> new RankImpl.BuilderImpl());
+            rankBuilder.name(rankName);
+            rankBuilder.displayName(resultSet.getString("display_name"));
+            rankBuilder.ladderPosition(resultSet.getInt("ladder_position"));
+            rankBuilder.displayInChat(resultSet.getBoolean("display_in_chat"));
+        }
+        resultSet.close();
+        preparedStatement.close();
+
+        // Fetch rank permissions
+        preparedStatement = connection.prepareStatement(SELECT_FACTION_RANK_PERMSSIONS_WHERE_FACTION_NAME);
+        preparedStatement.setString(1, factionName);
+        resultSet = preparedStatement.executeQuery();
+        while (resultSet.next())
+        {
+            Rank.Builder builder = rankBuilders.get(resultSet.getString("rank_name"));
+            builder.permission(FactionPermission.valueOf(resultSet.getString("permission").toUpperCase()));
+        }
+
+        return rankBuilders.values().stream()
+                .map(Rank.Builder::build)
+                .collect(Collectors.toList());
+    }
+
+    private void deleteFactionRankPermissions(Connection connection, String factionName, String rankName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RANK_PERMISSIONS_WHERE_FACTION_NAME_AND_RANK_NAME);
+        preparedStatement.setString(1, factionName);
+        preparedStatement.setString(2, rankName);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    private void deleteFactionMemberRankMapping(Connection connection, String factionName, String rankName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MEMBER_RANK_MAPPING_WHERE_FACTIONp_NAME_AND_RANK_NAME);
+        preparedStatement.setString(1, factionName);
+        preparedStatement.setString(2, rankName);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    private boolean deleteFactionClaims(final Connection connection, final String factionName) throws SQLException
+    {
+        Set<Claim> claims = getFactionClaims(connection, factionName);
+        if (claims.isEmpty())
+            return true;
 
         deleteFactionClaimOwners(connection, claims);
 
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CLAIM_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, name);
+        preparedStatement.setString(1, factionName);
         final boolean didSucceed = preparedStatement.execute();
         preparedStatement.close();
         return didSucceed;
     }
 
-    private boolean deleteFactionClaimOwners(Connection connection, Set<Claim> claims) throws SQLException
+    private void deleteFactionClaimOwners(Connection connection, Set<Claim> claims) throws SQLException
     {
-        if (claims.isEmpty())
-            return true;
-
         final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION);
         for (final Claim claim : claims)
         {
@@ -722,13 +567,12 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
         preparedStatement.executeBatch();
         preparedStatement.close();
-        return true;
     }
 
     @Override
     public Faction getFaction(final String factionName)
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             connection.setAutoCommit(false);
             PreparedStatement statement = connection.prepareStatement(SELECT_FACTION_WHERE_FACTIONNAME);
@@ -749,7 +593,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         final Set<Faction> factions = new HashSet<>();
         try
         {
-            final Connection connection = this.sqlProvider.getConnection();
+            final Connection connection = this.sqlConnectionProvider.getConnection();
             final ResultSet resultSet = connection.createStatement().executeQuery(SELECT_FACTION_NAMES);
             List<String> factionsNames = new ArrayList<>();
             while (resultSet.next())
@@ -784,17 +628,17 @@ public abstract class AbstractFactionStorage implements FactionStorage
         Connection connection = null;
         try
         {
-            connection = this.sqlProvider.getConnection();
+            connection = this.sqlConnectionProvider.getConnection();
             connection.setAutoCommit(false);
 
-            deleteFactionOfficers(connection, factionName);
-            deleteFactionMembers(connection, factionName);
-            deleteFactionRecruits(connection, factionName);
+            deleteAllFactionMemberRanksMappings(connection, factionName);
+            deleteAllFactionMembers(connection, factionName);
+            deleteAllRanks(connection, factionName);
             deleteFactionClaims(connection, factionName);
-            deleteFactionAlliances(connection, factionName);
-            deleteFactionEnemies(connection, factionName);
-            deleteFactionTruces(connection, factionName);
-            deleteFactionPerms(connection, factionName);
+            deleteRelations(connection, factionName, RelationType.ALLIANCE);
+            deleteRelations(connection, factionName, RelationType.TRUCE);
+            deleteRelations(connection, factionName, RelationType.ENEMY);
+            deleteAllRelationsPermissions(connection, factionName);
 
             this.factionProtectionFlagsStorage.deleteProtectionFlags(connection, factionName);
 
@@ -821,6 +665,14 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
+    private void deleteAllRelationsPermissions(Connection connection, String factionName) throws SQLException
+    {
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RELATION_PERMISSION_WHERE_FACTION_NAME);
+        preparedStatement.setString(1, factionName);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
     @Override
     public void deleteFactions()
     {
@@ -831,172 +683,25 @@ public abstract class AbstractFactionStorage implements FactionStorage
         }
     }
 
-    private void deleteFactionPerms(Connection connection, String factionName) throws SQLException
+    private Set<FactionMember> getFactionMembers(final Connection connection, final String factionName) throws SQLException
     {
-        deleteFactionTrucePerms(connection, factionName);
-        deleteFactionAllyPerms(connection, factionName);
-        deleteFactionOfficerPerms(connection, factionName);
-        deleteFactionMemberPerms(connection, factionName);
-        deleteFactionRecruitPerms(connection, factionName);
-    }
+        Map<UUID, Set<String>> membersWithRanks = new HashMap<>();
 
-    private void deleteFactionOfficerPerms(Connection connection, String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_OFFICER_PERMS);
-        preparedStatement.setString(1, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " officer perms for faction=" + factionName);
-        preparedStatement.close();
-    }
-
-    private void deleteFactionRecruitPerms(Connection connection, String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_RECRUIT_PERMS);
-        preparedStatement.setString(1, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " recruit perms for faction=" + factionName);
-        preparedStatement.close();
-    }
-
-    private void deleteFactionMemberPerms(Connection connection, String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_MEMBER_PERMS);
-        preparedStatement.setString(1, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " member perms for faction=" + factionName);
-        preparedStatement.close();
-    }
-
-    private void deleteFactionTrucePerms(Connection connection, String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_TRUCE_PERMS);
-        preparedStatement.setString(1, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " truce perms for faction=" + factionName);
-        preparedStatement.close();
-    }
-
-    private void deleteFactionAllyPerms(Connection connection, String factionName) throws SQLException
-    {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_ALLY_PERMS);
-        preparedStatement.setString(1, factionName);
-        int affectedRows = preparedStatement.executeUpdate();
-        logger.debug("Deleted " + affectedRows + " ally perms for faction=" + factionName);
-        preparedStatement.close();
-    }
-
-    private Set<String> getFactionAlliances(final Connection connection, final String factionName) throws SQLException
-    {
-        final Set<String> existingAlliancesNames = new HashSet<>();
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FACTION_ALLIANCES);
-        preparedStatement.setString(1, factionName);
-        preparedStatement.setString(2, factionName);
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        while (resultSet.next())
-        {
-            String firstFactionName = resultSet.getString(1);
-            String secondFactionName = resultSet.getString(2);
-            if (factionName.equals(firstFactionName))
-                existingAlliancesNames.add(secondFactionName);
-            else
-                existingAlliancesNames.add(firstFactionName);
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return existingAlliancesNames;
-    }
-
-    private Set<String> getFactionEnemies(final Connection connection, final String factionName) throws SQLException
-    {
-        final Set<String> existingEnemiesNames = new HashSet<>();
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FACTION_ENEMIES);
-        preparedStatement.setString(1, factionName);
-        preparedStatement.setString(2, factionName);
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        while (resultSet.next())
-        {
-            String firstFactionName = resultSet.getString(1);
-            String secondFactionName = resultSet.getString(2);
-            if (factionName.equals(firstFactionName))
-                existingEnemiesNames.add(secondFactionName);
-            else
-                existingEnemiesNames.add(firstFactionName);
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return existingEnemiesNames;
-    }
-
-    private Set<String> getFactionTruces(final Connection connection, final String factionName) throws SQLException
-    {
-        final Set<String> existingTrucesNames = new HashSet<>();
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FACTION_TRUCES);
-        preparedStatement.setString(1, factionName);
-        preparedStatement.setString(2, factionName);
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        while (resultSet.next())
-        {
-            String firstFactionName = resultSet.getString(1);
-            String secondFactionName = resultSet.getString(2);
-            if (factionName.equals(firstFactionName))
-                existingTrucesNames.add(secondFactionName);
-            else
-                existingTrucesNames.add(firstFactionName);
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return existingTrucesNames;
-    }
-
-    private Set<UUID> getFactionRecruits(final Connection connection, final String factionName) throws SQLException
-    {
-        final Set<UUID> recruits = new HashSet<>();
-        final PreparedStatement preparedStatement = connection.prepareStatement(SELECT_RECRUITS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        final ResultSet recruitsResultSet = preparedStatement.executeQuery();
-        while (recruitsResultSet.next())
-        {
-            final UUID recruitUUID = UUID.fromString(recruitsResultSet.getString("RecruitUUID"));
-            recruits.add(recruitUUID);
-        }
-        recruitsResultSet.close();
-        preparedStatement.close();
-        return recruits;
-    }
-
-    private Set<UUID> getFactionMembers(final Connection connection, final String factionName) throws SQLException
-    {
-        Set<UUID> members = new HashSet<>();
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MEMBERS_WHERE_FACTIONNAME);
         preparedStatement.setString(1, factionName);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next())
         {
-            UUID memberUUID = UUID.fromString(resultSet.getString("MemberUUID"));
-            members.add(memberUUID);
+            UUID memberUUID = UUID.fromString(resultSet.getString("member_uuid"));
+            Set<String> ranks = membersWithRanks.computeIfAbsent(memberUUID, k -> new HashSet<>());
+            ranks.add(resultSet.getString("rank_name"));
         }
         resultSet.close();
         preparedStatement.close();
-        return members;
-    }
 
-    private Set<UUID> getFactionOfficers(final Connection connection, final String factionName) throws SQLException
-    {
-        Set<UUID> officers = new HashSet<>();
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_OFFICERS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next())
-        {
-            UUID officerUUID = UUID.fromString(resultSet.getString("OfficerUUID"));
-            officers.add(officerUUID);
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return officers;
+        return membersWithRanks.entrySet().stream()
+                .map(entry -> new FactionMemberImpl(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toSet());
     }
 
     private Set<Claim> getFactionClaims(final Connection connection, final String factionName) throws SQLException
@@ -1007,9 +712,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next())
         {
-            String worldUUID = resultSet.getString("WorldUUID");
-            String chunkPositionAsString = resultSet.getString("ChunkPosition");
-            final boolean isAccessibleByFaction = resultSet.getBoolean("IsAccessibleByFaction");
+            String worldUUID = resultSet.getString("world_uuid");
+            String chunkPositionAsString = resultSet.getString("chunk_position");
+            final boolean isAccessibleByFaction = resultSet.getBoolean("is_accessible_by_faction");
             final Vector3i chunkPosition = ClaimTypeSerializer.deserializeVector3i(chunkPositionAsString);
             final Set<UUID> owners = new HashSet<>();
 
@@ -1019,7 +724,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             final ResultSet ownersResultSet = preparedStatement1.executeQuery();
             while (ownersResultSet.next())
             {
-                final String playerUniqueIdAsString = ownersResultSet.getString("PlayerUUID");
+                final String playerUniqueIdAsString = ownersResultSet.getString("player_uuid");
                 owners.add(UUID.fromString(playerUniqueIdAsString));
             }
             ownersResultSet.close();
@@ -1058,195 +763,57 @@ public abstract class AbstractFactionStorage implements FactionStorage
         return factionChest;
     }
 
-    private Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPerms(final Connection connection, final String factionName) throws SQLException
-    {
-        Map<FactionMemberType, Map<FactionPermType, Boolean>> permMap = new LinkedHashMap<>();
-        final Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
-        final Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
-        final Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
-        final Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
-        final Map<FactionPermType, Boolean> truceMap = new LinkedHashMap<>();
-
-        //Get officer perms
-        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_OFFICER_PERMS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet officerResult = preparedStatement.executeQuery();
-        boolean officerUSE = true;
-        boolean officerPLACE = true;
-        boolean officerDESTROY = true;
-        boolean officerCLAIM = true;
-        boolean officerATTACK = true;
-        boolean officerINVITE = true;
-        if (officerResult.next())
-        {
-            officerUSE = officerResult.getBoolean("Use");
-            officerPLACE = officerResult.getBoolean("Place");
-            officerDESTROY = officerResult.getBoolean("Destroy");
-            officerCLAIM = officerResult.getBoolean("Claim");
-            officerATTACK = officerResult.getBoolean("Attack");
-            officerINVITE = officerResult.getBoolean("Invite");
-        }
-        officerResult.close();
-        preparedStatement.close();
-
-        //Get member perms
-        preparedStatement = connection.prepareStatement(SELECT_MEMBER_PERMS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet memberResult = preparedStatement.executeQuery();
-        boolean memberUSE = true;
-        boolean memberPLACE = true;
-        boolean memberDESTROY = true;
-        boolean memberCLAIM = false;
-        boolean memberATTACK = false;
-        boolean memberINVITE = true;
-        if (memberResult.next())
-        {
-            memberUSE = memberResult.getBoolean("Use");
-            memberPLACE = memberResult.getBoolean("Place");
-            memberDESTROY = memberResult.getBoolean("Destroy");
-            memberCLAIM = memberResult.getBoolean("Claim");
-            memberATTACK = memberResult.getBoolean("Attack");
-            memberINVITE = memberResult.getBoolean("Invite");
-        }
-        memberResult.close();
-        preparedStatement.close();
-
-        //Get recruit perms
-        preparedStatement = connection.prepareStatement(SELECT_RECRUIT_PERMS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet recruitResult = preparedStatement.executeQuery();
-        boolean recruitUSE = true;
-        boolean recruitPLACE = true;
-        boolean recruitDESTROY = true;
-        boolean recruitCLAIM = false;
-        boolean recruitATTACK = false;
-        boolean recruitINVITE = false;
-        if (recruitResult.next())
-        {
-            recruitUSE = recruitResult.getBoolean("Use");
-            recruitPLACE = recruitResult.getBoolean("Place");
-            recruitDESTROY = recruitResult.getBoolean("Destroy");
-            recruitCLAIM = recruitResult.getBoolean("Claim");
-            recruitATTACK = recruitResult.getBoolean("Attack");
-            recruitINVITE = recruitResult.getBoolean("Invite");
-        }
-        recruitResult.close();
-        preparedStatement.close();
-
-        //Get truce perms
-        preparedStatement = connection.prepareStatement(SELECT_TRUCE_PERMS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet truceResult = preparedStatement.executeQuery();
-        boolean truceUSE = true;
-        boolean trucePLACE = false;
-        boolean truceDESTROY = false;
-        if (truceResult.next())
-        {
-            truceUSE = truceResult.getBoolean("Use");
-            trucePLACE = truceResult.getBoolean("Place");
-            truceDESTROY = truceResult.getBoolean("Destroy");
-        }
-        truceResult.close();
-        preparedStatement.close();
-
-        //Get allay perms
-        preparedStatement = connection.prepareStatement(SELECT_ALLY_PERMS_WHERE_FACTIONNAME);
-        preparedStatement.setString(1, factionName);
-        ResultSet allyResult = preparedStatement.executeQuery();
-        boolean allyUSE = true;
-        boolean allyPLACE = true;
-        boolean allyDESTROY = true;
-        if (allyResult.next())
-        {
-            allyUSE = allyResult.getBoolean("Use");
-            allyPLACE = allyResult.getBoolean("Place");
-            allyDESTROY = allyResult.getBoolean("Destroy");
-        }
-        allyResult.close();
-        preparedStatement.close();
-
-        officerMap.put(FactionPermType.USE, officerUSE);
-        officerMap.put(FactionPermType.PLACE, officerPLACE);
-        officerMap.put(FactionPermType.DESTROY, officerDESTROY);
-        officerMap.put(FactionPermType.CLAIM, officerCLAIM);
-        officerMap.put(FactionPermType.ATTACK, officerATTACK);
-        officerMap.put(FactionPermType.INVITE, officerINVITE);
-
-        membersMap.put(FactionPermType.USE, memberUSE);
-        membersMap.put(FactionPermType.PLACE, memberPLACE);
-        membersMap.put(FactionPermType.DESTROY, memberDESTROY);
-        membersMap.put(FactionPermType.CLAIM, memberCLAIM);
-        membersMap.put(FactionPermType.ATTACK, memberATTACK);
-        membersMap.put(FactionPermType.INVITE, memberINVITE);
-
-        recruitMap.put(FactionPermType.USE, recruitUSE);
-        recruitMap.put(FactionPermType.PLACE, recruitPLACE);
-        recruitMap.put(FactionPermType.DESTROY, recruitDESTROY);
-        recruitMap.put(FactionPermType.CLAIM, recruitCLAIM);
-        recruitMap.put(FactionPermType.ATTACK, recruitATTACK);
-        recruitMap.put(FactionPermType.INVITE, recruitINVITE);
-
-        truceMap.put(FactionPermType.USE, truceUSE);
-        truceMap.put(FactionPermType.PLACE, trucePLACE);
-        truceMap.put(FactionPermType.DESTROY, truceDESTROY);
-
-        allyMap.put(FactionPermType.USE, allyUSE);
-        allyMap.put(FactionPermType.PLACE, allyPLACE);
-        allyMap.put(FactionPermType.DESTROY, allyDESTROY);
-
-        permMap.put(FactionMemberType.OFFICER, officerMap);
-        permMap.put(FactionMemberType.MEMBER, membersMap);
-        permMap.put(FactionMemberType.RECRUIT, recruitMap);
-        permMap.put(FactionMemberType.TRUCE, truceMap);
-        permMap.put(FactionMemberType.ALLY, allyMap);
-
-        return permMap;
-    }
-
     private Faction mapToFaction(Connection connection, ResultSet factionsResultSet, String factionName) throws SQLException, IOException, ClassNotFoundException
     {
-        final Set<String> alliances = getFactionAlliances(connection, factionName);
-        final Set<String> enemies = getFactionEnemies(connection, factionName);
-        final Set<String> truces = getFactionTruces(connection, factionName);
-        final Set<UUID> officers = getFactionOfficers(connection, factionName);
-        final Set<UUID> recruits = getFactionRecruits(connection, factionName);
-        final Set<UUID> members = getFactionMembers(connection, factionName);
+        final Set<String> alliances = getRelations(connection, factionName, RelationType.ALLIANCE);
+        final Set<String> enemies = getRelations(connection, factionName, RelationType.ENEMY);
+        final Set<String> truces = getRelations(connection, factionName, RelationType.TRUCE);
+        final Set<FactionMember> members = getFactionMembers(connection, factionName);
         final Set<Claim> claims = getFactionClaims(connection, factionName);
 
         if (factionsResultSet.next())
         {
-            final String tag = factionsResultSet.getString("Tag");
-            final String tagColor = factionsResultSet.getString("TagColor");
+            final String tag = factionsResultSet.getString("tag");
+            final String tagColor = factionsResultSet.getString("tag_color");
             final TextColor textColor = TextColor.fromHexString(tagColor);
-            final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("Leader"));
-            final String factionHomeAsString = factionsResultSet.getString("Home");
-            final String description = factionsResultSet.getString("Description");
-            final String messageOfTheDay = factionsResultSet.getString("Motd");
-            final boolean isPublic = factionsResultSet.getBoolean("IsPublic");
+            final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("leader"));
+            final String factionHomeAsString = factionsResultSet.getString("home");
+            final String description = factionsResultSet.getString("description");
+            final String messageOfTheDay = factionsResultSet.getString("motd");
+            final boolean isPublic = factionsResultSet.getBoolean("is_public");
             FactionHome factionHome = null;
             if (factionHomeAsString != null)
                 factionHome = FactionHome.from(factionHomeAsString);
-            final String lastOnlineString = factionsResultSet.getString("LastOnline");
-            final Instant lastOnline = Instant.parse(lastOnlineString);
+            final Instant createdDate = factionsResultSet.getTimestamp("created_date").toInstant();
+            final Instant lastOnline = factionsResultSet.getTimestamp("last_online").toInstant();
+            final String defaultRankName = factionsResultSet.getString("default_rank_name");
 
             final FactionChest factionChest = getFactionChest(connection, factionName);
-            final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPerms(connection, factionName);
+            final Set<ProtectionFlag> protectionFlags = factionProtectionFlagsStorage.getProtectionFlags(connection, factionName);
+
+            final Set<FactionPermission> alliancePermissions = getRelationPermissions(connection, factionName, RelationType.ALLIANCE);
+            final Set<FactionPermission> trucePermissions = getRelationPermissions(connection, factionName, RelationType.TRUCE);
+
+            final List<Rank> ranks = getFactionRanks(connection, factionName);
 
             final Faction faction = FactionImpl.builder(factionName, Component.text(tag, textColor), leaderUUID)
-                    .setHome(factionHome)
-                    .setTruces(truces)
-                    .setAlliances(alliances)
-                    .setEnemies(enemies)
-                    .setClaims(claims)
-                    .setLastOnline(lastOnline)
-                    .setMembers(members)
-                    .setRecruits(recruits)
-                    .setOfficers(officers)
-                    .setChest(factionChest)
-                    .setPerms(perms)
-                    .setDescription(description)
-                    .setMessageOfTheDay(messageOfTheDay)
-                    .setIsPublic(isPublic)
+                    .home(factionHome)
+                    .truces(truces)
+                    .alliances(alliances)
+                    .enemies(enemies)
+                    .claims(claims)
+                    .lastOnline(lastOnline)
+                    .members(members)
+                    .chest(factionChest)
+                    .createdDate(createdDate)
+                    .ranks(ranks)
+                    .defaultRankName(defaultRankName)
+                    .alliancePermissions(alliancePermissions)
+                    .trucePermissions(trucePermissions)
+                    .description(description)
+                    .messageOfTheDay(messageOfTheDay)
+                    .isPublic(isPublic)
+                    .protectionFlags(protectionFlags)
                     .build();
             return faction;
         }

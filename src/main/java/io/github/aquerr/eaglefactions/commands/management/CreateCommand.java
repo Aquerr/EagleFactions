@@ -8,15 +8,19 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.validator.AlphaNumericFactionNameTagValidator;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
+import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.Sponge;
@@ -30,15 +34,12 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 
-/**
- * Created by Aquerr on 2017-07-12.
- */
 public class CreateCommand extends AbstractCommand
 {
     private final ChatConfig chatConfig;
@@ -132,9 +133,16 @@ public class CreateCommand extends AbstractCommand
 
     private void createAsPlayer(final String factionName, final String factionTag, final Player player)
     {
-        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), player.uniqueId())
-                .setCreatedDate(Instant.now())
-                .setProtectionFlags(prepareDefaultProtectionFlags())
+        List<Rank> defaultRanks = factionsConfig.getDefaultRanks();
+
+        final Faction faction = FactionImpl.builder(factionName,
+                        text(factionTag, this.chatConfig.getDefaultTagColor()),
+                        player.uniqueId())
+                .ranks(defaultRanks)
+                .defaultRankName(factionsConfig.getDefaultRankName())
+                .members(Set.of(new FactionMemberImpl(player.uniqueId(), Set.of(RankManagerImpl.getHighestRank(defaultRanks).getName()))))
+                .createdDate(Instant.now())
+                .protectionFlags(prepareDefaultProtectionFlags())
                 .build();
         final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
         if (isCancelled)
@@ -156,9 +164,13 @@ public class CreateCommand extends AbstractCommand
      */
     private void createAsConsole(final String factionName, final String factionTag, final Audience audience)
     {
-        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), new UUID(0, 0))
-                .setCreatedDate(Instant.now())
-                .setProtectionFlags(prepareDefaultProtectionFlags())
+        final List<Rank> defaultRanks = factionsConfig.getDefaultRanks();
+
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), FactionLogicImpl.DUMMY_UUID)
+                .createdDate(Instant.now())
+                .ranks(defaultRanks)
+                .defaultRankName(factionsConfig.getDefaultRankName())
+                .protectionFlags(prepareDefaultProtectionFlags())
                 .build();
         super.getPlugin().getFactionLogic().addFaction(faction);
         notifyServerPlayersAboutNewFaction(faction);

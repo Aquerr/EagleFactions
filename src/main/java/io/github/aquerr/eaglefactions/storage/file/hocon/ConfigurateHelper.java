@@ -1,22 +1,26 @@
 package io.github.aquerr.eaglefactions.storage.file.hocon;
 
-import com.google.common.collect.ImmutableSet;
 import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
+import io.github.aquerr.eaglefactions.api.entities.RelationType;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.EFTypeTokens;
+import io.github.aquerr.eaglefactions.storage.serializers.FactionMemberTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.ProtectionFlagTypeSerializer;
+import io.github.aquerr.eaglefactions.storage.serializers.RankTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemListTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.SlotItemTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.Vector3iTypeSerializer;
@@ -29,6 +33,8 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
@@ -39,9 +45,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,22 +62,26 @@ public class ConfigurateHelper
         {
             configNode.node("name").set(faction.getName());
             configNode.node("tag").set(LegacyComponentSerializer.legacyAmpersand().serialize(faction.getTag()));
-            configNode.node("leader").set(faction.getLeader().toString());
+            configNode.node("leader").set(faction.getLeader().getUniqueId().toString());
             configNode.node("description").set(faction.getDescription());
             configNode.node("motd").set(faction.getMessageOfTheDay());
-            configNode.node("officers").setList(EFTypeTokens.UUID_TOKEN, new ArrayList<>(faction.getOfficers()));
-            configNode.node("members").setList(EFTypeTokens.UUID_TOKEN, new ArrayList<>(faction.getMembers()));
-            configNode.node("recruits").setList(EFTypeTokens.UUID_TOKEN, new ArrayList<>(faction.getRecruits()));
+            configNode.node("members").setList(EFTypeTokens.FACTION_MEMBER_TYPE_TOKEN, new ArrayList<>(faction.getMembers()));
             configNode.node("truces").set(faction.getTruces());
             configNode.node("alliances").set(faction.getAlliances());
             configNode.node("enemies").set(faction.getEnemies());
+
+            configNode.node("relations").set(buildRelationsObject(faction));
+
+            configNode.node("truces-permissions").set(faction.getRelationPermissions(RelationType.TRUCE).stream().map(Enum::name).collect(Collectors.toSet()));
+            configNode.node("alliances-permissions").set(faction.getRelationPermissions(RelationType.ALLIANCE).stream().map(Enum::name).collect(Collectors.toSet()));
             configNode.node("claims").set(EFTypeTokens.CLAIM_SET_TYPE_TOKEN, faction.getClaims());
-            configNode.node("last_online").set(faction.getLastOnline().toString());
+            configNode.node("last-online").set(faction.getLastOnline().toString());
             configNode.node("created_date").set(String.valueOf(faction.getCreatedDate()));
-            configNode.node("perms").set(faction.getPerms());
+            configNode.node("ranks").setList(EFTypeTokens.RANK_TYPE_TOKEN, faction.getRanks());
+            configNode.node("default-rank-name").set(faction.getDefaultRank().getName());
             configNode.node("chest").set(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, faction.getChest().getItems());
-            configNode.node("isPublic").set(faction.isPublic());
-            configNode.node("protection_flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags());
+            configNode.node("is-public").set(faction.isPublic());
+            configNode.node("protection-flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags());
 
             if(faction.getHome() == null)
             {
@@ -85,10 +95,22 @@ public class ConfigurateHelper
         }
         catch(final Exception exception)
         {
-            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting faction '" + faction.getName() + "' in node.");
-            exception.printStackTrace();
+            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting faction '" + faction.getName() + "' in node.", exception);
             return false;
         }
+    }
+
+    private static Relations buildRelationsObject(Faction faction)
+    {
+        Relations relations = new Relations();
+        relations.setRelations(Map.of(
+                RelationType.ALLIANCE, new Relations.Relation(faction.getAlliances(), faction.getRelationPermissions(RelationType.ALLIANCE).stream()
+                        .map(Enum::name).collect(Collectors.toSet())),
+                RelationType.TRUCE, new Relations.Relation(faction.getTruces(), faction.getRelationPermissions(RelationType.TRUCE).stream()
+                        .map(Enum::name).collect(Collectors.toSet())),
+                RelationType.ENEMY, new Relations.Relation(faction.getEnemies(), Set.of())
+        ));
+        return relations;
     }
 
     public static boolean putPlayerInNode(final ConfigurationNode configNode, final FactionPlayer factionPlayer)
@@ -104,8 +126,7 @@ public class ConfigurateHelper
         }
         catch (Exception exception)
         {
-            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting player'" + factionPlayer.getName() + "' in node.");
-            exception.printStackTrace();
+            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting player'" + factionPlayer.getName() + "' in node.", exception);
             return false;
         }
     }
@@ -115,59 +136,59 @@ public class ConfigurateHelper
         String factionName;
         factionName = configNode.node("name").getString();
 
-        // Backwards compatibility
-        //TODO: Remove in future release
-        if (configNode.key() != null)
-            factionName = (String) configNode.key();
-
         final TextComponent tag = LegacyComponentSerializer.legacyAmpersand().deserialize(configNode.node("tag").getString());
         final String description = configNode.node("description").getString();
         final String messageOfTheDay = configNode.node("motd").getString();
-
-        //Backwards compatibility. We need to have a proper uuid stored in leader field.
-        //TODO: Remove in future release
-        final Object leaderValue = configNode.node("leader").key();
-        if (leaderValue == null || (leaderValue instanceof String && ((String) leaderValue).trim().equals("")))
-            configNode.node("leader").set(EFTypeTokens.UUID_TOKEN, new UUID(0, 0));
-        //
-
         final UUID leader = configNode.node("leader").get(EFTypeTokens.UUID_TOKEN, new UUID(0,0));
         final FactionHome home = FactionHome.from(String.valueOf(configNode.node("home").getString("")));
-        final Set<UUID> officers = configNode.node("officers").get(EFTypeTokens.UUID_SET_TYPE_TOKEN, Collections.emptySet());
-        final Set<UUID> members = configNode.node("members").get(EFTypeTokens.UUID_SET_TYPE_TOKEN, Collections.emptySet());
-        final Set<UUID> recruits = configNode.node("recruits").get(EFTypeTokens.UUID_SET_TYPE_TOKEN, Collections.emptySet());
+        final Set<FactionMember> members = new HashSet<>(configNode.node("members").getList(EFTypeTokens.FACTION_MEMBER_TYPE_TOKEN, Collections.emptyList()));
         final Set<String> alliances = new HashSet<>(configNode.node("alliances").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         final Set<String> enemies = new HashSet<>(configNode.node("enemies").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         final Set<String> truces = new HashSet<>(configNode.node("truces").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        final Set<FactionPermission> trucesPermissions = configNode.node("truces-permissions").getList(TypeToken.get(String.class), Collections.emptyList()).stream()
+                .filter(StringUtils::isNotBlank)
+                .map(FactionPermission::valueOf)
+                .collect(Collectors.toSet());
+        final Set<FactionPermission> alliancesPermissions = configNode.node("alliances-permissions").getList(TypeToken.get(String.class), Collections.emptyList()).stream()
+                .filter(StringUtils::isNotBlank)
+                .map(FactionPermission::valueOf)
+                .collect(Collectors.toSet());
         final Set<Claim> claims = configNode.node("claims").get(EFTypeTokens.CLAIM_SET_TYPE_TOKEN, Collections.emptySet());
-        final Instant lastOnline = configNode.node("last_online").get(Instant.class) != null ? Instant.parse(configNode.node("last_online").getString(Instant.now().toString())) : Instant.now();
-        final Map<FactionMemberType, Map<FactionPermType, Boolean>> perms = getFactionPermsFromNode(configNode.node("perms"));
+        final Instant lastOnline = configNode.node("last-online").get(Instant.class) != null ? Instant.parse(configNode.node("last-online").getString(Instant.now().toString())) : Instant.now();
+        final List<Rank> ranks = new ArrayList<>(configNode.node("ranks").getList(EFTypeTokens.RANK_TYPE_TOKEN, Collections.emptyList()));
+        final String defaultRankName = configNode.node("default-rank-name").getString("");
+        final Rank defaultRank = ranks.stream()
+                .filter(rank -> rank.getName().equalsIgnoreCase(defaultRankName))
+                .findFirst()
+                .or(() -> Optional.ofNullable(RankManagerImpl.getLowestRank(ranks)))
+                .orElseThrow();
         final List<FactionChest.SlotItem> slotItems = configNode.node("chest").get(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN);
-        final Set<ProtectionFlag> protectionFlags = configNode.node("protection_flags").get(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, Collections.emptySet());
+        final Set<ProtectionFlag> protectionFlags = configNode.node("protection-flags").get(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, Collections.emptySet());
 
         FactionChest chest;
         if (slotItems == null)
             chest = new FactionChestImpl(factionName);
         else
             chest = new FactionChestImpl(factionName, slotItems);
-        final boolean isPublic = configNode.node("isPublic").getBoolean(false);
+        final boolean isPublic = configNode.node("is-public").getBoolean(false);
 
         return FactionImpl.builder(factionName, tag, leader)
-                .setDescription(description)
-                .setMessageOfTheDay(messageOfTheDay)
-                .setHome(home)
-                .setOfficers(officers)
-                .setMembers(members)
-                .setRecruits(recruits)
-                .setAlliances(alliances)
-                .setEnemies(enemies)
-                .setTruces(truces)
-                .setClaims(claims)
-                .setLastOnline(lastOnline)
-                .setPerms(perms)
-                .setChest(chest)
-                .setIsPublic(isPublic)
-                .setProtectionFlags(protectionFlags)
+                .description(description)
+                .messageOfTheDay(messageOfTheDay)
+                .home(home)
+                .members(members)
+                .alliances(alliances)
+                .enemies(enemies)
+                .truces(truces)
+                .claims(claims)
+                .lastOnline(lastOnline)
+                .ranks(ranks)
+                .defaultRankName(defaultRank.getName())
+                .chest(chest)
+                .isPublic(isPublic)
+                .protectionFlags(protectionFlags)
+                .trucePermissions(trucesPermissions)
+                .alliancePermissions(alliancesPermissions)
                 .build();
     }
 
@@ -199,97 +220,9 @@ public class ConfigurateHelper
         }
         catch(IOException e)
         {
-            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while opening the file " + file.getName());
-            e.printStackTrace();
+            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while opening the file " + file.getName(), e);
             return null;
         }
-    }
-
-    public static Map<FactionMemberType, Map<FactionPermType, Boolean>> getFactionPermsFromNode(final ConfigurationNode factionNode)
-    {
-        Map<FactionMemberType, Map<FactionPermType, Boolean>> flagMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> officerMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> membersMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> recruitMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> allyMap = new LinkedHashMap<>();
-        Map<FactionPermType, Boolean> truceMap = new LinkedHashMap<>();
-
-        //Get officer perms
-        boolean officerUSE = factionNode.node("OFFICER", "USE").getBoolean(true);
-        boolean officerPLACE = factionNode.node("OFFICER", "PLACE").getBoolean(true);
-        boolean officerDESTROY = factionNode.node("OFFICER", "DESTROY").getBoolean(true);
-        boolean officerCLAIM = factionNode.node("OFFICER", "CLAIM").getBoolean(true);
-        boolean officerATTACK = factionNode.node("OFFICER", "ATTACK").getBoolean(true);
-        boolean officerINVITE = factionNode.node("OFFICER", "INVITE").getBoolean(true);
-        boolean officerCHEST = factionNode.node("OFFICER", "CHEST").getBoolean(true);
-
-        //Get member perms
-        boolean memberUSE = factionNode.node("MEMBER", "USE").getBoolean(true);
-        boolean memberPLACE = factionNode.node("MEMBER", "PLACE").getBoolean(true);
-        boolean memberDESTROY = factionNode.node("MEMBER", "DESTROY").getBoolean(true);
-        boolean memberCLAIM = factionNode.node("MEMBER", "CLAIM").getBoolean(false);
-        boolean memberATTACK = factionNode.node("MEMBER", "ATTACK").getBoolean(false);
-        boolean memberINVITE = factionNode.node("MEMBER", "INVITE").getBoolean(true);
-        boolean memberCHEST = factionNode.node("MEMBER", "CHEST").getBoolean(true);
-
-        //Get recruit perms
-        boolean recruitUSE = factionNode.node("RECRUIT", "USE").getBoolean(true);
-        boolean recruitPLACE = factionNode.node("RECRUIT", "PLACE").getBoolean(true);
-        boolean recruitDESTROY = factionNode.node("RECRUIT", "DESTROY").getBoolean(true);
-        boolean recruitCLAIM = factionNode.node("RECRUIT", "CLAIM").getBoolean(false);
-        boolean recruitATTACK = factionNode.node("RECRUIT", "ATTACK").getBoolean(false);
-        boolean recruitINVITE = factionNode.node("RECRUIT", "INVITE").getBoolean(false);
-        boolean recruitCHEST = factionNode.node("RECRUIT", "CHEST").getBoolean(false);
-
-        //Get ally perms
-        boolean allyUSE = factionNode.node("ALLY", "USE").getBoolean(true);
-        boolean allyPLACE = factionNode.node( "ALLY", "PLACE").getBoolean(false);
-        boolean allyDESTROY = factionNode.node("ALLY", "DESTROY").getBoolean(false);
-
-        //Get truce perms
-        boolean truceUSE = factionNode.node("TRUCE", "USE").getBoolean(true);
-        boolean trucePLACE = factionNode.node( "TRUCE", "PLACE").getBoolean(false);
-        boolean truceDESTROY = factionNode.node("TRUCE", "DESTROY").getBoolean(false);
-
-        officerMap.put(FactionPermType.USE, officerUSE);
-        officerMap.put(FactionPermType.PLACE, officerPLACE);
-        officerMap.put(FactionPermType.DESTROY, officerDESTROY);
-        officerMap.put(FactionPermType.CLAIM, officerCLAIM);
-        officerMap.put(FactionPermType.ATTACK, officerATTACK);
-        officerMap.put(FactionPermType.INVITE, officerINVITE);
-        officerMap.put(FactionPermType.CHEST, officerCHEST);
-
-        membersMap.put(FactionPermType.USE, memberUSE);
-        membersMap.put(FactionPermType.PLACE, memberPLACE);
-        membersMap.put(FactionPermType.DESTROY, memberDESTROY);
-        membersMap.put(FactionPermType.CLAIM, memberCLAIM);
-        membersMap.put(FactionPermType.ATTACK, memberATTACK);
-        membersMap.put(FactionPermType.INVITE, memberINVITE);
-        membersMap.put(FactionPermType.CHEST, memberCHEST);
-
-        recruitMap.put(FactionPermType.USE, recruitUSE);
-        recruitMap.put(FactionPermType.PLACE, recruitPLACE);
-        recruitMap.put(FactionPermType.DESTROY, recruitDESTROY);
-        recruitMap.put(FactionPermType.CLAIM, recruitCLAIM);
-        recruitMap.put(FactionPermType.ATTACK, recruitATTACK);
-        recruitMap.put(FactionPermType.INVITE, recruitINVITE);
-        recruitMap.put(FactionPermType.CHEST, recruitCHEST);
-
-        allyMap.put(FactionPermType.USE, allyUSE);
-        allyMap.put(FactionPermType.PLACE, allyPLACE);
-        allyMap.put(FactionPermType.DESTROY, allyDESTROY);
-
-        truceMap.put(FactionPermType.USE, truceUSE);
-        truceMap.put(FactionPermType.PLACE, trucePLACE);
-        truceMap.put(FactionPermType.DESTROY, truceDESTROY);
-
-        flagMap.put(FactionMemberType.OFFICER, officerMap);
-        flagMap.put(FactionMemberType.MEMBER, membersMap);
-        flagMap.put(FactionMemberType.RECRUIT, recruitMap);
-        flagMap.put(FactionMemberType.ALLY, allyMap);
-        flagMap.put(FactionMemberType.TRUCE, truceMap);
-
-        return flagMap;
     }
 
     public static ConfigurationOptions getDefaultOptions()
@@ -302,11 +235,75 @@ public class ConfigurateHelper
                 .register(EFTypeTokens.SLOT_ITEM_TYPE_TOKEN, new SlotItemTypeSerializer())
                 .register(EFTypeTokens.VECTOR_3I_TOKEN, new Vector3iTypeSerializer())
                 .register(EFTypeTokens.PROTECTION_FLAG_TYPE_TOKEN, new ProtectionFlagTypeSerializer())
+                .register(EFTypeTokens.RANK_TYPE_TOKEN, new RankTypeSerializer())
+                .register(EFTypeTokens.FACTION_MEMBER_TYPE_TOKEN, new FactionMemberTypeSerializer())
                 .build();
 
         final ConfigurationOptions configurationOptions = ConfigurationOptions.defaults()
                 .serializers(collection);
-        return configurationOptions.nativeTypes(ImmutableSet.of(Map.class, Set.class, List.class, Double.class, Float.class, Long.class, Integer.class, Boolean.class, String.class,
+        return configurationOptions.nativeTypes(Set.of(Map.class, Set.class, List.class, Double.class, Float.class, Long.class, Integer.class, Boolean.class, String.class,
                 Short.class, Byte.class, Number.class));
+    }
+
+    private ConfigurateHelper()
+    {
+        throw new IllegalStateException("This class should not be instantiated!");
+    }
+
+    @ConfigSerializable
+    private static class Relations
+    {
+        @Setting(value = "relations", nodeFromParent = true)
+        private Map<RelationType, Relation> relations;
+
+        public Map<RelationType, Relation> getRelations()
+        {
+            return relations;
+        }
+
+        public void setRelations(Map<RelationType, Relation> relations)
+        {
+            this.relations = relations;
+        }
+
+        @ConfigSerializable
+        private static class Relation
+        {
+            @Setting("factions")
+            private Set<String> factions;
+            @Setting("permissions")
+            private Set<String> permissions;
+
+            public Relation()
+            {
+
+            }
+
+            public Relation(Set<String> factions, Set<String> permissions)
+            {
+                this.factions = factions;
+                this.permissions = permissions;
+            }
+
+            public Set<String> getFactions()
+            {
+                return factions;
+            }
+
+            public Set<String> getPermissions()
+            {
+                return permissions;
+            }
+
+            public void setFactions(Set<String> factions)
+            {
+                this.factions = factions;
+            }
+
+            public void setPermissions(Set<String> permissions)
+            {
+                this.permissions = permissions;
+            }
+        }
     }
 }

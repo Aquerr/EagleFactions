@@ -87,19 +87,25 @@ repositories {
 dependencies {
     api(project(":EagleFactionsAPI"))
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
+    implementation("com.mysql:mysql-connector-j:8.3.0")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.h2database:h2:2.2.220")
-    compileOnly("org.xerial:sqlite-jdbc:3.43.0.0")
+    compileOnly("org.xerial:sqlite-jdbc:3.45.0.0")
     compileOnly("us.dynmap:DynmapCoreAPI:3.6")
     compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.6.2")
     implementation("org.bstats:bstats-sponge:3.0.2")
 
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:$spongeApiVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    testImplementation("org.mockito:mockito-core:5.5.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+    testImplementation("org.assertj:assertj-core:3.25.2")
+    testImplementation("org.testcontainers:testcontainers:1.19.7")
+    testImplementation("org.testcontainers:mariadb:1.19.7")
+    testImplementation("org.testcontainers:mysql:1.19.7")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+    testImplementation("org.xerial:sqlite-jdbc:3.45.0.0")
 }
 
 tasks {
@@ -108,6 +114,7 @@ tasks {
 
         relocate("org.h2", "io.github.aquerr.eaglefactions.lib.db.h2")
         relocate("org.mariadb.jdbc", "io.github.aquerr.eaglefactions.lib.db.mariadb")
+        relocate("com.mysql", "io.github.aquerr.eaglefactions.lib.db.mysql")
         relocate("com.zaxxer.hikari", "io.github.aquerr.eaglefactions.lib.db.pool.hikari")
         relocate("org.slf4j", "io.github.aquerr.eaglefactions.lib.slf4j")
         relocate("org.bstats", "io.github.aquerr.eaglefactions.lib.bstats")
@@ -118,13 +125,6 @@ tasks {
     artifacts {
         archives(shadowJar)
     }
-}
-
-tasks.register("build-release") {
-    group = "build"
-    description = "Task for building the release build"
-
-    finalizedBy(tasks.shadowJar)
 }
 
 tasks.withType<Test> {

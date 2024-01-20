@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands.management;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
@@ -59,7 +60,7 @@ public class DisbandCommand extends AbstractCommand
         if(faction.isSafeZone() || faction.isWarZone())
             throw messageService.resolveExceptionWithMessage("error.command.disband.this-faction-cannot-be-disbanded");
 
-        if (player.uniqueId().equals(faction.getLeader()))
+        if (player.uniqueId().equals(faction.getLeader().getUniqueId()))
         {
             sendDisbandEventAndDisband(player, faction, false);
         }
@@ -86,10 +87,10 @@ public class DisbandCommand extends AbstractCommand
 
     private void clearAutoClaimAndChatForFactionMembers(Faction faction)
     {
-        for (final UUID memberUUID : faction.getPlayers())
+        for (final FactionMember factionMember : faction.getMembers())
         {
-            EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(memberUUID);
-            EagleFactionsPlugin.CHAT_LIST.remove(memberUUID);
+            EagleFactionsPlugin.AUTO_CLAIM_LIST.remove(factionMember.getUniqueId());
+            EagleFactionsPlugin.CHAT_LIST.remove(factionMember.getUniqueId());
         }
     }
 }

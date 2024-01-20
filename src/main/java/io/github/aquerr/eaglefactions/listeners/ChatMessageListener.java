@@ -39,7 +39,7 @@ public class ChatMessageListener extends AbstractListener
     @IsCancelled(Tristate.FALSE)
     public void onChatMessage(final PlayerChatEvent event, final @Root ServerPlayer player)
     {
-        Audience audience = event.audience().orElse(event.originalAudience());
+        Audience audience = event.audience().orElseGet(() -> event.originalAudience());
         Component message = event.message();
 
         final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
@@ -107,7 +107,7 @@ public class ChatMessageListener extends AbstractListener
         final TextComponent fPrefix = ChatMessageHelper.getFactionPrefix(playerFaction);
         factionPrefix.append(fPrefix);
 
-        final TextComponent rPrefix = ChatMessageHelper.getRankPrefix(chatType, playerFaction, player);
+        final TextComponent rPrefix = ChatMessageHelper.getRankPrefix(playerFaction, player);
         if (rPrefix != null)
             rankPrefix.append(rPrefix);
 

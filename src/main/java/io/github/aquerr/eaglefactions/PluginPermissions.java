@@ -6,6 +6,11 @@ public final class PluginPermissions
     public static final String TRUCE_COMMAND = "eaglefactions.player.truce";
     public static final String ALLY_COMMAND = "eaglefactions.player.ally";
     public static final String ENEMY_COMMAND = "eaglefactions.player.enemy";
+    public static final String LIST_RELATIONS_COMMAND = "eaglefactions.player.relations.list";
+    public static final String LIST_RELATIONS_SELF_COMMAND = "eaglefactions.player.relations.list.self";
+    public static final String LIST_RELATIONS_OTHERS_COMMAND = "eaglefactions.player.relations.list.others";
+    public static final String RELATION_LIST_PERMISSIONS_COMMAND = "eaglefactions.player.relations.permission.list";
+    public static final String SET_RELATION_PERMISSION_COMMAND = "eaglefactions.player.relations.permission.set";
 
     //General
     public static final String CREATE_COMMAND = "eaglefactions.player.create";
@@ -28,9 +33,6 @@ public final class PluginPermissions
     public static final String INFO_COMMAND = "eaglefactions.player.info";
     public static final String INFO_COMMAND_SELF = "eaglefactions.player.info.self";
     public static final String INFO_COMMAND_OTHERS = "eaglefactions.player.info.others";
-    public static final String RELATIONS_COMMAND = "eaglefactions.player.relations";
-    public static final String RELATIONS_SELF_COMMAND = "eaglefactions.player.relations.self";
-    public static final String RELATIONS_OTHERS_COMMAND = "eaglefactions.player.relations.others";
     public static final String VERSION_COMMAND = "eaglefactions.player.version";
 
     public static final String DEBUG_COMMAND = "eaglefactions.player.debug";
@@ -38,17 +40,29 @@ public final class PluginPermissions
     //Claiming
     public static final String CLAIMS_LIST_COMMAND = "eaglefactions.player.claims";
     public static final String CLAIM_COMMAND = "eaglefactions.player.claim";
-    public static final String RADIUS_CLAIM_COMMAND = "eaglefactions.player.radiusclaim";
+    public static final String SQUARE_CLAIM_COMMAND = "eaglefactions.player.squareclaim";
     public static final String COMMAND_FILL_CLAIM_COMMAND = "eaglefactions.player.fillclaim";
     public static final String AUTO_CLAIM_COMMAND = "eaglefactions.player.autoclaim";
     public static final String UNCLAIM_COMMAND = "eaglefactions.player.unclaim";
     public static final String UNCLAIM_ALL_COMMAND = "eaglefactions.player.unclaimall";
 
-    //Promoting/Demoting
+    // Ranks
     public static final String SET_LEADER_COMMAND = "eaglefactions.player.setleader";
-    public static final String PROMOTE_COMMAND = "eaglefactions.player.promote";
-    public static final String DEMOTE_COMMAND = "eaglefactions.player.demote";
-    public static final String SET_HOME_COMMAND = "eaglefactions.player.sethome";
+//    public static final String PROMOTE_COMMAND = "eaglefactions.player.promote";
+//    public static final String DEMOTE_COMMAND = "eaglefactions.player.demote";
+
+    public static final String RANK_COMMANDS = "eaglefactions.player.rank";
+    public static final String LIST_RANKS_COMMAND = "eaglefactions.player.rank.list_ranks";
+    public static final String CREATE_RANK_COMMAND = "eaglefactions.player.rank.create";
+    public static final String SET_RANK_PERMISSION_COMMAND = "eaglefactions.player.rank.set_permission";
+    public static final String SET_RANK_DISPLAY_NAME_COMMAND = "eaglefactions.player.rank.set_display_name";
+    public static final String LIST_RANK_PERMISSIONS_COMMAND = "eaglefactions.player.rank.list_permissions";
+    public static final String SET_RANK_POSITION_COMMAND = "eaglefactions.player.rank.set_ladder_position";
+    public static final String ASSIGN_RANK_COMMAND = "eaglefactions.player.rank.assign";
+    public static final String DELETE_RANK = "eaglefactions.player.rank.delete";
+    public static final String SET_DEFAULT_RANK = "eaglefactions.player.rank.delete";
+
+    public static final String SET_HOME_COMMAND = "eaglefactions.player.rank.set-default-rank";
 
     //Home
     public static final String HOME_COMMAND = "eaglefactions.player.home";
@@ -98,6 +112,7 @@ public final class PluginPermissions
     public static final String WAR_ZONE_INTERACT = "eaglefactions.warzone.interact";
     public static final String BACKUP_COMMAND = "eaglefactions.admin.backup.create";
     public static final String RESTORE_BACKUP_COMMAND = "eaglefactions.admin.backup.restore";
+
     private PluginPermissions()
     {
 

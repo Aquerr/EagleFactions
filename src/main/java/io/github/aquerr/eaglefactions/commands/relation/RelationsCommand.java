@@ -81,7 +81,7 @@ public class RelationsCommand extends AbstractCommand
 
     private void showOtherFactionRelations(CommandContext context, Faction faction) throws CommandException
     {
-        if (!context.hasPermission(PluginPermissions.RELATIONS_COMMAND) && !context.hasPermission(PluginPermissions.RELATIONS_OTHERS_COMMAND))
+        if (!context.hasPermission(PluginPermissions.LIST_RELATIONS_COMMAND) && !context.hasPermission(PluginPermissions.LIST_RELATIONS_OTHERS_COMMAND))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
 
         showRelations(context, faction);
@@ -89,7 +89,7 @@ public class RelationsCommand extends AbstractCommand
 
     private void showSelfFactionRelations(CommandContext context, Faction faction) throws CommandException
     {
-        if (!context.hasPermission(PluginPermissions.RELATIONS_COMMAND) && !context.hasPermission(PluginPermissions.RELATIONS_SELF_COMMAND))
+        if (!context.hasPermission(PluginPermissions.LIST_RELATIONS_COMMAND) && !context.hasPermission(PluginPermissions.LIST_RELATIONS_SELF_COMMAND))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
 
         showRelations(context, faction);

@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.commands.args;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
@@ -48,9 +49,9 @@ public class OwnFactionPlayerArgument
                         .orElseThrow(() -> reader.createException(Component.text(messageService.resolveMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY))));
 
                 final List<FactionPlayer> factionPlayers = new LinkedList<>();
-                for (final UUID uuid : faction.getPlayers())
+                for (final FactionMember factionMember : faction.getMembers())
                 {
-                    this.playerManager.getFactionPlayer(uuid)
+                    this.playerManager.getFactionPlayer(factionMember.getUniqueId())
                             .ifPresent(factionPlayers::add);
                 }
 
@@ -102,9 +103,9 @@ public class OwnFactionPlayerArgument
                     return Collections.emptyList();
                 final Faction faction = optionalFaction.get();
                 final List<FactionPlayer> factionPlayers = new LinkedList<>();
-                for (final UUID uuid : faction.getPlayers())
+                for (final FactionMember factionMember : faction.getMembers())
                 {
-                    this.playerManager.getFactionPlayer(uuid)
+                    this.playerManager.getFactionPlayer(factionMember.getUniqueId())
                             .ifPresent(factionPlayers::add);
                 }
 

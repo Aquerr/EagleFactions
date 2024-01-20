@@ -339,7 +339,7 @@ public class EntityDamageListener extends AbstractListener
     private boolean isInOwnTerritory(final ServerPlayer player)
     {
         final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
-        return optionalFaction.filter(x-> x.getPlayerMemberType(player.uniqueId()) != null).isPresent();
+        return optionalFaction.map(x-> x.getMembers().contains(player.uniqueId())).orElse(false);
     }
 
     private boolean isSafeZone(final ServerLocation location)

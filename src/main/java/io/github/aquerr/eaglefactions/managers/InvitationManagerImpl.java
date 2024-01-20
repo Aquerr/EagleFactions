@@ -6,16 +6,21 @@ import io.github.aquerr.eaglefactions.api.entities.AllyRequest;
 import io.github.aquerr.eaglefactions.api.entities.ArmisticeRequest;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionInvite;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.entities.TruceRequest;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
 import io.github.aquerr.eaglefactions.entities.AllyRequestImpl;
 import io.github.aquerr.eaglefactions.entities.ArmisticeRequestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionInviteImpl;
+import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.TruceRequestImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -24,17 +29,20 @@ import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.RemoveInviteTask;
 import io.github.aquerr.eaglefactions.scheduling.RemoveRelationRequestTask;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.newline;
@@ -48,16 +56,19 @@ public class InvitationManagerImpl implements InvitationManager
     private final FactionLogic factionLogic;
     private final PlayerManager playerManager;
     private final MessageService messageService;
+    private final PermsManager permsManager;
 
     public InvitationManagerImpl(StorageManager storageManager,
                                  FactionLogic factionLogic,
                                  PlayerManager playerManager,
-                                 MessageService messageService)
+                                 MessageService messageService,
+                                 PermsManager permsManager)
     {
         this.factionLogic = factionLogic;
         this.playerManager = playerManager;
         this.storageManager = storageManager;
         this.messageService = messageService;
+        this.permsManager = permsManager;
     }
 
     @Override
@@ -103,9 +114,10 @@ public class InvitationManagerImpl implements InvitationManager
         if (isCancelled)
             return false;
 
-        final Set<UUID> recruits = new HashSet<>(faction.getRecruits());
-        recruits.add(player.uniqueId());
-        Faction updatedFaction = faction.toBuilder().setRecruits(recruits).build();
+        final Set<FactionMember> members = new HashSet<>(faction.getMembers());
+        members.add(new FactionMemberImpl(player.uniqueId(), Set.of(faction.getDefaultRank().getName())));
+
+        Faction updatedFaction = faction.toBuilder().members(members).build();
         this.storageManager.saveFaction(updatedFaction);
 
         //Save player...
@@ -137,10 +149,9 @@ public class InvitationManagerImpl implements InvitationManager
         }
 
         boolean hasAdminMode = this.playerManager.hasAdminMode(player.user());
-        boolean isLeader = isLeader(sourceFaction, player);
-        boolean isOfficer = isOfficer(sourceFaction, player);
+        boolean canManageRelations = canManageRelations(sourceFaction, player);
 
-        if(sourceFaction.isAlly(targetFaction) && (hasAdminMode || isLeader || isOfficer))
+        if(sourceFaction.isAlly(targetFaction) && (hasAdminMode || canManageRelations))
         {
             //Remove ally
             this.factionLogic.removeAlly(sourceFaction.getName(), targetFaction.getName());
@@ -156,7 +167,7 @@ public class InvitationManagerImpl implements InvitationManager
         }
         else
         {
-            if(!isLeader && !isOfficer)
+            if(!canManageRelations)
             {
                 player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS)));
                 return false;
@@ -179,11 +190,7 @@ public class InvitationManagerImpl implements InvitationManager
                 final AllyRequest invite = new AllyRequestImpl(sourceFaction, targetFaction);
                 EagleFactionsPlugin.RELATION_INVITES.add(invite);
 
-                final Optional<ServerPlayer> optionalInvitedFactionLeader = this.playerManager.getPlayer(targetFaction.getLeader());
-
-                optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(getAllyInviteGetMessage(sourceFaction)));
-                targetFaction.getOfficers().forEach(x-> this.playerManager.getPlayer(x)
-                        .ifPresent(y-> y.sendMessage(getAllyInviteGetMessage(sourceFaction))));
+                notifyFactionAboutRequest(targetFaction, () -> getAllyInviteGetMessage(sourceFaction));
 
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-invited-faction-to-the-alliance", targetFaction.getName()));
                 EagleFactionsScheduler.getInstance().scheduleWithDelay(new RemoveRelationRequestTask(invite), 2, TimeUnit.MINUTES);
@@ -211,10 +218,9 @@ public class InvitationManagerImpl implements InvitationManager
         }
 
         boolean hasAdminMode = this.playerManager.hasAdminMode(player.user());
-        boolean isLeader = isLeader(sourceFaction, player);
-        boolean isOfficer = isOfficer(sourceFaction, player);
+        boolean canManageRelations = canManageRelations(sourceFaction, player);
 
-        if(sourceFaction.isTruce(targetFaction) && (hasAdminMode || isLeader || isOfficer))
+        if(sourceFaction.isTruce(targetFaction) && (hasAdminMode || canManageRelations))
         {
             this.factionLogic.removeAlly(sourceFaction.getName(), targetFaction.getName());
 
@@ -230,7 +236,7 @@ public class InvitationManagerImpl implements InvitationManager
         }
         else
         {
-            if(!isLeader && !isOfficer)
+            if(!canManageRelations)
             {
                 player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS)));
                 return false;
@@ -253,11 +259,7 @@ public class InvitationManagerImpl implements InvitationManager
                 final TruceRequest invite = new TruceRequestImpl(sourceFaction, targetFaction);
                 EagleFactionsPlugin.RELATION_INVITES.add(invite);
 
-                final Optional<ServerPlayer> optionalInvitedFactionLeader = this.playerManager.getPlayer(targetFaction.getLeader());
-
-                optionalInvitedFactionLeader.ifPresent(x-> optionalInvitedFactionLeader.get().sendMessage(getTruceInviteGetMessage(sourceFaction)));
-                targetFaction.getOfficers().forEach(x-> this.playerManager.getPlayer(x)
-                        .ifPresent(y-> y.sendMessage(getTruceInviteGetMessage(sourceFaction))));
+                notifyFactionAboutRequest(targetFaction, () -> getTruceInviteGetMessage(sourceFaction));
 
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-invited-faction-to-the-truce", targetFaction.getName()));
 
@@ -286,8 +288,7 @@ public class InvitationManagerImpl implements InvitationManager
         }
 
         boolean hasAdminMode = this.playerManager.hasAdminMode(player.user());
-        boolean isLeader = isLeader(sourceFaction, player);
-        boolean isOfficer = isOfficer(sourceFaction, player);
+        boolean canManageRelations = canManageRelations(sourceFaction, player);
 
         if(hasAdminMode)
         {
@@ -305,7 +306,7 @@ public class InvitationManagerImpl implements InvitationManager
         }
         else
         {
-            if (!isLeader && !isOfficer)
+            if (!canManageRelations)
             {
                 player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS)));
                 return false;
@@ -333,11 +334,9 @@ public class InvitationManagerImpl implements InvitationManager
     {
         this.factionLogic.addAlly(allyRequest.getSender().getName(), allyRequest.getInvited().getName());
         final Faction senderFaction = this.factionLogic.getFactionByName(allyRequest.getSender().getName());
-        final Optional<ServerPlayer> optionalSenderFactionLeader = this.playerManager.getPlayer(senderFaction.getLeader());
-        optionalSenderFactionLeader.ifPresent(x -> optionalSenderFactionLeader.get()
-                .sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvited().getName())));
-        senderFaction.getOfficers().forEach(x -> this.playerManager.getPlayer(x)
-                .ifPresent(y -> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvited().getName()))));
+
+        notifyFactionAboutRequest(senderFaction, () -> messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-alliance", allyRequest.getInvited().getName()));
+
         EagleFactionsPlugin.RELATION_INVITES.remove(allyRequest);
     }
 
@@ -346,10 +345,9 @@ public class InvitationManagerImpl implements InvitationManager
     {
         this.factionLogic.addTruce(truceRequest.getSender().getName(), truceRequest.getInvited().getName());
         final Faction senderFaction = this.factionLogic.getFactionByName(truceRequest.getSender().getName());
-        final Optional<ServerPlayer> optionalSenderFactionLeader = this.playerManager.getPlayer(senderFaction.getLeader());
-        optionalSenderFactionLeader.ifPresent(x -> optionalSenderFactionLeader.get().sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvited().getName())));
-        senderFaction.getOfficers().forEach(x-> this.playerManager.getPlayer(x)
-                .ifPresent(y -> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvited().getName()))));
+
+        notifyFactionAboutRequest(senderFaction, () -> messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-invite-to-the-truce", truceRequest.getInvited().getName()));
+
         EagleFactionsPlugin.RELATION_INVITES.remove(truceRequest);
     }
 
@@ -358,21 +356,15 @@ public class InvitationManagerImpl implements InvitationManager
     {
         this.factionLogic.removeEnemy(armisticeRequest.getInvited().getName(), armisticeRequest.getSender().getName());
         final Faction senderFaction = this.factionLogic.getFactionByName(armisticeRequest.getSender().getName());
-        final Optional<ServerPlayer> senderFactionLeader = this.playerManager.getPlayer(senderFaction.getLeader());
-        senderFactionLeader.ifPresent(x->x.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvited().getName())));
-        senderFaction.getOfficers().forEach(x-> this.playerManager.getPlayer(x)
-                .ifPresent(y->y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvited().getName()))));
+
+        notifyFactionAboutRequest(senderFaction, () -> messageService.resolveMessageWithPrefix("command.relations.faction-accepted-your-armistice-request", armisticeRequest.getInvited().getName()));
+
         EagleFactionsPlugin.RELATION_INVITES.remove(armisticeRequest);
     }
 
-    private boolean isLeader(final Faction faction, final Player player)
+    private boolean canManageRelations(final Faction faction, final Player player)
     {
-        return player.uniqueId().equals(faction.getLeader());
-    }
-
-    private boolean isOfficer(final Faction faction, final Player player)
-    {
-        return faction.getOfficers().contains(player.uniqueId());
+        return permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.MANAGE_RELATIONS);
     }
 
     private void forceAllianceBetween(Faction senderFaction, Faction selectedFaction)
@@ -411,9 +403,8 @@ public class InvitationManagerImpl implements InvitationManager
         }
         EagleFactionsPlugin.RELATION_INVITES.add(armisticeRequest);
 
-        final Optional<ServerPlayer> targetFactionLeader = this.playerManager.getPlayer(targetFaction.getLeader());
-        targetFactionLeader.ifPresent(x->x.sendMessage(getArmisticeRequestMessage(sourceFaction)));
-        targetFaction.getOfficers().forEach(x-> playerManager.getPlayer(x).ifPresent(y->y.sendMessage(getArmisticeRequestMessage(sourceFaction))));
+        notifyFactionAboutRequest(targetFaction, () -> getArmisticeRequestMessage(sourceFaction));
+
         player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.you-have-sent-armistice-request-to-faction", targetFaction.getName()));
 
         EagleFactionsScheduler.getInstance().scheduleWithDelayAsync(new RemoveRelationRequestTask(armisticeRequest), 2, TimeUnit.MINUTES);
@@ -424,68 +415,71 @@ public class InvitationManagerImpl implements InvitationManager
     {
         factionLogic.addEnemy(sourceFaction.getName(), targetFaction.getName());
         player.sendMessage(messageService.resolveMessageWithPrefix("command.relations.your-faction-is-now-enemies-with-faction", targetFaction.getName()));
-
-        //Send message to enemy leader.
-        playerManager.getPlayer(targetFaction.getLeader()).ifPresent(x->x.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-has-declared-you-war", sourceFaction.getName())));
-
-        //Send message to enemy officers.
-        targetFaction.getOfficers().forEach(x-> playerManager.getPlayer(x).ifPresent(y-> y.sendMessage(messageService.resolveMessageWithPrefix("command.relations.faction-has-declared-you-war", sourceFaction.getName()))));
+        notifyFactionAboutRequest(targetFaction, () -> messageService.resolveMessageWithPrefix("command.relations.faction-has-declared-you-war", sourceFaction.getName()));
         return true;
     }
 
     private Component getInviteReceivedMessage(final Faction senderFaction)
     {
-        final TextComponent clickHereText = messageService.resolveComponentWithMessage("command.relations.click-here")
-                .clickEvent(ClickEvent.runCommand("/f join " + senderFaction.getName()))
-                .hoverEvent(HoverEvent.showText(text("/f join " + senderFaction.getName(), GOLD)));
-
-        return messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-invite", senderFaction.getName())
-                .append(messageService.resolveComponentWithMessage("command.relations.you-have-two-minutes-to-accept-it"))
-                .append(newline())
-                .append(messageService.resolveComponentWithMessage("command.relations.click-here-to-accept-invitation-or-type",
-                        clickHereText,
-                        text(" /f join " + senderFaction.getName(), GOLD)));
+        return buildRequestMessageWithHint(() -> messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-invite",
+                        senderFaction.getName()),
+                "/f join " + senderFaction.getName());
     }
 
     private Component getAllyInviteGetMessage(final Faction senderFaction)
     {
-        final TextComponent clickHereText = messageService.resolveComponentWithMessage("command.relations.click-here")
-                .clickEvent(ClickEvent.runCommand("/f ally " + senderFaction.getName()))
-                .hoverEvent(HoverEvent.showText(text("/f ally " + senderFaction.getName(), GOLD)));
-
-        return messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-invite-to-the-alliance", senderFaction.getName())
-                .append(messageService.resolveComponentWithMessage("command.relations.you-have-two-minutes-to-accept-it"))
-                .append(newline())
-                .append(messageService.resolveComponentWithMessage("command.relations.click-here-to-accept-invitation-or-type",
-                        clickHereText,
-                        text(" /f ally " + senderFaction.getName(), GOLD)));
+        return buildRequestMessageWithHint(() -> messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-invite-to-the-alliance",
+                        senderFaction.getName()),
+                "/f ally " + senderFaction.getName());
     }
 
     private Component getTruceInviteGetMessage(final Faction senderFaction)
     {
-        final TextComponent clickHereText = messageService.resolveComponentWithMessage("command.relations.click-here")
-                .clickEvent(ClickEvent.runCommand("/f truce " + senderFaction.getName()))
-                .hoverEvent(HoverEvent.showText(text("/f truce " + senderFaction.getName(), GOLD)));
-
-        return messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-invite-to-the-truce", senderFaction.getName())
-                .append(messageService.resolveComponentWithMessage("command.relations.you-have-two-minutes-to-accept-it"))
-                .append(newline())
-                .append(messageService.resolveComponentWithMessage("command.relations.click-here-to-accept-invitation-or-type",
-                        clickHereText,
-                        text(" /f truce " + senderFaction.getName(), GOLD)));
+        return buildRequestMessageWithHint(() -> messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-invite-to-the-truce",
+                        senderFaction.getName()),
+                "/f truce " + senderFaction.getName());
     }
 
     private Component getArmisticeRequestMessage(final Faction senderFaction)
     {
-        final TextComponent clickHereText = messageService.resolveComponentWithMessage("command.relations.click-here")
-                .clickEvent(ClickEvent.runCommand("/f enemy " + senderFaction.getName()))
-                .hoverEvent(HoverEvent.showText(text("/f enemy " + senderFaction.getName(), GOLD)));
+        return buildRequestMessageWithHint(() -> messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-armistice-request",
+                senderFaction.getName()),
+                "/f enemy " + senderFaction.getName());
+    }
 
-        return messageService.resolveMessageWithPrefix("command.relations.faction-has-sent-you-armistice-request", senderFaction.getName())
-                .append(messageService.resolveComponentWithMessage("command.relations.you-have-two-minutes-to-accept-it"))
-                .append(newline())
-                .append(messageService.resolveComponentWithMessage("command.relations.click-here-to-accept-invitation-or-type",
-                        clickHereText,
-                        text(" /f enemy " + senderFaction.getName(), GOLD)));
+    private Component buildRequestMessageWithHint(Supplier<Component> requestMessage, String command)
+    {
+        return LinearComponents.linear(
+                requestMessage.get(),
+                messageService.resolveComponentWithMessage("command.relations.you-have-two-minutes-to-accept-it"),
+                newline(),
+                buildCommandHint(command));
+    }
+
+    private Component buildCommandHint(String command)
+    {
+        final TextComponent clickHereText = messageService.resolveComponentWithMessage("command.relations.click-here")
+                .clickEvent(ClickEvent.runCommand(command))
+                .hoverEvent(HoverEvent.showText(text(command, GOLD)));
+
+        return messageService.resolveComponentWithMessage("command.relations.click-here-to-accept-invitation-or-type",
+                clickHereText,
+                text(command, GOLD));
+    }
+
+    private void notifyFactionAboutRequest(Faction faction, Supplier<Component> messageSupplier)
+    {
+        final Optional<ServerPlayer> leader = this.playerManager.getPlayer(faction.getLeader().getUniqueId());
+        leader.ifPresent(x->x.sendMessage(messageSupplier.get()));
+        faction.getRanks().stream()
+                .filter(rank -> rank.getPermissions().contains(FactionPermission.MANAGE_RELATIONS))
+                .map(Rank::getName)
+                .map(rankName -> faction.getMembers().stream()
+                        .filter(member -> member.getRankNames().contains(rankName))
+                        .collect(Collectors.toSet()))
+                .flatMap(Collection::stream)
+                .forEach(x -> this.playerManager.getPlayer(x.getUniqueId())
+                        .ifPresent(y->y.sendMessage(messageSupplier.get()))
+                );
     }
 }

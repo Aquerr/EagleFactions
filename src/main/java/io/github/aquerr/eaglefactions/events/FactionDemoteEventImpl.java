@@ -1,8 +1,8 @@
 package io.github.aquerr.eaglefactions.events;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.events.FactionDemoteEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
@@ -33,16 +33,16 @@ public class FactionDemoteEventImpl extends FactionAbstractEvent implements Fact
 
     static class Post extends FactionDemoteEventImpl implements FactionDemoteEvent.Post
     {
-        private final FactionMemberType demotedToRank;
+        private final Rank demotedToRank;
 
-        Post(Faction faction, Player demotedBy, FactionPlayer demotedPlayer, FactionMemberType demotedToRank, Cause cause)
+        Post(Faction faction, Player demotedBy, FactionPlayer demotedPlayer, Rank demotedToRank, Cause cause)
         {
             super(faction, demotedBy, demotedPlayer, cause);
             this.demotedToRank = demotedToRank;
         }
 
         @Override
-        public FactionMemberType getDemotedToRank()
+        public Rank getDemotedToRank()
         {
             return this.demotedToRank;
         }

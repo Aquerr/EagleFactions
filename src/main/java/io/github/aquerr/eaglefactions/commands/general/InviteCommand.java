@@ -53,6 +53,6 @@ public class InviteCommand extends AbstractCommand
 
     private boolean hasReachedPlayerLimit(Faction faction)
     {
-        return this.factionsConfig.isPlayerLimit() && faction.getPlayers().size() >= this.factionsConfig.getPlayerLimit();
+        return this.factionsConfig.isPlayerLimit() && faction.getMembers().size() >= this.factionsConfig.getPlayerLimit();
     }
 }

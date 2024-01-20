@@ -4,7 +4,6 @@ import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.storage.sql.FactionProtectionFlagsStorage;
-import io.github.aquerr.eaglefactions.storage.sql.SQLProvider;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -124,6 +123,7 @@ public class FactionProtectionFlagsMariaDbStorageImpl implements FactionProtecti
         {
             preparedStatement.setString(1, factionName);
             preparedStatement.setString(2, protectionFlag.getType().getName());
+            preparedStatement.setBoolean(3, protectionFlag.getValue());
             preparedStatement.addBatch();
             preparedStatement.clearParameters();
         }
