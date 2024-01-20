@@ -1,7 +1,6 @@
 package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,18 +42,12 @@ class FactionImplTest
     }
 
     @Test
-    void builderShouldSetDefaultFlagsIfNotSpecified()
-    {
-        Assertions.assertEquals(PermsManager.getDefaultFactionPerms(), faction.getPerms());
-    }
-
-    @Test
     void buildingAFactionWithoutNameShouldThrowException()
     {
         //given
         //when
         //then
-        assertThrows(IllegalStateException.class, () -> faction.toBuilder().setName(null).build());
+        assertThrows(IllegalStateException.class, () -> faction.toBuilder().name(null).build());
     }
 
     @Test
@@ -63,7 +56,7 @@ class FactionImplTest
         //given
         //when
         //then
-        assertThrows(IllegalStateException.class, () -> faction.toBuilder().setTag(null).build());
+        assertThrows(IllegalStateException.class, () -> faction.toBuilder().tag(null).build());
     }
 
     @Test
@@ -72,6 +65,6 @@ class FactionImplTest
         //given
         //when
         //then
-        assertThrows(IllegalStateException.class, () -> faction.toBuilder().setLeader(null).build());
+        assertThrows(IllegalStateException.class, () -> faction.toBuilder().leader(null).build());
     }
 }

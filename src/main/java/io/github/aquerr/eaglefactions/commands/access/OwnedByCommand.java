@@ -3,7 +3,9 @@ package io.github.aquerr.eaglefactions.commands.access;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
@@ -32,11 +34,13 @@ import static net.kyori.adventure.text.LinearComponents.linear;
 public class OwnedByCommand extends AbstractCommand
 {
     private final MessageService messageService;
+    private final PermsManager permsManager;
 
     public OwnedByCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.messageService = plugin.getMessageService();
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -48,7 +52,7 @@ public class OwnedByCommand extends AbstractCommand
         final Faction playerFaction = requirePlayerFaction(player);
 
         // Access can be run only by leader and officers
-        if (!playerFaction.getLeader().equals(player.uniqueId()) && !playerFaction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+        if (!permsManager.hasPermission(player.uniqueId(), playerFaction, FactionPermission.MANAGE_INTERNAL_CLAIMS) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             throw this.messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
         // Get claim at player's location

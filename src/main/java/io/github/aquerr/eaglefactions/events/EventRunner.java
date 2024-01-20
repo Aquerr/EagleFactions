@@ -2,9 +2,23 @@ package io.github.aquerr.eaglefactions.events;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
-import io.github.aquerr.eaglefactions.api.events.*;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
+import io.github.aquerr.eaglefactions.api.events.FactionAreaEnterEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionChestEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionClaimEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionCreateEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionDemoteEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionDisbandEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionInviteEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionJoinEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionKickEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionLeaderChangeEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionLeaveEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionPromoteEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionRenameEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionTagColorUpdateEvent;
+import io.github.aquerr.eaglefactions.api.events.FactionTagUpdateEvent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -293,7 +307,7 @@ public final class EventRunner
         final EventContext eventContext = Optional.ofNullable(demotedBy)
                 .map(EventRunner::getEventContextForPlayer)
                 .map(EventContext.Builder::build)
-                .orElse(defaultEventContext().build());
+                .orElseGet(() -> defaultEventContext().build());
 
         List<Object> causes = new ArrayList<>();
         if (demotedBy != null)
@@ -307,12 +321,12 @@ public final class EventRunner
         return eventManager.post(event);
     }
 
-    public static boolean runFactionDemoteEventPost(@Nullable final Player demotedBy, final FactionPlayer demotedPlayer, final FactionMemberType demotedTo, final Faction faction)
+    public static boolean runFactionDemoteEventPost(@Nullable final Player demotedBy, final FactionPlayer demotedPlayer, final Rank demotedToRank, final Faction faction)
     {
         final EventContext eventContext = Optional.ofNullable(demotedBy)
                 .map(EventRunner::getEventContextForPlayer)
                 .map(EventContext.Builder::build)
-                .orElse(defaultEventContext().build());
+                .orElseGet(() -> defaultEventContext().build());
 
         List<Object> causes = new ArrayList<>();
         if (demotedBy != null)
@@ -322,7 +336,7 @@ public final class EventRunner
         causes.add(faction);
         causes.add(demotedPlayer);
         final Cause cause = Cause.of(eventContext, causes);
-        final FactionDemoteEvent event = new FactionDemoteEventImpl.Post(faction, demotedBy, demotedPlayer, demotedTo, cause);
+        final FactionDemoteEvent event = new FactionDemoteEventImpl.Post(faction, demotedBy, demotedPlayer, demotedToRank, cause);
         return eventManager.post(event);
     }
 
@@ -331,7 +345,7 @@ public final class EventRunner
         final EventContext eventContext = Optional.ofNullable(promotedBy)
                 .map(EventRunner::getEventContextForPlayer)
                 .map(EventContext.Builder::build)
-                .orElse(defaultEventContext().build());
+                .orElseGet(() -> defaultEventContext().build());
 
         List<Object> causes = new ArrayList<>();
         if (promotedBy != null)
@@ -345,12 +359,12 @@ public final class EventRunner
         return eventManager.post(event);
     }
 
-    public static boolean runFactionPromoteEventPost(@Nullable final Player promotedBy, final FactionPlayer promotedPlayer, final FactionMemberType promotedToRank, final Faction faction)
+    public static boolean runFactionPromoteEventPost(@Nullable final Player promotedBy, final FactionPlayer promotedPlayer, final Rank promotedToRank, final Faction faction)
     {
         final EventContext eventContext = Optional.ofNullable(promotedBy)
                 .map(EventRunner::getEventContextForPlayer)
                 .map(EventContext.Builder::build)
-                .orElse(defaultEventContext().build());
+                .orElseGet(() -> defaultEventContext().build());
 
         List<Object> causes = new ArrayList<>();
         if (promotedBy != null)
@@ -361,6 +375,54 @@ public final class EventRunner
         causes.add(promotedPlayer);
         final Cause cause = Cause.of(eventContext, causes);
         final FactionPromoteEvent event = new FactionPromoteEventImpl.Post(promotedBy, promotedPlayer, faction, promotedToRank, cause);
+        return eventManager.post(event);
+    }
+
+    public static boolean runFactionLeaderChangeEventPre(@Nullable final Player promotedBy,
+                                                         @Nullable final FactionPlayer newLeader,
+                                                         final Faction faction)
+    {
+        final EventContext eventContext = Optional.ofNullable(promotedBy)
+                .map(EventRunner::getEventContextForPlayer)
+                .map(EventContext.Builder::build)
+                .orElseGet(() -> defaultEventContext().build());
+
+        List<Object> causes = new ArrayList<>();
+        if (promotedBy != null)
+        {
+            causes.add(promotedBy);
+        }
+        causes.add(faction);
+        if (newLeader != null)
+        {
+            causes.add(newLeader);
+        }
+        final Cause cause = Cause.of(eventContext, causes);
+        final FactionLeaderChangeEvent.Pre event = new FactionLeaderChangeEventImpl.Pre(promotedBy, newLeader, faction, cause);
+        return eventManager.post(event);
+    }
+
+    public static boolean runFactionLeaderChangeEventPost(@Nullable final Player promotedBy,
+                                                          @Nullable final FactionPlayer newLeader,
+                                                          final Faction faction)
+    {
+        final EventContext eventContext = Optional.ofNullable(promotedBy)
+                .map(EventRunner::getEventContextForPlayer)
+                .map(EventContext.Builder::build)
+                .orElseGet(() -> defaultEventContext().build());
+
+        List<Object> causes = new ArrayList<>();
+        if (promotedBy != null)
+        {
+            causes.add(promotedBy);
+        }
+        causes.add(faction);
+        if (newLeader != null)
+        {
+            causes.add(newLeader);
+        }
+        final Cause cause = Cause.of(eventContext, causes);
+        final FactionLeaderChangeEvent.Post event = new FactionLeaderChangeEventImpl.Post(promotedBy, newLeader, faction, cause);
         return eventManager.post(event);
     }
 

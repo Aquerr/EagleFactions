@@ -27,7 +27,7 @@ public class LeaveCommand extends AbstractCommand
     {
         final ServerPlayer player = requirePlayerSource(context);
         final Faction faction = requirePlayerFaction(player);
-        if (faction.getLeader().equals(player.uniqueId()))
+        if (faction.getLeader().getUniqueId().equals(player.uniqueId()))
         {
             if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
                 return leaveFaction(player, faction, true);

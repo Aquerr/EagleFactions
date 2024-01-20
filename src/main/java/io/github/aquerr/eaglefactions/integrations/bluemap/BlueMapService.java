@@ -217,10 +217,10 @@ public class BlueMapService
         if (this.bluemapConfig.showBluemapFactionLeader()) {
             try
             {
-                if (userStorage.load(faction.getLeader()).get().isPresent()) {
+                if (userStorage.load(faction.getLeader().getUniqueId()).get().isPresent()) {
                     description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
                             .replace("%leader%",
-                                    userStorage.load(faction.getLeader()).get().get().name()));
+                                    userStorage.load(faction.getLeader().getUniqueId()).get().get().name()));
                 }
             }
             catch (InterruptedException | ExecutionException e)
@@ -230,7 +230,7 @@ public class BlueMapService
         }
 
         if (this.bluemapConfig.showBluemapMemberInfo()) {
-            int memberCount = faction.getPlayers().size();
+            int memberCount = faction.getMembers().size();
             description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
                     .replace("%players%",
                             String.valueOf(memberCount)));

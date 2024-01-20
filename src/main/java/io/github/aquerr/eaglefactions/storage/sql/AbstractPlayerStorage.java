@@ -38,25 +38,23 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
 
     private static final String DELETE_PLAYERS = "DELETE FROM Players";
 
-    private final EagleFactions plugin;
-    private final SQLProvider sqlProvider;
+    private final SQLConnectionProvider sqlConnectionProvider;
 
-    protected AbstractPlayerStorage(final EagleFactions plugin, final SQLProvider sqlProvider)
+    protected AbstractPlayerStorage(final SQLConnectionProvider sqlConnectionProvider)
     {
-        if(sqlProvider == null)
+        if(sqlConnectionProvider == null)
         {
             EagleFactionsPlugin.getPlugin().getLogger().error("Could not establish connection to the database. Aborting...");
             throw new IllegalStateException("Could not establish connection to the database. Aborting...");
         }
-        this.plugin = plugin;
-        this.sqlProvider = sqlProvider;
+        this.sqlConnectionProvider = sqlConnectionProvider;
     }
 
     @Override
     public FactionPlayer getPlayer(final UUID playerUUID)
     {
         FactionPlayer factionPlayer = null;
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             final PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_WHERE_UUID);
             statement.setString(1, playerUUID.toString());
@@ -85,7 +83,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     @Override
     public boolean savePlayer(final FactionPlayer player)
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             //Add or update?
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PLAYER_WHERE_UUID);
@@ -119,7 +117,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     @Override
     public boolean savePlayers(final List<FactionPlayer> players)
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             final PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER);
             for (final FactionPlayer player : players)
@@ -148,7 +146,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     public Set<String> getServerPlayerNames()
     {
         final Set<String> playerNames = new HashSet<>();
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             final Statement statement = connection.createStatement();
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYER_NAMES);
@@ -171,7 +169,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     public Set<FactionPlayer> getServerPlayers()
     {
         final Set<FactionPlayer> factionPlayers = new HashSet<>();
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             final Statement statement = connection.createStatement();
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYERS);
@@ -200,7 +198,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
     @Override
     public void deletePlayers()
     {
-        try(final Connection connection = this.sqlProvider.getConnection())
+        try(final Connection connection = this.sqlConnectionProvider.getConnection())
         {
             final Statement statement = connection.createStatement();
             statement.execute(DELETE_PLAYERS);

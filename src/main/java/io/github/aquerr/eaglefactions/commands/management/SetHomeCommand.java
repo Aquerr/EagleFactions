@@ -4,6 +4,8 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
@@ -19,12 +21,14 @@ public class SetHomeCommand extends AbstractCommand
 {
     private final HomeConfig homeConfig;
     private final MessageService messageService;
+    private final PermsManager permsManager;
 
     public SetHomeCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.homeConfig = plugin.getConfiguration().getHomeConfig();
         this.messageService = plugin.getMessageService();
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -42,7 +46,7 @@ public class SetHomeCommand extends AbstractCommand
             return CommandResult.success();
         }
 
-        if(playerFaction.getLeader().equals(player.uniqueId()) || playerFaction.getOfficers().contains(player.uniqueId()))
+        if (permsManager.hasPermission(player.uniqueId(), playerFaction, FactionPermission.MANAGE_FACTION_HOME))
         {
             final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), player.serverLocation().chunkPosition());
             if (!chunkFaction.isPresent() && this.homeConfig.canPlaceHomeOutsideFactionClaim())

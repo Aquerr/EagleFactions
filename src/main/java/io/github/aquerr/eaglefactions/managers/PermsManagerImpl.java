@@ -3,105 +3,113 @@ package io.github.aquerr.eaglefactions.managers;
 import com.google.inject.Singleton;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
-import io.github.aquerr.eaglefactions.api.entities.FactionPermType;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
+import io.github.aquerr.eaglefactions.api.entities.RelationType;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
+import io.github.aquerr.eaglefactions.entities.RankImpl;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Singleton
 public class PermsManagerImpl implements PermsManager
 {
-    public PermsManagerImpl()
-    {
-
-    }
-
     @Override
     public boolean canBreakBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final Claim claim)
     {
-        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.DESTROY, claim);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermission.BLOCK_DESTROY, claim);
     }
 
     @Override
     public boolean canPlaceBlock(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final Claim claim)
     {
-        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.PLACE, claim);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermission.BLOCK_PLACE, claim);
     }
 
     @Override
     public boolean canInteract(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final Claim claim)
     {
-        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermType.USE, claim);
+        return checkPermission(playerUUID, playerFaction, chunkFaction, FactionPermission.INTERACT, claim);
     }
 
     @Override
     public boolean canClaim(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkPermission(playerUUID, playerFaction, FactionPermType.CLAIM);
+        return hasPermission(playerUUID, playerFaction, FactionPermission.TERRITORY_CLAIM);
     }
 
     @Override
     public boolean canAttack(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkPermission(playerUUID, playerFaction, FactionPermType.CLAIM);
+        return hasPermission(playerUUID, playerFaction, FactionPermission.ATTACK);
     }
 
     @Override
     public boolean canInvite(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkPermission(playerUUID, playerFaction, FactionPermType.INVITE);
+        return hasPermission(playerUUID, playerFaction, FactionPermission.INVITE_PLAYERS);
     }
 
     @Override
     public boolean canUseChest(final UUID playerUUID, final Faction playerFaction)
     {
-        return checkPermission(playerUUID, playerFaction, FactionPermType.CHEST);
+        return hasPermission(playerUUID, playerFaction, FactionPermission.VIEW_FACTION_CHEST);
     }
 
-    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final FactionPermType flagTypes)
+    @Override
+    public boolean hasPermission(UUID playerUUID, Faction playerFaction, FactionPermission permission)
     {
-        final FactionMemberType memberType = playerFaction.getPlayerMemberType(playerUUID);
-        if (memberType == FactionMemberType.LEADER)
-            return true;
-        return playerFaction.getPerms().get(memberType).get(flagTypes);
+        return getPlayerPermissions(playerUUID, playerFaction)
+                .contains(permission);
     }
 
-    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermType flagType, final Claim claim)
+    private boolean checkPermission(final UUID playerUUID, final Faction playerFaction, final Faction chunkFaction, final FactionPermission permission, final Claim claim)
     {
-        if (playerFaction.getName().equals(chunkFaction.getName()))
+        RelationType relationType = chunkFaction.getRelationTo(playerFaction);
+        if (relationType == RelationType.SAME_FACTION)
         {
-            final FactionMemberType memberType = chunkFaction.getPlayerMemberType(playerUUID);
-
-            //Leaders has permission for everything.
-            if (memberType == FactionMemberType.LEADER)
-                return true;
-            if (memberType == FactionMemberType.NONE)
-                return false;
-
-            final boolean hasPerm = chunkFaction.getPerms().get(memberType).get(flagType);
-            if (hasPerm) //If player has perms specified in /f perms, then we need to check for internal claiming
+            final Set<FactionPermission> playerRankPermissions = getPlayerPermissions(playerUUID, chunkFaction);
+            boolean hasPerm = playerRankPermissions.contains(permission);
+            if (!hasPerm)
             {
-                if (memberType == FactionMemberType.OFFICER) //Officers are like vice-leaders. They should have access to internal claims.
-                    return true;
-
-                final boolean isAccessibleByFaction = claim.isAccessibleByFaction();
-                if (isAccessibleByFaction)
-                    return true;
-                else return claim.hasAccess(playerUUID);
+                return false;
             }
-            else return false;
+
+            if (playerRankPermissions.contains(FactionPermission.INTERNAL_CLAIM_BYPASS_ACCESS))
+                return true;
+
+            final boolean isAccessibleByFaction = claim.isAccessibleByFaction();
+            if (isAccessibleByFaction) // Is public internal claim
+                return true;
+            else return claim.hasAccess(playerUUID); // Else if private, check if player has permission for claim.
         }
-        else if (playerFaction.getAlliances().contains(chunkFaction.getName()))
+        else
         {
-            final boolean hasPerms = chunkFaction.getPerms().get(FactionMemberType.ALLY).get(flagType);
-            return hasPerms && claim.isAccessibleByFaction(); //If faction has access then allies have it as well.
+            return chunkFaction.getRelationPermissions(relationType).contains(permission) && claim.isAccessibleByFaction();
         }
-        else if (playerFaction.getTruces().contains(chunkFaction.getName()))
-        {
-            //Truces cannot break, nor place or interact with blocks.
-            return false;
-        }
-        return false;
     }
+
+    private Set<FactionPermission> getPlayerPermissions(final UUID playerUUID, Faction faction)
+    {
+        return faction.getPlayerRanks(playerUUID).stream()
+                .map(Rank::getPermissions)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public static Set<FactionPermission> getDefaultAlliancePermissions()
+    {
+        return Set.of(FactionPermission.INTERACT, FactionPermission.BLOCK_PLACE, FactionPermission.BLOCK_DESTROY);
+    }
+
+    public static Set<FactionPermission> getDefaultTrucePermissions()
+    {
+        return Set.of(FactionPermission.INTERACT);
+    }
+
 }

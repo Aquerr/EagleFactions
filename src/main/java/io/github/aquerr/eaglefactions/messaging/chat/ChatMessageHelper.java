@@ -4,17 +4,20 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
-import io.github.aquerr.eaglefactions.api.entities.FactionMemberType;
+import io.github.aquerr.eaglefactions.api.entities.Rank;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Set;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 
@@ -47,9 +50,9 @@ public final class ChatMessageHelper
         if (!chatConfig.canColorTags())
             factionTag = factionTag.toBuilder().color(chatConfig.getDefaultTagColor()).build();
 
-        return Component.text()
+        return text()
                 .append(chatConfig.getFactionStartPrefix(), factionTag, chatConfig.getFactionEndPrefix())
-                .hoverEvent(HoverEvent.showText(Component.text("Click to view information about the faction!", BLUE)))
+                .hoverEvent(HoverEvent.showText(text("Click to view information about the faction!", BLUE)))
                 .clickEvent(ClickEvent.runCommand("/f info " + faction.getName()))
                 .build();
     }
@@ -58,16 +61,16 @@ public final class ChatMessageHelper
     {
         final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
 
-        return Component.text()
-                .append(chatConfig.getFactionStartPrefix(), Component.text(faction.getName(), GREEN), chatConfig.getFactionEndPrefix())
-                .hoverEvent(HoverEvent.showText(Component.text("Click to view information about the faction!", BLUE)))
+        return text()
+                .append(chatConfig.getFactionStartPrefix(), text(faction.getName(), GREEN), chatConfig.getFactionEndPrefix())
+                .hoverEvent(HoverEvent.showText(text("Click to view information about the faction!", BLUE)))
                 .clickEvent(ClickEvent.runCommand("/f info " + faction.getName()))
                 .build();
     }
 
     public static TextComponent getChatPrefix(ServerPlayer player)
     {
-        final TextComponent.Builder chatTypePrefix = Component.text();
+        final TextComponent.Builder chatTypePrefix = text();
 
         ChatEnum chatType = EagleFactionsPlugin.CHAT_LIST.get(player.uniqueId());
         if(chatType == null)
@@ -92,58 +95,29 @@ public final class ChatMessageHelper
 
     private static TextComponent getAllianceChatPrefix()
     {
-        return Component.text()
+        return text()
                 .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.alliance.prefix"))
                 .build();
     }
 
     private static TextComponent getFactionChatPrefix()
     {
-        return Component.text()
+        return text()
                 .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.faction.prefix"))
                 .build();
     }
 
-    public static TextComponent getRankPrefix(final ChatEnum chatType, final Faction faction, final ServerPlayer player)
+    public static TextComponent getRankPrefix(final Faction faction, final ServerPlayer player)
     {
-        final ChatConfig chatConfig =  EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig();
-
-        if(faction.getLeader().equals(player.uniqueId()))
-        {
-            if (!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.LEADER))
-                return null;
-
-            return Component.text()
-                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.leader.prefix"))
+        Rank rank = RankManagerImpl.getHighestRank(faction.getPlayerRanks(player.uniqueId()));
+        if (rank != null && rank.canDisplayInChat())
+            return text()
+                    .append(text("["))
+                    .append(LegacyComponentSerializer.legacyAmpersand().deserialize(rank.getDisplayName()))
+                    .append(text("]"))
                     .build();
-        }
-        else if(faction.getOfficers().contains(player.uniqueId()))
-        {
-            if (!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.OFFICER))
-                return null;
 
-            return Component.text()
-                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.officer.prefix"))
-                    .build();
-        }
-        else if (faction.getMembers().contains(player.uniqueId()))
-        {
-            if (!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.MEMBER))
-                return null;
-
-            return Component.text()
-                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.member.prefix"))
-                    .build();
-        }
-        else
-        {
-            if(!chatConfig.getVisibleRanks().get(chatType).contains(FactionMemberType.RECRUIT))
-                return null;
-
-            return Component.text()
-                    .append(EFMessageService.getInstance().resolveComponentWithMessage("chat.recruit.prefix"))
-                    .build();
-        }
+        return null;
     }
 
     public static Audience removeFactionChatPlayersFromAudience(final Audience audience)

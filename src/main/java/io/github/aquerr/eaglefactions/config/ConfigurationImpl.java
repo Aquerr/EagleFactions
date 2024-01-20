@@ -12,6 +12,7 @@ import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.config.StorageConfig;
 import io.github.aquerr.eaglefactions.api.config.VersionConfig;
+import io.github.aquerr.eaglefactions.storage.file.hocon.ConfigurateHelper;
 import io.github.aquerr.eaglefactions.util.FileUtils;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.leangen.geantyref.TypeToken;
@@ -157,7 +158,7 @@ public class ConfigurationImpl implements Configuration
 
     private void loadConfiguration() throws IOException
     {
-        configNode = configLoader.load(ConfigurationOptions.defaults().shouldCopyDefaults(true));
+        configNode = configLoader.load(ConfigurateHelper.getDefaultOptions().shouldCopyDefaults(true));
     }
 
     @Override
@@ -229,6 +230,20 @@ public class ConfigurationImpl implements Configuration
             e.printStackTrace();
         }
         return new HashSet<>();
+    }
+
+    @Override
+    public <T> List<T> getGenericList(Class<T> clazz, final Collection<T> defaultValue, final Object... nodePath)
+    {
+        try
+        {
+            return configNode.node(nodePath).getList(TypeToken.get(clazz), () -> new ArrayList<>(defaultValue));
+        }
+        catch(SerializationException e)
+        {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")

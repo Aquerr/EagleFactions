@@ -2,6 +2,8 @@ package io.github.aquerr.eaglefactions.commands.management;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
@@ -13,12 +15,14 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class MotdCommand extends AbstractCommand
 {
+    private final PermsManager permsManager;
     private final MessageService messageService;
 
     public MotdCommand(final EagleFactions plugin)
     {
         super(plugin);
         this.messageService = plugin.getMessageService();
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -29,9 +33,9 @@ public class MotdCommand extends AbstractCommand
         final Faction faction = requirePlayerFaction(player);
 
         //Check if player is leader
-        if (!faction.getLeader().equals(player.uniqueId()) && !faction.getOfficers().contains(player.uniqueId()))
+        if (!permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.MANAGE_MOTD))
         {
-            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
         }
 
         //Check motd length

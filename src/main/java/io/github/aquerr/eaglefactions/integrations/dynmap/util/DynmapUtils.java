@@ -50,15 +50,15 @@ public class DynmapUtils {
         }
 
         if (dynmapConfig.showDynmapFactionLeader()) {
-            if (userStorage.load(faction.getLeader()).get().isPresent()) {
+            if (userStorage.load(faction.getLeader().getUniqueId()).get().isPresent()) {
                 description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
                         .replace("%leader%",
-                                userStorage.load(faction.getLeader()).get().get().name()));
+                                userStorage.load(faction.getLeader().getUniqueId()).get().get().name()));
             }
         }
 
         if (dynmapConfig.showDynmapMemberInfo()) {
-            int memberCount = faction.getPlayers().size();
+            int memberCount = faction.getMembers().size();
             description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
                     .replace("%players%",
                             String.valueOf(memberCount)));

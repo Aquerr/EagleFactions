@@ -41,9 +41,7 @@ public class EFPlaceholderService implements PlaceholderService
         placeholderParsers.put(Placeholder.FACTION_MAX_POWER, new FactionMaxPowerParser(this.plugin.getFactionLogic(), this.plugin.getPowerManager()));
         placeholderParsers.put(Placeholder.FACTION_LAST_ONLINE, new FactionLastOnlineParser(this.plugin.getFactionLogic()));
         placeholderParsers.put(Placeholder.FACTION_CLAIMS_COUNT, new FactionClaimsCountParser(this.plugin.getFactionLogic()));
-        placeholderParsers.put(Placeholder.FACTION_OFFICERS_COUNT, new FactionOfficersCountParser(this.plugin.getFactionLogic()));
         placeholderParsers.put(Placeholder.FACTION_MEMBERS_COUNT, new FactionMembersCountParser(this.plugin.getFactionLogic()));
-        placeholderParsers.put(Placeholder.FACTION_RECRUITS_COUNT, new FactionRecruitsCountParser(this.plugin.getFactionLogic()));
         placeholderParsers.put(Placeholder.FACTION_ALLIANCES, new FactionAlliancesParser(this.plugin.getFactionLogic()));
         placeholderParsers.put(Placeholder.FACTION_ENEMIES, new FactionEnemiesParser(this.plugin.getFactionLogic()));
         placeholderParsers.put(Placeholder.FACTION_TRUCES, new FactionTrucesParser(this.plugin.getFactionLogic()));

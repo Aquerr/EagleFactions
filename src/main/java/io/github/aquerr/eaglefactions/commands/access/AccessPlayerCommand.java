@@ -3,7 +3,9 @@ package io.github.aquerr.eaglefactions.commands.access;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
@@ -17,9 +19,12 @@ import java.util.Optional;
 
 public class AccessPlayerCommand extends AbstractCommand
 {
+    private final PermsManager permsManager;
+
     public AccessPlayerCommand(EagleFactionsPlugin plugin)
     {
         super(plugin);
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -37,7 +42,7 @@ public class AccessPlayerCommand extends AbstractCommand
         if (!playerFaction.equals(chunkFaction))
             throw this.getPlugin().getMessageService().resolveExceptionWithMessage("error.claim.place-does-not-belong-to-your-faction");
 
-        if (!playerFaction.getLeader().equals(player.uniqueId()) && !playerFaction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+        if (!permsManager.hasPermission(player.uniqueId(), playerFaction, FactionPermission.MANAGE_INTERNAL_CLAIMS))
             throw this.getPlugin().getMessageService().resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
         // Get claim at player's location

@@ -10,12 +10,19 @@ import io.github.aquerr.eaglefactions.caching.FactionsCache;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.storage.file.hocon.HOCONFactionStorage;
 import io.github.aquerr.eaglefactions.storage.file.hocon.HOCONPlayerStorage;
+import io.github.aquerr.eaglefactions.storage.sql.DatabaseInitializer;
+import io.github.aquerr.eaglefactions.storage.sql.DatabaseProperties;
+import io.github.aquerr.eaglefactions.storage.sql.SQLConnectionProvider;
+import io.github.aquerr.eaglefactions.storage.sql.h2.H2ConnectionProvider;
 import io.github.aquerr.eaglefactions.storage.sql.h2.H2FactionStorage;
 import io.github.aquerr.eaglefactions.storage.sql.h2.H2PlayerStorage;
+import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbConnectionProvider;
 import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbFactionStorage;
 import io.github.aquerr.eaglefactions.storage.sql.mariadb.MariaDbPlayerStorage;
+import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLConnectionProvider;
 import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLFactionStorage;
 import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLPlayerStorage;
+import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteConnectionProvider;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteFactionStorage;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqlitePlayerStorage;
 import io.github.aquerr.eaglefactions.storage.task.DeleteFactionTask;
@@ -24,15 +31,18 @@ import io.github.aquerr.eaglefactions.storage.task.SavePlayerTask;
 import io.github.aquerr.eaglefactions.storage.task.UpdateFactionTask;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static java.lang.String.format;
 
 public class StorageManagerImpl implements StorageManager
 {
@@ -44,47 +54,64 @@ public class StorageManagerImpl implements StorageManager
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
-        Optional<StorageType> storageType = StorageType.findByName(storageConfig.getStorageType().toLowerCase());
-        if (!storageType.isPresent())
+        StorageType storageType = StorageType.findByName(storageConfig.getStorageType().toLowerCase()).orElse(null);
+        if (storageType == null)
         {
-            throw new RuntimeException(String.format("Storage type '%s' has not been recognized!", storageConfig.getStorageType()));
+            throw new IllegalArgumentException(format("Storage type '%s' has not been recognized!", storageConfig.getStorageType()));
         }
 
-        storageConfig.getStorageType().toLowerCase();
-        switch(storageType.get())
+        SQLConnectionProvider sqlConnectionProvider = null;
+        DatabaseProperties databaseProperties = new DatabaseProperties();
+        databaseProperties.setUsername(storageConfig.getStorageUsername());
+        databaseProperties.setPassword(storageConfig.getStoragePassword());
+        databaseProperties.setDatabaseName(storageConfig.getDatabaseName());
+        databaseProperties.setDatabaseUrl(storageConfig.getDatabaseUrl());
+        switch(storageType)
         {
-            case HOCON:
-                factionsStorage = new HOCONFactionStorage(configDir);
-                playerStorage = new HOCONPlayerStorage(configDir);
-                plugin.printInfo("HOCON storage has been initialized!");
-                break;
+
             case H2:
-                factionsStorage = new H2FactionStorage(plugin);
-                playerStorage = new H2PlayerStorage(plugin);
-                plugin.printInfo("H2 storage has been initialized!");
+                databaseProperties.setDatabaseFileDirectory(plugin.getConfigDir().resolve("data/h2"));
+                sqlConnectionProvider = new H2ConnectionProvider(databaseProperties);
+                factionsStorage = new H2FactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (H2ConnectionProvider) sqlConnectionProvider);
+                playerStorage = new H2PlayerStorage((H2ConnectionProvider) sqlConnectionProvider);
                 break;
             case MYSQL:
-                factionsStorage = new MySQLFactionStorage(plugin);
-                playerStorage = new MySQLPlayerStorage(plugin);
-                plugin.printInfo("MySQL storage has been initialized!");
+                sqlConnectionProvider = new MySQLConnectionProvider(databaseProperties);
+                factionsStorage = new MySQLFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MySQLConnectionProvider)sqlConnectionProvider);
+                playerStorage = new MySQLPlayerStorage((MySQLConnectionProvider)sqlConnectionProvider);
                 break;
             case MARIADB:
-                factionsStorage = new MariaDbFactionStorage(plugin);
-                playerStorage = new MariaDbPlayerStorage(plugin);
-                plugin.printInfo("MariaDB storage has been initialized!");
+                sqlConnectionProvider = new MariaDbConnectionProvider(databaseProperties);
+                factionsStorage = new MariaDbFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MariaDbConnectionProvider)sqlConnectionProvider);
+                playerStorage = new MariaDbPlayerStorage((MariaDbConnectionProvider)sqlConnectionProvider);
                 break;
             case SQLITE:
-                factionsStorage = new SqliteFactionStorage(plugin);
-                playerStorage = new SqlitePlayerStorage(plugin);
-                plugin.printInfo("Sqlite storage has been initialized!");
+                databaseProperties.setDatabaseFileDirectory(plugin.getConfigDir().resolve("data/sqlite"));
+                sqlConnectionProvider = new SqliteConnectionProvider(databaseProperties);
+                factionsStorage = new SqliteFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (SqliteConnectionProvider) sqlConnectionProvider);
+                playerStorage = new SqlitePlayerStorage((SqliteConnectionProvider)sqlConnectionProvider);
                 break;
+            case HOCON:
             default: //HOCON
-                plugin.printInfo("Couldn't find provided storage type.");
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
-                plugin.printInfo("Initialized default HOCON storage.");
                 break;
         }
+
+        if (storageType.isSql())
+        {
+            try
+            {
+                DatabaseInitializer.initialize(plugin, sqlConnectionProvider);
+            }
+            catch (SQLException | IOException e)
+            {
+                throw new IllegalStateException(format("Could not initialize the database for storage type = %s", storageType.getName()), e);
+            }
+        }
+
+        plugin.printInfo(storageType.getName().toUpperCase() + " has been initialized!");
+
         this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
     }
 
@@ -172,17 +199,21 @@ public class StorageManagerImpl implements StorageManager
         {
             FactionPlayer playerToSave = player;
 
-            //Only for backwards compatibility
-            if (!player.getFactionName().isPresent())
+            boolean factionExist = false;
+            for (final Faction faction : factions)
             {
-                for (final Faction faction : factions)
+                if (faction.containsPlayer(player.getUniqueId()) && !faction.getName().equalsIgnoreCase(player.getFactionName().orElse(null)))
                 {
-                    if (faction.containsPlayer(player.getUniqueId()))
-                    {
-                        playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction.getName(), player.getPower(), player.getMaxPower(), player.diedInWarZone());
-                    }
+                    factionExist = true;
+                    playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction.getName(), player.getPower(), player.getMaxPower(), player.diedInWarZone());
+                    break;
                 }
-                //Try to get correct faction for the player...
+            }
+
+            // Just in case someone deleted faction file :D
+            if (!factionExist && player.getFactionName().isPresent())
+            {
+                playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), null, player.getPower(), player.getMaxPower(), player.diedInWarZone());
             }
             FactionsCache.savePlayer(playerToSave);
         }

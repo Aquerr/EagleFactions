@@ -44,8 +44,10 @@ public class PVPLoggerImpl implements PVPLogger
     public static PVPLogger getInstance(final EagleFactions plugin)
     {
         if (INSTANCE == null)
-            return new PVPLoggerImpl(plugin);
-        else return INSTANCE;
+        {
+            INSTANCE = new PVPLoggerImpl(plugin);
+        }
+        return INSTANCE;
     }
 
     private PVPLoggerImpl(final EagleFactions plugin)
@@ -177,7 +179,7 @@ public class PVPLoggerImpl implements PVPLogger
         Objective objective = pvpLoggerObjective.getObjective();
         if (objective == null)
         {
-            final Scoreboard scoreboard = Optional.ofNullable(player.scoreboard()).orElse(Scoreboard.builder().build());
+            final Scoreboard scoreboard = Optional.ofNullable(player.scoreboard()).orElseGet(() -> Scoreboard.builder().build());
 
             objective = findObjectiveInScoreBoard(scoreboard, pvpLoggerObjective.getId());
             if (objective == null)

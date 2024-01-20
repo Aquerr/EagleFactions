@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands.general;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
@@ -90,25 +91,13 @@ public class CoordsCommand extends AbstractCommand
             teamCoords.add(messageService.resolveComponentWithMessage("command.coords.faction-home-coords", worldNameAndPos));
         }
 
-        final Optional<ServerPlayer> leader = getPlugin().getPlayerManager().getPlayer(faction.getLeader());
+        final Optional<ServerPlayer> leader = getPlugin().getPlayerManager().getPlayer(faction.getLeader().getUniqueId());
         leader.ifPresent(serverPlayer -> teamCoords.add(messageService.resolveComponentWithMessage("command.coords.leader-coords", serverPlayer.name() + " " + serverPlayer.serverLocation().blockPosition().toString())));
 
-        for (final UUID officerUUID: faction.getOfficers())
+        for (final FactionMember factionMember: faction.getMembers())
         {
-            final Optional<ServerPlayer> officer = getPlugin().getPlayerManager().getPlayer(officerUUID);
-            officer.ifPresent(serverPlayer -> teamCoords.add(messageService.resolveComponentWithMessage("command.coords.officer-coords", serverPlayer.name() + " " + serverPlayer.serverLocation().blockPosition().toString())));
-        }
-
-        for (final UUID memberUUID: faction.getMembers())
-        {
-            final Optional<ServerPlayer> member = getPlugin().getPlayerManager().getPlayer(memberUUID);
+            final Optional<ServerPlayer> member = getPlugin().getPlayerManager().getPlayer(factionMember.getUniqueId());
             member.ifPresent(serverPlayer -> teamCoords.add(messageService.resolveComponentWithMessage("command.coords.member-coords", serverPlayer.name() + " " + serverPlayer.serverLocation().blockPosition().toString())));
-        }
-
-        for (final UUID recruitUUID: faction.getRecruits())
-        {
-            final Optional<ServerPlayer> recruit = getPlugin().getPlayerManager().getPlayer(recruitUUID);
-            recruit.ifPresent(serverPlayer -> teamCoords.add(messageService.resolveComponentWithMessage("command.coords.recruit-coords", serverPlayer.name() + " " + serverPlayer.serverLocation().blockPosition().toString())));
         }
         return teamCoords;
     }

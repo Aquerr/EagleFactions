@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.managers.power.provider;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionMaxPowerProvider;
@@ -29,33 +30,9 @@ public class FactionMaxPowerByPlayerMaxPowerProvider implements FactionMaxPowerP
 
         float factionMaxPower = 0;
 
-        if(faction.getLeader() != null && !faction.getLeader().toString().equals(""))
+        for (final FactionMember factionMember : faction.getMembers())
         {
-            factionMaxPower = factionMaxPower + getPlayerMaxPower(faction.getLeader());
-        }
-
-        if(faction.getOfficers() != null && !faction.getOfficers().isEmpty())
-        {
-            for (UUID officer : faction.getOfficers())
-            {
-                factionMaxPower = factionMaxPower + getPlayerMaxPower(officer);
-            }
-        }
-
-        if(faction.getMembers() != null && !faction.getMembers().isEmpty())
-        {
-            for (UUID member : faction.getMembers())
-            {
-                factionMaxPower = factionMaxPower + getPlayerMaxPower(member);
-            }
-        }
-
-        if(faction.getRecruits() != null && !faction.getRecruits().isEmpty())
-        {
-            for (UUID recruit: faction.getRecruits())
-            {
-                factionMaxPower = factionMaxPower + getPlayerMaxPower(recruit);
-            }
+            factionMaxPower = factionMaxPower + getPlayerMaxPower(factionMember.getUniqueId());
         }
 
         return round(factionMaxPower, 2);

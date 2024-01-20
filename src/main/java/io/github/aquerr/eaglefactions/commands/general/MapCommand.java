@@ -7,7 +7,9 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -44,6 +46,7 @@ public class MapCommand extends AbstractCommand
     private final FactionsConfig factionsConfig;
     private final FactionLogic factionLogic;
     private final MessageService messageService;
+    private final PermsManager permsManager;
 
     public MapCommand(final EagleFactions plugin)
     {
@@ -52,6 +55,7 @@ public class MapCommand extends AbstractCommand
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.messageService = plugin.getMessageService();
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -216,9 +220,7 @@ public class MapCommand extends AbstractCommand
                 {
                     if(!this.factionsConfig.shouldDelayClaim()
                             && (super.getPlugin().getPlayerManager().hasAdminMode(player.user())
-                                || (optionalPlayerFaction.isPresent()
-                                    && (optionalPlayerFaction.get().getLeader().equals(player.uniqueId())
-                                        || optionalPlayerFaction.get().getOfficers().contains(player.uniqueId())))))
+                                || (optionalPlayerFaction.isPresent() && permsManager.hasPermission(player.uniqueId(), optionalPlayerFaction.get(), FactionPermission.TERRITORY_CLAIM))))
                     {
                         textBuilder.append(notCapturedMark.toBuilder().clickEvent(SpongeComponents.executeCallback((cause) -> claimByMap(player, chunk))).build());
                     }

@@ -3,6 +3,8 @@ package io.github.aquerr.eaglefactions.commands.claiming;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
@@ -13,12 +15,14 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class AutoClaimCommand extends AbstractCommand
 {
+    private final PermsManager permsManager;
     private final MessageService messageService;
 
     public AutoClaimCommand(EagleFactions plugin)
     {
         super(plugin);
         this.messageService = plugin.getMessageService();
+        this.permsManager = plugin.getPermsManager();
     }
 
     @Override
@@ -27,8 +31,9 @@ public class AutoClaimCommand extends AbstractCommand
         final ServerPlayer player = requirePlayerSource(context);
         final Faction faction = requirePlayerFaction(player);
 
-        if (!faction.getLeader().equals(player.uniqueId()) && !faction.getOfficers().contains(player.uniqueId()) && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
-            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
+        if (!permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.TERRITORY_CLAIM)
+                && !super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
 
         if (EagleFactionsPlugin.AUTO_CLAIM_LIST.contains(player.uniqueId()))
         {
