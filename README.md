@@ -20,27 +20,34 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 
 **If you enjoy using Eagle Factions, give this repo a star!**
 
+## Prerequisites
+
+* [**Sponge Server**](https://spongepowered.org/)
+* **Java 8** for 1.12.2
+* **Java 11** for 1.16.5
+* **Java 17** or newer for 1.18.2^
+
 ## Features
 
-* Create factions
+* Create and manage factions
 * Invite others to faction
 * Form alliances with other factions
-* Declare wars 
+* Declare wars
+* Custom ranks (since 1.16.5)
 * Power system
-* Claim territories/lands
-* Faction Map with ability to claim territories from it
-* Set faction's home that will allow faction's members to teleport to it
-* Toggleable friendly fire in faction and between alliances
+* Territory/chunk claiming and chunk-based protection system
+* Faction Map - built-in chat faction map with ability to claim territories from it
+* Faction homes - teleport to your own faction or your alliance
 * Unclaim other factions lands if their power is low
-* Factions' chests
+* Factions' chests - Command only ender storage for each faction
 * Eagle's Feather - Command only item that will allow you to bypass chest protection
-* Factions' Tags
-* Faction Chat and Alliance Chat
-* PVP-Logger
+* Special chat channels for faction and its alliances
+* PVP-Logger - built-in punish mechanism for logging out during combat
 * Plugin Messages' Translations
 * Database support
 * Dynmap support
 * Bluemap support
+* Extendable (through its own API)
 * Fully configurable
 
 ## Translations
