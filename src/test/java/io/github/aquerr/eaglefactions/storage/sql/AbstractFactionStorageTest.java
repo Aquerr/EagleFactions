@@ -73,6 +73,7 @@ public abstract class AbstractFactionStorageTest
         this.databaseContainer = buildDatabaseContainer();
         if (databaseContainer != null)
         {
+            databaseContainer.close();
             databaseContainer.start();
         }
 
@@ -127,11 +128,13 @@ public abstract class AbstractFactionStorageTest
     void cleanUp()
     {
         connectionProvider.close();
-        SqlStorageTestUtils.clearDBFiles(buildDatabaseDir());
-
         if (databaseContainer != null)
         {
             databaseContainer.close();
+        }
+        if (connectionProvider.getStorageType().isFile())
+        {
+            SqlStorageTestUtils.clearDBFiles(buildDatabaseDir());
         }
     }
 
