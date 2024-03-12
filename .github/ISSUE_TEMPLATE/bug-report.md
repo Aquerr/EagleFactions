@@ -11,6 +11,8 @@ assignees: 'Aquerr'
 
 * **Sponge Version:** <Your Sponge Version>
 
+* **Forge Version:** <Your Forge Version>
+
 * **Plugin Version:** <Your Plugin Version>
 
 ## What happens?
