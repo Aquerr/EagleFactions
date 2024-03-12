@@ -76,7 +76,7 @@ public abstract class AbstractFactionStorageTest
         if (databaseContainer != null)
         {
             databaseContainer.setStartupCheckStrategy(new IsRunningStartupCheckStrategy()
-                    .withTimeout(Duration.of(60, ChronoUnit.SECONDS)));
+                    .withTimeout(Duration.of(180, ChronoUnit.SECONDS)));
             databaseContainer.close();
             databaseContainer.start();
         }

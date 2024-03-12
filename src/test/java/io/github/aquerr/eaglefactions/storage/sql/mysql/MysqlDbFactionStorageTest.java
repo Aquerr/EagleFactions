@@ -13,6 +13,8 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Map;
+
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +37,8 @@ class MysqlDbFactionStorageTest extends AbstractFactionStorageTest
                 .withUsername(USERNAME)
                 .withPassword(PASSWORD)
                 .withDatabaseName(DATABASE_NAME)
-                .withExposedPorts(3306);
+                .withExposedPorts(3306)
+                .withTmpFs(Map.of("/var/lib/mysql", "rw"));
     }
 
     @Override
