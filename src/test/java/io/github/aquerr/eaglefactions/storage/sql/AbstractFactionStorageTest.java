@@ -22,14 +22,16 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.MockedStatic;
 import org.spongepowered.math.vector.Vector3i;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
+import org.testcontainers.containers.startupcheck.IsRunningStartupCheckStrategy;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.UUID;
 
@@ -74,7 +76,7 @@ public abstract class AbstractFactionStorageTest
         this.databaseContainer = buildDatabaseContainer();
         if (databaseContainer != null)
         {
-            databaseContainer.setStartupCheckStrategy(new OneShotStartupCheckStrategy());
+            databaseContainer.setStartupCheckStrategy(new IsRunningStartupCheckStrategy().withTimeout(Duration.of(10, ChronoUnit.SECONDS)));
             databaseContainer.close();
             databaseContainer.start();
         }
