@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.MockedStatic;
 import org.spongepowered.math.vector.Vector3i;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -73,6 +74,7 @@ public abstract class AbstractFactionStorageTest
         this.databaseContainer = buildDatabaseContainer();
         if (databaseContainer != null)
         {
+            databaseContainer.setStartupCheckStrategy(new OneShotStartupCheckStrategy());
             databaseContainer.close();
             databaseContainer.start();
         }
