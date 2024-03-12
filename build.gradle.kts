@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.spongepowered.gradle.plugin.config.PluginLoaders
 import org.spongepowered.plugin.metadata.model.PluginDependency
 import java.io.ByteArrayOutputStream
@@ -96,7 +97,9 @@ dependencies {
     implementation("org.bstats:bstats-sponge:3.0.2")
 
     testImplementation(project(":EagleFactionsAPI"))
-    testImplementation("org.spongepowered:spongeapi:$spongeApiVersion")
+    testImplementation("org.spongepowered:spongeapi:$spongeApiVersion") {
+        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+    }
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
     testImplementation("org.mockito:mockito-core:5.11.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
@@ -106,7 +109,8 @@ dependencies {
     testImplementation("org.testcontainers:mysql:1.19.7")
     testImplementation("org.testcontainers:junit-jupiter:1.19.7")
     testImplementation("org.xerial:sqlite-jdbc:3.45.0.0")
-    testImplementation("org.apache.logging.log4j:log4j-core:2.8.1")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.23.1")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1")
 }
 
 tasks {
@@ -130,6 +134,10 @@ tasks {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 publishing {

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <!-- avoid duplicated logs with additivity=false -->
+        <Logger name="org.testcontainers" level="debug" additivity="false">
+            <AppenderRef ref="console"/>
+        </Logger>
+        <Logger name="tc" level="DEBUG" additivity="false">
+            <AppenderRef ref="console"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>
