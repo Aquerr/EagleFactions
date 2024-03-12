@@ -13,7 +13,9 @@ import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.storage.StorageType;
 import net.kyori.adventure.text.Component;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -73,10 +75,14 @@ public abstract class AbstractFactionStorageTest
     {
         this.logger = mock(Logger.class);
 
+        Configurator.setLevel("org.testcontainers", Level.DEBUG);
+        Configurator.setLevel("tc", Level.DEBUG);
+
         this.databaseContainer = buildDatabaseContainer();
         if (databaseContainer != null)
         {
-            databaseContainer.setStartupCheckStrategy(new IsRunningStartupCheckStrategy().withTimeout(Duration.of(10, ChronoUnit.SECONDS)));
+            databaseContainer.setStartupCheckStrategy(new IsRunningStartupCheckStrategy()
+                    .withTimeout(Duration.of(30, ChronoUnit.SECONDS)));
             databaseContainer.close();
             databaseContainer.start();
         }
