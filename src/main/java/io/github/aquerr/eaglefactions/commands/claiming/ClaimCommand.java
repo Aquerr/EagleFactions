@@ -11,12 +11,13 @@ import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.managers.claim.ClaimContextImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
-import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -138,7 +139,11 @@ public class ClaimCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        this.factionLogic.startClaiming(player, faction, world.uniqueId(), chunk);
+        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunk),
+                player,
+                faction,
+                this.messageService));
+        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunk), player, faction, messageService));
         return CommandResult.success();
     }
 }

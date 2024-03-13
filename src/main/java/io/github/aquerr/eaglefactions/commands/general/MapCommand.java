@@ -13,6 +13,7 @@ import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.managers.claim.ClaimContextImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.text.Component;
@@ -353,7 +354,7 @@ public class MapCommand extends AbstractCommand
                         if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                             return;
 
-                        this.factionLogic.startClaiming(player, playerFaction, world.uniqueId(), chunk);
+                        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunk), player, playerFaction, messageService));
                     }
                     else
                     {
@@ -365,7 +366,7 @@ public class MapCommand extends AbstractCommand
                     if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                         return;
 
-                    this.factionLogic.startClaiming(player, playerFaction, world.uniqueId(), chunk);
+                    this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunk), player, playerFaction, messageService));
                 }
             }
         }

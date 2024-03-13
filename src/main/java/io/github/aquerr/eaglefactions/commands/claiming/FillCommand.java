@@ -9,17 +9,18 @@ import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
+import io.github.aquerr.eaglefactions.managers.claim.ClaimContextImpl;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.UUID;
 
 public class FillCommand extends AbstractCommand
 {
@@ -82,7 +83,7 @@ public class FillCommand extends AbstractCommand
     // Starts where player is standing
     private void fill(final ServerPlayer player, Faction faction) throws CommandException
     {
-        final UUID worldUUID = player.world().uniqueId();
+        final ServerWorld world = player.world();
         final Queue<Vector3i> chunks = new LinkedList<>();
         chunks.add(player.location().chunkPosition());
         while (!chunks.isEmpty())
@@ -91,10 +92,10 @@ public class FillCommand extends AbstractCommand
                 throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
 
             final Vector3i chunkPosition = chunks.poll();
-            if (!this.factionLogic.isClaimed(worldUUID, chunkPosition))
+            if (!this.factionLogic.isClaimed(world.uniqueId(), chunkPosition))
             {
                 faction = this.factionLogic.getFactionByName(faction.getName());
-                this.factionLogic.startClaiming(player, faction, worldUUID, chunkPosition);
+                this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunkPosition), player, faction, messageService));
                 chunks.add(chunkPosition.add(1, 0, 0));
                 chunks.add(chunkPosition.add(-1, 0, 0));
                 chunks.add(chunkPosition.add(0, 0, 1));

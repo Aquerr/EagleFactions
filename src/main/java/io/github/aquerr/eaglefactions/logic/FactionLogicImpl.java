@@ -8,14 +8,15 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionMember;
-import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
-import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimContext;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.DelayedClaimStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -24,9 +25,9 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagsImpl;
-import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.scheduling.ClaimDelayTask;
-import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimByItemsStrategy;
+import io.github.aquerr.eaglefactions.managers.claim.ClaimStrategyManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
 import net.kyori.adventure.text.TextComponent;
@@ -42,8 +43,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,11 +61,14 @@ public class FactionLogicImpl implements FactionLogic
     private static final String THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY = "error.general.there-is-no-faction-called-faction-name";
 
     private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
+    private ClaimStrategy claimStrategy = null;
+    private final ClaimStrategyManager claimStrategyManager;
 
     private final StorageManager storageManager;
     private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
     private final MessageService messageService;
+
 
     public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig, final MessageService messageService)
     {
@@ -75,6 +76,26 @@ public class FactionLogicImpl implements FactionLogic
         this.playerManager = playerManager;
         this.factionsConfig = factionsConfig;
         this.messageService = messageService;
+        this.claimStrategyManager = new ClaimStrategyManager(messageService);
+
+        determineClaimStrategy();
+    }
+
+    private void determineClaimStrategy()
+    {
+        if (this.factionsConfig.shouldClaimByItems())
+            claimStrategy = new ClaimByItemsStrategy(this, ItemUtil.convertToItemStackList(this.factionsConfig.getRequiredItemsToClaim()));
+        else
+            claimStrategy = new NoCostClaimStrategy(this);
+
+        if (this.factionsConfig.shouldDelayClaim())
+            claimStrategy = new DelayedClaimStrategy(claimStrategy, this.factionsConfig.getClaimDelay(), true);
+    }
+
+    @Override
+    public void setClaimStrategy(ClaimStrategy claimStrategy)
+    {
+        this.claimStrategy = claimStrategy;
     }
 
     @Override
@@ -200,7 +221,7 @@ public class FactionLogicImpl implements FactionLogic
             final Set<FactionMember> playerUUIDs = factionToDisband.getMembers();
             for (final FactionMember playerUUID : playerUUIDs)
             {
-                //Faction Player should always exists so we do not need to check if it is present.
+                //Faction Player should always exist, so we do not need to check if it is present.
                 final FactionPlayer factionPlayer = this.playerManager.getFactionPlayer(playerUUID.getUniqueId()).get();
                 final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
                 this.storageManager.savePlayer(updatedPlayer);
@@ -483,9 +504,12 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(claim);
 
-        final Set<Claim> claims = new HashSet<>(faction.getClaims());
+        final Faction factionToUpdate = getFactionByName(faction.getName());
+        checkNotNull(factionToUpdate);
+
+        final Set<Claim> claims = new HashSet<>(factionToUpdate.getClaims());
         claims.add(claim);
-        final Faction updatedFaction = faction.toBuilder().claims(claims).build();
+        final Faction updatedFaction = factionToUpdate.toBuilder().claims(claims).build();
         this.storageManager.saveFaction(updatedFaction);
 
 		ParticlesUtil.spawnClaimParticles(claim);
@@ -497,7 +521,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(claim);
 
-        removeClaimInternal(faction, claim);
+        removeClaimInternal(faction.getName(), claim);
 		ParticlesUtil.spawnUnclaimParticles(claim);
     }
 
@@ -507,7 +531,7 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
         checkNotNull(claim);
 
-        removeClaimInternal(faction, claim);
+        removeClaimInternal(faction.getName(), claim);
         ParticlesUtil.spawnDestroyClaimParticles(claim);
     }
 
@@ -713,70 +737,14 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public void startClaiming(final ServerPlayer player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
+    public void startClaiming(ClaimContext claimContext)
     {
-        checkNotNull(player);
-        checkNotNull(faction);
-        checkNotNull(worldUUID);
-        checkNotNull(chunkPosition);
+        checkNotNull(claimContext.getFaction());
+        checkNotNull(claimContext.getServerPlayer());
+        checkNotNull(claimContext.getServerLocation());
 
-        if(this.factionsConfig.shouldDelayClaim())
-        {
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.stay-in-the-chunk-for-number-of-seconds-to-claim-it", this.factionsConfig.getClaimDelay()));
-            EagleFactionsScheduler.getInstance().scheduleWithDelayedInterval(new ClaimDelayTask(player, chunkPosition), 1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS);
-        }
-        else
-        {
-            if(this.factionsConfig.shouldClaimByItems())
-            {
-                boolean didSucceed = addClaimByItems(player, faction, worldUUID, chunkPosition);
-                if(didSucceed)
-                    player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
-            }
-            else
-            {
-                player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunkPosition.toString()));
-                addClaim(faction, new Claim(worldUUID, chunkPosition));
-            }
-            EventRunner.runFactionClaimEventPost(player, faction, player.world(), chunkPosition);
-        }
+        claimStrategyManager.claim(claimStrategy, claimContext);
     }
-
-    @Override
-    public boolean addClaimByItems(final ServerPlayer player, final Faction faction, final UUID worldUUID, final Vector3i chunkPosition)
-    {
-        checkNotNull(player);
-        checkNotNull(faction);
-        checkNotNull(worldUUID);
-        checkNotNull(chunkPosition);
-
-        try
-        {
-            ItemUtil.pollItemsNeededForClaimFromPlayer(player);
-            addClaim(faction, new Claim(worldUUID, chunkPosition));
-            return true;
-        }
-        catch (RequiredItemsNotFoundException e)
-        {
-            player.sendMessage(messageService.resolveComponentWithMessage("error.command.claim.not-enough-resources", e.buildAllRequiredItemsMessage()));
-            return false;
-        }
-    }
-
-//    @Override
-//    public void togglePerm(final Faction faction, final FactionMemberType factionMemberType, final FactionPermission factionPermission, final Boolean flagValue)
-//    {
-//        checkNotNull(faction);
-//        checkNotNull(factionMemberType);
-//        checkNotNull(factionPermission);
-//        checkNotNull(flagValue);
-//
-//        final Map<FactionMemberType, Map<FactionPermission, Boolean>> perms = new HashMap<>(faction.getPerms());
-//        perms.get(factionMemberType).replace(factionPermission, flagValue);
-//
-//        final Faction updatedFaction = faction.toBuilder().setPerms(perms).build();
-//        storageManager.saveFaction(updatedFaction);
-//    }
 
     @Override
     public void changeTagColor(final Faction faction, final NamedTextColor textColor)
@@ -911,8 +879,9 @@ public class FactionLogicImpl implements FactionLogic
         this.storageManager.saveFaction(updatedFaction);
     }
 
-    private void removeClaimInternal(final Faction faction, final Claim claim)
+    private void removeClaimInternal(final String factionName, final Claim claim)
     {
+        final Faction faction = getFactionByName(factionName);
         final Set<Claim> claims = new HashSet<>(faction.getClaims());
         claims.remove(claim);
         final Faction updatedFaction = faction.toBuilder().claims(claims).build();

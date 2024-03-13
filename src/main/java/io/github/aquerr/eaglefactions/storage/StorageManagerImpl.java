@@ -61,41 +61,48 @@ public class StorageManagerImpl implements StorageManager
         }
 
         SQLConnectionProvider sqlConnectionProvider = null;
-        DatabaseProperties databaseProperties = new DatabaseProperties();
-        databaseProperties.setUsername(storageConfig.getStorageUsername());
-        databaseProperties.setPassword(storageConfig.getStoragePassword());
-        databaseProperties.setDatabaseName(storageConfig.getDatabaseName());
-        databaseProperties.setDatabaseUrl(storageConfig.getDatabaseUrl());
         switch(storageType)
         {
 
             case H2:
+            {
+                DatabaseProperties databaseProperties = prepareDatabaseProperties(storageConfig);
                 databaseProperties.setDatabaseFileDirectory(plugin.getConfigDir().resolve("data/h2"));
                 sqlConnectionProvider = new H2ConnectionProvider(databaseProperties);
                 factionsStorage = new H2FactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (H2ConnectionProvider) sqlConnectionProvider);
                 playerStorage = new H2PlayerStorage((H2ConnectionProvider) sqlConnectionProvider);
                 break;
+            }
             case MYSQL:
-                sqlConnectionProvider = new MySQLConnectionProvider(databaseProperties);
+            {
+                sqlConnectionProvider = new MySQLConnectionProvider(prepareDatabaseProperties(storageConfig));
                 factionsStorage = new MySQLFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MySQLConnectionProvider)sqlConnectionProvider);
                 playerStorage = new MySQLPlayerStorage((MySQLConnectionProvider)sqlConnectionProvider);
                 break;
+            }
             case MARIADB:
-                sqlConnectionProvider = new MariaDbConnectionProvider(databaseProperties);
+            {
+                sqlConnectionProvider = new MariaDbConnectionProvider(prepareDatabaseProperties(storageConfig));
                 factionsStorage = new MariaDbFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MariaDbConnectionProvider)sqlConnectionProvider);
                 playerStorage = new MariaDbPlayerStorage((MariaDbConnectionProvider)sqlConnectionProvider);
                 break;
+            }
             case SQLITE:
+            {
+                DatabaseProperties databaseProperties = prepareDatabaseProperties(storageConfig);
                 databaseProperties.setDatabaseFileDirectory(plugin.getConfigDir().resolve("data/sqlite"));
                 sqlConnectionProvider = new SqliteConnectionProvider(databaseProperties);
                 factionsStorage = new SqliteFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (SqliteConnectionProvider) sqlConnectionProvider);
                 playerStorage = new SqlitePlayerStorage((SqliteConnectionProvider)sqlConnectionProvider);
                 break;
+            }
             case HOCON:
-            default: //HOCON
+            default:
+            {
                 factionsStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
                 break;
+            }
         }
 
         if (storageType.isSql())
@@ -302,5 +309,15 @@ public class StorageManagerImpl implements StorageManager
 
         //Must be run after factions cache
         preparePlayerCache(); //Consider using cache that removes objects which have not been used for a long time.
+    }
+
+    private DatabaseProperties prepareDatabaseProperties(StorageConfig storageConfig)
+    {
+        DatabaseProperties databaseProperties = new DatabaseProperties();
+        databaseProperties.setUsername(storageConfig.getStorageUsername());
+        databaseProperties.setPassword(storageConfig.getStoragePassword());
+        databaseProperties.setDatabaseName(storageConfig.getDatabaseName());
+        databaseProperties.setDatabaseUrl(storageConfig.getDatabaseUrl());
+        return databaseProperties;
     }
 }
