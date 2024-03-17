@@ -58,9 +58,9 @@ public final class PluginPermissions
     public static final String SET_RANK_DISPLAY_NAME_COMMAND = "eaglefactions.player.rank.set_display_name";
     public static final String LIST_RANK_PERMISSIONS_COMMAND = "eaglefactions.player.rank.list_permissions";
     public static final String SET_RANK_POSITION_COMMAND = "eaglefactions.player.rank.set_ladder_position";
+    public static final String SET_RANK_DISPLAY_IN_CHAT_COMMAND = "eaglefactions.player.rank.set_display_in_chat";
     public static final String ASSIGN_RANK_COMMAND = "eaglefactions.player.rank.assign";
     public static final String DELETE_RANK = "eaglefactions.player.rank.delete";
-    public static final String SET_DEFAULT_RANK = "eaglefactions.player.rank.delete";
 
     public static final String SET_HOME_COMMAND = "eaglefactions.player.rank.set-default-rank";
 

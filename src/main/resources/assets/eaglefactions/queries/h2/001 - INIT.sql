@@ -9,14 +9,13 @@ CREATE TABLE faction
     name              VARCHAR(200) PRIMARY KEY NOT NULL,
     tag               VARCHAR(10)              NOT NULL,
     tag_color         VARCHAR(40)              NULL,
-    leader            VARCHAR(36)              NOT NULL,
+    leader            VARCHAR(36)              NULL,
     home              VARCHAR(200)             NULL,
     last_online       TIMESTAMP WITH TIME ZONE             NOT NULL,
     description       VARCHAR(255)             NOT NULL,
     motd              VARCHAR(255)             NOT NULL,
     is_public         BOOLEAN                  NOT NULL,
-    created_date      TIMESTAMP WITH TIME ZONE                NOT NULL,
-    default_rank_name VARCHAR(36)              NOT NULL
+    created_date      TIMESTAMP WITH TIME ZONE                NOT NULL
 );
 
 -- Create Members Table
@@ -92,7 +91,7 @@ CREATE TABLE claim_owner
 CREATE TABLE faction_chest
 (
     faction_name VARCHAR(200) PRIMARY KEY NOT NULL,
-    chest_items  BINARY                   NOT NULL
+    chest_items  VARBINARY                   NOT NULL
 );
 
 -- Create Players Table

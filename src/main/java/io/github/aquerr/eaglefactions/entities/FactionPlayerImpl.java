@@ -11,6 +11,7 @@ import org.spongepowered.api.entity.living.player.User;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class FactionPlayerImpl implements FactionPlayer
@@ -67,11 +68,11 @@ public class FactionPlayerImpl implements FactionPlayer
     }
 
     @Override
-    public List<Rank> getFactionRanks()
+    public Set<Rank> getFactionRanks()
     {
         return this.getFaction()
                 .map(faction -> faction.getPlayerRanks(this.uniqueId))
-                .orElse(Collections.emptyList());
+                .orElse(Collections.emptySet());
     }
 
     @Override

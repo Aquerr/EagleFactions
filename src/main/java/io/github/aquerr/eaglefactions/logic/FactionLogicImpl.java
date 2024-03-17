@@ -14,9 +14,11 @@ import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimByItemsStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.ClaimContext;
 import io.github.aquerr.eaglefactions.api.managers.claim.ClaimStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.DelayedClaimStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -25,9 +27,8 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagsImpl;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimByItemsStrategy;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.managers.claim.ClaimStrategyManager;
-import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
 import net.kyori.adventure.text.TextComponent;
@@ -57,7 +58,6 @@ import static net.kyori.adventure.text.Component.text;
 
 public class FactionLogicImpl implements FactionLogic
 {
-    public static final UUID DUMMY_UUID = new UUID(0, 0);
     private static final String THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY = "error.general.there-is-no-faction-called-faction-name";
 
     private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
@@ -165,10 +165,12 @@ public class FactionLogicImpl implements FactionLogic
         checkNotNull(faction);
 
         final List<ServerPlayer> factionPlayers = new ArrayList<>();
-        final FactionMember factionLeader = faction.getLeader();
-        if(!faction.getLeader().getUniqueId().equals(DUMMY_UUID) && this.playerManager.isPlayerOnline(factionLeader.getUniqueId()))
+        final UUID leaderUUID = faction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .orElse(null);
+        if(leaderUUID != null && this.playerManager.isPlayerOnline(leaderUUID))
         {
-            factionPlayers.add(playerManager.getPlayer(factionLeader.getUniqueId()).get());
+            factionPlayers.add(playerManager.getPlayer(leaderUUID).get());
         }
 
         for(final FactionMember factionMember : faction.getMembers())
@@ -260,7 +262,7 @@ public class FactionLogicImpl implements FactionLogic
 
         checkNotNull(faction, messageService.resolveMessage(THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY, factionName));
 
-        if (faction.getLeader().getUniqueId().equals(playerUUID))
+        if (playerUUID.equals(faction.getLeader().map(FactionMember::getUniqueId).orElse(null)))
             throw new IllegalArgumentException(messageService.resolveMessage("error.command.leave.you-cant-leave-your-faction-because-you-are-its-leader"));
 
         final Set<FactionMember> members = new HashSet<>(faction.getMembers());
@@ -296,7 +298,9 @@ public class FactionLogicImpl implements FactionLogic
         // Delete player in old faction
         getFactionByPlayerUUID(playerUUID)
                 .ifPresent((faction) -> {
-                    if (playerUUID.equals(faction.getLeader().getUniqueId()))
+                    if (playerUUID.equals(faction.getLeader()
+                            .map(FactionMember::getUniqueId)
+                            .orElse(null)))
                     {
                         EagleFactionsPlugin.getPlugin().getRankManager().setLeader(
                                 null, faction
@@ -315,9 +319,14 @@ public class FactionLogicImpl implements FactionLogic
                         .findFirst()
                 )
                 .orElse(faction.getDefaultRank());
+
         members.add(new FactionMemberImpl(playerUUID, Set.of(newRank.getName())));
 
-        Faction.Builder factionBuilder = faction.toBuilder().members(members);
+        Faction.Builder factionBuilder = faction.toBuilder();
+        factionBuilder.members(members);
+        if (newRank.getName().equalsIgnoreCase(RankManagerImpl.LEADER_RANK_NAME))
+            factionBuilder.leader(playerUUID);
+
         storageManager.saveFaction(factionBuilder.build());
 
         //Save player...
@@ -671,12 +680,12 @@ public class FactionLogicImpl implements FactionLogic
     {
         checkNotNull(faction);
 
-        if(faction.getLeader() != null && !faction.getLeader().getUniqueId().toString().isEmpty())
+        UUID leaderUUID = faction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .orElse(null);
+        if(leaderUUID != null && (playerManager.isPlayerOnline(leaderUUID)))
         {
-            if(playerManager.isPlayerOnline(faction.getLeader().getUniqueId()))
-            {
                 return true;
-            }
         }
 
         for(final FactionMember factionMember : faction.getMembers())

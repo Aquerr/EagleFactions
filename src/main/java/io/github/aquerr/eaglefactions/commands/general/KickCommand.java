@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands.general;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
@@ -16,6 +17,8 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import java.util.Optional;
 
 public class KickCommand extends AbstractCommand
 {
@@ -42,7 +45,9 @@ public class KickCommand extends AbstractCommand
         if(!playerFaction.containsPlayer(selectedPlayer.getUniqueId()))
             throw messageService.resolveExceptionWithMessage("error.general.this-player-is-not-in-your-faction");
 
-        if(playerFaction.getLeader().getUniqueId().equals(selectedPlayer.getUniqueId())
+        if (selectedPlayer.getUniqueId().equals(playerFaction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .orElse(null))
                 || hasSameOrHigherRank(playerFaction, player, selectedPlayer))
             throw messageService.resolveExceptionWithMessage("error.command.kick.you-cant-kick-this-player");
 

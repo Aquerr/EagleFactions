@@ -50,9 +50,46 @@ public class DatabaseInitializer
 
         //Get all .sql files
         String sqlScriptsLocation = "/assets/eaglefactions/queries/" + connectionProvider.getStorageType().getName().toLowerCase();
-        final List<Path> sqlFilesPaths = getSqlFilesPaths(eagleFactions, sqlScriptsLocation);
 
-        if (sqlFilesPaths.isEmpty())
+        final List<Path> filePaths = new ArrayList<>();
+        final URI uri = eagleFactions.getResource(sqlScriptsLocation);
+
+        if (uri == null)
+            throw new IOException("Script directory missing for storage type = " + sqlScriptsLocation);
+
+        FileSystem fileSystem = null;
+
+        Path scriptsDirPath;
+        if (uri.getScheme().equals("jar"))
+        {
+            fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+            scriptsDirPath = fileSystem.getPath(sqlScriptsLocation);
+        }
+        else
+        {
+            scriptsDirPath = Paths.get(uri);
+        }
+
+        try (Stream<Path> walk = Files.walk(scriptsDirPath, 1))
+        {
+            boolean skipFirst = true;
+            for (final Iterator<Path> it = walk.iterator(); it.hasNext(); )
+            {
+                if (skipFirst)
+                {
+                    it.next();
+                    skipFirst = false;
+                }
+
+                final Path zipPath = it.next();
+                filePaths.add(zipPath);
+            }
+        }
+
+        //Sort .sql files
+        filePaths.sort(Comparator.comparing(x -> x.getFileName().toString()));
+
+        if (filePaths.isEmpty())
         {
             //TODO: Use logger here...
             System.out.println("There may be a problem with database script files...");
@@ -60,7 +97,7 @@ public class DatabaseInitializer
             throw new IllegalStateException("Could not find any database script files in " + sqlScriptsLocation);
         }
 
-        for(final Path resourceFilePath : sqlFilesPaths)
+        for(final Path resourceFilePath : filePaths)
         {
             final int scriptNumber = Integer.parseInt(resourceFilePath.getFileName().toString().substring(0, 3));
             if(scriptNumber <= currentDatabaseVersion)
@@ -95,9 +132,14 @@ public class DatabaseInitializer
             }
             catch(Exception exception)
             {
+                if (fileSystem != null)
+                    fileSystem.close();
                 throw new IllegalStateException("There may be a problem with database script files...", exception);
             }
         }
+
+        if (fileSystem != null)
+            fileSystem.close();
     }
 
     private static boolean databaseExists(SQLConnectionProvider connectionProvider) throws SQLException
@@ -113,49 +155,6 @@ public class DatabaseInitializer
             }
         }
         return false;
-    }
-
-    private static List<Path> getSqlFilesPaths(EagleFactions eagleFactions,
-                                               String sqlScriptsLocation) throws IOException
-    {
-        final List<Path> filePaths = new ArrayList<>();
-        final URI uri = eagleFactions.getResource(sqlScriptsLocation);
-
-        if (uri == null)
-            throw new IOException("Script directory missing for storage type = " + sqlScriptsLocation);
-
-        Path myPath;
-        if (uri.getScheme().equals("jar"))
-        {
-            try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap()))
-            {
-                myPath = fileSystem.getPath(sqlScriptsLocation);
-            }
-        }
-        else
-        {
-            myPath = Paths.get(uri);
-        }
-
-        try (Stream<Path> walk = Files.walk(myPath, 1))
-        {
-            boolean skipFirst = true;
-            for (final Iterator<Path> it = walk.iterator(); it.hasNext(); )
-            {
-                if (skipFirst)
-                {
-                    it.next();
-                    skipFirst = false;
-                }
-
-                final Path zipPath = it.next();
-                filePaths.add(zipPath);
-            }
-        }
-
-        //Sort .sql files
-        filePaths.sort(Comparator.comparing(x -> x.getFileName().toString()));
-        return filePaths;
     }
 
     public static int getDatabaseVersion(SQLConnectionProvider connectionProvider) throws SQLException

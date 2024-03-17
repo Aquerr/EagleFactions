@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.integrations.bluemap;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsRunnableTask;
 
 import java.util.Iterator;
@@ -8,10 +9,13 @@ import java.util.Iterator;
 public class BlueMapUpdateTask implements EagleFactionsRunnableTask
 {
     private final BlueMapService blueMapService;
+    private final FactionLogic factionLogic;
 
-    public BlueMapUpdateTask(BlueMapService blueMapService)
+    public BlueMapUpdateTask(BlueMapService blueMapService,
+                             FactionLogic factionLogic)
     {
         this.blueMapService = blueMapService;
+        this.factionLogic = factionLogic;
     }
 
     @Override
@@ -20,7 +24,7 @@ public class BlueMapUpdateTask implements EagleFactionsRunnableTask
         for (Iterator<Faction> iterator = this.blueMapService.getDrawnFactions().iterator(); iterator.hasNext();)
         {
             Faction drawnFaction = iterator.next();
-            Faction faction = this.blueMapService.getPlugin().getFactionLogic().getFactionByName(drawnFaction.getName());
+            Faction faction = this.factionLogic.getFactionByName(drawnFaction.getName());
 
             // Delete drawn markers for changed factions...
             if (faction == null || hasNewClaims(drawnFaction, faction))
@@ -34,7 +38,7 @@ public class BlueMapUpdateTask implements EagleFactionsRunnableTask
             }
         }
 
-        for (Faction faction : this.blueMapService.getPlugin().getFactionLogic().getFactions().values())
+        for (Faction faction : this.factionLogic.getFactions().values())
         {
             this.blueMapService.addMarkersForFaction(faction);
         }

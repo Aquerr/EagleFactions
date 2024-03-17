@@ -16,6 +16,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Set;
+import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
@@ -107,9 +108,9 @@ public final class ChatMessageHelper
                 .build();
     }
 
-    public static TextComponent getRankPrefix(final Faction faction, final ServerPlayer player)
+    public static TextComponent getRankPrefix(final Faction faction, final UUID playerUUID)
     {
-        Rank rank = RankManagerImpl.getHighestRank(faction.getPlayerRanks(player.uniqueId()));
+        Rank rank = RankManagerImpl.getHighestRank(faction.getPlayerRanks(playerUUID));
         if (rank != null && rank.canDisplayInChat())
             return text()
                     .append(text("["))

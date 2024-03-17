@@ -32,6 +32,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -134,12 +135,16 @@ public class CreateCommand extends AbstractCommand
     private void createAsPlayer(final String factionName, final String factionTag, final Player player)
     {
         List<Rank> defaultRanks = factionsConfig.getDefaultRanks();
+        if (defaultRanks.stream().noneMatch(rank -> rank.getName().equalsIgnoreCase(RankManagerImpl.DEFAULT_RANK_NAME)))
+        {
+            defaultRanks = new ArrayList<>(defaultRanks);
+            defaultRanks.add(RankManagerImpl.buildDefaultRecruitRank());
+        }
 
         final Faction faction = FactionImpl.builder(factionName,
-                        text(factionTag, this.chatConfig.getDefaultTagColor()),
-                        player.uniqueId())
+                        text(factionTag, this.chatConfig.getDefaultTagColor()))
+                .leader(player.uniqueId())
                 .ranks(defaultRanks)
-                .defaultRankName(factionsConfig.getDefaultRankName())
                 .members(Set.of(new FactionMemberImpl(player.uniqueId(), Set.of(RankManagerImpl.getHighestRank(defaultRanks).getName()))))
                 .createdDate(Instant.now())
                 .protectionFlags(prepareDefaultProtectionFlags())
@@ -166,10 +171,9 @@ public class CreateCommand extends AbstractCommand
     {
         final List<Rank> defaultRanks = factionsConfig.getDefaultRanks();
 
-        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()), FactionLogicImpl.DUMMY_UUID)
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()))
                 .createdDate(Instant.now())
                 .ranks(defaultRanks)
-                .defaultRankName(factionsConfig.getDefaultRankName())
                 .protectionFlags(prepareDefaultProtectionFlags())
                 .build();
         super.getPlugin().getFactionLogic().addFaction(faction);

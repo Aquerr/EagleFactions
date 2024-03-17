@@ -72,7 +72,8 @@ class InvitationManagerImplTest
 
     private Faction prepareFaction()
     {
-        return FactionImpl.builder(FACTION_NAME, Component.text(""), LEADER_UUID)
+        return FactionImpl.builder(FACTION_NAME, Component.text(""))
+                .leader(LEADER_UUID)
                 .build();
     }
 }

@@ -95,7 +95,7 @@ public class FillCommand extends AbstractCommand
             if (!this.factionLogic.isClaimed(world.uniqueId(), chunkPosition))
             {
                 faction = this.factionLogic.getFactionByName(faction.getName());
-                this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunkPosition), player, faction, messageService));
+                this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunkPosition)), player, faction, messageService));
                 chunks.add(chunkPosition.add(1, 0, 0));
                 chunks.add(chunkPosition.add(-1, 0, 0));
                 chunks.add(chunkPosition.add(0, 0, 1));

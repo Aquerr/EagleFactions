@@ -14,7 +14,7 @@ import io.github.aquerr.eaglefactions.api.entities.RelationType;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
-import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
+import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimSetTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.EFTypeTokens;
@@ -62,7 +62,10 @@ public class ConfigurateHelper
         {
             configNode.node("name").set(faction.getName());
             configNode.node("tag").set(LegacyComponentSerializer.legacyAmpersand().serialize(faction.getTag()));
-            configNode.node("leader").set(faction.getLeader().getUniqueId().toString());
+            configNode.node("leader").set(faction.getLeader()
+                    .map(FactionMember::getUniqueId)
+                    .map(UUID::toString)
+                    .orElse(null));
             configNode.node("description").set(faction.getDescription());
             configNode.node("motd").set(faction.getMessageOfTheDay());
             configNode.node("members").setList(EFTypeTokens.FACTION_MEMBER_TYPE_TOKEN, new ArrayList<>(faction.getMembers()));
@@ -78,7 +81,6 @@ public class ConfigurateHelper
             configNode.node("last-online").set(faction.getLastOnline().toString());
             configNode.node("created_date").set(String.valueOf(faction.getCreatedDate()));
             configNode.node("ranks").setList(EFTypeTokens.RANK_TYPE_TOKEN, faction.getRanks());
-            configNode.node("default-rank-name").set(faction.getDefaultRank().getName());
             configNode.node("chest").set(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN, faction.getChest().getItems());
             configNode.node("is-public").set(faction.isPublic());
             configNode.node("protection-flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags());
@@ -126,7 +128,7 @@ public class ConfigurateHelper
         }
         catch (Exception exception)
         {
-            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting player'" + factionPlayer.getName() + "' in node.", exception);
+            LOGGER.error("{}Error while putting player '{}' in node.", PluginInfo.PLUGIN_PREFIX_PLAIN, factionPlayer.getName(), exception);
             return false;
         }
     }
@@ -139,7 +141,7 @@ public class ConfigurateHelper
         final TextComponent tag = LegacyComponentSerializer.legacyAmpersand().deserialize(configNode.node("tag").getString());
         final String description = configNode.node("description").getString();
         final String messageOfTheDay = configNode.node("motd").getString();
-        final UUID leader = configNode.node("leader").get(EFTypeTokens.UUID_TOKEN, new UUID(0,0));
+        final UUID leader = configNode.node("leader").get(EFTypeTokens.UUID_TOKEN, (UUID) null);
         final FactionHome home = FactionHome.from(String.valueOf(configNode.node("home").getString("")));
         final Set<FactionMember> members = new HashSet<>(configNode.node("members").getList(EFTypeTokens.FACTION_MEMBER_TYPE_TOKEN, Collections.emptyList()));
         final Set<String> alliances = new HashSet<>(configNode.node("alliances").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
@@ -156,12 +158,6 @@ public class ConfigurateHelper
         final Set<Claim> claims = configNode.node("claims").get(EFTypeTokens.CLAIM_SET_TYPE_TOKEN, Collections.emptySet());
         final Instant lastOnline = configNode.node("last-online").get(Instant.class) != null ? Instant.parse(configNode.node("last-online").getString(Instant.now().toString())) : Instant.now();
         final List<Rank> ranks = new ArrayList<>(configNode.node("ranks").getList(EFTypeTokens.RANK_TYPE_TOKEN, Collections.emptyList()));
-        final String defaultRankName = configNode.node("default-rank-name").getString("");
-        final Rank defaultRank = ranks.stream()
-                .filter(rank -> rank.getName().equalsIgnoreCase(defaultRankName))
-                .findFirst()
-                .or(() -> Optional.ofNullable(RankManagerImpl.getLowestRank(ranks)))
-                .orElseThrow();
         final List<FactionChest.SlotItem> slotItems = configNode.node("chest").get(EFTypeTokens.LIST_SLOT_ITEM_TYPE_TOKEN);
         final Set<ProtectionFlag> protectionFlags = configNode.node("protection-flags").get(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, Collections.emptySet());
 
@@ -172,7 +168,8 @@ public class ConfigurateHelper
             chest = new FactionChestImpl(factionName, slotItems);
         final boolean isPublic = configNode.node("is-public").getBoolean(false);
 
-        return FactionImpl.builder(factionName, tag, leader)
+        return FactionImpl.builder(factionName, tag)
+                .leader(leader)
                 .description(description)
                 .messageOfTheDay(messageOfTheDay)
                 .home(home)
@@ -183,7 +180,6 @@ public class ConfigurateHelper
                 .claims(claims)
                 .lastOnline(lastOnline)
                 .ranks(ranks)
-                .defaultRankName(defaultRank.getName())
                 .chest(chest)
                 .isPublic(isPublic)
                 .protectionFlags(protectionFlags)

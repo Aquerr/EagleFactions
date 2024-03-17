@@ -14,6 +14,7 @@ import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.RankImpl;
+import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.InventorySerializer;
@@ -65,8 +66,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String SELECT_RELATION_PERMISSION_WHERE_FACTION_NAME = "SELECT permission FROM faction_relation_permission WHERE faction_name=? AND relation_type=?";
     private static final String SELECT_FACTION_RANKS_WHERE_FACTION_NAME = "SELECT name, faction_name, display_name, ladder_position, display_in_chat FROM faction_rank WHERE faction_name=?";
     private static final String SELECT_FACTION_RANK_PERMSSIONS_WHERE_FACTION_NAME = "SELECT rank_name, faction_name, permission FROM faction_rank_permission WHERE faction_name=?";
-    private static final String INSERT_FACTION = "INSERT INTO faction (name, tag, tag_color, leader, home, last_online, description, motd, is_public, created_date, default_rank_name) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_FACTION = "INSERT INTO faction (name, tag, tag_color, leader, home, last_online, description, motd, is_public, created_date) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_CLAIM = "INSERT INTO claim (faction_name, world_uuid, chunk_position, is_accessible_by_faction) VALUES (?, ?, ?, ?)";
     private static final String INSERT_CLAIM_OWNER = "INSERT INTO claim_owner (world_uuid, chunk_position, player_uuid) VALUES (?, ?, ?)";
     private static final String INSERT_MEMBER = "INSERT INTO faction_member (member_uuid, faction_name) VALUES (?, ?)";
@@ -75,7 +76,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String INSERT_RELATION_PERMISSION = "INSERT INTO faction_relation_permission (faction_name, relation_type, permission) VALUES (?, ?, ?)";
     private static final String INSERT_RANK = "INSERT INTO faction_rank (name, faction_name, display_name, ladder_position, display_in_chat) VALUES (?, ?, ?, ?, ?)";
     private static final String INSERT_RANK_PERMISSION = "INSERT INTO faction_rank_permission (faction_name, rank_name, permission) VALUES (?, ?, ?)";
-    private static final String UPDATE_FACTION = "UPDATE faction SET name = ?, tag = ?, tag_color = ?, leader = ?, home = ?, last_online = ?, description = ?, motd = ?, is_public = ?, created_date = ?, default_rank_name = ? " +
+    private static final String UPDATE_FACTION = "UPDATE faction SET name = ?, tag = ?, tag_color = ?, leader = ?, home = ?, last_online = ?, description = ?, motd = ?, is_public = ?, created_date = ? " +
             "WHERE name = ?";
 
     private static final String DELETE_FACTION_WHERE_FACTIONNAME = "DELETE FROM faction WHERE name=?";
@@ -140,7 +141,13 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     .map(Component::color)
                     .map(TextColor::asHexString)
                     .orElse("GREEN"));
-            preparedStatement.setString(4, faction.getLeader().getUniqueId().toString());
+
+            String leaderUUID = faction.getLeader()
+                    .map(FactionMember::getUniqueId)
+                    .map(UUID::toString)
+                    .orElse(null);
+
+            preparedStatement.setString(4, leaderUUID);
             if (faction.getHome() != null)
                 preparedStatement.setString(5, faction.getHome().toString());
             else preparedStatement.setString(5, null);
@@ -149,9 +156,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
             preparedStatement.setString(8, faction.getMessageOfTheDay());
             preparedStatement.setString(9, faction.isPublic() ? "1" : "0");
             preparedStatement.setTimestamp(10, Timestamp.from(faction.getCreatedDate()));
-            preparedStatement.setString(11, faction.getDefaultRank().getName());
             if (isUpdate)
-                preparedStatement.setString(12, faction.getName()); //Where part
+                preparedStatement.setString(11, faction.getName()); //Where part
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -177,6 +183,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         {
             try
             {
+                e.printStackTrace();
                 connection.rollback();
                 connection.close();
             }
@@ -645,8 +652,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
             final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_WHERE_FACTIONNAME);
             preparedStatement.setString(1, factionName);
             final int affectedRows = preparedStatement.executeUpdate();
-            preparedStatement.close();
             connection.commit();
+            preparedStatement.close();
             connection.close();
             return affectedRows == 1;
         }
@@ -746,7 +753,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.next())
         {
-            byte[] factionChestItems = resultSet.getBytes("ChestItems");
+            byte[] factionChestItems = resultSet.getBytes("chest_items");
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(factionChestItems);
             DataContainer dataContainer = DataFormats.NBT.get().readFrom(byteArrayInputStream);
             byteArrayInputStream.close();
@@ -776,7 +783,9 @@ public abstract class AbstractFactionStorage implements FactionStorage
             final String tag = factionsResultSet.getString("tag");
             final String tagColor = factionsResultSet.getString("tag_color");
             final TextColor textColor = TextColor.fromHexString(tagColor);
-            final UUID leaderUUID = UUID.fromString(factionsResultSet.getString("leader"));
+            final UUID leaderUUID = Optional.ofNullable(factionsResultSet.getString("leader"))
+                    .map(UUID::fromString)
+                    .orElse(null);
             final String factionHomeAsString = factionsResultSet.getString("home");
             final String description = factionsResultSet.getString("description");
             final String messageOfTheDay = factionsResultSet.getString("motd");
@@ -786,7 +795,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
                 factionHome = FactionHome.from(factionHomeAsString);
             final Instant createdDate = factionsResultSet.getTimestamp("created_date").toInstant();
             final Instant lastOnline = factionsResultSet.getTimestamp("last_online").toInstant();
-            final String defaultRankName = factionsResultSet.getString("default_rank_name");
 
             final FactionChest factionChest = getFactionChest(connection, factionName);
             final Set<ProtectionFlag> protectionFlags = factionProtectionFlagsStorage.getProtectionFlags(connection, factionName);
@@ -796,7 +804,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
             final List<Rank> ranks = getFactionRanks(connection, factionName);
 
-            final Faction faction = FactionImpl.builder(factionName, Component.text(tag, textColor), leaderUUID)
+            final Faction faction = FactionImpl.builder(factionName, Component.text(tag, textColor))
+                    .leader(leaderUUID)
                     .home(factionHome)
                     .truces(truces)
                     .alliances(alliances)
@@ -807,7 +816,6 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     .chest(factionChest)
                     .createdDate(createdDate)
                     .ranks(ranks)
-                    .defaultRankName(defaultRankName)
                     .alliancePermissions(alliancePermissions)
                     .trucePermissions(trucePermissions)
                     .description(description)

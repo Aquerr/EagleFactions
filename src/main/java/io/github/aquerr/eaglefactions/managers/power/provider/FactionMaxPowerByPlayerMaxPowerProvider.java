@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionMaxPowerProvider;
+import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -13,8 +14,6 @@ import static io.github.aquerr.eaglefactions.util.MathUtil.round;
 
 public class FactionMaxPowerByPlayerMaxPowerProvider implements FactionMaxPowerProvider
 {
-    private static final UUID dummyUUID = new UUID(0, 0);
-
     private final PlayerManager playerManager;
 
     public FactionMaxPowerByPlayerMaxPowerProvider(PlayerManager playerManager)
@@ -40,7 +39,7 @@ public class FactionMaxPowerByPlayerMaxPowerProvider implements FactionMaxPowerP
 
     private float getPlayerMaxPower(final UUID playerUUID)
     {
-        if(playerUUID == null || playerUUID.equals(dummyUUID))
+        if(playerUUID == null)
             return 0;
 
         final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);

@@ -91,7 +91,10 @@ public class CoordsCommand extends AbstractCommand
             teamCoords.add(messageService.resolveComponentWithMessage("command.coords.faction-home-coords", worldNameAndPos));
         }
 
-        final Optional<ServerPlayer> leader = getPlugin().getPlayerManager().getPlayer(faction.getLeader().getUniqueId());
+        final Optional<ServerPlayer> leader = faction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .flatMap(getPlugin().getPlayerManager()::getPlayer);
+
         leader.ifPresent(serverPlayer -> teamCoords.add(messageService.resolveComponentWithMessage("command.coords.leader-coords", serverPlayer.name() + " " + serverPlayer.serverLocation().blockPosition().toString())));
 
         for (final FactionMember factionMember: faction.getMembers())

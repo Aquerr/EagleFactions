@@ -42,17 +42,24 @@ public final class VersionChecker
             String session = getSession(gson);
             Date latestVersionDate = getLatestVersionDate(gson, session);
             Date currentVersionDate = getCurrentVersionDate(gson, session, version);
+            if (currentVersionDate == null)
+            {
+                EagleFactionsPlugin.getPlugin().getLogger().info("You are using the version of Eagle Factions that seems not to be published.");
+                EagleFactionsPlugin.getPlugin().getLogger().info("Considering current version as LATEST.");
+                return true;
+            }
+
             return currentVersionDate.before(latestVersionDate);
         }
         catch (Exception exception)
         {
-            EagleFactionsPlugin.getPlugin().getLogger().warn("Could not check if there is a new version of Eagle Factions available. Reason: " + exception.getMessage());
+            EagleFactionsPlugin.getPlugin().getLogger().warn("Could not check if there is a new version of Eagle Factions available.", exception);
             EagleFactionsPlugin.getPlugin().getLogger().warn("Considering current version as LATEST.");
             return true;
         }
     }
 
-    private Date getCurrentVersionDate(Gson gson, String session, String currentVersion)
+    private Date getCurrentVersionDate(Gson gson, String session, String currentVersion) throws IOException
     {
         String url = "https://ore.spongepowered.org/api/v2/projects/eaglefactions/versions/" + currentVersion;
         Map<String, String> headers = new HashMap<>();
@@ -65,7 +72,7 @@ public final class VersionChecker
         return Date.from(Instant.parse(stringDate));
     }
 
-    private Date getLatestVersionDate(Gson gson, String session)
+    private Date getLatestVersionDate(Gson gson, String session) throws IOException
     {
         String url = "https://ore.spongepowered.org/api/v2/projects/eaglefactions/versions?offset=0";
         Map<String, String> headers = new HashMap<>();
@@ -76,7 +83,7 @@ public final class VersionChecker
         return Date.from(Instant.parse(stringDate));
     }
 
-    private String getSession(Gson gson)
+    private String getSession(Gson gson) throws IOException
     {
         String url = "https://ore.spongepowered.org/api/v2/authenticate";
         Map<String, String> headers = new HashMap<>();
@@ -85,32 +92,24 @@ public final class VersionChecker
         return jsonObject.get("session").getAsString();
     }
 
-    private JsonObject sendRequest(Gson gson, String method, String request, Map<String, String> headers)
+    private JsonObject sendRequest(Gson gson, String method, String request, Map<String, String> headers) throws IOException
     {
-        try
+        URL url = new URL(request);
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod(method);
+        headers.forEach(connection::setRequestProperty);
+        connection.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode == HttpURLConnection.HTTP_OK)
         {
-            URL url = new URL(request);
-
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(method);
-            headers.forEach(connection::setRequestProperty);
-            connection.setRequestProperty("User-Agent", USER_AGENT);
-            int responseCode = connection.getResponseCode();
-
-            if (responseCode == HttpURLConnection.HTTP_OK)
+            try(InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                JsonReader jsonReader = new JsonReader(bufferedReader))
             {
-                try(InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    JsonReader jsonReader = new JsonReader(bufferedReader))
-                {
-                    return gson.fromJson(jsonReader, JsonObject.class);
-                }
+                return gson.fromJson(jsonReader, JsonObject.class);
             }
-
-        }
-        catch (IOException e)
-        {
-            EagleFactionsPlugin.getPlugin().getLogger().error("Couldn't lookup if there is a new version of Eagle Factions available. Reason: " + e.getMessage());
         }
 
         return null;

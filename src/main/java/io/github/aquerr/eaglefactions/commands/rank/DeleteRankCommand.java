@@ -10,6 +10,7 @@ import io.github.aquerr.eaglefactions.api.managers.RankManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -38,6 +39,11 @@ public class DeleteRankCommand extends AbstractCommand
         Rank rank = context.requireOne(EagleFactionsCommandParameters.factionRank());
         ServerPlayer serverPlayer = requirePlayerSource(context);
         Faction faction = requirePlayerFaction(serverPlayer);
+
+        if (rank.getName().equalsIgnoreCase(RankManagerImpl.DEFAULT_RANK_NAME))
+        {
+            throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
+        }
 
         if (!playerManager.hasAdminMode(serverPlayer.user())
                 && permsManager.hasPermission(serverPlayer.uniqueId(), faction, FactionPermission.MANAGE_RANKS))

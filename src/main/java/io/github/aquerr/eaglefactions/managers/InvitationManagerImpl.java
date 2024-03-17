@@ -469,7 +469,9 @@ public class InvitationManagerImpl implements InvitationManager
 
     private void notifyFactionAboutRequest(Faction faction, Supplier<Component> messageSupplier)
     {
-        final Optional<ServerPlayer> leader = this.playerManager.getPlayer(faction.getLeader().getUniqueId());
+        final Optional<ServerPlayer> leader = faction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .flatMap(this.playerManager::getPlayer);
         leader.ifPresent(x->x.sendMessage(messageSupplier.get()));
         faction.getRanks().stream()
                 .filter(rank -> rank.getPermissions().contains(FactionPermission.MANAGE_RELATIONS))

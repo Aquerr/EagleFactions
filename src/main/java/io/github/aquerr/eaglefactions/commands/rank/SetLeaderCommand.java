@@ -2,6 +2,7 @@ package io.github.aquerr.eaglefactions.commands.rank;
 
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
@@ -11,6 +12,8 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import java.util.Optional;
 
 public class SetLeaderCommand extends AbstractCommand
 {
@@ -35,16 +38,22 @@ public class SetLeaderCommand extends AbstractCommand
 
         if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
-            if(playerFaction.getLeader().getUniqueId().equals(newLeaderPlayer.getUniqueId()))
+            if (newLeaderPlayer.getUniqueId().equals(playerFaction.getLeader()
+                    .map(FactionMember::getUniqueId)
+                    .orElse(null)))
                 throw messageService.resolveExceptionWithMessage("error.command.set-leader.you-are-already-the-leader-of-this-faction");
 
             super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);
             player.sendMessage(messageService.resolveMessageWithPrefix("command.set-leader.you-set-player-as-your-new-leader", newLeaderPlayer.getName()));
             return CommandResult.success();
         }
-        else if (playerFaction.getLeader().getUniqueId().equals(player.uniqueId()))
+        else if (player.uniqueId().equals(playerFaction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .orElse(null)))
         {
-            if(playerFaction.getLeader().getUniqueId().equals(newLeaderPlayer.getUniqueId()))
+            if (newLeaderPlayer.getUniqueId().equals(playerFaction.getLeader()
+                    .map(FactionMember::getUniqueId)
+                    .orElse(null)))
                 throw messageService.resolveExceptionWithMessage("error.command.set-leader.you-are-already-the-leader-of-this-faction");
 
             super.getPlugin().getRankManager().setLeader(newLeaderPlayer, playerFaction);

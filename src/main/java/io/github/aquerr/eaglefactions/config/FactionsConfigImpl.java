@@ -116,12 +116,6 @@ public class FactionsConfigImpl implements FactionsConfig
 
 		List<Rank> defaultRanks = RankManagerImpl.getDefaultRanks();
 		this.defaultRanks = this.configuration.getGenericList(Rank.class, defaultRanks, "default-ranks", "ranks");
-		String defaultRank = this.configuration.getString("recruit", "default-ranks", "default-rank");
-		this.defaultRankName = defaultRanks.stream()
-				.filter(rank -> rank.getName().equals(defaultRank))
-				.map(Rank::getName)
-				.findFirst()
-				.orElseThrow();
 	}
 
 	@Override

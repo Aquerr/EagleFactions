@@ -107,7 +107,7 @@ public class ChatMessageListener extends AbstractListener
         final TextComponent fPrefix = ChatMessageHelper.getFactionPrefix(playerFaction);
         factionPrefix.append(fPrefix);
 
-        final TextComponent rPrefix = ChatMessageHelper.getRankPrefix(playerFaction, player);
+        final TextComponent rPrefix = ChatMessageHelper.getRankPrefix(playerFaction, player.uniqueId());
         if (rPrefix != null)
             rankPrefix.append(rPrefix);
 

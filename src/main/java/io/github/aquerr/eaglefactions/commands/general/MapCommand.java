@@ -354,7 +354,7 @@ public class MapCommand extends AbstractCommand
                         if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                             return;
 
-                        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunk), player, playerFaction, messageService));
+                        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)), player, playerFaction, messageService));
                     }
                     else
                     {
@@ -366,7 +366,7 @@ public class MapCommand extends AbstractCommand
                     if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                         return;
 
-                    this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, chunk), player, playerFaction, messageService));
+                    this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)), player, playerFaction, messageService));
                 }
             }
         }

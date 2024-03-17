@@ -11,14 +11,13 @@ CREATE TABLE `faction`
     `name`              VARCHAR(200) NOT NULL,
     `tag`               VARCHAR(200) NOT NULL,
     `tag_color`         VARCHAR(40)  NULL,
-    `leader`            VARCHAR(36)  NOT NULL,
+    `leader`            VARCHAR(36)  NULL,
     `home`              VARCHAR(200) NULL,
     `last_online`       DATETIME     NOT NULL,
     `description`       VARCHAR(255) NOT NULL,
     `motd`              VARCHAR(255) NOT NULL,
     `is_public`         BOOLEAN      NOT NULL,
     `created_date`      DATETIME     NOT NULL,
-    `default_rank_name` VARCHAR(36)  NOT NULL,
     PRIMARY KEY (`name`)
 ) DEFAULT CHARSET = utf8mb4;
 

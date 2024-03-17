@@ -9,14 +9,13 @@ CREATE TABLE faction
     name              TEXT PRIMARY KEY NOT NULL,
     tag               TEXT             NOT NULL,
     tag_color         TEXT             NULL,
-    leader            TEXT             NOT NULL,
+    leader            TEXT             NULL,
     home              TEXT             NULL,
     last_online       INTEGER          NOT NULL,
     description       TEXT             NOT NULL,
     motd              TEXT             NOT NULL,
     is_public         INTEGER          NOT NULL,
-    created_date      INTEGER          NOT NULL,
-    default_rank_name VARCHAR(36)      NOT NULL
+    created_date      INTEGER          NOT NULL
 );
 
 -- Create Members Table

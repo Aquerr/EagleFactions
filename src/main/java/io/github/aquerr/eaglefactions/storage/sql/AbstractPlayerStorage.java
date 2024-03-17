@@ -18,25 +18,13 @@ import java.util.UUID;
 
 public abstract class AbstractPlayerStorage implements PlayerStorage
 {
-    private static final String INSERT_PLAYER = "INSERT INTO Players (PlayerUUID, Name, Faction, Power, MaxPower, DeathInWarzone) VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_PLAYER = "UPDATE Players SET PlayerUUID = ?, Name = ?, Faction = ?, Power = ?, MaxPower = ?, DeathInWarzone = ? WHERE PlayerUUID = ?";
-//    private static final String MERGE_PLAYER = "MERGE INTO Players (PlayerUUID, Name, Power, MaxPower, DeathInWarzone) KEY (PlayerUUID) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_PLAYER = "INSERT INTO player (player_uuid, name, faction_name, power, max_power, death_in_warzone) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_PLAYER = "UPDATE player SET player_uuid = ?, name = ?, faction_name = ?, power = ?, max_power = ?, death_in_warzone = ? WHERE player_uuid = ?";
+    private static final String SELECT_PLAYERS = "SELECT * FROM player";
+    private static final String SELECT_PLAYER_NAMES = "SELECT Name FROM player";
+    private static final String SELECT_PLAYER_WHERE_UUID = "SELECT * FROM player WHERE player_uuid=? LIMIT 1";
 
-//    private static final String SELECT_PLAYER_WHERE_PLAYERUUID = "SELECT Name FROM Players WHERE PlayerUUID=? LIMIT 1";
-    private static final String SELECT_PLAYERS = "SELECT * FROM Players";
-    private static final String SELECT_PLAYER_NAMES = "SELECT Name FROM Players";
-    private static final String SELECT_PLAYER_WHERE_UUID = "SELECT * FROM Players WHERE PlayerUUID=? LIMIT 1";
-//    private static final String SELECT_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "SELECT DeathInWarzone FROM Players WHERE PlayerUUID=? LIMIT 1";
-//    private static final String SELECT_PLAYER_WHERE_PLAYERUUID_AND_PLAYERNAME = "SELECT * FROM Players WHERE PlayerUUID=? AND Name=? LIMIT 1";
-//    private static final String SELECT_POWER_WHERE_PLAYERUUID = "SELECT Power FROM Players WHERE PlayerUUID=? LIMIT 1";
-//    private static final String SELECT_MAXPOWER_WHERE_PLAYERUUID = "SELECT MaxPower FROM Players WHERE PlayerUUID=? LIMIT 1";
-
-//    private static final String UPDATE_POWER_WHERE_PLAYERUUID = "UPDATE Players SET Power=? WHERE PlayerUUID=?";
-//    private static final String UPDATE_MAXPOWER_WHERE_PLAYERUUID = "UPDATE Players SET MaxPower=? WHERE PlayerUUID=?";
-//    private static final String UPDATE_DEATH_IN_WARZONE_WHERE_PLAYERUUID = "UPDATE Players SET DeathInWarzone=? WHERE PlayerUUID=?";
-//    private static final String UPDATE_PLAYERNAME_WHERE_PLAYERUUID = "UPDATE Players SET Name=? WHERE PlayerUUID=?";
-
-    private static final String DELETE_PLAYERS = "DELETE FROM Players";
+    private static final String DELETE_PLAYERS = "DELETE FROM player";
 
     private final SQLConnectionProvider sqlConnectionProvider;
 
@@ -61,11 +49,11 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next())
             {
-                final String name = resultSet.getString("Name");
-                final String factionName = resultSet.getString("Faction");
-                final float power = resultSet.getFloat("Power");
-                final float maxpower = resultSet.getFloat("MaxPower");
-                final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
+                final String name = resultSet.getString("name");
+                final String factionName = resultSet.getString("faction_name");
+                final float power = resultSet.getFloat("power");
+                final float maxpower = resultSet.getFloat("max_power");
+                final boolean deathInWarzone = resultSet.getBoolean("death_in_warzone");
 
                 factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, deathInWarzone);
             }
@@ -103,7 +91,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             statement.setBoolean(6, player.diedInWarZone());
             if(exists)
                 statement.setString(7, player.getUniqueId().toString()); //Where part
-            final boolean didSucceed = statement.execute();
+            final boolean didSucceed = statement.executeUpdate() >= 1;
             statement.close();
             return didSucceed;
         }
@@ -152,7 +140,7 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYER_NAMES);
             while (resultSet.next())
             {
-                final String playerName = resultSet.getString("Name");
+                final String playerName = resultSet.getString("name");
                 playerNames.add(playerName);
             }
             resultSet.close();
@@ -175,12 +163,12 @@ public abstract class AbstractPlayerStorage implements PlayerStorage
             final ResultSet resultSet = statement.executeQuery(SELECT_PLAYERS);
             while (resultSet.next())
             {
-                final UUID playerUUID = UUID.fromString(resultSet.getString("PlayerUUID"));
-                final String name = resultSet.getString("Name");
-                final String factionName = resultSet.getString("Faction");
-                final float power = resultSet.getFloat("Power");
-                final float maxpower = resultSet.getFloat("MaxPower");
-                final boolean deathInWarzone = resultSet.getBoolean("DeathInWarzone");
+                final UUID playerUUID = UUID.fromString(resultSet.getString("player_uuid"));
+                final String name = resultSet.getString("name");
+                final String factionName = resultSet.getString("faction_name");
+                final float power = resultSet.getFloat("power");
+                final float maxpower = resultSet.getFloat("max_power");
+                final boolean deathInWarzone = resultSet.getBoolean("death_in_warzone");
 
                 FactionPlayer factionPlayer = new FactionPlayerImpl(name, playerUUID, factionName, power, maxpower, deathInWarzone);
                 factionPlayers.add(factionPlayer);

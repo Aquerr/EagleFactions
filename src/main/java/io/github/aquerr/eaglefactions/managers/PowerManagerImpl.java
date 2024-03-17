@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionMaxPowerProvider;
 import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionPowerProvider;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
+import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.PowerIncrementTask;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,8 +31,6 @@ public class PowerManagerImpl implements PowerManager
 
     private final PlayerManager playerManager;
     private final PowerConfig powerConfig;
-
-    private static final UUID dummyUUID = new UUID(0, 0);
 
     public PowerManagerImpl(final PlayerManager playerManager, final PowerConfig powerConfig)
     {
@@ -80,7 +79,7 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public float getPlayerPower(@Nullable final UUID playerUUID)
     {
-        if (playerUUID == null || playerUUID.equals(dummyUUID))
+        if (playerUUID == null)
             return 0;
 
         final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
@@ -112,7 +111,7 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public float getPlayerMaxPower(final UUID playerUUID)
     {
-        if(playerUUID == null || playerUUID.equals(dummyUUID))
+        if(playerUUID == null)
             return 0;
 
         final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
@@ -122,7 +121,7 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public boolean setPlayerPower(UUID playerUUID, float power)
     {
-        if (playerUUID == null || playerUUID.equals(dummyUUID))
+        if (playerUUID == null)
             return false;
 
         final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);
@@ -136,7 +135,7 @@ public class PowerManagerImpl implements PowerManager
     @Override
     public boolean setPlayerMaxPower(UUID playerUUID, float maxpower)
     {
-        if (playerUUID == null || playerUUID.equals(dummyUUID))
+        if (playerUUID == null)
             return false;
 
         final Optional<FactionPlayer> optionalFactionPlayer = this.playerManager.getFactionPlayer(playerUUID);

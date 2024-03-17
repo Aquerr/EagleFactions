@@ -31,6 +31,13 @@ import java.util.concurrent.ExecutionException;
 
 public class DynmapUpdateTask implements EagleFactionsRunnableTask
 {
+    private DynmapService dynmapService;
+
+    public DynmapUpdateTask(final DynmapService dynmapService)
+    {
+        this.dynmapService = dynmapService;
+    }
+
     @Override
     public void run()
     {
@@ -137,14 +144,14 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
                     try
                     {
-                        areaMarker.setDescription(DynmapUtils.getFactionInfoWindow(faction));
+                        areaMarker.setDescription(dynmapService.getFactionInfoWindow(faction));
                     }
                     catch (ExecutionException | InterruptedException e)
                     {
                         e.printStackTrace();
                     }
 
-                    int areaColor = DynmapUtils.getAreaColor(faction);
+                    int areaColor = this.dynmapService.getAreaColor(faction);
                     areaMarker.setLineStyle(3, 0.8, areaColor);
                     areaMarker.setFillStyle(0.35, areaColor);
 

@@ -16,6 +16,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class DisbandCommand extends AbstractCommand
@@ -60,7 +61,9 @@ public class DisbandCommand extends AbstractCommand
         if(faction.isSafeZone() || faction.isWarZone())
             throw messageService.resolveExceptionWithMessage("error.command.disband.this-faction-cannot-be-disbanded");
 
-        if (player.uniqueId().equals(faction.getLeader().getUniqueId()))
+        if (player.uniqueId().equals(faction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .orElse(null)))
         {
             sendDisbandEventAndDisband(player, faction, false);
         }

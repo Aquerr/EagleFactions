@@ -234,11 +234,11 @@ class FactionLogicImplTest
 
     private Faction prepareFaction()
     {
-        return FactionImpl.builder(FACTION_NAME, FACTION_TAG, PLAYER_UUID)
+        return FactionImpl.builder(FACTION_NAME, FACTION_TAG)
+                .leader(PLAYER_UUID)
                 .ranks(List.of(RankImpl.builder()
                                 .name("test")
                         .build()))
-                .defaultRankName("test")
                 .build();
     }
 }

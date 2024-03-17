@@ -15,18 +15,20 @@ import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.List;
 
-public class SetDefaultRankCommand extends AbstractCommand
+public class SetRankDisplayInChatCommand extends AbstractCommand
 {
     private final PermsManager permsManager;
     private final PlayerManager playerManager;
     private final MessageService messageService;
     private final RankManager rankManager;
 
-    public SetDefaultRankCommand(EagleFactions plugin)
+    public SetRankDisplayInChatCommand(EagleFactions plugin)
     {
         super(plugin);
         this.permsManager = plugin.getPermsManager();
@@ -41,6 +43,7 @@ public class SetDefaultRankCommand extends AbstractCommand
         ServerPlayer serverPlayer = requirePlayerSource(context);
         Faction faction = requirePlayerFaction(serverPlayer);
         Rank rank = context.requireOne(EagleFactionsCommandParameters.factionRank());
+        boolean displayInChat = context.requireOne(CommonParameters.BOOLEAN);
 
         boolean hasAdminMode = playerManager.hasAdminMode(serverPlayer.user());
         if (!hasAdminMode && !permsManager.hasPermission(serverPlayer.uniqueId(), faction, FactionPermission.MANAGE_RANKS))
@@ -57,10 +60,9 @@ public class SetDefaultRankCommand extends AbstractCommand
         if (possibleRanks.stream().noneMatch(factionRank -> factionRank.isSameRank(rank)))
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
 
-
         try
         {
-            this.rankManager.setDefaultRank(faction, rank);
+            this.rankManager.setRankDisplayInChat(faction, rank, displayInChat);
             serverPlayer.sendMessage(messageService.resolveMessageWithPrefix("command.rank.rank-has-been-updated"));
         }
         catch (Exception exception)

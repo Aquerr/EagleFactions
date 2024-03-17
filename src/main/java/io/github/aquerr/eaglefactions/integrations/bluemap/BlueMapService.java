@@ -8,19 +8,20 @@ import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.math.Color;
 import de.bluecolored.bluemap.api.math.Shape;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.BluemapConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
+import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.integrations.bluemap.util.TempAreaMarker;
 import io.github.aquerr.eaglefactions.integrations.bluemap.util.TileFlags;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.ArrayDeque;
@@ -33,14 +34,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class BlueMapService
 {
     private static final String CLAIMS_MARKER_SET_ID = "eaglefactions-claims";
 
-    private final EagleFactions plugin;
+    private final FactionLogic factionLogic;
+    private final PlayerManager playerManager;
     private final BluemapConfig bluemapConfig;
     private BlueMapAPI blueMapAPI;
 
@@ -50,10 +51,13 @@ public class BlueMapService
 
     private ScheduledTask bluemapUpdateTask;
 
-    public BlueMapService(EagleFactions plugin)
+    public BlueMapService(BluemapConfig bluemapConfig,
+                          PlayerManager playerManager,
+                          FactionLogic factionLogic)
     {
-        this.plugin = plugin;
-        this.bluemapConfig = plugin.getConfiguration().getBluemapConfig();
+        this.bluemapConfig = bluemapConfig;
+        this.playerManager = playerManager;
+        this.factionLogic = factionLogic;
     }
 
     public void activate()
@@ -63,11 +67,6 @@ public class BlueMapService
 
             restartBluemapUpdateTask();
         });
-    }
-
-    public EagleFactions getPlugin()
-    {
-        return plugin;
     }
 
     public BlueMapAPI getBlueMapAPI()
@@ -86,7 +85,10 @@ public class BlueMapService
         {
             this.bluemapUpdateTask.cancel();
         }
-        this.bluemapUpdateTask = EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(new BlueMapUpdateTask(this), 0, TimeUnit.MINUTES, 1, TimeUnit.MINUTES);
+        this.bluemapUpdateTask = EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(
+                new BlueMapUpdateTask(this, this.factionLogic),
+                0, TimeUnit.MINUTES,
+                1, TimeUnit.MINUTES);
     }
 
     public void reload()
@@ -197,8 +199,6 @@ public class BlueMapService
     public String prepareMarkerDetailsForFaction(final Faction faction)
     {
         // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
-        UserManager userStorage = Sponge.server().userManager();
-
         StringBuilder description = new StringBuilder();
 
         String factionName = faction.getName();
@@ -214,18 +214,17 @@ public class BlueMapService
                     .append("</br>\n");
         }
 
-        if (this.bluemapConfig.showBluemapFactionLeader()) {
-            try
+        if (this.bluemapConfig.showBluemapFactionLeader())
+        {
+            ServerPlayer serverPlayer = faction.getLeader()
+                    .map(FactionMember::getUniqueId)
+                    .flatMap(playerManager::getPlayer)
+                    .orElse(null);
+
+            if (serverPlayer != null)
             {
-                if (userStorage.load(faction.getLeader().getUniqueId()).get().isPresent()) {
-                    description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
-                            .replace("%leader%",
-                                    userStorage.load(faction.getLeader().getUniqueId()).get().get().name()));
-                }
-            }
-            catch (InterruptedException | ExecutionException e)
-            {
-                throw new RuntimeException(e);
+                description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
+                        .replace("%leader%", serverPlayer.name()));
             }
         }
 

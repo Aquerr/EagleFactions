@@ -1,18 +1,11 @@
 package io.github.aquerr.eaglefactions.integrations.dynmap.util;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
-import io.github.aquerr.eaglefactions.api.entities.Faction;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.user.UserManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Util class for the Dynmap Integration. Contains some various functions just
@@ -24,73 +17,6 @@ import java.util.concurrent.ExecutionException;
  */
 
 public class DynmapUtils {
-
-    private static DynmapConfig dynmapConfig = EagleFactionsPlugin.getPlugin().getConfiguration().getDynmapConfig();
-
-    private static PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
-
-    public static String getFactionInfoWindow(final Faction faction) throws ExecutionException, InterruptedException
-    {
-        // TODO: fix missing line breaks. Sometimes they are missing. I don't know why.
-        UserManager userStorage = Sponge.server().userManager();
-
-        StringBuilder description = new StringBuilder();
-
-        String factionName = faction.getName();
-        String factionDesc = faction.getDescription();
-
-        description.append("<div class=\"infowindow\">\n")
-                .append("<span style=\"font-weight: bold; font-size: 150%;\">%name%</span></br>\n".replace("%name%", factionName))
-                .append("<span style=\"font-style: italic; font-size: 110%;\">%description%</span></br>\n".replace("%description%", factionDesc.length() > 0 ? factionDesc : "No description"));
-
-
-        if (plainTextComponentSerializer.serialize(faction.getTag()).length() > 0) {
-            description.append("<span style=\"font-weight: bold;\">Tag:</span> %tag%</br>\n".replace("%tag%", plainTextComponentSerializer.serialize(faction.getTag())))
-                    .append("</br>\n");
-        }
-
-        if (dynmapConfig.showDynmapFactionLeader()) {
-            if (userStorage.load(faction.getLeader().getUniqueId()).get().isPresent()) {
-                description.append("<span style=\"font-weight: bold;\">Leader:</span> %leader%</br>\n"
-                        .replace("%leader%",
-                                userStorage.load(faction.getLeader().getUniqueId()).get().get().name()));
-            }
-        }
-
-        if (dynmapConfig.showDynmapMemberInfo()) {
-            int memberCount = faction.getMembers().size();
-            description.append("<span style=\"font-weight: bold;\">Total members:</span> %players%</br>\n"
-                    .replace("%players%",
-                            String.valueOf(memberCount)));
-        }
-
-        description.append("</br>\n</div>");
-
-        return description.toString();
-    }
-
-    public static int getAreaColor(final Faction faction) {
-
-        int areaColor;
-
-        if(EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig().canColorTags())
-        {
-            areaColor = Integer.parseInt(faction.getTag().color().asHexString());
-        }
-        else
-        {
-            areaColor = dynmapConfig.getDynmapFactionColor();
-        }
-
-        if (faction.isSafeZone()) {
-            areaColor = dynmapConfig.getDynmapSafezoneColor();
-        } else if (faction.isWarZone()) {
-            areaColor = dynmapConfig.getDynmapWarzoneColor();
-        }
-
-        return areaColor;
-    }
-
 
     /**
      * WARNING: all code below is taken from Dynmap-Factions

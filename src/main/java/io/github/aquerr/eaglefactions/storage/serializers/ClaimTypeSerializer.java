@@ -17,7 +17,7 @@ public class ClaimTypeSerializer implements TypeSerializer<Claim>
     {
         Set<UUID> owners;
         boolean isAccessibleByFaction;
-        UUID worldUniqueId = node.node("worldUUID").get(EFTypeTokens.UUID_TOKEN, new UUID(0, 0));
+        UUID worldUniqueId = node.node("worldUUID").get(EFTypeTokens.UUID_TOKEN);
         Vector3i chunkPosition = node.node("chunkPosition").get(EFTypeTokens.VECTOR_3I_TOKEN, Vector3i.ZERO);
         isAccessibleByFaction = node.node("accessibleByFaction").getBoolean(true);
         owners = new HashSet<>(node.node("owners").getList(EFTypeTokens.UUID_TOKEN, Collections.emptyList()));

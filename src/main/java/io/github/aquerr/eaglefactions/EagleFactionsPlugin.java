@@ -82,8 +82,8 @@ import io.github.aquerr.eaglefactions.commands.rank.DeleteRankCommand;
 import io.github.aquerr.eaglefactions.commands.rank.ListRanksCommand;
 import io.github.aquerr.eaglefactions.commands.rank.RankInfoCommand;
 import io.github.aquerr.eaglefactions.commands.rank.RankListPermissionsCommand;
-import io.github.aquerr.eaglefactions.commands.rank.SetDefaultRankCommand;
 import io.github.aquerr.eaglefactions.commands.rank.SetLeaderCommand;
+import io.github.aquerr.eaglefactions.commands.rank.SetRankDisplayInChatCommand;
 import io.github.aquerr.eaglefactions.commands.rank.SetRankDisplayNameCommand;
 import io.github.aquerr.eaglefactions.commands.rank.SetRankPermissionCommand;
 import io.github.aquerr.eaglefactions.commands.rank.SetRankPositionCommand;
@@ -347,9 +347,9 @@ public class EagleFactionsPlugin implements EagleFactions
         // SafeZone and WarZone factions must always exist!
         if (this.factionLogic.getFactionByName(EagleFactionsPlugin.WAR_ZONE_NAME) == null)
         {
-            final Faction warzone = FactionImpl.builder(EagleFactionsPlugin.WAR_ZONE_NAME, text("WZ"), FactionLogicImpl.DUMMY_UUID)
+            final Faction warzone = FactionImpl.builder(EagleFactionsPlugin.WAR_ZONE_NAME, text("WZ"))
                     .createdDate(Instant.now())
-                    .members(Set.of(new FactionMemberImpl(FactionLogicImpl.DUMMY_UUID, Set.of())))
+                    .ranks(this.configuration.getFactionsConfig().getDefaultRanks())
                     .protectionFlags(new HashSet<>(asList(
                     new ProtectionFlagImpl(ProtectionFlagType.PVP, true),
                     new ProtectionFlagImpl(ProtectionFlagType.FIRE_SPREAD, true),
@@ -363,9 +363,9 @@ public class EagleFactionsPlugin implements EagleFactions
         }
         if (this.factionLogic.getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME) == null)
         {
-            final Faction safezone = FactionImpl.builder(EagleFactionsPlugin.SAFE_ZONE_NAME, text("SZ"), FactionLogicImpl.DUMMY_UUID)
+            final Faction safezone = FactionImpl.builder(EagleFactionsPlugin.SAFE_ZONE_NAME, text("SZ"))
                     .createdDate(Instant.now())
-                    .members(Set.of(new FactionMemberImpl(FactionLogicImpl.DUMMY_UUID, Set.of())))
+                    .ranks(this.configuration.getFactionsConfig().getDefaultRanks())
                     .protectionFlags(new HashSet<>(asList(
                             new ProtectionFlagImpl(ProtectionFlagType.PVP, false),
                             new ProtectionFlagImpl(ProtectionFlagType.FIRE_SPREAD, false),
@@ -556,9 +556,9 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Override
-    public Faction.Builder getBuilderForFaction(String name, TextComponent tag, UUID leader)
+    public Faction.Builder getBuilderForFaction(String name, TextComponent tag)
     {
-        return new FactionImpl.BuilderImpl(name, tag, leader);
+        return new FactionImpl.BuilderImpl(name, tag);
     }
 
     @Override
@@ -720,6 +720,11 @@ public class EagleFactionsPlugin implements EagleFactions
                 new SetRankPositionCommand(this),
                 Parameter.integerNumber().key("ladder_position").build());
 
+        Command.Parameterized setRankDisplayInChat = prepareCommand("command.rank.display-in-chat.desc",
+                PluginPermissions.SET_RANK_DISPLAY_IN_CHAT_COMMAND,
+                new SetRankDisplayInChatCommand(this),
+                CommonParameters.BOOLEAN);
+
         registerCommand(singletonList("rank"), "command.rank.desc",
                 PluginPermissions.RANK_COMMANDS,
                 new RankInfoCommand(this),
@@ -728,7 +733,8 @@ public class EagleFactionsPlugin implements EagleFactions
                         Parameter.subcommand(rankSetPermissionCommand, "set_permission"),
                         Parameter.subcommand(rankSetDisplayName, "set_display_name"),
                         Parameter.subcommand(rankListPermissionsCommand, "list_permissions"),
-                        Parameter.subcommand(setRankPositionCommand, "set_ladder_position")
+                        Parameter.subcommand(setRankPositionCommand, "set_ladder_position"),
+                        Parameter.subcommand(setRankDisplayInChat, "set_display_in_chat")
                 ))).optional().build());
 
         registerCommand(singletonList("list_ranks"), "command.list-ranks.desc", PluginPermissions.LIST_RANKS_COMMAND, new ListRanksCommand(this),
@@ -739,8 +745,6 @@ public class EagleFactionsPlugin implements EagleFactions
         registerCommand(singletonList("assign_rank"), "command.assign-rank.desc", PluginPermissions.ASSIGN_RANK_COMMAND, new AssignRankCommand(this),
                 EagleFactionsCommandParameters.factionPlayer(), EagleFactionsCommandParameters.factionRank());
         registerCommand(singletonList("delete_rank"), "command.delete-rank.desc", PluginPermissions.DELETE_RANK, new DeleteRankCommand(this),
-                EagleFactionsCommandParameters.factionRank());
-        registerCommand(singletonList("set_default_rank"), "command.set-default-rank.desc", PluginPermissions.SET_DEFAULT_RANK, new SetDefaultRankCommand(this),
                 EagleFactionsCommandParameters.factionRank());
 
         registerCommand(asList("claims", "list_claims"), "command.list-claims.desc", PluginPermissions.CLAIMS_LIST_COMMAND, new ClaimsListCommand(this),

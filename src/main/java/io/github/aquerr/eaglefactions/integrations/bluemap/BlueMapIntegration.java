@@ -35,7 +35,10 @@ public class BlueMapIntegration implements Integration
         {
             try
             {
-                this.bluemapService = new BlueMapService(plugin);
+                this.bluemapService = new BlueMapService(
+                        plugin.getConfiguration().getBluemapConfig(),
+                        plugin.getPlayerManager(),
+                        plugin.getFactionLogic());
                 this.bluemapService.activate();
                 plugin.printInfo(getName() + " is active!");
                 this.isActivated = true;

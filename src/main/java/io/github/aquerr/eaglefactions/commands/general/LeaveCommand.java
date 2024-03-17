@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.commands.general;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -11,6 +12,8 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
+import java.util.Optional;
 
 public class LeaveCommand extends AbstractCommand
 {
@@ -27,7 +30,9 @@ public class LeaveCommand extends AbstractCommand
     {
         final ServerPlayer player = requirePlayerSource(context);
         final Faction faction = requirePlayerFaction(player);
-        if (faction.getLeader().getUniqueId().equals(player.uniqueId()))
+        if (player.uniqueId().equals(faction.getLeader()
+                .map(FactionMember::getUniqueId)
+                .orElse(null)))
         {
             if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
                 return leaveFaction(player, faction, true);

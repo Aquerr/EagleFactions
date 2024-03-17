@@ -45,7 +45,7 @@ public class AssignRankCommand extends AbstractCommand
         Rank requestedRank = context.requireOne(EagleFactionsCommandParameters.factionRank());
 
         boolean hasAdminMode = playerManager.hasAdminMode(player.user());
-        if (!hasAdminMode && !permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.MANAGE_RANKS))
+        if (!hasAdminMode && !permsManager.hasPermission(player.uniqueId(), faction, FactionPermission.ASSIGN_RANKS))
         {
             throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_DONT_HAVE_ACCESS_TO_DO_THIS);
         }
@@ -64,7 +64,8 @@ public class AssignRankCommand extends AbstractCommand
 
         try
         {
-            this.rankManager.assignRank(player, faction, targetPlayer, requestedRank);
+            this.rankManager.assignRank(faction, targetPlayer, requestedRank);
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.assign-rank.success"));
         }
         catch (Exception exception)
         {

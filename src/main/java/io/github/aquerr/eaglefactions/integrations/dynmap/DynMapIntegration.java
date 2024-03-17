@@ -35,7 +35,7 @@ public class DynMapIntegration implements Integration
         {
             try
             {
-                this.dynmapService = new DynmapService(plugin);
+                this.dynmapService = new DynmapService(plugin.getConfiguration().getDynmapConfig(), plugin.getPlayerManager());
                 this.dynmapService.activate();
                 plugin.printInfo(getName() + " is active!");
                 this.isActivated = true;

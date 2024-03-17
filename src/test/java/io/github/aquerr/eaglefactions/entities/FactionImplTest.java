@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FactionImplTest
 {
@@ -18,7 +18,8 @@ class FactionImplTest
     @BeforeEach
     void prepareFactionObject()
     {
-        faction = FactionImpl.builder("Test", text("TE", BLUE), UUID.randomUUID())
+        faction = FactionImpl.builder("Test", text("TE", BLUE))
+                .leader(UUID.randomUUID())
                 .build();
     }
 
@@ -57,14 +58,5 @@ class FactionImplTest
         //when
         //then
         assertThrows(IllegalStateException.class, () -> faction.toBuilder().tag(null).build());
-    }
-
-    @Test
-    void buildingAFactionWithoutLeaderShouldThrowException()
-    {
-        //given
-        //when
-        //then
-        assertThrows(IllegalStateException.class, () -> faction.toBuilder().leader(null).build());
     }
 }

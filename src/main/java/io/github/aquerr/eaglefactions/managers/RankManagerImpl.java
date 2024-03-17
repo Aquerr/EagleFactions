@@ -6,6 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.entities.RelationType;
+import io.github.aquerr.eaglefactions.api.exception.ActionNotAllowedException;
 import io.github.aquerr.eaglefactions.api.exception.PlayerNotInFactionException;
 import io.github.aquerr.eaglefactions.api.exception.RankAlreadyExistsException;
 import io.github.aquerr.eaglefactions.api.exception.RankLadderPositionOutOfRange;
@@ -16,11 +17,11 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.RankImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -35,6 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class RankManagerImpl implements RankManager
 {
+    public static final String DEFAULT_RANK_NAME = "default";
+    public static final String LEADER_RANK_NAME = "leader";
+
     private final StorageManager storageManager;
 
     public RankManagerImpl(final StorageManager storageManager)
@@ -46,14 +50,16 @@ public class RankManagerImpl implements RankManager
     {
         return List.of(
                 RankImpl.builder()
-                        .name("leader")
+                        .name(LEADER_RANK_NAME)
                         .displayName("&6Leader")
+                        .displayInChat(true)
                         .permissions(Set.of(FactionPermission.values()))
-                        .ladderPosition(4)
+                        .ladderPosition(1000)
                         .build(),
                 RankImpl.builder()
                         .name("officer")
                         .displayName("&6Officer")
+                        .displayInChat(true)
                         .permissions(Set.of(
                                 FactionPermission.INTERACT,
                                 FactionPermission.BLOCK_PLACE,
@@ -61,31 +67,28 @@ public class RankManagerImpl implements RankManager
                                 FactionPermission.TERRITORY_CLAIM,
                                 FactionPermission.ATTACK,
                                 FactionPermission.INVITE_PLAYERS,
-                                FactionPermission.VIEW_FACTION_CHEST,
-                                FactionPermission.INTERNAL_CLAIM_BYPASS_ACCESS,
                                 FactionPermission.KICK_MEMBERS,
-                                FactionPermission.MANAGE_RANKS,
-                                FactionPermission.MANAGE_RELATIONS,
-                                FactionPermission.MANAGE_DESCRIPTION,
+                                FactionPermission.VIEW_FACTION_CHEST,
+                                FactionPermission.ASSIGN_RANKS,
                                 FactionPermission.MANAGE_FACTION_HOME,
-                                FactionPermission.MANAGE_IS_PUBLIC,
-                                FactionPermission.MANAGE_INTERNAL_CLAIMS,
                                 FactionPermission.MANAGE_MOTD,
-                                FactionPermission.MANAGE_TAG_COLOR,
-                                FactionPermission.MANAGE_TAG_NAME)
+                                FactionPermission.MANAGE_DESCRIPTION,
+                                FactionPermission.MANAGE_RELATIONS,
+                                FactionPermission.MANAGE_INTERNAL_CLAIMS)
                         )
-                        .ladderPosition(3)
+                        .ladderPosition(75)
                         .build(),
                 RankImpl.builder()
                         .name("member")
                         .displayName("&6Member")
+                        .displayInChat(false)
                         .permissions(Set.of(
                                 FactionPermission.INTERACT,
                                 FactionPermission.BLOCK_PLACE,
                                 FactionPermission.BLOCK_DESTROY,
                                 FactionPermission.VIEW_FACTION_CHEST)
                         )
-                        .ladderPosition(2)
+                        .ladderPosition(50)
                         .build(),
                 buildDefaultRecruitRank()
         );
@@ -94,14 +97,15 @@ public class RankManagerImpl implements RankManager
     public static Rank buildDefaultRecruitRank()
     {
         return RankImpl.builder()
-                .name("recruit")
+                .name(DEFAULT_RANK_NAME)
                 .displayName("&6Recruit")
+                .displayInChat(false)
                 .permissions(Set.of(
                         FactionPermission.INTERACT,
                         FactionPermission.BLOCK_PLACE,
                         FactionPermission.BLOCK_DESTROY
                 ))
-                .ladderPosition(1)
+                .ladderPosition(-1000)
                 .build();
     }
 
@@ -164,25 +168,38 @@ public class RankManagerImpl implements RankManager
 
         final Set<FactionMember> members = new HashSet<>(faction.getMembers());
 
-        UUID newLeaderUUID;
+        UUID oldLeaderUUID = faction.getLeader().map(FactionMember::getUniqueId).orElse(null);
+        UUID newLeaderUUID = targetPlayer == null ? null : targetPlayer.getUniqueId();
 
-        if (targetPlayer == null)
+        if (oldLeaderUUID != null)
         {
-            newLeaderUUID = new UUID(0, 0);
-        }
-        else
-        {
-            newLeaderUUID = targetPlayer.getUniqueId();
+            Set<String> oldLeaderRanks = members.stream()
+                    .filter(member -> member.getUniqueId().equals(oldLeaderUUID))
+                    .findFirst()
+                    .map(FactionMember::getRankNames)
+                    .orElse(Collections.emptySet());
+            Set<String> newRanks = new HashSet<>(oldLeaderRanks);
+            newRanks.remove(RankManagerImpl.LEADER_RANK_NAME);
+            if (newRanks.isEmpty())
+                newRanks.add(DEFAULT_RANK_NAME);
+
+            members.removeIf(member -> member.getUniqueId().equals(oldLeaderUUID));
+            members.add(new FactionMemberImpl(oldLeaderUUID, newRanks));
         }
 
-//        try
-//        {
-//            demotePlayer(null, targetPlayer);
-//        }
-//        catch (PlayerNotInFactionException e)
-//        {
-//            throw new RuntimeException(e);
-//        }
+        if (newLeaderUUID != null)
+        {
+            Set<String> newLeaderRanks = members.stream()
+                    .filter(member -> member.getUniqueId().equals(newLeaderUUID))
+                    .findFirst()
+                    .map(FactionMember::getRankNames)
+                    .orElse(Collections.emptySet());
+            Set<String> newRanks = new HashSet<>(newLeaderRanks);
+            newRanks.add(LEADER_RANK_NAME);
+
+            members.removeIf(member -> member.getUniqueId().equals(newLeaderUUID));
+            members.add(new FactionMemberImpl(newLeaderUUID, newRanks));
+        }
 
         final Faction updatedFaction = faction.toBuilder()
                 .leader(newLeaderUUID)
@@ -195,7 +212,7 @@ public class RankManagerImpl implements RankManager
     }
 
     @Override
-    public void assignRank(ServerPlayer player, Faction faction, FactionPlayer targetPlayer, Rank rank) throws PlayerNotInFactionException, RankNotExistsException
+    public void assignRank(Faction faction, FactionPlayer targetPlayer, Rank rank) throws PlayerNotInFactionException, RankNotExistsException
     {
         // If rank does not exist in faction, throw exception
         if (faction.getRanks().stream().noneMatch(rank1 -> rank1.getName().equalsIgnoreCase(rank.getName())))
@@ -220,7 +237,7 @@ public class RankManagerImpl implements RankManager
             throw new RankAlreadyExistsException();
         }
 
-        if (ladderPosition > 100 || ladderPosition < -100)
+        if (ladderPosition > 1000 || ladderPosition < -1000)
         {
             throw new RankLadderPositionOutOfRange();
         }
@@ -240,8 +257,14 @@ public class RankManagerImpl implements RankManager
     }
 
     @Override
-    public void deleteRank(Faction faction, Rank rank) throws RankNotExistsException
+    public void deleteRank(Faction faction, Rank rank) throws RankNotExistsException, ActionNotAllowedException
     {
+        if (rank.getName().equalsIgnoreCase(RankManagerImpl.DEFAULT_RANK_NAME)
+                || rank.getName().equalsIgnoreCase(RankManagerImpl.LEADER_RANK_NAME))
+        {
+            throw new ActionNotAllowedException();
+        }
+
         if (faction.getRanks().stream().noneMatch(factionRank -> factionRank.getName().equalsIgnoreCase(rank.getName())))
         {
             throw new RankNotExistsException();
@@ -256,8 +279,11 @@ public class RankManagerImpl implements RankManager
         {
             if (factionMember.getRankNames().contains(rank.getName()))
             {
-                Set<String> updatedRankNames = factionMember.getRankNames();
+                Set<String> updatedRankNames = new HashSet<>(factionMember.getRankNames());
                 updatedRankNames.remove(rank.getName());
+
+                if (updatedRankNames.isEmpty())
+                    updatedRankNames.add(RankManagerImpl.DEFAULT_RANK_NAME);
 
                 updatedFactionMembers.removeIf(member -> member.getUniqueId().equals(factionMember.getUniqueId()));
 
@@ -327,14 +353,17 @@ public class RankManagerImpl implements RankManager
     }
 
     @Override
-    public void setRankPosition(Faction faction, Rank rankToUpdate, int ladderPosition) throws RankLadderPositionOutOfRange, RankNotExistsException
+    public void setRankPosition(Faction faction, Rank rankToUpdate, int ladderPosition) throws RankLadderPositionOutOfRange, RankNotExistsException, ActionNotAllowedException
     {
+        if (isDefaultOrLeaderRank(rankToUpdate.getName()))
+            throw new ActionNotAllowedException("Default or Leader ranks position cannot be changed!");
+
         if (faction.getRanks().stream().noneMatch(factionRank -> factionRank.getName().equalsIgnoreCase(rankToUpdate.getName())))
         {
             throw new RankNotExistsException();
         }
 
-        if (ladderPosition > 100 || ladderPosition < -100)
+        if (ladderPosition > 1000 || ladderPosition < -1000)
         {
             throw new RankLadderPositionOutOfRange();
         }
@@ -345,21 +374,6 @@ public class RankManagerImpl implements RankManager
 
         final Faction updatedFaction = faction.toBuilder()
                 .ranks(reorderedRanks)
-                .build();
-
-        storageManager.saveFaction(updatedFaction);
-    }
-
-    @Override
-    public void setDefaultRank(Faction faction, Rank rank) throws RankNotExistsException
-    {
-        if (faction.getRanks().stream().noneMatch(factionRank -> factionRank.getName().equalsIgnoreCase(rank.getName())))
-        {
-            throw new RankNotExistsException();
-        }
-
-        final Faction updatedFaction = faction.toBuilder()
-                .defaultRankName(rank.getName())
                 .build();
 
         storageManager.saveFaction(updatedFaction);
@@ -389,7 +403,28 @@ public class RankManagerImpl implements RankManager
         storageManager.saveFaction(factionBuilder.build());
     }
 
-    private Rank updateRanksAndSaveFaction(List<Rank> oldRanks,
+    @Override
+    public void setRankDisplayInChat(Faction faction, Rank rank, boolean displayInChat) throws RankNotExistsException
+    {
+        if (faction.getRanks().stream().noneMatch(factionRank -> factionRank.getName().equalsIgnoreCase(rank.getName())))
+        {
+            throw new RankNotExistsException();
+        }
+
+        List<Rank> factionRanks = new LinkedList<>(faction.getRanks());
+        factionRanks.removeIf(factionRank -> factionRank.isSameRank(rank));
+        factionRanks.add(rank.toBuilder()
+                .displayInChat(displayInChat)
+                .build());
+
+        final Faction updatedFaction = faction.toBuilder()
+                .ranks(factionRanks)
+                .build();
+
+        storageManager.saveFaction(updatedFaction);
+    }
+
+    private Rank updateRanksAndSaveFaction(Collection<Rank> oldRanks,
                                            Rank newRank,
                                            Faction faction,
                                            FactionPlayer targetPlayer,
@@ -427,14 +462,14 @@ public class RankManagerImpl implements RankManager
         return newRank;
     }
 
-    public static Rank getHighestRank(List<Rank> ranks)
+    public static Rank getHighestRank(Collection<Rank> ranks)
     {
         return ranks.stream()
                 .max(Comparator.comparingInt(Rank::getLadderPosition))
                 .orElse(null);
     }
 
-    public static Rank getLowestRank(List<Rank> ranks)
+    public static Rank getLowestRank(Collection<Rank> ranks)
     {
         return ranks.stream()
                 .min(Comparator.comparingInt(Rank::getLadderPosition))
@@ -442,29 +477,26 @@ public class RankManagerImpl implements RankManager
     }
 
     public static List<Rank> getEditableRanks(Faction faction,
-                                              UUID promoterUUID,
+                                              UUID sourcePlayerUUID,
                                               boolean hasAdminMode)
     {
         if (hasAdminMode)
-            return faction.getRanks();
+            return faction.getRanks().stream()
+                    .filter(rank -> !rank.getName().equalsIgnoreCase(LEADER_RANK_NAME))
+                    .collect(Collectors.toList());
 
-        List<Rank> promoterRanks = faction.getPlayerRanks(promoterUUID);
+        Set<Rank> sourcePlayerRanks = faction.getPlayerRanks(sourcePlayerUUID);
 
-        if (promoterRanks == null || promoterRanks.isEmpty())
+        if (sourcePlayerRanks == null || sourcePlayerRanks.isEmpty())
             return Collections.emptyList();
 
-        int highestRankPosition = promoterRanks.stream()
+        int highestRankPosition = sourcePlayerRanks.stream()
                 .map(Rank::getLadderPosition)
                 .max(Integer::compareTo)
                 .orElse(0);
 
-        if (promoterUUID.equals(faction.getLeader().getUniqueId()))
-            return faction.getRanks().stream()
-                    .filter(rank -> rank.getLadderPosition() < highestRankPosition)
-                    .collect(Collectors.toList());
-
         return faction.getRanks().stream()
-                .filter(rank -> rank.getLadderPosition() < highestRankPosition - 1)
+                .filter(rank -> rank.getLadderPosition() < highestRankPosition)
                 .collect(Collectors.toList());
     }
 
@@ -517,5 +549,10 @@ public class RankManagerImpl implements RankManager
         resultList.add(rankToInsert);
 
         return resultList;
+    }
+
+    private boolean isDefaultOrLeaderRank(String rankName)
+    {
+        return DEFAULT_RANK_NAME.equalsIgnoreCase(rankName) || LEADER_RANK_NAME.equalsIgnoreCase(rankName);
     }
 }

@@ -20,7 +20,7 @@ public class FactionMemberTypeSerializer implements TypeSerializer<FactionMember
     @Override
     public FactionMember deserialize(Type type, ConfigurationNode node) throws SerializationException
     {
-        UUID uuid = node.node("uuid").get(EFTypeTokens.UUID_TOKEN, new UUID(0,0));
+        UUID uuid = node.node("uuid").get(EFTypeTokens.UUID_TOKEN, (UUID) null);
         Set<String> rankNames = new HashSet<>(node.node("ranks").getList(String.class, Collections.emptyList()));
         return new FactionMemberImpl(uuid, rankNames);
     }

@@ -12,6 +12,7 @@ import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.entities.RelationType;
 import io.github.aquerr.eaglefactions.managers.PermsManagerImpl;
+import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import net.kyori.adventure.text.TextComponent;
 
 import java.time.Instant;
@@ -52,10 +53,9 @@ public class FactionImpl implements Faction
     private final Map<RelationType, Set<FactionPermission>> relationPermissions;
 
     private final List<Rank> ranks;
-    private final String defaultRankName;
-    private FactionChest chest;
+    private final FactionChest chest;
 
-    private ProtectionFlags protectionFlags;
+    private final ProtectionFlags protectionFlags;
 
     public FactionImpl(final BuilderImpl builder)
     {
@@ -65,7 +65,7 @@ public class FactionImpl implements Faction
         this.messageOfTheDay = builder.messageOfTheDay;
         this.leader = builder.leader;
         this.members = builder.members.stream()
-                .collect(Collectors.toMap(FactionMember::getUniqueId, Function.identity()));
+                .collect(Collectors.toMap(FactionMember::getUniqueId, Function.identity(), (member, member2) -> member));
         this.claims = builder.claims;
         this.truces = builder.truces;
         this.alliances = builder.alliances;
@@ -76,7 +76,6 @@ public class FactionImpl implements Faction
         this.chest = builder.chest;
         this.isPublic = builder.isPublic;
         this.ranks = builder.ranks;
-        this.defaultRankName = builder.defaultRankName;
         this.relationPermissions = Map.of(
                 RelationType.ALLIANCE, builder.alliancePermissions,
                 RelationType.TRUCE, builder.trucePermissions
@@ -148,7 +147,16 @@ public class FactionImpl implements Faction
     public Rank getDefaultRank()
     {
         return this.getRanks().stream()
-                .filter(rank -> rank.getName().equals(this.defaultRankName))
+                .filter(rank -> rank.getName().equalsIgnoreCase(RankManagerImpl.DEFAULT_RANK_NAME))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public Rank getLeaderRank()
+    {
+        return this.getRanks().stream()
+                .filter(rank -> rank.getName().equalsIgnoreCase(RankManagerImpl.LEADER_RANK_NAME))
                 .findFirst()
                 .orElse(null);
     }
@@ -168,10 +176,10 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public FactionMember getLeader()
+    public Optional<FactionMember> getLeader()
     {
-        return Optional.ofNullable(this.members.get(this.leader))
-                .orElse(new FactionMemberImpl(this.leader, Set.of()));
+        return Optional.ofNullable(this.leader)
+                .map(this.members::get);
     }
 
     @Override
@@ -193,15 +201,27 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public List<Rank> getPlayerRanks(final UUID playerUUID)
+    public Set<Rank> getPlayerRanks(final UUID playerUUID)
     {
-        return getMembers().stream()
+        Set<Rank> ranks = getMembers().stream()
                 .filter(factionMember -> playerUUID.equals(factionMember.getUniqueId()))
                 .map(FactionMember::getRankNames)
                 .flatMap(Collection::stream)
                 .map(rankName -> getRank(rankName).orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull).collect(Collectors.toSet());
+
+        if (this.leader.equals(playerUUID))
+        {
+            ranks.add(getLeaderRank());
+        }
+
+        if (ranks.isEmpty())
+        {
+            // Player should always have at least one rank, because we need to take permissions from somewhere :)
+            ranks.add(getDefaultRank());
+        }
+
+        return ranks;
     }
 
     @Override
@@ -270,16 +290,15 @@ public class FactionImpl implements Faction
         factionBuilder.isPublic(this.isPublic);
         factionBuilder.protectionFlags(this.getProtectionFlags());
         factionBuilder.ranks(this.getRanks());
-        factionBuilder.defaultRankName(Optional.ofNullable(this.getDefaultRank()).map(Rank::getName).orElse(null));
         factionBuilder.alliancePermissions(this.getRelationPermissions(RelationType.ALLIANCE));
         factionBuilder.trucePermissions(this.getRelationPermissions(RelationType.TRUCE));
 
         return factionBuilder;
     }
 
-    public static Faction.Builder builder(final String name, final TextComponent tag, final UUID leader)
+    public static Faction.Builder builder(final String name, final TextComponent tag)
     {
-        return new BuilderImpl(name, tag, leader);
+        return new BuilderImpl(name, tag);
     }
 
     @Override
@@ -294,13 +313,13 @@ public class FactionImpl implements Faction
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FactionImpl faction = (FactionImpl) o;
-        return isPublic == faction.isPublic && Objects.equals(name, faction.name) && Objects.equals(tag, faction.tag) && Objects.equals(description, faction.description) && Objects.equals(messageOfTheDay, faction.messageOfTheDay) && Objects.equals(members, faction.members) && Objects.equals(truces, faction.truces) && Objects.equals(alliances, faction.alliances) && Objects.equals(enemies, faction.enemies) && Objects.equals(leader, faction.leader) && Objects.equals(claims, faction.claims) && Objects.equals(home, faction.home) && Objects.equals(lastOnline, faction.lastOnline) && Objects.equals(createdDate, faction.createdDate) && Objects.equals(relationPermissions, faction.relationPermissions) && Objects.equals(ranks, faction.ranks) && Objects.equals(defaultRankName, faction.defaultRankName) && Objects.equals(chest, faction.chest) && Objects.equals(protectionFlags, faction.protectionFlags);
+        return isPublic == faction.isPublic && Objects.equals(name, faction.name) && Objects.equals(tag, faction.tag) && Objects.equals(description, faction.description) && Objects.equals(messageOfTheDay, faction.messageOfTheDay) && Objects.equals(members, faction.members) && Objects.equals(truces, faction.truces) && Objects.equals(alliances, faction.alliances) && Objects.equals(enemies, faction.enemies) && Objects.equals(leader, faction.leader) && Objects.equals(claims, faction.claims) && Objects.equals(home, faction.home) && Objects.equals(lastOnline, faction.lastOnline) && Objects.equals(createdDate, faction.createdDate) && Objects.equals(relationPermissions, faction.relationPermissions) && Objects.equals(ranks, faction.ranks) && Objects.equals(chest, faction.chest) && Objects.equals(protectionFlags, faction.protectionFlags);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(name, tag, description, messageOfTheDay, members, truces, alliances, enemies, leader, claims, home, lastOnline, createdDate, isPublic, relationPermissions, ranks, defaultRankName, chest, protectionFlags);
+        return Objects.hash(name, tag, description, messageOfTheDay, members, truces, alliances, enemies, leader, claims, home, lastOnline, createdDate, isPublic, relationPermissions, ranks, chest, protectionFlags);
     }
 
     private Optional<Rank> getRankByName(String rankName)
@@ -308,6 +327,31 @@ public class FactionImpl implements Faction
         return this.ranks.stream()
                 .filter(rank -> rank.getName().equalsIgnoreCase(rankName))
                 .findFirst();
+    }
+
+    @Override
+    public String toString()
+    {
+        return "FactionImpl{" +
+                "name='" + name + '\'' +
+                ", tag=" + tag +
+                ", description='" + description + '\'' +
+                ", messageOfTheDay='" + messageOfTheDay + '\'' +
+                ", members=" + members +
+                ", truces=" + truces +
+                ", alliances=" + alliances +
+                ", enemies=" + enemies +
+                ", leader=" + leader +
+                ", claims=" + claims +
+                ", home=" + home +
+                ", lastOnline=" + lastOnline +
+                ", createdDate=" + createdDate +
+                ", isPublic=" + isPublic +
+                ", relationPermissions=" + relationPermissions +
+                ", ranks=" + ranks +
+                ", chest=" + chest +
+                ", protectionFlags=" + protectionFlags +
+                '}';
     }
 
     //Builder
@@ -327,7 +371,6 @@ public class FactionImpl implements Faction
         private Instant lastOnline;
         private Instant createdDate;
         private List<Rank> ranks;
-        private String defaultRankName;
         private Set<FactionPermission> alliancePermissions;
         private Set<FactionPermission> trucePermissions;
         private FactionChest chest;
@@ -345,19 +388,17 @@ public class FactionImpl implements Faction
             this.claims = new HashSet<>();
             this.protectionFlags = new HashSet<>();
             this.ranks = null;
-            this.defaultRankName = null;
             this.home = null;
             this.isPublic = false;
             this.alliancePermissions = null;
             this.trucePermissions = null;
         }
 
-        public BuilderImpl(final String name, final TextComponent tag, final UUID leader)
+        public BuilderImpl(final String name, final TextComponent tag)
         {
             this();
             this.name = name;
             this.tag = tag;
-            this.leader = leader;
             this.chest = new FactionChestImpl(this.name);
         }
 
@@ -388,6 +429,7 @@ public class FactionImpl implements Faction
         public Builder leader(final UUID leaderUUID)
         {
             this.leader = leaderUUID;
+            this.members.add(new FactionMemberImpl(leaderUUID, Set.of(RankManagerImpl.LEADER_RANK_NAME)));
             return this;
         }
 
@@ -447,13 +489,6 @@ public class FactionImpl implements Faction
         }
 
         @Override
-        public Builder defaultRankName(String defaultRankName)
-        {
-            this.defaultRankName = defaultRankName;
-            return this;
-        }
-
-        @Override
         public Builder alliancePermissions(Set<FactionPermission> permissions)
         {
             this.alliancePermissions = permissions;
@@ -487,8 +522,8 @@ public class FactionImpl implements Faction
 
         public Faction build()
         {
-            if(this.name == null || this.tag == null || this.leader == null)
-                throw new IllegalStateException("Couldn't build Faction object! Faction must have a name, a tag and a leader!");
+            if(this.name == null || this.tag == null)
+                throw new IllegalStateException("Couldn't build Faction object! Faction must have a name and a tag!");
 
             if(this.lastOnline == null)
                 this.lastOnline = Instant.now();

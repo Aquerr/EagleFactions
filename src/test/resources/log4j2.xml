@@ -7,10 +7,10 @@
     </Appenders>
     <Loggers>
         <!-- avoid duplicated logs with additivity=false -->
-        <Logger name="org.testcontainers" level="debug" additivity="false">
+        <Logger name="org.testcontainers" level="INFO" additivity="false">
             <AppenderRef ref="console"/>
         </Logger>
-        <Logger name="tc" level="DEBUG" additivity="false">
+        <Logger name="tc" level="INFO" additivity="false">
             <AppenderRef ref="console"/>
         </Logger>
         <Root level="INFO">
