@@ -1,4 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.spongepowered.gradle.plugin.config.PluginLoaders
 import org.spongepowered.plugin.metadata.model.PluginDependency
 import java.io.ByteArrayOutputStream
@@ -87,15 +86,20 @@ repositories {
 
 dependencies {
     api(project(":EagleFactionsAPI"))
+
+    // Databases
+    implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
     implementation("com.mysql:mysql-connector-j:8.3.0")
-    implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.h2database:h2:2.2.220")
-    compileOnly("org.xerial:sqlite-jdbc:3.45.0.0")
+    compileOnly("org.xerial:sqlite-jdbc:3.45.2.0") // Can't include it in JAR because of problematic NativeDB...
+
+    // Integrations
     compileOnly("us.dynmap:DynmapCoreAPI:3.6")
     compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.6.2")
     implementation("org.bstats:bstats-sponge:3.0.2")
 
+    // Tests
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:$spongeApiVersion") {
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
@@ -117,6 +121,9 @@ tasks {
     shadowJar {
         dependsOn(test)
 
+//        relocate("org.sqlite", "io.github.aquerr.eaglefactions.lib.db.sqlite") {
+//            exclude("org.sqlite.core.**")
+//        }
         relocate("org.h2", "io.github.aquerr.eaglefactions.lib.db.h2")
         relocate("org.mariadb.jdbc", "io.github.aquerr.eaglefactions.lib.db.mariadb")
         relocate("com.mysql", "io.github.aquerr.eaglefactions.lib.db.mysql")

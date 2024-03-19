@@ -60,7 +60,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean shouldShowAttackInBossBar = true;
 
 	private List<Rank> defaultRanks = new ArrayList<>();
-	private String defaultRankName = RankManagerImpl.buildDefaultRecruitRank().getName();
 
 	public FactionsConfigImpl(final Configuration configuration)
 	{
@@ -344,12 +343,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	public List<Rank> getDefaultRanks()
 	{
 		return this.defaultRanks;
-	}
-
-	@Override
-	public String getDefaultRankName()
-	{
-		return this.defaultRankName;
 	}
 
 	private HashMap<String, Integer> prepareItems(final List<String> itemsToPrepare)
