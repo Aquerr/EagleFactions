@@ -11,7 +11,6 @@ import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -59,15 +58,15 @@ public class SquareClaimCommand extends AbstractCommand
         {
             if(this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(world)) && isAdmin)
             {
-                return preformSquareClaim(player, faction, radius);
+                return performSquareClaim(player, faction, radius);
             }
             throw messageService.resolveExceptionWithMessage("error.command.claim.not-claimable-world");
         }
 
-        return preformSquareClaim(player, faction, radius);
+        return performSquareClaim(player, faction, radius);
     }
 
-    private CommandResult preformSquareClaim(final ServerPlayer player, final Faction playerFaction, final int radius)
+    private CommandResult performSquareClaim(final ServerPlayer player, final Faction playerFaction, final int radius)
     {
         final Vector3i playerChunk = player.location().chunkPosition();
         final ServerWorld world = player.world();

@@ -186,7 +186,7 @@ public class InvitationManagerImpl implements InvitationManager
             }
             else
             {
-                // Preform send operation
+                // Perform send operation
                 final AllyRequest invite = new AllyRequestImpl(sourceFaction, targetFaction);
                 EagleFactionsPlugin.RELATION_INVITES.add(invite);
 
@@ -255,7 +255,7 @@ public class InvitationManagerImpl implements InvitationManager
             }
             else
             {
-                // Preform send operation
+                // Perform send operation
                 final TruceRequest invite = new TruceRequestImpl(sourceFaction, targetFaction);
                 EagleFactionsPlugin.RELATION_INVITES.add(invite);
 

@@ -63,9 +63,9 @@ public class ClaimCommand extends AbstractCommand
             final Faction faction = optionalFaction.get();
             if(hasAdminMode)
             {
-                return preformAdminClaim(player, faction, chunk);
+                return performAdminClaim(player, faction, chunk);
             }
-            return preformClaimByFaction(player, faction, chunk);
+            return performClaimByFaction(player, faction, chunk);
         }
         else
         {
@@ -73,12 +73,12 @@ public class ClaimCommand extends AbstractCommand
                 throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY);
             final Faction faction = optionalPlayerFaction.get();
             if(hasAdminMode)
-                return preformAdminClaim(player, faction, chunk);
-            else return preformNormalClaim(player, faction, chunk);
+                return performAdminClaim(player, faction, chunk);
+            else return performNormalClaim(player, faction, chunk);
         }
     }
 
-    private CommandResult preformClaimByFaction(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
+    private CommandResult performClaimByFaction(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
@@ -90,10 +90,10 @@ public class ClaimCommand extends AbstractCommand
         if(!isClaimableWorld)
             throw messageService.resolveExceptionWithMessage(ERROR_NOT_CLAIMABLE_WORLD);
 
-        return preformNormalClaim(player, faction, chunk);
+        return performNormalClaim(player, faction, chunk);
     }
 
-    private CommandResult preformAdminClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
+    private CommandResult performAdminClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
         final boolean safeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(world));
@@ -113,7 +113,7 @@ public class ClaimCommand extends AbstractCommand
         return CommandResult.success();
     }
 
-    private CommandResult preformNormalClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
+    private CommandResult performNormalClaim(final ServerPlayer player, final Faction faction, final Vector3i chunk) throws CommandException
     {
         final ServerWorld world = player.world();
         final boolean isClaimableWorld = this.protectionConfig.getClaimableWorldNames().contains(getPlainWorldName(world));
