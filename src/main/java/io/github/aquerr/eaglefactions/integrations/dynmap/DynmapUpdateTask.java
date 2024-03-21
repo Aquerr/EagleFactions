@@ -73,16 +73,16 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
         for (Faction faction : EagleFactionsPlugin.getPlugin().getFactionLogic().getFactions().values())
         {
-            if (faction.getClaims().size() < 1 || DynmapService.drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
+            if (faction.getClaims().isEmpty() || DynmapService.drawnFactions.contains(faction)) continue; /* Faction does not have any claims or it's already drawn */
 
-            if (faction.getHome() != null)
+            if (faction.getHome().isPresent())
             { /* Let's draw faction home first */
-                ServerWorld factionHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().getWorldUUID())
+                ServerWorld factionHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().get().getWorldUUID())
                         .orElse(null);
 
                 if (factionHomeWorld != null)
                 {
-                    Vector3i blockPos = faction.getHome().getBlockPosition();
+                    Vector3i blockPos = faction.getHome().get().getBlockPosition();
 
                     Marker marker = DynmapService.markerSet.createMarker(null,
                             faction.getName() + " Home",
@@ -172,6 +172,6 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
     private boolean hasNewHome(final Faction drawnFaction, final Faction faction)
     {
-        return !Objects.equals(drawnFaction.getHome(), faction.getHome());
+        return !Objects.equals(drawnFaction.getHome().orElse(null), faction.getHome().orElse(null));
     }
 }

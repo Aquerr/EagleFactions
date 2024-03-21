@@ -85,13 +85,13 @@ public class ConfigurateHelper
             configNode.node("is-public").set(faction.isPublic());
             configNode.node("protection-flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags());
 
-            if(faction.getHome() == null)
+            if(faction.getHome().isEmpty())
             {
                 configNode.node("home").set(faction.getHome());
             }
             else
             {
-                configNode.node("home").set(faction.getHome().getWorldUUID().toString() + '|' + faction.getHome().getBlockPosition().toString());
+                configNode.node("home").set(faction.getHome().get().toString());
             }
             return true;
         }

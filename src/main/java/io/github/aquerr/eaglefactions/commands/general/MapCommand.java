@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
@@ -118,7 +119,6 @@ public class MapCommand extends AbstractCommand
             {
                 if (row == 0 && column == 0)
                 {
-                    //TODO: FACTION that player is standing at is not showed in the list.
                     textBuilder.append(playerLocationMark);
                     continue;
                 }
@@ -127,7 +127,7 @@ public class MapCommand extends AbstractCommand
                 final UUID uuid = world.uniqueId();
 
                 final Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(uuid, chunk);
-                if (optionalFaction != null && optionalFaction.isPresent())
+                if (optionalFaction.isPresent())
                 {
                     final Faction chunkFaction = optionalFaction.get();
                     if (optionalPlayerFaction.isPresent())
@@ -137,7 +137,6 @@ public class MapCommand extends AbstractCommand
                         if (chunkFaction.getName().equals(playerFaction.getName()))
                         {
                             textBuilder.append(factionMark.toBuilder().clickEvent(SpongeComponents.executeCallback((cause) -> claimByMap(player, chunk))).build());
-//                            playerFaction = optionalChunkFaction.get();
                         }
                         else if (!showPlayerFactionClaimsOnly && playerFaction.getAlliances().contains(chunkFaction.getName()))
                         {
@@ -285,7 +284,7 @@ public class MapCommand extends AbstractCommand
         final Claim claim = new Claim(player.world().uniqueId(), chunk);
         final boolean hasFactionsAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
 
-        if(!optionalPlayerFaction.isPresent())
+        if(optionalPlayerFaction.isEmpty())
         {
             player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY)));
             return;
@@ -308,16 +307,9 @@ public class MapCommand extends AbstractCommand
                 return;
 
             //Check if faction's home was set in this claim. If yes then remove it.
-            if (playerFaction.getHome() != null)
+            if (playerFaction.getHome().filter(home -> home.equals(new FactionHome(world.uniqueId(), chunk))).isPresent())
             {
-                if (world.uniqueId().equals(playerFaction.getHome().getWorldUUID()))
-                {
-                    final ServerLocation homeLocation = world.location(playerFaction.getHome().getBlockPosition());
-                    if (homeLocation.chunkPosition().toString().equals(player.serverLocation().chunkPosition().toString()))
-                    {
-                        this.factionLogic.setHome(playerFaction, null);
-                    }
-                }
+                this.factionLogic.setHome(playerFaction, null);
             }
             this.factionLogic.removeClaim(playerFaction, new Claim(world.uniqueId(), chunk));
             player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));

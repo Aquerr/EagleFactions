@@ -148,8 +148,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     .orElse(null);
 
             preparedStatement.setString(4, leaderUUID);
-            if (faction.getHome() != null)
-                preparedStatement.setString(5, faction.getHome().toString());
+            if (faction.getHome().isPresent())
+                preparedStatement.setString(5, faction.getHome().get().toString());
             else preparedStatement.setString(5, null);
             preparedStatement.setTimestamp(6, Timestamp.from(faction.getLastOnline()));
             preparedStatement.setString(7, faction.getDescription());

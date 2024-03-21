@@ -56,22 +56,22 @@ public class HomeCommand extends AbstractCommand
             if (player.hasPermission(PluginPermissions.HOME_COMMAND_ADMIN_TELEPORT_TO_OTHERS) || super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             {
                 final Faction faction = optionalFaction.get();
-                if (faction.getHome() == null)
+                if (faction.getHome().isEmpty())
                     throw messageService.resolveExceptionWithMessage("error.command.home.faction-does-not-have-set-up-its-home");
 
-                teleportHome(player, faction.getHome());
+                teleportHome(player, faction.getHome().get());
             }
             else
             {
                 final Optional<Faction> optionalPlayerFaction = getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
-                if (!optionalPlayerFaction.isPresent())
+                if (optionalPlayerFaction.isEmpty())
                     throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY);
 
                 final Faction faction = optionalFaction.get();
                 if (!optionalPlayerFaction.get().getName().equals(faction.getName()) && !optionalPlayerFaction.get().getAlliances().contains(faction.getName()))
                     throw messageService.resolveExceptionWithMessage("error.command.home.you-cant-teleport-to-this-faction-home-alliance-needed");
 
-                if (faction.getHome() == null)
+                if (faction.getHome().isEmpty())
                     throw messageService.resolveExceptionWithMessage("error.command.home.faction-does-not-have-set-up-its-home");
 
                 if (EagleFactionsPlugin.HOME_COOLDOWN_PLAYERS.containsKey(player.uniqueId()))
@@ -88,18 +88,18 @@ public class HomeCommand extends AbstractCommand
                 {
                     if (this.homeConfig.canHomeBetweenWorlds())
                     {
-                        teleportHome(player, faction.getHome());
+                        teleportHome(player, faction.getHome().get());
                     }
                     else
                     {
-                        if (player.world().uniqueId().equals(faction.getHome().getWorldUUID()))
+                        if (!player.world().uniqueId().equals(faction.getHome().get().getWorldUUID()))
                         {
-                            player.sendActionBar(messageService.resolveComponentWithMessage("command.home.stand-still", this.homeConfig.getHomeDelayTime()));
-                            teleportHome(player, faction.getHome());
+                            context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.home.faction-home-not-in-this-world")));
                         }
                         else
                         {
-                            context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.home.faction-home-not-in-this-world")));
+                            player.sendActionBar(messageService.resolveComponentWithMessage("command.home.stand-still", this.homeConfig.getHomeDelayTime()));
+                            teleportHome(player, faction.getHome().get());
                         }
                     }
                 }
@@ -109,17 +109,17 @@ public class HomeCommand extends AbstractCommand
         {
             final Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(player.uniqueId());
 
-            if (!optionalPlayerFaction.isPresent())
+            if (optionalPlayerFaction.isEmpty())
                 throw messageService.resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_IN_FACTION_IN_ORDER_TO_USE_THIS_COMMAND_MESSAGE_KEY);
 
             final Faction playerFaction = optionalPlayerFaction.get();
 
-            if (playerFaction.getHome() == null)
+            if (playerFaction.getHome().isEmpty())
                 throw messageService.resolveExceptionWithMessage("error.command.home.faction-does-not-have-set-up-its-home");
 
             if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
             {
-                teleportHome(player, playerFaction.getHome());
+                teleportHome(player, playerFaction.getHome().get());
                 return CommandResult.success();
             }
 
@@ -137,17 +137,17 @@ public class HomeCommand extends AbstractCommand
             {
                 if (this.homeConfig.canHomeBetweenWorlds())
                 {
-                    teleportHome(player, playerFaction.getHome());
+                    teleportHome(player, playerFaction.getHome().get());
                 }
                 else
                 {
-                    if (player.world().uniqueId().equals(playerFaction.getHome().getWorldUUID()))
+                    if (!player.world().uniqueId().equals(playerFaction.getHome().get().getWorldUUID()))
                     {
-                        teleportHome(player, playerFaction.getHome());
+                        context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.home.faction-home-not-in-this-world")));
                     }
                     else
                     {
-                        context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.home.faction-home-not-in-this-world")));
+                        teleportHome(player, playerFaction.getHome().get());
                     }
                 }
             }
@@ -307,7 +307,7 @@ public class HomeCommand extends AbstractCommand
         private void teleport(final ServerPlayer player, final FactionHome factionHome)
         {
             final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(factionHome.getWorldUUID());
-            if (!optionalWorld.isPresent())
+            if (optionalWorld.isEmpty())
             {
                 player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("command.home.missing-or-corrupted-hme")));
                 return;

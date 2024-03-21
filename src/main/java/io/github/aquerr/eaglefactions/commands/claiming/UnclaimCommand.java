@@ -4,6 +4,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.HomeConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -46,14 +47,12 @@ public class UnclaimCommand extends AbstractCommand
                 if (isCancelled)
                     return CommandResult.success();
 
-                if (!this.homeConfig.canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
+                if (!this.homeConfig.canPlaceHomeOutsideFactionClaim()
+                        && optionalChunkFaction.get().getHome()
+                        .filter(home -> home.equals(new FactionHome(world.uniqueId(), player.serverLocation().blockPosition())))
+                        .isPresent())
                 {
-                    if (world.uniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
-                    {
-                            final ServerLocation homeLocation = world.location(optionalChunkFaction.get().getHome().getBlockPosition());
-                            if(homeLocation.chunkPosition().toString().equals(player.serverLocation().chunkPosition().toString()))
-                                super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
-                    }
+                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
                 }
 
                 super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.uniqueId(), chunk));
@@ -86,14 +85,12 @@ public class UnclaimCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        if (!this.homeConfig.canPlaceHomeOutsideFactionClaim() && optionalChunkFaction.get().getHome() != null)
+        if (!this.homeConfig.canPlaceHomeOutsideFactionClaim()
+                && optionalChunkFaction.get().getHome()
+                .filter(home -> home.equals(new FactionHome(world.uniqueId(), world.location(home.getBlockPosition()).chunkPosition())))
+                .isPresent())
         {
-            if (world.uniqueId().equals(optionalChunkFaction.get().getHome().getWorldUUID()))
-            {
-                final ServerLocation homeLocation = world.location(optionalChunkFaction.get().getHome().getBlockPosition());
-                if(homeLocation.chunkPosition().equals(chunk))
-                    super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
-            }
+            super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
         }
 
         //We need to get faction again to see changes made after removing home.

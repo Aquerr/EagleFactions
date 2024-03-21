@@ -183,7 +183,7 @@ public class EntitySpawnListener extends AbstractListener
             if(faction == null)
                 return;
 
-            FactionHome factionHome = faction.getHome();
+            FactionHome factionHome = faction.getHome().orElse(null);
             if (factionHome == null)
             {
                 serverPlayer.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.home.could-not-spawn-at-faction-home-it-may-not-be-set")));

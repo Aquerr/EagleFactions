@@ -108,9 +108,9 @@ public class FactionImpl implements Faction
     }
 
     @Override
-    public FactionHome getHome()
+    public Optional<FactionHome> getHome()
     {
-        return this.home;
+        return Optional.ofNullable(this.home);
     }
 
     @Override

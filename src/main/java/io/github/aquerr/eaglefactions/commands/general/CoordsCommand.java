@@ -83,11 +83,11 @@ public class CoordsCommand extends AbstractCommand
             }
         }
 
-        if(faction.getHome() != null)
+        if(faction.getHome().isPresent())
         {
-            final Optional<ServerWorld> optionalHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().getWorldUUID());
+            final Optional<ServerWorld> optionalHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().get().getWorldUUID());
             final String worldNameAndPos = optionalHomeWorld.map(WorldUtil::getPlainWorldName)
-                    .orElse("Unknown World") + "|" + faction.getHome().getBlockPosition().toString();
+                    .orElse("Unknown World") + "|" + faction.getHome().get().getBlockPosition().toString();
             teamCoords.add(messageService.resolveComponentWithMessage("command.coords.faction-home-coords", worldNameAndPos));
         }
 

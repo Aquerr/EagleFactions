@@ -41,7 +41,7 @@ public class UnclaimAllCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        if(!this.homeConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome() != null)
+        if(!this.homeConfig.canPlaceHomeOutsideFactionClaim() && playerFaction.getHome().isPresent())
         {
             super.getPlugin().getFactionLogic().setHome(playerFaction, null);
         }
