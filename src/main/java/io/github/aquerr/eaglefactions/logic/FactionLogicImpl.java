@@ -14,10 +14,8 @@ import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimByItemsStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.ClaimContext;
 import io.github.aquerr.eaglefactions.api.managers.claim.ClaimStrategy;
-import io.github.aquerr.eaglefactions.api.managers.claim.DelayedClaimStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
 import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
@@ -29,7 +27,6 @@ import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagsImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import io.github.aquerr.eaglefactions.managers.claim.ClaimStrategyManager;
-import io.github.aquerr.eaglefactions.util.ItemUtil;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -61,35 +58,23 @@ public class FactionLogicImpl implements FactionLogic
     private static final String THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY = "error.general.there-is-no-faction-called-faction-name";
 
     private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
-    private ClaimStrategy claimStrategy = null;
+    private ClaimStrategy claimStrategy = new NoCostClaimStrategy(this);
     private final ClaimStrategyManager claimStrategyManager;
 
     private final StorageManager storageManager;
-    private final FactionsConfig factionsConfig;
     private final PlayerManager playerManager;
     private final MessageService messageService;
 
 
-    public FactionLogicImpl(final PlayerManager playerManager, final StorageManager storageManager, final FactionsConfig factionsConfig, final MessageService messageService)
+    public FactionLogicImpl(final PlayerManager playerManager,
+                            final StorageManager storageManager,
+                            final MessageService messageService,
+                            final ClaimStrategyManager claimStrategyManager)
     {
         this.storageManager = storageManager;
         this.playerManager = playerManager;
-        this.factionsConfig = factionsConfig;
         this.messageService = messageService;
-        this.claimStrategyManager = new ClaimStrategyManager(messageService);
-
-        determineClaimStrategy();
-    }
-
-    private void determineClaimStrategy()
-    {
-        if (this.factionsConfig.shouldClaimByItems())
-            claimStrategy = new ClaimByItemsStrategy(this, ItemUtil.convertToItemStackList(this.factionsConfig.getRequiredItemsToClaim()));
-        else
-            claimStrategy = new NoCostClaimStrategy(this);
-
-        if (this.factionsConfig.shouldDelayClaim())
-            claimStrategy = new DelayedClaimStrategy(claimStrategy, this.factionsConfig.getClaimDelay(), true);
+        this.claimStrategyManager = claimStrategyManager;
     }
 
     @Override

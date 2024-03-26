@@ -20,6 +20,10 @@ import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.managers.RankManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimByItemsStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.DelayedClaimStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.messaging.placeholder.PlaceholderService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -95,7 +99,6 @@ import io.github.aquerr.eaglefactions.commands.relation.SetRelationPermissionCom
 import io.github.aquerr.eaglefactions.commands.relation.TruceCommand;
 import io.github.aquerr.eaglefactions.config.ConfigurationImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
-import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
@@ -132,6 +135,7 @@ import io.github.aquerr.eaglefactions.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
+import io.github.aquerr.eaglefactions.managers.claim.ClaimStrategyManager;
 import io.github.aquerr.eaglefactions.managers.claim.provider.DefaultFactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.managers.claim.provider.FactionMaxClaimCountByPlayerPowerProvider;
 import io.github.aquerr.eaglefactions.managers.power.provider.DefaultFactionMaxPowerProvider;
@@ -144,6 +148,7 @@ import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
+import io.github.aquerr.eaglefactions.util.ItemUtil;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
@@ -185,7 +190,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -233,6 +237,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private StorageManager storageManager;
     private MessageService messageService;
     private IntegrationManager integrationManager;
+    private ClaimStrategyManager claimStrategyManager;
 
     private boolean isDisabled = false;
 
@@ -328,6 +333,8 @@ public class EagleFactionsPlugin implements EagleFactions
             // Reloads storage and cache.
             this.storageManager.reloadStorage();
 
+            determineClaimStrategy();
+
             initializeIntegrations();
 
             startFactionsRemover();
@@ -340,6 +347,21 @@ public class EagleFactionsPlugin implements EagleFactions
             exception.printStackTrace();
             disablePlugin();
         }
+    }
+
+    private void determineClaimStrategy()
+    {
+        ClaimStrategy claimStrategy = null;
+
+        if (this.configuration.getFactionsConfig().shouldClaimByItems())
+            claimStrategy = new ClaimByItemsStrategy(this.factionLogic, ItemUtil.convertToItemStackList(this.configuration.getFactionsConfig().getRequiredItemsToClaim()));
+        else
+            claimStrategy = new NoCostClaimStrategy(this.factionLogic);
+
+        if (this.configuration.getFactionsConfig().shouldDelayClaim())
+            claimStrategy = new DelayedClaimStrategy(claimStrategy, this.configuration.getFactionsConfig().getClaimDelay(), true);
+
+        this.factionLogic.setClaimStrategy(claimStrategy);
     }
 
     private void preCreateSafeZoneAndWarZone()
@@ -603,7 +625,8 @@ public class EagleFactionsPlugin implements EagleFactions
 
         this.permsManager = new PermsManagerImpl();
 
-        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.getConfiguration().getFactionsConfig(), this.messageService);
+        this.claimStrategyManager = new ClaimStrategyManager(messageService);
+        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.messageService, this.claimStrategyManager);
         this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
 
 
