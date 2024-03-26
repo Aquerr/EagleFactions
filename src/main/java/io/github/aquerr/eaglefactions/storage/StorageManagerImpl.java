@@ -25,10 +25,8 @@ import io.github.aquerr.eaglefactions.storage.sql.mysql.MySQLPlayerStorage;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteConnectionProvider;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqliteFactionStorage;
 import io.github.aquerr.eaglefactions.storage.sql.sqlite.SqlitePlayerStorage;
-import io.github.aquerr.eaglefactions.storage.task.DeleteFactionTask;
 import io.github.aquerr.eaglefactions.storage.task.IStorageTask;
-import io.github.aquerr.eaglefactions.storage.task.SavePlayerTask;
-import io.github.aquerr.eaglefactions.storage.task.UpdateFactionTask;
+import io.github.aquerr.eaglefactions.storage.task.StorageTaskFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
@@ -38,7 +36,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,11 +43,13 @@ import static java.lang.String.format;
 
 public class StorageManagerImpl implements StorageManager
 {
-    private final FactionStorage factionsStorage;
+    private final FactionStorage factionStorage;
     private final PlayerStorage playerStorage;
     private final BackupStorage backupStorage;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor(); //Only one thread.
+
+    private final StorageTaskFactory storageTaskFactory;
 
     public StorageManagerImpl(final EagleFactions plugin, final StorageConfig storageConfig, final Path configDir)
     {
@@ -69,21 +68,21 @@ public class StorageManagerImpl implements StorageManager
                 DatabaseProperties databaseProperties = prepareDatabaseProperties(storageConfig);
                 databaseProperties.setDatabaseFileDirectory(plugin.getConfigDir().resolve("data/h2"));
                 sqlConnectionProvider = new H2ConnectionProvider(databaseProperties);
-                factionsStorage = new H2FactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (H2ConnectionProvider) sqlConnectionProvider);
+                factionStorage = new H2FactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (H2ConnectionProvider) sqlConnectionProvider);
                 playerStorage = new H2PlayerStorage((H2ConnectionProvider) sqlConnectionProvider);
                 break;
             }
             case MYSQL:
             {
                 sqlConnectionProvider = new MySQLConnectionProvider(prepareDatabaseProperties(storageConfig));
-                factionsStorage = new MySQLFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MySQLConnectionProvider)sqlConnectionProvider);
+                factionStorage = new MySQLFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MySQLConnectionProvider)sqlConnectionProvider);
                 playerStorage = new MySQLPlayerStorage((MySQLConnectionProvider)sqlConnectionProvider);
                 break;
             }
             case MARIADB:
             {
                 sqlConnectionProvider = new MariaDbConnectionProvider(prepareDatabaseProperties(storageConfig));
-                factionsStorage = new MariaDbFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MariaDbConnectionProvider)sqlConnectionProvider);
+                factionStorage = new MariaDbFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (MariaDbConnectionProvider)sqlConnectionProvider);
                 playerStorage = new MariaDbPlayerStorage((MariaDbConnectionProvider)sqlConnectionProvider);
                 break;
             }
@@ -92,14 +91,14 @@ public class StorageManagerImpl implements StorageManager
                 DatabaseProperties databaseProperties = prepareDatabaseProperties(storageConfig);
                 databaseProperties.setDatabaseFileDirectory(plugin.getConfigDir().resolve("data/sqlite"));
                 sqlConnectionProvider = new SqliteConnectionProvider(databaseProperties);
-                factionsStorage = new SqliteFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (SqliteConnectionProvider) sqlConnectionProvider);
+                factionStorage = new SqliteFactionStorage(EagleFactionsPlugin.getPlugin().getLogger(), (SqliteConnectionProvider) sqlConnectionProvider);
                 playerStorage = new SqlitePlayerStorage((SqliteConnectionProvider)sqlConnectionProvider);
                 break;
             }
             case HOCON:
             default:
             {
-                factionsStorage = new HOCONFactionStorage(configDir);
+                factionStorage = new HOCONFactionStorage(configDir);
                 playerStorage = new HOCONPlayerStorage(configDir);
                 break;
             }
@@ -119,7 +118,8 @@ public class StorageManagerImpl implements StorageManager
 
         plugin.printInfo(storageType.getName().toUpperCase() + " has been initialized!");
 
-        this.backupStorage = new BackupStorage(factionsStorage, playerStorage, configDir);
+        this.backupStorage = new BackupStorage(factionStorage, playerStorage, configDir);
+        this.storageTaskFactory = new StorageTaskFactory(playerStorage, factionStorage);
     }
 
     private void queueStorageTask(IStorageTask task)
@@ -130,35 +130,14 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public void saveFaction(final Faction faction)
     {
-        queueStorageTask(new UpdateFactionTask(faction, () ->
-        {
-            try
-            {
-                this.factionsStorage.saveFaction(faction);
-            }
-            catch (Exception exception)
-            {
-                throw new CompletionException("Could not save/update faction: " + faction.getName(), exception);
-            }
-        }
-        ));
+        queueStorageTask(storageTaskFactory.saveFaction(faction));
         FactionsCache.saveFaction(faction);
     }
 
     @Override
     public boolean deleteFaction(final String factionName)
     {
-        queueStorageTask(new DeleteFactionTask(factionName, () ->
-        {
-            try
-            {
-                this.factionsStorage.deleteFaction(factionName);
-            }
-            catch (Exception exception)
-            {
-                throw new CompletionException("Could not delete faction: " + factionName, exception);
-            }
-        }));
+        queueStorageTask(storageTaskFactory.deleteFaction(factionName));
         FactionsCache.removeFaction(factionName);
         return true;
     }
@@ -172,7 +151,7 @@ public class StorageManagerImpl implements StorageManager
             if(factionCache != null)
                 return factionCache;
 
-            Faction faction = this.factionsStorage.getFaction(factionName);
+            Faction faction = this.factionStorage.getFaction(factionName);
             if (faction == null)
                 return null;
 
@@ -191,7 +170,7 @@ public class StorageManagerImpl implements StorageManager
 
     private void prepareFactionsCache()
     {
-        final Set<Faction> factionSet = this.factionsStorage.getFactions();
+        final Set<Faction> factionSet = this.factionStorage.getFactions();
         for (final Faction faction : factionSet)
         {
             FactionsCache.saveFaction(faction);
@@ -209,7 +188,7 @@ public class StorageManagerImpl implements StorageManager
             boolean factionExist = false;
             for (final Faction faction : factions)
             {
-                if (faction.containsPlayer(player.getUniqueId()) && !faction.getName().equalsIgnoreCase(player.getFactionName().orElse(null)))
+                if (faction.containsPlayer(player.getUniqueId()))
                 {
                     factionExist = true;
                     playerToSave = new FactionPlayerImpl(player.getName(), player.getUniqueId(), faction.getName(), player.getPower(), player.getMaxPower(), player.diedInWarZone());
@@ -230,7 +209,7 @@ public class StorageManagerImpl implements StorageManager
     public void reloadStorage()
     {
         FactionsCache.clear();
-        this.factionsStorage.load();
+        this.factionStorage.load();
 
         reloadCache();
     }
@@ -238,7 +217,7 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public boolean savePlayer(final FactionPlayer factionPlayer)
     {
-        queueStorageTask(new SavePlayerTask(factionPlayer, () -> this.playerStorage.savePlayer(factionPlayer)));
+        queueStorageTask(storageTaskFactory.savePlayer(factionPlayer));
         FactionsCache.savePlayer(factionPlayer);
         return true;
     }

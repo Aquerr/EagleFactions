@@ -144,7 +144,6 @@ public class ClaimCommand extends AbstractCommand
                 player,
                 faction,
                 this.messageService));
-        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)), player, faction, messageService));
         return CommandResult.success();
     }
 }

@@ -1,14 +1,18 @@
 package io.github.aquerr.eaglefactions.storage.task;
 
+import io.github.aquerr.eaglefactions.storage.FactionStorage;
+
+import java.util.concurrent.CompletionException;
+
 public class DeleteFactionTask implements IStorageTask
 {
+    private final FactionStorage factionStorage;
     private final String factionName;
-    private final Runnable runnable;
 
-    public DeleteFactionTask(String factionName, Runnable runnable)
+    public DeleteFactionTask(FactionStorage factionStorage, String factionName)
     {
+        this.factionStorage = factionStorage;
         this.factionName = factionName;
-        this.runnable = runnable;
     }
 
     public String getFactionName()
@@ -19,6 +23,13 @@ public class DeleteFactionTask implements IStorageTask
     @Override
     public void run()
     {
-        this.runnable.run();
+        try
+        {
+            this.factionStorage.deleteFaction(factionName);
+        }
+        catch (Exception exception)
+        {
+            throw new CompletionException("Could not delete faction: " + factionName, exception);
+        }
     }
 }

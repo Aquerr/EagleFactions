@@ -47,10 +47,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class ConfigurateHelper
 {
@@ -85,19 +86,12 @@ public class ConfigurateHelper
             configNode.node("is-public").set(faction.isPublic());
             configNode.node("protection-flags").set(EFTypeTokens.PROTECTION_FLAGS_SET_TYPE_TOKEN, faction.getProtectionFlags());
 
-            if(faction.getHome().isEmpty())
-            {
-                configNode.node("home").set(faction.getHome());
-            }
-            else
-            {
-                configNode.node("home").set(faction.getHome().get().toString());
-            }
+            configNode.node("home").set(faction.getHome().map(FactionHome::toString).orElse(null));
             return true;
         }
         catch(final Exception exception)
         {
-            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while putting faction '" + faction.getName() + "' in node.", exception);
+            LOGGER.error(format("%sError while putting faction '%s' in node.", PluginInfo.PLUGIN_PREFIX_PLAIN, faction.getName()), exception);
             return false;
         }
     }
@@ -141,7 +135,7 @@ public class ConfigurateHelper
         final TextComponent tag = LegacyComponentSerializer.legacyAmpersand().deserialize(configNode.node("tag").getString());
         final String description = configNode.node("description").getString();
         final String messageOfTheDay = configNode.node("motd").getString();
-        final UUID leader = configNode.node("leader").get(EFTypeTokens.UUID_TOKEN, (UUID) null);
+        final UUID leader = configNode.node("leader").get(EFTypeTokens.UUID_TOKEN);
         final FactionHome home = FactionHome.from(String.valueOf(configNode.node("home").getString("")));
         final Set<FactionMember> members = new HashSet<>(configNode.node("members").getList(EFTypeTokens.FACTION_MEMBER_TYPE_TOKEN, Collections.emptyList()));
         final Set<String> alliances = new HashSet<>(configNode.node("alliances").getList(TypeToken.get(String.class), Collections.emptyList())).stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
@@ -216,7 +210,7 @@ public class ConfigurateHelper
         }
         catch(IOException e)
         {
-            LOGGER.error(PluginInfo.PLUGIN_PREFIX_PLAIN + "Error while opening the file " + file.getName(), e);
+            LOGGER.error(format("%sError while opening the file %s", PluginInfo.PLUGIN_PREFIX_PLAIN, file.getName()), e);
             return null;
         }
     }

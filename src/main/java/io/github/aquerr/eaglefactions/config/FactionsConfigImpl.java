@@ -76,7 +76,7 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.maxTagLength = this.configuration.getInt(5, "tag", "max-length");
 		this.minTagLength = this.configuration.getInt(2, "tag", "min-length");
 
-		this.isPlayerLimit = this.configuration.getBoolean(false, "player-limit", "toggled");
+		this.isPlayerLimit = this.configuration.getBoolean(false, "player-limit", "enabled");
 		this.playerLimit = this.configuration.getInt(15, "player-limit", "limit");
 		this.attackTime = this.configuration.getInt(10, "attack-time");
 		this.percentageDamageReductionInOwnTerritory = this.configuration.getFloat(10.0f, "percentage-damage-reduction-in-own-territory");
@@ -86,14 +86,14 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.isAllianceFriendlyFire = this.configuration.getBoolean(false, "friendlyfire-alliance");
 
 		this.requireConnectedClaims = this.configuration.getBoolean(true, "connected-claims");
-		this.shouldDelayClaim = this.configuration.getBoolean(false, "delayed-claim", "toggled");
+		this.shouldDelayClaim = this.configuration.getBoolean(false, "delayed-claim", "enabled");
 		this.claimDelay = this.configuration.getInt(10, "delayed-claim", "claiming-time");
-		this.claimByItems = this.configuration.getBoolean(false, "claiming-by-items", "toggled");
+		this.claimByItems = this.configuration.getBoolean(false, "claiming-by-items", "enabled");
 		this.requiredItemsToClaim = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20", "minecraft:iron_ingot|4"), "claiming-by-items", "items"));
 
 		this.canUseFactionChest = this.configuration.getBoolean(true, "faction-chest");
 
-		this.factionCreationByItems = this.configuration.getBoolean(false, "creating-by-items", "toggled");
+		this.factionCreationByItems = this.configuration.getBoolean(false, "creating-by-items", "enabled");
 		this.requiredItemsToCreateFaction = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20"), "creating-by-items", "items"));
 
 		this.blockEnteringOfflineFactions = this.configuration.getBoolean(true, "block-entering-faction-while-offline");

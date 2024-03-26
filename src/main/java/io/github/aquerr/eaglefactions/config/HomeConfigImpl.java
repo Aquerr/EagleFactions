@@ -26,7 +26,7 @@ public class HomeConfigImpl implements HomeConfig
     {
         this.homeDelay = this.configuration.getInt(5, "home", "delay");
         this.homeCooldown = this.configuration.getInt(60, "home", "cooldown");
-        this.blockHomeAfterDeathInOwnFaction = this.configuration.getBoolean(false, "home","block-home-after-death-in-own-faction", "toggled");
+        this.blockHomeAfterDeathInOwnFaction = this.configuration.getBoolean(false, "home","block-home-after-death-in-own-faction", "enabled");
         this.homeBlockTimeAfterDeathInOwnFaction = this.configuration.getInt(60, "home", "block-home-after-death-in-own-faction", "block-time");
         this.canHomeBetweenWorlds = this.configuration.getBoolean(false, "home", "teleport-between-worlds");
         this.canPlaceHomeOutsideFactionClaim = this.configuration.getBoolean(false, "home", "can-place-outside-faction-claim");

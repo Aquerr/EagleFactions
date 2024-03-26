@@ -1,16 +1,19 @@
 package io.github.aquerr.eaglefactions.storage.task;
 
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.storage.FactionStorage;
+
+import java.util.concurrent.CompletionException;
 
 public class UpdateFactionTask implements IStorageTask
 {
+    private final FactionStorage factionStorage;
     private final Faction faction;
-    private final Runnable runnable;
 
-    public UpdateFactionTask(final Faction faction, final Runnable runnable)
+    public UpdateFactionTask(FactionStorage factionStorage, final Faction faction)
     {
+        this.factionStorage = factionStorage;
         this.faction = faction;
-        this.runnable = runnable;
     }
 
     public Faction getFaction()
@@ -21,6 +24,13 @@ public class UpdateFactionTask implements IStorageTask
     @Override
     public void run()
     {
-        this.runnable.run();
+        try
+        {
+            this.factionStorage.saveFaction(faction);
+        }
+        catch (Exception exception)
+        {
+            throw new CompletionException("Could not save/update faction: " + faction.getName(), exception);
+        }
     }
 }

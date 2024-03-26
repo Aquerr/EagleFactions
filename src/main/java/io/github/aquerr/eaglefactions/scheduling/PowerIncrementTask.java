@@ -35,7 +35,7 @@ public class PowerIncrementTask implements EagleFactionsConsumerTask<ScheduledTa
         if (!optionalFactionPlayer.isPresent())
             return;
 
-        final FactionPlayer factionPlayer=  optionalFactionPlayer.get();
+        final FactionPlayer factionPlayer = optionalFactionPlayer.get();
 
         if(factionPlayer.getPower() + this.powerConfig.getPowerIncrement() < factionPlayer.getMaxPower())
             this.powerManager.addPower(playerUUID, false);

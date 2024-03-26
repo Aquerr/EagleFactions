@@ -203,25 +203,26 @@ public class FactionImpl implements Faction
     @Override
     public Set<Rank> getPlayerRanks(final UUID playerUUID)
     {
-        Set<Rank> ranks = getMembers().stream()
+        Set<Rank> playerRanks = getMembers().stream()
                 .filter(factionMember -> playerUUID.equals(factionMember.getUniqueId()))
                 .map(FactionMember::getRankNames)
                 .flatMap(Collection::stream)
                 .map(rankName -> getRank(rankName).orElse(null))
-                .filter(Objects::nonNull).collect(Collectors.toSet());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        if (this.leader.equals(playerUUID))
+        if (Objects.equals(this.leader, playerUUID))
         {
-            ranks.add(getLeaderRank());
+            playerRanks.add(getLeaderRank());
         }
 
-        if (ranks.isEmpty())
+        if (playerRanks.isEmpty())
         {
             // Player should always have at least one rank, because we need to take permissions from somewhere :)
-            ranks.add(getDefaultRank());
+            playerRanks.add(getDefaultRank());
         }
 
-        return ranks;
+        return playerRanks;
     }
 
     @Override
@@ -265,7 +266,7 @@ public class FactionImpl implements Faction
     @Override
     public boolean containsPlayer(final UUID playerUUID)
     {
-        if (this.leader.equals(playerUUID))
+        if (Objects.equals(this.leader, playerUUID))
             return true;
         return this.members.containsKey(playerUUID);
     }
