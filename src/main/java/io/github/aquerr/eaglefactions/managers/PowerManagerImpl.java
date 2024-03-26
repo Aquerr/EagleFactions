@@ -9,7 +9,6 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionMaxPowerProvider;
 import io.github.aquerr.eaglefactions.api.managers.power.provider.FactionPowerProvider;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
-import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.PowerIncrementTask;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -170,7 +169,14 @@ public class PowerManagerImpl implements PowerManager
     public void startIncreasingPower(final UUID playerUUID)
     {
         final EagleFactionsScheduler eagleFactionsScheduler = EagleFactionsScheduler.getInstance();
-        eagleFactionsScheduler.scheduleWithDelayedInterval(new PowerIncrementTask(this.playerManager, this, this.powerConfig, playerUUID), 0, TimeUnit.SECONDS, 1, TimeUnit.MINUTES);
+        eagleFactionsScheduler.scheduleWithDelayedIntervalAsync(new PowerIncrementTask(
+                this.playerManager,
+                this,
+                this.powerConfig,
+                playerUUID),
+                1, TimeUnit.MINUTES,
+                1, TimeUnit.MINUTES,
+                PowerIncrementTask.TASK_NAME_GENERATOR.apply(playerUUID));
     }
 
     @Override

@@ -8,9 +8,12 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class PowerIncrementTask implements EagleFactionsConsumerTask<ScheduledTask>
 {
+    public static final Function<UUID, String> TASK_NAME_GENERATOR = (playerUUID -> "PowerIncrement" + playerUUID);
+
     private final PlayerManager playerManager;
     private final PowerManager powerManager;
     private final PowerConfig powerConfig;
