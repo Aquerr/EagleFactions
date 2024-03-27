@@ -125,7 +125,7 @@ public class PlayerMoveListener extends AbstractListener
             EventRunner.runFactionAreaEnterEventPost(event, player, optionalNewChunkFaction, optionalOldChunkFaction);
         }
 
-        if ("Wilderness".equals(newChunkFactionName))
+        if (EagleFactionsPlugin.WILDERNESS_NAME.equals(newChunkFactionName))
         {
             EagleFactionsScheduler.getInstance().scheduleWithDelayAsync(() ->
             {

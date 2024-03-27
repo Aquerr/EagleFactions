@@ -10,14 +10,13 @@ import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParamete
 import io.github.aquerr.eaglefactions.events.EventRunner;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class DisbandCommand extends AbstractCommand
 {
@@ -78,13 +77,19 @@ public class DisbandCommand extends AbstractCommand
 
     private void sendDisbandEventAndDisband(final Audience audience, final Faction faction, final boolean forceRemovedByAdmin)
     {
-        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(audience, faction, forceRemovedByAdmin, false);
+        final boolean isCancelled = EventRunner.runFactionDisbandEventPre(Optional.of(audience)
+                .filter(Player.class::isInstance)
+                .map(Player.class::cast)
+                .orElse(null), faction, forceRemovedByAdmin, false);
         if(!isCancelled)
         {
             super.getPlugin().getFactionLogic().disbandFaction(faction.getName());
             audience.sendMessage(messageService.resolveMessageWithPrefix("command.disband.success"));
             clearAutoClaimAndChatForFactionMembers(faction);
-            EventRunner.runFactionDisbandEventPost(audience, faction, forceRemovedByAdmin, false);
+            EventRunner.runFactionDisbandEventPost(Optional.of(audience)
+                    .filter(Player.class::isInstance)
+                    .map(Player.class::cast)
+                    .orElse(null), faction, forceRemovedByAdmin, false);
         }
     }
 

@@ -5,6 +5,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ChatConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.entities.FactionPlayer;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
@@ -19,10 +20,11 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
+import io.github.aquerr.eaglefactions.managers.creation.FactionCreationManager;
 import io.github.aquerr.eaglefactions.util.ItemUtil;
 import net.kyori.adventure.audience.Audience;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -38,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 
@@ -98,11 +101,11 @@ public class CreateCommand extends AbstractCommand
             {
                 return createAsPlayerByItems(factionName, factionTag, (ServerPlayer) context.cause().audience());
             }
-            createAsPlayer(factionName, factionTag, (ServerPlayer)context.cause().audience());
+            createFaction(context.cause().audience(), factionName, factionTag, ((ServerPlayer)context.cause().audience()).uniqueId());
         }
         else
         {
-            createAsConsole(factionName, factionTag, context.cause().audience());
+            createFaction(context.cause().audience(), factionName, factionTag, null);
         }
         return CommandResult.success();
     }
@@ -120,7 +123,7 @@ public class CreateCommand extends AbstractCommand
         {
             try
             {
-                ItemUtil.pollItemsNeededForCreationFromPlayer(player);
+                ItemUtil.pollItemsFromPlayer(player, ItemUtil.convertToItemStackList(this.factionsConfig.getRequiredItemsToCreateFaction()));
             }
             catch (RequiredItemsNotFoundException e)
             {
@@ -128,57 +131,76 @@ public class CreateCommand extends AbstractCommand
             }
         }
 
-        createAsPlayer(factionName, factionTag, player);
+        createFaction(player, factionName, factionTag, player.uniqueId());
         return CommandResult.success();
     }
 
-    private void createAsPlayer(final String factionName, final String factionTag, final Player player)
+    private void createFaction(
+            final Audience audience,
+            final String factionName,
+            final String factionTag,
+            @Nullable final UUID leaderUUID)
+    {
+        Set<FactionMember> members = new HashSet<>();
+        if (leaderUUID != null)
+        {
+            members.add(new FactionMemberImpl(leaderUUID, Set.of(RankManagerImpl.LEADER_RANK_NAME)));
+        }
+
+        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()))
+                .leader(leaderUUID)
+                .members(members)
+                .createdDate(Instant.now())
+                .ranks(prepareDefaultRanks())
+                .protectionFlags(prepareDefaultProtectionFlags())
+                .build();
+
+        final boolean isCancelled = EventRunner.runFactionCreateEventPre(
+                Optional.ofNullable(audience)
+                .filter(Player.class::isInstance)
+                .map(Player.class::cast)
+                .orElse(null),
+                faction
+        );
+        if (isCancelled)
+            return;
+
+        super.getPlugin().getFactionLogic().addFaction(faction);
+
+        //Update player cache...
+        if (leaderUUID != null)
+        {
+            final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(leaderUUID);
+            final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
+            super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
+        }
+
+        notifyServerPlayersAboutNewFaction(faction);
+        if (audience != null)
+        {
+            audience.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
+        }
+        EventRunner.runFactionCreateEventPost(Optional.ofNullable(audience)
+                .filter(Player.class::isInstance)
+                .map(Player.class::cast)
+                .orElse(null), faction);
+    }
+
+    private List<Rank> prepareDefaultRanks()
     {
         List<Rank> defaultRanks = factionsConfig.getDefaultRanks();
         if (defaultRanks.stream().noneMatch(rank -> rank.getName().equalsIgnoreCase(RankManagerImpl.DEFAULT_RANK_NAME)))
         {
             defaultRanks = new ArrayList<>(defaultRanks);
-            defaultRanks.add(RankManagerImpl.buildDefaultRecruitRank());
+            defaultRanks.add(RankManagerImpl.buildDefaultRank());
+        }
+        if (defaultRanks.stream().noneMatch(rank -> rank.getName().equalsIgnoreCase(RankManagerImpl.LEADER_RANK_NAME)))
+        {
+            defaultRanks = new ArrayList<>(defaultRanks);
+            defaultRanks.add(RankManagerImpl.buildLeaderRank());
         }
 
-        final Faction faction = FactionImpl.builder(factionName,
-                        text(factionTag, this.chatConfig.getDefaultTagColor()))
-                .leader(player.uniqueId())
-                .ranks(defaultRanks)
-                .members(Set.of(new FactionMemberImpl(player.uniqueId(), Set.of(RankManagerImpl.getHighestRank(defaultRanks).getName()))))
-                .createdDate(Instant.now())
-                .protectionFlags(prepareDefaultProtectionFlags())
-                .build();
-        final boolean isCancelled = EventRunner.runFactionCreateEventPre(player, faction);
-        if (isCancelled)
-            return;
-
-        //Update player cache...
-        final FactionPlayer factionPlayer = super.getPlugin().getStorageManager().getPlayer(player.uniqueId());
-        final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), factionName, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
-        super.getPlugin().getStorageManager().savePlayer(updatedPlayer);
-
-        super.getPlugin().getFactionLogic().addFaction(faction);
-        notifyServerPlayersAboutNewFaction(faction);
-        player.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
-        EventRunner.runFactionCreateEventPost(player, faction);
-    }
-
-    /**
-     * Audience can actually be one of the following: player, console, command block, RCON client or proxy.
-     */
-    private void createAsConsole(final String factionName, final String factionTag, final Audience audience)
-    {
-        final List<Rank> defaultRanks = factionsConfig.getDefaultRanks();
-
-        final Faction faction = FactionImpl.builder(factionName, text(factionTag, this.chatConfig.getDefaultTagColor()))
-                .createdDate(Instant.now())
-                .ranks(defaultRanks)
-                .protectionFlags(prepareDefaultProtectionFlags())
-                .build();
-        super.getPlugin().getFactionLogic().addFaction(faction);
-        notifyServerPlayersAboutNewFaction(faction);
-        audience.sendMessage(messageService.resolveMessageWithPrefix("command.create.success", faction.getName()));
+        return defaultRanks;
     }
 
     private Set<ProtectionFlag> prepareDefaultProtectionFlags()

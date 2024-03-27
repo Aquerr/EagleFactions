@@ -93,7 +93,7 @@ public class FactionsConfigImpl implements FactionsConfig
 
 		this.canUseFactionChest = this.configuration.getBoolean(true, "faction-chest");
 
-		this.factionCreationByItems = this.configuration.getBoolean(false, "creating-by-items", "enabled");
+		this.factionCreationByItems = this.configuration.getBoolean(false, "creation-by-items", "enabled");
 		this.requiredItemsToCreateFaction = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20"), "creating-by-items", "items"));
 
 		this.blockEnteringOfflineFactions = this.configuration.getBoolean(true, "block-entering-faction-while-offline");

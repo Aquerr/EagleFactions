@@ -17,7 +17,6 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.RankImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -49,13 +48,7 @@ public class RankManagerImpl implements RankManager
     public static List<Rank> getDefaultRanks()
     {
         return List.of(
-                RankImpl.builder()
-                        .name(LEADER_RANK_NAME)
-                        .displayName("&6Leader")
-                        .displayInChat(true)
-                        .permissions(Set.of(FactionPermission.values()))
-                        .ladderPosition(1000)
-                        .build(),
+                buildLeaderRank(),
                 RankImpl.builder()
                         .name("officer")
                         .displayName("&6Officer")
@@ -90,11 +83,22 @@ public class RankManagerImpl implements RankManager
                         )
                         .ladderPosition(50)
                         .build(),
-                buildDefaultRecruitRank()
+                buildDefaultRank()
         );
     }
 
-    public static Rank buildDefaultRecruitRank()
+    public static Rank buildLeaderRank()
+    {
+        return RankImpl.builder()
+                .name(LEADER_RANK_NAME)
+                .displayName("&6Leader")
+                .displayInChat(true)
+                .permissions(Set.of(FactionPermission.values()))
+                .ladderPosition(1000)
+                .build();
+    }
+
+    public static Rank buildDefaultRank()
     {
         return RankImpl.builder()
                 .name(DEFAULT_RANK_NAME)
@@ -108,54 +112,6 @@ public class RankManagerImpl implements RankManager
                 .ladderPosition(-1000)
                 .build();
     }
-
-//    @Override
-//    public Rank demotePlayer(final @Nullable ServerPlayer demotedBy,
-//                             final FactionPlayer targetPlayer) throws PlayerNotInFactionException
-//    {
-//        checkNotNull(targetPlayer);
-//
-//        Faction faction = targetPlayer.getFaction()
-//                .orElseThrow(() -> new PlayerNotInFactionException(targetPlayer));
-//
-//        final boolean isCancelled = EventRunner.runFactionDemoteEventPre(demotedBy, targetPlayer, faction);
-//
-//        Rank currentRank = targetPlayer.getFactionRank().get();
-//        if (isCancelled)
-//            return currentRank;
-//
-//        Rank demotedTo = faction.getRanks().stream().sorted(Comparator.comparingInt(Rank::getLadderPosition).reversed())
-//                .filter(rank -> rank.getLadderPosition() < currentRank.getLadderPosition())
-//                .findFirst()
-//                .orElse(currentRank);
-//
-//        return updateRanksAndSaveFaction(currentRank, demotedTo, faction, targetPlayer, (updatedFaction) -> EventRunner.runFactionDemoteEventPost(demotedBy, targetPlayer, demotedTo, updatedFaction));
-//    }
-
-//    @Override
-//    public Rank promotePlayer(final @Nullable ServerPlayer promotedBy,
-//                              final FactionPlayer targetPlayer) throws PlayerNotInFactionException
-//    {
-//        checkNotNull(targetPlayer);
-//
-//        Faction faction = targetPlayer.getFaction()
-//                .orElseThrow(() -> new PlayerNotInFactionException(targetPlayer));
-//
-//        final boolean isCancelled = EventRunner.runFactionPromoteEventPre(promotedBy, targetPlayer, faction);
-//
-//        Rank currentRank = targetPlayer.getFactionRanks();
-//        if (isCancelled)
-//            return currentRank;
-//
-//        int highestRankPosition = getHighestRank(targetPlayer.getFactionRanks()).getLadderPosition();
-//
-//        Rank promotedTo = faction.getRanks().stream().sorted(Comparator.comparingInt(Rank::getLadderPosition))
-//                .filter(rank -> rank.getLadderPosition() > currentRank.getLadderPosition())
-//                .findFirst()
-//                .orElse(currentRank);
-//
-//        return updateRanksAndSaveFaction(currentRank, promotedTo, faction, targetPlayer, (updatedFaction) -> EventRunner.runFactionPromoteEventPost(promotedBy, targetPlayer, promotedTo, updatedFaction));
-//    }
 
     @Override
     public boolean setLeader(final @Nullable FactionPlayer targetPlayer, final Faction faction)

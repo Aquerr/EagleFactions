@@ -17,23 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ItemUtil
+public final class ItemUtil
 {
     private static final Logger LOGGER = LogManager.getLogger(ItemUtil.class);
-
-    public static void pollItemsNeededForClaimFromPlayer(final Player player) throws RequiredItemsNotFoundException
-    {
-        final Map<String, Integer> requiredItems = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getRequiredItemsToClaim();
-        final List<ItemStack> itemStacks = convertToItemStackList(requiredItems);
-        pollItemsFromPlayer(player, itemStacks);
-    }
-
-    public static void pollItemsNeededForCreationFromPlayer(final Player player) throws RequiredItemsNotFoundException
-    {
-        final Map<String, Integer> requiredItems = EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().getRequiredItemsToCreateFaction();
-        final List<ItemStack> itemStacks = convertToItemStackList(requiredItems);
-        pollItemsFromPlayer(player, itemStacks);
-    }
 
     /**
      * Converts a map that contains mappings between items ids (String) and quantity (Integer).
@@ -82,5 +68,10 @@ public class ItemUtil
         {
             inventory.query(QueryTypes.ITEM_TYPE, itemStack.type()).poll(itemStack.quantity());
         }
+    }
+
+    private ItemUtil()
+    {
+
     }
 }
