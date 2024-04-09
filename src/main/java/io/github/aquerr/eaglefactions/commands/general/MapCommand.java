@@ -9,12 +9,13 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionHome;
 import io.github.aquerr.eaglefactions.api.entities.FactionPermission;
+import io.github.aquerr.eaglefactions.api.exception.CouldNotClaimException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.managers.claim.ClaimContextImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.text.Component;
@@ -49,6 +50,7 @@ public class MapCommand extends AbstractCommand
     private final FactionLogic factionLogic;
     private final MessageService messageService;
     private final PermsManager permsManager;
+    private final ClaimManager claimManager;
 
     public MapCommand(final EagleFactions plugin)
     {
@@ -58,6 +60,7 @@ public class MapCommand extends AbstractCommand
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.messageService = plugin.getMessageService();
         this.permsManager = plugin.getPermsManager();
+        this.claimManager = plugin.getClaimManager();
     }
 
     @Override
@@ -136,7 +139,7 @@ public class MapCommand extends AbstractCommand
 
                         if (chunkFaction.getName().equals(playerFaction.getName()))
                         {
-                            textBuilder.append(factionMark.toBuilder().clickEvent(SpongeComponents.executeCallback((cause) -> claimByMap(player, chunk))).build());
+                            textBuilder.append(factionMark.toBuilder().clickEvent(SpongeComponents.executeCallback((cause) -> handleMapClick(player, chunk))).build());
                         }
                         else if (!showPlayerFactionClaimsOnly && playerFaction.getAlliances().contains(chunkFaction.getName()))
                         {
@@ -222,7 +225,7 @@ public class MapCommand extends AbstractCommand
                             && (super.getPlugin().getPlayerManager().hasAdminMode(player.user())
                                 || (optionalPlayerFaction.isPresent() && permsManager.hasPermission(player.uniqueId(), optionalPlayerFaction.get(), FactionPermission.TERRITORY_CLAIM))))
                     {
-                        textBuilder.append(notCapturedMark.toBuilder().clickEvent(SpongeComponents.executeCallback((cause) -> claimByMap(player, chunk))).build());
+                        textBuilder.append(notCapturedMark.toBuilder().clickEvent(SpongeComponents.executeCallback((cause) -> handleMapClick(player, chunk))).build());
                     }
                     else
                     {
@@ -275,13 +278,12 @@ public class MapCommand extends AbstractCommand
         player.sendMessage(messageService.resolveComponentWithMessage("command.map.currently-standing-at", playerPosition.toString(), playerPositionClaim));
     }
 
-    private void claimByMap(ServerPlayer player, Vector3i chunk)
+    private void handleMapClick(ServerPlayer player, Vector3i chunk)
     {
         //Because faction could have changed we need to get it again here.
 
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
         final ServerWorld world = player.world();
-        final Claim claim = new Claim(player.world().uniqueId(), chunk);
         final boolean hasFactionsAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
 
         if(optionalPlayerFaction.isEmpty())
@@ -292,7 +294,6 @@ public class MapCommand extends AbstractCommand
 
         final Faction playerFaction = optionalPlayerFaction.get();
         final boolean hasClaimPermission = super.getPlugin().getPermsManager().canClaim(player.uniqueId(), playerFaction);
-        final boolean isFactionAttacked = EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName());
 
         if(!hasFactionsAdminMode && !hasClaimPermission)
         {
@@ -303,65 +304,89 @@ public class MapCommand extends AbstractCommand
         //If claimed then unclaim
         if(this.factionLogic.isClaimed(world.uniqueId(), chunk))
         {
-            if (EventRunner.runFactionUnclaimEventPre(player, playerFaction, world, chunk))
-                return;
-
-            //Check if faction's home was set in this claim. If yes then remove it.
-            if (playerFaction.getHome().filter(home -> home.equals(new FactionHome(world.uniqueId(), chunk))).isPresent())
-            {
-                this.factionLogic.setHome(playerFaction, null);
-            }
-            this.factionLogic.removeClaim(playerFaction, new Claim(world.uniqueId(), chunk));
-            player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));
-            EventRunner.runFactionUnclaimEventPost(player, playerFaction, world, chunk);
+            handleUnclaimClick(player, playerFaction, world, chunk);
         }
         else
         {
-            if(isFactionAttacked)
-            {
-                player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))));
+            handleClaimClick(player, playerFaction, world, chunk);
+        }
+        generateMap(player);
+    }
+
+    private void handleClaimClick(ServerPlayer player, Faction playerFaction, ServerWorld world, Vector3i chunk)
+    {
+        final Claim claim = new Claim(player.world().uniqueId(), chunk);
+        final boolean isFactionAttacked = EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName());
+
+        if(isFactionAttacked)
+        {
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(playerFaction.getName()))));
+            return;
+        }
+
+        if(this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size())
+        {
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
+            return;
+        }
+
+        if (playerFaction.isSafeZone() || playerFaction.isWarZone())
+        {
+            if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
                 return;
-            }
 
-            if(this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size())
+            this.factionLogic.addClaim(playerFaction, claim);
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
+            EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
+        }
+        else
+        {
+            if(this.factionsConfig.requireConnectedClaims())
             {
-                player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
-                return;
-            }
-
-            if (playerFaction.isSafeZone() || playerFaction.isWarZone())
-            {
-                if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
-                    return;
-
-                this.factionLogic.addClaim(playerFaction, claim);
-                player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
-            }
-            else
-            {
-                if(this.factionsConfig.requireConnectedClaims())
+                if(this.factionLogic.isClaimConnected(playerFaction, claim))
                 {
-                    if(this.factionLogic.isClaimConnected(playerFaction, claim))
-                    {
-                        if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
-                            return;
-
-                        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)), player, playerFaction, messageService));
-                    }
-                    else
-                    {
-                        player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.claim.claims-need-to-be-connected")));
-                    }
+                    doClaim(player, playerFaction, world, chunk);
                 }
                 else
                 {
-                    if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
-                        return;
-
-                    this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)), player, playerFaction, messageService));
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.claim.claims-need-to-be-connected")));
                 }
             }
+            else
+            {
+                doClaim(player, playerFaction, world, chunk);
+            }
         }
-        generateMap(player);
+    }
+
+    private void handleUnclaimClick(ServerPlayer player, Faction playerFaction, ServerWorld world, Vector3i chunk)
+    {
+        if (EventRunner.runFactionUnclaimEventPre(player, playerFaction, world, chunk))
+            return;
+
+        //Check if faction's home was set in this claim. If yes then remove it.
+        if (playerFaction.getHome().filter(home -> home.equals(new FactionHome(world.uniqueId(), chunk))).isPresent())
+        {
+            this.factionLogic.setHome(playerFaction, null);
+        }
+        this.factionLogic.removeClaim(playerFaction, new Claim(world.uniqueId(), chunk));
+        player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));
+        EventRunner.runFactionUnclaimEventPost(player, playerFaction, world, chunk);
+    }
+
+    private void doClaim(ServerPlayer player, Faction playerFaction, ServerWorld world, Vector3i chunk)
+    {
+        if (EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk))
+            return;
+
+        try
+        {
+            this.claimManager.claim(player, playerFaction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)));
+            player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", chunk.toString()));
+        }
+        catch (CouldNotClaimException e)
+        {
+            player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.claim.could-not-claim-territory-with-reason", e.getLocalizedMessage())));
+        }
     }
 }

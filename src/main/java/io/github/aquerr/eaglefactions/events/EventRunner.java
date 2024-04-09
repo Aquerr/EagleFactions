@@ -25,7 +25,7 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
@@ -108,7 +108,7 @@ public final class EventRunner
     /**
      * @return True if cancelled, false if not
      */
-    public static boolean runFactionClaimEventPre(final Player player, final Faction faction, final World world, final Vector3i chunkPosition)
+    public static boolean runFactionClaimEventPre(final Player player, final Faction faction, final ServerWorld world, final Vector3i chunkPosition)
     {
         final EventContext eventContext = prepareEventContext(player).build();
         final Cause eventCause = Cause.of(eventContext, player, faction);
@@ -119,7 +119,7 @@ public final class EventRunner
     /**
      * @return True if cancelled, false if not
      */
-    public static boolean runFactionClaimEventPost(final Player player, final Faction faction, final World world, final Vector3i chunkPosition)
+    public static boolean runFactionClaimEventPost(final Player player, final Faction faction, final ServerWorld world, final Vector3i chunkPosition)
     {
         final EventContext eventContext = prepareEventContext(player).build();
         final Cause eventCause = Cause.of(eventContext, player, faction);
@@ -178,7 +178,7 @@ public final class EventRunner
     /**
      * @return True if cancelled, false if not
      */
-    public static boolean runFactionUnclaimEventPre(final Player player, final Faction faction, final World world, final Vector3i chunkPosition)
+    public static boolean runFactionUnclaimEventPre(final Player player, final Faction faction, final ServerWorld world, final Vector3i chunkPosition)
     {
         final EventContext eventContext = prepareEventContext(player).build();
         final Cause eventCause = Cause.of(eventContext, player, faction);
@@ -189,7 +189,7 @@ public final class EventRunner
     /**
      * @return True if cancelled, false if not
      */
-    public static boolean runFactionUnclaimEventPost(final Player player, final Faction faction, final World world, final Vector3i chunkPosition)
+    public static boolean runFactionUnclaimEventPost(final Player player, final Faction faction, final ServerWorld world, final Vector3i chunkPosition)
     {
         final EventContext eventContext = prepareEventContext(player).build();
         final Cause eventCause = Cause.of(eventContext, player, faction);

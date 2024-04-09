@@ -1,17 +1,19 @@
 package io.github.aquerr.eaglefactions.commands.claiming;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
+import io.github.aquerr.eaglefactions.PluginInfo;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.exception.CouldNotClaimException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.events.EventRunner;
-import io.github.aquerr.eaglefactions.managers.claim.ClaimContextImpl;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
@@ -34,6 +36,7 @@ public class ClaimCommand extends AbstractCommand
     private final ProtectionConfig protectionConfig;
     private final FactionsConfig factionsConfig;
     private final MessageService messageService;
+    private final ClaimManager claimManager;
 
     public ClaimCommand(final EagleFactions plugin)
     {
@@ -42,6 +45,7 @@ public class ClaimCommand extends AbstractCommand
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.messageService = plugin.getMessageService();
+        this.claimManager = plugin.getClaimManager();
     }
 
     @Override
@@ -140,10 +144,16 @@ public class ClaimCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)),
-                player,
-                faction,
-                this.messageService));
+        try
+        {
+            this.claimManager.claim(player, faction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)));
+            player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", chunk.toString()));
+        }
+        catch (CouldNotClaimException e)
+        {
+            throw messageService.resolveExceptionWithMessage("error.claim.could-not-claim-territory-with-reason", e.getLocalizedMessage());
+        }
+
         return CommandResult.success();
     }
 }

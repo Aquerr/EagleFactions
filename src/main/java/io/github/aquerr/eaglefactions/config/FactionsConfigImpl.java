@@ -5,19 +5,15 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FactionsConfigImpl implements FactionsConfig
 {
 	private final Configuration configuration;
-
-	//TODO: Maybe move to GeneralConfig class?
-	//TODO: This should be possibly changed to .lang file.
-	private String languageTag = "en";
 
 	private int maxNameLength = 30;
 	private int minNameLength = 3;
@@ -36,14 +32,8 @@ public class FactionsConfigImpl implements FactionsConfig
 	private boolean requireConnectedClaims = true;
 	private boolean shouldDelayClaim = false;
 	private int claimDelay = 10;
-	private boolean claimByItems = false;
-	private Map<String, Integer> requiredItemsToClaim = new HashMap<>();
 
 	private boolean canUseFactionChest = true;
-
-	private boolean factionCreationByItems = false;
-	private Map<String, Integer> requiredItemsToCreateFaction = new HashMap<>();
-
 	private boolean blockEnteringOfflineFactions = false;
 	private boolean blockEnteringSafezoneFromWarzone = false;
 	private boolean canAttackOnlyAtNight = false;
@@ -61,6 +51,9 @@ public class FactionsConfigImpl implements FactionsConfig
 
 	private List<Rank> defaultRanks = new ArrayList<>();
 
+	private List<CostConfigDefinition> creationCostDefinitions;
+	private List<CostConfigDefinition> claimCostDefinitions;
+
 	public FactionsConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
@@ -69,15 +62,13 @@ public class FactionsConfigImpl implements FactionsConfig
 	@Override
 	public void reload()
 	{
-		this.languageTag = this.configuration.getString("en", "language");
+		this.maxNameLength = this.configuration.getInt(30,"faction", "name", "max-length");
+		this.minNameLength = this.configuration.getInt(3, "faction", "name", "min-length");
+		this.maxTagLength = this.configuration.getInt(5, "faction", "tag", "max-length");
+		this.minTagLength = this.configuration.getInt(2, "faction", "tag", "min-length");
 
-		this.maxNameLength = this.configuration.getInt(30,"name", "max-length");
-		this.minNameLength = this.configuration.getInt(3, "name", "min-length");
-		this.maxTagLength = this.configuration.getInt(5, "tag", "max-length");
-		this.minTagLength = this.configuration.getInt(2, "tag", "min-length");
-
-		this.isPlayerLimit = this.configuration.getBoolean(false, "player-limit", "enabled");
-		this.playerLimit = this.configuration.getInt(15, "player-limit", "limit");
+		this.isPlayerLimit = this.configuration.getBoolean(false, "faction", "player-limit", "enabled");
+		this.playerLimit = this.configuration.getInt(15, "faction", "player-limit", "limit");
 		this.attackTime = this.configuration.getInt(10, "attack-time");
 		this.percentageDamageReductionInOwnTerritory = this.configuration.getFloat(10.0f, "percentage-damage-reduction-in-own-territory");
 
@@ -88,18 +79,15 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.requireConnectedClaims = this.configuration.getBoolean(true, "connected-claims");
 		this.shouldDelayClaim = this.configuration.getBoolean(false, "delayed-claim", "enabled");
 		this.claimDelay = this.configuration.getInt(10, "delayed-claim", "claiming-time");
-		this.claimByItems = this.configuration.getBoolean(false, "claiming-by-items", "enabled");
-		this.requiredItemsToClaim = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20", "minecraft:iron_ingot|4"), "claiming-by-items", "items"));
 
 		this.canUseFactionChest = this.configuration.getBoolean(true, "faction-chest");
-
-		this.factionCreationByItems = this.configuration.getBoolean(false, "creation-by-items", "enabled");
-		this.requiredItemsToCreateFaction = prepareItems(this.configuration.getListOfStrings(Arrays.asList("minecraft:orange_wool|35", "minecraft:oak_planks|20"), "creating-by-items", "items"));
 
 		this.blockEnteringOfflineFactions = this.configuration.getBoolean(true, "block-entering-faction-while-offline");
 		this.blockEnteringSafezoneFromWarzone = this.configuration.getBoolean(false, "block-safezone-from-warzone");
 
 		this.canAttackOnlyAtNight = this.configuration.getBoolean(false, "attack-only-at-night");
+
+		Duration duration = this.configuration.getGenericType(Duration.class, Duration.ofDays(30), "factions-remover", "max-inactive-time");
 
 		this.maxInactiveTime = this.configuration.getString("30d", "factions-remover", "max-inactive-time");
 		this.notifyWhenFactionRemoved = this.configuration.getBoolean(true, "factions-remover", "notify-when-removed");
@@ -113,14 +101,11 @@ public class FactionsConfigImpl implements FactionsConfig
 		this.shouldShowDestroyedClaim = this.configuration.getBoolean(true, "show-destroyed-claim");
 		this.shouldShowAttackInBossBar = this.configuration.getBoolean(true, "show-attack-in-bossbar");
 
-		List<Rank> defaultRanks = RankManagerImpl.getDefaultRanks();
-		this.defaultRanks = this.configuration.getGenericList(Rank.class, defaultRanks, "default-ranks", "ranks");
-	}
+		this.creationCostDefinitions = this.configuration.getGenericList(CostConfigDefinition.class, Collections.emptyList(), "faction", "creation-cost", "costs");
+		this.claimCostDefinitions = this.configuration.getGenericList(CostConfigDefinition.class, Collections.emptyList(), "claiming-cost", "costs");
 
-	@Override
-	public String getLanguageTag()
-	{
-		return this.languageTag;
+		List<Rank> defaultRanks = RankManagerImpl.getDefaultRanks();
+		this.defaultRanks = this.configuration.getGenericList(Rank.class, defaultRanks, "faction", "default-ranks", "ranks");
 	}
 
 	@Override
@@ -202,18 +187,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	}
 
 	@Override
-	public boolean shouldClaimByItems()
-	{
-		return this.claimByItems;
-	}
-
-	@Override
-	public Map<String, Integer> getRequiredItemsToClaim()
-	{
-		return this.requiredItemsToClaim;
-	}
-
-	@Override
 	public boolean canUseFactionChest()
 	{
 		return this.canUseFactionChest;
@@ -223,18 +196,6 @@ public class FactionsConfigImpl implements FactionsConfig
 	public boolean requireConnectedClaims()
 	{
 		return this.requireConnectedClaims;
-	}
-
-	@Override
-	public boolean getFactionCreationByItems()
-	{
-		return this.factionCreationByItems;
-	}
-
-	@Override
-	public Map<String, Integer> getRequiredItemsToCreateFaction()
-	{
-		return this.requiredItemsToCreateFaction;
 	}
 
 	@Override
@@ -345,6 +306,18 @@ public class FactionsConfigImpl implements FactionsConfig
 		return this.defaultRanks;
 	}
 
+	@Override
+	public List<CostConfigDefinition> getFactionCreationOperationCostDefinitions()
+	{
+		return creationCostDefinitions;
+	}
+
+	@Override
+	public List<CostConfigDefinition> getClaimOperationCostDefinitions()
+	{
+		return this.claimCostDefinitions;
+	}
+
 	private HashMap<String, Integer> prepareItems(final List<String> itemsToPrepare)
 	{
 		final HashMap<String, Integer> items = new HashMap<>();
@@ -357,12 +330,4 @@ public class FactionsConfigImpl implements FactionsConfig
 		}
 		return items;
 	}
-
-//        truceMap.put(FactionPermission.INTERACT, true);
-//        truceMap.put(FactionPermission.BLOCK_PLACE, false);
-//        truceMap.put(FactionPermission.BLOCK_DESTROY, false);
-//
-//        allyMap.put(FactionPermission.INTERACT, true);
-//        allyMap.put(FactionPermission.BLOCK_PLACE, true);
-//        allyMap.put(FactionPermission.BLOCK_DESTROY, true);
 }

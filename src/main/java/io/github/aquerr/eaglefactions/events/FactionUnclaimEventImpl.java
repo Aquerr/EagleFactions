@@ -4,22 +4,22 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionClaimEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 public class FactionUnclaimEventImpl extends FactionAbstractEvent implements FactionClaimEvent.Unclaim
 {
-    private final World world;
+    private final ServerWorld world;
     private final Vector3i chunkPosition;
 
-    FactionUnclaimEventImpl(final Player creator, final Faction faction, final World world, final Vector3i chunkPosition, final Cause cause)
+    FactionUnclaimEventImpl(final Player creator, final Faction faction, final ServerWorld world, final Vector3i chunkPosition, final Cause cause)
     {
         super(creator, faction, cause);
         this.world = world;
         this.chunkPosition = chunkPosition;
     }
 
-    public World getWorld()
+    public ServerWorld getWorld()
     {
         return this.world;
     }
@@ -31,7 +31,7 @@ public class FactionUnclaimEventImpl extends FactionAbstractEvent implements Fac
 
     static class Pre extends FactionUnclaimEventImpl implements FactionClaimEvent.Unclaim.Pre
     {
-        Pre(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        Pre(Player creator, Faction faction, ServerWorld world, Vector3i chunkPosition, Cause cause)
         {
             super(creator, faction, world, chunkPosition, cause);
         }
@@ -39,7 +39,7 @@ public class FactionUnclaimEventImpl extends FactionAbstractEvent implements Fac
 
     static class Post extends FactionUnclaimEventImpl implements FactionClaimEvent.Unclaim.Post
     {
-        Post(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        Post(Player creator, Faction faction, ServerWorld world, Vector3i chunkPosition, Cause cause)
         {
             super(creator, faction, world, chunkPosition, cause);
         }

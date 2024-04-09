@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions;
 import com.google.inject.Inject;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
+import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.AcceptableInvite;
 import io.github.aquerr.eaglefactions.api.entities.ChatEnum;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -14,16 +15,18 @@ import io.github.aquerr.eaglefactions.api.entities.RelationType;
 import io.github.aquerr.eaglefactions.api.logic.AttackLogic;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.logic.PVPLogger;
+import io.github.aquerr.eaglefactions.api.logic.cost.OperationCostFactory;
 import io.github.aquerr.eaglefactions.api.managers.InvitationManager;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.managers.ProtectionManager;
 import io.github.aquerr.eaglefactions.api.managers.RankManager;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimByItemsStrategy;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimStrategy;
-import io.github.aquerr.eaglefactions.api.managers.claim.DelayedClaimStrategy;
-import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
+import io.github.aquerr.eaglefactions.api.managers.creation.FactionCreationManager;
+import io.github.aquerr.eaglefactions.api.logic.cost.OperationCost;
+import io.github.aquerr.eaglefactions.logic.cost.OperationCostConfigDefinitionToOperationCostMapper;
+import io.github.aquerr.eaglefactions.logic.cost.OperationCostFactoryImpl;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.messaging.placeholder.PlaceholderService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -135,9 +138,10 @@ import io.github.aquerr.eaglefactions.managers.PlayerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.PowerManagerImpl;
 import io.github.aquerr.eaglefactions.managers.ProtectionManagerImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
-import io.github.aquerr.eaglefactions.managers.claim.ClaimStrategyManager;
+import io.github.aquerr.eaglefactions.managers.claim.ClaimManagerImpl;
 import io.github.aquerr.eaglefactions.managers.claim.provider.DefaultFactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.managers.claim.provider.FactionMaxClaimCountByPlayerPowerProvider;
+import io.github.aquerr.eaglefactions.managers.creation.FactionCreationManagerImpl;
 import io.github.aquerr.eaglefactions.managers.power.provider.DefaultFactionMaxPowerProvider;
 import io.github.aquerr.eaglefactions.managers.power.provider.DefaultFactionPowerProvider;
 import io.github.aquerr.eaglefactions.managers.power.provider.FactionMaxPowerByPlayerMaxPowerProvider;
@@ -184,6 +188,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -237,7 +242,9 @@ public class EagleFactionsPlugin implements EagleFactions
     private StorageManager storageManager;
     private MessageService messageService;
     private IntegrationManager integrationManager;
-    private ClaimStrategyManager claimStrategyManager;
+    private ClaimManager claimManager;
+    private FactionCreationManager factionCreationManager;
+    private OperationCostFactory operationCostFactory;
 
     private boolean isDisabled = false;
 
@@ -333,7 +340,8 @@ public class EagleFactionsPlugin implements EagleFactions
             // Reloads storage and cache.
             this.storageManager.reloadStorage();
 
-            determineClaimStrategy();
+            prepareCreationCosts();
+            prepareClaimCosts();
 
             initializeIntegrations();
 
@@ -349,19 +357,26 @@ public class EagleFactionsPlugin implements EagleFactions
         }
     }
 
-    private void determineClaimStrategy()
+    private void prepareCreationCosts()
     {
-        ClaimStrategy claimStrategy = null;
+        List<FactionsConfig.CostConfigDefinition> operationCostDefinitions = this.configuration.getFactionsConfig().getFactionCreationOperationCostDefinitions();
+        List<OperationCost> creationCosts = new ArrayList<>();
+        for (FactionsConfig.CostConfigDefinition definition : operationCostDefinitions)
+        {
+            creationCosts.add(OperationCostConfigDefinitionToOperationCostMapper.map(operationCostFactory, definition));
+        }
+        this.factionCreationManager.setCreationCosts(creationCosts);
+    }
 
-        if (this.configuration.getFactionsConfig().shouldClaimByItems())
-            claimStrategy = new ClaimByItemsStrategy(this.factionLogic, ItemUtil.convertToItemStackList(this.configuration.getFactionsConfig().getRequiredItemsToClaim()));
-        else
-            claimStrategy = new NoCostClaimStrategy(this.factionLogic);
-
-        if (this.configuration.getFactionsConfig().shouldDelayClaim())
-            claimStrategy = new DelayedClaimStrategy(claimStrategy, this.configuration.getFactionsConfig().getClaimDelay(), true);
-
-        this.factionLogic.setClaimStrategy(claimStrategy);
+    private void prepareClaimCosts()
+    {
+        List<FactionsConfig.CostConfigDefinition> operationCostDefinitions = this.configuration.getFactionsConfig().getClaimOperationCostDefinitions();
+        List<OperationCost> claimCosts = new ArrayList<>();
+        for (FactionsConfig.CostConfigDefinition definition : operationCostDefinitions)
+        {
+            claimCosts.add(OperationCostConfigDefinitionToOperationCostMapper.map(operationCostFactory, definition));
+        }
+        this.claimManager.setClaimCosts(claimCosts);
     }
 
     private void preCreateSafeZoneAndWarZone()
@@ -381,7 +396,7 @@ public class EagleFactionsPlugin implements EagleFactions
                     new ProtectionFlagImpl(ProtectionFlagType.SPAWN_ANIMALS, true)
             )))
                     .build();
-            this.factionLogic.addFaction(warzone);
+            this.storageManager.saveFaction(warzone);
         }
         if (this.factionLogic.getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME) == null)
         {
@@ -397,7 +412,7 @@ public class EagleFactionsPlugin implements EagleFactions
                             new ProtectionFlagImpl(ProtectionFlagType.SPAWN_ANIMALS, true)
                     )))
                     .build();
-            this.factionLogic.addFaction(safezone);
+            this.storageManager.saveFaction(safezone);
         }
     }
 
@@ -578,6 +593,24 @@ public class EagleFactionsPlugin implements EagleFactions
     }
 
     @Override
+    public FactionCreationManager getFactionCreationManager()
+    {
+        return this.factionCreationManager;
+    }
+
+    @Override
+    public ClaimManager getClaimManager()
+    {
+        return this.claimManager;
+    }
+
+    @Override
+    public OperationCostFactory getOperationCostFactory()
+    {
+        return operationCostFactory;
+    }
+
+    @Override
     public Faction.Builder getBuilderForFaction(String name, TextComponent tag)
     {
         return new FactionImpl.BuilderImpl(name, tag);
@@ -614,7 +647,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.efPlaceholderService = new EFPlaceholderService(this);
 
-        EFMessageService.init(this.configuration.getFactionsConfig().getLanguageTag());
+        EFMessageService.init(this.configuration.getLangConfig().getLanguageTag());
         this.messageService = EFMessageService.getInstance();
         this.storageManager = new StorageManagerImpl(this, this.configuration.getStorageConfig(), this.configDir);
         this.playerManager = new PlayerManagerImpl(this.storageManager, this.configuration.getPowerConfig());
@@ -625,10 +658,11 @@ public class EagleFactionsPlugin implements EagleFactions
 
         this.permsManager = new PermsManagerImpl();
 
-        this.claimStrategyManager = new ClaimStrategyManager(messageService);
-        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.messageService, this.claimStrategyManager);
+        this.claimManager = new ClaimManagerImpl(this.configuration.getFactionsConfig(), this.factionLogic, permsManager, messageService);
+        this.factionCreationManager = new FactionCreationManagerImpl(this.configuration.getFactionsConfig(), this.configuration.getChatConfig(),
+                this.storageManager, this.playerManager, this.messageService);
+        this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.messageService);
         this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
-
 
         this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService, this.getConfiguration().getHomeConfig());
         this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
@@ -636,6 +670,8 @@ public class EagleFactionsPlugin implements EagleFactions
         this.rankManager = new RankManagerImpl(this.storageManager);
 
         this.integrationManager = new IntegrationManager(this);
+
+        this.operationCostFactory = new OperationCostFactoryImpl(this.powerManager);
     }
 
     private void startFactionsRemover()

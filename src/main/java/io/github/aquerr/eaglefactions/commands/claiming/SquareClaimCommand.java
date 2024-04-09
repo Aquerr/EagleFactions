@@ -7,15 +7,19 @@ import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.exception.CouldNotClaimException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -32,6 +36,7 @@ public class SquareClaimCommand extends AbstractCommand
     private final FactionsConfig factionsConfig;
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
+    private final ClaimManager claimManager;
 
     public SquareClaimCommand(final EagleFactions plugin)
     {
@@ -40,6 +45,7 @@ public class SquareClaimCommand extends AbstractCommand
         this.factionsConfig = plugin.getConfiguration().getFactionsConfig();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
+        this.claimManager = plugin.getClaimManager();
     }
 
     @Override
@@ -104,7 +110,6 @@ public class SquareClaimCommand extends AbstractCommand
                         continue;
 
                     newFactionClaims.add(new Claim(world.uniqueId(), chunk));
-                    player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
                     EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
@@ -160,8 +165,22 @@ public class SquareClaimCommand extends AbstractCommand
                 EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
             }
 
-            this.factionLogic.addClaims(playerFaction, newFactionClaims);
+            newFactionClaims.forEach(claim -> doClaim(player, playerFaction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, claim.getChunkPosition()))));
         });
         return CommandResult.success();
+    }
+
+    private void doClaim(ServerPlayer player, Faction playerFaction, ServerLocation serverLocation)
+    {
+        try
+        {
+            this.claimManager.claim(player, playerFaction, serverLocation);
+            player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", serverLocation.chunkPosition().toString()));
+        }
+        catch (CouldNotClaimException e)
+        {
+            player.sendMessage(messageService.resolveComponentWithMessage("error.claim.could-not-claim-territory-with-reason", e.getLocalizedMessage()));
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -4,12 +4,13 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
+import io.github.aquerr.eaglefactions.api.exception.CouldNotClaimException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PermsManager;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
-import io.github.aquerr.eaglefactions.managers.claim.ClaimContextImpl;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -29,6 +30,7 @@ public class FillCommand extends AbstractCommand
     private final PlayerManager playerManager;
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
+    private final ClaimManager claimManager;
 
     public FillCommand(EagleFactions plugin)
     {
@@ -38,6 +40,7 @@ public class FillCommand extends AbstractCommand
         this.playerManager = plugin.getPlayerManager();
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
+        this.claimManager = plugin.getClaimManager();
     }
 
     @Override
@@ -60,6 +63,7 @@ public class FillCommand extends AbstractCommand
             throw messageService.resolveExceptionWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()));
 
         fill(player, faction);
+        player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", ""));
         return CommandResult.success();
     }
 
@@ -95,7 +99,15 @@ public class FillCommand extends AbstractCommand
             if (!this.factionLogic.isClaimed(world.uniqueId(), chunkPosition))
             {
                 faction = this.factionLogic.getFactionByName(faction.getName());
-                this.factionLogic.startClaiming(new ClaimContextImpl(ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunkPosition)), player, faction, messageService));
+                try
+                {
+                    this.claimManager.claim(player, faction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunkPosition)));
+                }
+                catch (CouldNotClaimException e)
+                {
+                    throw messageService.resolveExceptionWithMessage("error.claim.could-not-claim-territory-with-reason", e.getLocalizedMessage());
+                }
+
                 chunks.add(chunkPosition.add(1, 0, 0));
                 chunks.add(chunkPosition.add(-1, 0, 0));
                 chunks.add(chunkPosition.add(0, 0, 1));

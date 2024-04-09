@@ -7,6 +7,7 @@ import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.DynmapConfig;
 import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.config.HomeConfig;
+import io.github.aquerr.eaglefactions.api.config.LangConfig;
 import io.github.aquerr.eaglefactions.api.config.PVPLoggerConfig;
 import io.github.aquerr.eaglefactions.api.config.PowerConfig;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
@@ -17,7 +18,6 @@ import io.github.aquerr.eaglefactions.util.FileUtils;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +72,7 @@ public class ConfigurationImpl implements Configuration
         this.configs.put(BluemapConfig.class, new BluemapConfigImpl(this));
         this.configs.put(HomeConfig.class, new HomeConfigImpl(this));
         this.configs.put(VersionConfig.class, new VersionConfigImpl(this));
+        this.configs.put(LangConfig.class, new LangConfigImpl(this));
         reloadConfiguration();
     }
 
@@ -147,6 +147,12 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
+    public LangConfig getLangConfig()
+    {
+        return getConfig(LangConfig.class);
+    }
+
+    @Override
     public void reloadConfiguration() throws IOException
     {
         loadConfiguration();
@@ -205,7 +211,7 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public List<String> getListOfStrings(final Collection<String> defaultValue, final Object... nodePath)
+    public List<String> getListOfStrings(final List<String> defaultValue, final Object... nodePath)
     {
         try
         {
@@ -219,7 +225,7 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public Set<String> getSetOfStrings(final Collection<String> defaultValue,final Object... nodePath)
+    public Set<String> getSetOfStrings(final Set<String> defaultValue,final Object... nodePath)
     {
         try
         {
@@ -233,7 +239,7 @@ public class ConfigurationImpl implements Configuration
     }
 
     @Override
-    public <T> List<T> getGenericList(Class<T> clazz, final Collection<T> defaultValue, final Object... nodePath)
+    public <T> List<T> getGenericList(Class<T> clazz, final List<T> defaultValue, final Object... nodePath)
     {
         try
         {
@@ -243,7 +249,20 @@ public class ConfigurationImpl implements Configuration
         {
             e.printStackTrace();
         }
-        return new ArrayList<>();
+        return defaultValue;
+    }
+
+    @Override
+    public <T> T getGenericType(Class<T> clazz, final T defaultValue, final Object... nodePath)
+    {
+        try
+        {
+            return configNode.node(nodePath).get(clazz, defaultValue);
+        }
+        catch (SerializationException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")

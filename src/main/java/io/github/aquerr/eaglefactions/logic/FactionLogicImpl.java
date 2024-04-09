@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.logic;
 
 import com.google.common.base.Preconditions;
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
-import io.github.aquerr.eaglefactions.api.config.FactionsConfig;
 import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
@@ -14,9 +13,7 @@ import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimContext;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimStrategy;
-import io.github.aquerr.eaglefactions.api.managers.claim.NoCostClaimStrategy;
+import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -26,7 +23,6 @@ import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagsImpl;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
-import io.github.aquerr.eaglefactions.managers.claim.ClaimStrategyManager;
 import io.github.aquerr.eaglefactions.util.ParticlesUtil;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -58,9 +54,6 @@ public class FactionLogicImpl implements FactionLogic
     private static final String THERE_IS_NOT_FACTION_CALLED_FACTION_NAME_MESSAGE_KEY = "error.general.there-is-no-faction-called-faction-name";
 
     private final Set<FactionMaxClaimCountProvider> factionMaxClaimCountProviders = new HashSet<>();
-    private ClaimStrategy claimStrategy = new NoCostClaimStrategy(this);
-    private final ClaimStrategyManager claimStrategyManager;
-
     private final StorageManager storageManager;
     private final PlayerManager playerManager;
     private final MessageService messageService;
@@ -68,19 +61,11 @@ public class FactionLogicImpl implements FactionLogic
 
     public FactionLogicImpl(final PlayerManager playerManager,
                             final StorageManager storageManager,
-                            final MessageService messageService,
-                            final ClaimStrategyManager claimStrategyManager)
+                            final MessageService messageService)
     {
         this.storageManager = storageManager;
         this.playerManager = playerManager;
         this.messageService = messageService;
-        this.claimStrategyManager = claimStrategyManager;
-    }
-
-    @Override
-    public void setClaimStrategy(ClaimStrategy claimStrategy)
-    {
-        this.claimStrategy = claimStrategy;
     }
 
     @Override
@@ -185,13 +170,6 @@ public class FactionLogicImpl implements FactionLogic
     public Map<Claim, Faction> getAllClaims()
     {
         return FactionsCache.getClaims();
-    }
-
-    @Override
-    public void addFaction(final Faction faction)
-    {
-        checkNotNull(faction);
-        storageManager.saveFaction(faction);
     }
 
     @Override
@@ -728,16 +706,6 @@ public class FactionLogicImpl implements FactionLogic
         final FactionPlayer factionPlayer = this.storageManager.getPlayer(playerUUID);
         final FactionPlayer updatedPlayer = new FactionPlayerImpl(factionPlayer.getName(), factionPlayer.getUniqueId(), null, factionPlayer.getPower(), factionPlayer.getMaxPower(), factionPlayer.diedInWarZone());
         this.storageManager.savePlayer(updatedPlayer);
-    }
-
-    @Override
-    public void startClaiming(ClaimContext claimContext)
-    {
-        checkNotNull(claimContext.getFaction());
-        checkNotNull(claimContext.getServerPlayer());
-        checkNotNull(claimContext.getServerLocation());
-
-        claimStrategyManager.claim(claimStrategy, claimContext);
     }
 
     @Override

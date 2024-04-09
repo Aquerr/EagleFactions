@@ -1,29 +1,39 @@
 package io.github.aquerr.eaglefactions.events;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.events.FactionClaimEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-public class FactionClaimEventImpl extends FactionUnclaimEventImpl implements FactionClaimEvent.Claim
+public class FactionClaimEventImpl extends FactionAbstractEvent implements FactionClaimEvent.Claim
 {
-    FactionClaimEventImpl(final Player creator, final Faction faction, final World world, final Vector3i chunkPosition, final Cause cause)
+    private final ServerWorld world;
+    private final Vector3i chunkPosition;
+
+    FactionClaimEventImpl(final Player creator, final Faction faction, final ServerWorld world, final Vector3i chunkPosition, final Cause cause)
     {
-        super(creator, faction, world, chunkPosition, cause);
+        super(creator, faction, cause);
+        this.world = world;
+        this.chunkPosition = chunkPosition;
     }
 
     @Override
-    public boolean isClaimedByItems()
+    public ServerWorld getWorld()
     {
-        return EagleFactionsPlugin.getPlugin().getConfiguration().getFactionsConfig().shouldClaimByItems();
+        return world;
+    }
+
+    @Override
+    public Vector3i getChunkPosition()
+    {
+        return chunkPosition;
     }
 
     static class Pre extends FactionClaimEventImpl implements FactionClaimEvent.Claim.Pre
     {
-        Pre(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        Pre(Player creator, Faction faction, ServerWorld world, Vector3i chunkPosition, Cause cause)
         {
             super(creator, faction, world, chunkPosition, cause);
         }
@@ -31,7 +41,7 @@ public class FactionClaimEventImpl extends FactionUnclaimEventImpl implements Fa
 
     static class Post extends FactionClaimEventImpl implements FactionClaimEvent.Claim.Post
     {
-        Post(Player creator, Faction faction, World world, Vector3i chunkPosition, Cause cause)
+        Post(Player creator, Faction faction, ServerWorld world, Vector3i chunkPosition, Cause cause)
         {
             super(creator, faction, world, chunkPosition, cause);
         }

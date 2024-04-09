@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 public class StorageManagerImpl implements StorageManager
@@ -130,6 +131,7 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public void saveFaction(final Faction faction)
     {
+        checkNotNull(faction);
         queueStorageTask(storageTaskFactory.saveFaction(faction));
         FactionsCache.saveFaction(faction);
     }
@@ -137,6 +139,7 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public boolean deleteFaction(final String factionName)
     {
+        checkNotNull(factionName);
         queueStorageTask(storageTaskFactory.deleteFaction(factionName));
         FactionsCache.removeFaction(factionName);
         return true;
@@ -145,6 +148,8 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public @Nullable Faction getFaction(final String factionName)
     {
+        checkNotNull(factionName);
+
         try
         {
             Faction factionCache = FactionsCache.getFaction(factionName);
@@ -217,6 +222,7 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public boolean savePlayer(final FactionPlayer factionPlayer)
     {
+        checkNotNull(factionPlayer);
         queueStorageTask(storageTaskFactory.savePlayer(factionPlayer));
         FactionsCache.savePlayer(factionPlayer);
         return true;
@@ -226,6 +232,7 @@ public class StorageManagerImpl implements StorageManager
     @Nullable
     public FactionPlayer getPlayer(final UUID playerUUID)
     {
+        checkNotNull(playerUUID);
         try
         {
             FactionPlayer cachedPlayer = FactionsCache.getPlayer(playerUUID);
@@ -264,6 +271,7 @@ public class StorageManagerImpl implements StorageManager
     @Override
     public boolean restoreBackup(final String backupName)
     {
+        checkNotNull(backupName);
         try
         {
             return this.backupStorage.restoreBackup(backupName);

@@ -1,6 +1,5 @@
 package io.github.aquerr.eaglefactions.util;
 
-import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.exception.RequiredItemsNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
