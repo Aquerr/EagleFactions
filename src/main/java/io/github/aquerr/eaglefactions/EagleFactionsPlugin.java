@@ -152,7 +152,6 @@ import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
 import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
-import io.github.aquerr.eaglefactions.util.ItemUtil;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
@@ -360,7 +359,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private void prepareCreationCosts()
     {
         List<FactionsConfig.CostConfigDefinition> operationCostDefinitions = this.configuration.getFactionsConfig().getFactionCreationOperationCostDefinitions();
-        List<OperationCost> creationCosts = new ArrayList<>();
+        List<OperationCost> creationCosts = new ArrayList<>(operationCostDefinitions.size());
         for (FactionsConfig.CostConfigDefinition definition : operationCostDefinitions)
         {
             creationCosts.add(OperationCostConfigDefinitionToOperationCostMapper.map(operationCostFactory, definition));
@@ -371,7 +370,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private void prepareClaimCosts()
     {
         List<FactionsConfig.CostConfigDefinition> operationCostDefinitions = this.configuration.getFactionsConfig().getClaimOperationCostDefinitions();
-        List<OperationCost> claimCosts = new ArrayList<>();
+        List<OperationCost> claimCosts = new ArrayList<>(operationCostDefinitions.size());
         for (FactionsConfig.CostConfigDefinition definition : operationCostDefinitions)
         {
             claimCosts.add(OperationCostConfigDefinitionToOperationCostMapper.map(operationCostFactory, definition));
@@ -658,11 +657,11 @@ public class EagleFactionsPlugin implements EagleFactions
 
         this.permsManager = new PermsManagerImpl();
 
-        this.claimManager = new ClaimManagerImpl(this.configuration.getFactionsConfig(), this.factionLogic, permsManager, messageService);
         this.factionCreationManager = new FactionCreationManagerImpl(this.configuration.getFactionsConfig(), this.configuration.getChatConfig(),
                 this.storageManager, this.playerManager, this.messageService);
         this.factionLogic = new FactionLogicImpl(this.playerManager, this.storageManager, this.messageService);
         this.factionLogic.addFactionMaxClaimCountProvider(new DefaultFactionMaxClaimCountProvider(new FactionMaxClaimCountByPlayerPowerProvider(this.powerManager)));
+        this.claimManager = new ClaimManagerImpl(this.configuration.getFactionsConfig(), this.factionLogic, permsManager, this.playerManager, messageService);
 
         this.attackLogic = new AttackLogicImpl(this.factionLogic, this.getConfiguration().getFactionsConfig(), this.messageService, this.getConfiguration().getHomeConfig());
         this.protectionManager = new ProtectionManagerImpl(this.factionLogic, this.permsManager, this.playerManager, this.messageService, this.configuration.getProtectionConfig(), this.configuration.getChatConfig(), this.configuration.getFactionsConfig());
@@ -671,7 +670,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
         this.integrationManager = new IntegrationManager(this);
 
-        this.operationCostFactory = new OperationCostFactoryImpl(this.powerManager);
+        this.operationCostFactory = new OperationCostFactoryImpl(this.messageService, this.powerManager);
     }
 
     private void startFactionsRemover()
@@ -755,10 +754,6 @@ public class EagleFactionsPlugin implements EagleFactions
                 EagleFactionsCommandParameters.faction());
         registerCommand(singletonList("enemy"), "command.enemy.desc", PluginPermissions.ENEMY_COMMAND, new EnemyCommand(this),
                 EagleFactionsCommandParameters.faction());
-//        registerCommand(singletonList("promote"), "command.promote.desc", PluginPermissions.PROMOTE_COMMAND, new PromoteCommand(this),
-//                EagleFactionsCommandParameters.factionPlayer());
-//        registerCommand(singletonList("demote"), "command.demote.desc", PluginPermissions.DEMOTE_COMMAND, new DemoteCommand(this),
-//                EagleFactionsCommandParameters.factionPlayer());
 
         Command.Parameterized rankSetPermissionCommand = prepareCommand("command.rank.permission.set.desc",
                 PluginPermissions.SET_RANK_PERMISSION_COMMAND,
@@ -965,7 +960,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         this.isDisabled = true;
         Sponge.eventManager().unregisterListeners(this);
-        this.logger.info(PLUGIN_PREFIX_PLAIN + "EagleFactions has been disabled due to an error!");
+        this.logger.info(PLUGIN_PREFIX_PLAIN + PluginInfo.NAME + " has been disabled due to an error!");
     }
 
     private void checkVersionAndInform()

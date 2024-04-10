@@ -3,6 +3,7 @@ package io.github.aquerr.eaglefactions.logic.cost;
 import io.github.aquerr.eaglefactions.api.exception.CostNotSatisfiedException;
 import io.github.aquerr.eaglefactions.api.logic.cost.OperationPowerCost;
 import io.github.aquerr.eaglefactions.api.managers.PowerManager;
+import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import static java.lang.String.format;
@@ -12,12 +13,15 @@ import static java.lang.String.format;
  */
 public class OperationPowerCostImpl implements OperationPowerCost
 {
+    private final MessageService messageService;
     private final PowerManager powerManager;
     private final float power;
 
-    public OperationPowerCostImpl(PowerManager powerManager,
+    public OperationPowerCostImpl(MessageService messageService,
+                                  PowerManager powerManager,
                                   float power)
     {
+        this.messageService = messageService;
         this.powerManager = powerManager;
         this.power = power;
     }
@@ -27,7 +31,7 @@ public class OperationPowerCostImpl implements OperationPowerCost
     {
         float currentPower = powerManager.getPlayerPower(serverPlayer.uniqueId());
         if (currentPower < power)
-            throw new CostNotSatisfiedException(format("Power not satisfied! Required power: %f, Player power: %f", this.power, currentPower));
+            throw new CostNotSatisfiedException(messageService.resolveMessage("error.cost.power.not-satisfied-player-power", this.power, currentPower));
         this.powerManager.setPlayerPower(serverPlayer.uniqueId(), currentPower - power);
     }
 }

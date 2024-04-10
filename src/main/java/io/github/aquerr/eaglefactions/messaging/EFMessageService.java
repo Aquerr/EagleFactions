@@ -6,8 +6,11 @@ import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.messaging.locale.Localization;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
+import net.kyori.adventure.text.PatternReplacementResult;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.io.IOException;
@@ -17,7 +20,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.List;
 import java.util.PropertyResourceBundle;
+import java.util.regex.MatchResult;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -143,15 +149,35 @@ public class EFMessageService implements MessageService
     @Override
     public TextComponent resolveComponentWithMessage(String messageKey, Object... args)
     {
-        args = Arrays.stream(args)
+        LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.legacyAmpersand();
+        List<Component> textArgs = Arrays.stream(args)
                 .map(arg -> {
                     if (arg instanceof Component)
                     {
-                        return LegacyComponentSerializer.legacyAmpersand().serialize((Component) arg);
+                        return (Component) arg;
                     }
-                    return arg;
-                }).toArray();
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(resolveMessage(messageKey, args));
+                    return Component.text((String.valueOf(arg)));
+                }).collect(Collectors.toList());
+        TextComponent textComponent = legacyComponentSerializer.deserialize(resolveMessage(messageKey));
+        for (Component arg : textArgs)
+        {
+            textComponent = (TextComponent) textComponent.replaceText(TextReplacementConfig.builder()
+                            .match("\\{\\d\\}")
+                            .condition(new TextReplacementConfig.Condition()
+                            {
+                                @Override
+                                public @NotNull PatternReplacementResult shouldReplace(@NotNull MatchResult result, int matchCount, int replaced)
+                                {
+                                    if (replaced > 0)
+                                        return PatternReplacementResult.STOP;
+                                    else
+                                        return PatternReplacementResult.REPLACE;
+                                }
+                            })
+                            .replacement(arg)
+                    .build());
+        }
+        return textComponent;
     }
 
     @Override

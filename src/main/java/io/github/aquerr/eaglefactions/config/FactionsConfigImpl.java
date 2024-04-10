@@ -87,8 +87,6 @@ public class FactionsConfigImpl implements FactionsConfig
 
 		this.canAttackOnlyAtNight = this.configuration.getBoolean(false, "attack-only-at-night");
 
-		Duration duration = this.configuration.getGenericType(Duration.class, Duration.ofDays(30), "factions-remover", "max-inactive-time");
-
 		this.maxInactiveTime = this.configuration.getString("30d", "factions-remover", "max-inactive-time");
 		this.notifyWhenFactionRemoved = this.configuration.getBoolean(true, "factions-remover", "notify-when-removed");
 		this.notifyWhenFactionCreated = this.configuration.getBoolean(false, "should-notify-when-faction-created");
@@ -316,18 +314,5 @@ public class FactionsConfigImpl implements FactionsConfig
 	public List<CostConfigDefinition> getClaimOperationCostDefinitions()
 	{
 		return this.claimCostDefinitions;
-	}
-
-	private HashMap<String, Integer> prepareItems(final List<String> itemsToPrepare)
-	{
-		final HashMap<String, Integer> items = new HashMap<>();
-		for (final String itemWithAmount : itemsToPrepare)
-		{
-			final String[] strings = itemWithAmount.split("\\|");
-			final String item = strings[0];
-			final int amount = Integer.parseInt(strings[1]);
-			items.put(item, amount);
-		}
-		return items;
 	}
 }

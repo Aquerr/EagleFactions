@@ -9,6 +9,7 @@ import io.github.aquerr.eaglefactions.api.entities.Claim;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.exception.CouldNotClaimException;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
+import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.commands.AbstractCommand;
@@ -37,6 +38,7 @@ public class SquareClaimCommand extends AbstractCommand
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
     private final ClaimManager claimManager;
+    private final PlayerManager playerManager;
 
     public SquareClaimCommand(final EagleFactions plugin)
     {
@@ -46,6 +48,7 @@ public class SquareClaimCommand extends AbstractCommand
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
         this.claimManager = plugin.getClaimManager();
+        this.playerManager = plugin.getPlayerManager();
     }
 
     @Override
@@ -76,6 +79,7 @@ public class SquareClaimCommand extends AbstractCommand
     {
         final Vector3i playerChunk = player.location().chunkPosition();
         final ServerWorld world = player.world();
+        final boolean hasAdminMode = playerManager.hasAdminMode(player.user());
 
         CompletableFuture.runAsync(() -> {
             //Radius claim
@@ -102,15 +106,17 @@ public class SquareClaimCommand extends AbstractCommand
                 if (optionalChunkFaction.isPresent())
                     continue;
 
-                //Check if admin mode
-                if (super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
+                //Check if faction has enough power to claim territory
+                if (this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
                 {
-                    boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
-                    if (isCancelled)
-                        continue;
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
+                    break;
+                }
 
+                //Check if admin mode
+                if (hasAdminMode)
+                {
                     newFactionClaims.add(new Claim(world.uniqueId(), chunk));
-                    EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
 
@@ -119,13 +125,6 @@ public class SquareClaimCommand extends AbstractCommand
                 {
                     player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.players-with-your-rank-cant-claim-lands")));
                     return;
-                }
-
-                //Check if faction has enough power to claim territory
-                if (this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
-                {
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
-                    break;
                 }
 
                 //If attacked then It should not be able to claim territories
@@ -137,21 +136,12 @@ public class SquareClaimCommand extends AbstractCommand
 
                 if (playerFaction.isSafeZone() || playerFaction.isWarZone())
                 {
-                    boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
-                    if (isCancelled)
-                        continue;
-
                     newFactionClaims.add(new Claim(world.uniqueId(), chunk));
                     player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
-                    EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
                     continue;
                 }
 
                 if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(playerFaction, new Claim(world.uniqueId(), chunk)))
-                    continue;
-
-                boolean isCancelled = EventRunner.runFactionClaimEventPre(player, playerFaction, world, chunk);
-                if (isCancelled)
                     continue;
 
                 if(this.factionsConfig.shouldDelayClaim())
@@ -174,7 +164,7 @@ public class SquareClaimCommand extends AbstractCommand
     {
         try
         {
-            this.claimManager.claim(player, playerFaction, serverLocation);
+            this.claimManager.claim(player, playerFaction, serverLocation, false);
             player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", serverLocation.chunkPosition().toString()));
         }
         catch (CouldNotClaimException e)

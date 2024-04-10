@@ -90,7 +90,7 @@ public class FactionCreationManagerImpl implements FactionCreationManager
         }
         catch (Exception exception)
         {
-            throw new CouldNotCreateFactionException(exception);
+            throw new CouldNotCreateFactionException(exception.getMessage());
         }
     }
 

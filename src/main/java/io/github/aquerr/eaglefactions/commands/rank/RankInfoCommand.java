@@ -12,7 +12,6 @@ import io.github.aquerr.eaglefactions.commands.AbstractCommand;
 import io.github.aquerr.eaglefactions.commands.args.EagleFactionsCommandParameters;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -68,11 +67,11 @@ public class RankInfoCommand extends AbstractCommand
     {
         List<Component> componentList = new ArrayList<>();
 
-        componentList.add(text("Name: " + rank.getName()).append(newline()));
-        componentList.add(text("Display Name: ").append(LegacyComponentSerializer.legacyAmpersand().deserialize(rank.getDisplayName()))
-                .append(newline()));
-        componentList.add(text("Members: ").append(buildMembers(faction, rank)).append(newline()));
-        componentList.add(text("Permissions: ").append(newline()).append(buildPermissions(rank)));
+        componentList.add(text("Name: " + rank.getName()));
+        componentList.add(text("Display Name: ").append(LegacyComponentSerializer.legacyAmpersand().deserialize(rank.getDisplayName())));
+        componentList.add(text("Members: ").append(buildMembers(faction, rank)));
+        componentList.add(text("Permissions: "));
+        componentList.addAll(buildPermissions(rank));
 
         PaginationList.builder()
                 .title(text("Rank Info", NamedTextColor.GREEN))
@@ -81,14 +80,14 @@ public class RankInfoCommand extends AbstractCommand
                 .sendTo(serverPlayer);
     }
 
-    private Component buildPermissions(Rank rank)
+    private List<Component> buildPermissions(Rank rank)
     {
         List<Component> componentList = new ArrayList<>();
         for (final FactionPermission permission : new TreeSet<>(rank.getPermissions()))
         {
             componentList.add(formatPermission(permission));
         }
-        return Component.join(JoinConfiguration.newlines(), componentList);
+        return componentList;
     }
 
     private Component buildMembers(Faction faction, Rank rank)

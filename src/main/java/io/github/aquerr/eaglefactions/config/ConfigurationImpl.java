@@ -257,12 +257,13 @@ public class ConfigurationImpl implements Configuration
     {
         try
         {
-            return configNode.node(nodePath).get(clazz, defaultValue);
+            return configNode.node(nodePath).get(clazz);
         }
         catch (SerializationException e)
         {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
+        return defaultValue;
     }
 
     @SuppressWarnings("unchecked")

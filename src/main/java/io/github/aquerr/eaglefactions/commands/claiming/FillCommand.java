@@ -62,8 +62,10 @@ public class FillCommand extends AbstractCommand
         if (isFactionUnderAttack(faction))
             throw messageService.resolveExceptionWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()));
 
+        if (hasReachedClaimLimit(faction))
+            throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
+
         fill(player, faction);
-        player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", ""));
         return CommandResult.success();
     }
 
@@ -87,32 +89,45 @@ public class FillCommand extends AbstractCommand
     // Starts where player is standing
     private void fill(final ServerPlayer player, Faction faction) throws CommandException
     {
+        int currentClaims = faction.getClaims().size();
+        int maxClaims = this.factionLogic.getFactionMaxClaims(faction);
+
         final ServerWorld world = player.world();
         final Queue<Vector3i> chunks = new LinkedList<>();
         chunks.add(player.location().chunkPosition());
         while (!chunks.isEmpty())
         {
-            if (hasReachedClaimLimit(faction))
-                throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
-
             final Vector3i chunkPosition = chunks.poll();
             if (!this.factionLogic.isClaimed(world.uniqueId(), chunkPosition))
             {
                 faction = this.factionLogic.getFactionByName(faction.getName());
-                try
+
+                if (currentClaims >= maxClaims)
                 {
-                    this.claimManager.claim(player, faction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunkPosition)));
+                    throw messageService.resolveExceptionWithMessage("error.command.claim.faction.not-enough-power");
                 }
-                catch (CouldNotClaimException e)
-                {
-                    throw messageService.resolveExceptionWithMessage("error.claim.could-not-claim-territory-with-reason", e.getLocalizedMessage());
-                }
+
+                tryClaim(player, faction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunkPosition)));
+                currentClaims++;
 
                 chunks.add(chunkPosition.add(1, 0, 0));
                 chunks.add(chunkPosition.add(-1, 0, 0));
                 chunks.add(chunkPosition.add(0, 0, 1));
                 chunks.add(chunkPosition.add(0, 0, -1));
             }
+        }
+    }
+
+    private void tryClaim(ServerPlayer player, Faction faction, ServerLocation serverLocation) throws CommandException
+    {
+        try
+        {
+            this.claimManager.claim(player, faction, serverLocation, false);
+            player.sendMessage(messageService.resolveComponentWithMessage("command.claim.land-has-been-successfully-claimed", ""));
+        }
+        catch (CouldNotClaimException e)
+        {
+            throw messageService.resolveExceptionWithMessage("error.claim.could-not-claim-territory-with-reason", e.getLocalizedMessage());
         }
     }
 }

@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public class InfoCommand extends AbstractCommand
@@ -125,7 +124,7 @@ public class InfoCommand extends AbstractCommand
                 .append(messageService.resolveComponentWithMessage("command.info.description", faction.getDescription())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.motd", faction.getMessageOfTheDay())).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.public", faction.isPublic())).append(newline())
-                .append(messageService.resolveComponentWithMessage("command.info.leader", leaderNameText.color(GOLD))).append(newline())
+                .append(messageService.resolveComponentWithMessage("command.info.leader", leaderNameText)).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.members", membersList)).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.power", super.getPlugin().getPowerManager().getFactionPower(faction) + "/" + super.getPlugin().getPowerManager().getFactionMaxPower(faction))).append(newline())
                 .append(messageService.resolveComponentWithMessage("command.info.claims", faction.getClaims().size() + "/" + this.factionLogic.getFactionMaxClaims(faction)))

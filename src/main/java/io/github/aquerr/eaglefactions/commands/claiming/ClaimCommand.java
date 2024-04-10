@@ -140,10 +140,6 @@ public class ClaimCommand extends AbstractCommand
         if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(faction, new Claim(world.uniqueId(), chunk)))
             throw messageService.resolveExceptionWithMessage("error.command.claim.claim.claims-need-to-be-connected");
 
-        boolean isCancelled = EventRunner.runFactionClaimEventPre(player, faction, world, chunk);
-        if (isCancelled)
-            return CommandResult.success();
-
         try
         {
             this.claimManager.claim(player, faction, ServerLocation.of(world, WorldUtil.getChunkTopCenter(world, chunk)));

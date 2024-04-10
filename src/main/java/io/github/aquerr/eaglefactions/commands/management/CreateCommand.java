@@ -71,7 +71,7 @@ public class CreateCommand extends AbstractCommand
         }
         catch (Exception e)
         {
-            throw messageService.resolveExceptionWithMessage("error.command.create.could-not-create-faction-with-reason", e.getMessage());
+            throw messageService.resolveExceptionWithMessage("error.command.create.could-not-create-faction-with-reason", e.getLocalizedMessage());
         }
 
         return CommandResult.success();
