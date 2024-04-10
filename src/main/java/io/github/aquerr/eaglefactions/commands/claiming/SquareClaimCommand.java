@@ -106,18 +106,18 @@ public class SquareClaimCommand extends AbstractCommand
                 if (optionalChunkFaction.isPresent())
                     continue;
 
-                //Check if faction has enough power to claim territory
-                if (this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
-                {
-                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
-                    break;
-                }
-
                 //Check if admin mode
                 if (hasAdminMode)
                 {
                     newFactionClaims.add(new Claim(world.uniqueId(), chunk));
                     continue;
+                }
+
+                //Check if faction has enough power to claim territory
+                if (this.factionLogic.getFactionMaxClaims(playerFaction) <= playerFaction.getClaims().size() + newFactionClaims.size())
+                {
+                    player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.claim.faction.not-enough-power")));
+                    break;
                 }
 
                 //If not admin then check faction perms for player
