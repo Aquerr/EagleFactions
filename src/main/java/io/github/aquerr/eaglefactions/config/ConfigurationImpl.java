@@ -66,7 +66,7 @@ public class ConfigurationImpl implements Configuration
         this.configs.put(ChatConfig.class, new ChatConfigImpl(this));
         this.configs.put(DynmapConfig.class, new DynmapConfigImpl(this));
         this.configs.put(PowerConfig.class, new PowerConfigImpl(this));
-        this.configs.put(ProtectionConfig.class, new ProtectionConfigImpl(pluginContainer, this));
+        this.configs.put(ProtectionConfig.class, new ProtectionConfigImpl(this));
         this.configs.put(PVPLoggerConfig.class, new PVPLoggerConfigImpl(this));
         this.configs.put(FactionsConfig.class, new FactionsConfigImpl(this));
         this.configs.put(BluemapConfig.class, new BluemapConfigImpl(this));

@@ -39,6 +39,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.UUID;
 
+import static io.github.aquerr.eaglefactions.TestUtils.BUILD_DIR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -48,7 +49,6 @@ import static org.mockito.Mockito.mockStatic;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractDatabaseStorageTest
 {
-    protected static final Path BUILD_DIR = Paths.get(".").resolve("build");
     protected static final String DATABASE_NAME = "eaglefactions";
     protected static final String USERNAME = "admin";
     protected static final String PASSWORD = "password";

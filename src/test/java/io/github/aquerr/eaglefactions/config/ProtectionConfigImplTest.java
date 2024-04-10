@@ -3,53 +3,52 @@ package io.github.aquerr.eaglefactions.config;
 import com.google.common.collect.ImmutableSet;
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 
+import java.util.Set;
+
+import static io.github.aquerr.eaglefactions.TestUtils.BUILD_DIR;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class ProtectionConfigImplTest
 {
     @Mock
     private Configuration configuration;
-    @Mock
-    private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
-    @Mock
-    private CommentedConfigurationNode configurationNode;
 
-//    @InjectMocks
-//    @Spy
-//    private ProtectionConfigImpl protectionConfig;
+    private ProtectionConfigImpl protectionConfig;
 
-//    @Test
-//    public void gettingDetectedWorldNamesShouldReturnAllWorlds()
-//    {
-//        given
-//        final Set<String> worlds = ImmutableSet.of("ClaimableWorld", "NotClaimableWorld", "SafeZoneWorld", "WarZoneWorld");
-//        doReturn("ClaimableWorld").when(protectionConfig.getClaimableWorldNames());
-//        doReturn("NotClaimableWorld").when(protectionConfig.getNotClaimableWorldNames());
-//        doReturn("SafeZoneWorld").when(protectionConfig.getSafeZoneWorldNames());
-//        doReturn("WarZoneWorld").when(protectionConfig.getWarZoneWorldNames());
-//
-//        when
-//        final Set<String> detectedWorlds = protectionConfig.getDetectedWorldNames();
-//
-//        then
-//        assertEquals(worlds, detectedWorlds);
-//        verify(protectionConfig, times(1)).getClaimableWorldNames();
-//        verify(protectionConfig, times(1)).getNotClaimableWorldNames();
-//        verify(protectionConfig, times(1)).getSafeZoneWorldNames();
-//        verify(protectionConfig, times(1)).getWarZoneWorldNames();
-//    }
+    @BeforeEach
+    void setup()
+    {
+        given(configuration.getConfigDirectoryPath()).willReturn(BUILD_DIR);
+        protectionConfig = new ProtectionConfigImpl(configuration);
+    }
 
     @Test
-    public void whenItemIsWhitelistedThenReturnTrue()
+    void gettingDetectedWorldNamesShouldReturnAllWorlds() throws SerializationException
+    {
+        // given
+        final Set<String> worlds = ImmutableSet.of("ClaimableWorld", "NotClaimableWorld", "SafeZoneWorld", "WarZoneWorld");
+
+        // when
+        protectionConfig.reload();
+        final Set<String> detectedWorlds = protectionConfig.getDetectedWorldNames();
+
+        // then
+        assertEquals(worlds, detectedWorlds);
+    }
+
+    @Test
+    void whenItemIsWhitelistedThenReturnTrue()
     {
         ProtectionConfig.WhiteList whiteList = new ProtectionConfigImpl.WhiteListsImpl(ImmutableSet.of("minecraft:bucket"), null, null);
 
@@ -60,7 +59,7 @@ class ProtectionConfigImplTest
     }
 
     @Test
-    public void whenItemIsNotWhitelistedThenReturnFalse()
+    void whenItemIsNotWhitelistedThenReturnFalse()
     {
         final ProtectionConfig.WhiteList whiteList = new ProtectionConfigImpl.WhiteListsImpl(ImmutableSet.of("minecraft:sword"), null, null);
 
@@ -71,7 +70,7 @@ class ProtectionConfigImplTest
     }
 
     @Test
-    public void whenWhitelistedPatternMatchesItemThenReturnTrue()
+    void whenWhitelistedPatternMatchesItemThenReturnTrue()
     {
         final ProtectionConfig.WhiteList whiteList = new ProtectionConfigImpl.WhiteListsImpl(ImmutableSet.of("minecraft:.*"), null, null);
 
@@ -82,7 +81,7 @@ class ProtectionConfigImplTest
     }
 
     @Test
-    public void whenWhitelistedPatternDoesNotMatchItemThenReturnFalse()
+    void whenWhitelistedPatternDoesNotMatchItemThenReturnFalse()
     {
         final ProtectionConfig.WhiteList whiteList = new ProtectionConfigImpl.WhiteListsImpl(ImmutableSet.of("enderio:.*"), null, null);
 

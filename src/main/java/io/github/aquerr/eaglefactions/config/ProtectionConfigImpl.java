@@ -11,7 +11,6 @@ import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,7 +51,7 @@ public class ProtectionConfigImpl implements ProtectionConfig
 
 	private List<String> blockedCommandsInOtherFactionsTerritory = new ArrayList<>();
 
-	public ProtectionConfigImpl(final PluginContainer pluginContainer, final Configuration configuration)
+	public ProtectionConfigImpl(final Configuration configuration)
 	{
 		this.configuration = configuration;
 
