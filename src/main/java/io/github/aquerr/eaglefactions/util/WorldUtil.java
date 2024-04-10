@@ -30,16 +30,16 @@ public final class WorldUtil
 
     public static ServerLocation getBlockTopCenter(ServerLocation blockLocation)
     {
-        double centerX = blockLocation.blockX() > 0 ? blockLocation.blockX() + 0.5 : blockLocation.blockX() - 0.5;
+        double centerX = blockLocation.blockX() < 0 ? blockLocation.blockX() + 0.5 : blockLocation.blockX() - 0.5;
         double centerY = blockLocation.blockY();
-        double centerZ = blockLocation.blockZ() > 0 ? blockLocation.blockZ() + 0.5 : blockLocation.blockZ() - 0.5;
+        double centerZ = blockLocation.blockZ() < 0 ? blockLocation.blockZ() + 0.5 : blockLocation.blockZ() - 0.5;
         return ServerLocation.of(blockLocation.world(), Vector3d.from(centerX, centerY, centerZ));
     }
 
     public static Vector3d getChunkTopCenter(final ServerWorld world, final Vector3i chunkPosition)
     {
-        final double x = (chunkPosition.x() << 4) + 8;
-        final double z = (chunkPosition.z() << 4) + 8;
+        final double x = (chunkPosition.x() << 4) + 8.0;
+        final double z = (chunkPosition.z() << 4) + 8.0;
         final double y = world.highestYAt((int)x, (int)z);
         return new Vector3d(x, y, z);
     }

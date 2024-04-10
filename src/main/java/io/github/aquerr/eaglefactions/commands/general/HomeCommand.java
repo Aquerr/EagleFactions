@@ -15,12 +15,14 @@ import io.github.aquerr.eaglefactions.scheduling.EagleFactionsConsumerTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.sound.Sound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -239,6 +241,7 @@ public class HomeCommand extends AbstractCommand
                 .orElseGet(() -> ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
         player.setLocation(safeLocation);
         player.sendActionBar(messageService.resolveComponentWithMessage("command.home.teleport-success"));
+
         startHomeCooldown(player.uniqueId());
     }
 
@@ -275,7 +278,7 @@ public class HomeCommand extends AbstractCommand
         @Override
         public void accept(ScheduledTask task)
         {
-            if (!player.serverLocation().blockPosition().equals(playerLastBlockPosition))
+            if (!player.isOnline() || !player.serverLocation().blockPosition().equals(playerLastBlockPosition))
             {
                 player.sendActionBar(messageService.resolveComponentWithMessage("command.home.you-moved"));
                 cancelAnimations();
@@ -314,7 +317,13 @@ public class HomeCommand extends AbstractCommand
             }
             ServerLocation safeLocation = Sponge.server().teleportHelper().findSafeLocation(ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()))
                     .orElseGet(() -> ServerLocation.of(optionalWorld.get(), factionHome.getBlockPosition()));
+
             player.setLocation(safeLocation);
+            player.playSound(Sound.sound()
+                    .type(SoundTypes.ITEM_TRIDENT_RETURN)
+                    .pitch(10)
+                    .source(Sound.Source.PLAYER)
+                    .build());
             player.sendActionBar(messageService.resolveComponentWithMessage("command.home.teleport-success"));
             startHomeCooldown(player.uniqueId());
         }
@@ -427,7 +436,7 @@ public class HomeCommand extends AbstractCommand
                 angle += angleIncrement;
             }
 
-            if (!this.lastPlayerBlockPosition.equals(this.player.serverLocation().blockPosition()) || !this.player.isOnline())
+            if (!this.player.isOnline() || !this.lastPlayerBlockPosition.equals(this.player.serverLocation().blockPosition()))
                 task.cancel();
         }
     }
