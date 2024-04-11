@@ -731,20 +731,24 @@ public class EagleFactionsPlugin implements EagleFactions
 
         Command.Parameterized listRelationPermissionsCommand = prepareCommand("command.relations.permissions.list.desc",
                 PluginPermissions.RELATION_LIST_PERMISSIONS_COMMAND,
-                new ListRelationPermissionsCommand(this));
+                new ListRelationPermissionsCommand(this),
+                Parameter.enumValue(RelationType.class).key("relation_type").build());
 
         Command.Parameterized setRelationPermissionCommand = prepareCommand("command.relations.permissions.set.desc",
                 PluginPermissions.SET_RELATION_PERMISSION_COMMAND,
-                new SetRelationPermissionCommand(this));
+                new SetRelationPermissionCommand(this),
+                Parameter.enumValue(RelationType.class).key("relation_type").build(),
+                Parameter.enumValue(FactionPermission.class).key("permission").build());
 
         registerCommand(singletonList("relations"), "command.relations.desc",
                 PluginPermissions.LIST_RELATIONS_COMMAND,
                 new RelationsCommand(this),
-                Parameter.enumValue(RelationType.class).key("relation_type").optional().build(),
-                Parameter.firstOfBuilder(Parameter.firstOf(List.of(
+                Parameter.firstOf(
+                        EagleFactionsCommandParameters.optionalFaction(),
                         Parameter.subcommand(listRelationPermissionsCommand, "list_permissions"),
                         Parameter.subcommand(setRelationPermissionCommand, "set_permission")
-                ))).optional().build());
+                )
+        );
 
         registerCommand(asList("p", "player"), "command.player.desc", PluginPermissions.PLAYER_COMMAND, new PlayerCommand(this),
                 EagleFactionsCommandParameters.optionalFactionPlayer());
