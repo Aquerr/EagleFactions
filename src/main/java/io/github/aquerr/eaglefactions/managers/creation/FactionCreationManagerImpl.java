@@ -84,7 +84,16 @@ public class FactionCreationManagerImpl implements FactionCreationManager
         {
             if (isServerPlayer(audience))
             {
-                payForOperation((ServerPlayer)audience);
+                ServerPlayer serverPlayer = (ServerPlayer) audience;
+                boolean hasAdminMode = this.playerManager.hasAdminMode(serverPlayer.user());
+                if (hasAdminMode)
+                {
+                    serverPlayer.sendMessage(messageService.resolveMessageWithPrefix("general.cost.bypassing-operation-cost-because-of-admin-mode"));
+                }
+                else
+                {
+                    payForOperation(serverPlayer);
+                }
             }
 
             doCreateFaction(audience, factionName, factionTag);
