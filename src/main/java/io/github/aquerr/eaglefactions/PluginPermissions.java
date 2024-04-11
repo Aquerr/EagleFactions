@@ -48,8 +48,6 @@ public final class PluginPermissions
 
     // Ranks
     public static final String SET_LEADER_COMMAND = "eaglefactions.player.setleader";
-//    public static final String PROMOTE_COMMAND = "eaglefactions.player.promote";
-//    public static final String DEMOTE_COMMAND = "eaglefactions.player.demote";
 
     public static final String RANK_COMMANDS = "eaglefactions.player.rank";
     public static final String LIST_RANKS_COMMAND = "eaglefactions.player.rank.list_ranks";

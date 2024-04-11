@@ -34,4 +34,10 @@ public class OperationItemsCostImpl implements OperationItemsCost
             throw new CostNotSatisfiedException(messageService.resolveMessage("error.cost.items.not-satisfied-player-items", exception.requiredItemsAsString(), exception.missingItemAsString()));
         }
     }
+
+    @Override
+    public void rollBack(ServerPlayer serverPlayer)
+    {
+        serverPlayer.inventory().offer(this.items.toArray(new ItemStack[0]));
+    }
 }

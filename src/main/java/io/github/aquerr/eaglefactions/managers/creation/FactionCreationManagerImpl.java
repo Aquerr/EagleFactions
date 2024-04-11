@@ -20,6 +20,7 @@ import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.FactionPlayerImpl;
 import io.github.aquerr.eaglefactions.entities.ProtectionFlagImpl;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.logic.cost.OperationCostHandler;
 import io.github.aquerr.eaglefactions.managers.RankManagerImpl;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.Sponge;
@@ -96,10 +97,7 @@ public class FactionCreationManagerImpl implements FactionCreationManager
 
     private void payForOperation(ServerPlayer serverPlayer) throws CostNotSatisfiedException
     {
-        for (OperationCost creationCost : this.creationCosts)
-        {
-            creationCost.pay(serverPlayer);
-        }
+        OperationCostHandler.payWithRollback(serverPlayer, this.creationCosts);
     }
 
     private void doCreateFaction(Audience audience, String factionName, String factionTag)

@@ -28,4 +28,10 @@ public class OperationHavingPowerCostImpl implements OperationHavingPowerCost
         if (currentPower < this.power)
             throw new CostNotSatisfiedException(messageService.resolveMessage("error.cost.power.not-satisfied-player-power", this.power, currentPower));
     }
+
+    @Override
+    public void rollBack(ServerPlayer serverPlayer)
+    {
+        // nothing to do here
+    }
 }

@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.api.managers.PowerManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import static java.lang.String.format;
+import java.util.UUID;
 
 /**
  * Cost that takes power from player for creating the faction.
@@ -33,5 +33,12 @@ public class OperationPowerCostImpl implements OperationPowerCost
         if (currentPower < power)
             throw new CostNotSatisfiedException(messageService.resolveMessage("error.cost.power.not-satisfied-player-power", this.power, currentPower));
         this.powerManager.setPlayerPower(serverPlayer.uniqueId(), currentPower - power);
+    }
+
+    @Override
+    public void rollBack(ServerPlayer serverPlayer)
+    {
+        UUID playerUUID = serverPlayer.uniqueId();
+        this.powerManager.setPlayerPower(playerUUID, powerManager.getPlayerPower(playerUUID) + this.power);
     }
 }

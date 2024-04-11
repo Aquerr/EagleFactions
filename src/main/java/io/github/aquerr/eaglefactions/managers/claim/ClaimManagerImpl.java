@@ -14,6 +14,7 @@ import io.github.aquerr.eaglefactions.api.managers.claim.ClaimContext;
 import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.events.EventRunner;
+import io.github.aquerr.eaglefactions.logic.cost.OperationCostHandler;
 import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.scheduling.DelayedClaimTask;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
@@ -168,10 +169,7 @@ public class ClaimManagerImpl implements ClaimManager
 
     private void payForOperation(ServerPlayer serverPlayer) throws CostNotSatisfiedException
     {
-        for (OperationCost claimCost : this.claimCosts)
-        {
-            claimCost.pay(serverPlayer);
-        }
+        OperationCostHandler.payWithRollback(serverPlayer, this.claimCosts);
     }
 
     private Claim toClaim(ServerLocation serverLocation)
