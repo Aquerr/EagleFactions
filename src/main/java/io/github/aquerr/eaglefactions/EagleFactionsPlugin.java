@@ -639,7 +639,6 @@ public class EagleFactionsPlugin implements EagleFactions
             return;
 
         configuration = new ConfigurationImpl(this.pluginContainer, configDir, resource);
-        pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void setupManagers()
@@ -671,6 +670,7 @@ public class EagleFactionsPlugin implements EagleFactions
         this.integrationManager = new IntegrationManager(this);
 
         this.operationCostFactory = new OperationCostFactoryImpl(this.messageService, this.powerManager);
+        this.pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void startFactionsRemover()
