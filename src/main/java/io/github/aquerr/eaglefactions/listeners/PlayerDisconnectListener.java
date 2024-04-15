@@ -29,7 +29,7 @@ public class PlayerDisconnectListener extends AbstractListener
     {
         if (super.getPlugin().getPVPLogger().isActive() && EagleFactionsPlugin.getPlugin().getPVPLogger().isPlayerBlocked(player))
         {
-            player.damage(1000, DamageSource.builder().type(DamageTypes.ATTACK).build());
+            player.damage(1000, DamageSource.builder().type(DamageTypes.GENERIC).build());
             super.getPlugin().getPVPLogger().removePlayer(player);
         }
 

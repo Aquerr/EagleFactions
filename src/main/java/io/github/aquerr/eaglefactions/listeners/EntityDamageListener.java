@@ -26,8 +26,6 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
@@ -37,7 +35,6 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
 
 public class EntityDamageListener extends AbstractListener
@@ -70,7 +67,6 @@ public class EntityDamageListener extends AbstractListener
     public void onEntityDamage(final DamageEntityEvent event)
     {
         final Entity targetEntity = event.entity();
-        final Cause cause = event.cause();
 
         //Handle damaging player in separate method.
         if(targetEntity instanceof Player)
@@ -82,12 +78,15 @@ public class EntityDamageListener extends AbstractListener
 
         User user = null;
 
-        if(cause.root() instanceof IndirectEntityDamageSource)
+        final DamageSource damageSource = event.source() instanceof DamageSource ? (DamageSource) event.source() : null;
+        if (damageSource != null)
         {
-            IndirectEntityDamageSource indirectEntityDamageSource = (IndirectEntityDamageSource) cause.root();
-            final Entity sourceEntity = indirectEntityDamageSource.indirectSource();
-            if(sourceEntity instanceof ServerPlayer)
-                user = ((ServerPlayer) sourceEntity).user();
+            Entity sourceEntity = damageSource.indirectSource()
+                    .or(damageSource::source)
+                    .orElse(null);
+
+            if (sourceEntity instanceof ServerPlayer serverPlayer)
+                user = serverPlayer.user();
         }
 
         if(user == null)
@@ -120,7 +119,10 @@ public class EntityDamageListener extends AbstractListener
         //At this point we know that damage has NOT been dealt inside Safe Zone.
 
         final boolean willCauseDeath = event.willCauseDeath();
-        final Object rootCause = event.cause().root();
+        final DamageSource damageSource = event.source() instanceof DamageSource ? (DamageSource) event.source() : null;
+
+        if (damageSource == null)
+            return;
 
         //Percentage damage reduction operator
         final DoubleUnaryOperator doubleUnaryOperator = operand ->
@@ -129,75 +131,45 @@ public class EntityDamageListener extends AbstractListener
             return -difference;
         };
 
-        //Handle projectiles
-        if(rootCause instanceof IndirectEntityDamageSource)
-        {
-            final IndirectEntityDamageSource indirectEntityDamageSource = (IndirectEntityDamageSource)rootCause;
-            final Entity indirectSource = indirectEntityDamageSource.indirectSource();
+        Entity sourceEntity = damageSource.indirectSource()
+                .or(damageSource::source)
+                .orElse(null);
 
-            //If player attacked the player
-            if(indirectSource instanceof ServerPlayer)
+        if (sourceEntity != null)
+        {
+            //TechGuns
+            if (ModSupport.isTechGuns(sourceEntity.getClass()))
             {
-                final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, (ServerPlayer) indirectSource, willCauseDeath);
-                if(shouldBlockDamage)
-                {
-                    event.setBaseDamage(0);
-                    event.setCancelled(true);
-                    if(!(indirectEntityDamageSource.source() instanceof ServerPlayer))
-                    {
-                        indirectEntityDamageSource.source().remove();
-                    }
-                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
-                }
-                else
-                {
-                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-                    if (isInOwnTerritory(attackedPlayer))
-                    {
-                        event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
-                    }
-                }
+                final Entity entity = ModSupport.getAttackerFromTechGuns(sourceEntity);
+                if (entity != null)
+                    sourceEntity = entity;
             }
         }
-        else if (rootCause instanceof EntityDamageSource)
+
+
+        if(sourceEntity instanceof ServerPlayer player)
         {
-            //Handle damage from other entities
-            final EntityDamageSource entityDamageSource = (EntityDamageSource) rootCause;
-            Entity entitySource = entityDamageSource.source();
-
-            //TechGuns
-            if (ModSupport.isTechGuns(entityDamageSource.getClass()))
+            final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
+            if(shouldBlockDamage)
             {
-                final Entity entity = ModSupport.getAttackerFromTechGuns(entityDamageSource);
-                if (entity != null)
-                    entitySource = entity;
+                event.setBaseDamage(0);
+                event.setCancelled(true);
+                world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
             }
-
-            if(entitySource instanceof ServerPlayer)
+            else
             {
-                final ServerPlayer player = (ServerPlayer) entitySource;
-                final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
-                if(shouldBlockDamage)
-                {
-                    event.setBaseDamage(0);
-                    event.setCancelled(true);
-                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
-                }
-                else
-                {
-                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-                    if (isInOwnTerritory(attackedPlayer))
-                    {
-                        event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
-                    }
-                }
-            }
-            else // Player attacked by mob
-            {
-                if(isInOwnTerritory(attackedPlayer))
+                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
+                if (isInOwnTerritory(attackedPlayer))
                 {
                     event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
                 }
+            }
+        }
+        else
+        {
+            if(isInOwnTerritory(attackedPlayer))
+            {
+                event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
             }
         }
     }
@@ -218,15 +190,9 @@ public class EntityDamageListener extends AbstractListener
         {
             final Faction attackedFaction = attackedPlayerFaction.get();
             final Faction sourceFaction = sourcePlayerFFaction.get();
-            if (attackedFaction.equals(sourceFaction))
-            {
-                sendPenaltyMessageAndDecreasePower(sourcePlayer);
-            }
-            else if (attackedFaction.isTruce(sourceFaction))
-            {
-                sendPenaltyMessageAndDecreasePower(sourcePlayer);
-            }
-            else if (attackedFaction.isAlly(sourceFaction))
+            if (attackedFaction.equals(sourceFaction)
+                    || attackedFaction.isTruce(sourceFaction)
+                    || attackedFaction.isAlly(sourceFaction))
             {
                 sendPenaltyMessageAndDecreasePower(sourcePlayer);
             }
@@ -273,9 +239,6 @@ public class EntityDamageListener extends AbstractListener
 
         if(!eventContext.containsKey(EventContextKeys.PLAYER))
             return;
-
-//        if(!cause.containsType(Player.class))
-//            return;
 
         final Player igniterPlayer = eventContext.get(EventContextKeys.PLAYER).get();
         final boolean isFactionFriendlyFireOn = this.factionsConfig.isFactionFriendlyFire();

@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.util;
 
 import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 
 public final class ModSupport
 {
@@ -35,19 +34,19 @@ public final class ModSupport
 
     /**
      * Gets the attacking entity from the EntityDamageSource. EntityDamageSource must come from TechGuns.
-     * @param entityDamageSource the source
+     * @param entity the source
      * @return attacking/source entity.
      */
-    public static Entity getAttackerFromTechGuns(final EntityDamageSource entityDamageSource)
+    public static Entity getAttackerFromTechGuns(final Entity entity)
     {
         Object attacker = null;
         try
         {
-            attacker = entityDamageSource.getClass().getField("attacker").get(entityDamageSource);
+            attacker = entity.getClass().getField("attacker").get(entity);
         }
         catch (IllegalAccessException | NoSuchFieldException e)
         {
-            EagleFactionsPlugin.getPlugin().getLogger().warn("Could not get 'attacker' from techguns entityDamangeSource: " + entityDamageSource.source().type().toString(), e);
+            EagleFactionsPlugin.getPlugin().getLogger().warn("Could not get 'attacker' from techguns entity: " + entity.type().toString(), e);
         }
         if (attacker instanceof Entity)
             return (Entity)attacker;

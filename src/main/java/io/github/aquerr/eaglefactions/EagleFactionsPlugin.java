@@ -483,9 +483,8 @@ public class EagleFactionsPlugin implements EagleFactions
 
             this.integrationManager.reloadIntegrations();
 
-            if(event.source() instanceof Player)
+            if(event.source() instanceof Player player)
             {
-                Player player = (Player)event.source();
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.reload.config-reloaded"));
             }
         }
@@ -639,7 +638,6 @@ public class EagleFactionsPlugin implements EagleFactions
             return;
 
         configuration = new ConfigurationImpl(this.pluginContainer, configDir, resource);
-        pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void setupManagers()
@@ -671,6 +669,7 @@ public class EagleFactionsPlugin implements EagleFactions
         this.integrationManager = new IntegrationManager(this);
 
         this.operationCostFactory = new OperationCostFactoryImpl(this.messageService, this.powerManager);
+        this.pvpLogger = PVPLoggerImpl.getInstance(this);
     }
 
     private void startFactionsRemover()

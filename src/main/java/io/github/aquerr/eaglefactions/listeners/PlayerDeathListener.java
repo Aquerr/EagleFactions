@@ -63,10 +63,13 @@ public class PlayerDeathListener extends AbstractListener
 
     private void checkPowerLossFlagAndDecreasePower(ServerPlayer player)
     {
-        getFactionAtLocation(player.serverLocation())
+        boolean shouldPowerLoss = getFactionAtLocation(player.serverLocation())
                 .map(faction -> faction.getProtectionFlagValue(ProtectionFlagType.TERRITORY_POWER_LOSS))
                 .filter(Boolean.TRUE::equals)
-                .ifPresent((value) -> decreasePower(player));
+                .orElse(true);
+
+        if (shouldPowerLoss)
+            decreasePower(player);
     }
 
     private void decreasePower(ServerPlayer player)
