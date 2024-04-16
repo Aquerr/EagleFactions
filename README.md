@@ -87,7 +87,7 @@ Also thanks to JetBrains for their IDE
 
 ## License
 
-[MIT](https://github.com/Aquerr/EagleFactions/blob/master/LICENSE)
+[MIT](https://github.com/Aquerr/EagleFactions/blob/api-10/LICENSE)
 
 ## Donation
 
