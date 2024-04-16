@@ -199,6 +199,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.aquerr.eaglefactions.PluginInfo.PLUGIN_PREFIX_PLAIN;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static net.kyori.adventure.text.Component.text;
@@ -634,11 +635,14 @@ public class EagleFactionsPlugin implements EagleFactions
 
     private void setupConfigs() throws IOException
     {
-        Resource resource = ResourceUtils.getResource("assets/eaglefactions/Settings.conf");
+        String configResourcePath = "assets/eaglefactions/Settings.conf";
+        Resource resource = ResourceUtils.getResource(configResourcePath);
         if (resource == null)
-            return;
+        {
+            throw new IllegalStateException(format("Config file could not be found at path %s", configResourcePath));
+        }
 
-        configuration = new ConfigurationImpl(this.pluginContainer, configDir, resource);
+        configuration = new ConfigurationImpl(configDir, resource);
     }
 
     private void setupManagers()

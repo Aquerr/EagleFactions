@@ -21,7 +21,6 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +41,7 @@ public class ConfigurationImpl implements Configuration
 
     private final Map<Class<? extends ConfigReloadable>, ConfigReloadable> configs = new HashMap<>();
 
-    public ConfigurationImpl(final PluginContainer pluginContainer, final Path configDir, final Resource configAsset) throws IOException
+    public ConfigurationImpl(final Path configDir, final Resource configAsset) throws IOException
     {
         this.configDirectoryPath = configDir;
         FileUtils.createDirectoryIfNotExists(this.configDirectoryPath);
@@ -60,7 +59,6 @@ public class ConfigurationImpl implements Configuration
         }
 
         this.configLoader = (HoconConfigurationLoader.builder()).path(this.configPath).build();
-        loadConfiguration();
 
         this.configs.put(StorageConfig.class, new StorageConfigImpl(this));
         this.configs.put(ChatConfig.class, new ChatConfigImpl(this));
