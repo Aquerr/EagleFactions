@@ -15,7 +15,7 @@ public final class ModSupport
      * Checks if the given class comes from TechGuns
      * @param clazz class to check
      * @param <T> the type of class
-     * @return <tt>true</tt> if class comes from TechGuns, <tt>false</tt> if not.
+     * @return true if class comes from TechGuns, false if not.
      */
     public static <T> boolean isTechGuns(final Class<T> clazz)
     {
@@ -26,7 +26,7 @@ public final class ModSupport
      * Checks if the given class comes from AncientWarfare
      * @param clazz class to check
      * @param <T> the type of class
-     * @return <tt>true</tt> if class comes from AncientWarfare, <tt>false</tt> if not.
+     * @return true if class comes from AncientWarfare, false if not.
      */
     public static <T> boolean isAncientWarfare(final Class<T> clazz)
     {
@@ -57,7 +57,7 @@ public final class ModSupport
     /**
      * Checks if the given class comes from Mekanism
      * @param entity to check
-     * @return <tt>true</tt> if class comes from Mekanism, <tt>false</tt> if not.
+     * @return true if class comes from Mekanism, false if not.
      */
     public static boolean isMekenism(final Entity entity)
     {
@@ -88,7 +88,7 @@ public final class ModSupport
     /**
      * Checks if the given entity is IC2's mining laser.
      * @param entity the entity
-     * @return <tt>true</tt> if the entity is mining laser, <tt>false</tt> if not.
+     * @return true if the entity is mining laser, false if not.
      */
     public static boolean isIndustrialCraftMiningLaser(Entity entity)
     {
@@ -98,7 +98,7 @@ public final class ModSupport
     /**
      * Checks if the given entity is from Flan's Mod. (For example, can be a helicopter)
      * @param entity the entity
-     * @return <tt>true</tt> if the entity is from Flan's Mod, <tt>false</tt> if not.
+     * @return true if the entity is from Flan's Mod, false if not.
      */
     public static boolean isFlan(Entity entity)
     {
