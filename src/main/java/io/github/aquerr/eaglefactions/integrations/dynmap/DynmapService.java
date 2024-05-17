@@ -6,6 +6,8 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.entities.FactionMember;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
@@ -19,6 +21,7 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -139,26 +142,30 @@ public class DynmapService
         return description.toString();
     }
 
-    public int getAreaColor(final Faction faction) {
-
-        int areaColor;
-
-        if(EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig().canColorTags())
+    public int getAreaColor(final Faction faction)
+    {
+        if (faction.isSafeZone())
         {
-            areaColor = Integer.parseInt(faction.getTag().color().asHexString());
+            return dynmapConfig.getDynmapSafezoneColor();
+        }
+        else if (faction.isWarZone())
+        {
+            return dynmapConfig.getDynmapWarzoneColor();
         }
         else
         {
-            areaColor = dynmapConfig.getDynmapFactionColor();
+            if (EagleFactionsPlugin.getPlugin().getConfiguration().getChatConfig().canColorTags())
+            {
+                return Optional.ofNullable(faction.getTag().color())
+                        .map(TextColor::asHexString)
+                        .map(Integer::decode)
+                        .orElse(dynmapConfig.getDynmapFactionColor());
+            }
+            else
+            {
+                return dynmapConfig.getDynmapFactionColor();
+            }
         }
-
-        if (faction.isSafeZone()) {
-            areaColor = dynmapConfig.getDynmapSafezoneColor();
-        } else if (faction.isWarZone()) {
-            areaColor = dynmapConfig.getDynmapWarzoneColor();
-        }
-
-        return areaColor;
     }
 
     private MarkerSet createOrGetMarkerSet()
