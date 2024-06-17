@@ -10,7 +10,6 @@ val spongeApiVersion = findProperty("sponge-api.version") as String
 plugins {
     `java-library`
     id("org.spongepowered.gradle.plugin") version "2.2.0"
-    java
     idea
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -91,7 +90,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
     implementation("com.mysql:mysql-connector-j:8.3.0")
     implementation("com.h2database:h2:2.2.220")
-    compileOnly("org.xerial:sqlite-jdbc:3.45.2.0") // Can't include it in JAR because of problematic NativeDB...
+    compileOnly("org.xerial:sqlite-jdbc:3.45.2.0") // Can't include it in JAR because of problematic NativeDB... //TODO: To remove...
 
     // Integrations
     compileOnly("us.dynmap:DynmapCoreAPI:3.6")
@@ -118,17 +117,28 @@ dependencies {
 
 tasks {
     shadowJar {
+
         dependsOn(test)
 
-//        relocate("org.sqlite", "io.github.aquerr.eaglefactions.lib.db.sqlite") {
-//            exclude("org.sqlite.core.**")
-//        }
-        relocate("org.h2", "io.github.aquerr.eaglefactions.lib.db.h2")
-        relocate("org.mariadb.jdbc", "io.github.aquerr.eaglefactions.lib.db.mariadb")
-        relocate("com.mysql", "io.github.aquerr.eaglefactions.lib.db.mysql")
-        relocate("com.zaxxer.hikari", "io.github.aquerr.eaglefactions.lib.db.pool.hikari")
-        relocate("org.slf4j", "io.github.aquerr.eaglefactions.lib.slf4j")
-        relocate("org.bstats", "io.github.aquerr.eaglefactions.lib.bstats")
+        mergeServiceFiles()
+
+        val libRelocationPath = "${project.group}.${eaglefactionsId}.lib"
+        relocate("org.h2", "${libRelocationPath}.db.h2")
+        relocate("org.mariadb.jdbc", "${libRelocationPath}.db.mariadb")
+        relocate("com.mysql", "${libRelocationPath}.db.mysql")
+        relocate("com.zaxxer.hikari", "${libRelocationPath}.db.pool.hikari")
+        relocate("org.bstats", "${libRelocationPath}.bstats")
+        relocate("com.sun.jna", "${libRelocationPath}.sun.jna")
+        relocate("com.github.benmanes", "${libRelocationPath}.github.benmanes")
+        relocate("org.slf4j", "${libRelocationPath}.slf4j")
+        relocate("org.apache.commons.logging", "${libRelocationPath}.apache.commons.logging")
+        relocate("com.google.errorprone", "${libRelocationPath}.google.errorprone")
+        relocate("com.google.protobuf", "${libRelocationPath}.google.protobuf")
+        relocate("waffle", "${libRelocationPath}.other")
+
+        dependencies {
+            exclude("org.checkerframework")
+        }
 
         archiveClassifier.set("")
     }
