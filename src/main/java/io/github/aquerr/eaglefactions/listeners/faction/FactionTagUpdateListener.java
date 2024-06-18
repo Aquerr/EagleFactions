@@ -3,7 +3,7 @@ package io.github.aquerr.eaglefactions.listeners.faction;
 import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.events.FactionTagUpdateEvent;
 import io.github.aquerr.eaglefactions.listeners.AbstractListener;
-import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
+import io.github.aquerr.eaglefactions.tab.TabListUpdater;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;

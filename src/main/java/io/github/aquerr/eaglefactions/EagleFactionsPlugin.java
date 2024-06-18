@@ -150,7 +150,8 @@ import io.github.aquerr.eaglefactions.messaging.EFMessageService;
 import io.github.aquerr.eaglefactions.messaging.placeholder.parser.EFPlaceholderService;
 import io.github.aquerr.eaglefactions.scheduling.EagleFactionsScheduler;
 import io.github.aquerr.eaglefactions.scheduling.FactionRemoverTask;
-import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
+import io.github.aquerr.eaglefactions.tab.FactionTabListService;
+import io.github.aquerr.eaglefactions.tab.TabListUpdater;
 import io.github.aquerr.eaglefactions.storage.StorageManagerImpl;
 import io.github.aquerr.eaglefactions.util.resource.Resource;
 import io.github.aquerr.eaglefactions.util.resource.ResourceUtils;
@@ -241,6 +242,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private RankManager rankManager;
     private StorageManager storageManager;
     private MessageService messageService;
+    private FactionTabListService factionTabListService;
     private IntegrationManager integrationManager;
     private ClaimManager claimManager;
     private FactionCreationManager factionCreationManager;
@@ -311,6 +313,9 @@ public class EagleFactionsPlugin implements EagleFactions
     @Listener
     public void onDataRegister(RegisterDataEvent event)
     {
+        if (this.isDisabled)
+            return;
+
         IS_EAGLE_FEATHER_KEY = Key.from(this.pluginContainer, "is_eagle_feather", Boolean.class);
         event.register(DataRegistration.of(IS_EAGLE_FEATHER_KEY, ItemStack.class));
     }
@@ -501,6 +506,9 @@ public class EagleFactionsPlugin implements EagleFactions
     @Listener
     public void onRegisterPlaceholderEvent(RegisterRegistryValueEvent.GameScoped event)
     {
+        if (this.isDisabled)
+            return;
+
         this.efPlaceholderService.onRegisterPlaceholderEvent(event);
     }
 
@@ -672,9 +680,10 @@ public class EagleFactionsPlugin implements EagleFactions
         this.rankManager = new RankManagerImpl(this.storageManager);
 
         this.integrationManager = new IntegrationManager(this);
-
         this.operationCostFactory = new OperationCostFactoryImpl(this.messageService, this.powerManager);
         this.pvpLogger = PVPLoggerImpl.getInstance(this);
+
+        this.factionTabListService = new FactionTabListService(this.configuration, this.playerManager);
     }
 
     private void startFactionsRemover()
@@ -689,7 +698,7 @@ public class EagleFactionsPlugin implements EagleFactions
     private void startTabListUpdater()
     {
         EagleFactionsScheduler.getInstance().scheduleWithDelayedIntervalAsync(
-                new TabListUpdater(this.configuration, this.playerManager),
+                new TabListUpdater(this.factionTabListService),
                 5, TimeUnit.SECONDS,
                 10, TimeUnit.SECONDS
         );
@@ -935,7 +944,7 @@ public class EagleFactionsPlugin implements EagleFactions
     {
         //Sponge events
         Sponge.eventManager().registerListeners(this.pluginContainer, new EntityDamageListener(this));
-        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerJoinListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerJoinListener(this, this.factionTabListService));
         Sponge.eventManager().registerListeners(this.pluginContainer, new PlayerDeathListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new ChangeBlockEventListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new BlockPlaceListener(this));
@@ -959,7 +968,7 @@ public class EagleFactionsPlugin implements EagleFactions
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionKickListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionLeaveListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionJoinListener(this));
-        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionCreateListener(this));
+        Sponge.eventManager().registerListeners(this.pluginContainer, new FactionCreateListener(this, this.factionTabListService));
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionTagUpdateListener(this));
         Sponge.eventManager().registerListeners(this.pluginContainer, new FactionTagColorUpdateListener(this));
     }

@@ -6,7 +6,7 @@ import io.github.aquerr.eaglefactions.api.EagleFactions;
 import io.github.aquerr.eaglefactions.api.config.ProtectionConfig;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
-import io.github.aquerr.eaglefactions.scheduling.TabListUpdater;
+import io.github.aquerr.eaglefactions.tab.FactionTabListService;
 import io.github.aquerr.eaglefactions.util.WorldUtil;
 import io.github.aquerr.eaglefactions.version.VersionChecker;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -22,12 +22,14 @@ public class PlayerJoinListener extends AbstractListener
 {
     private final ProtectionConfig protectionConfig;
     private final MessageService messageService;
+    private final FactionTabListService factionTabListService;
 
-    public PlayerJoinListener(final EagleFactions plugin)
+    public PlayerJoinListener(final EagleFactions plugin, FactionTabListService factionTabListService)
     {
         super(plugin);
         this.protectionConfig = plugin.getConfiguration().getProtectionConfig();
         this.messageService = plugin.getMessageService();
+        this.factionTabListService = factionTabListService;
     }
 
     @Listener(order = Order.POST)
@@ -56,7 +58,7 @@ public class PlayerJoinListener extends AbstractListener
         });
 
         clearPvpLoggerObjectives(player);
-        new TabListUpdater(this.getPlugin().getConfiguration(), this.getPlugin().getPlayerManager()).updateTabListForPlayer(player);
+        factionTabListService.updateTabListForPlayer(player);
     }
 
     private void checkVersionAndInform(ServerPlayer player)

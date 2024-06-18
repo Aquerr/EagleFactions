@@ -1,4 +1,4 @@
-package io.github.aquerr.eaglefactions.scheduling;
+package io.github.aquerr.eaglefactions.tab;
 
 import io.github.aquerr.eaglefactions.api.config.Configuration;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
@@ -17,49 +17,33 @@ import org.spongepowered.api.util.Identifiable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-public class TabListUpdater implements EagleFactionsRunnableTask
+public class FactionTabListService
 {
     private final PlayerManager playerManager;
     private final Configuration configuration;
 
-    public static final AtomicBoolean SHOULD_UPDATE = new AtomicBoolean(false);
-
-    public static void requestUpdate()
-    {
-        SHOULD_UPDATE.compareAndSet(false, true);
-    }
-
-    public TabListUpdater(Configuration configuration, PlayerManager playerManager)
+    public FactionTabListService(Configuration configuration, PlayerManager playerManager)
     {
         this.configuration = configuration;
         this.playerManager = playerManager;
     }
 
-    /**
-     * Main entry point of the updater job.
-     *
-     * Updates tab-list for every online player.
-     */
-    @Override
-    public void run()
+    public void updateTabListForAllPlayers()
     {
-        try
-        {
-            if (!this.configuration.getChatConfig().shouldDisplayFactionTagsInTabList())
-                return;
+        if (!this.configuration.getChatConfig().shouldDisplayFactionTagsInTabList())
+            return;
 
-            if (SHOULD_UPDATE.compareAndSet(true, false))
-            {
-                updateTabListForServerPlayers();
-            }
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-        }
+        updateTabListForServerPlayers();
+    }
+
+    public void updateTabListForPlayer(ServerPlayer player)
+    {
+        if (!this.configuration.getChatConfig().shouldDisplayFactionTagsInTabList())
+            return;
+
+        updateTabListForPlayer(player, getOnlineFactionPlayers());
     }
 
     private void updateTabListForServerPlayers()
@@ -82,18 +66,6 @@ public class TabListUpdater implements EagleFactionsRunnableTask
                 .map(factionPlayer -> factionPlayer.orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Used for updating player tab-list from outside TabListUpdater.
-     * @param player the player
-     */
-    public void updateTabListForPlayer(ServerPlayer player)
-    {
-        if (!this.configuration.getChatConfig().shouldDisplayFactionTagsInTabList())
-            return;
-
-        updateTabListForPlayer(player, getOnlineFactionPlayers());
     }
 
     private void updateTabListForPlayer(ServerPlayer player, Set<FactionPlayer> onlineFactionPlayers)
