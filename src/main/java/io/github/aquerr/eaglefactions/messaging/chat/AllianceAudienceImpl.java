@@ -6,9 +6,7 @@ import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.messaging.chat.AllianceAudience;
 import net.kyori.adventure.audience.Audience;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.*;
@@ -69,7 +67,7 @@ public class AllianceAudienceImpl implements AllianceAudience
 	}
 
 	@Override
-	public @NotNull Iterable<? extends Audience> audiences()
+	public Iterable<? extends Audience> audiences()
 	{
 		return this.audiences;
 	}

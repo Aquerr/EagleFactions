@@ -192,7 +192,7 @@ public class PVPLoggerImpl implements PVPLogger
             }
             player.setScoreboard(scoreboard);
         }
-        Score pvpTimerScore = objective.findOrCreateScore(Component.text("Time:"));
+        Score pvpTimerScore = objective.findOrCreateScore("Time:");
         pvpTimerScore.setScore(pvpLoggerObjective.getSeconds());
     }
 

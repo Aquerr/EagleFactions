@@ -2,7 +2,6 @@ package io.github.aquerr.eaglefactions.entities;
 
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlag;
 import io.github.aquerr.eaglefactions.api.entities.ProtectionFlagType;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -35,7 +34,7 @@ public class ProtectionFlagImpl implements ProtectionFlag, Comparable<Protection
     }
 
     @Override
-    public int compareTo(@NotNull ProtectionFlag o)
+    public int compareTo(ProtectionFlag o)
     {
         return this.type.getName().compareTo(o.getType().getName());
     }

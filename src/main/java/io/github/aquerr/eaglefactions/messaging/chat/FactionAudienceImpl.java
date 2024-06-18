@@ -5,17 +5,12 @@ import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.Faction;
 import io.github.aquerr.eaglefactions.api.messaging.chat.FactionAudience;
 import net.kyori.adventure.audience.Audience;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 public class FactionAudienceImpl implements FactionAudience
 {
@@ -54,7 +49,7 @@ public class FactionAudienceImpl implements FactionAudience
 	}
 
 	@Override
-	public @NotNull Iterable<? extends Audience> audiences()
+	public Iterable<? extends Audience> audiences()
 	{
 		return this.audiences;
 	}

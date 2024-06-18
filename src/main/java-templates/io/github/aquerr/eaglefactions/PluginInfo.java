@@ -12,7 +12,7 @@ public final class PluginInfo
 {
     public static final String ID = "eaglefactions";
     public static final String NAME = "Eagle Factions";
-    public static final String VERSION = "%VERSION%";
+    public static final String VERSION = "{{ version }}";
     public static final String DESCRIPTION = "A factions plugin that will make managing your battle-server easier. :)";
     public static final String PLUGIN_PREFIX_PLAIN = "[EF] ";
     public static final TextComponent PLUGIN_PREFIX = Component.text(PLUGIN_PREFIX_PLAIN, NamedTextColor.AQUA);

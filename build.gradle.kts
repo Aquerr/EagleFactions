@@ -12,8 +12,8 @@ plugins {
     id("org.spongepowered.gradle.plugin") version "2.2.0"
     idea
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("net.kyori.blossom") version "1.3.1"
+    id("io.github.goooler.shadow") version "8.1.7"
+    id("net.kyori.blossom") version "2.1.0"
 }
 
 description = eaglefactionsDescription
@@ -61,18 +61,17 @@ sponge {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(JavaVersion.VERSION_17.majorVersion))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(JavaVersion.VERSION_21.majorVersion))
 }
 
-blossom {
-    if(System.getenv("JENKINS_HOME") != null) {
-        rootProject.version = version.toString() + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
-        println("Version => " + rootProject.version)
-    } else {
-        rootProject.version = version.toString() + "-SNAPSHOT"
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property("version", rootProject.version.toString())
+            }
+        }
     }
-    replaceTokenIn("src/main/java/io/github/aquerr/eaglefactions/PluginInfo.java")
-    replaceToken("%VERSION%", rootProject.version.toString())
 }
 
 repositories {
@@ -80,10 +79,13 @@ repositories {
     maven("https://repo.spongepowered.org/maven")
     maven("https://jitpack.io")
     maven("https://repo.mikeprimm.com/")
+    maven("https://repo.bluecolored.de/releases")
 }
 
 dependencies {
     api(project(":EagleFactionsAPI"))
+
+    implementation("com.google.guava:guava:33.2.1-jre")
 
     // Databases
     implementation("com.zaxxer:HikariCP:5.1.0")
@@ -94,7 +96,7 @@ dependencies {
 
     // Integrations
     compileOnly("us.dynmap:DynmapCoreAPI:3.6")
-    compileOnly("com.github.BlueMap-Minecraft:BlueMapAPI:2.6.2")
+    compileOnly("de.bluecolored.bluemap:BlueMapAPI:2.7.2")
     implementation("org.bstats:bstats-sponge:3.0.2")
 
     // Tests
@@ -116,6 +118,15 @@ dependencies {
 }
 
 tasks {
+    jar {
+        if(System.getenv("JENKINS_HOME") != null) {
+            rootProject.version = version.toString() + "_" + System.getenv("BUILD_NUMBER") + "-SNAPSHOT"
+            println("Version => " + rootProject.version)
+        } else {
+            rootProject.version = version.toString() + "-SNAPSHOT"
+        }
+    }
+
     shadowJar {
 
         dependsOn(test)
@@ -134,6 +145,11 @@ tasks {
         relocate("org.apache.commons.logging", "${libRelocationPath}.apache.commons.logging")
         relocate("com.google.errorprone", "${libRelocationPath}.google.errorprone")
         relocate("com.google.protobuf", "${libRelocationPath}.google.protobuf")
+        relocate("com.google.guava", "${libRelocationPath}.google.guava")
+        relocate("com.google.common", "${libRelocationPath}.google.common")
+        relocate("com.google.thirdparty", "${libRelocationPath}.google.thirdparty")
+        relocate("javax.annotation", "${libRelocationPath}.javax.annotation")
+        relocate("org.checkerframework", "${libRelocationPath}.checkerframework")
         relocate("waffle", "${libRelocationPath}.other")
 
         dependencies {

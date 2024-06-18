@@ -10,7 +10,6 @@ import net.kyori.adventure.text.PatternReplacementResult;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.io.IOException;
@@ -22,7 +21,6 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.PropertyResourceBundle;
-import java.util.regex.MatchResult;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -163,16 +161,12 @@ public class EFMessageService implements MessageService
         {
             textComponent = (TextComponent) textComponent.replaceText(TextReplacementConfig.builder()
                             .match("\\{\\d\\}")
-                            .condition(new TextReplacementConfig.Condition()
+                            .condition((result, matchCount, replaced) ->
                             {
-                                @Override
-                                public @NotNull PatternReplacementResult shouldReplace(@NotNull MatchResult result, int matchCount, int replaced)
-                                {
-                                    if (replaced > 0)
-                                        return PatternReplacementResult.STOP;
-                                    else
-                                        return PatternReplacementResult.REPLACE;
-                                }
+                                if (replaced > 0)
+                                    return PatternReplacementResult.STOP;
+                                else
+                                    return PatternReplacementResult.REPLACE;
                             })
                             .replacement(arg)
                     .build());
