@@ -87,8 +87,8 @@ public class ChatMessageListener extends AbstractListener
             if(!PlainTextComponentSerializer.plainText().serialize(this.chatConfig.getNonFactionPlayerPrefix()).isEmpty())
             {
                 event.setMessage(LinearComponents.linear(this.chatConfig.getNonFactionPlayerPrefix(), Component.text("<" + sender.name() + "> "), event.message()));
-                return;
             }
+            return;
         }
 
         final TextComponent.Builder factionAndRankPrefix = Component.text();
