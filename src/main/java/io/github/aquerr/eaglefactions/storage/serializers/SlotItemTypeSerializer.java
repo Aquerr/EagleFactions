@@ -1,6 +1,7 @@
 package io.github.aquerr.eaglefactions.storage.serializers;
 
 import com.google.common.collect.Lists;
+import io.github.aquerr.eaglefactions.EagleFactionsPlugin;
 import io.github.aquerr.eaglefactions.api.entities.FactionChest;
 import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -46,12 +47,15 @@ public class SlotItemTypeSerializer implements TypeSerializer<FactionChest.SlotI
             e.printStackTrace();
         }
 
-        final Optional<ItemType> itemType = Sponge.game().registry(RegistryTypes.ITEM_TYPE)
-                .findEntry(ResourceKey.resolve(String.valueOf(dataContainer.get(DataQuery.of("ItemType")).get())))
+        final Optional<ItemType> itemType = dataContainer.get(DataQuery.of("id"))
+                .map(String::valueOf)
+                .map(ResourceKey::resolve)
+                .flatMap(Sponge.game().registry(RegistryTypes.ITEM_TYPE)::findEntry)
                 .map(RegistryEntry::value);
-        if (!itemType.isPresent())
+
+        if (itemType.isEmpty())
         {
-            throw new SerializationException("ItemType could not be recognized. Probably comes from a mod that has been removed from the server.");
+            EagleFactionsPlugin.getPlugin().getLogger().warn("ItemType could not be recognized. Probably comes from a mod that has been removed from the server.");
         }
 
         ItemStack itemStack;
