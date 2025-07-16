@@ -631,7 +631,7 @@ public class EagleFactionsPlugin implements EagleFactions
 
     public URI getResource(final String fileName)
     {
-        return this.getPluginContainer().locateResource(URI.create(fileName))
+        return this.getPluginContainer().locateResource(fileName)
                 .orElse(null);
     }
 

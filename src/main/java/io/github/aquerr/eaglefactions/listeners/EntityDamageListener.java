@@ -48,6 +48,7 @@ public class EntityDamageListener extends AbstractListener
 
     private final DamageModifier damageReductionModifier = DamageModifier.builder()
             .type(DamageModifierTypes.ARMOR)
+            .damageReductionGroup()
             .cause(Cause.builder().append(super.getPlugin()).build(EventContext.builder().build()))
             .build();
 
