@@ -117,7 +117,7 @@ public class PVPLoggerImpl implements PVPLogger
         final UUID playerUUID = player.uniqueId();
 
         //Update player's time if player is already blocked.
-        if (playerPVPLoggerObjectives.containsKey(playerUUID) && playerPVPLoggerObjectives.containsKey(playerUUID))
+        if (playerPVPLoggerObjectives.containsKey(playerUUID))
         {
             playerPVPLoggerObjectives.get(playerUUID).setSeconds(getBlockTime());
             return;
@@ -179,7 +179,7 @@ public class PVPLoggerImpl implements PVPLogger
         Objective objective = pvpLoggerObjective.getObjective();
         if (objective == null)
         {
-            final Scoreboard scoreboard = Optional.ofNullable(player.scoreboard()).orElseGet(() -> Scoreboard.builder().build());
+            final Scoreboard scoreboard = Scoreboard.builder().from(player.scoreboard()).build();
 
             objective = findObjectiveInScoreBoard(scoreboard, pvpLoggerObjective.getId());
             if (objective == null)

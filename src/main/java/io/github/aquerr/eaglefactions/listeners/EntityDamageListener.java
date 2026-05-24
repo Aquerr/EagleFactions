@@ -24,7 +24,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.cause.entity.damage.DamageStep;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
@@ -34,9 +33,7 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.function.DoubleUnaryOperator;
 
 public class EntityDamageListener extends AbstractListener
 {
@@ -103,8 +100,6 @@ public class EntityDamageListener extends AbstractListener
     public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "entity") ServerPlayer attackedPlayer)
     {
         boolean isPreEvent = event instanceof DamageEntityEvent.Pre;
-        boolean isPostEvent = event instanceof DamageEntityEvent.Post;
-
         if(!(event.cause().root() instanceof DamageSource) || ((DamageSource)event.cause().root()).doesAffectCreative())
             return;
 
@@ -128,16 +123,10 @@ public class EntityDamageListener extends AbstractListener
         //At this point we know that damage has NOT been dealt inside Safe Zone.
 
         final DamageSource damageSource = event.source() instanceof DamageSource ? (DamageSource) event.source() : null;
-
         if (damageSource == null)
             return;
 
         //Percentage damage reduction operator
-        final DoubleUnaryOperator doubleUnaryOperator = operand ->
-        {
-            final double difference = operand * (this.factionsConfig.getPercentageDamageReductionInOwnTerritory() / 100);
-            return -difference;
-        };
         DamageModifier damageModifier = DamageModifier.builder()
                 .type(DamageStepTypes.ARMOR.get())
                 .damageFunction((step, damage) -> -(damage * (this.factionsConfig.getPercentageDamageReductionInOwnTerritory() / 100)))
@@ -147,59 +136,68 @@ public class EntityDamageListener extends AbstractListener
                 .or(damageSource::source)
                 .orElse(null);
 
-        if (sourceEntity != null)
+        if (sourceEntity == null)
         {
-            //TechGuns
-            if (ModSupport.isTechGuns(sourceEntity.getClass()))
+            if(isInOwnTerritory(attackedPlayer))
             {
-                final Entity entity = ModSupport.getAttackerFromTechGuns(sourceEntity);
-                if (entity != null)
-                    sourceEntity = entity;
+                if (isPreEvent)
+                {
+                    ((DamageEntityEvent.Pre)event).addModifierAfter(DamageStepTypes.ARMOR.get(), damageModifier);
+                }
             }
+            return;
+        }
+
+        //TechGuns
+        if (ModSupport.isTechGuns(sourceEntity.getClass()))
+        {
+            final Entity entity = ModSupport.getAttackerFromTechGuns(sourceEntity);
+            if (entity != null)
+                sourceEntity = entity;
         }
 
         if(sourceEntity instanceof ServerPlayer player)
         {
-            if (isPostEvent)
-            {
-                boolean willCauseDeath = ((DamageEntityEvent.Post)event).willCauseDeath();
-                final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
-                if(shouldBlockDamage)
-                {
-                    event.setCancelled(true);
-                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
-                }
-                else
-                {
-                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-                    if (isInOwnTerritory(attackedPlayer))
-                    {
-                        if (isPreEvent)
-                        {
-                            ((DamageEntityEvent.Pre)event).addModifierAfter(DamageStepTypes.ARMOR.get(), damageModifier);
-                        }
-                    }
-                }
-            }
+            handleDamageDealtByPlayerToPlayer(event, isPreEvent, world, attackedPlayer, player, damageModifier);
+        }
+    }
+
+    private void handleDamageDealtByPlayerToPlayer(DamageEntityEvent event,
+                                                   boolean isPreEvent,
+                                                   ServerWorld world,
+                                                   ServerPlayer attackedPlayer,
+                                                   ServerPlayer attacker,
+                                                   DamageModifier damageModifier)
+    {
+        if(!this.protectionManager.canHitEntity(attackedPlayer, attacker, false).hasAccess())
+        {
+            event.setCancelled(true);
+            world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
         }
         else
         {
-            if(isInOwnTerritory(attackedPlayer))
+            this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
+            if (isInOwnTerritory(attackedPlayer))
             {
-                ((DamageEntityEvent.Pre)event).addModifierAfter(DamageStepTypes.ARMOR.get(), damageModifier);
+                if (isPreEvent)
+                {
+                    ((DamageEntityEvent.Pre)event).addModifierAfter(DamageStepTypes.ARMOR.get(), damageModifier);
+                }
+            }
+            boolean isPostEvent = event instanceof DamageEntityEvent.Post;
+            if (isPostEvent)
+            {
+                if (((DamageEntityEvent.Post)event).willCauseDeath())
+                {
+                    sendPowerAndNotification(attackedPlayer, attacker);
+                }
             }
         }
     }
 
-    private boolean shouldBlockDamageFromPlayer(final ServerPlayer attackedPlayer, final ServerPlayer sourcePlayer, boolean willCauseDeath)
+    private void sendPowerAndNotification(final ServerPlayer attackedPlayer,
+                                          final ServerPlayer sourcePlayer)
     {
-        final boolean canAttack = this.protectionManager.canHitEntity(attackedPlayer, sourcePlayer, false).hasAccess();
-        if (!canAttack)
-            return true;
-
-        if (!willCauseDeath)
-            return false;
-
         final Optional<Faction> attackedPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(attackedPlayer.uniqueId());
         final Optional<Faction> sourcePlayerFFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(sourcePlayer.uniqueId());
 
@@ -222,8 +220,6 @@ public class EntityDamageListener extends AbstractListener
         {
             sendKillAwardMessageAndIncreasePower(sourcePlayer);
         }
-
-        return false;
     }
 
     @Listener
@@ -306,14 +302,14 @@ public class EntityDamageListener extends AbstractListener
     {
         super.getPlugin().getPowerManager().penalty(player.uniqueId());
         player.sendMessage(messageService.resolveMessageWithPrefix("power.decreased-by", this.powerConfig.getPenalty()));
-        player.sendMessage(messageService.resolveComponentWithMessage("power.current-power", super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())));
+        player.sendMessage(messageService.resolveComponentWithMessage("power.current-power", super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()), super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())));
     }
 
     private void sendKillAwardMessageAndIncreasePower(final ServerPlayer player)
     {
         super.getPlugin().getPowerManager().addPower(player.uniqueId(), true);
         player.sendMessage(messageService.resolveMessageWithPrefix("power.increased-by", this.powerConfig.getKillAward()));
-        player.sendMessage(messageService.resolveComponentWithMessage("power.current-power", super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()) + "/" + super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())));
+        player.sendMessage(messageService.resolveComponentWithMessage("power.current-power", super.getPlugin().getPowerManager().getPlayerPower(player.uniqueId()), super.getPlugin().getPowerManager().getPlayerMaxPower(player.uniqueId())));
     }
 
     private boolean isInOwnTerritory(final ServerPlayer player)

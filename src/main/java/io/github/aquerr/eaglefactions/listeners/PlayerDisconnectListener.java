@@ -25,7 +25,7 @@ public class PlayerDisconnectListener extends AbstractListener
     }
 
     @Listener(order = Order.POST)
-    public void onDisconnect(ServerSideConnectionEvent.Disconnect event, @Root ServerPlayer player)
+    public void onDisconnect(ServerSideConnectionEvent.Leave event, @Root ServerPlayer player)
     {
         if (super.getPlugin().getPVPLogger().isActive() && EagleFactionsPlugin.getPlugin().getPVPLogger().isPlayerBlocked(player))
         {
