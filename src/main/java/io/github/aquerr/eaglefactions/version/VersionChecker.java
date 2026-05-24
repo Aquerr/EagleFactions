@@ -44,8 +44,8 @@ public final class VersionChecker
             Date currentVersionDate = getCurrentVersionDate(gson, session, version);
             if (currentVersionDate == null)
             {
-                EagleFactionsPlugin.getPlugin().getLogger().info("You are using the version of Eagle Factions that seems not to be published.");
-                EagleFactionsPlugin.getPlugin().getLogger().info("Considering current version as LATEST.");
+                EagleFactionsPlugin.getPlugin().getLogger().info("Seems that you are using the not published version of Eagle Factions.");
+                EagleFactionsPlugin.getPlugin().getLogger().info("Considering current version as the LATEST.");
                 return true;
             }
 

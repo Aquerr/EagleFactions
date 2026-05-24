@@ -12,8 +12,8 @@ plugins {
     id("org.spongepowered.gradle.plugin") version "2.3.0"
     idea
     `maven-publish`
-    id("io.github.goooler.shadow") version "8.1.8"
-    id("net.kyori.blossom") version "2.1.0"
+    id("com.gradleup.shadow") version "9.4.1"
+    id("net.kyori.blossom") version "2.2.0"
 }
 
 description = eaglefactionsDescription
@@ -88,34 +88,34 @@ dependencies {
     implementation("com.google.guava:guava:33.4.8-jre")
 
     // Databases
-    implementation("com.zaxxer:HikariCP:6.3.0")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.4")
-    implementation("com.mysql:mysql-connector-j:9.3.0")
-    implementation("com.h2database:h2:2.3.232")
-    compileOnly("org.xerial:sqlite-jdbc:3.45.2.0") // Can't include it in JAR because of problematic NativeDB... //TODO: To remove...
+    implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.8")
+    implementation("com.mysql:mysql-connector-j:9.7.0")
+    implementation("com.h2database:h2:2.4.240")
+    compileOnly("org.xerial:sqlite-jdbc:3.53.1.0") // Can't include it in JAR because of problematic NativeDB... //TODO: To remove...
 
     // Integrations
-    compileOnly("us.dynmap:DynmapCoreAPI:3.7-beta-6")
-    compileOnly("de.bluecolored:bluemap-api:2.7.4")
-    implementation("org.bstats:bstats-sponge:3.1.0")
+    compileOnly("us.dynmap:DynmapCoreAPI:3.8")
+    compileOnly("de.bluecolored:bluemap-api:2.7.8")
+    implementation("org.bstats:bstats-sponge:3.2.1")
 
     // Tests
     testImplementation(project(":EagleFactionsAPI"))
     testImplementation("org.spongepowered:spongeapi:$spongeApiVersion") {
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
-    testImplementation(platform("org.junit:junit-bom:5.13.3"))
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.mockito:mockito-core:5.18.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
-    testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation("org.testcontainers:testcontainers:1.21.3")
-    testImplementation("org.testcontainers:mariadb:1.21.3")
-    testImplementation("org.testcontainers:mysql:1.21.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.21.3")
-    testImplementation("org.xerial:sqlite-jdbc:3.45.2.0")
-    testImplementation("org.apache.logging.log4j:log4j-core:2.25.1")
-    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.1")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-mariadb:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-mysql:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
+    testImplementation("org.xerial:sqlite-jdbc:3.53.1.0")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.26.0")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.26.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -154,6 +154,7 @@ tasks {
         relocate("javax.annotation", "${libRelocationPath}.javax.annotation")
         relocate("org.checkerframework", "${libRelocationPath}.checkerframework")
         relocate("waffle", "${libRelocationPath}.other")
+        relocate("org.jspecify", "${libRelocationPath}.other")
 
         dependencies {
             exclude("org.checkerframework")

@@ -24,7 +24,8 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
+import org.spongepowered.api.event.cause.entity.damage.DamageStep;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
@@ -47,9 +48,8 @@ public class EntityDamageListener extends AbstractListener
     private final MessageService messageService;
 
     private final DamageModifier damageReductionModifier = DamageModifier.builder()
-            .type(DamageModifierTypes.ARMOR)
-            .damageReductionGroup()
-            .cause(Cause.builder().append(super.getPlugin()).build(EventContext.builder().build()))
+            .type(DamageStepTypes.ARMOR.get())
+            .frameModifier(stackFrame -> stackFrame.pushCause(Cause.builder().append(super.getPlugin()).build(EventContext.builder().build())))
             .build();
 
     public EntityDamageListener(final EagleFactions plugin)
@@ -102,6 +102,9 @@ public class EntityDamageListener extends AbstractListener
     @Listener(order = Order.EARLY, beforeModifications = true)
     public void onPlayerDamage(final DamageEntityEvent event, final @Getter(value = "entity") ServerPlayer attackedPlayer)
     {
+        boolean isPreEvent = event instanceof DamageEntityEvent.Pre;
+        boolean isPostEvent = event instanceof DamageEntityEvent.Post;
+
         if(!(event.cause().root() instanceof DamageSource) || ((DamageSource)event.cause().root()).doesAffectCreative())
             return;
 
@@ -111,7 +114,12 @@ public class EntityDamageListener extends AbstractListener
         //If it is safezone, protect the player from everything.
         if (isSafeZone(location))
         {
-            event.setBaseDamage(0);
+            if (isPreEvent) {
+                ((DamageEntityEvent.Pre)event).addModifierBefore(DamageStepTypes.START.get(), DamageModifier.builder()
+                                .damageFunction((step, damage) -> 0)
+                        .build());
+            }
+
             event.setCancelled(true);
             world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
             return;
@@ -119,7 +127,6 @@ public class EntityDamageListener extends AbstractListener
 
         //At this point we know that damage has NOT been dealt inside Safe Zone.
 
-        final boolean willCauseDeath = event.willCauseDeath();
         final DamageSource damageSource = event.source() instanceof DamageSource ? (DamageSource) event.source() : null;
 
         if (damageSource == null)
@@ -131,6 +138,10 @@ public class EntityDamageListener extends AbstractListener
             final double difference = operand * (this.factionsConfig.getPercentageDamageReductionInOwnTerritory() / 100);
             return -difference;
         };
+        DamageModifier damageModifier = DamageModifier.builder()
+                .type(DamageStepTypes.ARMOR.get())
+                .damageFunction((step, damage) -> -(damage * (this.factionsConfig.getPercentageDamageReductionInOwnTerritory() / 100)))
+                .build();
 
         Entity sourceEntity = damageSource.indirectSource()
                 .or(damageSource::source)
@@ -147,22 +158,27 @@ public class EntityDamageListener extends AbstractListener
             }
         }
 
-
         if(sourceEntity instanceof ServerPlayer player)
         {
-            final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
-            if(shouldBlockDamage)
+            if (isPostEvent)
             {
-                event.setBaseDamage(0);
-                event.setCancelled(true);
-                world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
-            }
-            else
-            {
-                this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
-                if (isInOwnTerritory(attackedPlayer))
+                boolean willCauseDeath = ((DamageEntityEvent.Post)event).willCauseDeath();
+                final boolean shouldBlockDamage = shouldBlockDamageFromPlayer(attackedPlayer, player, willCauseDeath);
+                if(shouldBlockDamage)
                 {
-                    event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
+                    event.setCancelled(true);
+                    world.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(50).offset(new Vector3d(0.5, 1.5, 0.5)).build(), attackedPlayer.position());
+                }
+                else
+                {
+                    this.pvpLogger.addOrUpdatePlayer(attackedPlayer);
+                    if (isInOwnTerritory(attackedPlayer))
+                    {
+                        if (isPreEvent)
+                        {
+                            ((DamageEntityEvent.Pre)event).addModifierAfter(DamageStepTypes.ARMOR.get(), damageModifier);
+                        }
+                    }
                 }
             }
         }
@@ -170,7 +186,7 @@ public class EntityDamageListener extends AbstractListener
         {
             if(isInOwnTerritory(attackedPlayer))
             {
-                event.addModifierAfter(damageReductionModifier, doubleUnaryOperator, new HashSet<>());
+                ((DamageEntityEvent.Pre)event).addModifierAfter(DamageStepTypes.ARMOR.get(), damageModifier);
             }
         }
     }

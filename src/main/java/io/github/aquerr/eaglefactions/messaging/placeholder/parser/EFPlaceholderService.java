@@ -10,7 +10,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
-import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.EnumMap;
@@ -56,11 +55,12 @@ public class EFPlaceholderService implements PlaceholderService
         initDefaultParsers();
 
         //Register placeholders
-        RegisterRegistryValueEvent.RegistryStep<PlaceholderParser> placeholderParserRegistryStep = event.registry(RegistryTypes.PLACEHOLDER_PARSER);
-        for (Map.Entry<Placeholder, EFPlaceholderParser> entry : this.placeholderParsers.entrySet())
-        {
-            placeholderParserRegistryStep.register(ResourceKey.of(PluginInfo.ID, entry.getKey().getName()), (context) -> processSpongePlaceholderContext(context, entry.getKey()));
-        }
+        event.registry(RegistryTypes.PLACEHOLDER_PARSER, placeholderParserRegistryStep -> {
+            for (Map.Entry<Placeholder, EFPlaceholderParser> entry : this.placeholderParsers.entrySet())
+            {
+                placeholderParserRegistryStep.register(ResourceKey.of(PluginInfo.ID, entry.getKey().getName()), (context) -> processSpongePlaceholderContext(context, entry.getKey()));
+            }
+        });
     }
 
     @Override
