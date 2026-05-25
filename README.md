@@ -23,9 +23,10 @@ Check our [Wiki](https://github.com/Aquerr/EagleFactions/wiki) to get to know ho
 ## Prerequisites
 
 * [**Sponge Server**](https://spongepowered.org/)
-* **Java 8** for 1.12.2
-* **Java 11** for 1.16.5
-* **Java 17** or newer for 1.18.2^
+* **Java 8** since 1.12.2
+* **Java 11** since 1.16.5
+* **Java 17** since 1.18.2
+* **Java 21** or newer for 1.21^
 
 ## Features
 
