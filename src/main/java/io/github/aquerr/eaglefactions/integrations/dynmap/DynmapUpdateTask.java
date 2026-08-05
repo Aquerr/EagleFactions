@@ -77,7 +77,7 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
 
             if (faction.getHome().isPresent())
             { /* Let's draw faction home first */
-                ServerWorld factionHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().get().getWorldUUID())
+                ServerWorld factionHomeWorld = WorldUtil.getWorldByKey(faction.getHome().get().getWorldId())
                         .orElse(null);
 
                 if (factionHomeWorld != null)
@@ -101,20 +101,20 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
             Code below may not be very clean. BUT IT WORKS!
              */
 
-            HashMap<UUID, Set<Claim>> claimsWorld = new HashMap<>();
+            HashMap<String, Set<Claim>> claimsWorld = new HashMap<>();
 
             /* Now sorting the claims by their worlds */
             Claim[] claims = new Claim[faction.getClaims().size()];
             claims = faction.getClaims().toArray(claims);
             for (Claim claim : claims)
             {
-                claimsWorld.computeIfAbsent(claim.getWorldUUID(), k -> new HashSet<>());
+                claimsWorld.computeIfAbsent(claim.getWorldId(), k -> new HashSet<>());
 
-                claimsWorld.get(claim.getWorldUUID()).add(claim);
+                claimsWorld.get(claim.getWorldId()).add(claim);
             }
 
             /* Now making TempAreaMarkers */
-            HashMap<UUID, ArrayList<TempAreaMarker>> areaMarkers = new HashMap<>();
+            HashMap<String, ArrayList<TempAreaMarker>> areaMarkers = new HashMap<>();
             claimsWorld.forEach((k, v) ->
             {
                 ArrayList<TempAreaMarker> tempMarkers = DynmapUtils.createAreas(v);
@@ -125,11 +125,11 @@ public class DynmapUpdateTask implements EagleFactionsRunnableTask
             /* Finally, lets draw areas! */
             DynmapService.drawnAreas.put(faction.getName(), new ArrayList<>());
 
-            for (Map.Entry<UUID, ArrayList<TempAreaMarker>> entry : areaMarkers.entrySet())
+            for (Map.Entry<String, ArrayList<TempAreaMarker>> entry : areaMarkers.entrySet())
             {
                 for (TempAreaMarker tempMarker : entry.getValue())
                 {
-                    ServerWorld world = WorldUtil.getWorldByUUID(entry.getKey())
+                    ServerWorld world = WorldUtil.getWorldByKey(entry.getKey())
                             .orElse(null);
 
                     if (world == null) continue; /* Somehow there's no world for that area */

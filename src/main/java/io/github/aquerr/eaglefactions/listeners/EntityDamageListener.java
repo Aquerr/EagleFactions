@@ -231,7 +231,7 @@ public class EntityDamageListener extends AbstractListener
         final Player ignitedPlayer = (Player) entity;
 
         //Check if location is safezone
-        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), ignitedPlayer.serverLocation().chunkPosition());
+        final Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), ignitedPlayer.serverLocation().chunkPosition());
         if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
         {
             event.setCancelled(true);
@@ -302,7 +302,7 @@ public class EntityDamageListener extends AbstractListener
 
     private boolean isInOwnTerritory(final ServerPlayer player)
     {
-        final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        final Optional<Faction> optionalFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().key().asString(), player.serverLocation().chunkPosition());
         return optionalFaction.map(x-> x.getMembers().contains(player.uniqueId())).orElse(false);
     }
 

@@ -190,7 +190,7 @@ public class EntitySpawnListener extends AbstractListener
                 return;
             }
 
-            ServerWorld world = WorldUtil.getWorldByUUID(factionHome.getWorldUUID()).orElse(null);
+            ServerWorld world = WorldUtil.getWorldByKey(factionHome.getWorldId()).orElse(null);
             if (world != null)
             {
                 ServerLocation safeLocation = Sponge.server().teleportHelper().findSafeLocation(ServerLocation.of(world, factionHome.getBlockPosition()))
@@ -222,7 +222,7 @@ public class EntitySpawnListener extends AbstractListener
             return;
         }
 
-        Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
+        Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).key().asString(), entity.serverLocation().chunkPosition());
         if(!optionalFaction.isPresent())
             return;
 
@@ -255,7 +255,7 @@ public class EntitySpawnListener extends AbstractListener
             return;
         }
 
-        Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).uniqueId(), entity.serverLocation().chunkPosition());
+        Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(((ServerWorld)entity.world()).key().asString(), entity.serverLocation().chunkPosition());
         if(!optionalFaction.isPresent())
             return;
 

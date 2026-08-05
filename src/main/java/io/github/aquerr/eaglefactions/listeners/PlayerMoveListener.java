@@ -58,8 +58,8 @@ public class PlayerMoveListener extends AbstractListener
 
         //TODO: Add checks for safezone, warzone and unclaimable worlds.
 
-        final Optional<Faction> optionalOldChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), oldChunk);
-        final Optional<Faction> optionalNewChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), newChunk);
+        final Optional<Faction> optionalOldChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), oldChunk);
+        final Optional<Faction> optionalNewChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), newChunk);
         String oldChunkFactionName = EagleFactionsPlugin.WILDERNESS_NAME;
         String newChunkFactionName = EagleFactionsPlugin.WILDERNESS_NAME;
 

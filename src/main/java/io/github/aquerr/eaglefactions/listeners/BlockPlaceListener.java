@@ -123,6 +123,6 @@ public class BlockPlaceListener extends AbstractListener
         ServerLocation blockLocation = blockSnapshot.location().orElse(null);
         if (blockLocation == null)
             return Optional.empty();
-        return this.factionLogic.getFactionByChunk(blockLocation.world().uniqueId(), blockLocation.chunkPosition());
+        return this.factionLogic.getFactionByChunk(blockLocation.world().key().asString(), blockLocation.chunkPosition());
     }
 }

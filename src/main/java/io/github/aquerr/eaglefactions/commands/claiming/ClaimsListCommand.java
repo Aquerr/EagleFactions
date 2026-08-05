@@ -99,7 +99,7 @@ public class ClaimsListCommand extends AbstractCommand
             final Component claimHoverInfo = linear(messageService.resolveComponentWithMessage("command.access.accessible-by-faction", claim.isAccessibleByFaction()), newline(),
                     messageService.resolveComponentWithMessage("command.access.owners", String.join(", ", ownersNames)));
 
-            final Optional<ServerWorld> world = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+            final Optional<ServerWorld> world = WorldUtil.getWorldByKey(claim.getWorldId());
             String worldName = "";
             //TODO: To test...
             if (world.isPresent())

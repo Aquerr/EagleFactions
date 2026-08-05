@@ -127,9 +127,9 @@ public class MapCommand extends AbstractCommand
                 }
 
                 final Vector3i chunk = playerPosition.add(column, 0, row);
-                final UUID uuid = world.uniqueId();
+                final String worldId = world.key().asString();
 
-                final Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(uuid, chunk);
+                final Optional<Faction> optionalFaction = this.factionLogic.getFactionByChunk(worldId, chunk);
                 if (optionalFaction.isPresent())
                 {
                     final Faction chunkFaction = optionalFaction.get();
@@ -238,7 +238,7 @@ public class MapCommand extends AbstractCommand
 
         String playerPositionClaim = "none";
 
-        Optional<Faction> optionalPlayerPositionFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), playerPosition);
+        Optional<Faction> optionalPlayerPositionFaction = this.factionLogic.getFactionByChunk(world.key().asString(), playerPosition);
 
         if (optionalPlayerPositionFaction.isPresent())
         {
@@ -302,7 +302,7 @@ public class MapCommand extends AbstractCommand
         }
 
         //If claimed then unclaim
-        if(this.factionLogic.isClaimed(world.uniqueId(), chunk))
+        if(this.factionLogic.isClaimed(world.key().asString(), chunk))
         {
             handleUnclaimClick(player, playerFaction, world, chunk);
         }
@@ -315,7 +315,7 @@ public class MapCommand extends AbstractCommand
 
     private void handleClaimClick(ServerPlayer player, Faction playerFaction, ServerWorld world, Vector3i chunk)
     {
-        final Claim claim = new Claim(player.world().uniqueId(), chunk);
+        final Claim claim = new Claim(player.world().key().asString(), chunk);
         final boolean isFactionAttacked = EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(playerFaction.getName());
 
         if(isFactionAttacked)
@@ -365,11 +365,11 @@ public class MapCommand extends AbstractCommand
             return;
 
         //Check if faction's home was set in this claim. If yes then remove it.
-        if (playerFaction.getHome().filter(home -> home.equals(new FactionHome(world.uniqueId(), chunk))).isPresent())
+        if (playerFaction.getHome().filter(home -> home.equals(new FactionHome(world.key().asString(), chunk))).isPresent())
         {
             this.factionLogic.setHome(playerFaction, null);
         }
-        this.factionLogic.removeClaim(playerFaction, new Claim(world.uniqueId(), chunk));
+        this.factionLogic.removeClaim(playerFaction, new Claim(world.key().asString(), chunk));
         player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));
         EventRunner.runFactionUnclaimEventPost(player, playerFaction, world, chunk);
     }

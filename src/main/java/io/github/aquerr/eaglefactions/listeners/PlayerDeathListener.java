@@ -84,6 +84,6 @@ public class PlayerDeathListener extends AbstractListener
 
     private Optional<Faction> getFactionAtLocation(ServerLocation serverLocation)
     {
-        return super.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().uniqueId(), serverLocation.chunkPosition());
+        return super.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().key().asString(), serverLocation.chunkPosition());
     }
 }

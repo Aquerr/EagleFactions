@@ -56,7 +56,7 @@ public class ClaimCommand extends AbstractCommand
         final ServerWorld world = player.world();
         final Vector3i chunk = player.serverLocation().chunkPosition();
         final Optional<Faction> optionalPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), chunk);
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), chunk);
         final boolean hasAdminMode = super.getPlugin().getPlayerManager().hasAdminMode(player.user());
 
         if (optionalChunkFaction.isPresent())
@@ -111,7 +111,7 @@ public class ClaimCommand extends AbstractCommand
         if (isCancelled)
             return CommandResult.success();
 
-        this.factionLogic.addClaim(faction, new Claim(world.uniqueId(), chunk));
+        this.factionLogic.addClaim(faction, new Claim(world.key().asString(), chunk));
         player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
         EventRunner.runFactionClaimEventPost(player, faction, player.world(), chunk);
         return CommandResult.success();
@@ -137,7 +137,7 @@ public class ClaimCommand extends AbstractCommand
         if (EagleFactionsPlugin.ATTACKED_FACTIONS.containsKey(faction.getName()))
             throw messageService.resolveExceptionWithMessage("error.command.claim.faction.under-attack", EagleFactionsPlugin.ATTACKED_FACTIONS.get(faction.getName()));
 
-        if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(faction, new Claim(world.uniqueId(), chunk)))
+        if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(faction, new Claim(world.key().asString(), chunk)))
             throw messageService.resolveExceptionWithMessage("error.command.claim.claim.claims-need-to-be-connected");
 
         try

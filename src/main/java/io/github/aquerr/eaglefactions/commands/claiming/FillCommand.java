@@ -98,7 +98,7 @@ public class FillCommand extends AbstractCommand
         while (!chunks.isEmpty())
         {
             final Vector3i chunkPosition = chunks.poll();
-            if (!this.factionLogic.isClaimed(world.uniqueId(), chunkPosition))
+            if (!this.factionLogic.isClaimed(world.key().asString(), chunkPosition))
             {
                 faction = this.factionLogic.getFactionByName(faction.getName());
 

@@ -149,7 +149,7 @@ public class ClaimManagerImpl implements ClaimManager
         }
 
         // Very important check!
-        if (this.factionLogic.isClaimed(serverWorld.uniqueId(), chunkPosition))
+        if (this.factionLogic.isClaimed(serverWorld.key().asString(), chunkPosition))
         {
             throw new IllegalStateException(messageService.resolveMessage("error.claim.place-is-already-claimed"));
         }
@@ -174,6 +174,6 @@ public class ClaimManagerImpl implements ClaimManager
 
     private Claim toClaim(ServerLocation serverLocation)
     {
-        return new Claim(serverLocation.world().uniqueId(), serverLocation.chunkPosition());
+        return new Claim(serverLocation.world().key().asString(), serverLocation.chunkPosition());
     }
 }

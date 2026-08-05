@@ -78,7 +78,7 @@ public class CollideEntityEventListener extends AbstractListener
                         return;
                     }
 
-                    final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(entity.serverLocation().world().uniqueId(), entity.serverLocation().chunkPosition());
+                    final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(entity.serverLocation().world().key().asString(), entity.serverLocation().chunkPosition());
                     if(optionalChunkFaction.isPresent() && optionalChunkFaction.get().isSafeZone())
                     {
                         sourceEntity.remove();

@@ -13,7 +13,6 @@ import io.github.aquerr.eaglefactions.api.entities.ProtectionFlags;
 import io.github.aquerr.eaglefactions.api.entities.Rank;
 import io.github.aquerr.eaglefactions.api.logic.FactionLogic;
 import io.github.aquerr.eaglefactions.api.managers.PlayerManager;
-import io.github.aquerr.eaglefactions.api.managers.claim.ClaimManager;
 import io.github.aquerr.eaglefactions.api.managers.claim.provider.FactionMaxClaimCountProvider;
 import io.github.aquerr.eaglefactions.api.messaging.MessageService;
 import io.github.aquerr.eaglefactions.api.storage.StorageManager;
@@ -98,12 +97,12 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public Optional<Faction> getFactionByChunk(final UUID worldUUID, final Vector3i chunk)
+    public Optional<Faction> getFactionByChunk(final String worldId, final Vector3i chunk)
     {
-        checkNotNull(worldUUID);
+        checkNotNull(worldId);
         checkNotNull(chunk);
 
-        Claim claim = new Claim(worldUUID, chunk);
+        Claim claim = new Claim(worldId, chunk);
 
         Optional<Faction> cachedOptional = FactionsCache.getClaimFaction(claim);
         if (cachedOptional.isPresent())
@@ -237,7 +236,7 @@ public class FactionLogicImpl implements FactionLogic
         for (final Claim claim : faction.getClaims()) {
             final Set<UUID> owners = new HashSet<>(claim.getOwners());
             owners.remove(playerUUID);
-            final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), owners, claim.isAccessibleByFaction());
+            final Claim updatedClaim = new Claim(claim.getWorldId(), claim.getChunkPosition(), owners, claim.isAccessibleByFaction());
             updatedClaims.add(updatedClaim);
         }
 
@@ -508,12 +507,12 @@ public class FactionLogicImpl implements FactionLogic
     }
 
     @Override
-    public boolean isClaimed(final UUID worldUUID, final Vector3i chunk)
+    public boolean isClaimed(final String worldId, final Vector3i chunk)
     {
-        checkNotNull(worldUUID);
+        checkNotNull(worldId);
         checkNotNull(chunk);
 
-        final Optional<Faction> faction = getFactionByChunk(worldUUID, chunk);
+        final Optional<Faction> faction = getFactionByChunk(worldId, chunk);
         return faction.isPresent();
     }
 
@@ -528,7 +527,7 @@ public class FactionLogicImpl implements FactionLogic
 
         for(final Claim claim : faction.getClaims())
         {
-            if(!claimToCheck.getWorldUUID().equals(claim.getWorldUUID()))
+            if(!claimToCheck.getWorldId().equals(claim.getWorldId()))
                 continue;
 
             final Vector3i chunkToCheck = claimToCheck.getChunkPosition();
@@ -559,7 +558,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<UUID> claimOwners = new HashSet<>(claim.getOwners());
         claimOwners.add(owner);
 
-        final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
+        final Claim updatedClaim = new Claim(claim.getWorldId(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
         updatedClaims.add(updatedClaim);
 
         final Faction updatedFaction = faction.toBuilder().claims(updatedClaims).build();
@@ -581,7 +580,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<UUID> claimOwners = new HashSet<>(claim.getOwners());
         claimOwners.remove(owner);
 
-        final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
+        final Claim updatedClaim = new Claim(claim.getWorldId(), claim.getChunkPosition(), claimOwners, claim.isAccessibleByFaction());
         updatedClaims.add(updatedClaim);
 
         final Faction updatedFaction = faction.toBuilder().claims(updatedClaims).build();
@@ -599,7 +598,7 @@ public class FactionLogicImpl implements FactionLogic
         final Set<Claim> updatedClaims = new HashSet<>(faction.getClaims());
         updatedClaims.remove(claim);
 
-        final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), claim.getOwners(), isAccessibleByFaction);
+        final Claim updatedClaim = new Claim(claim.getWorldId(), claim.getChunkPosition(), claim.getOwners(), isAccessibleByFaction);
         updatedClaims.add(updatedClaim);
 
         final Faction updatedFaction = faction.toBuilder().claims(updatedClaims).build();
@@ -612,7 +611,7 @@ public class FactionLogicImpl implements FactionLogic
     {
         checkNotNull(faction);
 
-        if (home != null && home.getBlockPosition() != null && home.getWorldUUID() != null)
+        if (home != null && home.getBlockPosition() != null && home.getWorldId() != null)
         {
             faction = faction.toBuilder().home(home).build();
         }
@@ -692,7 +691,7 @@ public class FactionLogicImpl implements FactionLogic
         for (final Claim claim : faction.getClaims()) {
             final Set<UUID> owners = new HashSet<>(claim.getOwners());
             owners.remove(playerUUID);
-            final Claim updatedClaim = new Claim(claim.getWorldUUID(), claim.getChunkPosition(), owners, claim.isAccessibleByFaction());
+            final Claim updatedClaim = new Claim(claim.getWorldId(), claim.getChunkPosition(), owners, claim.isAccessibleByFaction());
             updatedClaims.add(updatedClaim);
         }
 

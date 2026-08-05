@@ -86,7 +86,7 @@ class RankManagerImplTest
                 .enemies(Set.of("test_enemy"))
                 .protectionFlags(Set.of(new ProtectionFlagImpl(ProtectionFlagType.PVP, true)))
                 .home(null)
-                .claims(Set.of(new Claim(UUID.randomUUID(), Vector3i.ONE), new Claim(UUID.randomUUID(), Vector3i.ZERO)))
+                .claims(Set.of(new Claim("minecraft:overworld", Vector3i.ONE), new Claim("minecraft:overworld", Vector3i.ZERO)))
                 .chest(new FactionChestImpl(factionName))
                 .build();
     }

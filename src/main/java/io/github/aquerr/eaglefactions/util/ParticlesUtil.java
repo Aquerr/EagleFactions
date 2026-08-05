@@ -22,7 +22,7 @@ public final class ParticlesUtil
 
 	public static void spawnAddAccessParticles(final Claim claim)
 	{
-		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(claim.getWorldId());
 		if(!optionalWorld.isPresent())
 			return;
 
@@ -34,7 +34,7 @@ public final class ParticlesUtil
 
 	public static void spawnRemoveAccessParticles(final Claim claim)
 	{
-		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(claim.getWorldId());
 		if(!optionalWorld.isPresent())
 			return;
 
@@ -46,7 +46,7 @@ public final class ParticlesUtil
 
 	public static void spawnClaimParticles(final Claim claim)
 	{
-		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(claim.getWorldId());
 		if(!optionalWorld.isPresent())
 			return;
 
@@ -58,7 +58,7 @@ public final class ParticlesUtil
 
 	public static void spawnUnclaimParticles(final Claim claim)
 	{
-		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(claim.getWorldId());
 		if(!optionalWorld.isPresent())
 			return;
 
@@ -70,7 +70,7 @@ public final class ParticlesUtil
 
 	public static void spawnDestroyClaimParticles(final Claim claim)
 	{
-		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+		final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(claim.getWorldId());
 		if(!optionalWorld.isPresent())
 			return;
 

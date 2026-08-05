@@ -39,7 +39,7 @@ public class UnclaimCommand extends AbstractCommand
         {
             final ServerWorld world = player.world();
             final Vector3i chunk = player.serverLocation().chunkPosition();
-            final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), chunk);
+            final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), chunk);
 
             if (optionalChunkFaction.isPresent())
             {
@@ -49,13 +49,13 @@ public class UnclaimCommand extends AbstractCommand
 
                 if (!this.homeConfig.canPlaceHomeOutsideFactionClaim()
                         && optionalChunkFaction.get().getHome()
-                        .filter(home -> home.equals(new FactionHome(world.uniqueId(), player.serverLocation().blockPosition())))
+                        .filter(home -> home.equals(new FactionHome(world.key().asString(), player.serverLocation().blockPosition())))
                         .isPresent())
                 {
                     super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
                 }
 
-                super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.uniqueId(), chunk));
+                super.getPlugin().getFactionLogic().removeClaim(optionalChunkFaction.get(), new Claim(world.key().asString(), chunk));
 
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));
                 EventRunner.runFactionUnclaimEventPost(player, optionalChunkFaction.get(), world, chunk);
@@ -73,7 +73,7 @@ public class UnclaimCommand extends AbstractCommand
 
         final ServerWorld world = player.world();
         final Vector3i chunk = player.serverLocation().chunkPosition();
-        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), chunk);
+        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), chunk);
         if (!optionalChunkFaction.isPresent())
             throw messageService.resolveExceptionWithMessage("error.claim.place-does-not-belong-to-anyone");
 
@@ -87,15 +87,15 @@ public class UnclaimCommand extends AbstractCommand
 
         if (!this.homeConfig.canPlaceHomeOutsideFactionClaim()
                 && optionalChunkFaction.get().getHome()
-                .filter(home -> home.equals(new FactionHome(world.uniqueId(), world.location(home.getBlockPosition()).chunkPosition())))
+                .filter(home -> home.equals(new FactionHome(world.key().asString(), world.location(home.getBlockPosition()).chunkPosition())))
                 .isPresent())
         {
             super.getPlugin().getFactionLogic().setHome(optionalChunkFaction.get(), null);
         }
 
         //We need to get faction again to see changes made after removing home.
-        final Faction faction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), chunk).get();
-        super.getPlugin().getFactionLogic().removeClaim(faction, new Claim(world.uniqueId(), chunk));
+        final Faction faction = super.getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), chunk).get();
+        super.getPlugin().getFactionLogic().removeClaim(faction, new Claim(world.key().asString(), chunk));
         player.sendMessage(messageService.resolveMessageWithPrefix("command.unclaim.land-has-been-successfully-unclaimed", chunk.toString()));
         EventRunner.runFactionUnclaimEventPost(player, optionalChunkFaction.get(), world, chunk);
         return CommandResult.success();

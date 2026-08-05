@@ -102,15 +102,15 @@ class FactionLogicImplTest
     void whenGettingFactionByWorldAndChunkThenReturnFaction()
     {
         //given
-        final UUID worldUUID = UUID.randomUUID();
+        final String worldId = UUID.randomUUID().toString();
         final Vector3i chunk = Vector3i.ZERO;
-        final Claim claim = new Claim(worldUUID, chunk);
+        final Claim claim = new Claim(worldId, chunk);
         final Faction faction = prepareFaction().toBuilder().claims(ImmutableSet.of(claim)).build();
 
         when(factionLogic.getFactions()).thenReturn(ImmutableMap.of("test", faction));
 
         //when
-        final Optional<Faction> resultFaction = factionLogic.getFactionByChunk(worldUUID, chunk);
+        final Optional<Faction> resultFaction = factionLogic.getFactionByChunk(worldId, chunk);
 
         //then
         assertTrue(resultFaction.isPresent());
@@ -121,13 +121,13 @@ class FactionLogicImplTest
     void whenGettingFactionByWorldAndChunkThenReturnEmptyFaction()
     {
         //given
-        final UUID worldUUID = UUID.randomUUID();
+        final String worldId = "minecraft:overworld";
         final Vector3i chunk = Vector3i.ZERO;
 
         when(factionLogic.getFactions()).thenReturn(Collections.emptyMap());
 
         //when
-        final Optional<Faction> resultFaction = factionLogic.getFactionByChunk(worldUUID, chunk);
+        final Optional<Faction> resultFaction = factionLogic.getFactionByChunk(worldId, chunk);
 
         //then
         assertFalse(resultFaction.isPresent());

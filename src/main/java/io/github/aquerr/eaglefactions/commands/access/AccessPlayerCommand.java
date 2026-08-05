@@ -36,7 +36,7 @@ public class AccessPlayerCommand extends AbstractCommand
         final Faction playerFaction = requirePlayerFaction(player);
 
         // Access can be run only by leader and officers
-        final Faction chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition())
+        final Faction chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(player.world().key().asString(), player.serverLocation().chunkPosition())
                 .orElseThrow(() -> this.getPlugin().getMessageService().resolveExceptionWithMessage("error.claim.place-does-not-belong-to-anyone"));
 
         if (!playerFaction.equals(chunkFaction))
@@ -46,7 +46,7 @@ public class AccessPlayerCommand extends AbstractCommand
             throw this.getPlugin().getMessageService().resolveExceptionWithMessage(EFMessageService.ERROR_YOU_MUST_BE_THE_FACTIONS_LEADER_OR_OFFICER_TO_DO_THIS);
 
         // Get claim at player's location
-        final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(player.world().key().asString(), player.serverLocation().chunkPosition());
         final Claim claim = optionalClaim.get();
 
         if (claim.getOwners().contains(factionPlayer.getUniqueId()))

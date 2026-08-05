@@ -72,7 +72,7 @@ public class CommandBlockerOtherFactionTerritory
 
     private boolean isPlayerInOthersTerritory(ServerPlayer player)
     {
-        return !Objects.equals(this.factionLogic.getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition())
+        return !Objects.equals(this.factionLogic.getFactionByChunk(player.world().key().asString(), player.serverLocation().chunkPosition())
                 .map(Faction::getName)
                 .orElse(null), this.factionLogic.getFactionByPlayerUUID(player.uniqueId())
                 .map(Faction::getName)
