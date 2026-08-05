@@ -109,7 +109,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.18.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
     testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation("org.testcontainers:testcontainers:1.21.3")
+    testImplementation("org.testcontainers:testcontainers:1.21.4")
     testImplementation("org.testcontainers:mariadb:1.21.3")
     testImplementation("org.testcontainers:mysql:1.21.3")
     testImplementation("org.testcontainers:junit-jupiter:1.21.3")

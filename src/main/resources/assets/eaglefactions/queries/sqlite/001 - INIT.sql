@@ -74,15 +74,15 @@ CREATE TABLE faction_relation_permission
 CREATE TABLE claim
 (
     faction_name             TEXT    NOT NULL,
-    world_uuid               TEXT    NOT NULL,
+    world_id               TEXT    NOT NULL,
     chunk_position           TEXT    NOT NULL,
     is_accessible_by_faction INTEGER NOT NULL DEFAULT 1,
-    PRIMARY KEY (world_uuid, chunk_position)
+    PRIMARY KEY (world_id, chunk_position)
 );
 
 CREATE TABLE claim_owner
 (
-    world_uuid     TEXT NOT NULL,
+    world_id     TEXT NOT NULL,
     chunk_position TEXT NOT NULL,
     player_uuid    TEXT NOT NULL
 );

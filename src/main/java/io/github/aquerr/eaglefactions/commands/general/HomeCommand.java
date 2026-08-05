@@ -94,7 +94,7 @@ public class HomeCommand extends AbstractCommand
                     }
                     else
                     {
-                        if (!player.world().uniqueId().equals(faction.getHome().get().getWorldUUID()))
+                        if (!player.world().key().asString().equals(faction.getHome().get().getWorldId()))
                         {
                             context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.home.faction-home-not-in-this-world")));
                         }
@@ -143,7 +143,7 @@ public class HomeCommand extends AbstractCommand
                 }
                 else
                 {
-                    if (!player.world().uniqueId().equals(playerFaction.getHome().get().getWorldUUID()))
+                    if (!player.world().key().asString().equals(playerFaction.getHome().get().getWorldId()))
                     {
                         context.sendMessage(Identity.nil(), PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("error.command.home.faction-home-not-in-this-world")));
                     }
@@ -220,7 +220,7 @@ public class HomeCommand extends AbstractCommand
     {
         return eagleFactionsScheduler.scheduleWithDelayedInterval(
                 new HomeParticlesTask(player,
-                        WorldUtil.getBlockTopCenter(ServerLocation.of(WorldUtil.getWorldByUUID(factionHome.getWorldUUID()).get(), factionHome.getBlockPosition()))
+                        WorldUtil.getBlockTopCenter(ServerLocation.of(WorldUtil.getWorldByKey(factionHome.getWorldId()).get(), factionHome.getBlockPosition()))
                 ),
                 0,
                 TimeUnit.SECONDS,
@@ -231,7 +231,7 @@ public class HomeCommand extends AbstractCommand
 
     private void teleport(final ServerPlayer player, final FactionHome factionHome)
     {
-        final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(factionHome.getWorldUUID());
+        final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(factionHome.getWorldId());
         if (!optionalWorld.isPresent())
         {
             player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("command.home.missing-or-corrupted-hme")));
@@ -309,7 +309,7 @@ public class HomeCommand extends AbstractCommand
 
         private void teleport(final ServerPlayer player, final FactionHome factionHome)
         {
-            final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByUUID(factionHome.getWorldUUID());
+            final Optional<ServerWorld> optionalWorld = WorldUtil.getWorldByKey(factionHome.getWorldId());
             if (optionalWorld.isEmpty())
             {
                 player.sendMessage(PluginInfo.ERROR_PREFIX.append(messageService.resolveComponentWithMessage("command.home.missing-or-corrupted-hme")));

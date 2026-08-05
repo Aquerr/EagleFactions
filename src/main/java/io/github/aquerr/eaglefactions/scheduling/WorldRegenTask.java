@@ -15,7 +15,7 @@ public class WorldRegenTask implements EagleFactionsRunnableTask
     @Override
     public void run()
     {
-        WorldUtil.getWorldByUUID(claim.getWorldUUID())
+        WorldUtil.getWorldByKey(claim.getWorldId())
                 .ifPresent(serverWorld -> serverWorld.chunkManager().regenerateChunk(claim.getChunkPosition()));
     }
 }

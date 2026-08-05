@@ -102,14 +102,14 @@ public class SquareClaimCommand extends AbstractCommand
 
             for(final Vector3i chunk : chunksToClaim)
             {
-                final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), chunk);
+                final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), chunk);
                 if (optionalChunkFaction.isPresent())
                     continue;
 
                 //Check if admin mode
                 if (hasAdminMode)
                 {
-                    newFactionClaims.add(new Claim(world.uniqueId(), chunk));
+                    newFactionClaims.add(new Claim(world.key().asString(), chunk));
                     continue;
                 }
 
@@ -136,12 +136,12 @@ public class SquareClaimCommand extends AbstractCommand
 
                 if (playerFaction.isSafeZone() || playerFaction.isWarZone())
                 {
-                    newFactionClaims.add(new Claim(world.uniqueId(), chunk));
+                    newFactionClaims.add(new Claim(world.key().asString(), chunk));
                     player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
                     continue;
                 }
 
-                if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(playerFaction, new Claim(world.uniqueId(), chunk)))
+                if (this.factionsConfig.requireConnectedClaims() && !this.factionLogic.isClaimConnected(playerFaction, new Claim(world.key().asString(), chunk)))
                     continue;
 
                 if(this.factionsConfig.shouldDelayClaim())
@@ -150,7 +150,7 @@ public class SquareClaimCommand extends AbstractCommand
                     break;
                 }
 
-                newFactionClaims.add(new Claim(world.uniqueId(), chunk));
+                newFactionClaims.add(new Claim(world.key().asString(), chunk));
                 player.sendMessage(messageService.resolveMessageWithPrefix("command.claim.land-has-been-successfully-claimed", chunk.toString()));
                 EventRunner.runFactionClaimEventPost(player, playerFaction, world, chunk);
             }

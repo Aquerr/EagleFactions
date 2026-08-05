@@ -70,7 +70,7 @@ public class ModifyBlockListener extends AbstractListener
         ServerLocation serverLocation = blockTransaction.finalReplacement().location().orElse(null);
         if (serverLocation != null)
         {
-            Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().uniqueId(), serverLocation.chunkPosition());
+            Optional<Faction> optionalChunkFaction = this.getPlugin().getFactionLogic().getFactionByChunk(serverLocation.world().key().asString(), serverLocation.chunkPosition());
             if (this.protectionConfig.getSafeZoneWorldNames().contains(WorldUtil.getPlainWorldName(serverLocation.world()))
                     && !super.getPlugin().getFactionLogic().getFactionByName(EagleFactionsPlugin.SAFE_ZONE_NAME).getProtectionFlagValue(ProtectionFlagType.FIRE_SPREAD))
             {

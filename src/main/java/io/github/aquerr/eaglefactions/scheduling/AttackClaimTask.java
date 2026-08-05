@@ -55,7 +55,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
 
         if(this.seconds >= this.factionsConfig.getAttackTime())
         {
-            final Optional<Faction> optionalChunkFaction = factionLogic.getFactionByChunk(player.world().uniqueId(), attackedChunk);
+            final Optional<Faction> optionalChunkFaction = factionLogic.getFactionByChunk(player.world().key().asString(), attackedChunk);
             if (!optionalChunkFaction.isPresent())
             {
                 cancelTask(player, task, PluginInfo.PLUGIN_PREFIX.append(messageService.resolveComponentWithMessage("error.claim.place-does-not-belong-to-anyone")));
@@ -65,7 +65,7 @@ public class AttackClaimTask implements EagleFactionsConsumerTask<ScheduledTask>
             final Faction chunkFaction = optionalChunkFaction.get();
             this.attackLogic.informAboutDestroying(chunkFaction, player.serverLocation());
 
-            final Claim claim = new Claim(player.world().uniqueId(), attackedChunk);
+            final Claim claim = new Claim(player.world().key().asString(), attackedChunk);
             factionLogic.destroyClaim(chunkFaction, claim);
             cancelTask(player, task, PluginInfo.PLUGIN_PREFIX.append(messageService.resolveComponentWithMessage("attack.claim-destroyed")));
         }

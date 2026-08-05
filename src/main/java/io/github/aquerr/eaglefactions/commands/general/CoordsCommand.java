@@ -85,7 +85,7 @@ public class CoordsCommand extends AbstractCommand
 
         if(faction.getHome().isPresent())
         {
-            final Optional<ServerWorld> optionalHomeWorld = WorldUtil.getWorldByUUID(faction.getHome().get().getWorldUUID());
+            final Optional<ServerWorld> optionalHomeWorld = WorldUtil.getWorldByKey(faction.getHome().get().getWorldId());
             final String worldNameAndPos = optionalHomeWorld.map(WorldUtil::getPlainWorldName)
                     .orElse("Unknown World") + "|" + faction.getHome().get().getBlockPosition().toString();
             teamCoords.add(messageService.resolveComponentWithMessage("command.coords.faction-home-coords", worldNameAndPos));
@@ -107,7 +107,7 @@ public class CoordsCommand extends AbstractCommand
 
     private Claim getNearestClaim(final ServerPlayer player, final Faction faction)
     {
-        final UUID worldUUID = player.world().uniqueId();
+        final String worldId = player.world().key().asString();
         final Vector3i chunkPosition = player.serverLocation().chunkPosition();
         final Set<Claim> claims = faction.getClaims();
         if (claims.isEmpty())
@@ -117,7 +117,7 @@ public class CoordsCommand extends AbstractCommand
 
         for (final Claim claim : claims)
         {
-            if (!claim.getWorldUUID().equals(worldUUID))
+            if (!claim.getWorldId().equals(worldId))
                 continue;
 
             float distanceToCurrentClaim = nearestClaim.getChunkPosition().distance(chunkPosition);
@@ -126,7 +126,7 @@ public class CoordsCommand extends AbstractCommand
                 nearestClaim = claim;
         }
 
-        if (!nearestClaim.getWorldUUID().equals(worldUUID))
+        if (!nearestClaim.getWorldId().equals(worldId))
             nearestClaim = null;
 
         return nearestClaim;

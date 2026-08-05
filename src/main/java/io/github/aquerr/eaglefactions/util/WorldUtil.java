@@ -7,7 +7,6 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public final class WorldUtil
 {
@@ -16,10 +15,10 @@ public final class WorldUtil
         throw new UnsupportedOperationException();
     }
 
-    public static Optional<ServerWorld> getWorldByUUID(final UUID uuid)
+    public static Optional<ServerWorld> getWorldByKey(final String worldKey)
     {
         return Sponge.server().worldManager().worlds().stream()
-                .filter(serverWorld -> serverWorld.uniqueId().equals(uuid))
+                .filter(serverWorld -> serverWorld.key().asString().equals(worldKey))
                 .findFirst();
     }
 

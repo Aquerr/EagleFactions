@@ -80,7 +80,7 @@ public class RegenCommand extends AbstractCommand
 
         for (Claim claim : factionToRegen.getClaims())
         {
-            Optional<ServerWorld> world = WorldUtil.getWorldByUUID(claim.getWorldUUID());
+            Optional<ServerWorld> world = WorldUtil.getWorldByKey(claim.getWorldId());
 
             if (!world.isPresent())
             {

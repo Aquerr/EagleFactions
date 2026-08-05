@@ -76,18 +76,18 @@ CREATE TABLE `faction_relation_permission`
 CREATE TABLE `claim`
 (
     `faction_name`             VARCHAR(200) NOT NULL,
-    `world_uuid`               VARCHAR(36)  NOT NULL,
+    `world_id`               VARCHAR(100)  NOT NULL,
     `chunk_position`           VARCHAR(200) NOT NULL,
     `is_accessible_by_faction` BOOLEAN      NOT NULL DEFAULT TRUE,
-    PRIMARY KEY (`world_uuid`, `chunk_position`)
+    PRIMARY KEY (`world_id`, `chunk_position`)
 ) DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE claim_owner
 (
-    `world_uuid`     VARCHAR(36)  NOT NULL,
+    `world_id`     VARCHAR(100)  NOT NULL,
     `chunk_position` VARCHAR(200) NOT NULL,
     `player_uuid`    VARCHAR(36)  NOT NULL,
-    PRIMARY KEY (`world_uuid`, `chunk_position`)
+    PRIMARY KEY (`world_id`, `chunk_position`)
 ) DEFAULT CHARSET = utf8mb4;
 
 -- Create FactionsChest Table

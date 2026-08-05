@@ -43,7 +43,7 @@ public class AttackCommand extends AbstractCommand
     private CommandResult attackChunk(ServerPlayer player) throws CommandException
     {
         final Faction playerFaction = requirePlayerFaction(player);
-        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        final Optional<Faction> optionalChunkFaction = getPlugin().getFactionLogic().getFactionByChunk(player.world().key().asString(), player.serverLocation().chunkPosition());
         if(!optionalChunkFaction.isPresent())
             throw messageService.resolveExceptionWithMessage("error.claim.place-does-not-belong-to-anyone");
 

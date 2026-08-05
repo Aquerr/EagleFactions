@@ -30,7 +30,6 @@ import org.testcontainers.containers.startupcheck.IsRunningStartupCheckStrategy;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -109,7 +108,10 @@ public abstract class AbstractDatabaseStorageTest
     @Order(1)
     void shouldSaveFaction()
     {
-        boolean didSave = factionStorage.saveFaction(prepareFaction("test_faction"));
+        boolean didSave = factionStorage.saveFaction(prepareFaction(
+                "test_faction",
+                Set.of(new Claim("minecraft:overworld", Vector3i.ONE), new Claim("minecraft:overworld", Vector3i.ZERO)))
+        );
         assertThat(didSave).isTrue();
     }
 
@@ -117,7 +119,10 @@ public abstract class AbstractDatabaseStorageTest
     @Order(2)
     void shouldGetFaction()
     {
-        Faction expectedFaction = prepareFaction("new_faction");
+        Faction expectedFaction = prepareFaction(
+                "new_faction",
+                Set.of(new Claim("minecraft:overworld", Vector3i.from(5, 0, 5)), new Claim("minecraft:overworld", Vector3i.from(6, 0, 6)))
+        );
         factionStorage.saveFaction(expectedFaction);
         Faction actual = factionStorage.getFaction("new_faction");
         assertThat(actual).isNotNull();
@@ -194,7 +199,7 @@ public abstract class AbstractDatabaseStorageTest
                 .toAbsolutePath();
     }
 
-    protected Faction prepareFaction(String factionName)
+    protected Faction prepareFaction(String factionName, Set<Claim> claims)
     {
         return FactionImpl.builder(factionName, Component.text("TE"))
                 .leader(UUID.randomUUID())
@@ -212,7 +217,7 @@ public abstract class AbstractDatabaseStorageTest
                 .enemies(Set.of("test_enemy"))
                 .protectionFlags(Set.of(new ProtectionFlagImpl(ProtectionFlagType.PVP, true)))
                 .home(null)
-                .claims(Set.of(new Claim(UUID.randomUUID(), Vector3i.ONE), new Claim(UUID.randomUUID(), Vector3i.ZERO)))
+                .claims(claims)
                 .chest(new FactionChestImpl(factionName))
                 .build();
     }

@@ -147,7 +147,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             return forbiddenWarZone();
         }
 
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), location.chunkPosition());
         final Optional<Faction> optionalServerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.uniqueId());
         if (!optionalChunkFaction.isPresent())
         {
@@ -194,7 +194,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         final Faction playerFaction = optionalServerPlayerFaction.get();
-        if (this.permsManager.canInteract(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get()))
+        if (this.permsManager.canInteract(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.key().asString(), location.chunkPosition()).get()))
             return okFactionPerm();
         else
         {
@@ -221,7 +221,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (safeZoneWorlds.contains(getPlainWorldName(location.world())))
             return true;
 
-        final Optional<Faction> faction = this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
+        final Optional<Faction> faction = this.factionLogic.getFactionByChunk(location.world().key().asString(), location.chunkPosition());
         return faction.map(Faction::isSafeZone).orElse(false);
     }
 
@@ -278,7 +278,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             else return forbiddenWarZone();
         }
 
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), location.chunkPosition());
         final Optional<Faction> optionalServerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.uniqueId());
         if (!optionalChunkFaction.isPresent())
         {
@@ -324,7 +324,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         Faction playerFaction = optionalServerPlayerFaction.get();
-        if(this.permsManager.canInteract(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get()))
+        if(this.permsManager.canInteract(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.key().asString(), location.chunkPosition()).get()))
             return okFactionPerm();
         else
         {
@@ -395,7 +395,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             else return forbiddenWarZone();
         }
 
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), location.chunkPosition());
         final Optional<Faction> optionalServerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.uniqueId());
         if(optionalChunkFaction.isPresent())
         {
@@ -423,7 +423,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ok();
 
             final Faction chunkFaction = optionalChunkFaction.get();
-            final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition());
+            final Optional<Claim> optionalClaim = chunkFaction.getClaimAt(world.key().asString(), location.chunkPosition());
 
             if (optionalServerPlayerFaction.map(faction -> this.permsManager.canBreakBlock(user.uniqueId(), faction, optionalChunkFaction.get(), optionalClaim.get()))
                     .orElse(false))
@@ -476,7 +476,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             else return forbiddenWarZone();
         }
 
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), location.chunkPosition());
         if(!optionalChunkFaction.isPresent())
             return ok();
 
@@ -573,7 +573,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         Optional<Faction> optionalServerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(user.uniqueId());
-        Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
+        Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), location.chunkPosition());
         if(optionalChunkFaction.isPresent())
         {
             if(optionalChunkFaction.get().isSafeZone() || optionalChunkFaction.get().isWarZone())
@@ -600,7 +600,7 @@ public class ProtectionManagerImpl implements ProtectionManager
                 return ok();
 
             final Faction chunkFaction = optionalChunkFaction.get();
-            if (optionalServerPlayerFaction.filter(faction -> this.permsManager.canPlaceBlock(user.uniqueId(), faction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get())).isPresent())
+            if (optionalServerPlayerFaction.filter(faction -> this.permsManager.canPlaceBlock(user.uniqueId(), faction, chunkFaction, chunkFaction.getClaimAt(world.key().asString(), location.chunkPosition()).get())).isPresent())
                 return okFactionPerm();
             else return forbidden();
         }
@@ -664,7 +664,7 @@ public class ProtectionManagerImpl implements ProtectionManager
         }
 
         //If no faction
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.uniqueId(), location.chunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(world.key().asString(), location.chunkPosition());
         if (!optionalChunkFaction.isPresent())
         {
             if (!this.protectionConfig.shouldProtectWildernessFromPlayers())
@@ -701,7 +701,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             final Faction playerFaction = optionalServerPlayerFaction.get();
             if (chunkFaction.getName().equalsIgnoreCase(playerFaction.getName()))
             {
-                if (this.permsManager.canPlaceBlock(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.uniqueId(), location.chunkPosition()).get()))
+                if (this.permsManager.canPlaceBlock(user.uniqueId(), playerFaction, chunkFaction, chunkFaction.getClaimAt(world.key().asString(), location.chunkPosition()).get()))
                     return okFactionPerm();
                 else return forbidden();
             }
@@ -733,7 +733,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             else return forbiddenWarZone();
         }
 
-        Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition());
+        Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(location.world().key().asString(), location.chunkPosition());
         if (!optionalChunkFaction.isPresent())
             return ok();
 
@@ -744,7 +744,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             return forbiddenWarZone();
         else
         {
-            if (!this.factionLogic.getFactionByChunk(location.world().uniqueId(), location.chunkPosition())
+            if (!this.factionLogic.getFactionByChunk(location.world().key().asString(), location.chunkPosition())
                     .map(faction -> faction.getProtectionFlagValue(ProtectionFlagType.MOB_GRIEF))
                     .orElse(false))
                 return ok();
@@ -781,9 +781,9 @@ public class ProtectionManagerImpl implements ProtectionManager
             return ok();
 
         final ServerLocation entityLocation = attackedEntity.serverLocation();
-        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.world().uniqueId(), entityLocation.chunkPosition());
+        final Optional<Faction> optionalChunkFaction = this.factionLogic.getFactionByChunk(entityLocation.world().key().asString(), entityLocation.chunkPosition());
         final Optional<Faction> optionalAttackerServerPlayerFaction = this.factionLogic.getFactionByPlayerUUID(player.uniqueId());
-        final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.world().uniqueId(), player.serverLocation().chunkPosition());
+        final Optional<Faction> optionalSourceChunkFaction = this.factionLogic.getFactionByChunk(player.world().key().asString(), player.serverLocation().chunkPosition());
         final boolean isSafeZoneWorld = this.protectionConfig.getSafeZoneWorldNames().contains(getPlainWorldName(entityLocation.world()));
         final boolean isWarZoneWorld = !isSafeZoneWorld && this.protectionConfig.getWarZoneWorldNames().contains(getPlainWorldName(entityLocation.world()));
         final boolean notClaimableWorld = !isSafeZoneWorld && !isWarZoneWorld && this.protectionConfig.getNotClaimableWorldNames().contains(getPlainWorldName(entityLocation.world()));
@@ -848,7 +848,7 @@ public class ProtectionManagerImpl implements ProtectionManager
             if (!optionalAttackerServerPlayerFaction.isPresent())
                 return forbidden();
             final Faction attackerFaction = optionalAttackerServerPlayerFaction.get();
-            if (this.permsManager.canBreakBlock(player.uniqueId(), attackerFaction, chunkFaction, chunkFaction.getClaimAt(entityLocation.world().uniqueId(), entityLocation.chunkPosition()).get()))
+            if (this.permsManager.canBreakBlock(player.uniqueId(), attackerFaction, chunkFaction, chunkFaction.getClaimAt(entityLocation.world().key().asString(), entityLocation.chunkPosition()).get()))
                 return okFactionPerm();
             return forbidden();
         }
@@ -869,8 +869,8 @@ public class ProtectionManagerImpl implements ProtectionManager
         if (isSafeZoneWorld || isWarZoneWorld || notClaimableWorld)
             return ok();
 
-        final Optional<Faction> notifierFaction = this.factionLogic.getFactionByChunk(notifier.world().uniqueId(), notifier.chunkPosition());
-        final Optional<Faction> notifiedFaction = this.factionLogic.getFactionByChunk(notifiedLocation.world().uniqueId(), notifiedLocation.chunkPosition());
+        final Optional<Faction> notifierFaction = this.factionLogic.getFactionByChunk(notifier.world().key().asString(), notifier.chunkPosition());
+        final Optional<Faction> notifiedFaction = this.factionLogic.getFactionByChunk(notifiedLocation.world().key().asString(), notifiedLocation.chunkPosition());
 
         // Factions can notify wilderness but wilderness cannot notify factions.
         // Wilderness can only notify other factions if mob-gref is set to true.

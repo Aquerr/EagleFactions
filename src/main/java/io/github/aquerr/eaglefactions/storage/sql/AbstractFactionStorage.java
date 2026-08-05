@@ -14,7 +14,6 @@ import io.github.aquerr.eaglefactions.entities.FactionChestImpl;
 import io.github.aquerr.eaglefactions.entities.FactionImpl;
 import io.github.aquerr.eaglefactions.entities.FactionMemberImpl;
 import io.github.aquerr.eaglefactions.entities.RankImpl;
-import io.github.aquerr.eaglefactions.logic.FactionLogicImpl;
 import io.github.aquerr.eaglefactions.storage.FactionStorage;
 import io.github.aquerr.eaglefactions.storage.serializers.ClaimTypeSerializer;
 import io.github.aquerr.eaglefactions.storage.serializers.InventorySerializer;
@@ -33,7 +32,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +57,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             "WHERE faction_member.faction_name=?";
     private static final String SELECT_MEMBERS_RANKS_WHERE_MEMBER_UUID = "SELECT rank_name FROM faction_member_rank WHERE faction_name=? AND member_uuid=?";
     private static final String SELECT_CLAIMS_WHERE_FACTIONNAME = "SELECT * FROM claim WHERE faction_name=?";
-    private static final String SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK = "SELECT * FROM claim_owner WHERE world_uuid=? AND chunk_position=?";
+    private static final String SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK = "SELECT * FROM claim_owner WHERE world_id=? AND chunk_position=?";
     private static final String SELECT_CHEST_WHERE_FACTIONNAME = "SELECT chest_items FROM faction_chest WHERE faction_name=?";
     private static final String SELECT_FACTION_WHERE_FACTIONNAME = "SELECT * FROM faction WHERE name=?";
     private static final String SELECT_FACTION_RELATIONS_BY_TYPE = "SELECT * FROM faction_relation WHERE relation_type=? AND (faction_name_1=? OR faction_name_2=?)";
@@ -68,8 +66,8 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String SELECT_FACTION_RANK_PERMSSIONS_WHERE_FACTION_NAME = "SELECT rank_name, faction_name, permission FROM faction_rank_permission WHERE faction_name=?";
     private static final String INSERT_FACTION = "INSERT INTO faction (name, tag, tag_color, leader, home, last_online, description, motd, is_public, created_date) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String INSERT_CLAIM = "INSERT INTO claim (faction_name, world_uuid, chunk_position, is_accessible_by_faction) VALUES (?, ?, ?, ?)";
-    private static final String INSERT_CLAIM_OWNER = "INSERT INTO claim_owner (world_uuid, chunk_position, player_uuid) VALUES (?, ?, ?)";
+    private static final String INSERT_CLAIM = "INSERT INTO claim (faction_name, world_id, chunk_position, is_accessible_by_faction) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_CLAIM_OWNER = "INSERT INTO claim_owner (world_id, chunk_position, player_uuid) VALUES (?, ?, ?)";
     private static final String INSERT_MEMBER = "INSERT INTO faction_member (member_uuid, faction_name) VALUES (?, ?)";
     private static final String INSERT_MEMBER_RANK_MAPPING = "INSERT INTO faction_member_rank (member_uuid, faction_name, rank_name) VALUES (?, ?, ?)";
     private static final String INSERT_RELATION = "INSERT INTO faction_relation (relation_type, faction_name_1, faction_name_2) VALUES (?, ?, ?)";
@@ -91,7 +89,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
     private static final String DELETE_RELATION_BETWEEN_FACTIONS = "DELETE FROM faction_relation WHERE relation_type=? AND (faction_name_1=? AND faction_name_2=?) OR (faction_name_1=? AND faction_name_2=?)";
     private static final String DELETE_RELATION_PERMISSION_WHERE_FACTION_NAME = "DELETE FROM faction_relation_permission WHERE faction_name=?";
     private static final String DELETE_CLAIM_WHERE_FACTIONNAME = "DELETE FROM claim WHERE faction_name=?";
-    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION = "DELETE FROM claim_owner WHERE world_uuid=? AND chunk_position=?";
+    private static final String DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDID_AND_CHUNKPOSITION = "DELETE FROM claim_owner WHERE world_id=? AND chunk_position=?";
     private final SQLConnectionProvider sqlConnectionProvider;
 
     private final FactionProtectionFlagsStorage factionProtectionFlagsStorage;
@@ -236,7 +234,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             for (final Claim claim : faction.getClaims())
             {
                 preparedStatement.setString(1, faction.getName());
-                preparedStatement.setString(2, claim.getWorldUUID().toString());
+                preparedStatement.setString(2, claim.getWorldId());
                 preparedStatement.setString(3, claim.getChunkPosition().toString());
                 preparedStatement.setBoolean(4, claim.isAccessibleByFaction());
 
@@ -253,7 +251,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
                     final PreparedStatement ownerPreparedStatement = connection.prepareStatement(INSERT_CLAIM_OWNER);
                     for (final UUID owner : claim.getOwners())
                     {
-                        ownerPreparedStatement.setString(1, claim.getWorldUUID().toString());
+                        ownerPreparedStatement.setString(1, claim.getWorldId().toString());
                         ownerPreparedStatement.setString(2, claim.getChunkPosition().toString());
                         ownerPreparedStatement.setString(3, owner.toString());
                         ownerPreparedStatement.addBatch();
@@ -565,10 +563,10 @@ public abstract class AbstractFactionStorage implements FactionStorage
 
     private void deleteFactionClaimOwners(Connection connection, Set<Claim> claims) throws SQLException
     {
-        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDUUID_AND_CHUNKPOSITION);
+        final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FACTION_CLAIM_OWNERS_WHERE_WORLDID_AND_CHUNKPOSITION);
         for (final Claim claim : claims)
         {
-            preparedStatement.setString(1, claim.getWorldUUID().toString());
+            preparedStatement.setString(1, claim.getWorldId().toString());
             preparedStatement.setString(2, claim.getChunkPosition().toString());
             preparedStatement.addBatch();
         }
@@ -719,14 +717,14 @@ public abstract class AbstractFactionStorage implements FactionStorage
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next())
         {
-            String worldUUID = resultSet.getString("world_uuid");
+            String worldId = resultSet.getString("world_id");
             String chunkPositionAsString = resultSet.getString("chunk_position");
             final boolean isAccessibleByFaction = resultSet.getBoolean("is_accessible_by_faction");
             final Vector3i chunkPosition = ClaimTypeSerializer.deserializeVector3i(chunkPositionAsString);
             final Set<UUID> owners = new HashSet<>();
 
             final PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_CLAIM_OWNERS_WHERE_WORLD_AND_CHUNK);
-            preparedStatement1.setString(1, worldUUID);
+            preparedStatement1.setString(1, worldId);
             preparedStatement1.setString(2, chunkPositionAsString);
             final ResultSet ownersResultSet = preparedStatement1.executeQuery();
             while (ownersResultSet.next())
@@ -737,7 +735,7 @@ public abstract class AbstractFactionStorage implements FactionStorage
             ownersResultSet.close();
             preparedStatement1.close();
 
-            Claim claim = new Claim(UUID.fromString(worldUUID), chunkPosition, owners, isAccessibleByFaction);
+            Claim claim = new Claim(worldId, chunkPosition, owners, isAccessibleByFaction);
             claims.add(claim);
         }
         resultSet.close();

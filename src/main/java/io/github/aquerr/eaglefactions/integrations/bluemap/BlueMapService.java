@@ -45,7 +45,7 @@ public class BlueMapService
     private final BluemapConfig bluemapConfig;
     private BlueMapAPI blueMapAPI;
 
-    private final Map<UUID, MarkerSet> markerSetsPerWorld = new HashMap<>();
+    private final Map<String, MarkerSet> markerSetsPerWorld = new HashMap<>();
 
     private final List<Faction> drawnFactions = new ArrayList<>();
 
@@ -133,19 +133,19 @@ public class BlueMapService
     {
         int index = 0;
 
-        HashMap<UUID, Set<Claim>> claimsWorld = new HashMap<>();
+        HashMap<String, Set<Claim>> claimsWorld = new HashMap<>();
 
         /* Now sorting the claims by their worlds */
         Claim[] claims = new Claim[faction.getClaims().size()];
         claims = faction.getClaims().toArray(claims);
         for (Claim claim : claims)
         {
-            claimsWorld.computeIfAbsent(claim.getWorldUUID(), k -> new HashSet<>());
+            claimsWorld.computeIfAbsent(claim.getWorldId(), k -> new HashSet<>());
 
-            claimsWorld.get(claim.getWorldUUID()).add(claim);
+            claimsWorld.get(claim.getWorldId()).add(claim);
         }
 
-        HashMap<UUID, ArrayList<TempAreaMarker>> areaMarkers = new HashMap<>();
+        HashMap<String, ArrayList<TempAreaMarker>> areaMarkers = new HashMap<>();
         claimsWorld.forEach((k, v) ->
         {
             ArrayList<TempAreaMarker> tempMarkers = createAreas(v);
@@ -153,11 +153,11 @@ public class BlueMapService
             areaMarkers.put(k, tempMarkers);
         });
 
-        for (Map.Entry<UUID, ArrayList<TempAreaMarker>> entry : areaMarkers.entrySet())
+        for (Map.Entry<String, ArrayList<TempAreaMarker>> entry : areaMarkers.entrySet())
         {
             for (TempAreaMarker tempMarker : entry.getValue())
             {
-                ServerWorld world = WorldUtil.getWorldByUUID(entry.getKey())
+                ServerWorld world = WorldUtil.getWorldByKey(entry.getKey())
                         .orElse(null);
 
                 if (world == null) continue;
@@ -175,12 +175,12 @@ public class BlueMapService
                         .detail(prepareMarkerDetailsForFaction(faction))
                         .build();
 
-                this.markerSetsPerWorld.computeIfAbsent(world.uniqueId(), k -> MarkerSet.builder()
+                this.markerSetsPerWorld.computeIfAbsent(world.key().asString(), k -> MarkerSet.builder()
                         .label("Eagle Factions Claims")
                         .toggleable(true)
                         .build());
 
-                this.markerSetsPerWorld.get(world.uniqueId()).put(faction.getTag().content() + "-" + index, marker);
+                this.markerSetsPerWorld.get(world.key().asString()).put(faction.getTag().content() + "-" + index, marker);
                 index++;
             }
         }

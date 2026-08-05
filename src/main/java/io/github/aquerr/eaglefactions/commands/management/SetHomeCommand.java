@@ -37,7 +37,7 @@ public class SetHomeCommand extends AbstractCommand
         final ServerPlayer player = requirePlayerSource(context);
         final Faction playerFaction = requirePlayerFaction(player);
         final ServerWorld world = player.world();
-        final FactionHome newHome = new FactionHome(world.uniqueId(), player.serverLocation().blockPosition());
+        final FactionHome newHome = new FactionHome(world.key().asString(), player.serverLocation().blockPosition());
 
         if(super.getPlugin().getPlayerManager().hasAdminMode(player.user()))
         {
@@ -48,7 +48,7 @@ public class SetHomeCommand extends AbstractCommand
 
         if (permsManager.hasPermission(player.uniqueId(), playerFaction, FactionPermission.MANAGE_FACTION_HOME))
         {
-            final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.uniqueId(), player.serverLocation().chunkPosition());
+            final Optional<Faction> chunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(world.key().asString(), player.serverLocation().chunkPosition());
             if (!chunkFaction.isPresent() && this.homeConfig.canPlaceHomeOutsideFactionClaim())
             {
                 super.getPlugin().getFactionLogic().setHome(playerFaction, newHome);

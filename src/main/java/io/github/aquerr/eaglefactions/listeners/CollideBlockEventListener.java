@@ -65,7 +65,7 @@ public class CollideBlockEventListener extends AbstractListener
             return;
 
         Optional<Faction> optionalPlayerFaction = super.getPlugin().getFactionLogic().getFactionByPlayerUUID(user.uniqueId());
-        Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(event.targetLocation().world().uniqueId(), event.targetLocation().chunkPosition());
+        Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(event.targetLocation().world().key().asString(), event.targetLocation().chunkPosition());
 
         if(optionalChunkFaction.isPresent() && optionalPlayerFaction.isPresent())
         {
@@ -106,7 +106,7 @@ public class CollideBlockEventListener extends AbstractListener
             return;
 
         ServerLocation impactPoint = event.impactPoint();
-        Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(impactPoint.world().uniqueId(), impactPoint.chunkPosition());
+        Optional<Faction> optionalChunkFaction = super.getPlugin().getFactionLogic().getFactionByChunk(impactPoint.world().key().asString(), impactPoint.chunkPosition());
 
         if(!optionalChunkFaction.isPresent())
             return;
